@@ -5,8 +5,7 @@ import (
 	"time"
 
 	flow "github.com/Azure/go-workflow"
-
-	"github.com/larsartmann/go-workflow-auditlog"
+	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 func TestDiff_NoChanges(t *testing.T) {

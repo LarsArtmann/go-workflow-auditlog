@@ -24,6 +24,7 @@ func LoadReportFromReader(reader io.Reader) (WorkflowReport, error) {
 	var report WorkflowReport
 
 	decoder := json.NewDecoder(reader)
+
 	err := decoder.Decode(&report)
 	if err != nil {
 		return WorkflowReport{}, fmt.Errorf("decode report: %w", err)

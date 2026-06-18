@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	flow "github.com/Azure/go-workflow"
-
-	"github.com/larsartmann/go-workflow-auditlog"
+	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 func TestLoadReport_RoundTrip(t *testing.T) {
@@ -20,6 +19,7 @@ func TestLoadReport_RoundTrip(t *testing.T) {
 
 	// Export to JSON.
 	var buf bytes.Buffer
+
 	err := a.WriteReportJSON(&buf)
 	if err != nil {
 		t.Fatalf("WriteReportJSON: %v", err)
@@ -53,6 +53,7 @@ func TestLoadReport_FromFile(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	path := t.TempDir() + "/report.json"
+
 	err := a.ExportToFile(path)
 	if err != nil {
 		t.Fatalf("ExportToFile: %v", err)
@@ -77,6 +78,7 @@ func TestLoadReport_FromReader(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf bytes.Buffer
+
 	_ = a.WriteReportJSON(&buf)
 
 	loaded, err := auditlog.LoadReportFromReader(&buf)
@@ -118,6 +120,7 @@ func TestReportWriteNDJSON(t *testing.T) {
 	report := a.Report()
 
 	var buf bytes.Buffer
+
 	err := report.WriteNDJSON(&buf)
 	if err != nil {
 		t.Fatalf("WriteNDJSON: %v", err)
