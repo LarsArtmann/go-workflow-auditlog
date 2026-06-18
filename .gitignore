@@ -52,3 +52,6 @@ cover.html
 # Audit exports (from example/demo)
 audit-report.json
 audit-events.ndjson
+# Sensitive files
+*.db
+reports/
