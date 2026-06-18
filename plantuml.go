@@ -12,10 +12,14 @@ func (r WorkflowReport) WritePlantUML(writer io.Writer) error {
 }
 
 // WritePlantUMLString returns the PlantUML diagram as a string.
+// Returns a non-nil error only if diagram generation fails.
 func (r WorkflowReport) WritePlantUMLString() (string, error) {
 	var buf strings.Builder
 
 	err := r.WritePlantUML(&buf)
+	if err != nil {
+		return "", fmt.Errorf("write plantuml: %w", err)
+	}
 
-	return buf.String(), fmt.Errorf("write plantuml: %w", err)
+	return buf.String(), nil
 }

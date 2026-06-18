@@ -13,10 +13,14 @@ func (r WorkflowReport) WriteMermaid(writer io.Writer) error {
 }
 
 // WriteMermaidString returns the Mermaid diagram as a string.
+// Returns a non-nil error only if diagram generation fails.
 func (r WorkflowReport) WriteMermaidString() (string, error) {
 	var buf strings.Builder
 
 	err := r.WriteMermaid(&buf)
+	if err != nil {
+		return "", fmt.Errorf("write mermaid: %w", err)
+	}
 
-	return buf.String(), fmt.Errorf("write mermaid: %w", err)
+	return buf.String(), nil
 }
