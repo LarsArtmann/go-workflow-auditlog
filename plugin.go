@@ -138,7 +138,7 @@ func (a *Auditor) WriteReportJSON(writer io.Writer) error {
 
 // WriteEventsNDJSON writes every captured event as line-delimited JSON to writer.
 func (a *Auditor) WriteEventsNDJSON(writer io.Writer) error {
-	return writeEventsNDJSON(writer, a.recorder.Events())
+	return a.Report().WriteNDJSON(writer)
 }
 
 // ExportToFile writes the full WorkflowReport as indented JSON to path.

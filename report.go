@@ -155,3 +155,9 @@ func (r WorkflowReport) WriteJSON(writer io.Writer) error {
 
 	return encoder.Encode(r)
 }
+
+// WriteNDJSON writes the report's events as newline-delimited JSON.
+// Each line is a single Event object. This is the inverse of ReadEvents.
+func (r WorkflowReport) WriteNDJSON(writer io.Writer) error {
+	return writeEventsNDJSON(writer, r.Events)
+}
