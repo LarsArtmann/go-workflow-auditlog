@@ -16,41 +16,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Initial project structure.
+- **Core audit pipeline**: `Auditor` with `Attach` → `Do` → `Snapshot` lifecycle,
+  capturing per-attempt events (start/end, duration, error, status) and the full
+  step DAG (dependencies, retry/timeout config, step types).
 - **RunID**: every Event and WorkflowReport now carries a `run_id` identifying one
   workflow execution, for cross-system correlation (traces, logs). Auto-generated
   as a 128-bit hex ID, or set explicitly via `Config.RunID`. Read it via
   `Auditor.RunID()`. Survives NDJSON export → `ReplayEvents` round trips.
 - **StepID**: each StepInfo gets a 1-based, unique `step_id` that disambiguates
   steps sharing the same name (identical `String()` output). Stable within a run.
-- **Graphviz DOT diagrams**: `WriteGraphviz` / `WriteGraphvizString` /
-  `ExportGraphviz` render the step DAG as a Graphviz digraph with status colors.
+- **Export formats**: JSON report (`ExportToFile`), NDJSON event stream
+  (`ExportEventsToNDJSON`), and writer-based variants.
+- **Diagram export**: Mermaid, PlantUML, and Graphviz DOT writers with
+  status-based coloring. Includes `Export*` (file) and `Write*` (writer) variants.
+- **Filter API**: `WorkflowReport.Filtered(opts ...ReportOption)` for slicing
+  reports by step name, status, event type, and time range.
+- **Diff API**: `WorkflowReport.Diff(other) DiffResult` returns added/removed/
+  changed step slices and a duration delta. `StepDiff` records both the new and
+  previous status.
+- **Replay API**: `auditlog.ReplayEvents(events)` reconstructs a report from a
+  flat event stream.
+- **Load API**: `LoadReport`, `LoadReportFromReader`, `LoadReportFromBytes` parse
+  JSON reports.
+- **ReadEvents**: NDJSON reader with sentinel errors (`ErrEmpty`, `ErrNoEvents`,
+  `ErrOversizedLine`).
 - **ReportIndex**: `auditlog.NewReportIndex(report)` precomputes O(1) lookup maps
   (`StepByName`, `StepByID`, `EventsByStep`, `EventsByType`) for repeated queries.
+- **Query helpers**: `Duration()` wall-clock span, `Summary()` one-line report,
+  `FailedSteps()`, `SucceededSteps()`, `SkippedSteps()`, `RetriedSteps()`.
 - **Exported sentinel errors**: `ErrWorkflowIDPathSep`, `ErrEventCountMismatch`,
   `ErrStepCountMismatch`, `ErrStatusDrift` — matchable via `errors.Is`.
 - **goreleaser** config (`.goreleaser.yml`) for automated, changelog-grouped
   GitHub releases with a cross-compiled demo binary.
 - **Acceptance tests**: end-to-end scenarios verifying mixed-outcome pipelines,
   OnEvent stream integrity, and the filter → export → load lifecycle.
+- **Regression tests** for all fixed bugs (see Fixed below).
 - CONTRIBUTING.md rewritten with commands, testing patterns, code style, and a
   documented release process.
 - "Known Limitations" section in the README (name collisions, snapshot/replay
   constraints, upstream go-workflow retry race).
-- Initial project structure
-- Diff API: `WorkflowReport.Diff(other) WorkflowReport` returns `DiffResult` with
-  added/removed/changed step slices and a duration delta. StepDiff records both
-  the new and previous status.
-- Filter API: `WorkflowReport.Filtered(opts ...ReportOption)` for slicing reports
-  by step name, status, event type, and time range.
-- Replay API: `auditlog.ReplayEvents(events)` reconstructs a report from a flat
-  event stream.
-- Load API: `LoadReport`, `LoadReportFromReader`, `LoadReportFromBytes` parse
-  JSON reports.
-- Diagram export: Mermaid and PlantUML writers with status-based CSS classes.
-- `ReadEvents` NDJSON reader with sentinel errors (`ErrEmpty`, `ErrNoEvents`,
-  `ErrOversizedLine`).
-- `Duration()` wall-clock helper and `Summary()` one-line report.
-- Regression tests for fixed bugs (see Fixed).
 
 ### Changed
 

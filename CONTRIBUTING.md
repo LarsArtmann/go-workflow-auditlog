@@ -14,7 +14,16 @@ Thanks for your interest in contributing to `go-workflow-auditlog`!
 Requires Go 1.26+ and [`golangci-lint` v2](https://golangci-lint.run/).
 
 ```bash
-go get github.com/larsartmann/go-workflow-auditlog
+git clone https://github.com/LarsArtmann/go-workflow-auditlog.git
+cd go-workflow-auditlog
+go build ./...
+```
+
+Verify your environment:
+
+```bash
+go test -race ./...    # all tests pass
+golangci-lint run ./... # 0 issues
 ```
 
 ## Commands
@@ -79,10 +88,20 @@ in the changelog.
 6. **Create a GitHub Release** from the tag, pasting the changelog section as the
    release notes.
 
-`goreleaser` configuration (`.goreleaser.yml`) is provided to automate steps 5–6
-once a tag is pushed.
+`goreleaser` configuration (`.goreleaser.yml`) is provided to automate
+release artifacts and changelog generation. To test it locally without
+publishing:
+
+```bash
+goreleaser release --snapshot --clean
+goreleaser check   # validate config
+```
+
+This builds the demo binary in `dist/` and renders the changelog without
+creating a tag or pushing anything.
 
 ## Reporting Issues
 
-Please use [GitHub Issues](../../issues) to report bugs or request features.
-Include the Go version, go-workflow version, and a minimal reproduction.
+Please use [GitHub Issues](https://github.com/LarsArtmann/go-workflow-auditlog/issues)
+to report bugs or request features. Include the Go version, go-workflow version,
+and a minimal reproduction.

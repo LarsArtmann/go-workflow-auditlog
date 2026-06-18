@@ -42,6 +42,8 @@ Immutable objects defined by attributes.
 | EventType    | Enum: `attempt_start` / `attempt_end`                               | Two-value enum; phase is derived                                         |
 | Phase        | Enum: `before` / `after`                                            | Redundant with EventType but explicit in JSON                            |
 | ReportOption | Functional-option predicate for filtering reports                   | `WithStepsByName`, `WithStepsByStatus`, etc.                             |
+| RunID        | 128-bit hex identifier for one workflow execution                   | Stamped on every Event and WorkflowReport for trace correlation          |
+| StepID       | 1-based integer, unique within a run                                | Disambiguates steps that share the same `String()` output                |
 
 ## Events
 
@@ -56,16 +58,16 @@ Things that happen in the domain.
 
 Actions the system can perform.
 
-| Term                            | Definition                                           | Context                             |
-| ------------------------------- | ---------------------------------------------------- | ----------------------------------- |
-| `Attach(w)`                     | Inject audit callbacks into all workflow steps.      | Before `w.Do(ctx)`.                 |
-| `Snapshot(w)`                   | Read post-execution DAG state into the recorder.     | After `w.Do(ctx)` returns.          |
-| `Report()`                      | Assemble and return the consolidated WorkflowReport. | Read-only; uses RLock.              |
-| `Filtered(opts)`                | Return a filtered copy of a report.                  | Aggregates recomputed.              |
-| `Diff(other)`                   | Compare two reports.                                 | Returns added/removed/changed.      |
-| `ReplayEvents(events)`          | Reconstruct a report from a flat event stream.       | `Reconstructed=true` on the result. |
-| `LoadReport(path)`              | Read a JSON report from disk.                        | Inverse of `ExportToFile`.          |
-| `WriteMermaid(w)`/`PlantUML(w)` | Serialize the step DAG as a diagram.                 | For visualization tools.            |
+| Term                                              | Definition                                           | Context                             |
+| ------------------------------------------------- | ---------------------------------------------------- | ----------------------------------- |
+| `Attach(w)`                                       | Inject audit callbacks into all workflow steps.      | Before `w.Do(ctx)`.                 |
+| `Snapshot(w)`                                     | Read post-execution DAG state into the recorder.     | After `w.Do(ctx)` returns.          |
+| `Report()`                                        | Assemble and return the consolidated WorkflowReport. | Read-only; uses RLock.              |
+| `Filtered(opts)`                                  | Return a filtered copy of a report.                  | Aggregates recomputed.              |
+| `Diff(other)`                                     | Compare two reports.                                 | Returns added/removed/changed.      |
+| `ReplayEvents(events)`                            | Reconstruct a report from a flat event stream.       | `Reconstructed=true` on the result. |
+| `LoadReport(path)`                                | Read a JSON report from disk.                        | Inverse of `ExportToFile`.          |
+| `WriteMermaid(w)` / `PlantUML(w)` / `Graphviz(w)` | Serialize the step DAG as a diagram.                 | For visualization tools.            |
 
 ## Bounded Contexts
 

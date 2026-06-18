@@ -1,17 +1,57 @@
 # go-workflow-auditlog
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/larsartmann/go-workflow-auditlog.svg)](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)
+[![Go Report Card](https://goreportcard.com/badge/github.com/larsartmann/go-workflow-auditlog)](https://goreportcard.com/report/github.com/larsartmann/go-workflow-auditlog)
+[![CI](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-94.7%25-brightgreen)](#)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
+
 Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workflow) — records every step execution event (attempts, retries, durations, errors, dependencies, final statuses) with timestamped events and export to JSON / NDJSON.
 
-## Why?
+---
 
-go-workflow runs steps concurrently in a DAG, but provides no built-in way to answer:
+## Table of Contents
 
-- _Which step took the longest?_
-- _How many retries did that flaky step need?_
-- _What's the full dependency graph?_
-- _Which steps were skipped, and why?_
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Example Output](#example-output)
+- [How It Works](#how-it-works)
+- [Report Structure](#report-structure)
+- [API Reference](#api-reference)
+- [Config](#config)
+- [Diagrams](#diagrams)
+- [Concurrency Model](#concurrency-model)
+- [Step Naming](#step-naming)
+- [Known Limitations](#known-limitations)
+- [Contributing](#contributing)
+- [License](#license)
 
-This library answers those questions by injecting audit callbacks into your workflow and capturing a complete, timestamped event stream.
+---
+
+## Features
+
+- **Per-attempt event capture** — records every `attempt_start` / `attempt_end` with timestamp, duration, error, and status
+- **Full DAG structure** — captures dependency graph (upstream + dependents), retry/timeout config, and step types
+- **Skipped & canceled detection** — reads post-execution state to catch steps that bypass callbacks entirely
+- **Cross-system correlation** — 128-bit `RunID` stamped on every event for trace/log correlation
+- **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT diagrams
+- **Report filtering** — slice reports by step name, status, event type, or time range
+- **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration delta)
+- **Event replay** — reconstruct a report from a flat NDJSON event stream
+- **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
+- **Sentinel errors** — matchable via `errors.Is` for programmatic branching
+- **Zero runtime dependencies** — only `go-workflow` + `backoff/v4`
+- **94.7% test coverage** with race detector, 0 lint issues
+
+## Installation
+
+```bash
+go get github.com/larsartmann/go-workflow-auditlog
+```
+
+Requires Go 1.26+ and `github.com/Azure/go-workflow v0.1.13`.
 
 ## Quick Start
 
@@ -23,7 +63,6 @@ import (
     "fmt"
 
     flow "github.com/Azure/go-workflow"
-    "github.com/cenkalti/backoff/v4"
 
     "github.com/larsartmann/go-workflow-auditlog"
 )
@@ -63,11 +102,56 @@ func main() {
     // 4. Read the report
     report := audit.Report()
     fmt.Printf("Steps: %d, Events: %d\n", report.StepCount, report.EventCount)
+    fmt.Println(report.Summary())
 
     // Export
     _ = audit.ExportToFile("audit.json")
     _ = audit.ExportEventsToNDJSON("events.ndjson")
 }
+```
+
+The three-step lifecycle is **always** `Attach` → `Do` → `Snapshot`:
+
+| Step       | When        | What it captures                                |
+| ---------- | ----------- | ----------------------------------------------- |
+| `Attach`   | Before `Do` | Injects audit callbacks into every step         |
+| `Do`       | Execution   | Callbacks fire per-attempt, recording events    |
+| `Snapshot` | After `Do`  | Reads DAG structure + skipped/canceled statuses |
+
+## Example Output
+
+Run the bundled demo:
+
+```bash
+go run ./example
+```
+
+```
+━━━ demo version: dev | run id: 1dc74b1ad3d1b5c84e76097018e643f9 ━━━
+  [audit] ▶ #1 attempt_start attempt=1 step=fetch
+  [audit] ■ #2 attempt_end attempt=1 step=fetch (10.12ms)
+  [audit] ▶ #3 attempt_start attempt=1 step=flaky-api-call
+  [audit] ■ #4 attempt_end attempt=1 step=flaky-api-call error=transient error (0.01ms)
+  [audit] ▶ #13 attempt_start attempt=2 step=flaky-api-call
+  [audit] ■ #14 attempt_end attempt=2 step=flaky-api-call error=transient error (0.02ms)
+  [audit] ▶ #15 attempt_start attempt=3 step=flaky-api-call
+  → flaky step succeeded on attempt 3
+  [audit] ■ #16 attempt_end attempt=3 step=flaky-api-call (0.02ms)
+━━━ Workflow completed in 911.58ms ━━━
+
+━━━ Audit Report ━━━
+Workflow:     data-pipeline
+Steps:        6
+Succeeded:    6
+Failed:       0
+Events:       16
+Total time:   28.53ms
+Succeeded:    true
+
+━━━ Step Details ━━━
+  🟢 fetch [succeeded] attempts=1 type=FetchStep (10.12ms)
+  🟢 flaky-api-call [succeeded] attempts=3 deps=[fetch] retry(max=5) error=transient error
+  🟢 save [succeeded] attempts=1 type=SaveStep (5.12ms) deps=[transform]
 ```
 
 ## How It Works
@@ -82,7 +166,11 @@ go-workflow v0.1.13 provides `BeforeStep` and `AfterStep` callbacks per step, fi
 
 ### Why Snapshot is needed
 
-Steps settled inline by Conditions (Skipped/Canceled) never enter the interceptor/callback chain. `Snapshot(w)` reads `w.StateOf(step)` and `w.UpstreamOf(step)` to fill these gaps.
+Steps settled inline by Conditions (Skipped/Canceled) never enter the interceptor/callback chain. `Snapshot(w)` reads `w.StateOf(step)` and `w.UpstreamOf(step)` to fill these gaps. Without it, the report is missing the dependency graph and non-executed step statuses.
+
+### Why BeforeStep must pass through context
+
+The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, error)`. The returned context flows into `step.Do(ctx)`. If the callback returns `context.Background()`, **step-level timeouts are destroyed**. This library returns the original `ctx` unchanged.
 
 ## Report Structure
 
@@ -212,20 +300,69 @@ These exported errors are returned by `Validate()` and `New()`. Match them with 
 | `Enabled`              | `false` (checks env var)     | Turns audit logging on/off.                                                                                    |
 | `WorkflowID`           | `"default"`                  | Human-readable identifier.                                                                                     |
 | `RunID`                | auto-generated (128-bit hex) | Identifier for one execution; stamped on every event for trace correlation. Override to use your own trace ID. |
-| `OnEvent`              | `nil`                        | Callback fired after each event. Must not block.                                                               |
-| `MaxEvents`            | `0` (unlimited)              | Caps stored events to prevent OOM.                                                                             |
+| `OnEvent`              | `nil`                        | Callback fired after each event. Fires concurrently — must be goroutine-safe.                                  |
+| `MaxEvents`            | `0` (unlimited)              | Caps stored events to prevent OOM. Excess counted in `DroppedEventCount`.                                      |
 | `InitialEventCapacity` | `256`                        | Pre-allocates event slice.                                                                                     |
+
+## Diagrams
+
+Export the step DAG in three formats, with status-based coloring (succeeded = green, failed = red, skipped = gray, canceled = orange):
+
+**Mermaid** (renders natively in GitHub):
+
+```mermaid
+flowchart TD
+    fetch["fetch"]
+    validate["validate"]
+    transform["transform"]
+    save["save"]
+    validate --> fetch
+    transform --> validate
+    save --> transform
+    classDef succeeded fill:#2d5a2d,color:#fff
+    classDef failed fill:#8b2d2d,color:#fff
+    classDef skipped fill:#4a4a4a,color:#ccc
+    classDef canceled fill:#5a3d2d,color:#fff
+    class fetch succeeded
+    class validate succeeded
+    class transform succeeded
+    class save succeeded
+```
+
+**Graphviz DOT**:
+
+```dot
+digraph workflow {
+    rankdir=TB;
+    node [shape=box, style="rounded,filled", fontname="sans-serif"];
+    fetch    [label="fetch",    fillcolor="#2d5a2d", fontcolor="#fff"];
+    validate [label="validate", fillcolor="#2d5a2d", fontcolor="#fff"];
+    transform[label="transform",fillcolor="#2d5a2d", fontcolor="#fff"];
+    save     [label="save",     fillcolor="#2d5a2d", fontcolor="#fff"];
+    validate -> fetch;
+    transform -> validate;
+    save -> transform;
+}
+```
+
+Generate diagrams from any report:
+
+```go
+_ = report.WriteMermaid(os.Stdout)      // or audit.ExportMermaid("dag.mmd")
+_ = report.WriteGraphviz(os.Stdout)     // or audit.ExportGraphviz("dag.dot")
+_ = report.WritePlantUML(os.Stdout)     // or audit.ExportPlantUML("dag.puml")
+```
 
 ## Concurrency Model
 
-- Single `sync.RWMutex` protects all mutable state.
+- Single `sync.RWMutex` protects all mutable state (`events`, `steps`, `stepCounter`).
 - `BeforeStep`/`AfterStep` callbacks acquire the write lock once per call.
-- `OnEvent` callback fires **outside** the lock to prevent user code from blocking.
+- `OnEvent` callback fires **outside** the lock — but **concurrently** from parallel step goroutines. It must be goroutine-safe.
 - `BuildReport()` uses `RLock` — concurrent reads don't block each other.
 
 ## Step Naming
 
-go-workflow uses `flow.String(step)` for display names. By default this returns `*TypeName(0xpointer)` which is non-deterministic. For clean audit output, implement `String()` on your step types:
+go-workflow uses `flow.String(step)` for display names. By default this returns `*TypeName(0xpointer)` which is non-deterministic across runs. For clean audit output, implement `String()` on your step types:
 
 ```go
 func (s *MyStep) String() string { return "my-meaningful-name" }
@@ -235,20 +372,20 @@ Or use `flow.Name(step, "name")` when adding to the workflow.
 
 ## Known Limitations
 
-- **Step name collisions**: step identity is tracked internally by the `flow.Steper` pointer (always unique), but the JSON `step_name` field relies on `flow.String(step)`. If two steps produce the same `String()` output, their JSON output is ambiguous. Give each step a distinct `String()`.
+- **Step name collisions**: step identity is tracked internally by the `flow.Steper` pointer (always unique), but the JSON `step_name` field relies on `flow.String(step)`. If two steps produce the same `String()` output, their JSON output is ambiguous. Use the `step_id` field (1-based, stable per run) to disambiguate, or give each step a distinct `String()`.
 - **Snapshot is mandatory for full DAG**: `Attach` captures per-attempt events; the dependency graph and skipped/canceled statuses are only filled in after `Snapshot(w)` reads the workflow's final state.
 - **Replay loses DAG edges**: `ReplayEvents` reconstructs a report from a flat event stream. Dependencies, `MaxAttempts`, `HasRetry`, and `HasTimeout` are not available from events alone — use a Snapshot-captured report for full fidelity.
 - **go-workflow retry data race**: `DefaultRetryOption.Backoff` shares a single `ExponentialBackOff` instance that races under concurrent use. This is a known upstream issue in v0.1.13.
 - **`WorkflowID` cannot contain path separators** (`/` or `\`): it is used in export filenames and would break path safety. Use `Config.RunID` or your own export paths for arbitrary identifiers.
 
-## Installation
+## Contributing
 
-```bash
-go get github.com/larsartmann/go-workflow-auditlog
-```
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing patterns, code style, and the release process.
 
-Requires Go 1.26+ and `github.com/Azure/go-workflow v0.1.13`.
+- [Changelog](CHANGELOG.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Report a bug or request a feature](https://github.com/LarsArtmann/go-workflow-auditlog/issues)
 
 ## License
 
-MIT
+[MIT](LICENSE) — Copyright (c) 2026 Lars Artmann
