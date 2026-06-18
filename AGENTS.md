@@ -24,15 +24,21 @@ Single-package library (`auditlog`) with these source files:
 
 ```
 doc.go             — Package doc comment
-types.go           — Domain enums: EventType, Phase, StepStatus, fromFlowStatus
-event.go           — Event type + convenience methods (IsAttemptStart, Duration, etc.)
-step.go            — StepInfo type + methods (HasError, DeriveStatus)
+types.go           — Domain enums: EventType, Phase, StepStatus, StepRef, fromFlowStatus
+event.go           — Event type (embeds StepRef) + convenience methods
+step.go            — StepInfo type (embeds StepRef) + methods (HasError, DeriveStatus)
 plugin.go          — Public API: New(), Attach(), Snapshot(), Report(), Export*(), Config, Auditor
 recorder.go        — Core state machine: event capture, step records, attempt tracking
-interceptor.go     — Attach/Snapshot logic: callback injection + post-run DAG capture
+attach.go          — Attach/Snapshot logic: callback injection + post-run DAG capture (incl. sub-workflows)
 report.go          — WorkflowReport type + Validate() + query methods
 report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates
 export.go          — NDJSON writer
+ndjson.go          — NDJSON reader (ReadEvents)
+replay.go          — ReplayEvents: reconstruct Report from event stream
+filter.go          — Report filtering (Filtered, ReportOption, WithStepsByStatus, etc.)
+diagram.go         — Shared diagram engine: diagramFormatter interface + mermaid/plantuml formatters
+mermaid.go         — Mermaid flowchart export (delegates to writeDiagram)
+plantuml.go        — PlantUML component diagram export (delegates to writeDiagram)
 example/           — Data pipeline demo (fetch → validate → transform → save + retry)
 ```
 
@@ -83,6 +89,9 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - **`flow.StepStatus` uses capitalized strings** ("Succeeded", "Failed", etc.) while our JSON uses lowercase ("succeeded", "failed"). Conversion happens in `fromFlowStatus()`.
 - **`RetryOption.Attempts`** (not `MaxAttempts`) is the field name in go-workflow v0.1.13. The source doc comment says `MaxAttempts` but the actual struct field is `Attempts`.
 - **`Pipe` only sets dependencies**, not data flow. Data flows via `.Input()` callbacks. The example wires both.
+- **Sub-workflow traversal**: `snapshotWorkflow` uses `flow.Traverse` to walk the full step DAG, capturing inner steps of composite/sub-workflows that bypass Before/After callbacks. Wrapper steps with nil `StateOf` are skipped via `TraverseEndBranch`.
+- **`buildReportFromCore()` is the single Report construction path** — `BuildReport`, `Filtered`, and `ReplayEvents` all route through it. The denormalized aggregate fields are derived in exactly one place. Any new construction path MUST use it.
+- **Diagram export** uses a shared `writeDiagram` engine with a `diagramFormatter` interface. Mermaid adds status-based CSS classes (`succeeded`=`green`, `failed`=`red`, `skipped`=`gray`, `canceled`=`orange`) and retry count indicators (`×N`). PlantUML uses the same engine but skips class assignment.
 
 ---
 
