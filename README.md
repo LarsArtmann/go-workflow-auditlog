@@ -136,26 +136,26 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 ### `Auditor` Methods
 
-| Method                                                | Description                                                 |
-| ----------------------------------------------------- | ----------------------------------------------------------- |
-| `Attach(w *flow.Workflow) *flow.Workflow`             | Injects audit callbacks into all steps. Call before `Do`.   |
-| `Snapshot(w *flow.Workflow)`                          | Captures final DAG state. Call after `Do`.                  |
-| `Report() WorkflowReport`                             | Returns the consolidated report.                            |
-| `Events() []Event`                                    | Returns all captured events.                                |
-| `EventsCount() int`                                   | Event count without copying.                                |
-| `DroppedEventCount() int64`                           | Events dropped due to `MaxEvents` cap.                      |
-| `RunID() string`                                      | The run identifier stamped on every event (for correlation).|
-| `ReportFiltered(opts ...ReportOption) WorkflowReport` | Returns a filtered report (by name/status/event-type/time). |
-| `ExportToFile(path string) error`                     | Writes report as JSON.                                      |
-| `ExportEventsToNDJSON(path string) error`             | Writes events as NDJSON.                                    |
-| `WriteReportJSON(w io.Writer) error`                  | Writes report JSON to writer.                               |
-| `WriteEventsNDJSON(w io.Writer) error`                | Writes NDJSON to writer.                                    |
-| `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                 |
-| `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                |
-| `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                            |
-| `WriteMermaid(w io.Writer) error`                     | Writes Mermaid DAG to writer.                               |
-| `WritePlantUML(w io.Writer) error`                    | Writes PlantUML DAG to writer.                              |
-| `WriteGraphviz(w io.Writer) error`                    | Writes Graphviz DOT DAG to writer.                          |
+| Method                                                | Description                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------------ |
+| `Attach(w *flow.Workflow) *flow.Workflow`             | Injects audit callbacks into all steps. Call before `Do`.    |
+| `Snapshot(w *flow.Workflow)`                          | Captures final DAG state. Call after `Do`.                   |
+| `Report() WorkflowReport`                             | Returns the consolidated report.                             |
+| `Events() []Event`                                    | Returns all captured events.                                 |
+| `EventsCount() int`                                   | Event count without copying.                                 |
+| `DroppedEventCount() int64`                           | Events dropped due to `MaxEvents` cap.                       |
+| `RunID() string`                                      | The run identifier stamped on every event (for correlation). |
+| `ReportFiltered(opts ...ReportOption) WorkflowReport` | Returns a filtered report (by name/status/event-type/time).  |
+| `ExportToFile(path string) error`                     | Writes report as JSON.                                       |
+| `ExportEventsToNDJSON(path string) error`             | Writes events as NDJSON.                                     |
+| `WriteReportJSON(w io.Writer) error`                  | Writes report JSON to writer.                                |
+| `WriteEventsNDJSON(w io.Writer) error`                | Writes NDJSON to writer.                                     |
+| `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                  |
+| `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                 |
+| `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                             |
+| `WriteMermaid(w io.Writer) error`                     | Writes Mermaid DAG to writer.                                |
+| `WritePlantUML(w io.Writer) error`                    | Writes PlantUML DAG to writer.                               |
+| `WriteGraphviz(w io.Writer) error`                    | Writes Graphviz DOT DAG to writer.                           |
 
 ### `WorkflowReport` Methods
 
@@ -197,24 +197,24 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 These exported errors are returned by `Validate()` and `New()`. Match them with `errors.Is`:
 
-| Error                              | Returned when                                        |
-| ---------------------------------- | ---------------------------------------------------- |
-| `auditlog.ErrWorkflowIDPathSep`    | `Config.WorkflowID` contains `/` or `\`.             |
-| `auditlog.ErrEventCountMismatch`   | Report `EventCount` ≠ `len(Events)`.                 |
-| `auditlog.ErrStepCountMismatch`    | Report `StepCount` ≠ `len(Steps)`.                   |
-| `auditlog.ErrStatusDrift`          | A step's `Status` disagrees with its derived status. |
-| `auditlog.ErrReplayNoEvents`       | `ReplayEvents` received zero events.                 |
+| Error                            | Returned when                                        |
+| -------------------------------- | ---------------------------------------------------- |
+| `auditlog.ErrWorkflowIDPathSep`  | `Config.WorkflowID` contains `/` or `\`.             |
+| `auditlog.ErrEventCountMismatch` | Report `EventCount` ≠ `len(Events)`.                 |
+| `auditlog.ErrStepCountMismatch`  | Report `StepCount` ≠ `len(Steps)`.                   |
+| `auditlog.ErrStatusDrift`        | A step's `Status` disagrees with its derived status. |
+| `auditlog.ErrReplayNoEvents`     | `ReplayEvents` received zero events.                 |
 
 ## Config
 
-| Field                  | Default                  | Description                                      |
-| ---------------------- | ------------------------ | ------------------------------------------------ |
-| `Enabled`              | `false` (checks env var) | Turns audit logging on/off.                      |
-| `WorkflowID`           | `"default"`              | Human-readable identifier.                       |
+| Field                  | Default                      | Description                                                                                                    |
+| ---------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `Enabled`              | `false` (checks env var)     | Turns audit logging on/off.                                                                                    |
+| `WorkflowID`           | `"default"`                  | Human-readable identifier.                                                                                     |
 | `RunID`                | auto-generated (128-bit hex) | Identifier for one execution; stamped on every event for trace correlation. Override to use your own trace ID. |
-| `OnEvent`              | `nil`                    | Callback fired after each event. Must not block. |
-| `MaxEvents`            | `0` (unlimited)          | Caps stored events to prevent OOM.               |
-| `InitialEventCapacity` | `256`                    | Pre-allocates event slice.                       |
+| `OnEvent`              | `nil`                        | Callback fired after each event. Must not block.                                                               |
+| `MaxEvents`            | `0` (unlimited)              | Caps stored events to prevent OOM.                                                                             |
+| `InitialEventCapacity` | `256`                        | Pre-allocates event slice.                                                                                     |
 
 ## Concurrency Model
 
