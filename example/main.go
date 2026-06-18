@@ -14,7 +14,6 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	"github.com/cenkalti/backoff/v4"
-
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -28,7 +27,9 @@ type FetchStep struct {
 func (s *FetchStep) Do(_ context.Context) error {
 	fmt.Printf("  → fetching %s\n", s.URL)
 	time.Sleep(10 * time.Millisecond)
+
 	s.Data = []byte(`{"users":[1,2,3],"status":"ok"}`)
+
 	return nil
 }
 
@@ -48,6 +49,7 @@ func (s *ValidateStep) Do(_ context.Context) error {
 	}
 
 	s.Valid = true
+
 	return nil
 }
 
@@ -64,7 +66,9 @@ type TransformStep struct {
 func (s *TransformStep) Do(_ context.Context) error {
 	fmt.Println("  → transforming data")
 	time.Sleep(8 * time.Millisecond)
+
 	s.Out = []byte(`transformed:` + string(s.Input))
+
 	return nil
 }
 
@@ -78,6 +82,7 @@ type SaveStep struct {
 func (s *SaveStep) Do(_ context.Context) error {
 	fmt.Printf("  → saving to %s\n", s.Path)
 	time.Sleep(5 * time.Millisecond)
+
 	return nil
 }
 
@@ -89,6 +94,7 @@ type NotifyStep struct {
 
 func (s *NotifyStep) Do(_ context.Context) error {
 	fmt.Printf("  → notifying: %s\n", s.Msg)
+
 	return nil
 }
 
@@ -103,7 +109,9 @@ func (s *FlakyStep) Do(_ context.Context) error {
 	if s.calls < 3 {
 		return errors.New("transient error")
 	}
+
 	fmt.Println("  → flaky step succeeded on attempt", s.calls)
+
 	return nil
 }
 
@@ -130,14 +138,18 @@ func main() {
 			if e.IsAfter() {
 				phase = "■"
 			}
+
 			fmt.Printf("  [audit] %s #%d %s attempt=%d step=%s",
 				phase, e.Sequence, e.EventType, e.Attempt, e.Name)
+
 			if e.Error != nil {
 				fmt.Printf(" error=%s", *e.Error)
 			}
+
 			if e.DurationMs != nil {
 				fmt.Printf(" (%.2fms)", *e.DurationMs)
 			}
+
 			fmt.Println()
 		},
 	})
@@ -159,14 +171,17 @@ func main() {
 		flow.Step(fetch),
 		flow.Step(validate).DependsOn(fetch).Input(func(_ context.Context, v *ValidateStep) error {
 			v.Input = fetch.Data
+
 			return nil
 		}),
 		flow.Step(transform).DependsOn(validate).Input(func(_ context.Context, t *TransformStep) error {
 			t.Input = validate.Data()
+
 			return nil
 		}),
 		flow.Step(save).DependsOn(transform).Input(func(_ context.Context, s *SaveStep) error {
 			s.Input = transform.Out
+
 			return nil
 		}),
 
@@ -182,6 +197,7 @@ func main() {
 
 	// Run the workflow.
 	fmt.Println("━━━ Running data pipeline workflow ━━━")
+
 	start := time.Now()
 	runErr := w.Do(ctx)
 	elapsed := time.Since(start)
@@ -192,6 +208,7 @@ func main() {
 
 	// Print the report.
 	report := audit.Report()
+
 	fmt.Println()
 	fmt.Println("━━━ Audit Report ━━━")
 	fmt.Printf("Workflow:     %s\n", report.WorkflowID)
@@ -206,6 +223,7 @@ func main() {
 
 	fmt.Println()
 	fmt.Println("━━━ Step Details ━━━")
+
 	for _, step := range report.Steps {
 		icon := step.Status.Icon()
 		fmt.Printf("  %s %s [%s] attempts=%d type=%s",
@@ -241,17 +259,21 @@ func main() {
 	// Export to JSON.
 	if len(os.Args) > 1 && os.Args[1] == "--export" {
 		path := "audit-report.json"
+
 		err := audit.ExportToFile(path)
 		if err != nil {
 			log.Fatalf("export error: %v", err)
 		}
+
 		fmt.Printf("\nReport exported to %s\n", path)
 
 		ndjsonPath := "audit-events.ndjson"
+
 		err = audit.ExportEventsToNDJSON(ndjsonPath)
 		if err != nil {
 			log.Fatalf("ndjson export error: %v", err)
 		}
+
 		fmt.Printf("Events exported to %s\n", ndjsonPath)
 	}
 

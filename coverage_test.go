@@ -10,7 +10,6 @@ import (
 	"time"
 
 	flow "github.com/Azure/go-workflow"
-
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -160,6 +159,7 @@ func TestReport_StepByName(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	step := report.StepByName("find-me")
 	if step == nil {
 		t.Fatal("expected to find step 'find-me'")
@@ -183,6 +183,7 @@ func TestReport_EventsByType(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	starts := report.EventsByType(auditlog.EventTypeAttemptStart)
 	if len(starts) < 1 {
 		t.Errorf("expected at least 1 start event, got %d", len(starts))
@@ -209,6 +210,7 @@ func TestReport_SucceededSteps(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	succeeded := report.SucceededSteps()
 	if len(succeeded) != 2 {
 		t.Fatalf("expected 2 succeeded steps, got %d", len(succeeded))
@@ -228,6 +230,7 @@ func TestReport_SkippedSteps(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	skipped := report.SkippedSteps()
 	if len(skipped) != 1 {
 		t.Fatalf("expected 1 skipped step, got %d", len(skipped))
@@ -249,12 +252,14 @@ func TestStepInfo_HasError(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	step := report.StepByName("fail-step")
 	if !step.HasError() {
 		t.Error("expected HasError=true")
 	}
 
 	okStep := report.StepByName("fail-step")
+
 	okStep.Error = nil
 	if okStep.HasError() {
 		t.Error("expected HasError=false after clearing error")
@@ -274,6 +279,7 @@ func TestStepInfo_DeriveStatus_FromError(t *testing.T) {
 	t.Parallel()
 
 	errMsg := "fail"
+
 	s := auditlog.StepInfo{
 		Status: auditlog.StepStatusRunning,
 		Error:  &errMsg,
@@ -324,12 +330,14 @@ func TestWriteReportJSON_ToBuffer(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf bytes.Buffer
+
 	err := a.WriteReportJSON(&buf)
 	if err != nil {
 		t.Fatalf("WriteReportJSON error: %v", err)
 	}
 
 	var report auditlog.WorkflowReport
+
 	err = json.Unmarshal(buf.Bytes(), &report)
 	if err != nil {
 		t.Fatalf("invalid JSON output: %v", err)
@@ -347,6 +355,7 @@ func TestWriteEventsNDJSON_ToBuffer(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf bytes.Buffer
+
 	err := a.WriteEventsNDJSON(&buf)
 	if err != nil {
 		t.Fatalf("WriteEventsNDJSON error: %v", err)
@@ -358,6 +367,7 @@ func TestWriteEventsNDJSON_ToBuffer(t *testing.T) {
 	}
 
 	var evt auditlog.Event
+
 	err = json.Unmarshal(lines[0], &evt)
 	if err != nil {
 		t.Fatalf("invalid NDJSON line: %v", err)
@@ -368,6 +378,7 @@ func TestExportToFile_Error(t *testing.T) {
 	t.Parallel()
 
 	a := mustNew(t, auditlog.Config{Enabled: true})
+
 	err := a.ExportToFile("/nonexistent/dir/file.json")
 	if err == nil {
 		t.Fatal("expected error writing to nonexistent directory")
@@ -378,6 +389,7 @@ func TestExportEventsToNDJSON_Error(t *testing.T) {
 	t.Parallel()
 
 	a := mustNew(t, auditlog.Config{Enabled: true})
+
 	err := a.ExportEventsToNDJSON("/nonexistent/dir/file.ndjson")
 	if err == nil {
 		t.Fatal("expected error writing to nonexistent directory")
@@ -483,6 +495,7 @@ func TestStepType_Inferred(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	step := report.StepByName("typed")
 	if step.StepType != "succeedStep" {
 		t.Errorf("expected step type 'succeedStep', got %q", step.StepType)
@@ -498,6 +511,7 @@ func TestDuration_Tracked(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	step := report.StepByName("slow-step")
 	if step.DurationMs == nil {
 		t.Fatal("expected non-nil DurationMs")
@@ -567,12 +581,14 @@ func TestReport_JSONRoundTrip(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf bytes.Buffer
+
 	err := a.WriteReportJSON(&buf)
 	if err != nil {
 		t.Fatalf("WriteReportJSON error: %v", err)
 	}
 
 	var report auditlog.WorkflowReport
+
 	err = json.Unmarshal(buf.Bytes(), &report)
 	if err != nil {
 		t.Fatalf("JSON unmarshal error: %v", err)
@@ -642,6 +658,7 @@ func TestEventsCount_NoCopy(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	count := a.EventsCount()
+
 	events := a.Events()
 	if count != len(events) {
 		t.Errorf("EventsCount()=%d but len(Events())=%d", count, len(events))
@@ -672,6 +689,7 @@ func TestStepTypeName_NilStep(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	step := report.StepByName("func-step")
 	if step == nil {
 		t.Fatal("expected to find 'func-step'")
@@ -736,6 +754,7 @@ func TestWriteToFile_CloseError(t *testing.T) {
 	_ = os.WriteFile(path, []byte{}, 0o444)
 
 	a := mustNew(t, auditlog.Config{Enabled: true})
+
 	err := a.ExportToFile(path)
 	if err == nil {
 		// Some filesystems allow writing to read-only files; skip if no error.

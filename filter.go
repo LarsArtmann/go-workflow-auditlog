@@ -74,6 +74,7 @@ func (r WorkflowReport) Filtered(opts ...ReportOption) WorkflowReport {
 	}
 
 	var filteredSteps []StepInfo
+
 	for _, step := range r.Steps {
 		if !filter.matchStep(step) {
 			continue
@@ -83,6 +84,7 @@ func (r WorkflowReport) Filtered(opts ...ReportOption) WorkflowReport {
 	}
 
 	var filteredEvents []Event
+
 	for _, evt := range r.Events {
 		if !filter.matchEvent(evt) {
 			continue
@@ -153,6 +155,7 @@ func filterEventsToSteps(events []Event, steps []StepInfo) []Event {
 	}
 
 	var result []Event
+
 	for _, evt := range events {
 		if _, ok := names[evt.Name]; ok {
 			result = append(result, evt)

@@ -7,7 +7,6 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	"github.com/cenkalti/backoff/v4"
-
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -18,8 +17,12 @@ type succeedStep struct {
 	ran  bool
 }
 
-func (s *succeedStep) Do(_ context.Context) error { s.ran = true; return nil }
-func (s *succeedStep) String() string             { return s.name }
+func (s *succeedStep) Do(_ context.Context) error {
+	s.ran = true
+
+	return nil
+}
+func (s *succeedStep) String() string { return s.name }
 
 type failStep struct {
 	name string
@@ -130,7 +133,8 @@ func findStep(t *testing.T, report auditlog.WorkflowReport, name string) auditlo
 func assertReportValid(t *testing.T, report auditlog.WorkflowReport) {
 	t.Helper()
 
-	if err := report.Validate(); err != nil {
+	err := report.Validate()
+	if err != nil {
 		t.Fatalf("report invalid: %v", err)
 	}
 }
@@ -416,6 +420,7 @@ func TestOnEvent_Callback(t *testing.T) {
 	t.Parallel()
 
 	var captured []auditlog.Event
+
 	a := mustNew(t, auditlog.Config{
 		Enabled: true,
 		OnEvent: func(e auditlog.Event) { captured = append(captured, e) },
@@ -446,6 +451,7 @@ func TestExport_JSON(t *testing.T) {
 
 	dir := t.TempDir()
 	path := dir + "/report.json"
+
 	err := a.ExportToFile(path)
 	if err != nil {
 		t.Fatalf("ExportToFile error: %v", err)
@@ -467,6 +473,7 @@ func TestExport_NDJSON(t *testing.T) {
 
 	dir := t.TempDir()
 	path := dir + "/events.ndjson"
+
 	err := a.ExportEventsToNDJSON(path)
 	if err != nil {
 		t.Fatalf("ExportEventsToNDJSON error: %v", err)
@@ -486,6 +493,7 @@ func TestEventsByStep(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	evts := report.EventsByStep("query-step")
 	if len(evts) < 2 {
 		t.Errorf("expected at least 2 events for query-step, got %d", len(evts))
@@ -505,6 +513,7 @@ func TestFailedSteps(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	failed := report.FailedSteps()
 	if len(failed) != 1 {
 		t.Fatalf("expected 1 failed step, got %d", len(failed))
@@ -526,6 +535,7 @@ func TestRetriedSteps(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	report := a.Report()
+
 	retried := report.RetriedSteps()
 	if len(retried) != 1 {
 		t.Fatalf("expected 1 retried step, got %d", len(retried))

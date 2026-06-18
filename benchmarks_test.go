@@ -16,8 +16,9 @@ func BenchmarkInvocation(b *testing.B) {
 	b.Run("disabled", func(b *testing.B) {
 		a, _ := auditlog.New(auditlog.Config{Enabled: false})
 
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			b.StopTimer()
+
 			w := &flow.Workflow{}
 			w.Add(flow.Step(newSucceed("step")))
 			a.Attach(w)
@@ -30,8 +31,9 @@ func BenchmarkInvocation(b *testing.B) {
 	b.Run("enabled", func(b *testing.B) {
 		a, _ := auditlog.New(auditlog.Config{Enabled: true})
 
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			b.StopTimer()
+
 			w := &flow.Workflow{}
 			w.Add(flow.Step(newSucceed("step")))
 			a.Attach(w)
@@ -48,16 +50,19 @@ func BenchmarkInvocation(b *testing.B) {
 func BenchmarkAttach(b *testing.B) {
 	for _, n := range []int{10, 50, 100} {
 		b.Run(fmt.Sprintf("%d-steps", n), func(b *testing.B) {
-			for i := 0; i < b.N; i++ {
+			for range b.N {
 				b.StopTimer()
+
 				a, _ := auditlog.New(auditlog.Config{Enabled: true})
 				w := &flow.Workflow{}
+
 				steps := make([]flow.Steper, 0, n)
 				for j := range n {
 					s := newSucceed(fmt.Sprintf("step-%d", j))
 					steps = append(steps, s)
 					w.Add(flow.Step(s))
 				}
+
 				b.StartTimer()
 
 				a.Attach(w)
@@ -72,19 +77,21 @@ func BenchmarkBuildReport(b *testing.B) {
 		b.Run(fmt.Sprintf("%d-steps", n), func(b *testing.B) {
 			a, _ := auditlog.New(auditlog.Config{Enabled: true})
 			w := &flow.Workflow{}
+
 			steps := make([]flow.Steper, 0, n)
 			for j := range n {
 				s := newSucceed(fmt.Sprintf("step-%d", j))
 				steps = append(steps, s)
 				w.Add(flow.Step(s))
 			}
+
 			a.Attach(w)
 			_ = w.Do(context.Background())
 			a.Snapshot(w)
 
 			b.ResetTimer()
 
-			for i := 0; i < b.N; i++ {
+			for range b.N {
 				_ = a.Report()
 			}
 		})
@@ -94,17 +101,19 @@ func BenchmarkBuildReport(b *testing.B) {
 // BenchmarkEventsCopy measures the cost of copying the events slice.
 func BenchmarkEventsCopy(b *testing.B) {
 	a, _ := auditlog.New(auditlog.Config{Enabled: true})
+
 	w := &flow.Workflow{}
 	for j := range 100 {
 		w.Add(flow.Step(newSucceed(fmt.Sprintf("step-%d", j))))
 	}
+
 	a.Attach(w)
 	_ = w.Do(context.Background())
 	a.Snapshot(w)
 
 	b.ResetTimer()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		_ = a.Events()
 	}
 }
@@ -116,8 +125,9 @@ func BenchmarkOnEventCallback(b *testing.B) {
 		OnEvent: func(e auditlog.Event) {}, // no-op callback
 	})
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		b.StopTimer()
+
 		w := &flow.Workflow{}
 		w.Add(flow.Step(newSucceed("step")))
 		a.Attach(w)
@@ -131,8 +141,9 @@ func BenchmarkOnEventCallback(b *testing.B) {
 func BenchmarkRetryWithAudit(b *testing.B) {
 	a, _ := auditlog.New(auditlog.Config{Enabled: true})
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		b.StopTimer()
+
 		w := &flow.Workflow{}
 		step := &flakyStep{name: "bench-flaky", failUntil: 2}
 		w.Add(
@@ -155,7 +166,9 @@ func BenchmarkMermaidExport(b *testing.B) {
 		b.Run(fmt.Sprintf("%d-steps", n), func(b *testing.B) {
 			a, _ := auditlog.New(auditlog.Config{Enabled: true})
 			w := &flow.Workflow{}
+
 			var prev flow.Steper
+
 			for j := range n {
 				s := newSucceed(fmt.Sprintf("step-%d", j))
 				if prev != nil {
@@ -163,16 +176,19 @@ func BenchmarkMermaidExport(b *testing.B) {
 				} else {
 					w.Add(flow.Step(s))
 				}
+
 				prev = s
 			}
+
 			a.Attach(w)
 			_ = w.Do(context.Background())
 			a.Snapshot(w)
 
 			report := a.Report()
+
 			b.ResetTimer()
 
-			for i := 0; i < b.N; i++ {
+			for range b.N {
 				_ = report.WriteMermaid(&discardWriter{})
 			}
 		})

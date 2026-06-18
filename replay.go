@@ -12,6 +12,7 @@ var ErrReplayNoEvents = errors.New("no events to replay")
 // replayStep is the accumulator for a single step during replay.
 type replayStep struct {
 	StepRef
+
 	attemptCount int
 	startedAt    *time.Time
 	finishedAt   *time.Time
@@ -36,6 +37,7 @@ func ReplayEvents(events []Event) (WorkflowReport, error) {
 	}
 
 	steps := make(map[string]*replayStep)
+
 	var workflowID string
 
 	for _, evt := range events {
@@ -90,7 +92,8 @@ func ReplayEvents(events []Event) (WorkflowReport, error) {
 	)
 	report.Reconstructed = true
 
-	if err := report.Validate(); err != nil {
+	err := report.Validate()
+	if err != nil {
 		return report, fmt.Errorf("replayed report failed validation: %w", err)
 	}
 

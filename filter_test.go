@@ -6,7 +6,6 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	"github.com/cenkalti/backoff/v4"
-
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 

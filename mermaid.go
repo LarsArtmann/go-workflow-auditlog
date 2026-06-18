@@ -15,6 +15,7 @@ func (r WorkflowReport) WriteMermaid(writer io.Writer) error {
 // WriteMermaidString returns the Mermaid diagram as a string.
 func (r WorkflowReport) WriteMermaidString() (string, error) {
 	var buf strings.Builder
+
 	err := r.WriteMermaid(&buf)
 
 	return buf.String(), fmt.Errorf("write mermaid: %w", err)

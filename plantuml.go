@@ -14,6 +14,7 @@ func (r WorkflowReport) WritePlantUML(writer io.Writer) error {
 // WritePlantUMLString returns the PlantUML diagram as a string.
 func (r WorkflowReport) WritePlantUMLString() (string, error) {
 	var buf strings.Builder
+
 	err := r.WritePlantUML(&buf)
 
 	return buf.String(), fmt.Errorf("write plantuml: %w", err)

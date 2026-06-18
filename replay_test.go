@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	flow "github.com/Azure/go-workflow"
-
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -21,6 +20,7 @@ func TestReadEvents_RoundTrip(t *testing.T) {
 
 	// Export events as NDJSON.
 	var buf bytes.Buffer
+
 	err := a.WriteEventsNDJSON(&buf)
 	if err != nil {
 		t.Fatalf("WriteEventsNDJSON: %v", err)
@@ -105,6 +105,7 @@ func TestReplayEvents_BasicReconstruction(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	events := a.Events()
+
 	report, err := auditlog.ReplayEvents(events)
 	if err != nil {
 		t.Fatalf("ReplayEvents: %v", err)
@@ -196,6 +197,7 @@ func TestReplayEvents_FullRoundTrip(t *testing.T) {
 
 	// Export NDJSON.
 	var buf bytes.Buffer
+
 	_ = a.WriteEventsNDJSON(&buf)
 
 	// Read back + replay.

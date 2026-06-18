@@ -2,11 +2,11 @@ package auditlog_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
 	flow "github.com/Azure/go-workflow"
-
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -52,6 +52,7 @@ func Example_exportToFile() {
 	audit.Snapshot(w)
 
 	_ = audit.ExportToFile(os.TempDir() + "/audit-example.json")
+
 	fmt.Println("exported")
 
 	// Output:
@@ -88,7 +89,7 @@ func Example_filtering() {
 	w := &flow.Workflow{}
 	w.Add(
 		flow.Step(&exampleStep{name: "ok"}),
-		flow.Step(flow.Func("bad", func(_ context.Context) error { return fmt.Errorf("fail") })),
+		flow.Step(flow.Func("bad", func(_ context.Context) error { return errors.New("fail") })),
 	)
 
 	audit.Attach(w)

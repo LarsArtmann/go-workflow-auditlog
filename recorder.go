@@ -29,6 +29,7 @@ type attemptTracker struct {
 // stepRecord is the internal mutable state for a single step.
 type stepRecord struct {
 	StepRef
+
 	attemptCount int
 	startedAt    *time.Time
 	finishedAt   *time.Time
@@ -153,6 +154,7 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 
 	// Record the finish time and error from the last attempt.
 	rec.finishedAt = &now
+
 	rec.durationMs = durationMs
 	if errStr != nil {
 		rec.attemptErr = errStr

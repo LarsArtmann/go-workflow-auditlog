@@ -26,6 +26,7 @@ func TestMermaid_BasicDAG(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
+
 	err := a.Report().WriteMermaid(&buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
@@ -79,6 +80,7 @@ func TestMermaid_FailedStepRedClass(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
+
 	err := a.Report().WriteMermaid(&buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
@@ -109,6 +111,7 @@ func TestMermaid_RetryIndicator(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
+
 	err := a.Report().WriteMermaid(&buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
@@ -131,6 +134,7 @@ func TestMermaid_SpecialCharsSanitized(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
+
 	err := a.Report().WriteMermaid(&buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
@@ -150,6 +154,7 @@ func TestMermaid_EmptyReport(t *testing.T) {
 	a := mustNew(t, auditlog.Config{Enabled: true})
 
 	var buf strings.Builder
+
 	err := a.Report().WriteMermaid(&buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid on empty report error: %v", err)
@@ -174,6 +179,7 @@ func TestPlantUML_BasicDAG(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
+
 	err := a.Report().WritePlantUML(&buf)
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
@@ -214,6 +220,7 @@ func TestExportMermaid(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	path := t.TempDir() + "/dag.mmd"
+
 	err := a.ExportMermaid(path)
 	if err != nil {
 		t.Fatalf("ExportMermaid error: %v", err)
@@ -229,6 +236,7 @@ func TestExportPlantUML(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	path := t.TempDir() + "/dag.puml"
+
 	err := a.ExportPlantUML(path)
 	if err != nil {
 		t.Fatalf("ExportPlantUML error: %v", err)
@@ -252,6 +260,7 @@ func TestMermaid_FanOutFanIn(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
+
 	_ = a.Report().WriteMermaid(&buf)
 
 	output := buf.String()
@@ -293,6 +302,7 @@ func TestMermaid_SkippedStepGrayClass(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
+
 	_ = a.Report().WriteMermaid(&buf)
 
 	output := buf.String()
@@ -311,6 +321,7 @@ func TestPlantUML_NoMermaidClasses(t *testing.T) {
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
+
 	_ = a.Report().WritePlantUML(&buf)
 
 	output := buf.String()
@@ -340,6 +351,7 @@ func TestMermaid_CanceledStep(t *testing.T) {
 	a.Snapshot(w)
 
 	var buf strings.Builder
+
 	_ = a.Report().WriteMermaid(&buf)
 
 	output := buf.String()

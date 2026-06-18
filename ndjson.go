@@ -27,6 +27,7 @@ func ReadEvents(reader io.Reader) ([]Event, error) {
 	scanner.Buffer(make([]byte, 0, ndjsonMaxLineBytes), ndjsonMaxLineBytes)
 
 	var events []Event
+
 	sawData := false
 
 	for scanner.Scan() {
@@ -38,6 +39,7 @@ func ReadEvents(reader io.Reader) ([]Event, error) {
 		sawData = true
 
 		var evt Event
+
 		err := json.Unmarshal(line, &evt)
 		if err != nil {
 			return nil, fmt.Errorf("ndjson line %d: %w", len(events)+1, err)
@@ -46,7 +48,8 @@ func ReadEvents(reader io.Reader) ([]Event, error) {
 		events = append(events, evt)
 	}
 
-	if err := scanner.Err(); err != nil {
+	err := scanner.Err()
+	if err != nil {
 		if errors.Is(err, bufio.ErrTooLong) {
 			return nil, fmt.Errorf("%w: max %d bytes", ErrOversizedLine, ndjsonMaxLineBytes)
 		}
