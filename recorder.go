@@ -28,8 +28,7 @@ type attemptTracker struct {
 
 // stepRecord is the internal mutable state for a single step.
 type stepRecord struct {
-	name         string
-	stepType     string
+	StepRef
 	attemptCount int
 	startedAt    *time.Time
 	finishedAt   *time.Time
@@ -46,7 +45,7 @@ type stepRecord struct {
 	maxAttempts  int
 	hasRetry     bool
 	hasTimeout   bool
-	dependencies []string
+	dependencies []StepRef
 }
 
 // Recorder captures workflow execution events in-memory with minimal overhead.
@@ -109,14 +108,12 @@ func (r *Recorder) recordBeforeStep(step flow.Steper) {
 	rec.attemptCount++
 
 	evt := Event{
-		Sequence:   seq,
-		Timestamp:  now,
-		EventType:  EventTypeAttemptStart,
-		Phase:      PhaseBefore,
-		StepName:   name,
-		StepType:   rec.stepType,
-		Attempt:    rec.attemptCount,
-		WorkflowID: r.workflowID,
+		Sequence:  seq,
+		Timestamp: now,
+		EventType: EventTypeAttemptStart,
+		Phase:     PhaseBefore,
+		StepRef:   StepRef{Name: name, StepType: rec.StepType},
+		Attempt:   rec.attemptCount,
 	}
 	r.appendEventLocked(evt)
 
@@ -168,10 +165,8 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 		Timestamp:  now,
 		EventType:  EventTypeAttemptEnd,
 		Phase:      PhaseAfter,
-		StepName:   name,
-		StepType:   rec.stepType,
+		StepRef:    StepRef{Name: name, StepType: rec.StepType},
 		Attempt:    rec.attemptCount,
-		WorkflowID: r.workflowID,
 		DurationMs: durationMs,
 		Error:      errStr,
 		Status:     status,
@@ -193,8 +188,7 @@ func (r *Recorder) getOrCreateStepLocked(step flow.Steper, name string, now time
 	}
 
 	rec := &stepRecord{
-		name:      name,
-		stepType:  stepTypeName(step),
+		StepRef:   StepRef{Name: name, StepType: stepTypeName(step)},
 		startedAt: &now,
 		status:    StepStatusRunning,
 	}

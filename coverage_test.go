@@ -10,7 +10,6 @@ import (
 	"time"
 
 	flow "github.com/Azure/go-workflow"
-	"github.com/cenkalti/backoff/v4"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
@@ -26,7 +25,7 @@ func TestEvent_ConvenienceMethods(t *testing.T) {
 	startEvent := auditlog.Event{
 		EventType:  auditlog.EventTypeAttemptStart,
 		Phase:      auditlog.PhaseBefore,
-		StepName:   "step-a",
+		StepRef:    auditlog.StepRef{Name: "step-a"},
 		DurationMs: &dur,
 	}
 
@@ -336,9 +335,7 @@ func TestWriteReportJSON_ToBuffer(t *testing.T) {
 		t.Fatalf("invalid JSON output: %v", err)
 	}
 
-	if report.StepCount != 1 {
-		t.Errorf("expected StepCount=1 in JSON, got %d", report.StepCount)
-	}
+	assertStepCount(t, report, 1)
 }
 
 func TestWriteEventsNDJSON_ToBuffer(t *testing.T) {
@@ -464,9 +461,7 @@ func TestFanOutFanIn(t *testing.T) {
 	report := a.Report()
 	assertReportValid(t, report)
 
-	if report.StepCount != 4 {
-		t.Fatalf("expected 4 steps, got %d", report.StepCount)
-	}
+	assertStepCount(t, report, 4)
 
 	joinStep := findStep(t, report, "join")
 	if len(joinStep.Dependencies) != 2 {
@@ -489,8 +484,8 @@ func TestStepType_Inferred(t *testing.T) {
 
 	report := a.Report()
 	step := report.StepByName("typed")
-	if step.Type != "succeedStep" {
-		t.Errorf("expected step type 'succeedStep', got %q", step.Type)
+	if step.StepType != "succeedStep" {
+		t.Errorf("expected step type 'succeedStep', got %q", step.StepType)
 	}
 }
 
@@ -524,16 +519,14 @@ func TestDuration_Tracked(t *testing.T) {
 func TestWorkflowID_Propagated(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true, WorkflowID: "my-custom-wf"})
+	a := mustNewWithID(t, "my-custom-wf")
 	w := &flow.Workflow{}
 	s := newSucceed("step")
 	w.Add(flow.Step(s))
 	runWorkflow(t, a, w)
 
 	report := a.Report()
-	if report.WorkflowID != "my-custom-wf" {
-		t.Errorf("expected 'my-custom-wf', got %q", report.WorkflowID)
-	}
+	assertWorkflowID(t, report, "my-custom-wf")
 
 	for _, evt := range a.Events() {
 		if evt.WorkflowID != "my-custom-wf" {
@@ -560,9 +553,7 @@ func TestCanceledStatus(t *testing.T) {
 		t.Errorf("expected canceled, got %s", step.Status)
 	}
 
-	if report.CanceledCount != 1 {
-		t.Errorf("expected CanceledCount=1, got %d", report.CanceledCount)
-	}
+	assertCount(t, "CanceledCount", report.CanceledCount, 1)
 
 	if report.WorkflowSucceeded {
 		t.Error("expected WorkflowSucceeded=false")
@@ -598,9 +589,7 @@ func TestReport_JSONRoundTrip(t *testing.T) {
 		t.Errorf("version mismatch: %s", report.Version)
 	}
 
-	if report.StepCount != 2 {
-		t.Errorf("expected 2 steps, got %d", report.StepCount)
-	}
+	assertStepCount(t, report, 2)
 }
 
 func TestReport_WithRetryTiming(t *testing.T) {
@@ -609,10 +598,7 @@ func TestReport_WithRetryTiming(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	s := newFlaky("retry-timing", 2)
 	w.Add(
-		flow.Step(s).Retry(func(o *flow.RetryOption) {
-			o.Attempts = 5
-			o.Backoff = backoff.NewExponentialBackOff()
-		}),
+		flow.Step(s).Retry(retryOpts(5)),
 	)
 	runWorkflow(t, a, w)
 
@@ -674,13 +660,9 @@ func TestReport_EmptyWorkflow(t *testing.T) {
 	a := mustNew(t, auditlog.Config{Enabled: true})
 	report := a.Report()
 
-	if report.StepCount != 0 {
-		t.Errorf("expected 0 steps for empty workflow, got %d", report.StepCount)
-	}
+	assertStepCount(t, report, 0)
 
-	if report.EventCount != 0 {
-		t.Errorf("expected 0 events for empty workflow, got %d", report.EventCount)
-	}
+	assertEventCount(t, report, 0)
 
 	if !report.WorkflowSucceeded {
 		t.Error("empty workflow should be considered succeeded")
@@ -701,7 +683,7 @@ func TestStepTypeName_NilStep(t *testing.T) {
 		t.Fatal("expected to find 'func-step'")
 	}
 
-	if step.Type == "" {
+	if step.StepType == "" {
 		t.Error("expected non-empty step type")
 	}
 }
@@ -728,8 +710,8 @@ func TestSkip_Status(t *testing.T) {
 func TestMultipleWorkflows_Isolated(t *testing.T) {
 	t.Parallel()
 
-	a1 := mustNew(t, auditlog.Config{Enabled: true, WorkflowID: "wf-1"})
-	a2 := mustNew(t, auditlog.Config{Enabled: true, WorkflowID: "wf-2"})
+	a1 := mustNewWithID(t, "wf-1")
+	a2 := mustNewWithID(t, "wf-2")
 
 	w1 := &flow.Workflow{}
 	w1.Add(flow.Step(newSucceed("wf1-step")))
@@ -743,13 +725,8 @@ func TestMultipleWorkflows_Isolated(t *testing.T) {
 	r1 := a1.Report()
 	r2 := a2.Report()
 
-	if r1.WorkflowID != "wf-1" {
-		t.Errorf("expected wf-1, got %s", r1.WorkflowID)
-	}
-
-	if r2.WorkflowID != "wf-2" {
-		t.Errorf("expected wf-2, got %s", r2.WorkflowID)
-	}
+	assertWorkflowID(t, r1, "wf-1")
+	assertWorkflowID(t, r2, "wf-2")
 
 	if r1.StepCount != 1 || r2.StepCount != 1 {
 		t.Errorf("expected each to have 1 step, got %d and %d", r1.StepCount, r2.StepCount)

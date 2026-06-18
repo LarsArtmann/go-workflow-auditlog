@@ -72,7 +72,7 @@ func (r WorkflowReport) EventsByStep(stepName string) []Event {
 	var result []Event
 
 	for _, e := range r.Events {
-		if e.StepName == stepName {
+		if e.Name == stepName {
 			result = append(result, e)
 		}
 	}

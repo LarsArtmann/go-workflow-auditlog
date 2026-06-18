@@ -109,6 +109,15 @@ func (s *FlakyStep) Do(_ context.Context) error {
 
 func (s *FlakyStep) String() string { return "flaky-api-call" }
 
+// retryOpts returns a retry config function with a fresh backoff instance,
+// avoiding the data race in go-workflow's shared DefaultRetryOption.Backoff.
+func retryOpts(attempts uint64) func(*flow.RetryOption) {
+	return func(o *flow.RetryOption) {
+		o.Attempts = attempts
+		o.Backoff = backoff.NewExponentialBackOff()
+	}
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -122,7 +131,7 @@ func main() {
 				phase = "■"
 			}
 			fmt.Printf("  [audit] %s #%d %s attempt=%d step=%s",
-				phase, e.Sequence, e.EventType, e.Attempt, e.StepName)
+				phase, e.Sequence, e.EventType, e.Attempt, e.Name)
 			if e.Error != nil {
 				fmt.Printf(" error=%s", *e.Error)
 			}
@@ -165,10 +174,7 @@ func main() {
 		flow.Step(notify).DependsOn(save),
 
 		// A flaky step with retry (demonstrates attempt tracking).
-		flow.Step(flaky).DependsOn(fetch).Retry(func(o *flow.RetryOption) {
-			o.Attempts = 5
-			o.Backoff = backoff.NewExponentialBackOff()
-		}),
+		flow.Step(flaky).DependsOn(fetch).Retry(retryOpts(5)),
 	)
 
 	// Attach audit callbacks BEFORE running.
@@ -203,7 +209,7 @@ func main() {
 	for _, step := range report.Steps {
 		icon := step.Status.Icon()
 		fmt.Printf("  %s %s [%s] attempts=%d type=%s",
-			icon, step.Name, step.Status, step.AttemptCount, step.Type)
+			icon, step.Name, step.Status, step.AttemptCount, step.StepType)
 
 		if step.DurationMs != nil {
 			fmt.Printf(" (%.2fms)", *step.DurationMs)

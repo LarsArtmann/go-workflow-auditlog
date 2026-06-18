@@ -4,19 +4,19 @@ import "time"
 
 // StepInfo aggregates all observed data for a single workflow step.
 type StepInfo struct {
-	Name         string     `json:"name"`
-	Type         string     `json:"step_type"`
-	Status       StepStatus `json:"status"`
-	AttemptCount int        `json:"attempt_count"`
-	MaxAttempts  int        `json:"max_attempts,omitempty"`
-	StartedAt    *time.Time `json:"started_at,omitempty"`
-	FinishedAt   *time.Time `json:"finished_at,omitempty"`
-	DurationMs   *float64   `json:"duration_ms,omitempty"`
-	Dependencies []string   `json:"dependencies,omitempty"`
-	Dependents   []string   `json:"dependents,omitempty"`
-	Error        *string    `json:"error,omitempty"`
-	HasRetry     bool       `json:"has_retry"`
-	HasTimeout   bool       `json:"has_timeout"`
+	StepRef
+
+	Status       StepStatus  `json:"status"`
+	AttemptCount int         `json:"attempt_count"`
+	MaxAttempts  int         `json:"max_attempts,omitempty"`
+	StartedAt    *time.Time  `json:"started_at,omitempty"`
+	FinishedAt   *time.Time  `json:"finished_at,omitempty"`
+	DurationMs   *float64    `json:"duration_ms,omitempty"`
+	Dependencies []StepRef   `json:"dependencies,omitempty"`
+	Dependents   []StepRef   `json:"dependents,omitempty"`
+	Error        *string     `json:"error,omitempty"`
+	HasRetry     bool        `json:"has_retry"`
+	HasTimeout   bool        `json:"has_timeout"`
 }
 
 // HasError returns true if the step recorded an error.
@@ -42,7 +42,6 @@ func (s StepInfo) DeriveStatus() StepStatus {
 		return s.Status
 	}
 
-	// Pre-snapshot: infer from error pointer
 	if s.Error != nil {
 		return StepStatusFailed
 	}

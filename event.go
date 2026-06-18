@@ -4,14 +4,13 @@ import "time"
 
 // Event is a single, timestamped observation from a workflow step execution.
 type Event struct {
+	StepRef
+
 	Sequence   int        `json:"sequence"`
 	Timestamp  time.Time  `json:"timestamp"`
 	EventType  EventType  `json:"event_type"`
 	Phase      Phase      `json:"phase"`
-	StepName   string     `json:"step_name"`
-	StepType   string     `json:"step_type,omitempty"`
 	Attempt    int        `json:"attempt,omitempty"`
-	WorkflowID string     `json:"workflow_id"`
 	DurationMs *float64   `json:"duration_ms,omitempty"`
 	Error      *string    `json:"error,omitempty"`
 	Status     StepStatus `json:"status,omitempty"`

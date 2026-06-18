@@ -107,6 +107,12 @@ func newAuditAndWorkflow(t *testing.T) (*auditlog.Auditor, *flow.Workflow) {
 	return a, w
 }
 
+func mustNewWithID(t *testing.T, workflowID string) *auditlog.Auditor {
+	t.Helper()
+
+	return mustNew(t, auditlog.Config{Enabled: true, WorkflowID: workflowID})
+}
+
 func findStep(t *testing.T, report auditlog.WorkflowReport, name string) auditlog.StepInfo {
 	t.Helper()
 
@@ -129,6 +135,54 @@ func assertReportValid(t *testing.T, report auditlog.WorkflowReport) {
 	}
 }
 
+func assertStepCount(t *testing.T, report auditlog.WorkflowReport, want int) {
+	t.Helper()
+
+	if report.StepCount != want {
+		t.Errorf("expected %d steps, got %d", want, report.StepCount)
+	}
+}
+
+func assertEventCount(t *testing.T, report auditlog.WorkflowReport, want int) {
+	t.Helper()
+
+	if report.EventCount != want {
+		t.Errorf("expected %d events, got %d", want, report.EventCount)
+	}
+}
+
+func assertCount(t *testing.T, name string, got, want int) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("expected %s=%d, got %d", name, want, got)
+	}
+}
+
+func assertWorkflowID(t *testing.T, report auditlog.WorkflowReport, want string) {
+	t.Helper()
+
+	if report.WorkflowID != want {
+		t.Errorf("expected WorkflowID=%q, got %q", want, report.WorkflowID)
+	}
+}
+
+func assertAttemptCount(t *testing.T, s auditlog.StepInfo, want int) {
+	t.Helper()
+
+	if s.AttemptCount != want {
+		t.Errorf("expected %d attempts, got %d", want, s.AttemptCount)
+	}
+}
+
+func assertStatus(t *testing.T, s auditlog.StepInfo, want auditlog.StepStatus) {
+	t.Helper()
+
+	if s.Status != want {
+		t.Errorf("expected status %s, got %s", want, s.Status)
+	}
+}
+
 func runWorkflow(t *testing.T, a *auditlog.Auditor, w *flow.Workflow) {
 	t.Helper()
 
@@ -145,9 +199,7 @@ func TestNew_DefaultWorkflowID(t *testing.T) {
 	a := mustNew(t, auditlog.Config{Enabled: true})
 	report := a.Report()
 
-	if report.WorkflowID != "default" {
-		t.Errorf("expected default WorkflowID, got %q", report.WorkflowID)
-	}
+	assertWorkflowID(t, report, "default")
 }
 
 func TestNew_ValidateWorkflowID(t *testing.T) {
@@ -172,13 +224,9 @@ func TestDisabled_IsNoOp(t *testing.T) {
 	a.Snapshot(w)
 
 	report := a.Report()
-	if report.StepCount != 0 {
-		t.Errorf("disabled auditor should have 0 steps, got %d", report.StepCount)
-	}
+	assertStepCount(t, report, 0)
 
-	if report.EventCount != 0 {
-		t.Errorf("disabled auditor should have 0 events, got %d", report.EventCount)
-	}
+	assertEventCount(t, report, 0)
 }
 
 func TestSingleStep_Success(t *testing.T) {
@@ -193,22 +241,14 @@ func TestSingleStep_Success(t *testing.T) {
 	report := a.Report()
 	assertReportValid(t, report)
 
-	if report.StepCount != 1 {
-		t.Fatalf("expected 1 step, got %d", report.StepCount)
-	}
+	assertStepCount(t, report, 1)
 
 	s := findStep(t, report, "my-step")
-	if s.Status != auditlog.StepStatusSucceeded {
-		t.Errorf("expected succeeded, got %s", s.Status)
-	}
+	assertStatus(t, s, auditlog.StepStatusSucceeded)
 
-	if s.AttemptCount != 1 {
-		t.Errorf("expected 1 attempt, got %d", s.AttemptCount)
-	}
+	assertAttemptCount(t, s, 1)
 
-	if report.SucceededCount != 1 {
-		t.Errorf("expected SucceededCount=1, got %d", report.SucceededCount)
-	}
+	assertCount(t, "SucceededCount", report.SucceededCount, 1)
 
 	if !report.WorkflowSucceeded {
 		t.Error("expected WorkflowSucceeded=true")
@@ -228,17 +268,13 @@ func TestSingleStep_Failure(t *testing.T) {
 	assertReportValid(t, report)
 
 	s := findStep(t, report, "fail-step")
-	if s.Status != auditlog.StepStatusFailed {
-		t.Errorf("expected failed, got %s", s.Status)
-	}
+	assertStatus(t, s, auditlog.StepStatusFailed)
 
 	if s.Error == nil || *s.Error != "boom" {
 		t.Errorf("expected error 'boom', got %v", s.Error)
 	}
 
-	if report.FailedCount != 1 {
-		t.Errorf("expected FailedCount=1, got %d", report.FailedCount)
-	}
+	assertCount(t, "FailedCount", report.FailedCount, 1)
 
 	if report.WorkflowSucceeded {
 		t.Error("expected WorkflowSucceeded=false")
@@ -262,12 +298,12 @@ func TestDependencies_Tracked(t *testing.T) {
 	assertReportValid(t, report)
 
 	saveStep := findStep(t, report, "save")
-	if len(saveStep.Dependencies) != 1 || saveStep.Dependencies[0] != "fetch" {
+	if len(saveStep.Dependencies) != 1 || saveStep.Dependencies[0].Name != "fetch" {
 		t.Errorf("expected save to depend on fetch, got %v", saveStep.Dependencies)
 	}
 
 	fetchStep := findStep(t, report, "fetch")
-	if len(fetchStep.Dependents) != 1 || fetchStep.Dependents[0] != "save" {
+	if len(fetchStep.Dependents) != 1 || fetchStep.Dependents[0].Name != "save" {
 		t.Errorf("expected fetch to be depended on by save, got %v", fetchStep.Dependents)
 	}
 }
@@ -278,10 +314,7 @@ func TestRetry_AttemptCount(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("flaky", 2)
 	w.Add(
-		flow.Step(step).Retry(func(o *flow.RetryOption) {
-			o.Attempts = 5
-			o.Backoff = backoff.NewExponentialBackOff()
-		}),
+		flow.Step(step).Retry(retryOpts(5)),
 	)
 
 	runWorkflow(t, a, w)
@@ -294,9 +327,7 @@ func TestRetry_AttemptCount(t *testing.T) {
 		t.Errorf("expected succeeded after retries, got %s", s.Status)
 	}
 
-	if s.AttemptCount != 3 {
-		t.Errorf("expected 3 attempts (2 failures + 1 success), got %d", s.AttemptCount)
-	}
+	assertAttemptCount(t, s, 3)
 
 	if !s.HasRetry {
 		t.Error("expected HasRetry=true")
@@ -313,10 +344,7 @@ func TestRetry_AllFail(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("always-fail", 100)
 	w.Add(
-		flow.Step(step).Retry(func(o *flow.RetryOption) {
-			o.Attempts = 3
-			o.Backoff = backoff.NewExponentialBackOff()
-		}),
+		flow.Step(step).Retry(retryOpts(3)),
 	)
 
 	runWorkflow(t, a, w)
@@ -325,13 +353,9 @@ func TestRetry_AllFail(t *testing.T) {
 	assertReportValid(t, report)
 
 	s := findStep(t, report, "always-fail")
-	if s.Status != auditlog.StepStatusFailed {
-		t.Errorf("expected failed, got %s", s.Status)
-	}
+	assertStatus(t, s, auditlog.StepStatusFailed)
 
-	if s.AttemptCount != 3 {
-		t.Errorf("expected 3 attempts, got %d", s.AttemptCount)
-	}
+	assertAttemptCount(t, s, 3)
 }
 
 func TestSkippedSteps_CapturedBySnapshot(t *testing.T) {
@@ -355,9 +379,7 @@ func TestSkippedSteps_CapturedBySnapshot(t *testing.T) {
 		t.Errorf("expected skipped, got %s", skipped.Status)
 	}
 
-	if report.SkippedCount != 1 {
-		t.Errorf("expected SkippedCount=1, got %d", report.SkippedCount)
-	}
+	assertCount(t, "SkippedCount", report.SkippedCount, 1)
 }
 
 func TestEventSequence_Ordered(t *testing.T) {
@@ -499,10 +521,7 @@ func TestRetriedSteps(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("flaky", 1)
 	w.Add(
-		flow.Step(step).Retry(func(o *flow.RetryOption) {
-			o.Attempts = 5
-			o.Backoff = backoff.NewExponentialBackOff()
-		}),
+		flow.Step(step).Retry(retryOpts(5)),
 	)
 	runWorkflow(t, a, w)
 
@@ -512,9 +531,7 @@ func TestRetriedSteps(t *testing.T) {
 		t.Fatalf("expected 1 retried step, got %d", len(retried))
 	}
 
-	if retried[0].AttemptCount != 2 {
-		t.Errorf("expected 2 attempts, got %d", retried[0].AttemptCount)
-	}
+	assertAttemptCount(t, retried[0], 2)
 }
 
 func TestConcurrentSteps(t *testing.T) {
@@ -534,13 +551,9 @@ func TestConcurrentSteps(t *testing.T) {
 	report := a.Report()
 	assertReportValid(t, report)
 
-	if report.StepCount != 3 {
-		t.Fatalf("expected 3 steps, got %d", report.StepCount)
-	}
+	assertStepCount(t, report, 3)
 
-	if report.SucceededCount != 3 {
-		t.Errorf("expected 3 succeeded, got %d", report.SucceededCount)
-	}
+	assertCount(t, "SucceededCount", report.SucceededCount, 3)
 }
 
 func TestTimeout_Configured(t *testing.T) {
@@ -581,11 +594,11 @@ func TestPipe_DependencyChain(t *testing.T) {
 	assertReportValid(t, report)
 
 	pipe2 := findStep(t, report, "pipe-2")
-	if len(pipe2.Dependencies) != 1 || pipe2.Dependencies[0] != "pipe-1" {
+	if len(pipe2.Dependencies) != 1 || pipe2.Dependencies[0].Name != "pipe-1" {
 		t.Errorf("pipe-2 should depend on pipe-1, got %v", pipe2.Dependencies)
 	}
 
-	if len(pipe2.Dependents) != 1 || pipe2.Dependents[0] != "pipe-3" {
+	if len(pipe2.Dependents) != 1 || pipe2.Dependents[0].Name != "pipe-3" {
 		t.Errorf("pipe-2 should be depended on by pipe-3, got %v", pipe2.Dependents)
 	}
 }

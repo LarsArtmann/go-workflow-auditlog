@@ -2,6 +2,7 @@ package auditlog
 
 import (
 	"context"
+	"cmp"
 	"slices"
 	"time"
 
@@ -114,12 +115,14 @@ func (r *Recorder) snapshotStepLocked(w *flow.Workflow, step flow.Steper) {
 
 	// Capture dependencies (upstream steps).
 	upstreams := w.UpstreamOf(step)
-	deps := make([]string, 0, len(upstreams))
+	deps := make([]StepRef, 0, len(upstreams))
 
 	for up := range upstreams {
-		deps = append(deps, flow.String(up))
+		deps = append(deps, StepRef{Name: flow.String(up), StepType: stepTypeName(up)})
 	}
 
-	slices.Sort(deps)
+	slices.SortFunc(deps, func(a, b StepRef) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
 	rec.dependencies = deps
 }

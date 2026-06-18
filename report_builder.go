@@ -1,6 +1,7 @@
 package auditlog
 
 import (
+	"cmp"
 	"slices"
 	"time"
 
@@ -34,11 +35,15 @@ func (r *Recorder) buildStepsLocked() []StepInfo {
 	steps := make([]StepInfo, 0, len(r.steps))
 
 	for step, rec := range r.steps {
-		deps := append([]string(nil), rec.dependencies...)
-		slices.Sort(deps)
+		deps := append([]StepRef(nil), rec.dependencies...)
+		slices.SortFunc(deps, func(a, b StepRef) int {
+			return cmp.Compare(a.Name, b.Name)
+		})
 
 		stepDeps := dependents[step]
-		slices.Sort(stepDeps)
+		slices.SortFunc(stepDeps, func(a, b StepRef) int {
+			return cmp.Compare(a.Name, b.Name)
+		})
 
 		info := stepRecordToInfo(rec)
 		info.Dependencies = deps
@@ -48,31 +53,30 @@ func (r *Recorder) buildStepsLocked() []StepInfo {
 
 	// Sort by name for deterministic output.
 	slices.SortFunc(steps, func(a, b StepInfo) int {
-		if a.Name != b.Name {
-			return cmpStrings(a.Name, b.Name)
-		}
-
-		return 0
+		return cmp.Compare(a.Name, b.Name)
 	})
 
 	return steps
 }
 
 // buildDependentsMapLocked computes reverse dependencies: for each step,
-// which other steps depend on it. Returns a map of step → dependent names.
+// which other steps depend on it. Returns a map of step → dependent refs.
 // Must be called with r.mu held for reading.
-func (r *Recorder) buildDependentsMapLocked() map[flow.Steper][]string {
+func (r *Recorder) buildDependentsMapLocked() map[flow.Steper][]StepRef {
 	nameToStep := make(map[string]flow.Steper)
 	for step, rec := range r.steps {
-		nameToStep[rec.name] = step
+		nameToStep[rec.Name] = step
 	}
 
-	dependents := make(map[flow.Steper][]string)
+	dependents := make(map[flow.Steper][]StepRef)
 
 	for _, rec := range r.steps {
-		for _, depName := range rec.dependencies {
-			if targetStep, ok := nameToStep[depName]; ok {
-				dependents[targetStep] = append(dependents[targetStep], rec.name)
+		for _, dep := range rec.dependencies {
+			if targetStep, ok := nameToStep[dep.Name]; ok {
+				dependents[targetStep] = append(dependents[targetStep], StepRef{
+					Name:     rec.Name,
+					StepType: rec.StepType,
+				})
 			}
 		}
 	}
@@ -83,8 +87,7 @@ func (r *Recorder) buildDependentsMapLocked() map[flow.Steper][]string {
 // stepRecordToInfo converts an internal stepRecord to a public StepInfo.
 func stepRecordToInfo(rec *stepRecord) StepInfo {
 	return StepInfo{
-		Name:         rec.name,
-		Type:         rec.stepType,
+		StepRef:      rec.StepRef,
 		Status:       rec.status,
 		AttemptCount: rec.attemptCount,
 		MaxAttempts:  rec.maxAttempts,
@@ -95,18 +98,6 @@ func stepRecordToInfo(rec *stepRecord) StepInfo {
 		HasRetry:     rec.hasRetry,
 		HasTimeout:   rec.hasTimeout,
 	}
-}
-
-func cmpStrings(a, b string) int {
-	if a < b {
-		return -1
-	}
-
-	if a > b {
-		return 1
-	}
-
-	return 0
 }
 
 // buildReportFromCore assembles a WorkflowReport from core data, deriving all

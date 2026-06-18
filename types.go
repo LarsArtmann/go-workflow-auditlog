@@ -13,28 +13,33 @@ const (
 	EventTypeAttemptEnd EventType = "attempt_end"
 )
 
+// eventTypeMeta holds display metadata for each [EventType] value.
+// Centralizing the label/color here keeps the per-event-type presentation
+// in one place.
+var eventTypeMeta = map[EventType]struct {
+	Label string
+	Color string
+}{
+	EventTypeAttemptStart: {Label: "Attempt Start", Color: "var(--success)"},
+	EventTypeAttemptEnd:   {Label: "Attempt End", Color: "var(--warning)"},
+}
+
 // Label returns the human-readable display label for this event type.
 func (e EventType) Label() string {
-	switch e {
-	case EventTypeAttemptStart:
-		return "Attempt Start"
-	case EventTypeAttemptEnd:
-		return "Attempt End"
-	default:
-		return ""
+	if m, ok := eventTypeMeta[e]; ok {
+		return m.Label
 	}
+
+	return ""
 }
 
 // Color returns the CSS color token for this event type, used in HTML visualizations.
 func (e EventType) Color() string {
-	switch e {
-	case EventTypeAttemptStart:
-		return "var(--success)"
-	case EventTypeAttemptEnd:
-		return "var(--warning)"
-	default:
-		return ""
+	if m, ok := eventTypeMeta[e]; ok {
+		return m.Color
 	}
+
+	return ""
 }
 
 // Phase indicates whether an event is the start or end of an operation.
@@ -57,27 +62,31 @@ const (
 	StepStatusSkipped   StepStatus = "skipped"
 )
 
+// stepStatusMeta holds display metadata for each [StepStatus] value.
+// Centralizing the label/icon here keeps the per-status presentation in one
+// place and makes new statuses a one-line addition.
+var stepStatusMeta = map[StepStatus]struct {
+	Label string
+	Icon  string
+}{
+	StepStatusPending:   {Label: "Pending", Icon: "\u26AA"},
+	StepStatusRunning:   {Label: "Running", Icon: "\U0001F7E1"},
+	StepStatusSucceeded: {Label: "Succeeded", Icon: "\U0001F7E2"},
+	StepStatusFailed:    {Label: "Failed", Icon: "\U0001F534"},
+	StepStatusCanceled:  {Label: "Canceled", Icon: "\U0001F6AB"},
+	StepStatusSkipped:   {Label: "Skipped", Icon: "\u23ED\uFE0F"},
+}
+
 // String returns the step status name.
 func (s StepStatus) String() string { return string(s) }
 
 // Label returns the human-readable display label for this step status.
 func (s StepStatus) Label() string {
-	switch s {
-	case StepStatusPending:
-		return "Pending"
-	case StepStatusRunning:
-		return "Running"
-	case StepStatusSucceeded:
-		return "Succeeded"
-	case StepStatusFailed:
-		return "Failed"
-	case StepStatusCanceled:
-		return "Canceled"
-	case StepStatusSkipped:
-		return "Skipped"
-	default:
-		return ""
+	if m, ok := stepStatusMeta[s]; ok {
+		return m.Label
 	}
+
+	return ""
 }
 
 // IsTerminal returns true if the step has reached a terminal state
@@ -98,22 +107,18 @@ func (s StepStatus) IsError() bool {
 
 // Icon returns a display emoji for this step status.
 func (s StepStatus) Icon() string {
-	switch s {
-	case StepStatusPending:
-		return "\u26AA"
-	case StepStatusRunning:
-		return "\U0001F7E1"
-	case StepStatusSucceeded:
-		return "\U0001F7E2"
-	case StepStatusFailed:
-		return "\U0001F534"
-	case StepStatusCanceled:
-		return "\U0001F6AB"
-	case StepStatusSkipped:
-		return "\u23ED\uFE0F"
-	default:
-		return ""
+	if m, ok := stepStatusMeta[s]; ok {
+		return m.Icon
 	}
+
+	return ""
+}
+
+// StepRef identifies a step within a workflow.
+// Embedded in Event and StepInfo for JSON flattening.
+type StepRef struct {
+	Name     string `json:"step_name"`
+	StepType string `json:"step_type,omitempty"`
 }
 
 // fromFlowStatus converts a [flow.StepStatus] string to our StepStatus enum.
