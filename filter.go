@@ -102,14 +102,17 @@ func (r WorkflowReport) Filtered(opts ...ReportOption) WorkflowReport {
 		return cmp.Compare(a.Name, b.Name)
 	})
 
-	return buildReportFromCore(
+	filtered := buildReportFromCore(
 		r.Version,
 		r.WorkflowID,
-		time.Now(),
+		r.ExportedAt, // preserve original export time
 		r.DroppedEventCount,
 		filteredEvents,
 		filteredSteps,
 	)
+	filtered.Reconstructed = r.Reconstructed
+
+	return filtered
 }
 
 func (f *reportFilter) matchStep(step StepInfo) bool {
