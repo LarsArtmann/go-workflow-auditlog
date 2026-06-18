@@ -209,9 +209,23 @@ func TestNew_DefaultWorkflowID(t *testing.T) {
 func TestNew_ValidateWorkflowID(t *testing.T) {
 	t.Parallel()
 
-	_, err := auditlog.New(auditlog.Config{Enabled: true, WorkflowID: "bad/id"})
-	if err == nil {
-		t.Fatal("expected error for WorkflowID with path separator")
+	cases := []struct {
+		name       string
+		workflowID string
+	}{
+		{"path-separator", "bad/id"},
+		{"backslash", "bad\\id"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := auditlog.New(auditlog.Config{Enabled: true, WorkflowID: tc.workflowID})
+			if err == nil {
+				t.Fatalf("expected error for WorkflowID %q", tc.workflowID)
+			}
+		})
 	}
 }
 

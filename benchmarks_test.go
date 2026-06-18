@@ -6,9 +6,20 @@ import (
 	"testing"
 
 	flow "github.com/Azure/go-workflow"
-	"github.com/cenkalti/backoff/v4"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
+
+// addSucceedSteps appends n identical succeeding steps named "step-<j>" to both
+// steps and the workflow. Returns the (possibly grown) steps slice.
+func addSucceedSteps(w *flow.Workflow, steps []flow.Steper, n int) []flow.Steper {
+	for j := range n {
+		s := newSucceed(fmt.Sprintf("step-%d", j))
+		steps = append(steps, s)
+		w.Add(flow.Step(s))
+	}
+
+	return steps
+}
 
 // BenchmarkInvocation measures the overhead of audit callbacks on a single
 // step invocation (the hot path).
@@ -57,11 +68,7 @@ func BenchmarkAttach(b *testing.B) {
 				w := &flow.Workflow{}
 
 				steps := make([]flow.Steper, 0, n)
-				for j := range n {
-					s := newSucceed(fmt.Sprintf("step-%d", j))
-					steps = append(steps, s)
-					w.Add(flow.Step(s))
-				}
+				steps = addSucceedSteps(w, steps, n)
 
 				b.StartTimer()
 
@@ -79,11 +86,7 @@ func BenchmarkBuildReport(b *testing.B) {
 			w := &flow.Workflow{}
 
 			steps := make([]flow.Steper, 0, n)
-			for j := range n {
-				s := newSucceed(fmt.Sprintf("step-%d", j))
-				steps = append(steps, s)
-				w.Add(flow.Step(s))
-			}
+			steps = addSucceedSteps(w, steps, n)
 
 			a.Attach(w)
 			_ = w.Do(context.Background())
@@ -146,12 +149,7 @@ func BenchmarkRetryWithAudit(b *testing.B) {
 
 		w := &flow.Workflow{}
 		step := &flakyStep{name: "bench-flaky", failUntil: 2}
-		w.Add(
-			flow.Step(step).Retry(func(o *flow.RetryOption) {
-				o.Attempts = 5
-				o.Backoff = backoff.NewExponentialBackOff()
-			}),
-		)
+		w.Add(flow.Step(step).Retry(retryOpts(5)))
 		a.Attach(w)
 		b.StartTimer()
 

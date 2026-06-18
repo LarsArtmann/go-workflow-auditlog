@@ -398,15 +398,6 @@ func TestExportEventsToNDJSON_Error(t *testing.T) {
 
 // --- Config tests ---
 
-func TestNew_BackslashWorkflowID(t *testing.T) {
-	t.Parallel()
-
-	_, err := auditlog.New(auditlog.Config{Enabled: true, WorkflowID: "bad\\id"})
-	if err == nil {
-		t.Fatal("expected error for WorkflowID with backslash")
-	}
-}
-
 func TestNew_InitialEventCapacity(t *testing.T) {
 	t.Parallel()
 

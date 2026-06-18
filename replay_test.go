@@ -53,30 +53,27 @@ func TestReadEvents_RoundTrip(t *testing.T) {
 	}
 }
 
-func TestReadEvents_EmptyInput(t *testing.T) {
+func TestReadEvents_InvalidInput(t *testing.T) {
 	t.Parallel()
 
-	_, err := auditlog.ReadEvents(strings.NewReader(""))
-	if err == nil {
-		t.Fatal("expected error for empty input")
+	cases := []struct {
+		name  string
+		input string
+	}{
+		{"empty", ""},
+		{"blank-only", "\n\n\n"},
+		{"invalid-JSON", `{"bad": json}`},
 	}
-}
 
-func TestReadEvents_BlankLines(t *testing.T) {
-	t.Parallel()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	_, err := auditlog.ReadEvents(strings.NewReader("\n\n\n"))
-	if err == nil {
-		t.Fatal("expected error for blank-only input")
-	}
-}
-
-func TestReadEvents_InvalidJSON(t *testing.T) {
-	t.Parallel()
-
-	_, err := auditlog.ReadEvents(strings.NewReader(`{"bad": json}`))
-	if err == nil {
-		t.Fatal("expected error for invalid JSON")
+			_, err := auditlog.ReadEvents(strings.NewReader(tc.input))
+			if err == nil {
+				t.Fatalf("expected error for %s input", tc.name)
+			}
+		})
 	}
 }
 

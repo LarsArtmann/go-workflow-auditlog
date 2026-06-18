@@ -117,15 +117,6 @@ func (s *FlakyStep) Do(_ context.Context) error {
 
 func (s *FlakyStep) String() string { return "flaky-api-call" }
 
-// retryOpts returns a retry config function with a fresh backoff instance,
-// avoiding the data race in go-workflow's shared DefaultRetryOption.Backoff.
-func retryOpts(attempts uint64) func(*flow.RetryOption) {
-	return func(o *flow.RetryOption) {
-		o.Attempts = attempts
-		o.Backoff = backoff.NewExponentialBackOff()
-	}
-}
-
 func main() {
 	ctx := context.Background()
 
@@ -189,7 +180,12 @@ func main() {
 		flow.Step(notify).DependsOn(save),
 
 		// A flaky step with retry (demonstrates attempt tracking).
-		flow.Step(flaky).DependsOn(fetch).Retry(retryOpts(5)),
+		// We pass a FRESH backoff instance to avoid the data race in
+		// go-workflow's shared DefaultRetryOption.Backoff.
+		flow.Step(flaky).DependsOn(fetch).Retry(func(o *flow.RetryOption) {
+			o.Attempts = 5
+			o.Backoff = backoff.NewExponentialBackOff()
+		}),
 	)
 
 	// Attach audit callbacks BEFORE running.

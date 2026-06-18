@@ -5,7 +5,6 @@ import (
 	"time"
 
 	flow "github.com/Azure/go-workflow"
-	"github.com/cenkalti/backoff/v4"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -144,12 +143,7 @@ func TestFiltered_RetriesFiltered(t *testing.T) {
 
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("flaky", 2)
-	w.Add(
-		flow.Step(step).Retry(func(o *flow.RetryOption) {
-			o.Attempts = 5
-			o.Backoff = backoff.NewExponentialBackOff()
-		}),
-	)
+	w.Add(flow.Step(step).Retry(retryOpts(5)))
 	runWorkflow(t, a, w)
 
 	// Filter to only succeeded steps — the flaky step should be included
