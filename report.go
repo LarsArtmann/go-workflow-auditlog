@@ -16,20 +16,23 @@ var (
 
 // WorkflowReport is a consolidated, machine-readable snapshot of the audit log.
 type WorkflowReport struct {
-	Version           string     `json:"version"`
-	WorkflowID        string     `json:"workflow_id"`
-	ExportedAt        time.Time  `json:"exported_at"`
-	EventCount        int        `json:"event_count"`
-	StepCount         int        `json:"step_count"`
-	SucceededCount    int        `json:"succeeded_count"`
-	FailedCount       int        `json:"failed_count"`
-	SkippedCount      int        `json:"skipped_count"`
-	CanceledCount     int        `json:"canceled_count"`
-	TotalDurationMs   float64    `json:"total_duration_ms"`
-	WorkflowSucceeded bool       `json:"workflow_succeeded"`
-	DroppedEventCount int64      `json:"dropped_event_count"`
-	Events            []Event    `json:"events,omitempty"`
-	Steps             []StepInfo `json:"steps"`
+	Version           string    `json:"version"`
+	WorkflowID        string    `json:"workflow_id"`
+	ExportedAt        time.Time `json:"exported_at"`
+	EventCount        int       `json:"event_count"`
+	StepCount         int       `json:"step_count"`
+	SucceededCount    int       `json:"succeeded_count"`
+	FailedCount       int       `json:"failed_count"`
+	SkippedCount      int       `json:"skipped_count"`
+	CanceledCount     int       `json:"canceled_count"`
+	TotalDurationMs   float64   `json:"total_duration_ms"`
+	WorkflowSucceeded bool      `json:"workflow_succeeded"`
+	DroppedEventCount int64     `json:"dropped_event_count"`
+	// Reconstructed is true when the report was built by ReplayEvents from a
+	// flat event stream rather than from live workflow hooks.
+	Reconstructed bool       `json:"reconstructed,omitempty"`
+	Events        []Event    `json:"events,omitempty"`
+	Steps         []StepInfo `json:"steps"`
 }
 
 // Validate checks internal consistency of the report: denormalized count
