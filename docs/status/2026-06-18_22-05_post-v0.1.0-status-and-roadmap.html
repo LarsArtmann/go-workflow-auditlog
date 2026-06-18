@@ -33,14 +33,29 @@
         --radius: 0px;
         --radius-sm: 0px;
 
-        --font-heading: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas, monospace;
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
       }
 
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      html { scroll-behavior: smooth; }
-      section[id], [id] { scroll-margin-top: 60px; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      section[id],
+      [id] {
+        scroll-margin-top: 60px;
+      }
 
       body {
         background: var(--surface);
@@ -66,9 +81,26 @@
         align-items: center;
       }
 
-      .layout { display: flex; gap: 2.5rem; padding: 2rem; }
-      .sidebar { width: 220px; flex-shrink: 0; position: sticky; top: 1rem; align-self: flex-start; height: calc(100vh - 2rem); overflow-y: auto; display: none; }
-      .sidebar nav { display: flex; flex-direction: column; gap: 0; }
+      .layout {
+        display: flex;
+        gap: 2.5rem;
+        padding: 2rem;
+      }
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+        height: calc(100vh - 2rem);
+        overflow-y: auto;
+        display: none;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
       .sidebar .label {
         font-family: var(--font-mono);
         font-size: 0.68rem;
@@ -90,11 +122,30 @@
         line-height: 1.4;
         font-weight: 500;
       }
-      .sidebar a:hover, .sidebar a.active { color: var(--accent); border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
-      .main { flex: 1; min-width: 0; }
+      .sidebar a:hover,
+      .sidebar a.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+      }
+      .main {
+        flex: 1;
+        min-width: 0;
+      }
 
-      h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.02em; }
-      h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 0.6rem; }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      h1 {
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        line-height: 1.1;
+        margin: 0 0 0.6rem;
+      }
       h2 {
         font-size: 1.4rem;
         margin: 2.5rem 0 1rem;
@@ -104,12 +155,32 @@
         align-items: baseline;
         gap: 0.6rem;
       }
-      h2 .num { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); font-weight: 700; letter-spacing: 0.06em; }
-      h3 { font-size: 1.1rem; margin: 0 0 0.4rem; font-weight: 700; }
-      h4 { font-size: 0.98rem; margin: 0 0 0.3rem; font-weight: 700; }
-      p { margin: 0 0 1rem; }
+      h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h4 {
+        font-size: 0.98rem;
+        margin: 0 0 0.3rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
 
-      .hero { padding: 1.5rem 0 1.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-strong); }
+      .hero {
+        padding: 1.5rem 0 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
       .hero-badge {
         display: inline-block;
         font-family: var(--font-mono);
@@ -122,24 +193,96 @@
         padding: 0.3rem 0.7rem;
         margin-bottom: 0.9rem;
       }
-      .hero-subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 70ch; margin: 0; }
-      .hero-shapes { position: relative; height: 80px; margin-bottom: 1rem; }
-      .hero-shapes .circle { position: absolute; top: 0; left: 0; width: 56px; height: 56px; background: var(--problem); border-radius: 50%; }
-      .hero-shapes .square { position: absolute; top: 24px; left: 72px; width: 48px; height: 48px; background: var(--solution); }
-      .hero-shapes .tri { position: absolute; top: 8px; left: 140px; width: 0; height: 0; border-left: 28px solid transparent; border-right: 28px solid transparent; border-bottom: 48px solid var(--warning); }
+      .hero-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        max-width: 70ch;
+        margin: 0;
+      }
+      .hero-shapes {
+        position: relative;
+        height: 80px;
+        margin-bottom: 1rem;
+      }
+      .hero-shapes .circle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 56px;
+        height: 56px;
+        background: var(--problem);
+        border-radius: 50%;
+      }
+      .hero-shapes .square {
+        position: absolute;
+        top: 24px;
+        left: 72px;
+        width: 48px;
+        height: 48px;
+        background: var(--solution);
+      }
+      .hero-shapes .tri {
+        position: absolute;
+        top: 8px;
+        left: 140px;
+        width: 0;
+        height: 0;
+        border-left: 28px solid transparent;
+        border-right: 28px solid transparent;
+        border-bottom: 48px solid var(--warning);
+      }
 
-      .card { background: var(--surface-raised); border: 1px solid var(--border); padding: 1.1rem 1.3rem; margin-bottom: 1rem; border-left: 4px solid var(--border-strong); }
-      .card-problem { border-left-color: var(--problem); background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised)); }
-      .card-solution { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised)); }
-      .card-warning { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised)); }
+      .card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
 
-      .issue { background: var(--surface-raised); border: 1px solid var(--border); padding: 1.1rem 1.3rem; margin-bottom: 1rem; border-left: 4px solid var(--border-strong); }
-      .issue-critical { border-left-color: var(--problem); background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised)); }
-      .issue-important { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised)); }
-      .issue-nice { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised)); }
-      .issue h3 { margin-bottom: 0.3rem; }
-      .issue .where { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-faint); margin: 0.2rem 0 0.6rem; }
-      .issue p:last-child { margin-bottom: 0; }
+      .issue {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .issue-critical {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .issue-important {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+      .issue-nice {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .issue h3 {
+        margin-bottom: 0.3rem;
+      }
+      .issue .where {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        margin: 0.2rem 0 0.6rem;
+      }
+      .issue p:last-child {
+        margin-bottom: 0;
+      }
 
       .severity {
         display: inline-block;
@@ -152,9 +295,15 @@
         margin-bottom: 0.6rem;
         color: var(--surface);
       }
-      .severity-critical { background: var(--problem); }
-      .severity-important { background: var(--warning); }
-      .severity-nice { background: var(--solution); }
+      .severity-critical {
+        background: var(--problem);
+      }
+      .severity-important {
+        background: var(--warning);
+      }
+      .severity-nice {
+        background: var(--solution);
+      }
 
       .badge {
         display: inline-block;
@@ -167,79 +316,308 @@
         border: 1px solid var(--border-strong);
         color: var(--text-muted);
       }
-      .badge-critical { color: var(--problem); border-color: var(--problem); }
-      .badge-high { color: var(--warning); border-color: var(--warning); }
-      .badge-medium { color: var(--accent); border-color: var(--accent); }
-      .badge-low { color: var(--text-muted); }
-      .badge-fixed { color: var(--solution); border-color: var(--solution); }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-medium {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .badge-low {
+        color: var(--text-muted);
+      }
+      .badge-fixed {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
 
-      .callout { margin: 0.8rem 0 0; padding: 0.7rem 0.9rem; border-left: 3px solid var(--border-strong); background: color-mix(in srgb, var(--text) 5%, transparent); font-size: 0.9rem; }
-      .callout strong { display: inline-block; margin-right: 0.4rem; }
-      .callout-solution { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 10%, transparent); }
-      .callout-warning { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 10%, transparent); }
+      .callout {
+        margin: 0.8rem 0 0;
+        padding: 0.7rem 0.9rem;
+        border-left: 3px solid var(--border-strong);
+        background: color-mix(in srgb, var(--text) 5%, transparent);
+        font-size: 0.9rem;
+      }
+      .callout strong {
+        display: inline-block;
+        margin-right: 0.4rem;
+      }
+      .callout-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 10%, transparent);
+      }
+      .callout-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 10%, transparent);
+      }
 
-      .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin: 1rem 0 1.5rem; }
-      .stat-card { background: var(--surface-raised); border: 1px solid var(--border); padding: 1.1rem 1rem; position: relative; }
-      .stat-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--border-strong); }
-      .stat-bad::before { background: var(--problem); }
-      .stat-good::before { background: var(--solution); }
-      .stat-warn::before { background: var(--warning); }
-      .stat-value { font-family: var(--font-heading); font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: var(--text); }
-      .stat-bad .stat-value { color: var(--problem); }
-      .stat-good .stat-value { color: var(--solution); }
-      .stat-warn .stat-value { color: var(--warning); }
-      .stat-label { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin-top: 0.5rem; }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .stat-card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1rem;
+        position: relative;
+      }
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border-strong);
+      }
+      .stat-bad::before {
+        background: var(--problem);
+      }
+      .stat-good::before {
+        background: var(--solution);
+      }
+      .stat-warn::before {
+        background: var(--warning);
+      }
+      .stat-value {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--text);
+      }
+      .stat-bad .stat-value {
+        color: var(--problem);
+      }
+      .stat-good .stat-value {
+        color: var(--solution);
+      }
+      .stat-warn .stat-value {
+        color: var(--warning);
+      }
+      .stat-label {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-faint);
+        margin-top: 0.5rem;
+      }
 
-      .strengths { display: grid; gap: 0.5rem; margin: 1rem 0 1.5rem; }
-      .strength { display: grid; grid-template-columns: auto 1fr; gap: 0.8rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
-      .strength .check { font-family: var(--font-mono); font-weight: 700; color: var(--solution); font-size: 1.1rem; line-height: 1.4; }
-      .strength .text strong { display: block; margin-bottom: 0.15rem; }
-      .strength .text span { color: var(--text-muted); font-size: 0.9rem; }
+      .strengths {
+        display: grid;
+        gap: 0.5rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .strength {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.8rem;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .strength .check {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        color: var(--solution);
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+      .strength .text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+      .strength .text span {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
 
-      table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.9rem; }
-      th { text-align: left; padding: 0.6rem 0.9rem; background: var(--surface-raised); color: var(--text-faint); font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--border-strong); }
-      td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); }
-      tr:hover td { background: var(--surface-raised); }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.9rem;
+      }
+      th {
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        background: var(--surface-raised);
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      td {
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+      }
+      tr:hover td {
+        background: var(--surface-raised);
+      }
 
-      .compare-header { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0 0.5rem; }
-      .compare-before, .compare-after { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.4rem 0.7rem; color: var(--surface); }
-      .compare-before { background: var(--problem); }
-      .compare-after { background: var(--solution); }
-      .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
-      .compare-row pre { margin: 0; }
+      .compare-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin: 1rem 0 0.5rem;
+      }
+      .compare-before,
+      .compare-after {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0.4rem 0.7rem;
+        color: var(--surface);
+      }
+      .compare-before {
+        background: var(--problem);
+      }
+      .compare-after {
+        background: var(--solution);
+      }
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .compare-row pre {
+        margin: 0;
+      }
 
-      pre { background: var(--surface-sunken); border: 1px solid var(--border); padding: 1rem 1.2rem; margin: 1rem 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65; overflow-x: auto; }
-      code { font-family: var(--font-mono); }
-      .tok-keyword { color: var(--accent); }
-      .tok-type { color: var(--warning); }
-      .tok-string { color: var(--solution); }
-      .tok-comment { color: var(--text-faint); font-style: italic; }
-      .tok-func { color: #74a9ff; }
-      .tok-number { color: var(--accent); }
-      .tok-generic { color: var(--problem); }
-      .tok-builtin { color: #4dd9ff; }
-      .tok-punct { color: var(--text-muted); }
-      .tok-attr { color: var(--accent); }
+      pre {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      .tok-keyword {
+        color: var(--accent);
+      }
+      .tok-type {
+        color: var(--warning);
+      }
+      .tok-string {
+        color: var(--solution);
+      }
+      .tok-comment {
+        color: var(--text-faint);
+        font-style: italic;
+      }
+      .tok-func {
+        color: #74a9ff;
+      }
+      .tok-number {
+        color: var(--accent);
+      }
+      .tok-generic {
+        color: var(--problem);
+      }
+      .tok-builtin {
+        color: #4dd9ff;
+      }
+      .tok-punct {
+        color: var(--text-muted);
+      }
+      .tok-attr {
+        color: var(--accent);
+      }
 
-      .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0; }
-      .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0; }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
 
-      .toc { background: var(--surface-raised); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 1rem 1.3rem; margin: 1rem 0 1.5rem; }
-      .toc h3 { margin-bottom: 0.5rem; }
-      .toc ul { list-style: none; padding: 0; }
-      .toc li { margin: 0.25rem 0; }
-      .toc a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
-      .toc a:hover { color: var(--accent); }
+      .toc {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.3rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .toc h3 {
+        margin-bottom: 0.5rem;
+      }
+      .toc ul {
+        list-style: none;
+        padding: 0;
+      }
+      .toc li {
+        margin: 0.25rem 0;
+      }
+      .toc a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .toc a:hover {
+        color: var(--accent);
+      }
 
-      .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-faint); font-family: var(--font-mono); }
+      .footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8rem;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
 
-      @media (min-width: 1024px) { .sidebar { display: block; } }
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: block;
+        }
+      }
       @media (max-width: 768px) {
-        .layout { flex-direction: column; padding: 1rem; }
-        .top-bar { padding: 0.6rem 1rem; flex-wrap: wrap; gap: 0.3rem; }
-        .grid-2, .grid-3 { grid-template-columns: 1fr; }
-        .compare-header, .compare-row { grid-template-columns: 1fr; }
-        .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        .layout {
+          flex-direction: column;
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 0.6rem 1rem;
+          flex-wrap: wrap;
+          gap: 0.3rem;
+        }
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .compare-header,
+        .compare-row {
+          grid-template-columns: 1fr;
+        }
+        .stat-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
     </style>
   </head>
@@ -274,9 +652,11 @@
           </div>
           <div class="hero-badge">PROJECT STATUS · ALPHA</div>
           <h1>go-workflow-auditlog</h1>
-          <p class="hero-subtitle">v0.1.0 release prep is done. Post-release focus: harden the audit semantics, expand the
-            query surface, and push coverage from 94.7% → 99%. Library is feature-complete for its stated ALPHA
-            surface; what's left is depth, not breadth.</p>
+          <p class="hero-subtitle">
+            v0.1.0 release prep is done. Post-release focus: harden the audit semantics, expand the
+            query surface, and push coverage from 94.7% → 99%. Library is feature-complete for its
+            stated ALPHA surface; what's left is depth, not breadth.
+          </p>
         </div>
 
         <nav class="toc">
@@ -322,11 +702,13 @@
           </div>
         </div>
 
-        <p><strong>One-liner:</strong> The library is in good shape. v0.1.0 was released two days ago with full
-          documentation refresh, security disclosure process, and changelog. Today we shipped one bug fix
-          (<code>StepInfo.Error</code> now reflects the final outcome only, not the last attempt's error).
-          The next major push is API ergonomics, observability hooks, and one structural refactor
-          (split the package).</p>
+        <p>
+          <strong>One-liner:</strong> The library is in good shape. v0.1.0 was released two days ago
+          with full documentation refresh, security disclosure process, and changelog. Today we
+          shipped one bug fix (<code>StepInfo.Error</code> now reflects the final outcome only, not
+          the last attempt's error). The next major push is API ergonomics, observability hooks, and
+          one structural refactor (split the package).
+        </p>
 
         <div class="grid-2">
           <div>
@@ -336,32 +718,40 @@
                 <div class="check">+</div>
                 <div class="text">
                   <strong>Zero external runtime deps</strong>
-                  <span>Single Go module, depends only on Azure/go-workflow and cenkalti/backoff/v4. No transitive
-                    risk surface to audit.</span>
+                  <span
+                    >Single Go module, depends only on Azure/go-workflow and cenkalti/backoff/v4. No
+                    transitive risk surface to audit.</span
+                  >
                 </div>
               </div>
               <div class="strength">
                 <div class="check">+</div>
                 <div class="text">
                   <strong>Single construction path</strong>
-                  <span><code>buildReportFromCore</code> is the only way a WorkflowReport is built — no risk of
-                    denormalized fields drifting from core data.</span>
+                  <span
+                    ><code>buildReportFromCore</code> is the only way a WorkflowReport is built — no
+                    risk of denormalized fields drifting from core data.</span
+                  >
                 </div>
               </div>
               <div class="strength">
                 <div class="check">+</div>
                 <div class="text">
                   <strong>Honest schema + validation</strong>
-                  <span><code>WorkflowSucceeded</code> requires zero pending/running steps. <code>Validate()</code>
-                    catches status/error drift. Comments don't lie.</span>
+                  <span
+                    ><code>WorkflowSucceeded</code> requires zero pending/running steps.
+                    <code>Validate()</code> catches status/error drift. Comments don't lie.</span
+                  >
                 </div>
               </div>
               <div class="strength">
                 <div class="check">+</div>
                 <div class="text">
                   <strong>Comprehensive export surface</strong>
-                  <span>JSON, NDJSON, Mermaid, PlantUML, Graphviz DOT, replay, diff, index, filter, load.
-                    6 ways to consume the same data, all round-trippable.</span>
+                  <span
+                    >JSON, NDJSON, Mermaid, PlantUML, Graphviz DOT, replay, diff, index, filter,
+                    load. 6 ways to consume the same data, all round-trippable.</span
+                  >
                 </div>
               </div>
             </div>
@@ -373,24 +763,31 @@
                 <div class="check" style="color: var(--problem)">−</div>
                 <div class="text">
                   <strong>Single package, 17 source files</strong>
-                  <span>Long compile times when editing. Boundary between <em>core</em>, <em>serialization</em>,
-                    and <em>exporters</em> is invisible. Hard to depend on a subset.</span>
+                  <span
+                    >Long compile times when editing. Boundary between <em>core</em>,
+                    <em>serialization</em>, and <em>exporters</em> is invisible. Hard to depend on a
+                    subset.</span
+                  >
                 </div>
               </div>
               <div class="strength">
                 <div class="check" style="color: var(--problem)">−</div>
                 <div class="text">
                   <strong>Coverage has a ceiling around 95%</strong>
-                  <span>Defensive nil checks and a couple of error-formatting branches in <code>recordAfterStep</code>
-                    and <code>attach.go</code> remain untested.</span>
+                  <span
+                    >Defensive nil checks and a couple of error-formatting branches in
+                    <code>recordAfterStep</code> and <code>attach.go</code> remain untested.</span
+                  >
                 </div>
               </div>
               <div class="strength">
                 <div class="check" style="color: var(--problem)">−</div>
                 <div class="text">
                   <strong>No public benchmarks in CI</strong>
-                  <span>Benchmarks exist (<code>benchmarks_test.go</code>) but aren't run on PRs. We have no
-                    performance regression safety net.</span>
+                  <span
+                    >Benchmarks exist (<code>benchmarks_test.go</code>) but aren't run on PRs. We
+                    have no performance regression safety net.</span
+                  >
                 </div>
               </div>
             </div>
@@ -402,58 +799,79 @@
 
         <div class="card card-solution">
           <h4>Core event capture</h4>
-          <p>Before/After callbacks captured per attempt via <code>State.MergeConfig</code> injection. Single
-            mutex guards all mutable state; <code>onEvent</code> callback always fires outside the lock.</p>
+          <p>
+            Before/After callbacks captured per attempt via
+            <code>State.MergeConfig</code> injection. Single mutex guards all mutable state;
+            <code>onEvent</code> callback always fires outside the lock.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>DAG-aware Snapshot</h4>
-          <p>Snapshot reads <code>StateOf</code>/<code>UpstreamOf</code> post-run, including sub-workflow inner
-            steps via <code>flow.Traverse</code>. Captures skipped/canceled steps that bypass callbacks.</p>
+          <p>
+            Snapshot reads <code>StateOf</code>/<code>UpstreamOf</code> post-run, including
+            sub-workflow inner steps via <code>flow.Traverse</code>. Captures skipped/canceled steps
+            that bypass callbacks.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Export: JSON, NDJSON, Mermaid, PlantUML, Graphviz DOT</h4>
-          <p>5 distinct export formats, all using the shared <code>writeDiagram</code> engine for graph
-            output. NDJSON reader handles malformed lines with line-numbered errors.</p>
+          <p>
+            5 distinct export formats, all using the shared <code>writeDiagram</code> engine for
+            graph output. NDJSON reader handles malformed lines with line-numbered errors.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Query surface: Filter, Index, Diff</h4>
-          <p><code>Filtered</code> with <code>ReportOption</code>s (steps-by-status, time range, drop).
-            <code>ReportIndex</code> for O(1) name/ID lookup. <code>Diff</code> for run-over-run comparison with
-            wall-clock <code>Duration</code> + <code>Summary</code>.</p>
+          <p>
+            <code>Filtered</code> with <code>ReportOption</code>s (steps-by-status, time range,
+            drop). <code>ReportIndex</code> for O(1) name/ID lookup. <code>Diff</code> for
+            run-over-run comparison with wall-clock <code>Duration</code> + <code>Summary</code>.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Replay &amp; Load</h4>
-          <p><code>ReplayEvents</code> reconstructs a <code>Report</code> from an event stream, preserving
-            RunID and assigning StepIDs. <code>LoadReport</code> / <code>LoadReportFromReader</code> /
-            <code>LoadReportFromBytes</code> for round-trip.</p>
+          <p>
+            <code>ReplayEvents</code> reconstructs a <code>Report</code> from an event stream,
+            preserving RunID and assigning StepIDs. <code>LoadReport</code> /
+            <code>LoadReportFromReader</code> / <code>LoadReportFromBytes</code> for round-trip.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Validation &amp; status drift detection</h4>
-          <p><code>WorkflowReport.Validate()</code> catches event/step count mismatches and status drift
-            (stored Status != derived Status). Sentinel errors for programmatic handling.</p>
+          <p>
+            <code>WorkflowReport.Validate()</code> catches event/step count mismatches and status
+            drift (stored Status != derived Status). Sentinel errors for programmatic handling.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Example pipeline + goreleaser</h4>
-          <p>Demo binary shows fetch → validate → transform → save with retry. <code>.goreleaser.yml</code>
-            automates GitHub releases with grouped changelog + demo artifact.</p>
+          <p>
+            Demo binary shows fetch → validate → transform → save with retry.
+            <code>.goreleaser.yml</code> automates GitHub releases with grouped changelog + demo
+            artifact.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>v0.1.0 documentation + security policy</h4>
-          <p>README, CHANGELOG, FEATURES, TODO_LIST, ROADMAP, AGENTS.md all current. SECURITY.md with
-            private vulnerability reporting. Status reports for the release prep.</p>
+          <p>
+            README, CHANGELOG, FEATURES, TODO_LIST, ROADMAP, AGENTS.md all current. SECURITY.md with
+            private vulnerability reporting. Status reports for the release prep.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>StepInfo.Error = final outcome (fixed today)</h4>
-          <p>Regression test: succeeded-after-retry step now has nil Error. Per-attempt errors remain in the
-            Event stream. Invariant documented in AGENTS.md gotchas.</p>
+          <p>
+            Regression test: succeeded-after-retry step now has nil Error. Per-attempt errors remain
+            in the Event stream. Invariant documented in AGENTS.md gotchas.
+          </p>
         </div>
 
         <!-- b) PARTIALLY DONE -->
@@ -461,36 +879,46 @@
 
         <div class="card card-warning">
           <h4>Test coverage at 94.7% (target 99%)</h4>
-          <p>Gap concentrated in: <code>recordAfterStep</code> defensive nil branch (4.2% uncovered),
-            <code>attach.go</code> wrapper-step nil path, <code>fromFlowStatus</code> default branch for
-            unknown statuses, and <code>export.go</code> write-error paths. Each is a few lines; total
-            uncovered statements: ~70 across 11 files. None are critical paths.</p>
+          <p>
+            Gap concentrated in: <code>recordAfterStep</code> defensive nil branch (4.2% uncovered),
+            <code>attach.go</code> wrapper-step nil path, <code>fromFlowStatus</code> default branch
+            for unknown statuses, and <code>export.go</code> write-error paths. Each is a few lines;
+            total uncovered statements: ~70 across 11 files. None are critical paths.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>Race detector coverage</h4>
-          <p>All tests pass under <code>-race</code>, but only a handful exercise real concurrency.
-            <code>TestConcurrent_Steps</code> covers fan-out, but no stress test with high goroutine count
-            or long-running workflows.</p>
+          <p>
+            All tests pass under <code>-race</code>, but only a handful exercise real concurrency.
+            <code>TestConcurrent_Steps</code> covers fan-out, but no stress test with high goroutine
+            count or long-running workflows.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>Diagram export polish</h4>
-          <p>Mermaid + PlantUML + DOT all work. Mermaid has CSS class assignment + retry indicator.
-            PlantUML/DOT are functional but don't differentiate retry/timeout visually. Shared engine
-            is solid; per-formatter decoration is uneven.</p>
+          <p>
+            Mermaid + PlantUML + DOT all work. Mermaid has CSS class assignment + retry indicator.
+            PlantUML/DOT are functional but don't differentiate retry/timeout visually. Shared
+            engine is solid; per-formatter decoration is uneven.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>ROADMAP.md</h4>
-          <p>Exists with future direction but mixes "soon" tasks (v0.2) with raw ideas (v0.5+). No
-            owner / no acceptance criteria. Hard to act on.</p>
+          <p>
+            Exists with future direction but mixes "soon" tasks (v0.2) with raw ideas (v0.5+). No
+            owner / no acceptance criteria. Hard to act on.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>Example demo</h4>
-          <p>Prints events, summary, step details. Doesn't show: NDJSON export, Mermaid export, diff,
-            replay, filter, or load. A user reading the demo can't see the full feature surface.</p>
+          <p>
+            Prints events, summary, step details. Doesn't show: NDJSON export, Mermaid export, diff,
+            replay, filter, or load. A user reading the demo can't see the full feature surface.
+          </p>
         </div>
 
         <!-- c) NOT STARTED -->
@@ -498,67 +926,90 @@
 
         <div class="card">
           <h4>Structured logging (slog) integration</h4>
-          <p>The Auditor accepts a generic <code>onEvent func(Event)</code> callback but doesn't integrate
-            with <code>log/slog</code>. A <code>SlogHandler</code> adapter that emits one structured log
-            record per event would unlock native observability pipelines.</p>
+          <p>
+            The Auditor accepts a generic <code>onEvent func(Event)</code> callback but doesn't
+            integrate with <code>log/slog</code>. A <code>SlogHandler</code> adapter that emits one
+            structured log record per event would unlock native observability pipelines.
+          </p>
         </div>
 
         <div class="card">
           <h4>OpenTelemetry trace correlation</h4>
-          <p>RunID is a 128-bit random hex. No built-in way to map it to a trace ID. The recorder
-            already has the right shape — would need a small adapter that injects <code>trace.SpanFromContext</code>
-            into the RunID at Attach time, and emits OTel events.</p>
+          <p>
+            RunID is a 128-bit random hex. No built-in way to map it to a trace ID. The recorder
+            already has the right shape — would need a small adapter that injects
+            <code>trace.SpanFromContext</code> into the RunID at Attach time, and emits OTel events.
+          </p>
         </div>
 
         <div class="card">
           <h4>Prometheus / OpenMetrics exporter</h4>
-          <p>Per-step histograms for duration, counters for status transitions, gauges for in-flight
-            attempts. ~150 lines plus a <code>Collect</code> method. No design exists yet.</p>
+          <p>
+            Per-step histograms for duration, counters for status transitions, gauges for in-flight
+            attempts. ~150 lines plus a <code>Collect</code> method. No design exists yet.
+          </p>
         </div>
 
         <div class="card">
           <h4>HTML report exporter</h4>
-          <p>Mermaid is great for DAGs but a self-contained HTML report (timeline + DAG + step detail
-            table) would be a strong differentiator. We have the template skill already.</p>
+          <p>
+            Mermaid is great for DAGs but a self-contained HTML report (timeline + DAG + step detail
+            table) would be a strong differentiator. We have the template skill already.
+          </p>
         </div>
 
         <div class="card">
           <h4>Sub-workflow composition tests</h4>
-          <p><code>subworkflow_test.go</code> exists but covers only one pattern. No test for: deeply
-            nested sub-workflows, sub-workflow with its own retries, sub-workflow error propagation.</p>
+          <p>
+            <code>subworkflow_test.go</code> exists but covers only one pattern. No test for: deeply
+            nested sub-workflows, sub-workflow with its own retries, sub-workflow error propagation.
+          </p>
         </div>
 
         <div class="card">
           <h4>Property-based tests</h4>
-          <p>All tests are example-based. <code>testing/quick</code> or <code>pgregory.net/rapid</code> could
-            generate random workflow topologies + step result sequences and assert report invariants
-            (event count == 2×attempt count, error/status coherence, etc.).</p>
+          <p>
+            All tests are example-based. <code>testing/quick</code> or
+            <code>pgregory.net/rapid</code> could generate random workflow topologies + step result
+            sequences and assert report invariants (event count == 2×attempt count, error/status
+            coherence, etc.).
+          </p>
         </div>
 
         <div class="card">
           <h4>Performance regression CI</h4>
-          <p>Benchmarks exist in <code>benchmarks_test.go</code> but aren't gated in CI. Need a GitHub
-            Action that runs <code>go test -bench=. -benchmem</code> and posts a comparison comment on PRs.</p>
+          <p>
+            Benchmarks exist in <code>benchmarks_test.go</code> but aren't gated in CI. Need a
+            GitHub Action that runs <code>go test -bench=. -benchmem</code> and posts a comparison
+            comment on PRs.
+          </p>
         </div>
 
         <div class="card">
           <h4>Split single package into core / exporters</h4>
-          <p>17 files in <code>auditlog</code> is too many. Natural split: <code>auditlog</code> (core types,
-            recorder, report) + <code>auditlog/export</code> (JSON, NDJSON) + <code>auditlog/diagram</code>
-            (Mermaid, PlantUML, DOT). Would need to update all imports; mechanical but verbose.</p>
+          <p>
+            17 files in <code>auditlog</code> is too many. Natural split:
+            <code>auditlog</code> (core types, recorder, report) +
+            <code>auditlog/export</code> (JSON, NDJSON) + <code>auditlog/diagram</code> (Mermaid,
+            PlantUML, DOT). Would need to update all imports; mechanical but verbose.
+          </p>
         </div>
 
         <div class="card">
           <h4>v0.2.0 API stabilization</h4>
-          <p>Once we have external users, we need a v0.2.0 with breaking-change budget. Currently the
+          <p>
+            Once we have external users, we need a v0.2.0 with breaking-change budget. Currently the
             API can still evolve freely (good for ALPHA), but several types will need to firm up:
-            <code>Config</code> fields, <code>ReportOption</code> semantics, error types.</p>
+            <code>Config</code> fields, <code>ReportOption</code> semantics, error types.
+          </p>
         </div>
 
         <div class="card">
           <h4>WorkflowReport → proto / flatbuffers</h4>
-          <p>JSON is fine for files, expensive for IPC. If we ever want to ship reports over gRPC or
-            share them between processes, a binary schema would help. Not urgent.</p>
+          <p>
+            JSON is fine for files, expensive for IPC. If we ever want to ship reports over gRPC or
+            share them between processes, a binary schema would help. Not urgent.
+          </p>
         </div>
 
         <!-- d) TOTALLY FUCKED UP -->
@@ -568,16 +1019,19 @@
           <span class="severity severity-critical">Critical</span>
           <h3>go-workflow v0.1.13 data race in DefaultRetryOption.Backoff</h3>
           <div class="where">upstream: github.com/Azure/go-workflow</div>
-          <p>Workaround in place: every test creates <code>o.Backoff = backoff.NewExponentialBackOff()</code>
-            (fresh instance). Without this workaround, <code>-race</code> explodes on any concurrent retry.
-            We can't fix it in our library; we're at the mercy of upstream. Mitigation: pin go-workflow
-            and document the trap. Risk: every contributor must remember to use <code>retryOpts()</code>
-            in tests, not the bare <code>RetryOption</code>.</p>
+          <p>
+            Workaround in place: every test creates
+            <code>o.Backoff = backoff.NewExponentialBackOff()</code> (fresh instance). Without this
+            workaround, <code>-race</code> explodes on any concurrent retry. We can't fix it in our
+            library; we're at the mercy of upstream. Mitigation: pin go-workflow and document the
+            trap. Risk: every contributor must remember to use <code>retryOpts()</code> in tests,
+            not the bare <code>RetryOption</code>.
+          </p>
           <div class="callout callout-warning">
             <strong>Watch out</strong>
-            New contributors will hit this within their first retry test. AGENTS.md documents it but it's
-            still a foot-gun. Consider adding a CI test that runs the example under -race and fails if
-            the backoff is shared.
+            New contributors will hit this within their first retry test. AGENTS.md documents it but
+            it's still a foot-gun. Consider adding a CI test that runs the example under -race and
+            fails if the backoff is shared.
           </div>
         </div>
 
@@ -585,17 +1039,21 @@
           <span class="severity severity-critical">Critical</span>
           <h3>Step name collisions are silently ambiguous</h3>
           <div class="where">recorder.go:stepKey / report_builder.go:buildDependentsMapLocked</div>
-          <p>Internal step identity uses the <code>flow.Steper</code> pointer (correct, unique). But the
-            JSON <code>step_name</code> field uses <code>flow.String(step)</code>, which is non-deterministic
-            for steps that don't implement <code>String()</code> (yields <code>*TypeName(0xpointer)</code>).
-            Two steps with identical types and no <code>String()</code> produce non-matching <code>step_name</code>
-            strings across runs, but matching ones with the same pointer can produce identical-but-unrelated
-            names within one report. <code>buildDependentsMapLocked</code> uses name → pointer mapping for
-            reverse deps, so a name collision breaks the dependent graph.</p>
+          <p>
+            Internal step identity uses the <code>flow.Steper</code> pointer (correct, unique). But
+            the JSON <code>step_name</code> field uses <code>flow.String(step)</code>, which is
+            non-deterministic for steps that don't implement <code>String()</code> (yields
+            <code>*TypeName(0xpointer)</code>). Two steps with identical types and no
+            <code>String()</code> produce non-matching <code>step_name</code> strings across runs,
+            but matching ones with the same pointer can produce identical-but-unrelated names within
+            one report. <code>buildDependentsMapLocked</code> uses name → pointer mapping for
+            reverse deps, so a name collision breaks the dependent graph.
+          </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Use pointer identity (or StepID) as the canonical key everywhere internally; emit the human name
-            only in the JSON output. We've documented this as a known limitation but haven't refactored.
+            Use pointer identity (or StepID) as the canonical key everywhere internally; emit the
+            human name only in the JSON output. We've documented this as a known limitation but
+            haven't refactored.
           </div>
         </div>
 
@@ -603,15 +1061,17 @@
           <span class="severity severity-critical">Critical</span>
           <h3>flow.StatusFromError semantics are undocumented &amp; fragile</h3>
           <div class="where">recorder.go:fromErrorToStatus</div>
-          <p>We use <code>flow.StatusFromError(err)</code> which returns capitalized strings ("Succeeded",
-            "Failed", "Canceled", "Skipped") that we then lowercase. If upstream changes the mapping or
-            the casing, our status enum breaks silently. The conversion lives in
-            <code>types.go:fromFlowStatus</code> as a switch with a <code>default → Pending</code> that
-            hides breakage.</p>
+          <p>
+            We use <code>flow.StatusFromError(err)</code> which returns capitalized strings
+            ("Succeeded", "Failed", "Canceled", "Skipped") that we then lowercase. If upstream
+            changes the mapping or the casing, our status enum breaks silently. The conversion lives
+            in <code>types.go:fromFlowStatus</code> as a switch with a
+            <code>default → Pending</code> that hides breakage.
+          </p>
           <div class="callout callout-warning">
             <strong>Watch out</strong>
-            No test asserts that <code>flow.StatusFromError</code> returns the specific strings we expect.
-            A name change in upstream would break without any test failure.
+            No test asserts that <code>flow.StatusFromError</code> returns the specific strings we
+            expect. A name change in upstream would break without any test failure.
           </div>
         </div>
 
@@ -619,13 +1079,17 @@
           <span class="severity severity-important">Important</span>
           <h3>No upper bound on RunID / no RunID validation</h3>
           <div class="where">plugin.go / runid.go</div>
-          <p><code>newRunID()</code> returns 32-char hex from crypto/rand. If a user passes their own
-            RunID via <code>Config.RunID</code>, we never validate it. Empty string is silently accepted.
-            Empty RunID propagates to every Event's <code>run_id</code> field, breaking correlation.</p>
+          <p>
+            <code>newRunID()</code> returns 32-char hex from crypto/rand. If a user passes their own
+            RunID via <code>Config.RunID</code>, we never validate it. Empty string is silently
+            accepted. Empty RunID propagates to every Event's <code>run_id</code> field, breaking
+            correlation.
+          </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            In <code>NewRecorder</code>: if RunID is provided, validate non-empty and warn (or error) on
-            values that look like they will collide (e.g. all zeros). Empty → auto-generate.
+            In <code>NewRecorder</code>: if RunID is provided, validate non-empty and warn (or
+            error) on values that look like they will collide (e.g. all zeros). Empty →
+            auto-generate.
           </div>
         </div>
 
@@ -633,14 +1097,17 @@
           <span class="severity severity-important">Important</span>
           <h3>Sequence counter is atomic but events can be observed out of order</h3>
           <div class="where">recorder.go:onEvent / AGENTS.md line 65-69</div>
-          <p>AGENTS.md says "delivery order is not guaranteed to match event Sequence (sort if needed)"
-            — but the only way to sort is <code>Sequence</code> itself, and Sequence is assigned in
-            lock-step with the event creation, not with the goroutine ordering. The OnEvent callback
-            fires from parallel step goroutines; if the recorder is busy when goroutine A finishes
-            (e.g. holding the lock for goroutine B), goroutine A's <code>onEvent</code> call is delayed.
-            The Sequence is still monotonic in the recorder, but a consumer that sorts by Sequence
-            and then processes in goroutine-launch order will see inversion. AGENTS.md is honest about
-            this but the field name "Sequence" is misleading.</p>
+          <p>
+            AGENTS.md says "delivery order is not guaranteed to match event Sequence (sort if
+            needed)" — but the only way to sort is <code>Sequence</code> itself, and Sequence is
+            assigned in lock-step with the event creation, not with the goroutine ordering. The
+            OnEvent callback fires from parallel step goroutines; if the recorder is busy when
+            goroutine A finishes (e.g. holding the lock for goroutine B), goroutine A's
+            <code>onEvent</code> call is delayed. The Sequence is still monotonic in the recorder,
+            but a consumer that sorts by Sequence and then processes in goroutine-launch order will
+            see inversion. AGENTS.md is honest about this but the field name "Sequence" is
+            misleading.
+          </p>
           <div class="callout callout-warning">
             <strong>Watch out</strong>
             Don't rename "Sequence" — it's load-bearing in the JSON schema. But consider adding
@@ -653,13 +1120,17 @@
           <span class="severity severity-important">Important</span>
           <h3>BenchmarkRetryWithAudit is 1.5 SECONDS (likely test bleed, not real perf)</h3>
           <div class="where">benchmarks_test.go</div>
-          <p>All other benchmarks are sub-millisecond. <code>BenchmarkRetryWithAudit-32 = 1,507,983,375 ns/op</code>
-            (1.5s per iteration). The retry test uses real backoff with sleeps, so the benchmark is
-            measuring wall-clock sleep, not the audit overhead. It is useless as a perf signal.</p>
+          <p>
+            All other benchmarks are sub-millisecond.
+            <code>BenchmarkRetryWithAudit-32 = 1,507,983,375 ns/op</code> (1.5s per iteration). The
+            retry test uses real backoff with sleeps, so the benchmark is measuring wall-clock
+            sleep, not the audit overhead. It is useless as a perf signal.
+          </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
             Either use a no-op backoff (constant 0 duration) for the benchmark, or split it into
-            <code>BenchmarkRetryOverhead</code> (no real backoff) and <code>BenchmarkRetryEndToEnd</code>
+            <code>BenchmarkRetryOverhead</code> (no real backoff) and
+            <code>BenchmarkRetryEndToEnd</code>
             (real backoff, not for regression comparison).
           </div>
         </div>
@@ -670,55 +1141,78 @@
         <div class="grid-2">
           <div class="card">
             <h4>Domain language document</h4>
-            <p><code>docs/DOMAIN_LANGUAGE.md</code> doesn't exist. Project language is in AGENTS.md but
-              mixed with implementation notes. A standalone glossary (Step, Attempt, Event, Recorder,
-              Snapshot, Replay, Report) would make onboarding faster and force naming consistency.</p>
+            <p>
+              <code>docs/DOMAIN_LANGUAGE.md</code> doesn't exist. Project language is in AGENTS.md
+              but mixed with implementation notes. A standalone glossary (Step, Attempt, Event,
+              Recorder, Snapshot, Replay, Report) would make onboarding faster and force naming
+              consistency.
+            </p>
           </div>
           <div class="card">
             <h4>Failure modes doc</h4>
-            <p>No central list of "things that can go wrong" (RunID collision, name collision, dropped
-              events, snapshot after Do, Attach after Do). Adding <code>docs/FAILURE_MODES.md</code>
-              would be a 5% effort for 50% fewer support questions.</p>
+            <p>
+              No central list of "things that can go wrong" (RunID collision, name collision,
+              dropped events, snapshot after Do, Attach after Do). Adding
+              <code>docs/FAILURE_MODES.md</code> would be a 5% effort for 50% fewer support
+              questions.
+            </p>
           </div>
           <div class="card">
             <h4>Co-locate tests with code owners</h4>
-            <p>All 13 test files in the root. As we add a separate <code>export</code> subpackage,
-              consider moving <code>export_test.go</code> alongside. Improves discoverability.</p>
+            <p>
+              All 13 test files in the root. As we add a separate <code>export</code> subpackage,
+              consider moving <code>export_test.go</code> alongside. Improves discoverability.
+            </p>
           </div>
           <div class="card">
             <h4>Comment policy: <em>why</em>, not <em>what</em></h4>
-            <p>Mostly honored. A few places in <code>recorder.go</code> restate the code in English
-              ("Pop the most recent pending attempt (LIFO)"). Could be tightened, but not a blocker.</p>
+            <p>
+              Mostly honored. A few places in <code>recorder.go</code> restate the code in English
+              ("Pop the most recent pending attempt (LIFO)"). Could be tightened, but not a blocker.
+            </p>
           </div>
           <div class="card">
             <h4>Example: actually use the exports</h4>
-            <p>The demo should call <code>ExportJSON</code>, <code>ExportMermaid</code>, and
-              <code>Diff</code> against a previously-saved report to show the full surface end-to-end.</p>
+            <p>
+              The demo should call <code>ExportJSON</code>, <code>ExportMermaid</code>, and
+              <code>Diff</code> against a previously-saved report to show the full surface
+              end-to-end.
+            </p>
           </div>
           <div class="card">
             <h4>Makefile / Taskfile</h4>
-            <p>AGENTS.md lists commands but they're copy-paste. A <code>Taskfile.yml</code> (or
-              <code>justfile</code>, per LarsArtmann convention actually <code>flake.nix</code>) would
-              unify <code>test</code>, <code>lint</code>, <code>cover</code>, <code>bench</code>, <code>demo</code>.</p>
+            <p>
+              AGENTS.md lists commands but they're copy-paste. A <code>Taskfile.yml</code> (or
+              <code>justfile</code>, per LarsArtmann convention actually <code>flake.nix</code>)
+              would unify <code>test</code>, <code>lint</code>, <code>cover</code>,
+              <code>bench</code>, <code>demo</code>.
+            </p>
           </div>
           <div class="card">
             <h4>Type-driven errors</h4>
-            <p>We use sentinel errors (<code>ErrStatusDrift</code>, <code>ErrEventCountMismatch</code>).
-              For v0.2 consider typed error structs with attempt number, step name, and inner cause.
-              Costs ~30 lines, dramatically improves debugging.</p>
+            <p>
+              We use sentinel errors (<code>ErrStatusDrift</code>,
+              <code>ErrEventCountMismatch</code>). For v0.2 consider typed error structs with
+              attempt number, step name, and inner cause. Costs ~30 lines, dramatically improves
+              debugging.
+            </p>
           </div>
           <div class="card">
             <h4>Public API docs on pkg.go.dev</h4>
-            <p>Not generated. Run <code>gomarkdoc</code> or write hand-curated doc.go. Currently only
-              <code>doc.go</code> + comments surface on godoc.</p>
+            <p>
+              Not generated. Run <code>gomarkdoc</code> or write hand-curated doc.go. Currently only
+              <code>doc.go</code> + comments surface on godoc.
+            </p>
           </div>
         </div>
 
         <!-- f) TOP #25 -->
         <h2 id="next"><span class="num">f</span>Top #25 Next</h2>
 
-        <p>Sorted by impact (Pareto). 80% of value comes from the first 8 items; the remaining 17 are
-          depth, polish, and future-proofing.</p>
+        <p>
+          Sorted by impact (Pareto). 80% of value comes from the first 8 items; the remaining 17 are
+          depth, polish, and future-proofing.
+        </p>
 
         <table>
           <thead>
@@ -734,181 +1228,238 @@
               <td>1</td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>Correctness</td>
-              <td>Refactor <code>buildDependentsMapLocked</code> to use pointer identity (not name) for the
-                reverse-dependency graph. Closes the silent name-collision bug.</td>
+              <td>
+                Refactor <code>buildDependentsMapLocked</code> to use pointer identity (not name)
+                for the reverse-dependency graph. Closes the silent name-collision bug.
+              </td>
             </tr>
             <tr>
               <td>2</td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>Hardening</td>
-              <td>Add an integration test that runs the example binary under <code>-race</code> with
-                concurrent retries. Guards against the go-workflow backoff race regression.</td>
+              <td>
+                Add an integration test that runs the example binary under <code>-race</code> with
+                concurrent retries. Guards against the go-workflow backoff race regression.
+              </td>
             </tr>
             <tr>
               <td>3</td>
               <td><span class="badge badge-high">High</span></td>
               <td>UX</td>
-              <td>Validate <code>Config.RunID</code> in <code>New()</code>: auto-generate when empty,
-                warn on malformed input. Prevents silent correlation breakage.</td>
+              <td>
+                Validate <code>Config.RunID</code> in <code>New()</code>: auto-generate when empty,
+                warn on malformed input. Prevents silent correlation breakage.
+              </td>
             </tr>
             <tr>
               <td>4</td>
               <td><span class="badge badge-high">High</span></td>
               <td>Testing</td>
-              <td>Push coverage 94.7% → 99% by targeting the ~70 uncovered statements. Highest-impact:
+              <td>
+                Push coverage 94.7% → 99% by targeting the ~70 uncovered statements. Highest-impact:
                 <code>recordAfterStep</code> nil branch, <code>attach.go</code> wrapper nil path,
-                <code>fromFlowStatus</code> default, <code>export.go</code> write-error paths.</td>
+                <code>fromFlowStatus</code> default, <code>export.go</code> write-error paths.
+              </td>
             </tr>
             <tr>
               <td>5</td>
               <td><span class="badge badge-high">High</span></td>
               <td>Observability</td>
-              <td><code>SlogHandler</code> adapter: emit one <code>slog.Record</code> per event with
-                step name, attempt, duration, status, error. Unlocks native observability pipelines.</td>
+              <td>
+                <code>SlogHandler</code> adapter: emit one <code>slog.Record</code> per event with
+                step name, attempt, duration, status, error. Unlocks native observability pipelines.
+              </td>
             </tr>
             <tr>
               <td>6</td>
               <td><span class="badge badge-high">High</span></td>
               <td>Documentation</td>
-              <td>Create <code>docs/DOMAIN_LANGUAGE.md</code>. Glossary for Step, Attempt, Event,
-                Recorder, Snapshot, Replay, Report, RunID. One of the highest-leverage doc investments.</td>
+              <td>
+                Create <code>docs/DOMAIN_LANGUAGE.md</code>. Glossary for Step, Attempt, Event,
+                Recorder, Snapshot, Replay, Report, RunID. One of the highest-leverage doc
+                investments.
+              </td>
             </tr>
             <tr>
               <td>7</td>
               <td><span class="badge badge-high">High</span></td>
               <td>Testing</td>
-              <td>Add a property-based test (rapid or quick) that generates random workflow topologies
-                + attempt result sequences and asserts report invariants: event count = 2×attempt count,
-                error/status coherence, no orphaned steps.</td>
+              <td>
+                Add a property-based test (rapid or quick) that generates random workflow topologies
+                + attempt result sequences and asserts report invariants: event count = 2×attempt
+                count, error/status coherence, no orphaned steps.
+              </td>
             </tr>
             <tr>
               <td>8</td>
               <td><span class="badge badge-high">High</span></td>
               <td>CI</td>
-              <td>GitHub Action that runs <code>go test -bench=. -benchmem</code> on PRs and posts a
-                perf delta comment. Catches regressions like the broken retry benchmark before merge.</td>
+              <td>
+                GitHub Action that runs <code>go test -bench=. -benchmem</code> on PRs and posts a
+                perf delta comment. Catches regressions like the broken retry benchmark before
+                merge.
+              </td>
             </tr>
             <tr>
               <td>9</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Correctness</td>
-              <td>Add a test asserting <code>flow.StatusFromError</code> returns the specific strings
-                <code>fromFlowStatus</code> expects. Catches upstream rename breakage.</td>
+              <td>
+                Add a test asserting <code>flow.StatusFromError</code> returns the specific strings
+                <code>fromFlowStatus</code> expects. Catches upstream rename breakage.
+              </td>
             </tr>
             <tr>
               <td>10</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Observability</td>
-              <td>OpenTelemetry trace correlation: helper to derive RunID from
+              <td>
+                OpenTelemetry trace correlation: helper to derive RunID from
                 <code>trace.SpanContextFromContext(ctx).TraceID()</code>. Emits OTel events for each
-                attempt boundary.</td>
+                attempt boundary.
+              </td>
             </tr>
             <tr>
               <td>11</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Benchmarks</td>
-              <td>Fix <code>BenchmarkRetryWithAudit</code> to use zero-duration backoff. Currently
-                measures sleep, not overhead. The 1.5s number is a lie.</td>
+              <td>
+                Fix <code>BenchmarkRetryWithAudit</code> to use zero-duration backoff. Currently
+                measures sleep, not overhead. The 1.5s number is a lie.
+              </td>
             </tr>
             <tr>
               <td>12</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>UX</td>
-              <td>Enrich the example to call <code>ExportJSON</code>, <code>ExportMermaid</code>,
-                <code>Diff</code>. Show the full feature surface, not just the report struct.</td>
+              <td>
+                Enrich the example to call <code>ExportJSON</code>, <code>ExportMermaid</code>,
+                <code>Diff</code>. Show the full feature surface, not just the report struct.
+              </td>
             </tr>
             <tr>
               <td>13</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Architecture</td>
-              <td>Split single package into <code>auditlog</code> (core) + <code>auditlog/export</code>
-                (JSON, NDJSON) + <code>auditlog/diagram</code> (Mermaid, PlantUML, DOT). Mechanical
-                refactor, big readability win.</td>
+              <td>
+                Split single package into <code>auditlog</code> (core) +
+                <code>auditlog/export</code> (JSON, NDJSON) +
+                <code>auditlog/diagram</code> (Mermaid, PlantUML, DOT). Mechanical refactor, big
+                readability win.
+              </td>
             </tr>
             <tr>
               <td>14</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Metrics</td>
-              <td>Prometheus exporter: per-step duration histograms, status transition counters,
-                in-flight attempt gauges. <code>Collect()</code> method on a new type.</td>
+              <td>
+                Prometheus exporter: per-step duration histograms, status transition counters,
+                in-flight attempt gauges. <code>Collect()</code> method on a new type.
+              </td>
             </tr>
             <tr>
               <td>15</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Error model</td>
-              <td>Replace sentinel errors with typed error structs carrying attempt #, step name,
-                and inner cause. <code>type StepFailedError struct { StepName string; Attempt int;
-                Cause error }</code>. ~30 lines, dramatic debuggability win.</td>
+              <td>
+                Replace sentinel errors with typed error structs carrying attempt #, step name, and
+                inner cause.
+                <code
+                  >type StepFailedError struct { StepName string; Attempt int; Cause error }</code
+                >. ~30 lines, dramatic debuggability win.
+              </td>
             </tr>
             <tr>
               <td>16</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Documentation</td>
-              <td><code>docs/FAILURE_MODES.md</code>: central list of "things that can go wrong"
-                (RunID collision, name collision, dropped events, snapshot after Do, Attach after Do).</td>
+              <td>
+                <code>docs/FAILURE_MODES.md</code>: central list of "things that can go wrong"
+                (RunID collision, name collision, dropped events, snapshot after Do, Attach after
+                Do).
+              </td>
             </tr>
             <tr>
               <td>17</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Testing</td>
-              <td>Stress test: 1000-step workflow with all steps retrying under -race. Establish a
-                baseline for "no flake under load."</td>
+              <td>
+                Stress test: 1000-step workflow with all steps retrying under -race. Establish a
+                baseline for "no flake under load."
+              </td>
             </tr>
             <tr>
               <td>18</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>UX</td>
-              <td>Better <code>go doc</code> output: run <code>gomarkdoc</code> on the package and
-                commit the result, or write hand-curated examples in <code>Example*</code> functions.</td>
+              <td>
+                Better <code>go doc</code> output: run <code>gomarkdoc</code> on the package and
+                commit the result, or write hand-curated examples in
+                <code>Example*</code> functions.
+              </td>
             </tr>
             <tr>
               <td>19</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>UX</td>
-              <td>PlantUML/DOT visual differentiation for retry/timeout (Mermaid already has it).
-                Shared engine makes this a one-formatter-at-a-time task.</td>
+              <td>
+                PlantUML/DOT visual differentiation for retry/timeout (Mermaid already has it).
+                Shared engine makes this a one-formatter-at-a-time task.
+              </td>
             </tr>
             <tr>
               <td>20</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Documentation</td>
-              <td>Move <code>export_test.go</code> into the new <code>auditlog/export</code> package
-                when we split. Co-located tests discover better.</td>
+              <td>
+                Move <code>export_test.go</code> into the new <code>auditlog/export</code> package
+                when we split. Co-located tests discover better.
+              </td>
             </tr>
             <tr>
               <td>21</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Tooling</td>
-              <td>Taskfile / flake.nix / justfile for unified <code>test</code>, <code>lint</code>,
+              <td>
+                Taskfile / flake.nix / justfile for unified <code>test</code>, <code>lint</code>,
                 <code>cover</code>, <code>bench</code>, <code>demo</code> entrypoints. Replaces the
-                copy-paste in AGENTS.md.</td>
+                copy-paste in AGENTS.md.
+              </td>
             </tr>
             <tr>
               <td>22</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Export</td>
-              <td>Self-contained HTML report exporter: timeline + DAG + step detail table. We have
-                the template skill; this is a glue job.</td>
+              <td>
+                Self-contained HTML report exporter: timeline + DAG + step detail table. We have the
+                template skill; this is a glue job.
+              </td>
             </tr>
             <tr>
               <td>23</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Export</td>
-              <td>WorkflowReport → protobuf or flatbuffers for IPC / gRPC use cases. Not urgent.</td>
+              <td>
+                WorkflowReport → protobuf or flatbuffers for IPC / gRPC use cases. Not urgent.
+              </td>
             </tr>
             <tr>
               <td>24</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Testing</td>
-              <td>Sub-workflow composition: deeply nested, sub-workflow with its own retries, error
-                propagation. One test each.</td>
+              <td>
+                Sub-workflow composition: deeply nested, sub-workflow with its own retries, error
+                propagation. One test each.
+              </td>
             </tr>
             <tr>
               <td>25</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Comment hygiene</td>
-              <td>Review every comment in <code>recorder.go</code> for "what vs why." A few restate
-                the code. Quick polish, not a blocker.</td>
+              <td>
+                Review every comment in <code>recorder.go</code> for "what vs why." A few restate
+                the code. Quick polish, not a blocker.
+              </td>
             </tr>
           </tbody>
         </table>
@@ -917,39 +1468,53 @@
         <h2 id="open-question"><span class="num">g</span>My #1 Open Question</h2>
 
         <div class="card card-warning">
-          <h4>Should we add a <code>LastError</code> (or <code>TransientErrors</code>) field to
-            <code>StepInfo</code> for the forensic use case, or stay minimal?</h4>
+          <h4>
+            Should we add a <code>LastError</code> (or <code>TransientErrors</code>) field to
+            <code>StepInfo</code> for the forensic use case, or stay minimal?
+          </h4>
 
-          <p>Today's fix (Error = final outcome only) is the right call for the default semantic.
-            But it <em>does</em> lose information: a user looking at a succeeded step has no fast
-            way to see "this step transiently failed twice before succeeding" without scanning
-            the event stream and filtering for <code>IsAttemptEnd() &amp;&amp; HasError()</code>.</p>
+          <p>
+            Today's fix (Error = final outcome only) is the right call for the default semantic. But
+            it <em>does</em> lose information: a user looking at a succeeded step has no fast way to
+            see "this step transiently failed twice before succeeding" without scanning the event
+            stream and filtering for <code>IsAttemptEnd() &amp;&amp; HasError()</code>.
+          </p>
 
           <p>I see three options and I don't know which is best for this project's audience:</p>
 
-          <ol style="margin: 0.5rem 0 1rem 1.5rem;">
-            <li><strong>Stay minimal.</strong> Error = final outcome. Users who want per-attempt
-              history go to the Event stream. Clean, single source of truth. But: extra work for
-              the common "did this step ever fail?" question.</li>
-            <li><strong>Add <code>TransientErrors []string</code>.</strong> All non-final attempt
+          <ol style="margin: 0.5rem 0 1rem 1.5rem">
+            <li>
+              <strong>Stay minimal.</strong> Error = final outcome. Users who want per-attempt
+              history go to the Event stream. Clean, single source of truth. But: extra work for the
+              common "did this step ever fail?" question.
+            </li>
+            <li>
+              <strong>Add <code>TransientErrors []string</code>.</strong> All non-final attempt
               error messages, in order. Final outcome is still <code>Error</code>. Preserves
               forensics, doesn't conflate with final error. Cost: ~5 lines, one extra test, one
-              extra JSON field. Slight schema bump (additive only — v0.2.0 is fine).</li>
-            <li><strong>Add <code>LastAttempt int</code> + reuse <code>Error</code> for final,
-              <code>AttemptErrors map[int]string</code> for the rest.</strong> Most expressive,
-              most schema surface, most complexity. Probably overkill for v0.x.</li>
+              extra JSON field. Slight schema bump (additive only — v0.2.0 is fine).
+            </li>
+            <li>
+              <strong
+                >Add <code>LastAttempt int</code> + reuse <code>Error</code> for final,
+                <code>AttemptErrors map[int]string</code> for the rest.</strong
+              >
+              Most expressive, most schema surface, most complexity. Probably overkill for v0.x.
+            </li>
           </ol>
 
-          <p>What's the right call depends on: who the target users are, whether this library is
+          <p>
+            What's the right call depends on: who the target users are, whether this library is
             meant for human-readability (the example) or machine-aggregation (a metrics pipeline),
             and whether we expect StepInfo to be queried with SQL-like filters. I can't decide this
-            alone — it requires product judgment about audience.</p>
+            alone — it requires product judgment about audience.
+          </p>
 
           <div class="callout callout-warning">
             <strong>My gut</strong>
-            Option 2. <code>TransientErrors []string</code> is additive, cheap, and answers the
-            "did this step ever fail?" question in O(1) JSON lookups. But I'd want to hear from
-            a real user first.
+            Option 2. <code>TransientErrors []string</code> is additive, cheap, and answers the "did
+            this step ever fail?" question in O(1) JSON lookups. But I'd want to hear from a real
+            user first.
           </div>
         </div>
 
@@ -967,19 +1532,33 @@
         var nav = document.querySelector("[data-nav]");
         if (!nav) return;
         var links = nav.querySelectorAll('a[href^="#"]');
-        var ids = Array.prototype.map.call(links, function (l) { return l.getAttribute("href").slice(1); });
-        var sections = Array.prototype.map.call(ids, function (id) { return document.getElementById(id); }).filter(Boolean);
+        var ids = Array.prototype.map.call(links, function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = Array.prototype.map
+          .call(ids, function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
         if (!sections.length) return;
-        var observer = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-              Array.prototype.forEach.call(links, function (link) {
-                link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id);
-              });
-            }
-          });
-        }, { rootMargin: "-80px 0px -60% 0px", threshold: 0 });
-        sections.forEach(function (s) { observer.observe(s); });
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                Array.prototype.forEach.call(links, function (link) {
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href") === "#" + entry.target.id,
+                  );
+                });
+              }
+            });
+          },
+          { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
+        );
+        sections.forEach(function (s) {
+          observer.observe(s);
+        });
       })();
     </script>
   </body>
