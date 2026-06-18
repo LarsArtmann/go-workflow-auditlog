@@ -67,13 +67,24 @@ func (r *Recorder) makeCallbacks() (flow.BeforeStep, flow.AfterStep) {
 }
 
 // snapshotWorkflow reads step statuses, dependencies, and retry/timeout config
-// from the workflow's post-execution state.
+// from the workflow's post-execution state. Traverses sub-workflows to capture
+// inner step statuses that bypass Before/After callbacks.
 func (r *Recorder) snapshotWorkflow(w *flow.Workflow) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	for _, step := range w.Steps() {
-		r.snapshotStepLocked(w, step)
+	for _, root := range w.Steps() {
+		flow.Traverse(root, func(step flow.Steper, _ []flow.Steper) flow.TraverseDecision {
+			// Skip wrapper steps that don't have their own state (NamedStep, etc).
+			// Their underlying step is traversed separately.
+			if w.StateOf(step) == nil {
+				return flow.TraverseEndBranch
+			}
+
+			r.snapshotStepLocked(w, step)
+
+			return flow.TraverseContinue
+		})
 	}
 }
 

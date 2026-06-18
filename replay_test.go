@@ -7,7 +7,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 
-	"github.com/larsartmann/go-workflow-auditlog"
+	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 func TestReadEvents_RoundTrip(t *testing.T) {

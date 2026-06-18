@@ -7,8 +7,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	"github.com/cenkalti/backoff/v4"
-
-	"github.com/larsartmann/go-workflow-auditlog"
+	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 // BenchmarkInvocation measures the overhead of audit callbacks on a single
@@ -54,7 +53,7 @@ func BenchmarkAttach(b *testing.B) {
 				a, _ := auditlog.New(auditlog.Config{Enabled: true})
 				w := &flow.Workflow{}
 				steps := make([]flow.Steper, 0, n)
-				for j := 0; j < n; j++ {
+				for j := range n {
 					s := newSucceed(fmt.Sprintf("step-%d", j))
 					steps = append(steps, s)
 					w.Add(flow.Step(s))
@@ -74,7 +73,7 @@ func BenchmarkBuildReport(b *testing.B) {
 			a, _ := auditlog.New(auditlog.Config{Enabled: true})
 			w := &flow.Workflow{}
 			steps := make([]flow.Steper, 0, n)
-			for j := 0; j < n; j++ {
+			for j := range n {
 				s := newSucceed(fmt.Sprintf("step-%d", j))
 				steps = append(steps, s)
 				w.Add(flow.Step(s))
@@ -96,7 +95,7 @@ func BenchmarkBuildReport(b *testing.B) {
 func BenchmarkEventsCopy(b *testing.B) {
 	a, _ := auditlog.New(auditlog.Config{Enabled: true})
 	w := &flow.Workflow{}
-	for j := 0; j < 100; j++ {
+	for j := range 100 {
 		w.Add(flow.Step(newSucceed(fmt.Sprintf("step-%d", j))))
 	}
 	a.Attach(w)
@@ -157,7 +156,7 @@ func BenchmarkMermaidExport(b *testing.B) {
 			a, _ := auditlog.New(auditlog.Config{Enabled: true})
 			w := &flow.Workflow{}
 			var prev flow.Steper
-			for j := 0; j < n; j++ {
+			for j := range n {
 				s := newSucceed(fmt.Sprintf("step-%d", j))
 				if prev != nil {
 					w.Add(flow.Step(s).DependsOn(prev))
