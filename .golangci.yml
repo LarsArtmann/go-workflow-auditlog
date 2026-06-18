@@ -203,8 +203,8 @@ linters:
         - .Wrapf(
         - .WithMessage(
         - .WithMessagef(
-      ignore-package-regex:
-        - ^github.com/larsartmann/go-workflow-auditlog
+      ignore-package-globs:
+        - github.com/larsartmann/go-workflow-auditlog
   exclusions:
     generated: lax
     rules:
