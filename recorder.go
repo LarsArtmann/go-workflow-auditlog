@@ -169,18 +169,19 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 		rec.pendingAttempts = rec.pendingAttempts[:idx]
 	}
 
-	// Record the finish time and error from the last attempt.
+	// Record the finish time and error from the last attempt. We always
+	// overwrite — a nil errStr (success) clears any stale error from a
+	// previous failed attempt, so the step-level Error field reflects the
+	// final outcome only. The per-attempt error history is preserved in
+	// the Event stream (each attempt_end carries its own Error pointer).
 	rec.finishedAt = &now
+	rec.attemptErr = errStr
 
 	// Only overwrite the duration if we measured one; otherwise keep the
 	// previous attempt's duration so a stray AfterStep without a matching
 	// BeforeStep doesn't clobber a valid value.
 	if durationMs != nil {
 		rec.durationMs = durationMs
-	}
-
-	if errStr != nil {
-		rec.attemptErr = errStr
 	}
 
 	status := fromErrorToStatus(err)

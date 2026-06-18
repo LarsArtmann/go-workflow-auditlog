@@ -102,6 +102,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - **Sub-workflow traversal**: `snapshotWorkflow` uses `flow.Traverse` to walk the full step DAG, capturing inner steps of composite/sub-workflows that bypass Before/After callbacks. Wrapper steps with nil `StateOf` are skipped via `TraverseEndBranch`.
 - **`buildReportFromCore()` is the single Report construction path** — `BuildReport`, `Filtered`, and `ReplayEvents` all route through it. The denormalized aggregate fields are derived in exactly one place. Any new construction path MUST use it.
 - **Diagram export** uses a shared `writeDiagram` engine with a `diagramFormatter` interface. Mermaid adds status-based CSS classes (`succeeded`=`green`, `failed`=`red`, `skipped`=`gray`, `canceled`=`orange`) and retry count indicators (`×N`). PlantUML uses the same engine but skips class assignment.
+- **`StepInfo.Error` reflects the FINAL outcome only.** For a step that fails on attempts 1–2 and succeeds on attempt 3, the `Error` field is `nil` (not "transient failure" from the last failed attempt). The per-attempt error history is preserved in the `Event` stream — each `attempt_end` event carries its own `Error`. Rationale: the step-level `Error` is the answer to "why did this step end in its final state?", and a succeeded step ended successfully. See `recorder.go:recordAfterStep` and the regression test `TestRetry_StepErrorClearedOnSuccess`.
 
 ---
 

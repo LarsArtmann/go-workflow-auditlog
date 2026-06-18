@@ -399,6 +399,53 @@ func TestRetry_AttemptCount(t *testing.T) {
 	}
 }
 
+// TestRetry_StepErrorClearedOnSuccess is a regression test: when a step
+// fails on earlier attempts and then succeeds, its StepInfo.Error field
+// must be nil. The per-attempt error history is preserved in the event
+// stream; the step-level Error represents the final outcome only.
+func TestRetry_StepErrorClearedOnSuccess(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newFlaky("flaky-clears-error", 2) // fails twice, then succeeds
+	addRetryStep(w, step, 5)
+
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+	assertReportValid(t, report)
+
+	s := findStep(t, report, "flaky-clears-error")
+	assertStatus(t, s, auditlog.StepStatusSucceeded)
+	assertAttemptCount(t, s, 3)
+
+	if s.HasError() {
+		t.Errorf("expected Error=nil for step that eventually succeeded, got %q", *s.Error)
+	}
+
+	// The per-attempt error is still preserved in the event stream.
+	endEvents := report.EventsByStep("flaky-clears-error")
+	if len(endEvents) == 0 {
+		t.Fatal("expected attempt_end events for the flaky step")
+	}
+
+	foundTransient := false
+
+	for _, evt := range endEvents {
+		if !evt.IsAttemptEnd() {
+			continue
+		}
+
+		if evt.HasError() {
+			foundTransient = true
+		}
+	}
+
+	if !foundTransient {
+		t.Error("expected at least one attempt_end event with the transient error in the event stream")
+	}
+}
+
 func TestRetry_AllFail(t *testing.T) {
 	t.Parallel()
 
