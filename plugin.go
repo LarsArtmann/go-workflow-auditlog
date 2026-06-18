@@ -105,10 +105,10 @@ func envIsEnabled() bool {
 	}
 }
 
-// Attach injects audit callbacks into all steps. See interceptor.go.
+// Attach injects audit callbacks into all steps. See attach.go.
 // Disabled when Config.Enabled is false.
 
-// Snapshot captures final workflow state. See interceptor.go.
+// Snapshot captures final workflow state. See attach.go.
 // Disabled when Config.Enabled is false.
 
 // Report returns a consolidated snapshot of everything observed so far.

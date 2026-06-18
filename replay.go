@@ -38,13 +38,7 @@ func ReplayEvents(events []Event) (WorkflowReport, error) {
 
 	steps := make(map[string]*replayStep)
 
-	var workflowID string
-
 	for _, evt := range events {
-		if workflowID == "" {
-			// workflowID not on events anymore — left empty for replayed reports.
-		}
-
 		step := getOrCreateReplayStep(steps, evt.Name, evt.StepType)
 
 		switch {
@@ -84,7 +78,7 @@ func ReplayEvents(events []Event) (WorkflowReport, error) {
 
 	report := buildReportFromCore(
 		SchemaVersion,
-		workflowID,
+		"", // workflowID not available from events alone
 		time.Now(),
 		0, // no dropped events in replay
 		events,

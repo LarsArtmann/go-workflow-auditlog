@@ -64,7 +64,6 @@ type Recorder struct {
 	mu        sync.RWMutex
 	events    []Event
 	steps     map[stepKey]*stepRecord
-	stepOrder map[stepKey]int
 
 	sequence   *atomic.Int64
 	workflowID string
@@ -80,7 +79,6 @@ func NewRecorder(workflowID string, onEvent func(Event)) *Recorder {
 		mu:         sync.RWMutex{},
 		events:     make([]Event, 0, initialEventCapacity),
 		steps:      make(map[stepKey]*stepRecord),
-		stepOrder:  make(map[stepKey]int),
 		sequence:   newSequenceCounter(),
 		workflowID: workflowID,
 		onEvent:    onEvent,
@@ -195,7 +193,6 @@ func (r *Recorder) getOrCreateStepLocked(step flow.Steper, name string, now time
 		status:    StepStatusRunning,
 	}
 	r.steps[step] = rec
-	r.stepOrder[step] = len(r.stepOrder)
 
 	return rec
 }
