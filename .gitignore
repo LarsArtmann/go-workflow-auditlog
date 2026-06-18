@@ -45,5 +45,10 @@ Thumbs.db
 *.log
 # Build artifacts
 /go-workflow-auditlog
-# Sensitive files
-*.db
+# Coverage
+cover.out
+cover.html
+
+# Audit exports (from example/demo)
+audit-report.json
+audit-events.ndjson
