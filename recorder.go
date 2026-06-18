@@ -61,9 +61,9 @@ type stepRecord struct {
 // The onEvent callback is always called outside the lock to prevent user code
 // from blocking or deadlocking the recorder.
 type Recorder struct {
-	mu        sync.RWMutex
-	events    []Event
-	steps     map[stepKey]*stepRecord
+	mu     sync.RWMutex
+	events []Event
+	steps  map[stepKey]*stepRecord
 
 	sequence   *atomic.Int64
 	workflowID string
