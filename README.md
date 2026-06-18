@@ -5,10 +5,11 @@ Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workfl
 ## Why?
 
 go-workflow runs steps concurrently in a DAG, but provides no built-in way to answer:
-- *Which step took the longest?*
-- *How many retries did that flaky step need?*
-- *What's the full dependency graph?*
-- *Which steps were skipped, and why?*
+
+- _Which step took the longest?_
+- _How many retries did that flaky step need?_
+- _What's the full dependency graph?_
+- _Which steps were skipped, and why?_
 
 This library answers those questions by injecting audit callbacks into your workflow and capturing a complete, timestamped event stream.
 
@@ -126,41 +127,41 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 ### `Auditor` Methods
 
-| Method | Description |
-|--------|-------------|
-| `Attach(w *flow.Workflow)` | Injects audit callbacks into all steps. Call before `Do`. |
-| `Snapshot(w *flow.Workflow)` | Captures final DAG state. Call after `Do`. |
-| `Report() WorkflowReport` | Returns the consolidated report. |
-| `Events() []Event` | Returns all captured events. |
-| `EventsCount() int` | Event count without copying. |
-| `DroppedEventCount() int64` | Events dropped due to `MaxEvents` cap. |
-| `ExportToFile(path string) error` | Writes report as JSON. |
-| `ExportEventsToNDJSON(path string) error` | Writes events as NDJSON. |
-| `WriteReportJSON(w io.Writer) error` | Writes report JSON to writer. |
-| `WriteEventsNDJSON(w io.Writer) error` | Writes NDJSON to writer. |
+| Method                                    | Description                                               |
+| ----------------------------------------- | --------------------------------------------------------- |
+| `Attach(w *flow.Workflow)`                | Injects audit callbacks into all steps. Call before `Do`. |
+| `Snapshot(w *flow.Workflow)`              | Captures final DAG state. Call after `Do`.                |
+| `Report() WorkflowReport`                 | Returns the consolidated report.                          |
+| `Events() []Event`                        | Returns all captured events.                              |
+| `EventsCount() int`                       | Event count without copying.                              |
+| `DroppedEventCount() int64`               | Events dropped due to `MaxEvents` cap.                    |
+| `ExportToFile(path string) error`         | Writes report as JSON.                                    |
+| `ExportEventsToNDJSON(path string) error` | Writes events as NDJSON.                                  |
+| `WriteReportJSON(w io.Writer) error`      | Writes report JSON to writer.                             |
+| `WriteEventsNDJSON(w io.Writer) error`    | Writes NDJSON to writer.                                  |
 
 ### Report Query Methods
 
-| Method | Description |
-|--------|-------------|
-| `report.StepByName(name)` | Find a step by name. |
-| `report.EventsByStep(name)` | Filter events by step. |
-| `report.EventsByType(type)` | Filter events by type. |
-| `report.FailedSteps()` | All failed/canceled steps. |
-| `report.SucceededSteps()` | All succeeded steps. |
-| `report.SkippedSteps()` | All skipped steps. |
-| `report.RetriedSteps()` | All steps with >1 attempt. |
-| `report.Validate()` | Checks internal consistency. |
+| Method                      | Description                  |
+| --------------------------- | ---------------------------- |
+| `report.StepByName(name)`   | Find a step by name.         |
+| `report.EventsByStep(name)` | Filter events by step.       |
+| `report.EventsByType(type)` | Filter events by type.       |
+| `report.FailedSteps()`      | All failed/canceled steps.   |
+| `report.SucceededSteps()`   | All succeeded steps.         |
+| `report.SkippedSteps()`     | All skipped steps.           |
+| `report.RetriedSteps()`     | All steps with >1 attempt.   |
+| `report.Validate()`         | Checks internal consistency. |
 
 ## Config
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `Enabled` | `false` (checks env var) | Turns audit logging on/off. |
-| `WorkflowID` | `"default"` | Human-readable identifier. |
-| `OnEvent` | `nil` | Callback fired after each event. Must not block. |
-| `MaxEvents` | `0` (unlimited) | Caps stored events to prevent OOM. |
-| `InitialEventCapacity` | `256` | Pre-allocates event slice. |
+| Field                  | Default                  | Description                                      |
+| ---------------------- | ------------------------ | ------------------------------------------------ |
+| `Enabled`              | `false` (checks env var) | Turns audit logging on/off.                      |
+| `WorkflowID`           | `"default"`              | Human-readable identifier.                       |
+| `OnEvent`              | `nil`                    | Callback fired after each event. Must not block. |
+| `MaxEvents`            | `0` (unlimited)          | Caps stored events to prevent OOM.               |
+| `InitialEventCapacity` | `256`                    | Pre-allocates event slice.                       |
 
 ## Concurrency Model
 

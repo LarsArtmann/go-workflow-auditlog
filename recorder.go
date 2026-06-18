@@ -264,7 +264,7 @@ func stepTypeName(step flow.Steper) string {
 	}
 
 	t := reflect.TypeOf(step)
-	if t.Kind() == reflect.Ptr {
+	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 

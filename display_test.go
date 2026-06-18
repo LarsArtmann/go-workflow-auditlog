@@ -3,7 +3,7 @@ package auditlog_test
 import (
 	"testing"
 
-	"github.com/larsartmann/go-workflow-auditlog"
+	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 // Test all StepStatus display methods for completeness.

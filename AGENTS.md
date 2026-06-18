@@ -8,13 +8,13 @@ Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that re
 
 ## Commands
 
-| Command               | Purpose                                         |
-| --------------------- | ----------------------------------------------- |
-| `go test ./...`       | Run all tests                                   |
-| `go test -race ./...` | Run all tests with race detector                |
-| `go test -race -coverprofile=cover.out -covermode=atomic ./...` | Tests with coverage (96%+) |
-| `go vet ./...`        | Static analysis                                 |
-| `go run ./example`    | Run the demo pipeline                           |
+| Command                                                         | Purpose                          |
+| --------------------------------------------------------------- | -------------------------------- |
+| `go test ./...`                                                 | Run all tests                    |
+| `go test -race ./...`                                           | Run all tests with race detector |
+| `go test -race -coverprofile=cover.out -covermode=atomic ./...` | Tests with coverage (96%+)       |
+| `go vet ./...`                                                  | Static analysis                  |
+| `go run ./example`                                              | Run the demo pipeline            |
 
 ---
 
