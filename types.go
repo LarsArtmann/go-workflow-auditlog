@@ -21,6 +21,8 @@ const (
 // eventTypeMeta holds display metadata for each [EventType] value.
 // Centralizing the label/color here keeps the per-event-type presentation
 // in one place.
+//
+//nolint:gochecknoglobals // Lookup table, treated as immutable after init.
 var eventTypeMeta = map[EventType]struct {
 	Label string
 	Color string
@@ -70,6 +72,8 @@ const (
 // stepStatusMeta holds display metadata for each [StepStatus] value.
 // Centralizing the label/icon here keeps the per-status presentation in one
 // place and makes new statuses a one-line addition.
+//
+//nolint:gochecknoglobals // Lookup table, treated as immutable after init.
 var stepStatusMeta = map[StepStatus]struct {
 	Label string
 	Icon  string

@@ -29,9 +29,12 @@ func ReadEvents(reader io.Reader) ([]Event, error) {
 	var events []Event
 
 	sawData := false
+	lineNum := 0
 
 	for scanner.Scan() {
+		lineNum++
 		line := scanner.Bytes()
+
 		if len(line) == 0 {
 			continue
 		}
@@ -42,7 +45,7 @@ func ReadEvents(reader io.Reader) ([]Event, error) {
 
 		err := json.Unmarshal(line, &evt)
 		if err != nil {
-			return nil, fmt.Errorf("ndjson line %d: %w", len(events)+1, err)
+			return nil, fmt.Errorf("ndjson line %d: %w", lineNum, err)
 		}
 
 		events = append(events, evt)

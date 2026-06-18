@@ -3,6 +3,7 @@ package auditlog
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"io"
 )
 
@@ -14,9 +15,14 @@ func writeEventsNDJSON(writer io.Writer, events []Event) error {
 	for _, evt := range events {
 		err := encoder.Encode(evt)
 		if err != nil {
-			return err
+			return fmt.Errorf("encode event %d: %w", evt.Sequence, err)
 		}
 	}
 
-	return buf.Flush()
+	err := buf.Flush()
+	if err != nil {
+		return fmt.Errorf("flush ndjson buffer: %w", err)
+	}
+
+	return nil
 }

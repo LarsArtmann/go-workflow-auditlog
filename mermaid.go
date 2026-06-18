@@ -1,7 +1,6 @@
 package auditlog
 
 import (
-	"fmt"
 	"io"
 	"strings"
 )
@@ -19,7 +18,7 @@ func (r WorkflowReport) WriteMermaidString() (string, error) {
 
 	err := r.WriteMermaid(&buf)
 	if err != nil {
-		return "", fmt.Errorf("write mermaid: %w", err)
+		return "", err
 	}
 
 	return buf.String(), nil

@@ -105,12 +105,6 @@ func envIsEnabled() bool {
 	}
 }
 
-// Attach injects audit callbacks into all steps. See attach.go.
-// Disabled when Config.Enabled is false.
-
-// Snapshot captures final workflow state. See attach.go.
-// Disabled when Config.Enabled is false.
-
 // Report returns a consolidated snapshot of everything observed so far.
 func (a *Auditor) Report() WorkflowReport {
 	return a.recorder.BuildReport()
@@ -174,9 +168,9 @@ func (a *Auditor) ExportPlantUML(path string) error {
 // writeToFile is a helper that creates a file, calls the writer function, and
 // properly closes the file, returning the write error if any.
 func writeToFile(path string, write func(io.Writer) error) error {
-	f, err := os.Create(path)
+	f, err := os.Create(path) //nolint:gosec // path is user-provided by design.
 	if err != nil {
-		return err
+		return fmt.Errorf("create file %q: %w", path, err)
 	}
 
 	writeErr := write(f)
@@ -186,5 +180,9 @@ func writeToFile(path string, write func(io.Writer) error) error {
 		return writeErr
 	}
 
-	return closeErr
+	if closeErr != nil {
+		return fmt.Errorf("close file %q: %w", path, closeErr)
+	}
+
+	return nil
 }

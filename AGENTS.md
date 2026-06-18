@@ -2,19 +2,20 @@
 
 Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that records every step execution event (attempts, retries, durations, errors, dependencies, final statuses) with timestamps and export to JSON / NDJSON.
 
-**Module**: `github.com/larsartmann/go-workflow-auditlog` · **Package**: `auditlog` · **Go**: 1.23+ · **Status**: ALPHA
+**Module**: `github.com/larsartmann/go-workflow-auditlog` · **Package**: `auditlog` · **Go**: 1.26+ · **Status**: ALPHA
 
 ---
 
 ## Commands
 
-| Command                                                         | Purpose                          |
-| --------------------------------------------------------------- | -------------------------------- |
-| `go test ./...`                                                 | Run all tests                    |
-| `go test -race ./...`                                           | Run all tests with race detector |
-| `go test -race -coverprofile=cover.out -covermode=atomic ./...` | Tests with coverage (96%+)       |
-| `go vet ./...`                                                  | Static analysis                  |
-| `go run ./example`                                              | Run the demo pipeline            |
+| Command                                                         | Purpose                           |
+| --------------------------------------------------------------- | --------------------------------- |
+| `go test ./...`                                                 | Run all tests                     |
+| `go test -race ./...`                                           | Run all tests with race detector  |
+| `go test -race -coverprofile=cover.out -covermode=atomic ./...` | Tests with coverage (~95%)        |
+| `go vet ./...`                                                  | Static analysis                   |
+| `golangci-lint run ./...`                                       | Lint (golangci-lint v2, 0 issues) |
+| `go run ./example`                                              | Run the demo pipeline             |
 
 ---
 
@@ -30,10 +31,13 @@ step.go            — StepInfo type (embeds StepRef) + methods (HasError, Deriv
 plugin.go          — Public API: New(), Attach(), Snapshot(), Report(), Export*(), Config, Auditor
 recorder.go        — Core state machine: event capture, step records, attempt tracking
 attach.go          — Attach/Snapshot logic: callback injection + post-run DAG capture (incl. sub-workflows)
-report.go          — WorkflowReport type + Validate() + query methods
-report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates
-export.go          — NDJSON writer
-ndjson.go          — NDJSON reader (ReadEvents)
+report.go          — WorkflowReport type + Validate() + query methods (StepByName, EventsBy*, *Steps) + WriteJSON
+report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates (WorkflowSucceeded)
+filter.go          — Report filtering (Filtered, ReportOption, WithStepsByStatus, etc.)
+diff.go            — Diff API: DiffResult/StepDiff, Diff() between reports, Duration() wall-clock, Summary()
+loader.go          — LoadReport / LoadReportFromReader / LoadReportFromBytes
+export.go          — NDJSON writer (writeEventsNDJSON internal helper)
+ndjson.go          — ReadEvents NDJSON reader (sentinel errors)
 replay.go          — ReplayEvents: reconstruct Report from event stream
 filter.go          — Report filtering (Filtered, ReportOption, WithStepsByStatus, etc.)
 diagram.go         — Shared diagram engine: diagramFormatter interface + mermaid/plantuml formatters
@@ -102,8 +106,8 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - Retry tests use fresh `backoff.NewExponentialBackOff()` to avoid the go-workflow race.
 - External test package (`auditlog_test`).
 - `t.Setenv()` for env var tests (runs sequentially).
-- 50+ tests covering: disabled/enabled, success/failure, dependencies, retry, timeout/cancel, skip, concurrent steps, fan-out/fan-in, event ordering, OnEvent callback, export formats, report validation, query methods, edge cases.
-- Coverage: **96.2%** of statements.
+- 60+ tests covering: disabled/enabled, success/failure, dependencies, retry, timeout/cancel, skip, concurrent steps, fan-out/fan-in, event ordering, OnEvent callback, export formats (JSON/NDJSON), report validation, query methods, filter, diff, replay, load, diagrams (Mermaid/PlantUML), edge cases, plus regression tests for fixed bugs (status drift, diff ordering, NDJSON line numbers, WorkflowSucceeded honesty about pending steps).
+- Coverage: **94.6%** of statements (auditlog package).
 
 ### Shared test helpers (in `auditlog_test.go`)
 

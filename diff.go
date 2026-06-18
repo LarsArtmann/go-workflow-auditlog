@@ -2,6 +2,7 @@ package auditlog
 
 import (
 	"fmt"
+	"slices"
 	"time"
 )
 
@@ -14,10 +15,13 @@ type DiffResult struct {
 }
 
 // StepDiff captures a single step's state in a diff context.
+// For status changes, Status holds the new value and OldStatus the previous one
+// (OldStatus is empty for added steps).
 type StepDiff struct {
-	Name     string     `json:"name"`
-	Status   StepStatus `json:"status"`
-	Duration float64    `json:"duration_ms,omitempty"`
+	Name      string     `json:"name"`
+	Status    StepStatus `json:"status"`
+	OldStatus StepStatus `json:"old_status,omitempty"`
+	Duration  float64    `json:"duration_ms,omitempty"`
 }
 
 // HasChanges returns true if the diff found any differences.
@@ -28,6 +32,8 @@ func (d DiffResult) HasChanges() bool {
 
 // Diff compares this report against another and returns the differences.
 // Useful for detecting regressions between workflow runs.
+//
+// Output slices are sorted by step name for deterministic results across runs.
 func (r WorkflowReport) Diff(other WorkflowReport) DiffResult {
 	result := DiffResult{
 		DurationDelta: other.TotalDurationMs - r.TotalDurationMs,
@@ -44,33 +50,55 @@ func (r WorkflowReport) Diff(other WorkflowReport) DiffResult {
 		theirs[s.Name] = s
 	}
 
-	// Find added and changed steps.
+	// Collect names for deterministic ordering.
+	added := make([]string, 0)
+	changed := make([]string, 0)
+
 	for name, theirStep := range theirs {
 		if ourStep, ok := ours[name]; ok {
 			if ourStep.Status != theirStep.Status {
-				result.StatusChanged = append(result.StatusChanged, diffStep(name, theirStep))
+				changed = append(changed, name)
 			}
 		} else {
-			result.AddedSteps = append(result.AddedSteps, diffStep(name, theirStep))
+			added = append(added, name)
 		}
 	}
 
-	// Find removed steps.
-	for name, ourStep := range ours {
+	removed := make([]string, 0)
+
+	for name := range ours {
 		if _, ok := theirs[name]; !ok {
-			result.RemovedSteps = append(result.RemovedSteps, diffStep(name, ourStep))
+			removed = append(removed, name)
 		}
+	}
+
+	slices.Sort(added)
+	slices.Sort(changed)
+	slices.Sort(removed)
+
+	for _, name := range added {
+		result.AddedSteps = append(result.AddedSteps, diffStep(name, theirs[name], StepStatus("")))
+	}
+
+	for _, name := range changed {
+		result.StatusChanged = append(result.StatusChanged, diffStep(name, theirs[name], ours[name].Status))
+	}
+
+	for _, name := range removed {
+		result.RemovedSteps = append(result.RemovedSteps, diffStep(name, ours[name], StepStatus("")))
 	}
 
 	return result
 }
 
 // diffStep builds a StepDiff entry from a step name and StepInfo.
-func diffStep(name string, step StepInfo) StepDiff {
+// oldStatus is the previous status (empty for added/removed entries).
+func diffStep(name string, step StepInfo, oldStatus StepStatus) StepDiff {
 	return StepDiff{
-		Name:     name,
-		Status:   step.Status,
-		Duration: step.Duration(),
+		Name:      name,
+		Status:    step.Status,
+		OldStatus: oldStatus,
+		Duration:  step.Duration(),
 	}
 }
 

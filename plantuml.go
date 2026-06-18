@@ -1,7 +1,6 @@
 package auditlog
 
 import (
-	"fmt"
 	"io"
 	"strings"
 )
@@ -18,7 +17,7 @@ func (r WorkflowReport) WritePlantUMLString() (string, error) {
 
 	err := r.WritePlantUML(&buf)
 	if err != nil {
-		return "", fmt.Errorf("write plantuml: %w", err)
+		return "", err
 	}
 
 	return buf.String(), nil

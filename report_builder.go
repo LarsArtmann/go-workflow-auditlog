@@ -101,7 +101,7 @@ func buildReportFromCore(
 	events []Event,
 	steps []StepInfo,
 ) WorkflowReport {
-	report := WorkflowReport{ //nolint:exhaustruct
+	report := WorkflowReport{
 		Version:           version,
 		WorkflowID:        workflowID,
 		ExportedAt:        exportedAt,
@@ -125,6 +125,8 @@ func finalizeDenormalized(report *WorkflowReport) {
 	report.CanceledCount = 0
 	report.TotalDurationMs = 0
 
+	pendingOrRunning := 0
+
 	for _, step := range report.Steps {
 		switch step.Status {
 		case StepStatusSucceeded:
@@ -135,11 +137,17 @@ func finalizeDenormalized(report *WorkflowReport) {
 			report.SkippedCount++
 		case StepStatusCanceled:
 			report.CanceledCount++
+		case StepStatusPending, StepStatusRunning:
+			pendingOrRunning++
 		}
 
 		report.TotalDurationMs += step.Duration()
 	}
 
+	// WorkflowSucceeded requires every step to have reached a successful
+	// terminal state. Pending/running steps mean the workflow isn't done yet;
+	// any failure or cancel means it didn't succeed.
 	report.WorkflowSucceeded = report.FailedCount == 0 &&
-		report.CanceledCount == 0
+		report.CanceledCount == 0 &&
+		pendingOrRunning == 0
 }

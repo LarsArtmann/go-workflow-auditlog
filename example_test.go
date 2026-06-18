@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	flow "github.com/Azure/go-workflow"
@@ -60,6 +61,8 @@ func Example_exportToFile() {
 }
 
 // Example_mermaidDiagram shows how to generate a Mermaid DAG visualization.
+// The diagram is written to any io.Writer — here we use io.Discard since the
+// output is non-deterministic across runs.
 func Example_mermaidDiagram() {
 	audit, _ := auditlog.New(auditlog.Config{Enabled: true})
 
@@ -77,9 +80,9 @@ func Example_mermaidDiagram() {
 	audit.Snapshot(w)
 
 	report := audit.Report()
-	_ = report.WriteMermaid(os.Stdout)
+	_ = report.WriteMermaid(io.Discard)
 
-	// Output will contain "flowchart TD" and the step names.
+	// Output:
 }
 
 // Example_filtering shows how to filter a report.

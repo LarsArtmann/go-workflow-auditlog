@@ -92,7 +92,7 @@ type NotifyStep struct {
 	Msg string
 }
 
-func (s *NotifyStep) Do(_ context.Context) error {
+func (s *NotifyStep) Do(_ context.Context) error { //nolint:unparam
 	fmt.Printf("  → notifying: %s\n", s.Msg)
 
 	return nil
@@ -104,9 +104,12 @@ type FlakyStep struct {
 	calls int
 }
 
+// flakyFailUntil is the number of attempts after which FlakyStep succeeds.
+const flakyFailUntil = 3
+
 func (s *FlakyStep) Do(_ context.Context) error {
 	s.calls++
-	if s.calls < 3 {
+	if s.calls < flakyFailUntil {
 		return errors.New("transient error")
 	}
 
@@ -117,10 +120,9 @@ func (s *FlakyStep) Do(_ context.Context) error {
 
 func (s *FlakyStep) String() string { return "flaky-api-call" }
 
-func main() {
-	ctx := context.Background()
-
-	// Create the auditor.
+// newAuditor builds the audit log Auditor used by the demo, wiring an OnEvent
+// callback that pretty-prints each event to stdout.
+func newAuditor() *auditlog.Auditor {
 	audit, err := auditlog.New(auditlog.Config{
 		Enabled:    true,
 		WorkflowID: "data-pipeline",
@@ -148,7 +150,11 @@ func main() {
 		log.Fatalf("auditlog.New error: %v", err)
 	}
 
-	// Build the workflow.
+	return audit
+}
+
+// buildWorkflow constructs the data pipeline DAG with retry on the flaky step.
+func buildWorkflow() *flow.Workflow {
 	fetch := &FetchStep{URL: "https://api.example.com/data"}
 	validate := &ValidateStep{}
 	transform := &TransformStep{}
@@ -158,7 +164,7 @@ func main() {
 
 	w := &flow.Workflow{}
 	w.Add(
-		// Linear pipeline: fetch → validate → transform → save
+		// Linear pipeline: fetch → validate → transform → save.
 		flow.Step(fetch),
 		flow.Step(validate).DependsOn(fetch).Input(func(_ context.Context, v *ValidateStep) error {
 			v.Input = fetch.Data
@@ -188,23 +194,11 @@ func main() {
 		}),
 	)
 
-	// Attach audit callbacks BEFORE running.
-	audit.Attach(w)
+	return w
+}
 
-	// Run the workflow.
-	fmt.Println("━━━ Running data pipeline workflow ━━━")
-
-	start := time.Now()
-	runErr := w.Do(ctx)
-	elapsed := time.Since(start)
-	fmt.Printf("━━━ Workflow completed in %v ━━━\n", elapsed)
-
-	// Snapshot final state AFTER running.
-	audit.Snapshot(w)
-
-	// Print the report.
-	report := audit.Report()
-
+// printReportSummary prints the high-level report counters.
+func printReportSummary(report auditlog.WorkflowReport) {
 	fmt.Println()
 	fmt.Println("━━━ Audit Report ━━━")
 	fmt.Printf("Workflow:     %s\n", report.WorkflowID)
@@ -216,7 +210,10 @@ func main() {
 	fmt.Printf("Events:       %d\n", report.EventCount)
 	fmt.Printf("Total time:   %.2fms\n", report.TotalDurationMs)
 	fmt.Printf("Succeeded:    %v\n", report.WorkflowSucceeded)
+}
 
+// printStepDetails prints per-step information including timing, deps, and errors.
+func printStepDetails(report auditlog.WorkflowReport) {
 	fmt.Println()
 	fmt.Println("━━━ Step Details ━━━")
 
@@ -247,35 +244,79 @@ func main() {
 
 		fmt.Println()
 	}
+}
+
+// maybeExport writes JSON + NDJSON artifacts and a sample event if --export is set.
+func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.WorkflowReport) {
+	if len(args) <= 1 || args[1] != "--export" {
+		return
+	}
+
+	const jsonPath = "audit-report.json"
+
+	err := audit.ExportToFile(jsonPath)
+	if err != nil {
+		log.Fatalf("export error: %v", err)
+	}
+
+	fmt.Printf("\nReport exported to %s\n", jsonPath)
+
+	const ndjsonPath = "audit-events.ndjson"
+
+	err = audit.ExportEventsToNDJSON(ndjsonPath)
+	if err != nil {
+		log.Fatalf("ndjson export error: %v", err)
+	}
+
+	fmt.Printf("Events exported to %s\n", ndjsonPath)
+
+	printSampleEvent(report)
+}
+
+// printSampleEvent pretty-prints the first captured event as JSON.
+func printSampleEvent(report auditlog.WorkflowReport) {
+	if len(report.Events) == 0 {
+		return
+	}
+
+	sample, err := json.MarshalIndent(report.Events[0], "", "  ")
+	if err != nil {
+		log.Printf("marshal sample event: %v", err)
+
+		return
+	}
+
+	fmt.Printf("\nSample event:\n%s\n", sample)
+}
+
+func main() {
+	ctx := context.Background()
+
+	audit := newAuditor()
+	w := buildWorkflow()
+
+	// Attach audit callbacks BEFORE running.
+	audit.Attach(w)
+
+	// Run the workflow.
+	fmt.Println("━━━ Running data pipeline workflow ━━━")
+
+	start := time.Now()
+	runErr := w.Do(ctx)
+	elapsed := time.Since(start)
+	fmt.Printf("━━━ Workflow completed in %v ━━━\n", elapsed)
+
+	// Snapshot final state AFTER running.
+	audit.Snapshot(w)
+
+	// Print the report.
+	report := audit.Report()
+	printReportSummary(report)
+	printStepDetails(report)
 
 	if runErr != nil {
 		fmt.Printf("\nWorkflow error: %v\n", runErr)
 	}
 
-	// Export to JSON.
-	if len(os.Args) > 1 && os.Args[1] == "--export" {
-		path := "audit-report.json"
-
-		err := audit.ExportToFile(path)
-		if err != nil {
-			log.Fatalf("export error: %v", err)
-		}
-
-		fmt.Printf("\nReport exported to %s\n", path)
-
-		ndjsonPath := "audit-events.ndjson"
-
-		err = audit.ExportEventsToNDJSON(ndjsonPath)
-		if err != nil {
-			log.Fatalf("ndjson export error: %v", err)
-		}
-
-		fmt.Printf("Events exported to %s\n", ndjsonPath)
-	}
-
-	// Pretty-print a sample event.
-	if len(report.Events) > 0 {
-		sample, _ := json.MarshalIndent(report.Events[0], "", "  ")
-		fmt.Printf("\nSample event:\n%s\n", sample)
-	}
+	maybeExport(audit, os.Args, report)
 }

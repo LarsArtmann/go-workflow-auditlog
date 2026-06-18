@@ -9,16 +9,13 @@ import (
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
-// addSucceedSteps appends n identical succeeding steps named "step-<j>" to both
-// steps and the workflow. Returns the (possibly grown) steps slice.
-func addSucceedSteps(w *flow.Workflow, steps []flow.Steper, n int) []flow.Steper {
+// addSucceedSteps appends n identical succeeding steps named "step-<j>" to the
+// workflow.
+func addSucceedSteps(w *flow.Workflow, n int) {
 	for j := range n {
 		s := newSucceed(fmt.Sprintf("step-%d", j))
-		steps = append(steps, s)
 		w.Add(flow.Step(s))
 	}
-
-	return steps
 }
 
 // BenchmarkInvocation measures the overhead of audit callbacks on a single
@@ -67,8 +64,7 @@ func BenchmarkAttach(b *testing.B) {
 				a, _ := auditlog.New(auditlog.Config{Enabled: true})
 				w := &flow.Workflow{}
 
-				steps := make([]flow.Steper, 0, n)
-				steps = addSucceedSteps(w, steps, n)
+				addSucceedSteps(w, n)
 
 				b.StartTimer()
 
@@ -85,8 +81,7 @@ func BenchmarkBuildReport(b *testing.B) {
 			a, _ := auditlog.New(auditlog.Config{Enabled: true})
 			w := &flow.Workflow{}
 
-			steps := make([]flow.Steper, 0, n)
-			steps = addSucceedSteps(w, steps, n)
+			addSucceedSteps(w, n)
 
 			a.Attach(w)
 			_ = w.Do(context.Background())

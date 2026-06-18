@@ -114,6 +114,7 @@ func (r *Recorder) snapshotStepLocked(w *flow.Workflow, step flow.Steper) {
 	if opt := state.Option(); opt != nil {
 		if opt.RetryOption != nil {
 			rec.hasRetry = true
+			//nolint:gosec // Attempts is a small retry count, overflow is not realistic.
 			rec.maxAttempts = int(opt.RetryOption.Attempts)
 		}
 

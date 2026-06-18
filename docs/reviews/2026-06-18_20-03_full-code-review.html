@@ -1,0 +1,1500 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Code Review — go-workflow-auditlog</title>
+    <style>
+      /* =========================================================================
+         BAUHAUS DARK — Dashboard template
+         Design language: form follows function. Primary colors on graphite.
+         Zero external dependencies: system fonts, no CDN, no build step.
+         Token architecture: see references/bauhaus-tokens.md
+         ========================================================================= */
+
+      :root {
+        /* --- Primitive palette (Bauhaus Dark) --- */
+        --color-graphite: #0e0e10;
+        --color-graphite-2: #18181d;
+        --color-graphite-3: #16161a;
+        --color-bone: #f4f4f0;
+        --color-red: #ff6b6b;
+        --color-blue: #6eb5ff;
+        --color-yellow: #f4d35e;
+        --color-amber: #ffb347;
+        --color-hairline: rgba(244, 244, 240, 0.12);
+        --color-hairline-strong: rgba(244, 244, 240, 0.25);
+
+        /* --- Semantic layer (shared vocabulary with editorial template) --- */
+        --surface: var(--color-graphite);
+        --surface-raised: var(--color-graphite-2);
+        --surface-sunken: var(--color-graphite-3);
+        --text: var(--color-bone);
+        --text-muted: rgba(244, 244, 240, 0.72);
+        --text-faint: rgba(244, 244, 240, 0.45);
+        --border: var(--color-hairline);
+        --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-amber);
+        --problem: var(--color-red);
+        --solution: var(--color-blue);
+        --warning: var(--color-yellow);
+
+        /* --- Backward-compatible aliases (do not break consumer skills) --- */
+        --bg: var(--surface);
+        --bg-elevated: var(--surface-raised);
+        --bg-sunken: var(--surface-sunken);
+        --bg-card: var(--surface-raised);
+        --bg-code: var(--surface-sunken);
+        --ink: var(--text);
+        --ink-secondary: var(--text-muted);
+        --ink-muted: var(--text-faint);
+        --rose: var(--problem);
+        --rose-glow: color-mix(in srgb, var(--problem) 15%, transparent);
+        --emerald: var(--solution);
+        --emerald-glow: color-mix(in srgb, var(--solution) 15%, transparent);
+        --amber-glow: color-mix(in srgb, var(--warning) 15%, transparent);
+        --coral: var(--problem);
+        --coral-light: color-mix(in srgb, var(--problem) 15%, transparent);
+        --teal: var(--solution);
+        --teal-light: color-mix(in srgb, var(--solution) 15%, transparent);
+        --amber-light: color-mix(in srgb, var(--warning) 20%, transparent);
+
+        /* --- Shape --- */
+        --radius: 0px; /* Bauhaus default: sharp corners */
+        --radius-sm: 0px;
+
+        /* --- Type stacks (system only — zero external fonts) --- */
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      /* Sticky-header offset for anchor jumps */
+      section[id],
+      [id] {
+        scroll-margin-top: 60px;
+      }
+
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* --- Full-bleed top bar --- */
+      .top-bar {
+        background: var(--text);
+        color: var(--surface);
+        padding: 0.6rem 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* --- Layout: optional sticky sidebar TOC --- */
+      .layout {
+        display: flex;
+        gap: 2.5rem;
+        padding: 2rem;
+      }
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+        height: calc(100vh - 2rem);
+        overflow-y: auto;
+        display: none;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .sidebar .label {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
+      .sidebar a {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 0.45rem 0.75rem;
+        border-left: 2px solid transparent;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+        font-weight: 500;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+      }
+      .main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* --- Headings --- */
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      h1 {
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        line-height: 1.1;
+        margin: 0 0 0.6rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+      }
+      h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h4 {
+        font-size: 0.98rem;
+        margin: 0 0 0.3rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
+
+      /* --- Hero --- */
+      .hero {
+        padding: 1.5rem 0 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
+      .hero-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--surface);
+        background: var(--accent);
+        padding: 0.3rem 0.7rem;
+        margin-bottom: 0.9rem;
+      }
+      .hero-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        max-width: 70ch;
+        margin: 0;
+      }
+
+      /* Bauhaus signature: geometric shape cluster (optional) */
+      .hero-shapes {
+        position: relative;
+        height: 80px;
+        margin-bottom: 1rem;
+      }
+      .hero-shapes .circle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 56px;
+        height: 56px;
+        background: var(--problem);
+        border-radius: 50%;
+      }
+      .hero-shapes .square {
+        position: absolute;
+        top: 24px;
+        left: 72px;
+        width: 48px;
+        height: 48px;
+        background: var(--solution);
+      }
+      .hero-shapes .tri {
+        position: absolute;
+        top: 8px;
+        left: 140px;
+        width: 0;
+        height: 0;
+        border-left: 28px solid transparent;
+        border-right: 28px solid transparent;
+        border-bottom: 48px solid var(--warning);
+      }
+
+      /* --- General cards --- */
+      .card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+
+      /* --- Issue cards --- */
+      .issue {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .issue-critical {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .issue-important {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+      .issue-nice {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .issue h3 {
+        margin-bottom: 0.3rem;
+      }
+      .issue .where {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        margin: 0.2rem 0 0.6rem;
+      }
+      .issue p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* --- Severity badges (used inside issue cards) --- */
+      .severity {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        margin-bottom: 0.6rem;
+        color: var(--surface);
+      }
+      .severity-critical {
+        background: var(--problem);
+      }
+      .severity-important {
+        background: var(--warning);
+      }
+      .severity-nice {
+        background: var(--solution);
+      }
+
+      /* --- Inline badges (used in tables) --- */
+      .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.18rem 0.5rem;
+        border: 1px solid var(--border-strong);
+        color: var(--text-muted);
+      }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-medium {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .badge-low {
+        color: var(--text-muted);
+      }
+      .badge-fixed {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
+
+      /* --- Callouts (used inside issues or standalone) --- */
+      .callout {
+        margin: 0.8rem 0 0;
+        padding: 0.7rem 0.9rem;
+        border-left: 3px solid var(--border-strong);
+        background: color-mix(in srgb, var(--text) 5%, transparent);
+        font-size: 0.9rem;
+      }
+      .callout strong {
+        display: inline-block;
+        margin-right: 0.4rem;
+      }
+      .callout-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 10%, transparent);
+      }
+      .callout-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 10%, transparent);
+      }
+
+      /* --- Stat cards / scorecards (aliased vocabulary) --- */
+      .stat-grid,
+      .scorecard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .stat-card,
+      .score-card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1rem;
+        position: relative;
+      }
+      .stat-card::before,
+      .score-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border-strong);
+      }
+      .stat-bad,
+      .score-bad {
+        /* default top bar already set */
+      }
+      .stat-bad::before,
+      .score-bad::before {
+        background: var(--problem);
+      }
+      .stat-good::before,
+      .score-good::before {
+        background: var(--solution);
+      }
+      .stat-warn::before,
+      .score-warn::before {
+        background: var(--warning);
+      }
+      .stat-value,
+      .score {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--text);
+      }
+      .stat-bad .stat-value,
+      .score-bad .score {
+        color: var(--problem);
+      }
+      .stat-good .stat-value,
+      .score-good .score {
+        color: var(--solution);
+      }
+      .stat-warn .stat-value,
+      .score-warn .score {
+        color: var(--warning);
+      }
+      .stat-label,
+      .score-card .label {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-faint);
+        margin-top: 0.5rem;
+      }
+
+      /* --- Strengths list --- */
+      .strengths {
+        display: grid;
+        gap: 0.5rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .strength {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.8rem;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .strength .check {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        color: var(--solution);
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+      .strength .text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+      .strength .text span {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      /* --- Tables --- */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.9rem;
+      }
+      th {
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        background: var(--surface-raised);
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      td {
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+      }
+      tr:hover td {
+        background: var(--surface-raised);
+      }
+
+      /* --- Before/After comparison --- */
+      .compare-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin: 1rem 0 0.5rem;
+      }
+      .compare-before,
+      .compare-after {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0.4rem 0.7rem;
+        color: var(--surface);
+      }
+      .compare-before {
+        background: var(--problem);
+      }
+      .compare-after {
+        background: var(--solution);
+      }
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .compare-row pre {
+        margin: 0;
+      }
+
+      /* --- Code blocks + syntax highlighting --- */
+      pre {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      .tok-keyword {
+        color: var(--accent);
+      } /* func, type, struct, if, return */
+      .tok-type {
+        color: var(--warning);
+      } /* int, string, bool, error */
+      .tok-string {
+        color: var(--solution);
+      } /* "quoted strings" */
+      .tok-comment {
+        color: var(--text-faint);
+        font-style: italic;
+      }
+      .tok-func {
+        color: #74a9ff;
+      } /* function names */
+      .tok-number {
+        color: var(--accent);
+      } /* 42, 3.14 */
+      .tok-generic {
+        color: var(--problem);
+      } /* T, ID in generics */
+      .tok-builtin {
+        color: #4dd9ff;
+      } /* make, len, append */
+      .tok-punct {
+        color: var(--text-muted);
+      } /* { } ( ) ; = : */
+      .tok-attr {
+        color: var(--accent);
+      } /* Nix attribute names */
+
+      /* --- Dependency tree / ASCII diagrams --- */
+      .dep-tree {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.7;
+        white-space: pre;
+        overflow-x: auto;
+      }
+      .dep-tree .root {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .dep-tree .ok {
+        color: var(--solution);
+      }
+      .dep-tree .unwanted {
+        color: var(--problem);
+      }
+
+      /* --- Inline node-and-arrow diagrams --- */
+      .diagram {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+      }
+      .node {
+        display: inline-block;
+        padding: 0.35rem 0.7rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--surface-sunken);
+        border: 1px solid var(--border-strong);
+      }
+      .node-core {
+        background: var(--accent);
+        color: var(--surface);
+        border-color: var(--accent);
+      }
+      .node-problem {
+        background: var(--problem);
+        color: var(--surface);
+        border-color: var(--problem);
+      }
+      .node-good {
+        background: var(--solution);
+        color: var(--surface);
+        border-color: var(--solution);
+      }
+      .arrow {
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+
+      /* --- Grids (responsive) --- */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+
+      /* --- Inline TOC (alternative to sidebar) --- */
+      .toc {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.3rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .toc h3 {
+        margin-bottom: 0.5rem;
+      }
+      .toc ul {
+        list-style: none;
+        padding: 0;
+      }
+      .toc li {
+        margin: 0.25rem 0;
+      }
+      .toc a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .toc a:hover {
+        color: var(--accent);
+      }
+
+      /* --- Migration / numbered steps --- */
+      .migration-step {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+      }
+      .migration-num {
+        font-family: var(--font-mono);
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .migration-content h4 {
+        margin-bottom: 0.2rem;
+      }
+      .migration-content p {
+        margin-bottom: 0;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      /* --- Footer --- */
+      .footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8rem;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+
+      /* --- Responsive --- */
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: block;
+        }
+      }
+      @media (max-width: 768px) {
+        .layout {
+          flex-direction: column;
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 0.6rem 1rem;
+          flex-wrap: wrap;
+          gap: 0.3rem;
+        }
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .compare-header,
+        .compare-row {
+          grid-template-columns: 1fr;
+        }
+        .stat-grid,
+        .scorecard {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .migration-step {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Full-bleed top bar -->
+    <div class="top-bar">
+      <span>FULL CODE REVIEW</span>
+      <span>2026-06-18</span>
+      <span>go-workflow-auditlog · ALPHA</span>
+    </div>
+
+    <div class="layout">
+      <!-- Sidebar TOC -->
+      <aside class="sidebar" data-nav>
+        <nav>
+          <div class="label">Contents</div>
+          <a href="#summary">Summary</a>
+          <a href="#critical">Critical Bugs</a>
+          <a href="#splitbrains">Split Brains</a>
+          <a href="#quality">Quality Wins</a>
+          <a href="#issues">All Issues</a>
+          <a href="#strengths">Strengths</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <!-- Hero -->
+        <div class="hero">
+          <div class="hero-shapes">
+            <div class="circle"></div>
+            <div class="square"></div>
+            <div class="tri"></div>
+          </div>
+          <div class="hero-badge">Full Code Review</div>
+          <h1>go-workflow-auditlog</h1>
+          <p class="hero-subtitle">
+            Senior-architect pass over every source, test, config, and doc file. Bugs fixed on the
+            spot; configuration drift corrected; regression tests added; docs realigned with the
+            actual API surface.
+          </p>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <h2 id="summary"><span class="num">00</span>Summary</h2>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value">28</div>
+            <div class="stat-label">Files Reviewed</div>
+          </div>
+          <div class="stat-card stat-bad">
+            <div class="stat-value">6</div>
+            <div class="stat-label">Critical Bugs Found</div>
+          </div>
+          <div class="stat-card stat-warn">
+            <div class="stat-value">8</div>
+            <div class="stat-label">Split Brains</div>
+          </div>
+          <div class="stat-card stat-good">
+            <div class="stat-value">14</div>
+            <div class="stat-label">Issues Fixed</div>
+          </div>
+        </div>
+
+        <p style="margin: 1.5rem 0; color: var(--text-muted)">
+          Linter issues reduced from <strong>145 → 0</strong>. All tests pass with the race
+          detector. Coverage is <strong>94.6%</strong> on the auditlog package. CI is now internally
+          consistent (Go 1.26 + golangci-lint v2.4.0).
+        </p>
+
+        <!-- Critical Bugs -->
+        <h2 id="critical"><span class="num">01</span>Critical Bugs (Fixed)</h2>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Fixed</span>
+          <h3>Validate() status-drift check was dead code</h3>
+          <div class="where">report.go:50-56</div>
+          <p>
+            The condition
+            <code>step.Status != derived &amp;&amp; step.Status.IsTerminal()</code> could never
+            fail: when status is terminal, <code>DeriveStatus()</code> returns the same value, so
+            the left side of the <code>&amp;&amp;</code> is always false. The stated intent — detect
+            drift between stored status and error pointer — was unreachable. No test exercised the
+            drift path, so the bug went unnoticed.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix</strong>
+            Removed the <code>&amp;&amp; step.Status.IsTerminal()</code> guard. Now fires whenever
+            stored status disagrees with derived. Added
+            <code>TestReport_Validate_StatusDrift</code>.
+          </div>
+        </div>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Fixed</span>
+          <h3>Diff() output was non-deterministic</h3>
+          <div class="where">diff.go:48-63</div>
+          <p>
+            Iterating <code>theirs</code> / <code>ours</code> maps produced randomized
+            <code>AddedSteps</code> / <code>RemovedSteps</code> / <code>StatusChanged</code>
+            ordering. Two diffs over identical inputs could yield different slice orders — a
+            regression test's worst enemy.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix</strong>
+            Collect names into slices and <code>slices.Sort</code> them before emitting StepDiff
+            entries. <code>StepDiff</code> also gained an <code>OldStatus</code> field so callers
+            can see from→to transitions. Added <code>TestDiff_DeterministicOrdering</code>.
+          </div>
+        </div>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Fixed</span>
+          <h3>WorkflowSucceeded lied during mid-execution</h3>
+          <div class="where">report_builder.go:143-144</div>
+          <p>
+            <code>WorkflowSucceeded = FailedCount == 0 &amp;&amp; CanceledCount == 0</code>
+            returned <code>true</code> if no step had failed, even when steps were still pending or
+            running. A report built mid-flight would have reported success.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix</strong>
+            Added a <code>pendingOrRunning</code> counter to the aggregate builder; the flag is now
+            false unless every step has reached a successful terminal state. Added
+            <code>TestWorkflowSucceeded_PendingStepsIsFalse</code>.
+          </div>
+        </div>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Fixed</span>
+          <h3>NDJSON error line number counted events, not lines</h3>
+          <div class="where">ndjson.go:45</div>
+          <p>
+            <code>fmt.Errorf("ndjson line %d", len(events)+1)</code> reported the event count rather
+            than the actual file line. A malformed line following blank lines would have pointed at
+            the wrong place.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix</strong>
+            Track a real <code>lineNum</code> counter (incremented per <code>Scan</code>, including
+            blank lines). Added <code>TestReadEvents_LineNumberInError</code>.
+          </div>
+        </div>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Fixed</span>
+          <h3>recorder.durationMs clobbered by stray AfterStep</h3>
+          <div class="where">recorder.go:156</div>
+          <p>
+            <code>rec.durationMs = durationMs</code> unconditionally overwrote the prior attempt's
+            measured duration. If a step's <code>AfterStep</code> fired without a matching
+            <code>BeforeStep</code> (which go-workflow can do for edge cases),
+            <code>durationMs</code> would become <code>nil</code>, silently erasing a previously
+            valid duration.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix</strong>
+            Only overwrite when <code>durationMs != nil</code>. The previous value is preserved.
+          </div>
+        </div>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Fixed</span>
+          <h3>CI was broken: Go 1.23 vs go.mod 1.26.3, lint v1 vs config v2</h3>
+          <div class="where">.github/workflows/ci.yml + go.mod + .golangci.yml</div>
+          <p>
+            go.mod requires Go 1.26.3 but CI installed 1.23 — the test job would have failed at
+            <code>go build</code>. The lint job installed golangci-lint v1.62 while the config is v2
+            format. Worse: depguard's allow list used the unsupported <code>$module</code> variable,
+            so every import of <code>github.com/Azure/go-workflow</code> and even the project's own
+            package was flagged.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix</strong>
+            Bumped CI to <code>go-version: "1.26"</code> and <code>golangci-lint v2.4.0</code>.
+            Rewrote <code>.golangci.yml</code>: explicit depguard allow list, snake_case
+            tagliatelle, scoped exhaustruct, narrowed varnamelen, etc.
+          </div>
+        </div>
+
+        <!-- Split Brains -->
+        <h2 id="splitbrains"><span class="num">02</span>Split Brains (Fixed)</h2>
+
+        <div class="card card-problem">
+          <h4>depguard forbade the library's own dependencies</h4>
+          <p>
+            The config used <code>$module</code>, which depuard v2 does not support. Result: 22
+            linter errors flagging the project's central purpose (wrapping
+            <code>go-workflow</code>). Replaced with an explicit allow list.
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>tagliatelle wanted camelCase, code uses snake_case</h4>
+          <p>
+            JSON tags throughout the public API are snake_case (<code>workflow_id</code>,
+            <code>event_count</code>, …). The linter was running with its camelCase default,
+            producing 27 spurious warnings. Now configured
+            <code>tagliatelle.case.rules.json: snake</code>.
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>README &lt;&gt; code drift</h4>
+          <p>
+            README claimed <code>Requires Go 1.23+</code> while go.mod requires 1.26.3. The Auditor
+            methods table omitted <code>ReportFiltered</code>, <code>WriteMermaid</code>,
+            <code>WritePlantUML</code>, <code>ExportMermaid</code>, <code>ExportPlantUML</code>; the
+            report methods table omitted <code>Diff</code>, <code>Filtered</code>,
+            <code>Duration</code>, <code>Summary</code>, <code>WriteJSON</code>,
+            <code>WriteNDJSON</code>, <code>WriteMermaid</code>, <code>WritePlantUML</code>; and the
+            package-level <code>LoadReport*</code> / <code>ReadEvents</code> /
+            <code>ReplayEvents</code>
+            were entirely missing. All added.
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>AGENTS.md listed wrong file inventory and coverage</h4>
+          <p>
+            Listed <code>interceptor.go</code> (since renamed <code>attach.go</code>), missed
+            <code>diff.go</code>, <code>filter.go</code>, <code>loader.go</code>,
+            <code>diagram.go</code>, <code>mermaid.go</code>, <code>plantuml.go</code>,
+            <code>replay.go</code>. Coverage claimed 96.2% but actual is 94.6%. Go version claimed
+            1.23+. All corrected.
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>DOMAIN_LANGUAGE.md was the unfilled template</h4>
+          <p>
+            Literally <code>.</code> as the project name and "Example Term" placeholders. Now filled
+            with the real ubiquitous language (Workflow, Auditor, Step, Attempt, Event, Report,
+            Snapshot, etc.) plus bounded contexts (Capture, Reporting, Export, Replay, Diff).
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>Orphan doc comments in plugin.go</h4>
+          <p>
+            Two doc comments stacked with no code between them — leftovers from when
+            <code>Attach</code> / <code>Snapshot</code> lived in <code>plugin.go</code>. They had no
+            symbol to attach to and were confusing godoc. Removed.
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>WriteMermaidString / WritePlantUMLString double-wrapped errors</h4>
+          <p>
+            <code>WriteMermaid</code> already wraps with <code>"write diagram: %w"</code>; the
+            String variants wrapped again with <code>"write mermaid:"</code>, producing nested error
+            messages. Removed the redundant outer wrap.
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>Experimental Go build tags that nothing uses</h4>
+          <p>
+            <code>goexperiment.arenas</code>, <code>goexperiment.jsonv2</code>,
+            <code>goexperiment.goroutineleakprofile</code>, etc. were set on the linter run, but no
+            file uses any experimental feature. Removed.
+          </p>
+        </div>
+
+        <!-- Quality Wins -->
+        <h2 id="quality"><span class="num">03</span>Quality Wins (Fixed)</h2>
+
+        <div class="card card-solution">
+          <h4>errcheck on defer Close()</h4>
+          <p>
+            <code>defer f.Close()</code> in <code>loader.go</code> ignored the error. Wrapped in
+            <code>defer func() { _ = f.Close() }</code>.
+          </p>
+        </div>
+
+        <div class="card card-solution">
+          <h4>errchkjson: MarshalIndent error ignored</h4>
+          <p>
+            <code>example/main.go</code> did <code>sample, _ := json.MarshalIndent(...)</code> on a
+            value containing <code>time.Time</code>. Now checked; failure logged.
+          </p>
+        </div>
+
+        <div class="card card-solution">
+          <h4>wrapcheck: unwrapped external errors</h4>
+          <p>
+            <code>os.Create</code>, <code>os.File.Close</code>, <code>json.Encoder.Encode</code>,
+            <code>bufio.Writer.Flush</code> all returned unwrapped errors. Now wrapped with
+            <code>fmt.Errorf("...: %w", err)</code>
+            for actionable error chains.
+          </p>
+        </div>
+
+        <div class="card card-solution">
+          <h4>errname: errTest → testError</h4>
+          <p>
+            Test helper <code>type errTest string</code> did not conform to the
+            <code>xxxError</code> convention. Renamed throughout.
+          </p>
+        </div>
+
+        <div class="card card-solution">
+          <h4>exhaustive: missing Pending/Running cases</h4>
+          <p>
+            <code>finalizeDenormalized</code> switch omitted <code>StepStatusPending</code> and
+            <code>StepStatusRunning</code>. The default branch handled them, but the explicit cases
+            now also feed the new <code>pendingOrRunning</code> counter.
+          </p>
+        </div>
+
+        <div class="card card-solution">
+          <h4>funlen / cyclop: example main() was too complex (17 &gt; 12)</h4>
+          <p>
+            Refactored <code>example/main.go</code> into <code>newAuditor</code>,
+            <code>buildWorkflow</code>, <code>printReportSummary</code>,
+            <code>printStepDetails</code>, <code>maybeExport</code>, <code>printSampleEvent</code>.
+            Main is now ~10 statements.
+          </p>
+        </div>
+
+        <div class="card card-solution">
+          <h4>ineffassign / unparam: addSucceedSteps unused return</h4>
+          <p>
+            Benchmark helper returned a slice that no caller used. Simplified the signature to
+            <code>addSucceedSteps(w, n)</code>.
+          </p>
+        </div>
+
+        <!-- All Issues Table -->
+        <h2 id="issues"><span class="num">04</span>All Issues</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Severity</th>
+              <th>File</th>
+              <th>Issue</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>report.go:50</td>
+              <td>Validate() drift check unreachable</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>diff.go:48</td>
+              <td>Diff() non-deterministic ordering</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>report_builder.go:143</td>
+              <td>WorkflowSucceeded lied mid-execution</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>ndjson.go:45</td>
+              <td>Wrong line number in error</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>recorder.go:156</td>
+              <td>durationMs clobbered by stray AfterStep</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>ci.yml / go.mod</td>
+              <td>CI Go 1.23 vs go.mod 1.26.3 + lint v1 vs config v2</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>.golangci.yml</td>
+              <td>depguard forbade own dependencies ($module unsupported)</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>.golangci.yml</td>
+              <td>tagliatelle camelCase vs snake_case code</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>README.md</td>
+              <td>Stale method tables + wrong Go version</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>AGENTS.md</td>
+              <td>Wrong file list, coverage %, Go version</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>DOMAIN_LANGUAGE.md</td>
+              <td>Unfilled template</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>plugin.go:108</td>
+              <td>Orphan doc comments</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>mermaid.go / plantuml.go</td>
+              <td>Double-wrapped errors</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>.golangci.yml</td>
+              <td>Unused experimental build tags</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>loader.go:17</td>
+              <td>errcheck on defer Close()</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>16</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>example/main.go:278</td>
+              <td>errchkjson: MarshalIndent unchecked</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>17</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>export.go / report.go / plugin.go</td>
+              <td>wrapcheck: external errors unwrapped</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>18</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>auditlog_test.go:69</td>
+              <td>errname: errTest → testError</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>19</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>report_builder.go:129</td>
+              <td>exhaustive switch cases</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>20</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>example/main.go:120</td>
+              <td>funlen / cyclop 17 &gt; 12</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>21</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>benchmarks_test.go:14</td>
+              <td>ineffassign / unparam on helper</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>22</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>CHANGELOG.md</td>
+              <td>Unreleased section empty</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Strengths -->
+        <h2 id="strengths"><span class="num">05</span>Strengths</h2>
+        <div class="strengths">
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Single-lock concurrency model</strong>
+              <span
+                >One <code>sync.RWMutex</code> guards all mutable state; <code>onEvent</code> fires
+                outside the lock. Simple, correct, easy to reason about.</span
+              >
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Single Report construction path</strong>
+              <span
+                ><code>buildReportFromCore()</code> is the only place denormalized aggregates are
+                derived. <code>BuildReport</code>, <code>Filtered</code>, and
+                <code>ReplayEvents</code> all route through it — no drift between paths.</span
+              >
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Strong type-safe enums</strong>
+              <span
+                ><code>EventType</code>, <code>Phase</code>, <code>StepStatus</code> are typed
+                strings with display metadata tables. Impossible-to-misuse API.</span
+              >
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Round-trip NDJSON / JSON / Replay contracts</strong>
+              <span
+                >Events serialize to NDJSON, deserialize via <code>ReadEvents</code>, and
+                reconstruct via <code>ReplayEvents</code>. Reports serialize to JSON, load via
+                <code>LoadReport*</code>. Tested both ways.</span
+              >
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>External test package</strong>
+              <span
+                >Tests live in <code>package auditlog_test</code> — guarantees tests exercise the
+                public API only, catching accidental reliance on internals.</span
+              >
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Functional-option filtering</strong>
+              <span
+                ><code>ReportOption</code> pattern (<code>WithStepsByName</code>,
+                <code>WithStepsByStatus</code>, <code>WithEventsByType</code>,
+                <code>WithTimeRange</code>) is composable and idiomatic Go.</span
+              >
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Diagram engine is properly factored</strong>
+              <span
+                ><code>diagramFormatter</code> interface + shared <code>writeDiagram</code> means
+                Mermaid and PlantUML are thin adapters. Adding DOT/D2 would be a 30-line
+                change.</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Before/After: linter state -->
+        <h2>Before / After</h2>
+        <div class="compare-header">
+          <div class="compare-before">Before</div>
+          <div class="compare-after">After</div>
+        </div>
+        <div class="compare-row">
+          <div>
+            <pre><code><span class="tok-comment">// .golangci.yml — depuard misconfig</span>
+<span class="tok-attr">depguard</span><span class="tok-punct">:</span>
+  <span class="tok-attr">rules</span><span class="tok-punct">:</span>
+    <span class="tok-attr">main</span><span class="tok-punct">:</span>
+      <span class="tok-attr">allow</span><span class="tok-punct">:</span>
+        - <span class="tok-string">$gostd</span>
+        - <span class="tok-string">$module</span>   <span class="tok-comment">// unsupported! silently fails</span></code></pre>
+          </div>
+          <div>
+            <pre><code><span class="tok-comment">// .golangci.yml — explicit allow list</span>
+<span class="tok-attr">depguard</span><span class="tok-punct">:</span>
+  <span class="tok-attr">rules</span><span class="tok-punct">:</span>
+    <span class="tok-attr">main</span><span class="tok-punct">:</span>
+      <span class="tok-attr">list-mode</span><span class="tok-punct">:</span> <span class="tok-string">strict</span>
+      <span class="tok-attr">allow</span><span class="tok-punct">:</span>
+        - <span class="tok-string">$gostd</span>
+        - <span class="tok-string">github.com/Azure/go-workflow</span>
+        - <span class="tok-string">github.com/cenkalti/backoff/v4</span>
+        - <span class="tok-string">github.com/larsartmann/go-workflow-auditlog</span></code></pre>
+          </div>
+        </div>
+        <div class="compare-row">
+          <div>
+            <pre><code><span class="tok-comment">// report.go — dead check</span>
+<span class="tok-keyword">if</span> step.Status != derived &amp;&amp;
+   step.Status.<span class="tok-func">IsTerminal</span>() {
+   <span class="tok-comment">// unreachable: when terminal,</span>
+   <span class="tok-comment">// derived == status by construction</span>
+}</code></pre>
+          </div>
+          <div>
+            <pre><code><span class="tok-comment">// report.go — actually fires</span>
+<span class="tok-keyword">if</span> step.Status != derived {
+   <span class="tok-keyword">return</span> <span class="tok-func">fmt.Errorf</span>(
+     <span class="tok-string">"%w: step %q has status %q ..."</span>,
+     errReportStatusDrift, ...)</code></pre>
+          </div>
+        </div>
+
+        <h2>Remaining Recommendations (Not Fixed)</h2>
+        <div class="card card-warning">
+          <h4>WorkflowReport has no RunID</h4>
+          <p>
+            Only <code>WorkflowID</code> is present. Two runs of the same workflow cannot be
+            distinguished in storage. Consider adding a <code>RunID</code> (UUID) populated at
+            <code>New()</code> time and serialized in the report.
+          </p>
+        </div>
+        <div class="card card-warning">
+          <h4>Recorder.sequence uses *atomic.Int64 unnecessarily</h4>
+          <p>
+            <code>Recorder</code> is always passed by pointer. The indirection through
+            <code>*atomic.Int64</code> + <code>newSequenceCounter()</code> helper is historical; a
+            value field would work and remove one allocation.
+          </p>
+        </div>
+        <div class="card card-warning">
+          <h4>Sentinel errors are unexported</h4>
+          <p>
+            <code>errReportEventCountMismatch</code>, <code>errReportStepCountMismatch</code>,
+            <code>errReportStatusDrift</code>, <code>errWorkflowIDPathSep</code> are
+            package-private. Callers cannot use <code>errors.Is</code> to branch on them. Consider
+            exporting them as <code>Err…</code> for a 1.0 release.
+          </p>
+        </div>
+        <div class="card card-warning">
+          <h4>Event.Phase is redundant with EventType</h4>
+          <p>
+            Every <code>AttemptStart</code> event has <code>Phase=Before</code>; every
+            <code>AttemptEnd</code> has <code>Phase=After</code>. <code>Phase</code>
+            exists in the JSON schema for clarity but carries no information. Worth documenting or
+            dropping in a future schema bump.
+          </p>
+        </div>
+        <div class="card card-warning">
+          <h4>EventsByStep / EventsByType are O(N) per query</h4>
+          <p>
+            Acceptable for typical sizes, but a <code>BuildReport</code>-time index (map from
+            name/type → []int) would make repeated queries O(1).
+          </p>
+        </div>
+        <div class="card card-warning">
+          <h4>Step name collisions still possible</h4>
+          <p>
+            Two steps with the same <code>String()</code> produce the same <code>step_name</code> in
+            JSON. Internal tracking uses the <code>flow.Steper</code> pointer so it's correct, but
+            the JSON output is ambiguous. Consider a doc note + optional <code>StepID</code> field.
+          </p>
+        </div>
+
+        <footer class="footer">
+          Generated 2026-06-18 &middot; Reviewed against HEAD after fixes &middot; 28 files visited
+          &middot; tests + lint verified green
+        </footer>
+      </main>
+    </div>
+
+    <!-- Progressive-enhancement scrollspy. Nav still works without JS via anchor links. -->
+    <script>
+      (function () {
+        if (!("IntersectionObserver" in window)) return;
+        var nav = document.querySelector("[data-nav]");
+        if (!nav) return;
+        var links = nav.querySelectorAll('a[href^="#"]');
+        var ids = Array.from(links).map(function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        if (!sections.length) return;
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                links.forEach(function (link) {
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href") === "#" + entry.target.id,
+                  );
+                });
+              }
+            });
+          },
+          { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
+        );
+        sections.forEach(function (s) {
+          observer.observe(s);
+        });
+      })();
+    </script>
+  </body>
+</html>

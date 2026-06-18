@@ -30,7 +30,7 @@ type failStep struct {
 	msg  string
 }
 
-func (s *failStep) Do(_ context.Context) error { return errTest(s.msg) }
+func (s *failStep) Do(_ context.Context) error { return testError(s.msg) }
 func (s *failStep) String() string             { return s.name }
 
 type flakyStep struct {
@@ -42,7 +42,7 @@ type flakyStep struct {
 func (s *flakyStep) Do(_ context.Context) error {
 	s.calls++
 	if s.calls <= s.failUntil {
-		return errTest("transient failure")
+		return testError("transient failure")
 	}
 
 	return nil
@@ -66,9 +66,9 @@ func (s *slowStep) Do(ctx context.Context) error {
 
 func (s *slowStep) String() string { return s.name }
 
-type errTest string
+type testError string
 
-func (e errTest) Error() string { return string(e) }
+func (e testError) Error() string { return string(e) }
 
 // --- Step constructors ---
 

@@ -75,7 +75,7 @@ type Recorder struct {
 
 // NewRecorder creates a new event recorder.
 func NewRecorder(workflowID string, onEvent func(Event)) *Recorder {
-	return &Recorder{ //nolint:exhaustruct
+	return &Recorder{
 		mu:         sync.RWMutex{},
 		events:     make([]Event, 0, initialEventCapacity),
 		steps:      make(map[stepKey]*stepRecord),
@@ -153,7 +153,13 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 	// Record the finish time and error from the last attempt.
 	rec.finishedAt = &now
 
-	rec.durationMs = durationMs
+	// Only overwrite the duration if we measured one; otherwise keep the
+	// previous attempt's duration so a stray AfterStep without a matching
+	// BeforeStep doesn't clobber a valid value.
+	if durationMs != nil {
+		rec.durationMs = durationMs
+	}
+
 	if errStr != nil {
 		rec.attemptErr = errStr
 	}

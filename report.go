@@ -38,6 +38,10 @@ type WorkflowReport struct {
 // Validate checks internal consistency of the report: denormalized count
 // fields must match the actual slice lengths, and every step's Status must
 // match its DeriveStatus. Returns nil if consistent.
+//
+// The status drift check catches the case where a step's stored Status field
+// disagrees with what its Error pointer implies — e.g., Status=Pending with a
+// non-nil Error (which DeriveStatus would map to Failed).
 func (r WorkflowReport) Validate() error {
 	if r.EventCount != len(r.Events) {
 		return fmt.Errorf("%w: got %d, want %d", errReportEventCountMismatch, r.EventCount, len(r.Events))
@@ -49,7 +53,7 @@ func (r WorkflowReport) Validate() error {
 
 	for _, step := range r.Steps {
 		derived := step.DeriveStatus()
-		if step.Status != derived && step.Status.IsTerminal() {
+		if step.Status != derived {
 			return fmt.Errorf("%w: step %q has status %q but derived status is %q",
 				errReportStatusDrift, step.Name, step.Status, derived)
 		}
@@ -153,7 +157,12 @@ func (r WorkflowReport) WriteJSON(writer io.Writer) error {
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ")
 
-	return encoder.Encode(r)
+	err := encoder.Encode(r)
+	if err != nil {
+		return fmt.Errorf("encode report: %w", err)
+	}
+
+	return nil
 }
 
 // WriteNDJSON writes the report's events as newline-delimited JSON.

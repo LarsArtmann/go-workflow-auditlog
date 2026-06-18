@@ -90,20 +90,26 @@ Steps settled inline by Conditions (Skipped/Canceled) never enter the intercepto
 {
   "version": "0.1.0",
   "workflow_id": "my-pipeline",
+  "exported_at": "2026-06-18T15:21:09Z",
   "event_count": 4,
   "step_count": 2,
   "succeeded_count": 2,
   "failed_count": 0,
+  "skipped_count": 0,
+  "canceled_count": 0,
   "total_duration_ms": 15.23,
   "workflow_succeeded": true,
+  "dropped_event_count": 0,
   "steps": [
     {
-      "name": "fetch",
+      "step_name": "fetch",
       "step_type": "FetchStep",
       "status": "succeeded",
       "attempt_count": 1,
       "duration_ms": 10.5,
-      "dependents": ["save"]
+      "has_retry": false,
+      "has_timeout": false,
+      "dependents": [{ "step_name": "save" }]
     }
   ],
   "events": [
@@ -127,31 +133,56 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 ### `Auditor` Methods
 
-| Method                                    | Description                                               |
-| ----------------------------------------- | --------------------------------------------------------- |
-| `Attach(w *flow.Workflow)`                | Injects audit callbacks into all steps. Call before `Do`. |
-| `Snapshot(w *flow.Workflow)`              | Captures final DAG state. Call after `Do`.                |
-| `Report() WorkflowReport`                 | Returns the consolidated report.                          |
-| `Events() []Event`                        | Returns all captured events.                              |
-| `EventsCount() int`                       | Event count without copying.                              |
-| `DroppedEventCount() int64`               | Events dropped due to `MaxEvents` cap.                    |
-| `ExportToFile(path string) error`         | Writes report as JSON.                                    |
-| `ExportEventsToNDJSON(path string) error` | Writes events as NDJSON.                                  |
-| `WriteReportJSON(w io.Writer) error`      | Writes report JSON to writer.                             |
-| `WriteEventsNDJSON(w io.Writer) error`    | Writes NDJSON to writer.                                  |
+| Method                                                | Description                                                 |
+| ----------------------------------------------------- | ----------------------------------------------------------- |
+| `Attach(w *flow.Workflow) *flow.Workflow`             | Injects audit callbacks into all steps. Call before `Do`.   |
+| `Snapshot(w *flow.Workflow)`                          | Captures final DAG state. Call after `Do`.                  |
+| `Report() WorkflowReport`                             | Returns the consolidated report.                            |
+| `Events() []Event`                                    | Returns all captured events.                                |
+| `EventsCount() int`                                   | Event count without copying.                                |
+| `DroppedEventCount() int64`                           | Events dropped due to `MaxEvents` cap.                      |
+| `ReportFiltered(opts ...ReportOption) WorkflowReport` | Returns a filtered report (by name/status/event-type/time). |
+| `ExportToFile(path string) error`                     | Writes report as JSON.                                      |
+| `ExportEventsToNDJSON(path string) error`             | Writes events as NDJSON.                                    |
+| `WriteReportJSON(w io.Writer) error`                  | Writes report JSON to writer.                               |
+| `WriteEventsNDJSON(w io.Writer) error`                | Writes NDJSON to writer.                                    |
+| `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                 |
+| `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                |
+| `WriteMermaid(w io.Writer) error`                     | Writes Mermaid DAG to writer.                               |
+| `WritePlantUML(w io.Writer) error`                    | Writes PlantUML DAG to writer.                              |
 
-### Report Query Methods
+### `WorkflowReport` Methods
 
-| Method                      | Description                  |
-| --------------------------- | ---------------------------- |
-| `report.StepByName(name)`   | Find a step by name.         |
-| `report.EventsByStep(name)` | Filter events by step.       |
-| `report.EventsByType(type)` | Filter events by type.       |
-| `report.FailedSteps()`      | All failed/canceled steps.   |
-| `report.SucceededSteps()`   | All succeeded steps.         |
-| `report.SkippedSteps()`     | All skipped steps.           |
-| `report.RetriedSteps()`     | All steps with >1 attempt.   |
-| `report.Validate()`         | Checks internal consistency. |
+| Method                                                 | Description                                                          |
+| ------------------------------------------------------ | -------------------------------------------------------------------- |
+| `report.StepByName(name)`                              | Find a step by name.                                                 |
+| `report.EventsByStep(name)`                            | Filter events by step.                                               |
+| `report.EventsByType(type)`                            | Filter events by type.                                               |
+| `report.FailedSteps()`                                 | All failed/canceled steps.                                           |
+| `report.SucceededSteps()`                              | All succeeded steps.                                                 |
+| `report.SkippedSteps()`                                | All skipped steps.                                                   |
+| `report.RetriedSteps()`                                | All steps with >1 attempt.                                           |
+| `report.Filtered(opts ...ReportOption) WorkflowReport` | Returns a filtered copy of the report.                               |
+| `report.Diff(other WorkflowReport) DiffResult`         | Compares two reports (added/removed/changed steps + duration delta). |
+| `report.Duration() time.Duration`                      | Wall-clock duration spanned by all events (earliest → latest).       |
+| `report.Summary() string`                              | One-line human-readable summary.                                     |
+| `report.WriteJSON(w io.Writer) error`                  | Serialize report as JSON.                                            |
+| `report.WriteNDJSON(w io.Writer) error`                | Serialize events as NDJSON.                                          |
+| `report.WriteMermaid(w io.Writer) error`               | Mermaid diagram.                                                     |
+| `report.WritePlantUML(w io.Writer) error`              | PlantUML diagram.                                                    |
+| `report.WriteMermaidString() (string, error)`          | Mermaid diagram as string.                                           |
+| `report.WritePlantUMLString() (string, error)`         | PlantUML diagram as string.                                          |
+| `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
+
+### Package-Level Functions
+
+| Function                                                             | Description                                          |
+| -------------------------------------------------------------------- | ---------------------------------------------------- |
+| `auditlog.LoadReport(path string) (WorkflowReport, error)`           | Load a JSON report from a file.                      |
+| `auditlog.LoadReportFromReader(r io.Reader) (WorkflowReport, error)` | Load a JSON report from a reader.                    |
+| `auditlog.LoadReportFromBytes(b []byte) (WorkflowReport, error)`     | Load a JSON report from bytes.                       |
+| `auditlog.ReadEvents(r io.Reader) ([]Event, error)`                  | Read NDJSON events (inverse of `WriteEventsNDJSON`). |
+| `auditlog.ReplayEvents(events []Event) (WorkflowReport, error)`      | Reconstruct a report from a flat event stream.       |
 
 ## Config
 
@@ -186,7 +217,7 @@ Or use `flow.Name(step, "name")` when adding to the workflow.
 go get github.com/larsartmann/go-workflow-auditlog
 ```
 
-Requires Go 1.23+ and `github.com/Azure/go-workflow v0.1.13`.
+Requires Go 1.26+ and `github.com/Azure/go-workflow v0.1.13`.
 
 ## License
 

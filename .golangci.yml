@@ -2,12 +2,6 @@ version: "2"
 run:
   timeout: 5m
   go: 1.26.3
-  build-tags:
-    - goexperiment.arenas
-    - goexperiment.goroutineleakprofile
-    - goexperiment.jsonv2
-    - goexperiment.runtimesecret
-    - goexperiment.simd
   allow-parallel-runners: true
   allow-serial-runners: true
   issues-exit-code: 1
@@ -132,12 +126,22 @@ linters:
     depguard:
       rules:
         main:
+          list-mode: strict
+          files:
+            - "$all"
           allow:
             - $gostd
-            - $module
+            - github.com/Azure/go-workflow
+            - github.com/cenkalti/backoff/v4
+            - github.com/larsartmann/go-workflow-auditlog
     exhaustruct:
       exclude:
         - os/exec.Cmd
+        - github.com/Azure/go-workflow.StepConfig
+        - github.com/Azure/go-workflow.RetryOption
+        - github.com/larsartmann/go-workflow-auditlog.*
+    exhaustive:
+      default-signifies-exhaustive: true
     ginkgolinter:
       forbid-focus-container: true
       forbid-spec-pollution: true
@@ -159,6 +163,11 @@ linters:
           name: exported
         - disabled: true
           name: package-comments
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+          yaml: snake
     testifylint:
       disable:
         - go-require
@@ -169,6 +178,7 @@ linters:
         - err
         - ok
         - tt
+        - tc
         - fn
         - t
         - i
@@ -177,10 +187,38 @@ linters:
         - a
         - b
         - v
+        - w
+        - s
+        - r
+        - id
+        - f
+        - rs
       ignore-type-assert-ok: true
+    wrapcheck:
+      ignore-sigs:
+        - .Errorf(
+        - errors.New(
+        - errors.Unwrap(
+        - .Wrap(
+        - .Wrapf(
+        - .WithMessage(
+        - .WithMessagef(
+      ignore-package-regex:
+        - ^github.com/larsartmann/go-workflow-auditlog
   exclusions:
     generated: lax
     rules:
+      - path: example/
+        linters:
+          - forbidigo
+          - mnd
+          - cyclop
+          - err113
+          - exhaustruct
+          - varnamelen
+          - gochecknoglobals
+          - wrapcheck
+          - gosec
       - path: _test\.go
         linters:
           - exhaustruct
@@ -189,6 +227,11 @@ linters:
           - funlen
           - cyclop
           - goconst
+          - err113
+          - wrapcheck
+          - varnamelen
+          - mnd
+          - gosec
       - path: _test\.go
         text: unused
         linters:

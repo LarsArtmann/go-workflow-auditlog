@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -313,6 +314,34 @@ func TestReport_Validate_StepCountMismatch(t *testing.T) {
 	err := report.Validate()
 	if err == nil {
 		t.Fatal("expected validation error for step count mismatch")
+	}
+}
+
+// TestReport_Validate_StatusDrift confirms the status drift check actually
+// fires when a step's stored Status disagrees with its Error pointer. This
+// is a regression test for a prior bug where the check could never fail.
+func TestReport_Validate_StatusDrift(t *testing.T) {
+	t.Parallel()
+
+	errMsg := "boom"
+
+	report := auditlog.WorkflowReport{
+		EventCount: 1,
+		Events:     []auditlog.Event{{}},
+		StepCount:  1,
+		Steps: []auditlog.StepInfo{{
+			Status: auditlog.StepStatusPending, // non-terminal, but Error implies failure
+			Error:  &errMsg,
+		}},
+	}
+
+	err := report.Validate()
+	if err == nil {
+		t.Fatal("expected validation error for status drift")
+	}
+
+	if !strings.Contains(err.Error(), "does not match derived status") {
+		t.Errorf("expected error mentioning status mismatch, got %v", err)
 	}
 }
 
@@ -660,6 +689,28 @@ func TestReport_EmptyWorkflow(t *testing.T) {
 
 	if !report.WorkflowSucceeded {
 		t.Error("empty workflow should be considered succeeded")
+	}
+}
+
+// TestWorkflowSucceeded_PendingStepsIsFalse verifies that WorkflowSucceeded
+// is false when a report contains non-terminal steps. The aggregate is
+// recomputed through Filtered() → buildReportFromCore → finalizeDenormalized,
+// which previously returned true as long as no step had failed or canceled.
+func TestWorkflowSucceeded_PendingStepsIsFalse(t *testing.T) {
+	t.Parallel()
+
+	// Construct a report with a non-terminal step. WorkflowSucceeded is the
+	// zero value here, so we route it through Filtered() to recompute.
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "stuck"}, Status: auditlog.StepStatusRunning},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	if recomputed.WorkflowSucceeded {
+		t.Error("expected WorkflowSucceeded=false when steps are still running")
 	}
 }
 

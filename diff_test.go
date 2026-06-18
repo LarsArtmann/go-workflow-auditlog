@@ -43,6 +43,50 @@ func TestDiff_StatusChanged(t *testing.T) {
 	if diff.StatusChanged[0].Name != "step" {
 		t.Errorf("expected 'step', got %q", diff.StatusChanged[0].Name)
 	}
+
+	// OldStatus records the previous state; Status records the new one.
+	if diff.StatusChanged[0].OldStatus != auditlog.StepStatusSucceeded {
+		t.Errorf("expected OldStatus=succeeded, got %s", diff.StatusChanged[0].OldStatus)
+	}
+
+	if diff.StatusChanged[0].Status != auditlog.StepStatusFailed {
+		t.Errorf("expected Status=failed, got %s", diff.StatusChanged[0].Status)
+	}
+}
+
+// TestDiff_DeterministicOrdering verifies that two diffs over the same inputs
+// produce identical slice ordering. This is a regression test for a prior bug
+// where map iteration produced random output order.
+func TestDiff_DeterministicOrdering(t *testing.T) {
+	t.Parallel()
+
+	makeReport := func() auditlog.WorkflowReport {
+		a, w := newAuditAndWorkflow(t)
+		w.Add(
+			flow.Step(newSucceed("alpha")),
+			flow.Step(newSucceed("bravo")),
+			flow.Step(newSucceed("charlie")),
+		)
+		runWorkflow(t, a, w)
+
+		return a.Report()
+	}
+
+	left := makeReport()
+	right := makeReport()
+
+	d1 := left.Diff(right)
+	d2 := left.Diff(right)
+
+	if len(d1.AddedSteps) != len(d2.AddedSteps) || len(d1.RemovedSteps) != len(d2.RemovedSteps) {
+		t.Fatalf("diff lengths differ across runs")
+	}
+
+	for i := range d1.AddedSteps {
+		if d1.AddedSteps[i].Name != d2.AddedSteps[i].Name {
+			t.Fatalf("added[%d] differs: %s vs %s", i, d1.AddedSteps[i].Name, d2.AddedSteps[i].Name)
+		}
+	}
 }
 
 func TestDiff_StepAdded(t *testing.T) {

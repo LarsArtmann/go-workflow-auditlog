@@ -77,6 +77,25 @@ func TestReadEvents_InvalidInput(t *testing.T) {
 	}
 }
 
+// TestReadEvents_LineNumberInError verifies that the error message reports the
+// actual line number (counting blank lines), not the event count. This is a
+// regression test for a prior bug where blank lines were skipped in the count.
+func TestReadEvents_LineNumberInError(t *testing.T) {
+	t.Parallel()
+
+	// Two blank lines, then a malformed event on line 3.
+	input := "\n\n{bad json}\n"
+
+	_, err := auditlog.ReadEvents(strings.NewReader(input))
+	if err == nil {
+		t.Fatal("expected error for malformed input")
+	}
+
+	if !strings.Contains(err.Error(), "line 3") {
+		t.Errorf("expected error to mention 'line 3', got %v", err)
+	}
+}
+
 func TestReadEvents_SkipsBlankLines(t *testing.T) {
 	t.Parallel()
 

@@ -10,11 +10,13 @@ import (
 // LoadReport reads a JSON WorkflowReport from a file path.
 // This is the inverse of ExportToFile.
 func LoadReport(path string) (WorkflowReport, error) {
-	f, err := os.Open(path)
+	f, err := os.Open(path) //nolint:gosec // path is user-provided by design.
 	if err != nil {
 		return WorkflowReport{}, fmt.Errorf("open report %q: %w", path, err)
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	return LoadReportFromReader(f)
 }
