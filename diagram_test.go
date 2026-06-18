@@ -33,37 +33,13 @@ func TestMermaid_BasicDAG(t *testing.T) {
 
 	output := buf.String()
 
-	// Verify header.
-	if !strings.Contains(output, "flowchart TD") {
-		t.Error("expected 'flowchart TD' in output")
-	}
-
-	// Verify nodes exist.
-	if !strings.Contains(output, "fetch") {
-		t.Error("expected 'fetch' node in output")
-	}
-
-	if !strings.Contains(output, "transform") {
-		t.Error("expected 'transform' node in output")
-	}
-
-	if !strings.Contains(output, "save") {
-		t.Error("expected 'save' node in output")
-	}
-
-	// Verify edges (dependency arrows).
-	if !strings.Contains(output, "-->") {
-		t.Error("expected '-->' edge in output")
-	}
-
-	// Verify status class assignment.
-	if !strings.Contains(output, "classDef succeeded") {
-		t.Error("expected succeeded classDef in output")
-	}
-
-	if !strings.Contains(output, "succeeded") {
-		t.Error("expected succeeded class in output")
-	}
+	assertContains(t, output, "flowchart TD", "expected 'flowchart TD' in output")
+	assertContains(t, output, "fetch", "expected 'fetch' node in output")
+	assertContains(t, output, "transform", "expected 'transform' node in output")
+	assertContains(t, output, "save", "expected 'save' node in output")
+	assertContains(t, output, "-->", "expected '-->' edge in output")
+	assertContains(t, output, "classDef succeeded", "expected succeeded classDef in output")
+	assertContains(t, output, "succeeded", "expected succeeded class in output")
 }
 
 func TestMermaid_FailedStepRedClass(t *testing.T) {
@@ -87,13 +63,8 @@ func TestMermaid_FailedStepRedClass(t *testing.T) {
 
 	output := buf.String()
 
-	if !strings.Contains(output, "classDef failed") {
-		t.Error("expected failed classDef in output")
-	}
-
-	if !strings.Contains(output, "failed") {
-		t.Error("expected failed class assignment in output")
-	}
+	assertContains(t, output, "classDef failed", "expected failed classDef in output")
+	assertContains(t, output, "failed", "expected failed class assignment in output")
 }
 
 func TestMermaid_RetryIndicator(t *testing.T) {
@@ -101,7 +72,7 @@ func TestMermaid_RetryIndicator(t *testing.T) {
 
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("flaky", 2)
-	w.Add(flow.Step(step).Retry(retryOpts(5)))
+	addRetryStep(w, step, 5)
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
@@ -114,9 +85,7 @@ func TestMermaid_RetryIndicator(t *testing.T) {
 	output := buf.String()
 
 	// The retry count should appear in the label.
-	if !strings.Contains(output, "×3") {
-		t.Error("expected '×3' retry indicator in mermaid output")
-	}
+	assertContains(t, output, "×3", "expected '×3' retry indicator in mermaid output")
 }
 
 func TestMermaid_SpecialCharsSanitized(t *testing.T) {
@@ -155,9 +124,7 @@ func TestMermaid_EmptyReport(t *testing.T) {
 	}
 
 	output := buf.String()
-	if !strings.Contains(output, "flowchart TD") {
-		t.Error("expected header even for empty report")
-	}
+	assertContains(t, output, "flowchart TD", "expected header even for empty report")
 }
 
 func TestPlantUML_BasicDAG(t *testing.T) {
@@ -166,10 +133,7 @@ func TestPlantUML_BasicDAG(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	fetch := newSucceed("fetch")
 	save := newSucceed("save")
-	w.Add(
-		flow.Step(fetch),
-		flow.Step(save).DependsOn(fetch),
-	)
+	addDependentStep(w, fetch, save)
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
@@ -181,28 +145,11 @@ func TestPlantUML_BasicDAG(t *testing.T) {
 
 	output := buf.String()
 
-	// Verify PlantUML markers.
-	if !strings.Contains(output, "@startuml") {
-		t.Error("expected '@startuml' in output")
-	}
-
-	if !strings.Contains(output, "@enduml") {
-		t.Error("expected '@enduml' in output")
-	}
-
-	// Verify component declarations.
-	if !strings.Contains(output, "component") {
-		t.Error("expected 'component' in output")
-	}
-
-	// Verify nodes exist.
-	if !strings.Contains(output, "fetch") {
-		t.Error("expected 'fetch' in output")
-	}
-
-	if !strings.Contains(output, "save") {
-		t.Error("expected 'save' in output")
-	}
+	assertContains(t, output, "@startuml", "expected '@startuml' in output")
+	assertContains(t, output, "@enduml", "expected '@enduml' in output")
+	assertContains(t, output, "component", "expected 'component' in output")
+	assertContains(t, output, "fetch", "expected 'fetch' in output")
+	assertContains(t, output, "save", "expected 'save' in output")
 }
 
 func TestExportMermaid(t *testing.T) {
@@ -278,9 +225,7 @@ func TestWriteMermaidString(t *testing.T) {
 	// WriteMermaidString currently wraps nil errors; verify the output is usable.
 	_ = err
 
-	if !strings.Contains(output, "flowchart TD") {
-		t.Error("expected 'flowchart TD' in string output")
-	}
+	assertContains(t, output, "flowchart TD", "expected 'flowchart TD' in string output")
 }
 
 func TestMermaid_SkippedStepGrayClass(t *testing.T) {
@@ -301,9 +246,7 @@ func TestMermaid_SkippedStepGrayClass(t *testing.T) {
 
 	output := buf.String()
 
-	if !strings.Contains(output, "classDef skipped") {
-		t.Error("expected skipped classDef in output")
-	}
+	assertContains(t, output, "classDef skipped", "expected skipped classDef in output")
 }
 
 func TestPlantUML_NoMermaidClasses(t *testing.T) {
@@ -350,7 +293,5 @@ func TestMermaid_CanceledStep(t *testing.T) {
 
 	output := buf.String()
 
-	if !strings.Contains(output, "classDef canceled") {
-		t.Error("expected canceled classDef in output")
-	}
+	assertContains(t, output, "classDef canceled", "expected canceled classDef in output")
 }

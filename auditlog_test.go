@@ -2,6 +2,7 @@ package auditlog_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -88,6 +89,30 @@ func retryOpts(attempts uint64) func(*flow.RetryOption) {
 	}
 }
 
+// addRetryStep wires a step into the workflow with the given retry attempt count.
+// Centralizes the boilerplate of flow.Step(x).Retry(retryOpts(N)) so individual
+// tests don't have to repeat it.
+func addRetryStep(w *flow.Workflow, step flow.Steper, attempts uint64) {
+	w.Add(flow.Step(step).Retry(retryOpts(attempts)))
+}
+
+// addDependentStep wires parent and child steps into the workflow, where
+// child depends on parent. Centralizes the two-step dependency chain so tests
+// don't repeat the boilerplate.
+func addDependentStep(w *flow.Workflow, parent, child flow.Steper) {
+	w.Add(
+		flow.Step(parent),
+		flow.Step(child).DependsOn(parent),
+	)
+}
+
+// addParallelSteps wires two independent steps into the workflow as a
+// parallel pair. Centralizes the w.Add(flow.Step(x), flow.Step(y)) idiom
+// used by tests that need a 2-step setup with no dependency edge.
+func addParallelSteps(w *flow.Workflow, a, b flow.Steper) {
+	w.Add(flow.Step(a), flow.Step(b))
+}
+
 // --- Helpers ---
 
 func mustNew(t *testing.T, cfg auditlog.Config) *auditlog.Auditor {
@@ -143,7 +168,7 @@ func assertStepCount(t *testing.T, report auditlog.WorkflowReport, want int) {
 	t.Helper()
 
 	if report.StepCount != want {
-		t.Errorf("expected %d steps, got %d", want, report.StepCount)
+		t.Fatalf("expected %d steps, got %d", want, report.StepCount)
 	}
 }
 
@@ -184,6 +209,24 @@ func assertStatus(t *testing.T, s auditlog.StepInfo, want auditlog.StepStatus) {
 
 	if s.Status != want {
 		t.Errorf("expected status %s, got %s", want, s.Status)
+	}
+}
+
+// assertContains fails the test if substr is not present in output.
+func assertContains(t *testing.T, output, substr, message string) {
+	t.Helper()
+
+	if !strings.Contains(output, substr) {
+		t.Error(message)
+	}
+}
+
+// assertFirstStepName fails the test if the report's first step is not named want.
+func assertFirstStepName(t *testing.T, report auditlog.WorkflowReport, want string) {
+	t.Helper()
+
+	if report.Steps[0].Name != want {
+		t.Errorf("expected first step %q, got %q", want, report.Steps[0].Name)
 	}
 }
 
@@ -305,10 +348,7 @@ func TestDependencies_Tracked(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	fetch := newSucceed("fetch")
 	save := newSucceed("save")
-	w.Add(
-		flow.Step(fetch),
-		flow.Step(save).DependsOn(fetch),
-	)
+	addDependentStep(w, fetch, save)
 
 	runWorkflow(t, a, w)
 
@@ -331,9 +371,7 @@ func TestRetry_AttemptCount(t *testing.T) {
 
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("flaky", 2)
-	w.Add(
-		flow.Step(step).Retry(retryOpts(5)),
-	)
+	addRetryStep(w, step, 5)
 
 	runWorkflow(t, a, w)
 
@@ -361,9 +399,7 @@ func TestRetry_AllFail(t *testing.T) {
 
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("always-fail", 100)
-	w.Add(
-		flow.Step(step).Retry(retryOpts(3)),
-	)
+	addRetryStep(w, step, 3)
 
 	runWorkflow(t, a, w)
 
@@ -493,8 +529,14 @@ func TestExport_NDJSON(t *testing.T) {
 		t.Fatalf("ExportEventsToNDJSON error: %v", err)
 	}
 
-	if a.EventsCount() < 2 {
-		t.Errorf("expected at least 2 events, got %d", a.EventsCount())
+	assertEventsRecorded(t, a, 2)
+}
+
+func assertEventsRecorded(t *testing.T, a *auditlog.Auditor, want int) {
+	t.Helper()
+
+	if got := a.EventsCount(); got < want {
+		t.Errorf("expected at least %d events, got %d", want, got)
 	}
 }
 
@@ -520,10 +562,7 @@ func TestFailedSteps(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	ok := newSucceed("ok")
 	bad := newFail("bad", "err")
-	w.Add(
-		flow.Step(ok),
-		flow.Step(bad),
-	)
+	addParallelSteps(w, ok, bad)
 	runWorkflow(t, a, w)
 
 	report := a.Report()
@@ -543,9 +582,7 @@ func TestRetriedSteps(t *testing.T) {
 
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("flaky", 1)
-	w.Add(
-		flow.Step(step).Retry(retryOpts(5)),
-	)
+	addRetryStep(w, step, 5)
 	runWorkflow(t, a, w)
 
 	report := a.Report()

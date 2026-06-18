@@ -1,8 +1,6 @@
 package auditlog
 
 import (
-	"cmp"
-	"slices"
 	"time"
 
 	flow "github.com/Azure/go-workflow"
@@ -36,14 +34,10 @@ func (r *Recorder) buildStepsLocked() []StepInfo {
 
 	for step, rec := range r.steps {
 		deps := append([]StepRef(nil), rec.dependencies...)
-		slices.SortFunc(deps, func(a, b StepRef) int {
-			return cmp.Compare(a.Name, b.Name)
-		})
+		sortByName(deps)
 
 		stepDeps := dependents[step]
-		slices.SortFunc(stepDeps, func(a, b StepRef) int {
-			return cmp.Compare(a.Name, b.Name)
-		})
+		sortByName(stepDeps)
 
 		info := stepRecordToInfo(rec)
 		info.Dependencies = deps
@@ -52,9 +46,7 @@ func (r *Recorder) buildStepsLocked() []StepInfo {
 	}
 
 	// Sort by name for deterministic output.
-	slices.SortFunc(steps, func(a, b StepInfo) int {
-		return cmp.Compare(a.Name, b.Name)
-	})
+	sortStepsByName(steps)
 
 	return steps
 }

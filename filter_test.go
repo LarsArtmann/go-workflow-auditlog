@@ -14,17 +14,12 @@ func TestFiltered_ByStepName(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	s1 := newSucceed("keep-me")
 	s2 := newSucceed("filter-out")
-	w.Add(flow.Step(s1), flow.Step(s2))
+	addParallelSteps(w, s1, s2)
 	runWorkflow(t, a, w)
 
 	filtered := a.ReportFiltered(auditlog.WithStepsByName("keep-me"))
-	if filtered.StepCount != 1 {
-		t.Fatalf("expected 1 step, got %d", filtered.StepCount)
-	}
-
-	if filtered.Steps[0].Name != "keep-me" {
-		t.Errorf("expected 'keep-me', got %q", filtered.Steps[0].Name)
-	}
+	assertStepCount(t, filtered, 1)
+	assertFirstStepName(t, filtered, "keep-me")
 }
 
 func TestFiltered_ByStatus(t *testing.T) {
@@ -33,17 +28,12 @@ func TestFiltered_ByStatus(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	ok := newSucceed("ok")
 	bad := newFail("bad", "err")
-	w.Add(flow.Step(ok), flow.Step(bad))
+	addParallelSteps(w, ok, bad)
 	runWorkflow(t, a, w)
 
 	filtered := a.ReportFiltered(auditlog.WithStepsByStatus(auditlog.StepStatusFailed))
-	if filtered.StepCount != 1 {
-		t.Fatalf("expected 1 step, got %d", filtered.StepCount)
-	}
-
-	if filtered.Steps[0].Name != "bad" {
-		t.Errorf("expected 'bad', got %q", filtered.Steps[0].Name)
-	}
+	assertStepCount(t, filtered, 1)
+	assertFirstStepName(t, filtered, "bad")
 }
 
 func TestFiltered_ByEventType(t *testing.T) {
@@ -92,7 +82,7 @@ func TestFiltered_NoOptions(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	s1 := newSucceed("s1")
 	s2 := newSucceed("s2")
-	w.Add(flow.Step(s1), flow.Step(s2))
+	addParallelSteps(w, s1, s2)
 	runWorkflow(t, a, w)
 
 	original := a.Report()
@@ -109,15 +99,13 @@ func TestFiltered_MultipleStatuses(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	ok := newSucceed("ok")
 	bad := newFail("bad", "err")
-	w.Add(flow.Step(ok), flow.Step(bad))
+	addParallelSteps(w, ok, bad)
 	runWorkflow(t, a, w)
 
 	filtered := a.ReportFiltered(
 		auditlog.WithStepsByStatus(auditlog.StepStatusSucceeded, auditlog.StepStatusFailed),
 	)
-	if filtered.StepCount != 2 {
-		t.Fatalf("expected 2 steps, got %d", filtered.StepCount)
-	}
+	assertStepCount(t, filtered, 2)
 }
 
 func TestFiltered_EventsFilteredToSteps(t *testing.T) {
@@ -126,7 +114,7 @@ func TestFiltered_EventsFilteredToSteps(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	s1 := newSucceed("keep")
 	s2 := newSucceed("drop")
-	w.Add(flow.Step(s1), flow.Step(s2))
+	addParallelSteps(w, s1, s2)
 	runWorkflow(t, a, w)
 
 	filtered := a.ReportFiltered(auditlog.WithStepsByName("keep"))
@@ -143,15 +131,13 @@ func TestFiltered_RetriesFiltered(t *testing.T) {
 
 	a, w := newAuditAndWorkflow(t)
 	step := newFlaky("flaky", 2)
-	w.Add(flow.Step(step).Retry(retryOpts(5)))
+	addRetryStep(w, step, 5)
 	runWorkflow(t, a, w)
 
 	// Filter to only succeeded steps — the flaky step should be included
 	// because it eventually succeeded.
 	filtered := a.ReportFiltered(auditlog.WithStepsByStatus(auditlog.StepStatusSucceeded))
-	if filtered.StepCount != 1 {
-		t.Fatalf("expected 1 succeeded step, got %d", filtered.StepCount)
-	}
+	assertStepCount(t, filtered, 1)
 }
 
 func TestFiltered_AggregatesRecomputed(t *testing.T) {
@@ -160,7 +146,7 @@ func TestFiltered_AggregatesRecomputed(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	ok := newSucceed("ok")
 	bad := newFail("bad", "err")
-	w.Add(flow.Step(ok), flow.Step(bad))
+	addParallelSteps(w, ok, bad)
 	runWorkflow(t, a, w)
 
 	full := a.Report()

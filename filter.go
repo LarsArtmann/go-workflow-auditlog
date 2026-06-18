@@ -1,8 +1,6 @@
 package auditlog
 
 import (
-	"cmp"
-	"slices"
 	"time"
 )
 
@@ -98,9 +96,7 @@ func (r WorkflowReport) Filtered(opts ...ReportOption) WorkflowReport {
 		filteredEvents = filterEventsToSteps(filteredEvents, filteredSteps)
 	}
 
-	slices.SortFunc(filteredSteps, func(a, b StepInfo) int {
-		return cmp.Compare(a.Name, b.Name)
-	})
+	sortStepsByName(filteredSteps)
 
 	filtered := buildReportFromCore(
 		r.Version,

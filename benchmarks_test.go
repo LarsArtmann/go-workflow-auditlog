@@ -149,7 +149,7 @@ func BenchmarkRetryWithAudit(b *testing.B) {
 
 		w := &flow.Workflow{}
 		step := &flakyStep{name: "bench-flaky", failUntil: 2}
-		w.Add(flow.Step(step).Retry(retryOpts(5)))
+		addRetryStep(w, step, 5)
 		a.Attach(w)
 		b.StartTimer()
 

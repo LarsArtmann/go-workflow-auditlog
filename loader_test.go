@@ -14,7 +14,7 @@ func TestLoadReport_RoundTrip(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	s1 := newSucceed("load-step-1")
 	s2 := newFail("load-step-2", "err")
-	w.Add(flow.Step(s1), flow.Step(s2))
+	addParallelSteps(w, s1, s2)
 	runWorkflow(t, a, w)
 
 	// Export to JSON.
@@ -35,9 +35,7 @@ func TestLoadReport_RoundTrip(t *testing.T) {
 		t.Errorf("expected WorkflowID 'test', got %q", loaded.WorkflowID)
 	}
 
-	if loaded.StepCount != 2 {
-		t.Errorf("expected 2 steps, got %d", loaded.StepCount)
-	}
+	assertStepCount(t, loaded, 2)
 
 	if loaded.FailedCount != 1 {
 		t.Errorf("expected 1 failed, got %d", loaded.FailedCount)
@@ -64,9 +62,7 @@ func TestLoadReport_FromFile(t *testing.T) {
 		t.Fatalf("LoadReport: %v", err)
 	}
 
-	if loaded.StepCount != 1 {
-		t.Errorf("expected 1 step, got %d", loaded.StepCount)
-	}
+	assertStepCount(t, loaded, 1)
 }
 
 func TestLoadReport_FromReader(t *testing.T) {
@@ -86,9 +82,7 @@ func TestLoadReport_FromReader(t *testing.T) {
 		t.Fatalf("LoadReportFromReader: %v", err)
 	}
 
-	if loaded.StepCount != 1 {
-		t.Errorf("expected 1 step, got %d", loaded.StepCount)
-	}
+	assertStepCount(t, loaded, 1)
 }
 
 func TestLoadReport_InvalidJSON(t *testing.T) {

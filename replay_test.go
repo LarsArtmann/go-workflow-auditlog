@@ -15,7 +15,7 @@ func TestReadEvents_RoundTrip(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	s1 := newSucceed("rt-step-1")
 	s2 := newFail("rt-step-2", "boom")
-	w.Add(flow.Step(s1), flow.Step(s2))
+	addParallelSteps(w, s1, s2)
 	runWorkflow(t, a, w)
 
 	// Export events as NDJSON.
@@ -186,10 +186,7 @@ func TestReplayEvents_FullRoundTrip(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	s1 := newSucceed("rt-1")
 	s2 := newFail("rt-2", "err")
-	w.Add(
-		flow.Step(s1),
-		flow.Step(s2).DependsOn(s1),
-	)
+	addDependentStep(w, s1, s2)
 	runWorkflow(t, a, w)
 
 	// Export NDJSON.

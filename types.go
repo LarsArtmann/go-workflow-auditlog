@@ -134,6 +134,14 @@ func sortByName(refs []StepRef) {
 	})
 }
 
+// sortStepsByName sorts a slice of StepInfo in place by Name, in ascending
+// order. Used to produce deterministic step ordering across runs.
+func sortStepsByName(steps []StepInfo) {
+	slices.SortFunc(steps, func(a, b StepInfo) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+}
+
 // fromFlowStatus converts a [flow.StepStatus] string to our StepStatus enum.
 // go-workflow uses capitalized strings ("Succeeded", "Failed", etc.) while we
 // use lowercase for JSON snake_case consistency.

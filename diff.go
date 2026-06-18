@@ -48,33 +48,30 @@ func (r WorkflowReport) Diff(other WorkflowReport) DiffResult {
 	for name, theirStep := range theirs {
 		if ourStep, ok := ours[name]; ok {
 			if ourStep.Status != theirStep.Status {
-				result.StatusChanged = append(result.StatusChanged, StepDiff{
-					Name:     name,
-					Status:   theirStep.Status,
-					Duration: theirStep.Duration(),
-				})
+				result.StatusChanged = append(result.StatusChanged, diffStep(name, theirStep))
 			}
 		} else {
-			result.AddedSteps = append(result.AddedSteps, StepDiff{
-				Name:     name,
-				Status:   theirStep.Status,
-				Duration: theirStep.Duration(),
-			})
+			result.AddedSteps = append(result.AddedSteps, diffStep(name, theirStep))
 		}
 	}
 
 	// Find removed steps.
 	for name, ourStep := range ours {
 		if _, ok := theirs[name]; !ok {
-			result.RemovedSteps = append(result.RemovedSteps, StepDiff{
-				Name:     name,
-				Status:   ourStep.Status,
-				Duration: ourStep.Duration(),
-			})
+			result.RemovedSteps = append(result.RemovedSteps, diffStep(name, ourStep))
 		}
 	}
 
 	return result
+}
+
+// diffStep builds a StepDiff entry from a step name and StepInfo.
+func diffStep(name string, step StepInfo) StepDiff {
+	return StepDiff{
+		Name:     name,
+		Status:   step.Status,
+		Duration: step.Duration(),
+	}
 }
 
 // Duration returns the total wall-clock duration spanned by all events,

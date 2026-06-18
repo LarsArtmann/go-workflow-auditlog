@@ -223,10 +223,7 @@ func TestReport_SkippedSteps(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	upstream := newFail("failing", "fail")
 	downstream := newSucceed("skipped")
-	w.Add(
-		flow.Step(upstream),
-		flow.Step(downstream).DependsOn(upstream),
-	)
+	addDependentStep(w, upstream, downstream)
 	runWorkflow(t, a, w)
 
 	report := a.Report()
@@ -410,9 +407,7 @@ func TestNew_InitialEventCapacity(t *testing.T) {
 	w.Add(flow.Step(s))
 	runWorkflow(t, a, w)
 
-	if a.EventsCount() < 2 {
-		t.Errorf("expected events, got %d", a.EventsCount())
-	}
+	assertEventsRecorded(t, a, 2)
 }
 
 // --- Nil safety tests ---
@@ -565,10 +560,7 @@ func TestReport_JSONRoundTrip(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	s1 := newSucceed("rt-1")
 	s2 := newFail("rt-2", "fail")
-	w.Add(
-		flow.Step(s1),
-		flow.Step(s2).DependsOn(s1),
-	)
+	addDependentStep(w, s1, s2)
 	runWorkflow(t, a, w)
 
 	var buf bytes.Buffer
