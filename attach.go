@@ -1,9 +1,7 @@
 package auditlog
 
 import (
-	"cmp"
 	"context"
-	"slices"
 	"time"
 
 	flow "github.com/Azure/go-workflow"
@@ -121,8 +119,6 @@ func (r *Recorder) snapshotStepLocked(w *flow.Workflow, step flow.Steper) {
 		deps = append(deps, StepRef{Name: flow.String(up), StepType: stepTypeName(up)})
 	}
 
-	slices.SortFunc(deps, func(a, b StepRef) int {
-		return cmp.Compare(a.Name, b.Name)
-	})
+	sortByName(deps)
 	rec.dependencies = deps
 }

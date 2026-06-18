@@ -1,5 +1,10 @@
 package auditlog
 
+import (
+	"cmp"
+	"slices"
+)
+
 // SchemaVersion is the current report schema version.
 const SchemaVersion = "0.1.0"
 
@@ -119,6 +124,14 @@ func (s StepStatus) Icon() string {
 type StepRef struct {
 	Name     string `json:"step_name"`
 	StepType string `json:"step_type,omitempty"`
+}
+
+// sortByName sorts a slice of StepRef in place by Name, in ascending order.
+// Used to give Dependencies and Dependents deterministic output across runs.
+func sortByName(refs []StepRef) {
+	slices.SortFunc(refs, func(a, b StepRef) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
 }
 
 // fromFlowStatus converts a [flow.StepStatus] string to our StepStatus enum.

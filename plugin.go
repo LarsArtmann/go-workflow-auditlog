@@ -151,6 +151,26 @@ func (a *Auditor) ExportEventsToNDJSON(path string) error {
 	return writeToFile(path, a.WriteEventsNDJSON)
 }
 
+// WriteMermaid writes the step DAG as a Mermaid diagram to the writer.
+func (a *Auditor) WriteMermaid(writer io.Writer) error {
+	return a.Report().WriteMermaid(writer)
+}
+
+// WritePlantUML writes the step DAG as a PlantUML diagram to the writer.
+func (a *Auditor) WritePlantUML(writer io.Writer) error {
+	return a.Report().WritePlantUML(writer)
+}
+
+// ExportMermaid writes the step DAG as Mermaid to path.
+func (a *Auditor) ExportMermaid(path string) error {
+	return writeToFile(path, a.WriteMermaid)
+}
+
+// ExportPlantUML writes the step DAG as PlantUML to path.
+func (a *Auditor) ExportPlantUML(path string) error {
+	return writeToFile(path, a.WritePlantUML)
+}
+
 // writeToFile is a helper that creates a file, calls the writer function, and
 // properly closes the file, returning the write error if any.
 func writeToFile(path string, write func(io.Writer) error) error {
