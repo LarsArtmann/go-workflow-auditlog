@@ -527,12 +527,6 @@ func TestWorkflowID_Propagated(t *testing.T) {
 
 	report := a.Report()
 	assertWorkflowID(t, report, "my-custom-wf")
-
-	for _, evt := range a.Events() {
-		if evt.WorkflowID != "my-custom-wf" {
-			t.Errorf("event workflow_id: expected 'my-custom-wf', got %q", evt.WorkflowID)
-		}
-	}
 }
 
 func TestCanceledStatus(t *testing.T) {

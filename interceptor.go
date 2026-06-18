@@ -1,8 +1,8 @@
 package auditlog
 
 import (
-	"context"
 	"cmp"
+	"context"
 	"slices"
 	"time"
 

@@ -6,17 +6,17 @@ import "time"
 type StepInfo struct {
 	StepRef
 
-	Status       StepStatus  `json:"status"`
-	AttemptCount int         `json:"attempt_count"`
-	MaxAttempts  int         `json:"max_attempts,omitempty"`
-	StartedAt    *time.Time  `json:"started_at,omitempty"`
-	FinishedAt   *time.Time  `json:"finished_at,omitempty"`
-	DurationMs   *float64    `json:"duration_ms,omitempty"`
-	Dependencies []StepRef   `json:"dependencies,omitempty"`
-	Dependents   []StepRef   `json:"dependents,omitempty"`
-	Error        *string     `json:"error,omitempty"`
-	HasRetry     bool        `json:"has_retry"`
-	HasTimeout   bool        `json:"has_timeout"`
+	Status       StepStatus `json:"status"`
+	AttemptCount int        `json:"attempt_count"`
+	MaxAttempts  int        `json:"max_attempts,omitempty"`
+	StartedAt    *time.Time `json:"started_at,omitempty"`
+	FinishedAt   *time.Time `json:"finished_at,omitempty"`
+	DurationMs   *float64   `json:"duration_ms,omitempty"`
+	Dependencies []StepRef  `json:"dependencies,omitempty"`
+	Dependents   []StepRef  `json:"dependents,omitempty"`
+	Error        *string    `json:"error,omitempty"`
+	HasRetry     bool       `json:"has_retry"`
+	HasTimeout   bool       `json:"has_timeout"`
 }
 
 // HasError returns true if the step recorded an error.
