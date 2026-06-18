@@ -6,6 +6,11 @@ import "time"
 type StepInfo struct {
 	StepRef
 
+	// StepID is a 1-based, unique identifier assigned when the step is first
+	// observed. It disambiguates steps that share the same Name (which can
+	// happen when two step types produce identical String() output). Stable
+	// within a single report/run; not guaranteed stable across runs.
+	StepID       int        `json:"step_id,omitempty"`
 	Status       StepStatus `json:"status"`
 	AttemptCount int        `json:"attempt_count"`
 	MaxAttempts  int        `json:"max_attempts,omitempty"`

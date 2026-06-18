@@ -101,6 +101,7 @@ func (r WorkflowReport) Filtered(opts ...ReportOption) WorkflowReport {
 	filtered := buildReportFromCore(
 		r.Version,
 		r.WorkflowID,
+		r.RunID,
 		r.ExportedAt, // preserve original export time
 		r.DroppedEventCount,
 		filteredEvents,

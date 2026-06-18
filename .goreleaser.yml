@@ -1,0 +1,81 @@
+# goreleaser config for go-workflow-auditlog.
+#
+# This is a library, not a service, so the primary release artifact is the
+# GitHub Release with auto-generated, grouped changelog notes. We also build
+# the demo binary (go run ./example) cross-platform so users can try the
+# library's output without writing code first.
+#
+# Usage:
+#   goreleaser release --clean          # full release (run by CI on tag push)
+#   goreleaser release --snapshot --clean # local dry-run, no publish
+#   goreleaser check                     # validate this config
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go vet ./...
+    - go test -race ./...
+
+builds:
+  - id: demo
+    main: ./example
+    binary: workflow-auditlog-demo
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+archives:
+  - id: default
+    builds: [demo]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_
+      {{- title .Os }}_{{ .Arch }}
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-dev"
+
+release:
+  draft: false
+  # Mark v0.x releases as pre-release automatically (library is pre-1.0).
+  prerelease: auto
+  make_latest: true
+  name_template: "{{ .Tag }}"
+
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: "New Features"
+      regexp: '^.*feat[(\w)]*!?:.*$'
+      order: 0
+    - title: "Bug Fixes"
+      regexp: '^.*fix[(\w)]*!?:.*$'
+      order: 1
+    - title: "Documentation"
+      regexp: '^.*docs[(\w)]*!?:.*$'
+      order: 2
+    - title: "Refactor"
+      regexp: '^.*refactor[(\w)]*!?:.*$'
+      order: 3
+    - title: "Other"
+      order: 999
+  filters:
+    exclude:
+      - "^Merge"
+      - "^chore:"
+      - "^style:"

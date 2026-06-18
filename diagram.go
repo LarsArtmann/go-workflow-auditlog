@@ -244,3 +244,51 @@ func (plantumlFormatter) ClassAssign(_, _ string) string {
 	// PlantUML doesn't support Mermaid-style class assignment.
 	return ""
 }
+
+// --- Graphviz DOT formatter ---
+
+type dotFormatter struct{}
+
+func (dotFormatter) Header() string {
+	return `digraph workflow {
+    rankdir=TB;
+    node [shape=box, style="rounded,filled", fontname="sans-serif", fillcolor="#e8a838", fontcolor="#14110d"];
+    edge [color="#9a8d78"];`
+}
+
+func (dotFormatter) Footer() string { return "}" }
+
+func (dotFormatter) NodeID(name string) string {
+	return sanitizeDiagramID(name)
+}
+
+func (dotFormatter) NodeDecl(id, label string) string {
+	return fmt.Sprintf(`%s [label="%s"]`, id, dotLabel(label))
+}
+
+func (dotFormatter) EdgeDecl(fromID, toID string) string {
+	return fmt.Sprintf("%s -> %s", fromID, toID)
+}
+
+func (dotFormatter) ClassAssign(id, className string) string {
+	if color, ok := dotStatusColors[className]; ok {
+		return fmt.Sprintf(`%s [fillcolor="%s", fontcolor="#fff"]`, id, color)
+	}
+
+	return ""
+}
+
+// dotLabel escapes characters that break DOT quoted labels.
+func dotLabel(label string) string {
+	return strings.ReplaceAll(label, `"`, "'")
+}
+
+// dotStatusColors maps the statusClass names to Graphviz fill colors.
+//
+//nolint:gochecknoglobals // Lookup table, treated as immutable after init.
+var dotStatusColors = map[string]string{
+	"succeeded": "#2d5a2d",
+	"failed":    "#8b2d2d",
+	"skipped":   "#4a4a4a",
+	"canceled":  "#5a3d2d",
+}

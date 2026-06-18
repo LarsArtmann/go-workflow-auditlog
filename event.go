@@ -6,6 +6,7 @@ import "time"
 type Event struct {
 	StepRef
 
+	RunID      string     `json:"run_id,omitempty"`
 	Sequence   int        `json:"sequence"`
 	Timestamp  time.Time  `json:"timestamp"`
 	EventType  EventType  `json:"event_type"`

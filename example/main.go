@@ -17,6 +17,9 @@ import (
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
+// version is set at build time via -ldflags "-X main.version=..." (goreleaser).
+var version = "dev"
+
 // --- Domain steps ---
 
 type FetchStep struct {
@@ -300,6 +303,7 @@ func main() {
 
 	// Run the workflow.
 	fmt.Println("━━━ Running data pipeline workflow ━━━")
+	fmt.Printf("━━━ demo version: %s | run id: %s ━━━\n", version, audit.RunID())
 
 	start := time.Now()
 	runErr := w.Do(ctx)

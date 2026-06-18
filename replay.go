@@ -36,31 +36,35 @@ func ReplayEvents(events []Event) (WorkflowReport, error) {
 		return WorkflowReport{}, ErrReplayNoEvents
 	}
 
+	stepInfos := replayStepsFromEvents(events)
+
+	report := buildReportFromCore(
+		SchemaVersion,
+		"",              // workflowID not available from events alone
+		events[0].RunID, // runID is stamped on every event during capture
+		time.Now(),
+		0, // no dropped events in replay
+		events,
+		stepInfos,
+	)
+	report.Reconstructed = true
+
+	err := report.Validate()
+	if err != nil {
+		return report, fmt.Errorf("replayed report failed validation: %w", err)
+	}
+
+	return report, nil
+}
+
+// replayStepsFromEvents folds a flat event stream into sorted StepInfo records
+// with stable 1-based StepIDs.
+func replayStepsFromEvents(events []Event) []StepInfo {
 	steps := make(map[string]*replayStep)
 
 	for _, evt := range events {
 		step := getOrCreateReplayStep(steps, evt.Name, evt.StepType)
-
-		switch {
-		case evt.IsAttemptStart():
-			if step.startedAt == nil {
-				started := evt.Timestamp
-				step.startedAt = &started
-			}
-
-			step.attemptCount = max(step.attemptCount, evt.Attempt)
-
-		case evt.IsAttemptEnd():
-			finished := evt.Timestamp
-			step.finishedAt = &finished
-			step.durationMs = evt.DurationMs
-			step.status = evt.Status
-
-			if evt.Error != nil {
-				errStr := *evt.Error
-				step.attemptErr = &errStr
-			}
-		}
+		replayApplyEvent(step, evt)
 	}
 
 	stepInfos := make([]StepInfo, 0, len(steps))
@@ -76,22 +80,38 @@ func ReplayEvents(events []Event) (WorkflowReport, error) {
 		})
 	}
 
-	report := buildReportFromCore(
-		SchemaVersion,
-		"", // workflowID not available from events alone
-		time.Now(),
-		0, // no dropped events in replay
-		events,
-		stepInfos,
-	)
-	report.Reconstructed = true
+	// Sort by name for deterministic output, then assign stable 1-based IDs.
+	sortStepsByName(stepInfos)
 
-	err := report.Validate()
-	if err != nil {
-		return report, fmt.Errorf("replayed report failed validation: %w", err)
+	for i := range stepInfos {
+		stepInfos[i].StepID = i + 1
 	}
 
-	return report, nil
+	return stepInfos
+}
+
+// replayApplyEvent updates a replayStep accumulator from a single event.
+func replayApplyEvent(step *replayStep, evt Event) {
+	switch {
+	case evt.IsAttemptStart():
+		if step.startedAt == nil {
+			started := evt.Timestamp
+			step.startedAt = &started
+		}
+
+		step.attemptCount = max(step.attemptCount, evt.Attempt)
+
+	case evt.IsAttemptEnd():
+		finished := evt.Timestamp
+		step.finishedAt = &finished
+		step.durationMs = evt.DurationMs
+		step.status = evt.Status
+
+		if evt.Error != nil {
+			errStr := *evt.Error
+			step.attemptErr = &errStr
+		}
+	}
 }
 
 func getOrCreateReplayStep(steps map[string]*replayStep, name, stepType string) *replayStep {

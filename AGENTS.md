@@ -25,25 +25,28 @@ Single-package library (`auditlog`) with these source files:
 
 ```
 doc.go             — Package doc comment
-types.go           — Domain enums: EventType, Phase, StepStatus, StepRef, fromFlowStatus
-event.go           — Event type (embeds StepRef) + convenience methods
-step.go            — StepInfo type (embeds StepRef) + methods (HasError, DeriveStatus)
-plugin.go          — Public API: New(), Attach(), Snapshot(), Report(), Export*(), Config, Auditor
-recorder.go        — Core state machine: event capture, step records, attempt tracking
+types.go           — Domain enums: EventType, Phase, StepStatus, StepRef, fromFlowStatus, SchemaVersion
+event.go           — Event type (embeds StepRef, carries RunID) + convenience methods
+step.go            — StepInfo type (embeds StepRef, carries StepID) + methods (HasError, DeriveStatus)
+plugin.go          — Public API: New(), Attach(), Snapshot(), Report(), Export*(), Config, Auditor, RunID()
+recorder.go        — Core state machine: event capture, step records, attempt tracking, RunID + StepID counters
+runid.go           — newRunID(): 128-bit crypto-random hex run identifier
 attach.go          — Attach/Snapshot logic: callback injection + post-run DAG capture (incl. sub-workflows)
-report.go          — WorkflowReport type + Validate() + query methods (StepByName, EventsBy*, *Steps) + WriteJSON
+report.go          — WorkflowReport type (carries RunID) + Validate() + sentinel errors + query methods + WriteJSON
 report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates (WorkflowSucceeded)
 filter.go          — Report filtering (Filtered, ReportOption, WithStepsByStatus, etc.)
 diff.go            — Diff API: DiffResult/StepDiff, Diff() between reports, Duration() wall-clock, Summary()
+index.go           — ReportIndex: opt-in O(1) lookup maps over a report
 loader.go          — LoadReport / LoadReportFromReader / LoadReportFromBytes
 export.go          — NDJSON writer (writeEventsNDJSON internal helper)
 ndjson.go          — ReadEvents NDJSON reader (sentinel errors)
-replay.go          — ReplayEvents: reconstruct Report from event stream
-filter.go          — Report filtering (Filtered, ReportOption, WithStepsByStatus, etc.)
-diagram.go         — Shared diagram engine: diagramFormatter interface + mermaid/plantuml formatters
+replay.go          — ReplayEvents: reconstruct Report from event stream (preserves RunID + assigns StepIDs)
+diagram.go         — Shared diagram engine: diagramFormatter interface + mermaid/plantuml/dot formatters
 mermaid.go         — Mermaid flowchart export (delegates to writeDiagram)
 plantuml.go        — PlantUML component diagram export (delegates to writeDiagram)
-example/           — Data pipeline demo (fetch → validate → transform → save + retry)
+graphviz.go        — Graphviz DOT digraph export (delegates to writeDiagram)
+example/           — Data pipeline demo (fetch → validate → transform → save + retry); version ldflags
+.goreleaser.yml    — Automated GitHub releases with grouped changelog + demo binary
 ```
 
 ### Data Flow
@@ -57,10 +60,13 @@ example/           — Data pipeline demo (fetch → validate → transform → 
 
 ### Concurrency Model
 
-- **Single `sync.RWMutex` (`mu`)** protects all mutable state: `events`, `steps`, `stepOrder`.
+- **Single `sync.RWMutex` (`mu`)** protects all mutable state: `events`, `steps`, `stepCounter`.
 - `sequence` is `atomic.Int64` — no mutex needed for the counter.
+- `stepCounter` (for `StepID`) is a plain int guarded by `mu` (assigned under the write lock).
 - Each callback acquires `mu` once, performs all mutations, then releases.
-- `onEvent` callback is always called outside the lock to avoid blocking.
+- `onEvent` callback is always called outside the lock to avoid blocking. **It fires
+  concurrently** from parallel step goroutines — consumers must be goroutine-safe,
+  and delivery order is not guaranteed to match event Sequence (sort if needed).
 - `BuildReport()` uses `mu.RLock()` for reading.
 
 ---

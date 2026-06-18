@@ -18,6 +18,7 @@ func (r *Recorder) BuildReport() WorkflowReport {
 	return buildReportFromCore(
 		SchemaVersion,
 		r.workflowID,
+		r.runID,
 		time.Now(),
 		r.droppedEvents.Load(),
 		events,
@@ -80,6 +81,7 @@ func (r *Recorder) buildDependentsMapLocked() map[flow.Steper][]StepRef {
 func stepRecordToInfo(rec *stepRecord) StepInfo {
 	return StepInfo{
 		StepRef:      rec.StepRef,
+		StepID:       rec.stepID,
 		Status:       rec.status,
 		AttemptCount: rec.attemptCount,
 		MaxAttempts:  rec.maxAttempts,
@@ -95,7 +97,7 @@ func stepRecordToInfo(rec *stepRecord) StepInfo {
 // buildReportFromCore assembles a WorkflowReport from core data, deriving all
 // denormalized aggregate fields. This is the single construction path.
 func buildReportFromCore(
-	version, workflowID string,
+	version, workflowID, runID string,
 	exportedAt time.Time,
 	droppedEventCount int64,
 	events []Event,
@@ -104,6 +106,7 @@ func buildReportFromCore(
 	report := WorkflowReport{
 		Version:           version,
 		WorkflowID:        workflowID,
+		RunID:             runID,
 		ExportedAt:        exportedAt,
 		DroppedEventCount: droppedEventCount,
 		Events:            events,

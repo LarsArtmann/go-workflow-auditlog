@@ -3,6 +3,7 @@ package auditlog_test
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"os"
@@ -300,6 +301,10 @@ func TestReport_Validate_EventCountMismatch(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected validation error for event count mismatch")
 	}
+
+	if !errors.Is(err, auditlog.ErrEventCountMismatch) {
+		t.Errorf("expected error to wrap auditlog.ErrEventCountMismatch, got: %v", err)
+	}
 }
 
 func TestReport_Validate_StepCountMismatch(t *testing.T) {
@@ -313,6 +318,10 @@ func TestReport_Validate_StepCountMismatch(t *testing.T) {
 	err := report.Validate()
 	if err == nil {
 		t.Fatal("expected validation error for step count mismatch")
+	}
+
+	if !errors.Is(err, auditlog.ErrStepCountMismatch) {
+		t.Errorf("expected error to wrap auditlog.ErrStepCountMismatch, got: %v", err)
 	}
 }
 
@@ -337,6 +346,10 @@ func TestReport_Validate_StatusDrift(t *testing.T) {
 	err := report.Validate()
 	if err == nil {
 		t.Fatal("expected validation error for status drift")
+	}
+
+	if !errors.Is(err, auditlog.ErrStatusDrift) {
+		t.Errorf("expected error to wrap auditlog.ErrStatusDrift, got: %v", err)
 	}
 
 	assertContains(t, err.Error(), "does not match derived status",
@@ -554,6 +567,138 @@ func TestWorkflowID_Propagated(t *testing.T) {
 
 	report := a.Report()
 	assertWorkflowID(t, report, "my-custom-wf")
+}
+
+// TestRunID_DefaultGenerated confirms that when no RunID is supplied, the
+// auditor generates a non-empty, hex-formatted run ID and stamps it on every
+// captured event and the final report.
+func TestRunID_DefaultGenerated(t *testing.T) {
+	t.Parallel()
+
+	a := mustNew(t, auditlog.Config{Enabled: true})
+	w := &flow.Workflow{}
+	w.Add(flow.Step(newSucceed("step-a")))
+	w.Add(flow.Step(newSucceed("step-b")))
+	runWorkflow(t, a, w)
+
+	runID := a.RunID()
+	if runID == "" {
+		t.Fatal("expected non-empty generated RunID")
+	}
+
+	if len(runID) != 32 {
+		t.Errorf("expected 32-char hex RunID, got %d chars: %q", len(runID), runID)
+	}
+
+	_, err := hex.DecodeString(runID)
+	if err != nil {
+		t.Errorf("expected lowercase hex RunID, got %q: %v", runID, err)
+	}
+
+	report := a.Report()
+	if report.RunID != runID {
+		t.Errorf("report RunID %q != accessor RunID %q", report.RunID, runID)
+	}
+
+	if len(report.Events) == 0 {
+		t.Fatal("expected events in report")
+	}
+
+	for i, evt := range report.Events {
+		if evt.RunID != runID {
+			t.Errorf("event %d RunID %q != run RunID %q", i, evt.RunID, runID)
+		}
+	}
+}
+
+// TestRunID_CustomHonored confirms a caller-supplied RunID is used verbatim
+// (no generation, no mutation) on the report and events.
+func TestRunID_CustomHonored(t *testing.T) {
+	t.Parallel()
+
+	const custom = "trace-abc-123"
+
+	a := mustNew(t, auditlog.Config{Enabled: true, RunID: custom})
+	w := &flow.Workflow{}
+	w.Add(flow.Step(newSucceed("step")))
+	runWorkflow(t, a, w)
+
+	if a.RunID() != custom {
+		t.Errorf("expected custom RunID %q, got %q", custom, a.RunID())
+	}
+
+	report := a.Report()
+	if report.RunID != custom {
+		t.Errorf("report RunID %q != custom %q", report.RunID, custom)
+	}
+}
+
+// TestRunID_ReplayRoundTrip confirms the RunID survives an NDJSON export →
+// ReplayEvents round trip, so offline analysis can still correlate the run.
+func TestRunID_ReplayRoundTrip(t *testing.T) {
+	t.Parallel()
+
+	a := mustNew(t, auditlog.Config{Enabled: true})
+	w := &flow.Workflow{}
+	w.Add(flow.Step(newSucceed("step")))
+	runWorkflow(t, a, w)
+
+	runID := a.RunID()
+	report := a.Report()
+
+	replayed, err := auditlog.ReplayEvents(report.Events)
+	if err != nil {
+		t.Fatalf("replay failed: %v", err)
+	}
+
+	if replayed.RunID != runID {
+		t.Errorf("replayed RunID %q != original %q", replayed.RunID, runID)
+	}
+}
+
+// TestRunID_UniquePerAuditor confirms two auditors get distinct run IDs, so
+// concurrent or sequential runs never share a correlation key.
+func TestRunID_UniquePerAuditor(t *testing.T) {
+	t.Parallel()
+
+	a1 := mustNew(t, auditlog.Config{Enabled: true})
+	a2 := mustNew(t, auditlog.Config{Enabled: true})
+
+	if a1.RunID() == a2.RunID() {
+		t.Errorf("expected distinct RunIDs, both were %q", a1.RunID())
+	}
+}
+
+// TestStepID_UniqueAndSequential confirms every step gets a distinct, non-zero
+// StepID and that all IDs form a contiguous 1..N set.
+func TestStepID_UniqueAndSequential(t *testing.T) {
+	t.Parallel()
+
+	a := mustNew(t, auditlog.Config{Enabled: true})
+	w := &flow.Workflow{}
+	w.Add(flow.Step(newSucceed("step-a")))
+	w.Add(flow.Step(newSucceed("step-b")))
+	w.Add(flow.Step(newSucceed("step-c")))
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+	if len(report.Steps) != 3 {
+		t.Fatalf("expected 3 steps, got %d", len(report.Steps))
+	}
+
+	seen := make(map[int]string, len(report.Steps))
+
+	for _, step := range report.Steps {
+		if step.StepID == 0 {
+			t.Errorf("step %q has zero StepID", step.Name)
+		}
+
+		if dup, ok := seen[step.StepID]; ok {
+			t.Errorf("StepID %d shared by %q and %q", step.StepID, dup, step.Name)
+		}
+
+		seen[step.StepID] = step.Name
+	}
 }
 
 func TestCanceledStatus(t *testing.T) {

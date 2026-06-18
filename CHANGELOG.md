@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **RunID**: every Event and WorkflowReport now carries a `run_id` identifying one
+  workflow execution, for cross-system correlation (traces, logs). Auto-generated
+  as a 128-bit hex ID, or set explicitly via `Config.RunID`. Read it via
+  `Auditor.RunID()`. Survives NDJSON export → `ReplayEvents` round trips.
+- **StepID**: each StepInfo gets a 1-based, unique `step_id` that disambiguates
+  steps sharing the same name (identical `String()` output). Stable within a run.
+- **Graphviz DOT diagrams**: `WriteGraphviz` / `WriteGraphvizString` /
+  `ExportGraphviz` render the step DAG as a Graphviz digraph with status colors.
+- **ReportIndex**: `auditlog.NewReportIndex(report)` precomputes O(1) lookup maps
+  (`StepByName`, `StepByID`, `EventsByStep`, `EventsByType`) for repeated queries.
+- **Exported sentinel errors**: `ErrWorkflowIDPathSep`, `ErrEventCountMismatch`,
+  `ErrStepCountMismatch`, `ErrStatusDrift` — matchable via `errors.Is`.
+- **goreleaser** config (`.goreleaser.yml`) for automated, changelog-grouped
+  GitHub releases with a cross-compiled demo binary.
+- **Acceptance tests**: end-to-end scenarios verifying mixed-outcome pipelines,
+  OnEvent stream integrity, and the filter → export → load lifecycle.
+- CONTRIBUTING.md rewritten with commands, testing patterns, code style, and a
+  documented release process.
+- "Known Limitations" section in the README (name collisions, snapshot/replay
+  constraints, upstream go-workflow retry race).
 - Initial project structure
 - Diff API: `WorkflowReport.Diff(other) WorkflowReport` returns `DiffResult` with
   added/removed/changed step slices and a duration delta. StepDiff records both
@@ -26,6 +46,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- `NewRecorder` now takes a `runID` argument: `NewRecorder(workflowID, runID string, onEvent func(Event))`.
+  Pre-1.0 breaking change to thread run identity to the event stream.
+- `Config.OnEvent` doc corrected: the callback fires concurrently from parallel
+  steps (not "sequentially") and must be goroutine-safe.
+- `ReplayEvents` refactored into `replayStepsFromEvents` + `replayApplyEvent`
+  helpers; replay output is now sorted deterministically and assigns StepIDs.
+- `EventType` and `Phase` doc comments now explain their intentional redundancy.
 - CI bumped to Go 1.26 and golangci-lint v2.4.0.
 - `golangci.yml` overhauled: depguard now permits go-workflow and own module;
   tagliatelle configured for snake_case JSON; varnamelen / exhaustruct scopes

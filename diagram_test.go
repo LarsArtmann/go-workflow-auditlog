@@ -184,6 +184,81 @@ func TestExportPlantUML(t *testing.T) {
 	}
 }
 
+func TestGraphviz_BasicDAG(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	fetch := newSucceed("fetch")
+	save := newSucceed("save")
+	addDependentStep(w, fetch, save)
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteGraphviz(&buf)
+	if err != nil {
+		t.Fatalf("WriteGraphviz error: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, "digraph workflow", "expected 'digraph workflow' header")
+	assertContains(t, output, "fetch", "expected 'fetch' node")
+	assertContains(t, output, "save", "expected 'save' node")
+	assertContains(t, output, "->", "expected '->' edge")
+	assertContains(t, output, "label=\"fetch\"", "expected fetch label")
+}
+
+func TestGraphviz_FailedStepColor(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	bad := newFail("bad", "boom")
+	w.Add(flow.Step(bad))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteGraphviz(&buf)
+	if err != nil {
+		t.Fatalf("WriteGraphviz error: %v", err)
+	}
+
+	output := buf.String()
+	assertContains(t, output, "#8b2d2d", "expected red fillcolor for failed step")
+}
+
+func TestGraphviz_EmptyReport(t *testing.T) {
+	t.Parallel()
+
+	a := mustNew(t, auditlog.Config{Enabled: true})
+
+	var buf strings.Builder
+
+	err := a.Report().WriteGraphviz(&buf)
+	if err != nil {
+		t.Fatalf("WriteGraphviz on empty report error: %v", err)
+	}
+
+	assertContains(t, buf.String(), "digraph workflow", "expected header even for empty report")
+}
+
+func TestExportGraphviz(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("export-dot")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	path := t.TempDir() + "/dag.dot"
+
+	err := a.ExportGraphviz(path)
+	if err != nil {
+		t.Fatalf("ExportGraphviz error: %v", err)
+	}
+}
+
 func TestMermaid_FanOutFanIn(t *testing.T) {
 	t.Parallel()
 
@@ -226,6 +301,22 @@ func TestWriteMermaidString(t *testing.T) {
 	_ = err
 
 	assertContains(t, output, "flowchart TD", "expected 'flowchart TD' in string output")
+}
+
+func TestWriteGraphvizString(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("string-step")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	output, err := a.Report().WriteGraphvizString()
+	if err != nil {
+		t.Fatalf("WriteGraphvizString error: %v", err)
+	}
+
+	assertContains(t, output, "digraph workflow", "expected 'digraph workflow' in string output")
 }
 
 func TestMermaid_SkippedStepGrayClass(t *testing.T) {

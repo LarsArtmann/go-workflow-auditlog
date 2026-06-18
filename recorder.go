@@ -30,6 +30,8 @@ type attemptTracker struct {
 type stepRecord struct {
 	StepRef
 
+	stepID int
+
 	attemptCount int
 	startedAt    *time.Time
 	finishedAt   *time.Time
@@ -65,24 +67,40 @@ type Recorder struct {
 	events []Event
 	steps  map[stepKey]*stepRecord
 
-	sequence   *atomic.Int64
-	workflowID string
-	onEvent    func(Event)
+	sequence    *atomic.Int64
+	workflowID  string
+	runID       string
+	onEvent     func(Event)
+	stepCounter int
 
 	maxEvents     int
 	droppedEvents atomic.Int64
 }
 
 // NewRecorder creates a new event recorder.
-func NewRecorder(workflowID string, onEvent func(Event)) *Recorder {
+//
+// workflowID identifies the workflow (stable across runs); runID identifies a
+// single execution and is stamped on every captured Event so all observations
+// from one run can be correlated. Pass a non-empty runID (e.g. a trace ID) to
+// integrate with external observability systems.
+func NewRecorder(workflowID, runID string, onEvent func(Event)) *Recorder {
 	return &Recorder{
 		mu:         sync.RWMutex{},
 		events:     make([]Event, 0, initialEventCapacity),
 		steps:      make(map[stepKey]*stepRecord),
 		sequence:   newSequenceCounter(),
 		workflowID: workflowID,
+		runID:      runID,
 		onEvent:    onEvent,
 	}
+}
+
+// nextStepIDLocked returns the next 1-based step identifier. Caller must
+// hold r.mu.
+func (r *Recorder) nextStepIDLocked() int {
+	r.stepCounter++
+
+	return r.stepCounter
 }
 
 func newSequenceCounter() *atomic.Int64 {
@@ -107,6 +125,7 @@ func (r *Recorder) recordBeforeStep(step flow.Steper) {
 	rec.attemptCount++
 
 	evt := Event{
+		RunID:     r.runID,
 		Sequence:  seq,
 		Timestamp: now,
 		EventType: EventTypeAttemptStart,
@@ -167,6 +186,7 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 	status := fromErrorToStatus(err)
 
 	evt := Event{
+		RunID:      r.runID,
 		Sequence:   seq,
 		Timestamp:  now,
 		EventType:  EventTypeAttemptEnd,
@@ -195,6 +215,7 @@ func (r *Recorder) getOrCreateStepLocked(step flow.Steper, name string, now time
 
 	rec := &stepRecord{
 		StepRef:   StepRef{Name: name, StepType: stepTypeName(step)},
+		stepID:    r.nextStepIDLocked(),
 		startedAt: &now,
 		status:    StepStatusRunning,
 	}
@@ -234,6 +255,15 @@ func (r *Recorder) EventsCount() int {
 	defer r.mu.RUnlock()
 
 	return len(r.events)
+}
+
+// RunID returns the run identifier stamped on every captured event. It is safe
+// to call concurrently.
+func (r *Recorder) RunID() string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	return r.runID
 }
 
 // errorToStringPtr converts an error to a heap-allocated string pointer.

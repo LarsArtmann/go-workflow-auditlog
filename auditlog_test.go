@@ -2,6 +2,7 @@ package auditlog_test
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -267,6 +268,10 @@ func TestNew_ValidateWorkflowID(t *testing.T) {
 			_, err := auditlog.New(auditlog.Config{Enabled: true, WorkflowID: tc.workflowID})
 			if err == nil {
 				t.Fatalf("expected error for WorkflowID %q", tc.workflowID)
+			}
+
+			if !errors.Is(err, auditlog.ErrWorkflowIDPathSep) {
+				t.Errorf("expected error to wrap auditlog.ErrWorkflowIDPathSep, got: %v", err)
 			}
 		})
 	}

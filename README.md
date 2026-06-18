@@ -90,6 +90,7 @@ Steps settled inline by Conditions (Skipped/Canceled) never enter the intercepto
 {
   "version": "0.1.0",
   "workflow_id": "my-pipeline",
+  "run_id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
   "exported_at": "2026-06-18T15:21:09Z",
   "event_count": 4,
   "step_count": 2,
@@ -104,6 +105,7 @@ Steps settled inline by Conditions (Skipped/Canceled) never enter the intercepto
     {
       "step_name": "fetch",
       "step_type": "FetchStep",
+      "step_id": 1,
       "status": "succeeded",
       "attempt_count": 1,
       "duration_ms": 10.5,
@@ -114,6 +116,7 @@ Steps settled inline by Conditions (Skipped/Canceled) never enter the intercepto
   ],
   "events": [
     {
+      "run_id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
       "sequence": 1,
       "timestamp": "2026-06-18T15:21:09Z",
       "event_type": "attempt_start",
@@ -141,6 +144,7 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `Events() []Event`                                    | Returns all captured events.                                |
 | `EventsCount() int`                                   | Event count without copying.                                |
 | `DroppedEventCount() int64`                           | Events dropped due to `MaxEvents` cap.                      |
+| `RunID() string`                                      | The run identifier stamped on every event (for correlation).|
 | `ReportFiltered(opts ...ReportOption) WorkflowReport` | Returns a filtered report (by name/status/event-type/time). |
 | `ExportToFile(path string) error`                     | Writes report as JSON.                                      |
 | `ExportEventsToNDJSON(path string) error`             | Writes events as NDJSON.                                    |
@@ -148,8 +152,10 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `WriteEventsNDJSON(w io.Writer) error`                | Writes NDJSON to writer.                                    |
 | `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                 |
 | `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                |
+| `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                            |
 | `WriteMermaid(w io.Writer) error`                     | Writes Mermaid DAG to writer.                               |
 | `WritePlantUML(w io.Writer) error`                    | Writes PlantUML DAG to writer.                              |
+| `WriteGraphviz(w io.Writer) error`                    | Writes Graphviz DOT DAG to writer.                          |
 
 ### `WorkflowReport` Methods
 
@@ -170,8 +176,10 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `report.WriteNDJSON(w io.Writer) error`                | Serialize events as NDJSON.                                          |
 | `report.WriteMermaid(w io.Writer) error`               | Mermaid diagram.                                                     |
 | `report.WritePlantUML(w io.Writer) error`              | PlantUML diagram.                                                    |
+| `report.WriteGraphviz(w io.Writer) error`              | Graphviz DOT diagram.                                                |
 | `report.WriteMermaidString() (string, error)`          | Mermaid diagram as string.                                           |
 | `report.WritePlantUMLString() (string, error)`         | PlantUML diagram as string.                                          |
+| `report.WriteGraphvizString() (string, error)`         | Graphviz DOT diagram as string.                                      |
 | `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
 
 ### Package-Level Functions
@@ -183,6 +191,19 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `auditlog.LoadReportFromBytes(b []byte) (WorkflowReport, error)`     | Load a JSON report from bytes.                       |
 | `auditlog.ReadEvents(r io.Reader) ([]Event, error)`                  | Read NDJSON events (inverse of `WriteEventsNDJSON`). |
 | `auditlog.ReplayEvents(events []Event) (WorkflowReport, error)`      | Reconstruct a report from a flat event stream.       |
+| `auditlog.NewReportIndex(r WorkflowReport) *ReportIndex`             | Precompute O(1) lookup maps over a report.           |
+
+### Sentinel Errors
+
+These exported errors are returned by `Validate()` and `New()`. Match them with `errors.Is`:
+
+| Error                              | Returned when                                        |
+| ---------------------------------- | ---------------------------------------------------- |
+| `auditlog.ErrWorkflowIDPathSep`    | `Config.WorkflowID` contains `/` or `\`.             |
+| `auditlog.ErrEventCountMismatch`   | Report `EventCount` ≠ `len(Events)`.                 |
+| `auditlog.ErrStepCountMismatch`    | Report `StepCount` ≠ `len(Steps)`.                   |
+| `auditlog.ErrStatusDrift`          | A step's `Status` disagrees with its derived status. |
+| `auditlog.ErrReplayNoEvents`       | `ReplayEvents` received zero events.                 |
 
 ## Config
 
@@ -190,6 +211,7 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | ---------------------- | ------------------------ | ------------------------------------------------ |
 | `Enabled`              | `false` (checks env var) | Turns audit logging on/off.                      |
 | `WorkflowID`           | `"default"`              | Human-readable identifier.                       |
+| `RunID`                | auto-generated (128-bit hex) | Identifier for one execution; stamped on every event for trace correlation. Override to use your own trace ID. |
 | `OnEvent`              | `nil`                    | Callback fired after each event. Must not block. |
 | `MaxEvents`            | `0` (unlimited)          | Caps stored events to prevent OOM.               |
 | `InitialEventCapacity` | `256`                    | Pre-allocates event slice.                       |
@@ -210,6 +232,14 @@ func (s *MyStep) String() string { return "my-meaningful-name" }
 ```
 
 Or use `flow.Name(step, "name")` when adding to the workflow.
+
+## Known Limitations
+
+- **Step name collisions**: step identity is tracked internally by the `flow.Steper` pointer (always unique), but the JSON `step_name` field relies on `flow.String(step)`. If two steps produce the same `String()` output, their JSON output is ambiguous. Give each step a distinct `String()`.
+- **Snapshot is mandatory for full DAG**: `Attach` captures per-attempt events; the dependency graph and skipped/canceled statuses are only filled in after `Snapshot(w)` reads the workflow's final state.
+- **Replay loses DAG edges**: `ReplayEvents` reconstructs a report from a flat event stream. Dependencies, `MaxAttempts`, `HasRetry`, and `HasTimeout` are not available from events alone — use a Snapshot-captured report for full fidelity.
+- **go-workflow retry data race**: `DefaultRetryOption.Backoff` shares a single `ExponentialBackOff` instance that races under concurrent use. This is a known upstream issue in v0.1.13.
+- **`WorkflowID` cannot contain path separators** (`/` or `\`): it is used in export filenames and would break path safety. Use `Config.RunID` or your own export paths for arbitrary identifiers.
 
 ## Installation
 

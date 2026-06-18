@@ -9,6 +9,13 @@ import (
 const SchemaVersion = "0.1.0"
 
 // EventType categorizes audit log events.
+//
+// Every event is one of two types, mirroring the two go-workflow callbacks:
+// AttemptStart (from BeforeStep) and AttemptEnd (from AfterStep). EventType is
+// intentionally redundant with Phase — an AttemptStart always carries
+// PhaseBefore, an AttemptEnd always carries PhaseAfter. Both fields are kept so
+// consumers can filter by either axis (event kind or lifecycle position)
+// without cross-referencing.
 type EventType string
 
 const (
@@ -50,6 +57,11 @@ func (e EventType) Color() string {
 }
 
 // Phase indicates whether an event is the start or end of an operation.
+//
+// It is deliberately redundant with EventType: AttemptStart ↔ PhaseBefore and
+// AttemptEnd ↔ PhaseAfter. The duplication is retained in the JSON output so
+// that consumers can filter on lifecycle position ("before"/"after") without
+// knowing the event-type vocabulary, and vice versa.
 type Phase string
 
 const (

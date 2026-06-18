@@ -8,16 +8,26 @@ import (
 	"time"
 )
 
+// Sentinel errors returned by [WorkflowReport.Validate]. Consumers can match
+// on these with [errors.Is] to distinguish validation failure modes without
+// parsing error text.
 var (
-	errReportEventCountMismatch = errors.New("event_count does not match len(events)")
-	errReportStepCountMismatch  = errors.New("step_count does not match len(steps)")
-	errReportStatusDrift        = errors.New("step status does not match derived status")
+	// ErrEventCountMismatch indicates the report's EventCount field does not
+	// match the length of its Events slice.
+	ErrEventCountMismatch = errors.New("event_count does not match len(events)")
+	// ErrStepCountMismatch indicates the report's StepCount field does not
+	// match the length of its Steps slice.
+	ErrStepCountMismatch = errors.New("step_count does not match len(steps)")
+	// ErrStatusDrift indicates a step's stored Status disagrees with the
+	// status implied by its Error pointer (see [StepInfo.DeriveStatus]).
+	ErrStatusDrift = errors.New("step status does not match derived status")
 )
 
 // WorkflowReport is a consolidated, machine-readable snapshot of the audit log.
 type WorkflowReport struct {
 	Version           string    `json:"version"`
 	WorkflowID        string    `json:"workflow_id"`
+	RunID             string    `json:"run_id,omitempty"`
 	ExportedAt        time.Time `json:"exported_at"`
 	EventCount        int       `json:"event_count"`
 	StepCount         int       `json:"step_count"`
@@ -44,18 +54,18 @@ type WorkflowReport struct {
 // non-nil Error (which DeriveStatus would map to Failed).
 func (r WorkflowReport) Validate() error {
 	if r.EventCount != len(r.Events) {
-		return fmt.Errorf("%w: got %d, want %d", errReportEventCountMismatch, r.EventCount, len(r.Events))
+		return fmt.Errorf("%w: got %d, want %d", ErrEventCountMismatch, r.EventCount, len(r.Events))
 	}
 
 	if r.StepCount != len(r.Steps) {
-		return fmt.Errorf("%w: got %d, want %d", errReportStepCountMismatch, r.StepCount, len(r.Steps))
+		return fmt.Errorf("%w: got %d, want %d", ErrStepCountMismatch, r.StepCount, len(r.Steps))
 	}
 
 	for _, step := range r.Steps {
 		derived := step.DeriveStatus()
 		if step.Status != derived {
 			return fmt.Errorf("%w: step %q has status %q but derived status is %q",
-				errReportStatusDrift, step.Name, step.Status, derived)
+				ErrStatusDrift, step.Name, step.Status, derived)
 		}
 	}
 
