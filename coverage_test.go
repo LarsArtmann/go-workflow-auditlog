@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -340,9 +339,8 @@ func TestReport_Validate_StatusDrift(t *testing.T) {
 		t.Fatal("expected validation error for status drift")
 	}
 
-	if !strings.Contains(err.Error(), "does not match derived status") {
-		t.Errorf("expected error mentioning status mismatch, got %v", err)
-	}
+	assertContains(t, err.Error(), "does not match derived status",
+		"expected error mentioning status mismatch")
 }
 
 // --- Export tests ---

@@ -91,9 +91,7 @@ func TestReadEvents_LineNumberInError(t *testing.T) {
 		t.Fatal("expected error for malformed input")
 	}
 
-	if !strings.Contains(err.Error(), "line 3") {
-		t.Errorf("expected error to mention 'line 3', got %v", err)
-	}
+	assertContains(t, err.Error(), "line 3", "expected error to mention 'line 3', got "+err.Error())
 }
 
 func TestReadEvents_SkipsBlankLines(t *testing.T) {
