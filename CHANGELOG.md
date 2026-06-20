@@ -12,6 +12,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+## [0.1.1] - 2026-06-20
+
+### Added
+
+- **SECURITY.md** with a private vulnerability reporting process.
+
+### Fixed
+
+- **`StepInfo.Error` now reflects the final outcome.** Previously, when a step
+  failed on early attempts and succeeded on a later retry, `StepInfo.Error`
+  retained the error string from the last failed attempt — reporting a false
+  "transient failure" even though `Status` was `Succeeded`. The recorder now
+  always assigns the attempt error (a `nil` error clears any stale value), so
+  the step-level `Error` always matches the final status. Per-attempt error
+  history remains preserved in the `Event` stream — each `attempt_end` event
+  carries its own `Error` pointer. Includes a regression test
+  (`TestRetry_StepErrorClearedOnSuccess`).
+
 ## [0.1.0] - 2026-06-18
 
 ### Added
