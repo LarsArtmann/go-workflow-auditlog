@@ -2,92 +2,9 @@ package auditlog
 
 import (
 	"fmt"
-	"io"
-	"slices"
-	"strings"
+
+	"github.com/larsartmann/go-output"
 )
-
-// diagramFormatter turns a collected DAG into a specific text format.
-type diagramFormatter interface {
-	Header() string
-	Footer() string
-	NodeID(name string) string
-	NodeDecl(id, label string) string
-	EdgeDecl(fromID, toID string) string
-	ClassAssign(id, className string) string
-}
-
-// diagramEntry is a single line in the generated diagram, paired with its
-// sort key so declarations and edges can be deduplicated and ordered.
-type diagramEntry struct {
-	line string
-	key  string
-}
-
-// diagramAvgLineBytes is the pre-allocation estimate for each diagram line.
-const diagramAvgLineBytes = 64
-
-// writeDiagram writes a dependency graph using the supplied formatter.
-// It deduplicates nodes and edges, sorts output for deterministic reports,
-// and assigns status-based CSS classes for visual styling.
-func writeDiagram(writer io.Writer, report WorkflowReport, formatter diagramFormatter) error {
-	seen := make(map[string]struct{})
-
-	var entries []diagramEntry
-
-	add := func(key, line string) {
-		if _, ok := seen[key]; ok {
-			return
-		}
-
-		seen[key] = struct{}{}
-		entries = append(entries, diagramEntry{line: line, key: key})
-	}
-
-	for _, step := range report.Steps {
-		fromID := formatter.NodeID(step.Name)
-		add(fromID, formatter.NodeDecl(fromID, stepLabel(step)))
-
-		for _, dep := range step.Dependencies {
-			toID := formatter.NodeID(dep.Name)
-			add(toID, formatter.NodeDecl(toID, dep.Name))
-			add(fromID+"->"+toID, formatter.EdgeDecl(fromID, toID))
-		}
-
-		// Assign status-based class for visual styling.
-		if class := statusClass(step.Status); class != "" {
-			add("class:"+fromID, formatter.ClassAssign(fromID, class))
-		}
-	}
-
-	slices.SortFunc(entries, func(a, b diagramEntry) int {
-		return strings.Compare(a.key, b.key)
-	})
-
-	var builder strings.Builder
-	builder.Grow(len(entries) * diagramAvgLineBytes)
-
-	builder.WriteString(formatter.Header())
-	builder.WriteByte('\n')
-
-	for _, entry := range entries {
-		builder.WriteString("    ")
-		builder.WriteString(entry.line)
-		builder.WriteByte('\n')
-	}
-
-	if footer := formatter.Footer(); footer != "" {
-		builder.WriteString(footer)
-		builder.WriteByte('\n')
-	}
-
-	_, err := writer.Write([]byte(builder.String()))
-	if err != nil {
-		return fmt.Errorf("write diagram: %w", err)
-	}
-
-	return nil
-}
 
 // stepLabel builds a display label for a step, including retry indicator.
 func stepLabel(step StepInfo) string {
@@ -99,196 +16,69 @@ func stepLabel(step StepInfo) string {
 	return label
 }
 
-// statusClass maps a StepStatus to a CSS class name for diagram styling.
-func statusClass(s StepStatus) string {
+// statusStyle maps a StepStatus to an output.GraphStyle for diagram coloring.
+// Terminal statuses get fill + font colors; non-terminal statuses get no
+// styling (the renderer uses its default node appearance).
+func statusStyle(s StepStatus) output.GraphStyle {
 	switch s {
 	case StepStatusSucceeded:
-		return "succeeded"
+		return output.GraphStyle{Fill: statusColorSucceeded, FontColor: fontColorLight}
 	case StepStatusFailed:
-		return "failed"
+		return output.GraphStyle{Fill: statusColorFailed, FontColor: fontColorLight}
 	case StepStatusSkipped:
-		return "skipped"
+		return output.GraphStyle{Fill: statusColorSkipped, FontColor: fontColorDim}
 	case StepStatusCanceled:
-		return "canceled"
+		return output.GraphStyle{Fill: statusColorCanceled, FontColor: fontColorLight}
 	default:
-		return ""
+		return output.GraphStyle{}
 	}
 }
 
-// diagramIDReplacer collapses characters that are invalid in Mermaid/PlantUML
-// node identifiers into underscores.
-//
-//nolint:gochecknoglobals // Reusable strings.Replacer, safe to share.
-var diagramIDReplacer = strings.NewReplacer(
-	"-", "_",
-	" ", "_",
-	"/", "_",
-	".", "_",
-	"*", "_",
-	"[", "_",
-	"]", "_",
-	"(", "_",
-	")", "_",
+// Status fill colors shared across all diagram formats. Font colors are set
+// per-status in statusStyle for contrast against the fill.
+const (
+	statusColorSucceeded = "#2d5a2d" // green
+	statusColorFailed    = "#8b2d2d" // red
+	statusColorSkipped   = "#4a4a4a" // gray
+	statusColorCanceled  = "#5a3d2d" // orange-brown
+
+	fontColorLight = "#fff" // white text on dark fills
+	fontColorDim   = "#ccc" // light gray for skipped (lower contrast)
 )
 
-// sanitizeDiagramID builds a valid node identifier from a step name.
-// Returns "node" if the result would be empty.
-func sanitizeDiagramID(name string) string {
-	raw := diagramIDReplacer.Replace(name)
+// buildGraph converts a WorkflowReport's step DAG into go-output graph nodes
+// and edges. Every step becomes a node (colored by status). Each dependency
+// becomes an edge pointing from the step to its dependency. Dependencies that
+// are not themselves steps in the report are added as plain (uncolored) nodes.
+func buildGraph(report WorkflowReport) ([]output.GraphNode, []output.GraphEdge) {
+	seen := make(map[string]struct{})
 
-	var b strings.Builder
-	b.Grow(len(raw))
+	var nodes []output.GraphNode
 
-	for _, r := range raw {
-		if isDiagramIdentRune(r) {
-			b.WriteRune(r)
+	var edges []output.GraphEdge
+
+	addNode := func(name, label string, status StepStatus) {
+		if _, ok := seen[name]; ok {
+			return
+		}
+
+		seen[name] = struct{}{}
+
+		node := output.NewGraphNode(name, label)
+		node.Style = statusStyle(status)
+		nodes = append(nodes, *node)
+	}
+
+	for _, step := range report.Steps {
+		addNode(step.Name, stepLabel(step), step.Status)
+	}
+
+	for _, step := range report.Steps {
+		for _, dep := range step.Dependencies {
+			addNode(dep.Name, dep.Name, StepStatusPending)
+			edges = append(edges, *output.NewGraphEdge(step.Name, dep.Name))
 		}
 	}
 
-	if b.Len() == 0 {
-		return "node"
-	}
-
-	return b.String()
-}
-
-// isDiagramIdentRune reports whether r is valid in a node identifier.
-func isDiagramIdentRune(r rune) bool {
-	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') ||
-		(r >= '0' && r <= '9') || r == '_'
-}
-
-// mermaidLabelReplacer escapes characters that break Mermaid node labels.
-//
-//nolint:gochecknoglobals // Reusable strings.Replacer, safe to share.
-var mermaidLabelReplacer = strings.NewReplacer(
-	`"`, "'",
-	"[", "(",
-	"]", ")",
-	"{", "(",
-	"}", ")",
-	"\n", "<br>",
-)
-
-func mermaidLabel(label string) string {
-	return mermaidLabelReplacer.Replace(label)
-}
-
-func plantumlLabel(label string) string {
-	return strings.ReplaceAll(label, `"`, "'")
-}
-
-// --- Mermaid formatter ---
-
-type mermaidFormatter struct{}
-
-func (mermaidFormatter) Header() string {
-	return `%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#e8a838', 'primaryTextColor':'#14110d', 'primaryBorderColor':'#4a4030', 'lineColor':'#9a8d78', 'fontSize':'14px'}}}%%
-flowchart TD
-    classDef succeeded fill:#2d5a2d,color:#fff
-    classDef failed fill:#8b2d2d,color:#fff
-    classDef skipped fill:#4a4a4a,color:#ccc
-    classDef canceled fill:#5a3d2d,color:#fff`
-}
-
-func (mermaidFormatter) Footer() string { return "" }
-
-func (mermaidFormatter) NodeID(name string) string {
-	return sanitizeDiagramID(name)
-}
-
-func (mermaidFormatter) NodeDecl(id, label string) string {
-	return fmt.Sprintf("%s[\"%s\"]", id, mermaidLabel(label))
-}
-
-func (mermaidFormatter) EdgeDecl(fromID, toID string) string {
-	return fmt.Sprintf("%s --> %s", fromID, toID)
-}
-
-func (mermaidFormatter) ClassAssign(id, className string) string {
-	return fmt.Sprintf("class %s %s", id, className)
-}
-
-// --- PlantUML formatter ---
-
-type plantumlFormatter struct{}
-
-func (plantumlFormatter) Header() string {
-	return `@startuml
-skinparam component {
-  BackgroundColor #e8a838
-  FontColor #14110d
-  BorderColor #4a4030
-}
-skinparam arrow {
-  Color #9a8d78
-}
-skinparam defaultTextAlignment left`
-}
-
-func (plantumlFormatter) Footer() string { return "@enduml" }
-
-func (plantumlFormatter) NodeID(name string) string {
-	return sanitizeDiagramID(name)
-}
-
-func (plantumlFormatter) NodeDecl(id, label string) string {
-	return fmt.Sprintf(`component "%s" as %s`, plantumlLabel(label), id)
-}
-
-func (plantumlFormatter) EdgeDecl(fromID, toID string) string {
-	return fmt.Sprintf("%s --> %s", fromID, toID)
-}
-
-func (plantumlFormatter) ClassAssign(_, _ string) string {
-	// PlantUML doesn't support Mermaid-style class assignment.
-	return ""
-}
-
-// --- Graphviz DOT formatter ---
-
-type dotFormatter struct{}
-
-func (dotFormatter) Header() string {
-	return `digraph workflow {
-    rankdir=TB;
-    node [shape=box, style="rounded,filled", fontname="sans-serif", fillcolor="#e8a838", fontcolor="#14110d"];
-    edge [color="#9a8d78"];`
-}
-
-func (dotFormatter) Footer() string { return "}" }
-
-func (dotFormatter) NodeID(name string) string {
-	return sanitizeDiagramID(name)
-}
-
-func (dotFormatter) NodeDecl(id, label string) string {
-	return fmt.Sprintf(`%s [label="%s"]`, id, dotLabel(label))
-}
-
-func (dotFormatter) EdgeDecl(fromID, toID string) string {
-	return fmt.Sprintf("%s -> %s", fromID, toID)
-}
-
-func (dotFormatter) ClassAssign(id, className string) string {
-	if color, ok := dotStatusColors[className]; ok {
-		return fmt.Sprintf(`%s [fillcolor="%s", fontcolor="#fff"]`, id, color)
-	}
-
-	return ""
-}
-
-// dotLabel escapes characters that break DOT quoted labels.
-func dotLabel(label string) string {
-	return strings.ReplaceAll(label, `"`, "'")
-}
-
-// dotStatusColors maps the statusClass names to Graphviz fill colors.
-//
-//nolint:gochecknoglobals // Lookup table, treated as immutable after init.
-var dotStatusColors = map[string]string{
-	"succeeded": "#2d5a2d",
-	"failed":    "#8b2d2d",
-	"skipped":   "#4a4a4a",
-	"canceled":  "#5a3d2d",
+	return nodes, edges
 }

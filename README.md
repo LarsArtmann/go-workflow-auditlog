@@ -312,36 +312,36 @@ Export the step DAG in three formats, with status-based coloring (succeeded = gr
 
 ```mermaid
 flowchart TD
-    fetch["fetch"]
-    validate["validate"]
-    transform["transform"]
-    save["save"]
+    fetch[fetch]
+    validate[validate]
+    transform[transform]
+    save[save]
     validate --> fetch
     transform --> validate
     save --> transform
-    classDef succeeded fill:#2d5a2d,color:#fff
-    classDef failed fill:#8b2d2d,color:#fff
-    classDef skipped fill:#4a4a4a,color:#ccc
-    classDef canceled fill:#5a3d2d,color:#fff
-    class fetch succeeded
-    class validate succeeded
-    class transform succeeded
-    class save succeeded
+
+    %% Styling
+    style fetch fill:#2d5a2d,color:#fff
+    style validate fill:#2d5a2d,color:#fff
+    style transform fill:#2d5a2d,color:#fff
+    style save fill:#2d5a2d,color:#fff
 ```
 
 **Graphviz DOT**:
 
 ```dot
 digraph workflow {
-    rankdir=TB;
-    node [shape=box, style="rounded,filled", fontname="sans-serif"];
-    fetch    [label="fetch",    fillcolor="#2d5a2d", fontcolor="#fff"];
-    validate [label="validate", fillcolor="#2d5a2d", fontcolor="#fff"];
-    transform[label="transform",fillcolor="#2d5a2d", fontcolor="#fff"];
-    save     [label="save",     fillcolor="#2d5a2d", fontcolor="#fff"];
-    validate -> fetch;
-    transform -> validate;
-    save -> transform;
+  rankdir=TB;
+  node [shape=box fontname="Helvetica"];
+
+  "fetch" [label="fetch" fillcolor=#2d5a2d];
+  "validate" [label="validate" fillcolor=#2d5a2d];
+  "transform" [label="transform" fillcolor=#2d5a2d];
+  "save" [label="save" fillcolor=#2d5a2d];
+
+  "validate" -> "fetch";
+  "transform" -> "validate";
+  "save" -> "transform";
 }
 ```
 

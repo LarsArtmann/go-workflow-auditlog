@@ -41,10 +41,10 @@ loader.go          — LoadReport / LoadReportFromReader / LoadReportFromBytes
 export.go          — NDJSON writer (writeEventsNDJSON internal helper)
 ndjson.go          — ReadEvents NDJSON reader (sentinel errors)
 replay.go          — ReplayEvents: reconstruct Report from event stream (preserves RunID + assigns StepIDs)
-diagram.go         — Shared diagram engine: diagramFormatter interface + mermaid/plantuml/dot formatters
-mermaid.go         — Mermaid flowchart export (delegates to writeDiagram)
-plantuml.go        — PlantUML component diagram export (delegates to writeDiagram)
-graphviz.go        — Graphviz DOT digraph export (delegates to writeDiagram)
+diagram.go         — Translation layer: buildGraph() converts WorkflowReport → go-output GraphNode/GraphEdge + statusStyle() maps StepStatus → GraphStyle colors
+mermaid.go         — Mermaid flowchart export (delegates to go-output graph.MermaidRenderer, code fence off)
+plantuml.go        — PlantUML component diagram export (delegates to go-output plantuml.PlantUMLDiagram)
+graphviz.go        — Graphviz DOT digraph export (delegates to go-output graph.DOTRenderer, graphID "workflow")
 example/           — Data pipeline demo (fetch → validate → transform → save + retry); version ldflags
 .goreleaser.yml    — Automated GitHub releases with grouped changelog + demo binary
 ```
@@ -56,7 +56,7 @@ example/           — Data pipeline demo (fetch → validate → transform → 
 3. During `w.Do(ctx)`, callbacks fire per-attempt → `Recorder` captures timestamped `Event`s
 4. `Snapshot(w)` reads `w.StateOf(step)` + `w.UpstreamOf(step)` to fill in DAG structure and skipped/canceled statuses
 5. `Report()` assembles `StepInfo` slice (with forward + reverse deps) and event stream
-6. Export methods serialize to JSON or NDJSON
+6. Export methods serialize to JSON, NDJSON, or diagrams (Mermaid/PlantUML/DOT via [go-output](https://github.com/larsartmann/go-output))
 
 ### Concurrency Model
 
@@ -101,7 +101,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - **`Pipe` only sets dependencies**, not data flow. Data flows via `.Input()` callbacks. The example wires both.
 - **Sub-workflow traversal**: `snapshotWorkflow` uses `flow.Traverse` to walk the full step DAG, capturing inner steps of composite/sub-workflows that bypass Before/After callbacks. Wrapper steps with nil `StateOf` are skipped via `TraverseEndBranch`.
 - **`buildReportFromCore()` is the single Report construction path** — `BuildReport`, `Filtered`, and `ReplayEvents` all route through it. The denormalized aggregate fields are derived in exactly one place. Any new construction path MUST use it.
-- **Diagram export** uses a shared `writeDiagram` engine with a `diagramFormatter` interface. Mermaid adds status-based CSS classes (`succeeded`=`green`, `failed`=`red`, `skipped`=`gray`, `canceled`=`orange`) and retry count indicators (`×N`). PlantUML uses the same engine but skips class assignment.
+- **Diagram export** uses [go-output](https://github.com/larsartmann/go-output) renderers. `buildGraph()` in `diagram.go` translates `WorkflowReport` steps into `output.GraphNode` + `output.GraphEdge` (edges point step → dependency). `statusStyle()` maps `StepStatus` → `output.GraphStyle` fill colors (`succeeded`=`#2d5a2d` green, `failed`=`#8b2d2d` red, `skipped`=`#4a4a4a` gray, `canceled`=`#5a3d2d` orange). Mermaid uses per-node `style` directives (not `classDef`); code fence is OFF for raw `.mmd` output. DOT uses `graphID "workflow"`. PlantUML uses `[label] as id` component notation. Each renderer handles its own ID sanitization and label escaping — auditlog passes raw step names as node IDs. Dependency: `go-output` root v0.17.0 + `graph` v0.13.0 + `plantuml` v0.13.0 (multi-module; sub-modules tagged at v0.13.0, root at v0.17.0; MVS resolves correctly since replace directives in published go.mods are ignored by consumers).
 - **`StepInfo.Error` reflects the FINAL outcome only.** For a step that fails on attempts 1–2 and succeeds on attempt 3, the `Error` field is `nil` (not "transient failure" from the last failed attempt). The per-attempt error history is preserved in the `Event` stream — each `attempt_end` event carries its own `Error`. Rationale: the step-level `Error` is the answer to "why did this step end in its final state?", and a succeeded step ended successfully. See `recorder.go:recordAfterStep` and the regression test `TestRetry_StepErrorClearedOnSuccess`.
 
 ---
@@ -114,7 +114,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - External test package (`auditlog_test`).
 - `t.Setenv()` for env var tests (runs sequentially).
 - 125+ tests covering: disabled/enabled, success/failure, dependencies, retry, timeout/cancel, skip, concurrent steps, fan-out/fan-in, event ordering, OnEvent callback, export formats (JSON/NDJSON), report validation, query methods, filter, diff, replay, load, diagrams (Mermaid/PlantUML), edge cases, plus regression tests for fixed bugs (status drift, diff ordering, NDJSON line numbers, WorkflowSucceeded honesty about pending steps, stale error cleared on retry success).
-- Coverage: **94.7%** of statements (auditlog package).
+- Coverage: **94.0%** of statements (auditlog package).
 
 ### Shared test helpers (in `auditlog_test.go`)
 

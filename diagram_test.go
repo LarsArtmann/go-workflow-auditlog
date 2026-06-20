@@ -38,11 +38,10 @@ func TestMermaid_BasicDAG(t *testing.T) {
 	assertContains(t, output, "transform", "expected 'transform' node in output")
 	assertContains(t, output, "save", "expected 'save' node in output")
 	assertContains(t, output, "-->", "expected '-->' edge in output")
-	assertContains(t, output, "classDef succeeded", "expected succeeded classDef in output")
-	assertContains(t, output, "succeeded", "expected succeeded class in output")
+	assertContains(t, output, "#2d5a2d", "expected green fill color for succeeded step")
 }
 
-func TestMermaid_FailedStepRedClass(t *testing.T) {
+func TestMermaid_FailedStepRedColor(t *testing.T) {
 	t.Parallel()
 
 	a, w := newAuditAndWorkflow(t)
@@ -63,8 +62,7 @@ func TestMermaid_FailedStepRedClass(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "classDef failed", "expected failed classDef in output")
-	assertContains(t, output, "failed", "expected failed class assignment in output")
+	assertContains(t, output, "#8b2d2d", "expected red fill color for failed step")
 }
 
 func TestMermaid_RetryIndicator(t *testing.T) {
@@ -106,9 +104,10 @@ func TestMermaid_SpecialCharsSanitized(t *testing.T) {
 	// The output should not contain invalid Mermaid identifiers.
 	output := buf.String()
 
-	if strings.Contains(output, "my.step-with-dashes]") {
-		t.Error("expected dots/dashes sanitized in node ID")
-	}
+	// go-output's MermaidID drops dots and hyphens from node identifiers.
+	// The sanitized ID must appear in the output; the raw name survives only
+	// in the display label.
+	assertContains(t, output, "mystepwithdashes", "expected sanitized node ID in output")
 }
 
 func TestMermaid_EmptyReport(t *testing.T) {
@@ -319,7 +318,7 @@ func TestWriteGraphvizString(t *testing.T) {
 	assertContains(t, output, "digraph workflow", "expected 'digraph workflow' in string output")
 }
 
-func TestMermaid_SkippedStepGrayClass(t *testing.T) {
+func TestMermaid_SkippedStepGrayColor(t *testing.T) {
 	t.Parallel()
 
 	a, w := newAuditAndWorkflow(t)
@@ -337,7 +336,7 @@ func TestMermaid_SkippedStepGrayClass(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "classDef skipped", "expected skipped classDef in output")
+	assertContains(t, output, "#4a4a4a", "expected gray fill color for skipped step")
 }
 
 func TestPlantUML_NoMermaidClasses(t *testing.T) {
@@ -384,5 +383,5 @@ func TestMermaid_CanceledStep(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "classDef canceled", "expected canceled classDef in output")
+	assertContains(t, output, "#5a3d2d", "expected orange fill color for canceled step")
 }

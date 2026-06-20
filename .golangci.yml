@@ -133,12 +133,18 @@ linters:
             - $gostd
             - github.com/Azure/go-workflow
             - github.com/cenkalti/backoff/v4
+            - github.com/larsartmann/go-output
+            - github.com/larsartmann/go-output/graph
+            - github.com/larsartmann/go-output/plantuml
             - github.com/larsartmann/go-workflow-auditlog
     exhaustruct:
       exclude:
         - os/exec.Cmd
         - github.com/Azure/go-workflow.StepConfig
         - github.com/Azure/go-workflow.RetryOption
+        - github.com/larsartmann/go-output.GraphNode
+        - github.com/larsartmann/go-output.GraphEdge
+        - github.com/larsartmann/go-output.GraphStyle
         - github.com/larsartmann/go-workflow-auditlog.*
     exhaustive:
       default-signifies-exhaustive: true
