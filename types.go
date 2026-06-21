@@ -171,6 +171,13 @@ func (s StepStatus) IsError() bool {
 	return s == StepStatusFailed || s == StepStatusCanceled
 }
 
+// IsKnown returns true if the status is a recognized value.
+func (s StepStatus) IsKnown() bool {
+	_, ok := stepStatusMeta[s]
+
+	return ok
+}
+
 // Icon returns a display emoji for this step status.
 func (s StepStatus) Icon() string {
 	if m, ok := stepStatusMeta[s]; ok {
