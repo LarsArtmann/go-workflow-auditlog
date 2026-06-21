@@ -38,6 +38,7 @@ type WorkflowReport struct {
 	PendingCount           int       `json:"pending_count"`
 	RunningCount           int       `json:"running_count"`
 	TotalDurationMs        float64   `json:"total_duration_ms"`
+	WallClockDurationMs    float64   `json:"wall_clock_duration_ms"`
 	WorkflowSucceeded      bool      `json:"workflow_succeeded"`
 	DroppedEventCount      int64     `json:"dropped_event_count"`
 	PeakConcurrency        int       `json:"peak_concurrency,omitempty"`

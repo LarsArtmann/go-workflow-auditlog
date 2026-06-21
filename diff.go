@@ -105,26 +105,10 @@ func diffStep(name string, step StepInfo, oldStatus StepStatus) StepDiff {
 // Duration returns the total wall-clock duration spanned by all events,
 // from the earliest to the latest timestamp. This is different from
 // TotalDurationMs (which sums individual step durations and may overcount
-// when steps run in parallel).
+// when steps run in parallel). The same value is available as the
+// WallClockDurationMs JSON field.
 func (r WorkflowReport) Duration() time.Duration {
-	if len(r.Events) == 0 {
-		return 0
-	}
-
-	earliest := r.Events[0].Timestamp
-	latest := r.Events[0].Timestamp
-
-	for _, evt := range r.Events {
-		if evt.Timestamp.Before(earliest) {
-			earliest = evt.Timestamp
-		}
-
-		if evt.Timestamp.After(latest) {
-			latest = evt.Timestamp
-		}
-	}
-
-	return latest.Sub(earliest)
+	return time.Duration(computeWallClockDurationMs(r.Events) * float64(time.Millisecond))
 }
 
 // Summary returns a human-readable one-line summary of the report.
