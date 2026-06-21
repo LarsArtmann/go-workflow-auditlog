@@ -6,9 +6,16 @@ import (
 	"github.com/larsartmann/go-output"
 )
 
-// stepLabel builds a display label for a step, including retry indicator.
+// stepLabel builds a display label for a step, including status label and
+// retry indicator. Used by all diagram and tree renderers for consistency.
 func stepLabel(step StepInfo) string {
 	label := step.Name
+
+	statusLabel := step.Status.Label()
+	if statusLabel != "" {
+		label = fmt.Sprintf("%s [%s]", label, statusLabel)
+	}
+
 	if step.AttemptCount > 1 {
 		label = fmt.Sprintf("%s (×%d)", label, step.AttemptCount)
 	}

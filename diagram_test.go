@@ -205,7 +205,7 @@ func TestGraphviz_BasicDAG(t *testing.T) {
 	assertContains(t, output, "fetch", "expected 'fetch' node")
 	assertContains(t, output, "save", "expected 'save' node")
 	assertContains(t, output, "->", "expected '->' edge")
-	assertContains(t, output, "label=\"fetch\"", "expected fetch label")
+	assertContains(t, output, "label=\"fetch", "expected fetch label")
 }
 
 func TestGraphviz_FailedStepColor(t *testing.T) {

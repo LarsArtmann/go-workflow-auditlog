@@ -10,23 +10,6 @@ import (
 	"github.com/larsartmann/go-output/tree"
 )
 
-// treeStepLabel builds a display label for a step in tree output, including
-// status and retry indicator.
-func treeStepLabel(step StepInfo) string {
-	label := step.Name
-
-	statusLabel := step.Status.Label()
-	if statusLabel != "" {
-		label = fmt.Sprintf("%s [%s]", label, statusLabel)
-	}
-
-	if step.AttemptCount > 1 {
-		label = fmt.Sprintf("%s (×%d)", label, step.AttemptCount)
-	}
-
-	return label
-}
-
 // buildTreeNodes constructs a forest of TreeNodes from the step DAG.
 // Root nodes are steps with no dependencies; children are their dependents.
 // The result is wrapped in a single root node for the renderer.
@@ -76,14 +59,14 @@ func (r WorkflowReport) buildTreeNodes() *output.TreeNode {
 				continue
 			}
 
-			childNode := output.NewTreeNode(childStep.Name, treeStepLabel(childStep))
+			childNode := output.NewTreeNode(childStep.Name, stepLabel(childStep))
 			parent.AddChild(childNode)
 			addChildren(childNode, childStep)
 		}
 	}
 
 	for _, rootStep := range roots {
-		rootNode := output.NewTreeNode(rootStep.Name, treeStepLabel(rootStep))
+		rootNode := output.NewTreeNode(rootStep.Name, stepLabel(rootStep))
 		forestRoot.AddChild(rootNode)
 		addChildren(rootNode, rootStep)
 	}
