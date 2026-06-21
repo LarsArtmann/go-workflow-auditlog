@@ -180,6 +180,21 @@ func (s StepStatus) Color() (string, string) {
 	return "", ""
 }
 
+// RunID identifies a single execution ("run") of a workflow. It is stamped on
+// every Event and on the WorkflowReport so all observations from one execution
+// can be correlated across systems (e.g. matched to a distributed trace).
+//
+// RunID is a branded string type: it serializes to/from JSON as a plain string
+// but the type system prevents accidentally passing a WorkflowID (also a
+// string) where a RunID is expected. Convert with RunID("value") or string(id).
+type RunID string
+
+// String returns the run ID as a plain string. Satisfies fmt.Stringer.
+func (r RunID) String() string { return string(r) }
+
+// IsEmpty returns true when the RunID is the zero value (no ID assigned).
+func (r RunID) IsEmpty() bool { return r == "" }
+
 // StepRef identifies a step within a workflow.
 // Embedded in Event and StepInfo for JSON flattening.
 type StepRef struct {

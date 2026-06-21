@@ -592,7 +592,7 @@ func TestRunID_DefaultGenerated(t *testing.T) {
 		t.Errorf("expected 32-char hex RunID, got %d chars: %q", len(runID), runID)
 	}
 
-	_, err := hex.DecodeString(runID)
+	_, err := hex.DecodeString(string(runID))
 	if err != nil {
 		t.Errorf("expected lowercase hex RunID, got %q: %v", runID, err)
 	}

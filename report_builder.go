@@ -100,7 +100,7 @@ func stepRecordToInfo(rec *stepRecord) StepInfo {
 // buildReportFromCore assembles a WorkflowReport from core data, deriving all
 // denormalized aggregate fields. This is the single construction path.
 func buildReportFromCore(
-	version, workflowID, runID string,
+	version, workflowID string, runID RunID,
 	exportedAt time.Time,
 	droppedEventCount int64,
 	events []Event,

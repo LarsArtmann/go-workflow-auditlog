@@ -27,7 +27,7 @@ type Config struct {
 	// all observations from one execution can be correlated across systems
 	// (e.g. matched to a distributed trace). If empty, New() generates a random
 	// 128-bit hex ID.
-	RunID string
+	RunID RunID
 	// OnEvent is called after each event is captured, outside the recorder
 	// lock so it cannot deadlock the recorder. Must not block.
 	// Note: concurrent steps invoke this concurrently — the callback must be
@@ -139,7 +139,7 @@ func (a *Auditor) EventsCount() int {
 // RunID returns the run identifier stamped on every captured event. Useful for
 // correlating the audit log with external systems (traces, logs) before a full
 // report is built.
-func (a *Auditor) RunID() string {
+func (a *Auditor) RunID() RunID {
 	return a.recorder.RunID()
 }
 

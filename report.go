@@ -33,7 +33,7 @@ var (
 type WorkflowReport struct {
 	Version                string    `json:"version"`
 	WorkflowID             string    `json:"workflow_id"`
-	RunID                  string    `json:"run_id,omitempty"`
+	RunID                  RunID     `json:"run_id,omitempty"`
 	ExportedAt             time.Time `json:"exported_at"`
 	EventCount             int       `json:"event_count"`
 	StepCount              int       `json:"step_count"`

@@ -268,7 +268,7 @@ func assertFailureReason(t *testing.T, report auditlog.WorkflowReport, want stri
 
 // assertEventRunIDsMatch fails the test if any event in events does not have
 // the expected RunID. Used by RunID propagation tests.
-func assertEventRunIDsMatch(t *testing.T, events []auditlog.Event, runID string) {
+func assertEventRunIDsMatch(t *testing.T, events []auditlog.Event, runID auditlog.RunID) {
 	t.Helper()
 
 	for i, evt := range events {

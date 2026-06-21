@@ -69,7 +69,7 @@ type Recorder struct {
 
 	sequence    *atomic.Int64
 	workflowID  string
-	runID       string
+	runID       RunID
 	onEvent     func(Event)
 	stepCounter int
 
@@ -83,7 +83,7 @@ type Recorder struct {
 // single execution and is stamped on every captured Event so all observations
 // from one run can be correlated. Pass a non-empty runID (e.g. a trace ID) to
 // integrate with external observability systems.
-func NewRecorder(workflowID, runID string, onEvent func(Event)) *Recorder {
+func NewRecorder(workflowID string, runID RunID, onEvent func(Event)) *Recorder {
 	return &Recorder{
 		mu:         sync.RWMutex{},
 		events:     make([]Event, 0, initialEventCapacity),
@@ -260,7 +260,7 @@ func (r *Recorder) EventsCount() int {
 
 // RunID returns the run identifier stamped on every captured event. It is safe
 // to call concurrently.
-func (r *Recorder) RunID() string {
+func (r *Recorder) RunID() RunID {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

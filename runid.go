@@ -16,11 +16,11 @@ const runIDBytes = 16
 // The value is 32 hex characters (128 bits) of entropy — collision-resistant
 // for any practical workload and compatible with observability tooling that
 // keys on trace-style IDs.
-func newRunID() string {
+func newRunID() RunID {
 	b := make([]byte, runIDBytes)
 	// crypto/rand.Read is documented to always succeed with a nil error when
 	// the slice is non-empty; a failure would indicate a broken entropy source.
 	_, _ = rand.Read(b)
 
-	return hex.EncodeToString(b)
+	return RunID(hex.EncodeToString(b))
 }
