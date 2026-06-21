@@ -605,11 +605,7 @@ func TestRunID_DefaultGenerated(t *testing.T) {
 		t.Fatal("expected events in report")
 	}
 
-	for i, evt := range report.Events {
-		if evt.RunID != runID {
-			t.Errorf("event %d RunID %q != run RunID %q", i, evt.RunID, runID)
-		}
-	}
+	assertEventRunIDsMatch(t, report.Events, runID)
 }
 
 // TestRunID_CustomHonored confirms a caller-supplied RunID is used verbatim
@@ -847,7 +843,7 @@ func TestWorkflowSucceeded_PendingStepsIsFalse(t *testing.T) {
 	// zero value here, so we route it through Filtered() to recompute.
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "stuck"}, Status: auditlog.StepStatusRunning},
+			stepFixture("stuck", auditlog.StepStatusRunning),
 		},
 	}
 
@@ -946,9 +942,9 @@ func TestReport_AggregateCounts_PendingRunning(t *testing.T) {
 	// Build a report with a non-terminal step directly.
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "pending-step"}, Status: auditlog.StepStatusPending},
-			{StepRef: auditlog.StepRef{Name: "running-step"}, Status: auditlog.StepStatusRunning},
-			{StepRef: auditlog.StepRef{Name: "done-step"}, Status: auditlog.StepStatusSucceeded},
+			stepFixture("pending-step", auditlog.StepStatusPending),
+			stepFixture("running-step", auditlog.StepStatusRunning),
+			stepFixture("done-step", auditlog.StepStatusSucceeded),
 		},
 	}
 
@@ -964,16 +960,14 @@ func TestReport_PeakConcurrency_ParallelSteps(t *testing.T) {
 
 	// Use slow steps to ensure true overlap in the event stream.
 	a, w := newAuditAndWorkflow(t)
-	addParallelSteps(w, newSlow("a", 20*time.Millisecond), newSlow("b", 20*time.Millisecond))
+	addSlowParallelSteps(w, 20*time.Millisecond)
 	runWorkflow(t, a, w)
 
 	report := a.Report()
 	assertReportValid(t, report)
 
 	// Two parallel slow steps should produce a peak concurrency of 2.
-	if report.PeakConcurrency != 2 {
-		t.Errorf("expected PeakConcurrency=2, got %d", report.PeakConcurrency)
-	}
+	assertPeakConcurrency(t, report, 2)
 }
 
 func TestReport_PeakConcurrency_SequentialSteps(t *testing.T) {
@@ -987,9 +981,7 @@ func TestReport_PeakConcurrency_SequentialSteps(t *testing.T) {
 	assertReportValid(t, report)
 
 	// Sequential steps should never overlap.
-	if report.PeakConcurrency != 1 {
-		t.Errorf("expected PeakConcurrency=1, got %d", report.PeakConcurrency)
-	}
+	assertPeakConcurrency(t, report, 1)
 }
 
 func TestReport_CriticalPathDuration_DependentChain(t *testing.T) {
@@ -1055,9 +1047,9 @@ func TestReport_FailureReason_FailedSteps(t *testing.T) {
 
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
-			{StepRef: auditlog.StepRef{Name: "bad-a"}, Status: auditlog.StepStatusFailed},
-			{StepRef: auditlog.StepRef{Name: "bad-b"}, Status: auditlog.StepStatusFailed},
+			stepFixture("ok", auditlog.StepStatusSucceeded),
+			stepFixture("bad-a", auditlog.StepStatusFailed),
+			stepFixture("bad-b", auditlog.StepStatusFailed),
 		},
 	}
 
@@ -1067,10 +1059,7 @@ func TestReport_FailureReason_FailedSteps(t *testing.T) {
 		t.Error("expected workflow to be failed")
 	}
 
-	want := "2 step(s) failed: bad-a, bad-b"
-	if recomputed.FailureReason != want {
-		t.Errorf("expected FailureReason=%q, got %q", want, recomputed.FailureReason)
-	}
+	assertFailureReason(t, recomputed, "2 step(s) failed: bad-a, bad-b")
 }
 
 func TestReport_FailureReason_CanceledSteps(t *testing.T) {
@@ -1078,17 +1067,14 @@ func TestReport_FailureReason_CanceledSteps(t *testing.T) {
 
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
-			{StepRef: auditlog.StepRef{Name: "cancel"}, Status: auditlog.StepStatusCanceled},
+			stepFixture("ok", auditlog.StepStatusSucceeded),
+			stepFixture("cancel", auditlog.StepStatusCanceled),
 		},
 	}
 
 	recomputed := raw.Filtered()
 
-	want := "1 step(s) canceled: cancel"
-	if recomputed.FailureReason != want {
-		t.Errorf("expected FailureReason=%q, got %q", want, recomputed.FailureReason)
-	}
+	assertFailureReason(t, recomputed, "1 step(s) canceled: cancel")
 }
 
 func TestReport_FailureReason_Success(t *testing.T) {
@@ -1096,7 +1082,7 @@ func TestReport_FailureReason_Success(t *testing.T) {
 
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+			stepFixture("ok", auditlog.StepStatusSucceeded),
 		},
 	}
 
@@ -1117,7 +1103,7 @@ func TestReport_WallClockDuration_ParallelLessThanSum(t *testing.T) {
 	// Two parallel slow steps: wall-clock ≈ max(20ms, 20ms) = 20ms,
 	// but TotalDurationMs = 20 + 20 = 40ms. Wall-clock should be less.
 	a, w := newAuditAndWorkflow(t)
-	addParallelSteps(w, newSlow("a", 20*time.Millisecond), newSlow("b", 20*time.Millisecond))
+	addSlowParallelSteps(w, 20*time.Millisecond)
 	runWorkflow(t, a, w)
 
 	report := a.Report()
@@ -1153,8 +1139,8 @@ func TestReport_Summary_WithFailureReason(t *testing.T) {
 	raw := auditlog.WorkflowReport{
 		WorkflowID: "test-wf",
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
-			{StepRef: auditlog.StepRef{Name: "bad"}, Status: auditlog.StepStatusFailed},
+			stepFixture("ok", auditlog.StepStatusSucceeded),
+			stepFixture("bad", auditlog.StepStatusFailed),
 		},
 	}
 
@@ -1171,7 +1157,7 @@ func TestReport_Summary_SuccessNoReason(t *testing.T) {
 	raw := auditlog.WorkflowReport{
 		WorkflowID: "test-wf",
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+			stepFixture("ok", auditlog.StepStatusSucceeded),
 		},
 	}
 
@@ -1191,7 +1177,7 @@ func TestReport_Validate_CountMismatch(t *testing.T) {
 		SucceededCount: 2, // lie — only 1 succeeded step
 		StepCount:      1,
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+			stepFixture("ok", auditlog.StepStatusSucceeded),
 		},
 	}
 

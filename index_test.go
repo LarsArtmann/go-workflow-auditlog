@@ -26,9 +26,7 @@ func TestReportIndex_AgreesWithLinearQueries(t *testing.T) {
 		t.Errorf("StepByName(fetch) = %+v, want fetch step", got)
 	}
 
-	if index.StepByName("nonexistent") != nil {
-		t.Error("expected nil for unknown step name")
-	}
+	assertNilStep(t, index.StepByName("nonexistent"), "expected nil for unknown step name")
 
 	// StepByID agrees with the StepID assigned in the report.
 	for _, step := range report.Steps {
@@ -37,9 +35,7 @@ func TestReportIndex_AgreesWithLinearQueries(t *testing.T) {
 		}
 	}
 
-	if index.StepByID(99999) != nil {
-		t.Error("expected nil for unknown step ID")
-	}
+	assertNilStep(t, index.StepByID(99999), "expected nil for unknown step ID")
 
 	// EventsByStep agrees with the linear method.
 	for _, name := range []string{"fetch", "save"} {
@@ -70,13 +66,9 @@ func TestReportIndex_EmptyReport(t *testing.T) {
 
 	index := auditlog.NewReportIndex(auditlog.WorkflowReport{})
 
-	if index.StepByName("anything") != nil {
-		t.Error("expected nil StepByName on empty report")
-	}
+	assertNilStep(t, index.StepByName("anything"), "expected nil StepByName on empty report")
 
-	if index.StepByID(1) != nil {
-		t.Error("expected nil StepByID on empty report")
-	}
+	assertNilStep(t, index.StepByID(1), "expected nil StepByID on empty report")
 
 	if events := index.EventsByStep("anything"); events != nil {
 		t.Errorf("expected nil EventsByStep on empty report, got %d", len(events))

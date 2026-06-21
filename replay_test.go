@@ -227,9 +227,7 @@ func TestReplayEvents_FullRoundTrip(t *testing.T) {
 		t.Errorf("expected 2 steps, got %d", report.StepCount)
 	}
 
-	if report.FailedCount != 1 {
-		t.Errorf("expected 1 failed, got %d", report.FailedCount)
-	}
+	assertFailedCount(t, report, 1)
 
 	if !report.Reconstructed {
 		t.Error("expected Reconstructed=true")

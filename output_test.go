@@ -11,6 +11,25 @@ import (
 
 // --- D2 Diagram Tests ---
 
+// renderMarkdownTable renders the report's step summary as Markdown into a
+// buffer and returns it. Centralizes the
+// `var buf strings.Builder; err := a.Report().WriteTable(&buf, output.FormatMarkdown, output.RenderOptions{})`
+// boilerplate used by output tests that need a Markdown rendering of a report.
+func renderMarkdownTable(t *testing.T, a *auditlog.Auditor) string {
+	t.Helper()
+
+	var buf strings.Builder
+
+	err := a.Report().WriteTable(&buf, output.FormatMarkdown, output.RenderOptions{})
+	if err != nil {
+		t.Fatalf("WriteTable markdown error: %v", err)
+	}
+
+	return buf.String()
+}
+
+// --- D2 Diagram Tests ---
+
 func TestD2_BasicDAG(t *testing.T) {
 	t.Parallel()
 
@@ -117,14 +136,7 @@ func TestWriteTable_Markdown(t *testing.T) {
 	w.Add(flow.Step(fetch), flow.Step(bad))
 	runWorkflow(t, a, w)
 
-	var buf strings.Builder
-
-	err := a.Report().WriteTable(&buf, output.FormatMarkdown, output.RenderOptions{})
-	if err != nil {
-		t.Fatalf("WriteTable markdown error: %v", err)
-	}
-
-	output := buf.String()
+	output := renderMarkdownTable(t, a)
 
 	assertContains(t, output, "Step", "expected markdown table header")
 	assertContains(t, output, "fetch", "expected fetch row")
@@ -207,14 +219,7 @@ func TestWriteTable_EmptyReport(t *testing.T) {
 
 	a := mustNew(t, auditlog.Config{Enabled: true})
 
-	var buf strings.Builder
-
-	err := a.Report().WriteTable(&buf, output.FormatMarkdown, output.RenderOptions{})
-	if err != nil {
-		t.Fatalf("WriteTable on empty report error: %v", err)
-	}
-
-	output := buf.String()
+	output := renderMarkdownTable(t, a)
 	assertContains(t, output, "| Step |", "expected header even for empty report")
 }
 

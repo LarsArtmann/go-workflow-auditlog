@@ -81,6 +81,13 @@ func newFlaky(name string, failUntil int) *flakyStep {
 
 func newSlow(name string, d time.Duration) *slowStep { return &slowStep{name: name, d: d} }
 
+// stepFixture builds a StepInfo with just a name and status. Centralizes the
+// {StepRef: auditlog.StepRef{Name: ...}, Status: ...} struct literal that
+// dozens of tests use to construct minimal step records.
+func stepFixture(name string, status auditlog.StepStatus) auditlog.StepInfo {
+	return auditlog.StepInfo{StepRef: auditlog.StepRef{Name: name}, Status: status}
+}
+
 // retryOpts returns a retry config function with a FRESH backoff instance,
 // avoiding the data race in go-workflow's shared DefaultRetryOption.Backoff.
 func retryOpts(attempts uint64) func(*flow.RetryOption) {
@@ -112,6 +119,14 @@ func addDependentStep(w *flow.Workflow, parent, child flow.Steper) {
 // used by tests that need a 2-step setup with no dependency edge.
 func addParallelSteps(w *flow.Workflow, a, b flow.Steper) {
 	w.Add(flow.Step(a), flow.Step(b))
+}
+
+// addSlowParallelSteps wires two slow steps of the same duration into the
+// workflow as a parallel pair. Centralizes the
+// `addParallelSteps(w, newSlow("a", D), newSlow("b", D))` idiom used by
+// wall-clock and concurrency tests that need guaranteed overlapping execution.
+func addSlowParallelSteps(w *flow.Workflow, d time.Duration) {
+	addParallelSteps(w, newSlow("a", d), newSlow("b", d))
 }
 
 // --- Helpers ---
@@ -228,6 +243,59 @@ func assertFirstStepName(t *testing.T, report auditlog.WorkflowReport, want stri
 
 	if report.Steps[0].Name != want {
 		t.Errorf("expected first step %q, got %q", want, report.Steps[0].Name)
+	}
+}
+
+// assertPeakConcurrency fails the test if the report's PeakConcurrency does
+// not match want. Used by peak-concurrency coverage tests.
+func assertPeakConcurrency(t *testing.T, report auditlog.WorkflowReport, want int) {
+	t.Helper()
+
+	if report.PeakConcurrency != want {
+		t.Errorf("expected PeakConcurrency=%d, got %d", want, report.PeakConcurrency)
+	}
+}
+
+// assertFailureReason fails the test if the report's FailureReason does not
+// match want. Used by failure-reason coverage tests.
+func assertFailureReason(t *testing.T, report auditlog.WorkflowReport, want string) {
+	t.Helper()
+
+	if report.FailureReason != want {
+		t.Errorf("expected FailureReason=%q, got %q", want, report.FailureReason)
+	}
+}
+
+// assertEventRunIDsMatch fails the test if any event in events does not have
+// the expected RunID. Used by RunID propagation tests.
+func assertEventRunIDsMatch(t *testing.T, events []auditlog.Event, runID string) {
+	t.Helper()
+
+	for i, evt := range events {
+		if evt.RunID != runID {
+			t.Errorf("event %d RunID %q != %q", i, evt.RunID, runID)
+		}
+	}
+}
+
+// assertFailedCount fails the test if report.FailedCount does not equal want.
+// Used by failure count assertions across acceptance and replay tests.
+func assertFailedCount(t *testing.T, report auditlog.WorkflowReport, want int) {
+	t.Helper()
+
+	if report.FailedCount != want {
+		t.Errorf("expected %d failed, got %d", want, report.FailedCount)
+	}
+}
+
+// assertNilStep fails the test if the returned *StepInfo is non-nil, with a
+// message explaining what was looked up. Centralizes the
+// "index returned non-nil for unknown X" idiom used by ReportIndex tests.
+func assertNilStep(t *testing.T, got *auditlog.StepInfo, message string) {
+	t.Helper()
+
+	if got != nil {
+		t.Error(message)
 	}
 }
 

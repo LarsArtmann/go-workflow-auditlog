@@ -151,3 +151,29 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
   different field with different semantics and merging would harm clarity.
 - Production-code duplication is never acceptable: extract helpers (see
   `sortByName`, `sortStepsByName`, `diffStep`).
+
+#### Acceptable clones (documented in source)
+
+At `-t 15` two clone groups remain after the deduplication pass; both are
+classified as `idiom` by art-dupl and would only disappear at higher
+thresholds (`-t 30` reports zero). Documented here so the next reader
+knows they were considered.
+
+- **`assert*` test helpers (auditlog_test.go)**: 7 helpers
+  (`assertStepCount`, `assertEventCount`, `assertWorkflowID`,
+  `assertFirstStepName`, `assertPeakConcurrency`, `assertFailureReason`,
+  `assertFailedCount`) share the signature shape
+  `func assertX(t *testing.T, report auditlog.WorkflowReport, want T)`.
+  Each asserts a distinct field on the report with its own error message;
+  merging into a generic `assertField(t, name, got, want)` would replace
+  named call sites with stringly-typed lookups and harm test readability.
+  Keeping typed helpers is the correct trade-off.
+- **`WriteTable` API surface (plugin.go:212, table.go:52)**: The
+  `(a *Auditor).WriteTable` method is a 1-line delegating wrapper around
+  `(r WorkflowReport).WriteTable`. The signature match is intrinsic to
+  the consistent `Write*` / `Export*` method surface that Auditor exposes
+  for every format (WriteMermaid, WritePlantUML, WriteGraphviz, WriteD2,
+  WriteTree, WriteHTMLTree, WriteTable all follow the same delegation
+  pattern). Removing the convenience method would force callers to write
+  `a.Report().WriteTable(...)` instead of `a.WriteTable(...)` for this
+  one format only, breaking the API symmetry.

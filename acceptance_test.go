@@ -38,9 +38,7 @@ func TestAcceptance_MixedOutcomePipeline(t *testing.T) {
 		t.Errorf("SucceededCount: got %d, want 2 (root + retry-step)", report.SucceededCount)
 	}
 
-	if report.FailedCount != 1 {
-		t.Errorf("FailedCount: got %d, want 1 (bad-step)", report.FailedCount)
-	}
+	assertFailedCount(t, report, 1)
 
 	// A failure means the overall workflow did not succeed.
 	if report.WorkflowSucceeded {
@@ -118,11 +116,7 @@ func TestAcceptance_OnEventStreamIsOrderedAndTagged(t *testing.T) {
 	}
 
 	// Every event is tagged with the run ID.
-	for i, evt := range collected {
-		if evt.RunID != runID {
-			t.Errorf("event %d RunID %q != %q", i, evt.RunID, runID)
-		}
-	}
+	assertEventRunIDsMatch(t, collected, runID)
 
 	// There is at least one start and one end event.
 	if !slices.ContainsFunc(collected, auditlog.Event.IsAttemptStart) {
