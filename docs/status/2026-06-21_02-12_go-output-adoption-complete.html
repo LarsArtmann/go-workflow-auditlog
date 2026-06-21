@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status Report — go-workflow-auditlog — 2026-06-21</title>
+<style>
+:root {
+  --color-graphite: #0e0e10;
+  --color-graphite-2: #18181d;
+  --color-graphite-3: #16161a;
+  --color-bone: #f4f4f0;
+  --color-red: #ff6b6b;
+  --color-blue: #6eb5ff;
+  --color-yellow: #f4d35e;
+  --color-amber: #ffb347;
+
+  --surface: var(--color-graphite);
+  --surface-raised: var(--color-graphite-2);
+  --surface-sunken: var(--color-graphite-3);
+  --text: var(--color-bone);
+  --text-muted: #a0a0a8;
+  --text-faint: #6a6a72;
+  --border: #2a2a30;
+  --border-strong: #3a3a42;
+  --accent: var(--color-amber);
+  --problem: var(--color-red);
+  --solution: var(--color-blue);
+  --warning: var(--color-yellow);
+
+  --radius: 0px;
+  --font-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "JetBrains Mono", "Cascadia Code", monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Layout */
+.layout { display: flex; max-width: 1400px; margin: 0 auto; }
+.sidebar {
+  position: sticky; top: 0; height: 100vh; width: 240px; flex-shrink: 0;
+  border-right: 1px solid var(--border); padding: 24px 16px;
+  overflow-y: auto;
+}
+.sidebar .label {
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-faint); margin-bottom: 8px;
+}
+.sidebar nav a {
+  display: block; padding: 5px 12px; color: var(--text-muted); text-decoration: none;
+  font-size: 13px; border-left: 2px solid transparent; transition: all 0.15s;
+}
+.sidebar nav a:hover { color: var(--text); border-left-color: var(--accent); }
+.sidebar nav a.active { color: var(--accent); border-left-color: var(--accent); }
+.main { flex: 1; min-width: 0; padding: 48px 56px 80px; }
+
+@media (max-width: 1100px) { .sidebar { display: none; } .main { padding: 32px 24px 64px; } }
+
+/* Hero */
+.hero { margin-bottom: 48px; }
+.hero-badge {
+  display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--accent); padding: 4px 10px;
+  border: 1px solid var(--accent); margin-bottom: 16px;
+}
+.hero h1 { font-size: 32px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 8px; }
+.hero-subtitle { color: var(--text-muted); font-size: 16px; }
+.hero-shapes { margin-top: 20px; display: flex; gap: 8px; }
+.hero-shapes span { display: inline-block; width: 28px; height: 28px; }
+.hero-shapes .circle { background: var(--color-yellow); border-radius: 50%; }
+.hero-shapes .square { background: var(--color-red); }
+.hero-shapes .triangle {
+  width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
+  border-bottom: 28px solid var(--color-blue);
+}
+
+/* Stat Cards */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 48px; }
+.stat-card {
+  background: var(--surface-raised); border: 1px solid var(--border); padding: 20px;
+  border-top: 3px solid var(--text-faint);
+}
+.stat-card.stat-good { border-top-color: var(--solution); }
+.stat-card.stat-warn { border-top-color: var(--warning); }
+.stat-card.stat-bad { border-top-color: var(--problem); }
+.stat-value { font-size: 28px; font-weight: 900; letter-spacing: -0.02em; }
+.stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); margin-top: 4px; }
+
+/* Sections */
+h2 {
+  font-size: 22px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 20px;
+  margin-top: 56px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+h2 .num { display: inline-block; background: var(--accent); color: var(--surface); font-size: 13px; font-weight: 900; padding: 2px 8px; margin-right: 10px; }
+h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; margin-top: 24px; }
+
+/* Cards */
+.card {
+  background: var(--surface-raised); border: 1px solid var(--border); padding: 20px 24px;
+  margin-bottom: 12px; border-left: 3px solid var(--text-faint);
+}
+.card-problem { border-left-color: var(--problem); }
+.card-solution { border-left-color: var(--solution); }
+.card-warning { border-left-color: var(--warning); }
+.card h3 { margin-top: 0; }
+.card p { color: var(--text-muted); }
+.card code, .card .where { font-family: var(--font-mono); font-size: 13px; color: var(--text-faint); }
+
+/* Callouts */
+.callout {
+  padding: 16px 20px; margin-bottom: 12px; border-left: 3px solid;
+  background: var(--surface-sunken);
+}
+.callout-solution { border-color: var(--solution); }
+.callout-warning { border-color: var(--warning); }
+.callout strong { display: inline-block; margin-bottom: 4px; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px; }
+th { text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border-strong); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+tr:hover td { background: var(--surface-sunken); }
+
+/* Badges */
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border: 1px solid; }
+.badge-critical { color: var(--problem); border-color: var(--problem); }
+.badge-high { color: var(--warning); border-color: var(--warning); }
+.badge-medium { color: var(--accent); border-color: var(--accent); }
+.badge-low { color: var(--text-muted); border-color: var(--text-muted); }
+.badge-fixed { color: var(--solution); border-color: var(--solution); }
+
+/* Issue cards */
+.issue { background: var(--surface-raised); border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 10px; }
+.issue-critical { border-left: 3px solid var(--problem); }
+.issue-important { border-left: 3px solid var(--warning); }
+.issue-nice { border-left: 3px solid var(--solution); }
+.severity { display: inline-block; font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 6px; margin-right: 8px; }
+.severity-critical { background: var(--problem); color: var(--surface); }
+.severity-important { background: var(--warning); color: var(--surface); }
+.severity-nice { background: var(--solution); color: var(--surface); }
+.issue h3 { display: inline; font-size: 14px; }
+.issue .where { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+.issue p { color: var(--text-muted); margin-top: 6px; font-size: 14px; }
+
+/* Code blocks */
+pre { background: var(--surface-sunken); border: 1px solid var(--border); padding: 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
+code { font-family: var(--font-mono); font-size: 13px; }
+
+/* Footer */
+.footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--text-faint); font-size: 13px; }
+
+/* Question */
+.question-box {
+  background: var(--surface-sunken); border: 1px solid var(--accent); padding: 24px 32px; margin-top: 48px;
+}
+.question-box h2 { border: none; margin-top: 0; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <nav data-nav>
+      <div class="label">Contents</div>
+      <a href="#summary">Summary</a>
+      <a href="#metrics">Metrics</a>
+      <a href="#fully-done">Fully Done</a>
+      <a href="#partially-done">Partially Done</a>
+      <a href="#not-started">Not Started</a>
+      <a href="#fucked-up">Totally Fucked Up</a>
+      <a href="#improve">Improve</a>
+      <a href="#next-25">Top 25 Next</a>
+      <a href="#question">The Big Question</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="hero">
+      <div class="hero-badge">Status Report &middot; 2026-06-21</div>
+      <h1>go-output Adoption Complete</h1>
+      <p class="hero-subtitle">All diagram, table, and tree rendering now delegates to go-output. 162 tests, 92.8% coverage, 0 lint issues.</p>
+      <div class="hero-shapes">
+        <span class="circle"></span>
+        <span class="square"></span>
+        <span class="triangle"></span>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <section id="metrics">
+      <h2><span class="num">01</span>Metrics</h2>
+      <div class="stat-grid">
+        <div class="stat-card stat-good">
+          <div class="stat-value">162</div>
+          <div class="stat-label">Tests</div>
+        </div>
+        <div class="stat-card stat-good">
+          <div class="stat-value">92.8%</div>
+          <div class="stat-label">Coverage</div>
+        </div>
+        <div class="stat-card stat-good">
+          <div class="stat-value">0</div>
+          <div class="stat-label">Lint Issues</div>
+        </div>
+        <div class="stat-card stat-good">
+          <div class="stat-value">38</div>
+          <div class="stat-label">Go Files</div>
+        </div>
+        <div class="stat-card stat-warn">
+          <div class="stat-value">6,846</div>
+          <div class="stat-label">LOC</div>
+        </div>
+        <div class="stat-card stat-warn">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Direct Deps</div>
+        </div>
+        <div class="stat-card stat-bad">
+          <div class="stat-value">~35</div>
+          <div class="stat-label">Transitive Deps</div>
+        </div>
+        <div class="stat-card stat-warn">
+          <div class="stat-value">ALPHA</div>
+          <div class="stat-label">Status</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FULLY DONE -->
+    <section id="fully-done">
+      <h2><span class="num">A</span>Fully Done</h2>
+
+      <div class="card card-solution">
+        <h3>Mermaid diagram migration</h3>
+        <p>Replaced hand-rolled <code>mermaidFormatter</code> with <code>graph.MermaidRenderer</code>. Per-node <code>style</code> directives replace <code>classDef</code>/<code>class</code> assignments. Code fence OFF for raw .mmd output. <code>diagram.go:53</code> buildGraph() translates report → GraphNode/GraphEdge.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>PlantUML diagram migration</h3>
+        <p>Replaced <code>plantumlFormatter</code> with <code>plantuml.PlantUMLDiagram</code>. Bracket notation <code>[label] as id</code> with inline color specs.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>Graphviz DOT diagram migration</h3>
+        <p>Replaced <code>dotFormatter</code> with <code>graph.DOTRenderer</code>. GraphID set to <code>"workflow"</code> to preserve <code>digraph workflow</code> header.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>D2 diagram export (new)</h3>
+        <p>New <code>d2.go</code>: <code>buildD2Graph()</code> + <code>statusD2Style()</code> translate report → <code>d2.D2Node</code>/<code>d2.D2Edge</code>. Uses <code>d2.D2Diagram</code> with title "Workflow DAG". <code>WriteD2()</code> + <code>WriteD2String()</code> on WorkflowReport.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>Table export — 16 formats (new)</h3>
+        <p>New <code>table.go</code>: <code>buildTableData()</code> produces columns (Step, Status, Duration, Attempts, Error). <code>WriteTable()</code> delegates to <code>output.RenderTableData()</code> dispatch — supports table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml via sub-module <code>init()</code> registration.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>Tree export — ASCII + HTML (new)</h3>
+        <p>New <code>tree.go</code>: <code>buildTreeNodes()</code> constructs forest from step DAG (roots = no deps, children = dependents). <code>WriteTree()</code> uses <code>tree.ASCIITreeRenderer</code>. <code>WriteHTMLTree()</code> uses <code>markup.HTMLTreeRenderer</code>. Both label nodes with step name + status + retry count.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>Report analytics (new)</h3>
+        <p>Five new aggregate fields on <code>WorkflowReport</code>: <code>PendingCount</code>, <code>RunningCount</code> (split from combined counter), <code>PeakConcurrency</code> (max concurrent in-flight attempts), <code>CriticalPathDurationMs</code> (longest dependency chain), <code>FailureReason</code> (human-readable failure summary). All derived in <code>finalizeDenormalized()</code> — the single construction path.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>Translation layer in diagram.go</h3>
+        <p><code>buildGraph()</code> converts WorkflowReport → GraphNode/GraphEdge (edges point step → dependency). <code>statusStyle()</code> maps StepStatus → GraphStyle fill colors. Shared color constants (<code>statusColorSucceeded</code> etc.) used by all diagram formats.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>Lint config updated</h3>
+        <p>.golangci.yml depguard allow-list expanded to include all go-output sub-modules (d2, delimited, graph, markdown, markup, plantuml, serialization, table, tree). Exhaustruct excludes added for <code>GraphNode</code>, <code>GraphEdge</code>, <code>GraphStyle</code>, <code>D2Node</code>, <code>D2Edge</code>, <code>D2NodeStyle</code>, <code>D2StrokeStyle</code>. 0 issues.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>Documentation updated</h3>
+        <p>AGENTS.md: file map, data flow, and gotchas sections updated for D2/table/tree. README.md: Mermaid and DOT example output updated to match go-output format (per-node style directives, not classDef).</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>All tests pass with race detector</h3>
+        <p>162 tests pass with <code>-race</code>. Coverage at 92.8%. Example binary runs correctly. <code>go vet</code> clean.</p>
+      </div>
+    </section>
+
+    <!-- PARTIALLY DONE -->
+    <section id="partially-done">
+      <h2><span class="num">B</span>Partially Done</h2>
+
+      <div class="card card-warning">
+        <h3>Auditor Export* methods incomplete</h3>
+        <p><code>plugin.go</code> has <code>ExportMermaid</code>, <code>ExportPlantUML</code>, <code>ExportGraphviz</code> but NO <code>ExportD2</code>, <code>ExportTable</code>, <code>ExportTree</code>, <code>ExportHTMLTree</code>. The WorkflowReport methods exist but aren't wired to the Auditor's file-export convenience API.</p>
+      </div>
+
+      <div class="card card-warning">
+        <h3>Test coverage gaps in new exports</h3>
+        <p><code>output_test.go</code> tests D2/table/tree basics but <code>WritePlantUMLString</code> has 0% coverage. Several Write* methods sit at ~83% (error paths untested). <code>WriteD2String</code>, <code>WriteTableString</code>, <code>WriteTreeString</code>, <code>WriteHTMLTreeString</code> may lack string-variant tests.</p>
+      </div>
+
+      <div class="card card-warning">
+        <h3>AGENTS.md gotchas not fully updated</h3>
+        <p>The diagram export gotcha was updated for Mermaid/PlantUML/DOT/D2 but the table and tree export patterns are not documented as gotchas. The D2StrokeStyle exhaustruct exclude and table module init() registration pattern are not mentioned.</p>
+      </div>
+
+      <div class="card card-warning">
+        <h3>README API reference incomplete</h3>
+        <p>README documents Mermaid/PlantUML/Graphviz but not D2, Table, or Tree export methods. The "Export Formats" table doesn't list the 16 table formats or the new tree/HTML tree methods.</p>
+      </div>
+    </section>
+
+    <!-- NOT STARTED -->
+    <section id="not-started">
+      <h2><span class="num">C</span>Not Started</h2>
+
+      <div class="card">
+        <h3>Project documentation files</h3>
+        <p><code>FEATURES.md</code>, <code>TODO_LIST.md</code>, <code>ROADMAP.md</code>, <code>docs/DOMAIN_LANGUAGE.md</code> — all missing or empty. No feature inventory, no task list, no roadmap, no domain glossary.</p>
+      </div>
+
+      <div class="card">
+        <h3>Integration / round-trip tests</h3>
+        <p>No integration tests verifying: report → JSON → LoadReport → report → diagram → structural verify. No cross-format consistency tests (e.g., same report rendered as Mermaid vs DOT vs D2 should have same node/edge structure).</p>
+      </div>
+
+      <div class="card">
+        <h3>Benchmarks for new render paths</h3>
+        <p>No benchmarks for WriteD2, WriteTable, WriteTree, WriteHTMLTree, or the report analytics (computePeakConcurrency, computeCriticalPathDuration). Only <code>benchmarks_test.go</code> exists for Mermaid smoke testing.</p>
+      </div>
+
+      <div class="card">
+        <h3>Fuzz tests for go-output integration</h3>
+        <p>No fuzz tests verifying that arbitrary step names (special chars, unicode, empty strings) produce valid diagrams via go-output's escape functions. The old code had <code>TestMermaid_SpecialCharsSanitized</code> but no fuzz coverage.</p>
+      </div>
+
+      <div class="card">
+        <h3>Example doesn't demo new formats</h3>
+        <p>The example pipeline only demos JSON + NDJSON + Mermaid. Doesn't show D2, Table (16 formats), or Tree output.</p>
+      </div>
+
+      <div class="card">
+        <h3>Version bump</h3>
+        <p>Still at v0.1.1. The go-output adoption is a significant API expansion (new export methods, new report fields, new dependencies). Should be v0.2.0.</p>
+      </div>
+
+      <div class="card">
+        <h3>CHANGELOG.md not updated</h3>
+        <p>No changelog entry for the go-output adoption, new report analytics, or new export formats.</p>
+      </div>
+    </section>
+
+    <!-- TOTALLY FUCKED UP -->
+    <section id="fucked-up">
+      <h2><span class="num">D</span>Totally Fucked Up!</h2>
+
+      <div class="issue issue-critical">
+        <span class="severity severity-critical">Critical</span>
+        <h3>Dependency bloat: from 2 to 12 direct deps, ~35 transitive</h3>
+        <div class="where">go.mod</div>
+        <p>The library went from 2 direct dependencies (go-workflow + backoff) to 12 direct + ~35 transitive. The table module pulls in <code>charm.land/lipgloss/v2</code> + 8 charmbracelet transitives. The serialization module pulls in <code>go-faster/yaml</code> + <code>go-faster/jx</code> + <code>go-faster/errors</code> + <code>segmentio/asm</code>. This contradicts the original "zero heavy deps" philosophy. An auditlog library should not transitively require a TUI styling framework.</p>
+        <div class="callout callout-warning">
+          <strong>Root cause</strong>: <code>table.go</code> blank-imports <code>go-output/table</code> (which requires lipgloss) and <code>go-output/serialization</code> (which requires yaml). These are auto-registered via <code>init()</code> so <code>RenderTableData</code> can dispatch to them. Every consumer of the auditlog library now pulls in lipgloss + yaml even if they only want JSON diagrams.
+        </div>
+      </div>
+
+      <div class="issue issue-important">
+        <span class="severity severity-important">Important</span>
+        <h3>go-output version skew: root v0.17.0 vs sub-modules v0.13.0</h3>
+        <div class="where">go.mod</div>
+        <p>go-output root is at v0.17.0 but all sub-modules are tagged at v0.13.0. This works today because MVS resolves the sub-modules independently, but it's a fragile arrangement. If go-output changes its module structure or drops the v0.13.0 tags, this breaks.</p>
+      </div>
+    </section>
+
+    <!-- IMPROVE -->
+    <section id="improve">
+      <h2><span class="num">E</span>What We Should Improve</h2>
+
+      <div class="card card-problem">
+        <h3>1. Make heavy deps optional</h3>
+        <p>The lipgloss and yaml dependencies should NOT be forced on every consumer. Options: (a) split auditlog into core + visualization sub-modules; (b) use build tags for optional format support; (c) lazy-import via interface satisfaction rather than <code>init()</code> blank imports. The current blank-import pattern in <code>table.go</code> is the root cause.</p>
+      </div>
+
+      <div class="card card-problem">
+        <h3>2. Deduplicate buildGraph patterns</h3>
+        <p><code>diagram.go:buildGraph()</code>, <code>d2.go:buildD2Graph()</code>, and <code>tree.go:buildTreeNodes()</code> share the same "iterate steps, deduplicate by name, add nodes + edges" pattern. Run <code>art-dupl -t 15</code> to verify and extract a shared traversal helper if warranted.</p>
+      </div>
+
+      <div class="card card-warning">
+        <h3>3. Error path test coverage</h3>
+        <p>Most Write* methods sit at 83% coverage — the error paths (writer failure, render failure) are untested. Add tests that inject failing <code>io.Writer</code>s and verify error wrapping.</p>
+      </div>
+
+      <div class="card card-warning">
+        <h3>4. Table export coupling</h3>
+        <p><code>table.go</code> imports 4 sub-modules via blank imports. This means ANY consumer of auditlog gets ALL 16 table format renderers compiled in, even if they only use JSON. Consider a <code>tableformats/</code> sub-package that consumers can import opt-in.</p>
+      </div>
+
+      <div class="card card-solution">
+        <h3>5. Report analytics are well-tested</h3>
+        <p><code>computePeakConcurrency</code> (88.9%), <code>computeCriticalPathDuration</code> (96.2%), <code>buildFailureReason</code> (94.4%) — solid coverage. The analytics logic is clean and single-purpose. Good work.</p>
+      </div>
+    </section>
+
+    <!-- TOP 25 NEXT -->
+    <section id="next-25">
+      <h2><span class="num">F</span>Top 25 Things to Do Next</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Task</th>
+            <th>Impact</th>
+            <th>Effort</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Add <code>ExportD2</code>, <code>ExportTable</code>, <code>ExportTree</code>, <code>ExportHTMLTree</code> to plugin.go Auditor</td><td><span class="badge badge-critical">Critical</span></td><td>Low</td></tr>
+          <tr><td>2</td><td>Fix dependency bloat: remove blank imports of lipgloss/yaml sub-modules or split into optional package</td><td><span class="badge badge-critical">Critical</span></td><td>High</td></tr>
+          <tr><td>3</td><td>Add <code>WritePlantUMLString</code> test (currently 0% coverage)</td><td><span class="badge badge-high">High</span></td><td>Low</td></tr>
+          <tr><td>4</td><td>Add error-path tests for all Write* methods (failing writer injection)</td><td><span class="badge badge-high">High</span></td><td>Medium</td></tr>
+          <tr><td>5</td><td>Create <code>FEATURES.md</code> with honest feature inventory</td><td><span class="badge badge-high">High</span></td><td>Low</td></tr>
+          <tr><td>6</td><td>Create <code>TODO_LIST.md</code> with actionable tasks</td><td><span class="badge badge-high">High</span></td><td>Low</td></tr>
+          <tr><td>7</td><td>Create <code>docs/DOMAIN_LANGUAGE.md</code> with ubiquitous language</td><td><span class="badge badge-medium">Medium</span></td><td>Low</td></tr>
+          <tr><td>8</td><td>Create <code>ROADMAP.md</code> with long-term direction</td><td><span class="badge badge-medium">Medium</span></td><td>Low</td></tr>
+          <tr><td>9</td><td>Update README.md API reference to document D2/Table/Tree export methods</td><td><span class="badge badge-high">High</span></td><td>Medium</td></tr>
+          <tr><td>10</td><td>Version bump to v0.2.0 (new API surface + new dependencies)</td><td><span class="badge badge-high">High</span></td><td>Low</td></tr>
+          <tr><td>11</td><td>Update CHANGELOG.md with go-output adoption entry</td><td><span class="badge badge-medium">Medium</span></td><td>Low</td></tr>
+          <tr><td>12</td><td>Add integration tests: report → JSON → LoadReport → report → diagram → verify structure</td><td><span class="badge badge-medium">Medium</span></td><td>Medium</td></tr>
+          <tr><td>13</td><td>Add benchmarks for WriteD2, WriteTable, WriteTree, report analytics</td><td><span class="badge badge-medium">Medium</span></td><td>Medium</td></tr>
+          <tr><td>14</td><td>Run <code>art-dupl -t 15</code> to check duplication between diagram.go, d2.go, tree.go</td><td><span class="badge badge-medium">Medium</span></td><td>Low</td></tr>
+          <tr><td>15</td><td>Update example to demo D2/Table/Tree output formats</td><td><span class="badge badge-medium">Medium</span></td><td>Medium</td></tr>
+          <tr><td>16</td><td>Add fuzz tests for diagram ID sanitization via go-output escape functions</td><td><span class="badge badge-low">Low</span></td><td>Medium</td></tr>
+          <tr><td>17</td><td>Add D2 diagram status-coloring tests (like Mermaid has for each status)</td><td><span class="badge badge-medium">Medium</span></td><td>Low</td></tr>
+          <tr><td>18</td><td>Add table export tests for all 16 formats (format dispatch verification)</td><td><span class="badge badge-medium">Medium</span></td><td>Medium</td></tr>
+          <tr><td>19</td><td>Add cross-format consistency tests (same report → Mermaid vs DOT vs D2 = same graph)</td><td><span class="badge badge-low">Low</span></td><td>Medium</td></tr>
+          <tr><td>20</td><td>Consider splitting library into core (auditlog) + visualization (diagrams/tables) sub-modules</td><td><span class="badge badge-medium">Medium</span></td><td>High</td></tr>
+          <tr><td>21</td><td>Add CI workflow to verify go-output version compatibility (root vs sub-module skew)</td><td><span class="badge badge-low">Low</span></td><td>Low</td></tr>
+          <tr><td>22</td><td>Document the table module <code>init()</code> registration pattern in AGENTS.md gotchas</td><td><span class="badge badge-low">Low</span></td><td>Low</td></tr>
+          <tr><td>23</td><td>Review whether <code>WriteTableString</code> double-sets opts.Writer (it sets buf twice)</td><td><span class="badge badge-medium">Medium</span></td><td>Low</td></tr>
+          <tr><td>24</td><td>Consider <code>output.RenderOptions</code> propagation for color modes in table/tree/diagram exports</td><td><span class="badge badge-low">Low</span></td><td>Medium</td></tr>
+          <tr><td>25</td><td>Add <code>WriteD2String</code>, <code>WriteTreeString</code>, <code>WriteHTMLTreeString</code> tests</td><td><span class="badge badge-medium">Medium</span></td><td>Low</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- THE BIG QUESTION -->
+    <section id="question">
+      <div class="question-box">
+        <h2><span class="num">G</span>The #1 Question I Can't Answer Myself</h2>
+        <p style="font-size: 17px; margin-top: 16px;">
+          <strong>Should this library remain single-module with all go-output sub-modules as direct dependencies, or should it split into a core auditlog module (JSON/NDJSON only) and a visualization module (diagrams/tables/trees)?</strong>
+        </p>
+        <p style="margin-top: 12px; color: var(--text-muted);">
+          The original design philosophy was "zero heavy deps" — 2 direct dependencies. The go-output adoption adds 12 direct + ~35 transitive dependencies including lipgloss (TUI styling), yaml, and toml parsers. This is fine if auditlog is meant to be a full-featured observability tool. But if consumers want a lightweight audit trail library (just JSON/NDJSON event capture), they now pay a heavy dependency tax for features they may not use.
+        </p>
+        <p style="margin-top: 12px; color: var(--text-muted);">
+          The tradeoff: splitting into sub-modules (like go-output itself does) keeps the core dependency-light but adds module management complexity. Keeping single-module is simpler but forces all consumers to carry lipgloss + yaml. This is an architectural direction decision, not a technical one — I can implement either path, but I can't decide which is right for your intended audience.
+        </p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Generated 2026-06-21 02:12 CEST &middot; Reviewed against commit <code>86068ea</code> &middot; Module: <code>github.com/larsartmann/go-workflow-auditlog</code> &middot; Go 1.26.3
+    </footer>
+  </main>
+</div>
+
+<script>
+// Progressive enhancement: scrollspy
+(function() {
+  var nav = document.querySelector('[data-nav]');
+  if (!nav || !('IntersectionObserver' in window)) return;
+  var links = nav.querySelectorAll('a');
+  var sections = [];
+  links.forEach(function(link) {
+    var id = link.getAttribute('href').slice(1);
+    var section = document.getElementById(id);
+    if (section) sections.push({ link: link, el: section });
+  });
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        links.forEach(function(l) { l.classList.remove('active'); });
+        var match = sections.find(function(s) { return s.el === entry.target; });
+        if (match) match.link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(function(s) { observer.observe(s.el); });
+})();
+</script>
+</body>
+</html>
