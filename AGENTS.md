@@ -27,20 +27,20 @@ Single-package library (`auditlog`) with these source files:
 doc.go             — Package doc comment
 types.go           — Domain enums: EventType, Phase, StepStatus, StepRef, fromFlowStatus, SchemaVersion
 event.go           — Event type (embeds StepRef, carries RunID) + convenience methods
-step.go            — StepInfo type (embeds StepRef, carries StepID) + methods (HasError, DeriveStatus)
+step.go            — StepInfo type + stepCore (shared accumulator for live/replay) + toStepInfo() conversion
 plugin.go          — Public API: New(), Attach(), Snapshot(), Report(), Export*(), Config, Auditor, RunID()
 recorder.go        — Core state machine: event capture, step records, attempt tracking, RunID + StepID counters
 runid.go           — newRunID(): 128-bit crypto-random hex run identifier
 attach.go          — Attach/Snapshot logic: callback injection + post-run DAG capture (incl. sub-workflows)
-report.go          — WorkflowReport type (carries RunID) + Validate() + sentinel errors + query methods + WriteJSON
-report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates (WorkflowSucceeded)
+report.go          — WorkflowReport type (carries RunID) + Validate() + sentinel errors + query methods + Duration()/Summary() + WriteJSON + Export*() + computeWallClockDurationMs
+report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates (WorkflowSucceeded, finalizeDenormalized)
 filter.go          — Report filtering (Filtered, ReportOption, WithStepsByStatus, etc.)
-diff.go            — Diff API: DiffResult/StepDiff, Diff() between reports, Duration() wall-clock, Summary()
+diff.go            — Diff API: DiffResult/StepDiff, Diff() between reports
 index.go           — ReportIndex: opt-in O(1) lookup maps over a report
 loader.go          — LoadReport / LoadReportFromReader / LoadReportFromBytes
 export.go          — NDJSON writer (writeEventsNDJSON internal helper)
 ndjson.go          — ReadEvents NDJSON reader (sentinel errors)
-replay.go          — ReplayEvents: reconstruct Report from event stream (preserves RunID + assigns StepIDs)
+replay.go          — ReplayEvents: reconstruct Report from event stream (uses stepCore from step.go, preserves RunID + assigns StepIDs)
 diagram.go         — Translation layer: buildGraph() converts WorkflowReport → go-output GraphNode/GraphEdge + statusStyle() maps StepStatus → GraphStyle colors
 mermaid.go         — Mermaid flowchart export (delegates to go-output graph.MermaidRenderer, code fence off)
 plantuml.go        — PlantUML component diagram export (delegates to go-output plantuml.PlantUMLDiagram)
@@ -109,6 +109,8 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - **Table export** (`WriteTable`) delegates to `output.RenderTableData` which dispatches to 16+ registered formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml. Sub-module imports auto-register renderers via `init()`. `buildTableData()` produces columns: Step, Status, Duration, Attempts, Error.
 - **Tree export** (`WriteTree` / `WriteHTMLTree`) builds a `TreeNode` forest from step DAG: root = steps with no dependencies, children = dependents (execution flow). `tree.ASCIITreeRenderer` produces depth-colored ASCII output; `markup.HTMLTreeRenderer` produces nested `<ul>` lists.
 - **`StepInfo.Error` reflects the FINAL outcome only.** For a step that fails on attempts 1–2 and succeeds on attempt 3, the `Error` field is `nil` (not "transient failure" from the last failed attempt). The per-attempt error history is preserved in the `Event` stream — each `attempt_end` event carries its own `Error`. Rationale: the step-level `Error` is the answer to "why did this step end in its final state?", and a succeeded step ended successfully. See `recorder.go:recordAfterStep` and the regression test `TestRetry_StepErrorClearedOnSuccess`.
+- **`RunID` is a branded string type** (`type RunID string`) defined in `types.go`. It serializes to/from JSON as a plain string but the type system prevents accidentally passing a `WorkflowID` (also a string) where a `RunID` is expected. Convert with `RunID("value")` or `string(id)`. The `len()` built-in works directly on `RunID`; `hex.DecodeString` and similar stdlib functions need `string(runID)`.
+- **`stepCore` is the shared step-state accumulator** (`step.go`) embedded by both `stepRecord` (live capture, `recorder.go`) and the replay accumulator (`replay.go`). The single `toStepInfo()` method produces the public `StepInfo` from the common fields. Live-only fields (stepID, pendingAttempts, maxAttempts, hasRetry, hasTimeout, dependencies) live on `stepRecord` only. Any new step-state field MUST go on `stepCore` so both paths stay synchronized.
 
 ---
 
