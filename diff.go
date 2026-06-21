@@ -36,7 +36,7 @@ func (d DiffResult) HasChanges() bool {
 // Output slices are sorted by step name for deterministic results across runs.
 func (r WorkflowReport) Diff(other WorkflowReport) DiffResult {
 	result := DiffResult{
-		DurationDelta: other.TotalDurationMs - r.TotalDurationMs,
+		DurationDelta: other.WallClockDurationMs - r.WallClockDurationMs,
 	}
 
 	// Build step lookup maps by name.
@@ -112,8 +112,21 @@ func (r WorkflowReport) Duration() time.Duration {
 }
 
 // Summary returns a human-readable one-line summary of the report.
+// Uses wall-clock duration (actual elapsed time) rather than the summed
+// per-step duration, and includes the failure reason when the workflow
+// did not succeed.
 func (r WorkflowReport) Summary() string {
-	return fmt.Sprintf("%s: %d steps (%d ok, %d failed, %d skipped) in %.1fms",
+	base := fmt.Sprintf("%s: %d steps (%d ok, %d failed, %d skipped) in %.1fms",
 		r.WorkflowID, r.StepCount, r.SucceededCount, r.FailedCount,
-		r.SkippedCount, r.TotalDurationMs)
+		r.SkippedCount, r.WallClockDurationMs)
+
+	if r.WorkflowSucceeded {
+		return base
+	}
+
+	if r.FailureReason != "" {
+		return base + " — " + r.FailureReason
+	}
+
+	return base + " — failed"
 }
