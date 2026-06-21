@@ -2,6 +2,37 @@ package auditlog
 
 import "time"
 
+// stepCore holds the common step-state fields shared between live capture
+// (stepRecord in recorder.go) and event-stream replay (replay.go). Both paths
+// accumulate the same data from different sources; this shared type ensures
+// they can never diverge. The single toStepInfo method produces the public
+// StepInfo with the fields available from the core alone.
+type stepCore struct {
+	StepRef
+
+	attemptCount int
+	startedAt    *time.Time
+	finishedAt   *time.Time
+	durationMs   *float64
+	attemptErr   *string
+	status       StepStatus
+}
+
+// toStepInfo builds a public StepInfo from the core accumulator fields.
+// Callers that have additional live-only fields (stepID, maxAttempts, etc.)
+// add them after calling this.
+func (c stepCore) toStepInfo() StepInfo {
+	return StepInfo{
+		StepRef:      c.StepRef,
+		Status:       c.status,
+		AttemptCount: c.attemptCount,
+		StartedAt:    c.startedAt,
+		FinishedAt:   c.finishedAt,
+		DurationMs:   c.durationMs,
+		Error:        c.attemptErr,
+	}
+}
+
 // StepInfo aggregates all observed data for a single workflow step.
 type StepInfo struct {
 	StepRef

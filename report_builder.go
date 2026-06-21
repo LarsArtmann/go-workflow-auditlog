@@ -81,20 +81,15 @@ func (r *Recorder) buildDependentsMapLocked() map[flow.Steper][]StepRef {
 }
 
 // stepRecordToInfo converts an internal stepRecord to a public StepInfo.
+// Uses stepCore.toStepInfo() for the common fields, then adds live-only data.
 func stepRecordToInfo(rec *stepRecord) StepInfo {
-	return StepInfo{
-		StepRef:      rec.StepRef,
-		StepID:       rec.stepID,
-		Status:       rec.status,
-		AttemptCount: rec.attemptCount,
-		MaxAttempts:  rec.maxAttempts,
-		StartedAt:    rec.startedAt,
-		FinishedAt:   rec.finishedAt,
-		DurationMs:   rec.durationMs,
-		Error:        rec.attemptErr,
-		HasRetry:     rec.hasRetry,
-		HasTimeout:   rec.hasTimeout,
-	}
+	info := rec.toStepInfo()
+	info.StepID = rec.stepID
+	info.MaxAttempts = rec.maxAttempts
+	info.HasRetry = rec.hasRetry
+	info.HasTimeout = rec.hasTimeout
+
+	return info
 }
 
 // buildReportFromCore assembles a WorkflowReport from core data, deriving all

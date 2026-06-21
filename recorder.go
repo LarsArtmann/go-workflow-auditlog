@@ -26,25 +26,18 @@ type attemptTracker struct {
 	startTime time.Time
 }
 
-// stepRecord is the internal mutable state for a single step.
+// stepRecord is the internal mutable state for a single step during live
+// capture. It embeds stepCore (shared with replay) and adds fields only
+// available from the live workflow (step ID, pending attempts, Snapshot data).
 type stepRecord struct {
-	StepRef
+	stepCore
 
 	stepID int
 
-	attemptCount int
-	startedAt    *time.Time
-	finishedAt   *time.Time
-	durationMs   *float64
-	attemptErr   *string
-
-	// pendingAttempt tracks the in-flight attempt's start time.
+	// pendingAttempts tracks in-flight attempt start times.
 	pendingAttempts []attemptTracker
 
-	// status is set by Snapshot from the workflow's final state.
-	status StepStatus
-
-	// Snapshot-enriched fields.
+	// Snapshot-enriched fields (not available during replay).
 	maxAttempts  int
 	hasRetry     bool
 	hasTimeout   bool
@@ -215,10 +208,12 @@ func (r *Recorder) getOrCreateStepLocked(step flow.Steper, name string, now time
 	}
 
 	rec := &stepRecord{
-		StepRef:   StepRef{Name: name, StepType: stepTypeName(step)},
-		stepID:    r.nextStepIDLocked(),
-		startedAt: &now,
-		status:    StepStatusRunning,
+		stepCore: stepCore{
+			StepRef:   StepRef{Name: name, StepType: stepTypeName(step)},
+			startedAt: &now,
+			status:    StepStatusRunning,
+		},
+		stepID: r.nextStepIDLocked(),
 	}
 	r.steps[step] = rec
 

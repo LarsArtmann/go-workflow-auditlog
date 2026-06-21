@@ -9,18 +9,6 @@ import (
 // ErrReplayNoEvents is returned when ReplayEvents receives zero events.
 var ErrReplayNoEvents = errors.New("no events to replay")
 
-// replayStep is the accumulator for a single step during replay.
-type replayStep struct {
-	StepRef
-
-	attemptCount int
-	startedAt    *time.Time
-	finishedAt   *time.Time
-	durationMs   *float64
-	attemptErr   *string
-	status       StepStatus
-}
-
 // ReplayEvents reconstructs a WorkflowReport from a flat event stream.
 //
 // This is the inverse of ExportEventsToNDJSON: write events to NDJSON, then
@@ -60,7 +48,7 @@ func ReplayEvents(events []Event) (WorkflowReport, error) {
 // replayStepsFromEvents folds a flat event stream into sorted StepInfo records
 // with stable 1-based StepIDs.
 func replayStepsFromEvents(events []Event) []StepInfo {
-	steps := make(map[string]*replayStep)
+	steps := make(map[string]*stepCore)
 
 	for _, evt := range events {
 		step := getOrCreateReplayStep(steps, evt.Name, evt.StepType)
@@ -69,15 +57,7 @@ func replayStepsFromEvents(events []Event) []StepInfo {
 
 	stepInfos := make([]StepInfo, 0, len(steps))
 	for _, rs := range steps {
-		stepInfos = append(stepInfos, StepInfo{
-			StepRef:      rs.StepRef,
-			Status:       rs.status,
-			AttemptCount: rs.attemptCount,
-			StartedAt:    rs.startedAt,
-			FinishedAt:   rs.finishedAt,
-			DurationMs:   rs.durationMs,
-			Error:        rs.attemptErr,
-		})
+		stepInfos = append(stepInfos, rs.toStepInfo())
 	}
 
 	// Sort by name for deterministic output, then assign stable 1-based IDs.
@@ -90,8 +70,8 @@ func replayStepsFromEvents(events []Event) []StepInfo {
 	return stepInfos
 }
 
-// replayApplyEvent updates a replayStep accumulator from a single event.
-func replayApplyEvent(step *replayStep, evt Event) {
+// replayApplyEvent updates a stepCore accumulator from a single event.
+func replayApplyEvent(step *stepCore, evt Event) {
 	switch {
 	case evt.IsAttemptStart():
 		if step.startedAt == nil {
@@ -114,12 +94,12 @@ func replayApplyEvent(step *replayStep, evt Event) {
 	}
 }
 
-func getOrCreateReplayStep(steps map[string]*replayStep, name, stepType string) *replayStep {
+func getOrCreateReplayStep(steps map[string]*stepCore, name, stepType string) *stepCore {
 	if step, ok := steps[name]; ok {
 		return step
 	}
 
-	step := &replayStep{
+	step := &stepCore{
 		StepRef: StepRef{Name: name, StepType: stepType},
 		status:  StepStatusPending,
 	}
