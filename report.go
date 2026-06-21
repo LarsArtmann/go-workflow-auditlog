@@ -21,6 +21,10 @@ var (
 	// ErrStatusDrift indicates a step's stored Status disagrees with the
 	// status implied by its Error pointer (see [StepInfo.DeriveStatus]).
 	ErrStatusDrift = errors.New("step status does not match derived status")
+	// ErrCountMismatch indicates a denormalized status-count field
+	// (SucceededCount, FailedCount, etc.) disagrees with the actual count
+	// derived from the Steps slice.
+	ErrCountMismatch = errors.New("status count does not match steps")
 )
 
 // WorkflowReport is a consolidated, machine-readable snapshot of the audit log.
@@ -72,6 +76,36 @@ func (r WorkflowReport) Validate() error {
 		if step.Status != derived {
 			return fmt.Errorf("%w: step %q has status %q but derived status is %q",
 				ErrStatusDrift, step.Name, step.Status, derived)
+		}
+	}
+
+	err := validateStatusCounts(r)
+
+	return err
+}
+
+// validateStatusCounts verifies the denormalized status-count fields match
+// the actual counts derived from the Steps slice.
+func validateStatusCounts(r WorkflowReport) error {
+	want := map[StepStatus]int{
+		StepStatusSucceeded: r.SucceededCount,
+		StepStatusFailed:    r.FailedCount,
+		StepStatusSkipped:   r.SkippedCount,
+		StepStatusCanceled:  r.CanceledCount,
+		StepStatusPending:   r.PendingCount,
+		StepStatusRunning:   r.RunningCount,
+	}
+
+	got := make(map[StepStatus]int)
+
+	for _, step := range r.Steps {
+		got[step.Status]++
+	}
+
+	for status, expected := range want {
+		if got[status] != expected {
+			return fmt.Errorf("%w: %s expected %d, got %d",
+				ErrCountMismatch, status, expected, got[status])
 		}
 	}
 
