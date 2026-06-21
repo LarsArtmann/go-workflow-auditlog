@@ -33,14 +33,29 @@
         --radius: 0px;
         --radius-sm: 0px;
 
-        --font-heading: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas, monospace;
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
       }
 
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      html { scroll-behavior: smooth; }
-      section[id], [id] { scroll-margin-top: 60px; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      section[id],
+      [id] {
+        scroll-margin-top: 60px;
+      }
 
       body {
         background: var(--surface);
@@ -66,149 +81,506 @@
         align-items: center;
       }
 
-      .layout { display: flex; gap: 2.5rem; padding: 2rem; }
-      .sidebar {
-        width: 220px; flex-shrink: 0; position: sticky; top: 1rem;
-        align-self: flex-start; height: calc(100vh - 2rem); overflow-y: auto; display: none;
+      .layout {
+        display: flex;
+        gap: 2.5rem;
+        padding: 2rem;
       }
-      .sidebar nav { display: flex; flex-direction: column; gap: 0; }
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+        height: calc(100vh - 2rem);
+        overflow-y: auto;
+        display: none;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
       .sidebar .label {
-        font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent);
-        margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border-strong);
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
       }
       .sidebar a {
-        font-size: 0.85rem; color: var(--text-muted); text-decoration: none;
-        padding: 0.45rem 0.75rem; border-left: 2px solid transparent;
-        transition: all 0.15s ease; line-height: 1.4; font-weight: 500;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 0.45rem 0.75rem;
+        border-left: 2px solid transparent;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+        font-weight: 500;
       }
-      .sidebar a:hover, .sidebar a.active {
-        color: var(--accent); border-left-color: var(--accent);
+      .sidebar a:hover,
+      .sidebar a.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
         background: color-mix(in srgb, var(--accent) 8%, transparent);
       }
-      .main { flex: 1; min-width: 0; }
+      .main {
+        flex: 1;
+        min-width: 0;
+      }
 
-      h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.02em; }
-      h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 0.6rem; }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      h1 {
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        line-height: 1.1;
+        margin: 0 0 0.6rem;
+      }
       h2 {
-        font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.4rem;
-        border-bottom: 2px solid var(--border-strong); display: flex; align-items: baseline; gap: 0.6rem;
+        font-size: 1.4rem;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
       }
-      h2 .num { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); font-weight: 700; letter-spacing: 0.06em; }
-      h3 { font-size: 1.1rem; margin: 0 0 0.4rem; font-weight: 700; }
-      h4 { font-size: 0.98rem; margin: 0 0 0.3rem; font-weight: 700; }
-      p { margin: 0 0 1rem; }
+      h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h4 {
+        font-size: 0.98rem;
+        margin: 0 0 0.3rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
 
-      .hero { padding: 1.5rem 0 1.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-strong); }
+      .hero {
+        padding: 1.5rem 0 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
       .hero-badge {
-        display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.14em; color: var(--surface);
-        background: var(--accent); padding: 0.3rem 0.7rem; margin-bottom: 0.9rem;
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--surface);
+        background: var(--accent);
+        padding: 0.3rem 0.7rem;
+        margin-bottom: 0.9rem;
       }
-      .hero-subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 70ch; margin: 0; }
+      .hero-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        max-width: 70ch;
+        margin: 0;
+      }
 
-      .hero-shapes { position: relative; height: 80px; margin-bottom: 1rem; }
-      .hero-shapes .circle { position: absolute; top: 0; left: 0; width: 56px; height: 56px; background: var(--problem); border-radius: 50%; }
-      .hero-shapes .square { position: absolute; top: 24px; left: 72px; width: 48px; height: 48px; background: var(--solution); }
-      .hero-shapes .tri { position: absolute; top: 8px; left: 140px; width: 0; height: 0; border-left: 28px solid transparent; border-right: 28px solid transparent; border-bottom: 48px solid var(--warning); }
+      .hero-shapes {
+        position: relative;
+        height: 80px;
+        margin-bottom: 1rem;
+      }
+      .hero-shapes .circle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 56px;
+        height: 56px;
+        background: var(--problem);
+        border-radius: 50%;
+      }
+      .hero-shapes .square {
+        position: absolute;
+        top: 24px;
+        left: 72px;
+        width: 48px;
+        height: 48px;
+        background: var(--solution);
+      }
+      .hero-shapes .tri {
+        position: absolute;
+        top: 8px;
+        left: 140px;
+        width: 0;
+        height: 0;
+        border-left: 28px solid transparent;
+        border-right: 28px solid transparent;
+        border-bottom: 48px solid var(--warning);
+      }
 
       .card {
-        background: var(--surface-raised); border: 1px solid var(--border);
-        padding: 1.1rem 1.3rem; margin-bottom: 1rem; border-left: 4px solid var(--border-strong);
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
       }
-      .card-problem { border-left-color: var(--problem); background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised)); }
-      .card-solution { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised)); }
-      .card-warning { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised)); }
+      .card-problem {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
 
       .issue {
-        background: var(--surface-raised); border: 1px solid var(--border);
-        padding: 1.1rem 1.3rem; margin-bottom: 1rem; border-left: 4px solid var(--border-strong);
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
       }
-      .issue-critical { border-left-color: var(--problem); background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised)); }
-      .issue-important { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised)); }
-      .issue-nice { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised)); }
-      .issue h3 { margin-bottom: 0.3rem; }
-      .issue .where { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-faint); margin: 0.2rem 0 0.6rem; }
-      .issue p:last-child { margin-bottom: 0; }
+      .issue-critical {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .issue-important {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+      .issue-nice {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .issue h3 {
+        margin-bottom: 0.3rem;
+      }
+      .issue .where {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        margin: 0.2rem 0 0.6rem;
+      }
+      .issue p:last-child {
+        margin-bottom: 0;
+      }
 
       .severity {
-        display: inline-block; font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700;
-        letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.55rem; margin-bottom: 0.6rem; color: var(--surface);
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        margin-bottom: 0.6rem;
+        color: var(--surface);
       }
-      .severity-critical { background: var(--problem); }
-      .severity-important { background: var(--warning); }
-      .severity-nice { background: var(--solution); }
+      .severity-critical {
+        background: var(--problem);
+      }
+      .severity-important {
+        background: var(--warning);
+      }
+      .severity-nice {
+        background: var(--solution);
+      }
 
       .badge {
-        display: inline-block; font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700;
-        letter-spacing: 0.06em; text-transform: uppercase; padding: 0.18rem 0.5rem;
-        border: 1px solid var(--border-strong); color: var(--text-muted);
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.18rem 0.5rem;
+        border: 1px solid var(--border-strong);
+        color: var(--text-muted);
       }
-      .badge-critical { color: var(--problem); border-color: var(--problem); }
-      .badge-high { color: var(--warning); border-color: var(--warning); }
-      .badge-medium { color: var(--accent); border-color: var(--accent); }
-      .badge-low { color: var(--text-muted); }
-      .badge-fixed { color: var(--solution); border-color: var(--solution); }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-medium {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .badge-low {
+        color: var(--text-muted);
+      }
+      .badge-fixed {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
 
       .callout {
-        margin: 0.8rem 0 0; padding: 0.7rem 0.9rem; border-left: 3px solid var(--border-strong);
-        background: color-mix(in srgb, var(--text) 5%, transparent); font-size: 0.9rem;
+        margin: 0.8rem 0 0;
+        padding: 0.7rem 0.9rem;
+        border-left: 3px solid var(--border-strong);
+        background: color-mix(in srgb, var(--text) 5%, transparent);
+        font-size: 0.9rem;
       }
-      .callout strong { display: inline-block; margin-right: 0.4rem; }
-      .callout-solution { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 10%, transparent); }
-      .callout-warning { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 10%, transparent); }
+      .callout strong {
+        display: inline-block;
+        margin-right: 0.4rem;
+      }
+      .callout-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 10%, transparent);
+      }
+      .callout-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 10%, transparent);
+      }
 
-      .stat-grid, .scorecard { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin: 1rem 0 1.5rem; }
-      .stat-card, .score-card { background: var(--surface-raised); border: 1px solid var(--border); padding: 1.1rem 1rem; position: relative; }
-      .stat-card::before, .score-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--border-strong); }
-      .stat-bad::before, .score-bad::before { background: var(--problem); }
-      .stat-good::before, .score-good::before { background: var(--solution); }
-      .stat-warn::before, .score-warn::before { background: var(--warning); }
-      .stat-value, .score { font-family: var(--font-heading); font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: var(--text); }
-      .stat-bad .stat-value, .score-bad .score { color: var(--problem); }
-      .stat-good .stat-value, .score-good .score { color: var(--solution); }
-      .stat-warn .stat-value, .score-warn .score { color: var(--warning); }
-      .stat-label, .score-card .label { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin-top: 0.5rem; }
+      .stat-grid,
+      .scorecard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .stat-card,
+      .score-card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1rem;
+        position: relative;
+      }
+      .stat-card::before,
+      .score-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border-strong);
+      }
+      .stat-bad::before,
+      .score-bad::before {
+        background: var(--problem);
+      }
+      .stat-good::before,
+      .score-good::before {
+        background: var(--solution);
+      }
+      .stat-warn::before,
+      .score-warn::before {
+        background: var(--warning);
+      }
+      .stat-value,
+      .score {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--text);
+      }
+      .stat-bad .stat-value,
+      .score-bad .score {
+        color: var(--problem);
+      }
+      .stat-good .stat-value,
+      .score-good .score {
+        color: var(--solution);
+      }
+      .stat-warn .stat-value,
+      .score-warn .score {
+        color: var(--warning);
+      }
+      .stat-label,
+      .score-card .label {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-faint);
+        margin-top: 0.5rem;
+      }
 
-      .strengths { display: grid; gap: 0.5rem; margin: 1rem 0 1.5rem; }
-      .strength { display: grid; grid-template-columns: auto 1fr; gap: 0.8rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
-      .strength .check { font-family: var(--font-mono); font-weight: 700; color: var(--solution); font-size: 1.1rem; line-height: 1.4; }
-      .strength .text strong { display: block; margin-bottom: 0.15rem; }
-      .strength .text span { color: var(--text-muted); font-size: 0.9rem; }
+      .strengths {
+        display: grid;
+        gap: 0.5rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .strength {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.8rem;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .strength .check {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        color: var(--solution);
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+      .strength .text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+      .strength .text span {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
 
-      table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.9rem; }
-      th { text-align: left; padding: 0.6rem 0.9rem; background: var(--surface-raised); color: var(--text-faint); font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--border-strong); }
-      td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-      tr:hover td { background: var(--surface-raised); }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.9rem;
+      }
+      th {
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        background: var(--surface-raised);
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      td {
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      tr:hover td {
+        background: var(--surface-raised);
+      }
 
-      pre { background: var(--surface-sunken); border: 1px solid var(--border); padding: 1rem 1.2rem; margin: 1rem 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65; overflow-x: auto; }
-      code { font-family: var(--font-mono); }
-      .tok-keyword { color: var(--accent); }
-      .tok-type { color: var(--warning); }
-      .tok-string { color: var(--solution); }
-      .tok-comment { color: var(--text-faint); font-style: italic; }
-      .tok-func { color: #74a9ff; }
-      .tok-attr { color: var(--accent); }
+      pre {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      .tok-keyword {
+        color: var(--accent);
+      }
+      .tok-type {
+        color: var(--warning);
+      }
+      .tok-string {
+        color: var(--solution);
+      }
+      .tok-comment {
+        color: var(--text-faint);
+        font-style: italic;
+      }
+      .tok-func {
+        color: #74a9ff;
+      }
+      .tok-attr {
+        color: var(--accent);
+      }
 
-      .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0; }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
 
       .question {
-        background: var(--surface-raised); border: 1px solid var(--accent); border-left: 4px solid var(--accent);
-        padding: 1.4rem 1.6rem; margin: 1.5rem 0;
+        background: var(--surface-raised);
+        border: 1px solid var(--accent);
+        border-left: 4px solid var(--accent);
+        padding: 1.4rem 1.6rem;
+        margin: 1.5rem 0;
       }
-      .question .q-label { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); margin-bottom: 0.6rem; }
-      .question h3 { font-size: 1.25rem; margin-bottom: 0.6rem; }
-      .question p { color: var(--text-muted); margin-bottom: 0.6rem; }
-      .question .why { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-faint); }
+      .question .q-label {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 0.6rem;
+      }
+      .question h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.6rem;
+      }
+      .question p {
+        color: var(--text-muted);
+        margin-bottom: 0.6rem;
+      }
+      .question .why {
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        color: var(--text-faint);
+      }
 
-      .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-faint); font-family: var(--font-mono); }
+      .footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8rem;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
 
-      @media (min-width: 1024px) { .sidebar { display: block; } }
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: block;
+        }
+      }
       @media (max-width: 768px) {
-        .layout { flex-direction: column; padding: 1rem; }
-        .top-bar { padding: 0.6rem 1rem; flex-wrap: wrap; gap: 0.3rem; }
-        .grid-2 { grid-template-columns: 1fr; }
-        .stat-grid, .scorecard { grid-template-columns: repeat(2, 1fr); }
+        .layout {
+          flex-direction: column;
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 0.6rem 1rem;
+          flex-wrap: wrap;
+          gap: 0.3rem;
+        }
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .stat-grid,
+        .scorecard {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
     </style>
   </head>
@@ -244,10 +616,10 @@
           <div class="hero-badge">Full Status Update</div>
           <h1>Post Wall-Clock Metrics &mdash; Honest Snapshot</h1>
           <p class="hero-subtitle">
-            Comprehensive point-in-time audit of go-workflow-auditlog after the
-            wall-clock duration metrics landed. Tests green, lint clean, tree clean
-            &mdash; but the report surfaced real gaps: missing project docs, an empty
-            CHANGELOG Unreleased section, and zero FEATURES.md / TODO_LIST.md.
+            Comprehensive point-in-time audit of go-workflow-auditlog after the wall-clock duration
+            metrics landed. Tests green, lint clean, tree clean &mdash; but the report surfaced real
+            gaps: missing project docs, an empty CHANGELOG Unreleased section, and zero FEATURES.md
+            / TODO_LIST.md.
           </p>
         </div>
 
@@ -290,31 +662,37 @@
 
         <div class="callout callout-solution">
           <strong>Headline:</strong>
-          The headline number was lying by 4&times;. A 36-step BuildFlow pipeline that
-          runs in ~64&thinsp;s wall-clock reported <em>265&thinsp;s</em> total because
-          <code>TotalDurationMs</code> sums per-step durations across parallel branches.
-          That ghost system is now surfaced as a real JSON field
-          (<code>WallClockDurationMs</code>) and threaded through <code>Summary()</code>,
-          <code>Diff()</code>, and <code>Validate()</code>.
+          The headline number was lying by 4&times;. A 36-step BuildFlow pipeline that runs in
+          ~64&thinsp;s wall-clock reported <em>265&thinsp;s</em> total because
+          <code>TotalDurationMs</code> sums per-step durations across parallel branches. That ghost
+          system is now surfaced as a real JSON field (<code>WallClockDurationMs</code>) and
+          threaded through <code>Summary()</code>, <code>Diff()</code>, and <code>Validate()</code>.
         </div>
 
         <!-- ===== A · FULLY DONE ===== -->
         <h2 id="done"><span class="num">01</span>A &middot; Fully Done</h2>
-        <p>Verified against source, tests, and git history. Committed to <code>master</code>, pushed to <code>origin/master</code>.</p>
+        <p>
+          Verified against source, tests, and git history. Committed to <code>master</code>, pushed
+          to <code>origin/master</code>.
+        </p>
 
         <div class="card card-solution">
           <h4>WallClockDurationMs field <span class="badge badge-fixed">2370e5a</span></h4>
           <p>
             New JSON field on <code>WorkflowReport</code> computed as the earliest-to-latest
-            event-timestamp span. Eliminates the 4&times; inflation for parallel workflows.
-            The computation already lived in <code>diff.go</code> as a Go-only method &mdash; this
+            event-timestamp span. Eliminates the 4&times; inflation for parallel workflows. The
+            computation already lived in <code>diff.go</code> as a Go-only method &mdash; this
             surfaced the ghost system as real serialized data.
           </p>
-          <div class="where">report.go:46 &middot; report_builder.go computeWallClockDurationMs()</div>
+          <div class="where">
+            report.go:46 &middot; report_builder.go computeWallClockDurationMs()
+          </div>
         </div>
 
         <div class="card card-solution">
-          <h4>Summary() &amp; Diff() on wall-clock <span class="badge badge-fixed">efe9740</span></h4>
+          <h4>
+            Summary() &amp; Diff() on wall-clock <span class="badge badge-fixed">efe9740</span>
+          </h4>
           <p>
             <code>Summary()</code> now reports <code>WallClockDurationMs</code> and appends
             <code>FailureReason</code> on failure, making the one-liner self-diagnosing.
@@ -325,7 +703,9 @@
         </div>
 
         <div class="card card-solution">
-          <h4>Validate() checks 6 status-count fields <span class="badge badge-fixed">d33aabb</span></h4>
+          <h4>
+            Validate() checks 6 status-count fields <span class="badge badge-fixed">d33aabb</span>
+          </h4>
           <p>
             <code>Validate()</code> now verifies Succeeded/Failed/Skipped/Canceled/Pending/Running
             counts against the actual <code>Steps</code> slice. Extracted into
@@ -338,11 +718,11 @@
         <div class="card card-solution">
           <h4>PeakConcurrency + CriticalPathDurationMs + FailureReason</h4>
           <p>
-            Three richer aggregates computed in <code>finalizeDenormalized()</code>:
-            max in-flight attempts (event-stream scan), longest dependency-chain duration
-            (memoized DFS), and a human-readable failure summary. All routed through the
-            single construction path so <code>BuildReport</code>, <code>Filtered</code>, and
-            <code>ReplayEvents</code> stay consistent.
+            Three richer aggregates computed in <code>finalizeDenormalized()</code>: max in-flight
+            attempts (event-stream scan), longest dependency-chain duration (memoized DFS), and a
+            human-readable failure summary. All routed through the single construction path so
+            <code>BuildReport</code>, <code>Filtered</code>, and <code>ReplayEvents</code> stay
+            consistent.
           </p>
           <div class="where">report_builder.go &middot; report.go:48-50</div>
         </div>
@@ -350,8 +730,8 @@
         <div class="card card-solution">
           <h4>D2 / Table / Tree export <span class="badge badge-fixed">65df5fd</span></h4>
           <p>
-            New renderers added via go-output: D2 architecture diagram, Markdown table,
-            and ASCII tree. Example binary now exports all three artifact types.
+            New renderers added via go-output: D2 architecture diagram, Markdown table, and ASCII
+            tree. Example binary now exports all three artifact types.
             <code>buildD2Graph</code> replaced with a thin converter from the shared
             <code>buildGraph()</code> (single source of truth for all diagram renderers).
           </p>
@@ -361,18 +741,18 @@
           <h4>Refactors (prior agent) <span class="badge badge-fixed">ceb4e26 f1aa9f1</span></h4>
           <p>
             Status colors consolidated into <code>StepStatus.Color()</code> method;
-            <code>stepLabel</code> / <code>treeStepLabel</code> unified into one function;
-            redundant <code>opts.Writer</code> assignment removed.
+            <code>stepLabel</code> / <code>treeStepLabel</code> unified into one function; redundant
+            <code>opts.Writer</code> assignment removed.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>Docs &amp; tests</h4>
           <p>
-            AGENTS.md and README.md updated with new fields, the three-duration-metrics
-            gotcha, and the D2/table/tree docs. 8+ new tests in
-            <code>coverage_test.go</code> covering wall-clock, peak concurrency, critical
-            path, failure reason, count-mismatch validation, and the diff/summary switches.
+            AGENTS.md and README.md updated with new fields, the three-duration-metrics gotcha, and
+            the D2/table/tree docs. 8+ new tests in
+            <code>coverage_test.go</code> covering wall-clock, peak concurrency, critical path,
+            failure reason, count-mismatch validation, and the diff/summary switches.
           </p>
         </div>
 
@@ -384,23 +764,23 @@
           <p>
             The 6 new fields (<code>WallClockDurationMs</code>,
             <code>PeakConcurrency</code>, <code>CriticalPathDurationMs</code>,
-            <code>FailureReason</code>, <code>PendingCount</code>, <code>RunningCount</code>)
-            and <code>ErrCountMismatch</code> are committed to code and docs but
-            <strong>not recorded in <code>CHANGELOG.md</code></strong>. The
-            <code>[Unreleased]</code> section has empty Added/Changed/Fixed blocks.
-            Consumers reading the changelog won&rsquo;t know these exist.
+            <code>FailureReason</code>, <code>PendingCount</code>, <code>RunningCount</code>) and
+            <code>ErrCountMismatch</code> are committed to code and docs but
+            <strong>not recorded in <code>CHANGELOG.md</code></strong
+            >. The <code>[Unreleased]</code> section has empty Added/Changed/Fixed blocks. Consumers
+            reading the changelog won&rsquo;t know these exist.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Duration() helper lives in diff.go</h4>
           <p>
-            <code>computeWallClockDurationMs()</code> and the <code>Duration()</code> method
-            that calls it sit in <code>diff.go</code>, while the sibling
-            <code>computePeakConcurrency</code>, <code>computeCriticalPathDuration</code>,
-            and <code>buildFailureReason</code> live in <code>report_builder.go</code>.
-            Functionally correct &mdash; the fix eliminated the ghost system &mdash; but the
-            placement is slightly incohesive. A move would improve discoverability.
+            <code>computeWallClockDurationMs()</code> and the <code>Duration()</code> method that
+            calls it sit in <code>diff.go</code>, while the sibling
+            <code>computePeakConcurrency</code>, <code>computeCriticalPathDuration</code>, and
+            <code>buildFailureReason</code> live in <code>report_builder.go</code>. Functionally
+            correct &mdash; the fix eliminated the ghost system &mdash; but the placement is
+            slightly incohesive. A move would improve discoverability.
           </p>
         </div>
 
@@ -409,7 +789,10 @@
         <div class="grid-2">
           <div class="card">
             <h4>FEATURES.md</h4>
-            <p>Does not exist. Required by AGENTS policy for honest feature inventory (DONE / PARTIAL / PLANNED).</p>
+            <p>
+              Does not exist. Required by AGENTS policy for honest feature inventory (DONE / PARTIAL
+              / PLANNED).
+            </p>
           </div>
           <div class="card">
             <h4>TODO_LIST.md</h4>
@@ -429,9 +812,9 @@
           <div class="card">
             <h4>Table.go wall-clock column</h4>
             <p>
-              Considered adding a wall-clock column to the per-step table export. Skipped
-              &mdash; it&rsquo;s a report-level metric that doesn&rsquo;t fit the per-step row shape.
-              Marked as a deliberate non-decision, not debt.
+              Considered adding a wall-clock column to the per-step table export. Skipped &mdash;
+              it&rsquo;s a report-level metric that doesn&rsquo;t fit the per-step row shape. Marked
+              as a deliberate non-decision, not debt.
             </p>
           </div>
           <div class="card">
@@ -442,23 +825,26 @@
 
         <!-- ===== D · FUCKED UP ===== -->
         <h2 id="fucked"><span class="num">04</span>D &middot; Totally Fucked Up</h2>
-        <p>Brutal honesty: nothing is catastrophically broken. But two things are genuinely wrong and must be said plainly.</p>
+        <p>
+          Brutal honesty: nothing is catastrophically broken. But two things are genuinely wrong and
+          must be said plainly.
+        </p>
 
         <div class="issue issue-critical">
           <span class="severity severity-critical">Critical · Documentation lie</span>
           <h3>CHANGELOG [Unreleased] is empty despite a feature session</h3>
           <div class="where">CHANGELOG.md:8-16</div>
           <p>
-            We shipped 6 new public JSON fields, a new sentinel error, a validation
-            upgrade, and a ghost-system fix &mdash; and recorded <strong>zero</strong> of it
-            in the changelog. Any consumer diffing releases will miss every change.
-            This is the single most damaging gap right now because it makes the work
-            invisible to everyone who doesn&rsquo;t read git logs.
+            We shipped 6 new public JSON fields, a new sentinel error, a validation upgrade, and a
+            ghost-system fix &mdash; and recorded <strong>zero</strong> of it in the changelog. Any
+            consumer diffing releases will miss every change. This is the single most damaging gap
+            right now because it makes the work invisible to everyone who doesn&rsquo;t read git
+            logs.
           </p>
           <div class="callout callout-solution">
             <strong>Fix:</strong>
-            Populate Added (6 fields + ErrCountMismatch), Changed (Summary/Diff now use
-            wall-clock, Validate extended), under [Unreleased].
+            Populate Added (6 fields + ErrCountMismatch), Changed (Summary/Diff now use wall-clock,
+            Validate extended), under [Unreleased].
           </div>
         </div>
 
@@ -467,12 +853,11 @@
           <h3>No FEATURES.md, no TODO_LIST.md, no ROADMAP.md</h3>
           <div class="where">repo root</div>
           <p>
-            The global AGENTS policy explicitly mandates these three files. Their absence
-            means every AI session reconstructs feature status from scratch and has no
-            canonical backlog. The prior status reports (also in <code>docs/status/</code>)
-            are doing the job these files should do &mdash; but status reports are snapshots,
-            not living docs.
-          </div>
+            The global AGENTS policy explicitly mandates these three files. Their absence means
+            every AI session reconstructs feature status from scratch and has no canonical backlog.
+            The prior status reports (also in <code>docs/status/</code>) are doing the job these
+            files should do &mdash; but status reports are snapshots, not living docs.
+          </p>
         </div>
 
         <!-- ===== E · IMPROVE ===== -->
@@ -482,42 +867,63 @@
             <div class="check">!</div>
             <div class="text">
               <strong>Single construction path is a strength &mdash; protect it</strong>
-              <span>buildReportFromCore() &rarr; finalizeDenormalized() is the only place aggregates derive. New report builders (Filtered, ReplayEvents) already route through it. Any future path MUST too.</span>
+              <span
+                >buildReportFromCore() &rarr; finalizeDenormalized() is the only place aggregates
+                derive. New report builders (Filtered, ReplayEvents) already route through it. Any
+                future path MUST too.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">!</div>
             <div class="text">
               <strong>Move Duration() to report.go</strong>
-              <span>The wall-clock method sits in diff.go alongside diff-only helpers. report.go owns WorkflowReport and is where consumers look. Cohesion fix, low risk.</span>
+              <span
+                >The wall-clock method sits in diff.go alongside diff-only helpers. report.go owns
+                WorkflowReport and is where consumers look. Cohesion fix, low risk.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">!</div>
             <div class="text">
               <strong>Make step names deterministic by default</strong>
-              <span>flow.String(step) returns pointer addresses. The library documents this as a known limitation but could offer a Name(step) helper that falls back to type name when String() is unset.</span>
+              <span
+                >flow.String(step) returns pointer addresses. The library documents this as a known
+                limitation but could offer a Name(step) helper that falls back to type name when
+                String() is unset.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">!</div>
             <div class="text">
               <strong>Coverage is 93.2% &mdash; push to 95%+</strong>
-              <span>The new validateStatusCounts branches and omitempty fields are the likely uncovered lines. Add targeted tests rather than chasing coverage for its own sake.</span>
+              <span
+                >The new validateStatusCounts branches and omitempty fields are the likely uncovered
+                lines. Add targeted tests rather than chasing coverage for its own sake.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">!</div>
             <div class="text">
               <strong>Status reports as HTML, not Markdown</strong>
-              <span>The last two status reports were .md files; the skill mandates self-contained HTML dashboards for snapshots. Snapshots get the visual treatment; living docs stay Markdown.</span>
+              <span
+                >The last two status reports were .md files; the skill mandates self-contained HTML
+                dashboards for snapshots. Snapshots get the visual treatment; living docs stay
+                Markdown.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">!</div>
             <div class="text">
               <strong>Consider a typed RunID</strong>
-              <span>RunID is a plain string today. A branded string type (RunID) would make impossible states unrepresentable and improve API ergonomics without breaking JSON.</span>
+              <span
+                >RunID is a plain string today. A branded string type (RunID) would make impossible
+                states unrepresentable and improve API ergonomics without breaking JSON.</span
+              >
             </div>
           </div>
         </div>
@@ -539,7 +945,10 @@
               <td>1</td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>Populate CHANGELOG [Unreleased]</td>
-              <td>Makes 6 new fields + ErrCountMismatch visible to consumers. Highest impact, lowest effort.</td>
+              <td>
+                Makes 6 new fields + ErrCountMismatch visible to consumers. Highest impact, lowest
+                effort.
+              </td>
             </tr>
             <tr>
               <td>2</td>
@@ -551,7 +960,10 @@
               <td>3</td>
               <td><span class="badge badge-high">High</span></td>
               <td>Create TODO_LIST.md</td>
-              <td>Canonical short/mid-term backlog. Stops status reports from being the de-facto backlog.</td>
+              <td>
+                Canonical short/mid-term backlog. Stops status reports from being the de-facto
+                backlog.
+              </td>
             </tr>
             <tr>
               <td>4</td>
@@ -563,7 +975,9 @@
               <td>5</td>
               <td><span class="badge badge-high">High</span></td>
               <td>Verify wall-clock with real BuildFlow report</td>
-              <td>Re-run against the 36-step pipeline JSON to confirm 265s&rarr;64s fix in the field.</td>
+              <td>
+                Re-run against the 36-step pipeline JSON to confirm 265s&rarr;64s fix in the field.
+              </td>
             </tr>
             <tr>
               <td>6</td>
@@ -575,7 +989,9 @@
               <td>7</td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Tag v0.2.0 release</td>
-              <td>New public JSON fields are additive but meaningful. Semver minor bump is honest.</td>
+              <td>
+                New public JSON fields are additive but meaningful. Semver minor bump is honest.
+              </td>
             </tr>
             <tr>
               <td>8</td>
@@ -617,25 +1033,34 @@
               <td>14</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Document the 3 duration metrics in README</td>
-              <td>Total vs WallClock vs CriticalPath &mdash; currently only in AGENTS.md gotcha.</td>
+              <td>
+                Total vs WallClock vs CriticalPath &mdash; currently only in AGENTS.md gotcha.
+              </td>
             </tr>
             <tr>
               <td>15</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>godoc examples for new fields</td>
-              <td>WallClockDurationMs, PeakConcurrency, CriticalPath deserve runnable ExampleX funcs.</td>
+              <td>
+                WallClockDurationMs, PeakConcurrency, CriticalPath deserve runnable ExampleX funcs.
+              </td>
             </tr>
             <tr>
               <td>16</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Benchmark finalizeDenormalized()</td>
-              <td>4 new compute passes on every report build. Confirm no regression on 100+ step flows.</td>
+              <td>
+                4 new compute passes on every report build. Confirm no regression on 100+ step
+                flows.
+              </td>
             </tr>
             <tr>
               <td>17</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>Streaming NDJSON export option</td>
-              <td>Currently Report() materializes all events. Large runs may want a streaming writer.</td>
+              <td>
+                Currently Report() materializes all events. Large runs may want a streaming writer.
+              </td>
             </tr>
             <tr>
               <td>18</td>
@@ -647,7 +1072,10 @@
               <td>19</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>ReplayEvents round-trip property test</td>
-              <td>Export &rarr; Read &rarr; Replay should reconstruct an equivalent report. Fuzz/property.</td>
+              <td>
+                Export &rarr; Read &rarr; Replay should reconstruct an equivalent report.
+                Fuzz/property.
+              </td>
             </tr>
             <tr>
               <td>20</td>
@@ -659,7 +1087,10 @@
               <td>21</td>
               <td><span class="badge badge-low">Low</span></td>
               <td>FailureReason structured categories</td>
-              <td>Plain string today; consider structured reasons (typed categories) for machine consumers.</td>
+              <td>
+                Plain string today; consider structured reasons (typed categories) for machine
+                consumers.
+              </td>
             </tr>
             <tr>
               <td>22</td>
@@ -689,23 +1120,27 @@
         </table>
 
         <!-- ===== G · TOP QUESTION ===== -->
-        <h2 id="question"><span class="num">07</span>G &middot; The One Question I Can&rsquo;t Answer</h2>
+        <h2 id="question">
+          <span class="num">07</span>G &middot; The One Question I Can&rsquo;t Answer
+        </h2>
         <div class="question">
           <div class="q-label">Blocking question</div>
-          <h3>Is the BuildFlow audit-log JSON consumed by an automated system, or only read by humans?</h3>
+          <h3>
+            Is the BuildFlow audit-log JSON consumed by an automated system, or only read by humans?
+          </h3>
           <p>
-            I added 6 new fields to the public <code>WorkflowReport</code> JSON shape and
-            changed the semantics of <code>Summary()</code> and <code>Diff().DurationDelta</code>
-            from sum-of-durations to wall-clock. For a strict JSON consumer (a dashboard,
-            an alerting rule, a regression gate) the <em>added</em> fields are safe, but the
-            <em>semantic change</em> to existing methods could quietly flip a regression
-            signal from &ldquo;no change&rdquo; to &ldquo;improved&rdquo;.
+            I added 6 new fields to the public <code>WorkflowReport</code> JSON shape and changed
+            the semantics of <code>Summary()</code> and <code>Diff().DurationDelta</code> from
+            sum-of-durations to wall-clock. For a strict JSON consumer (a dashboard, an alerting
+            rule, a regression gate) the <em>added</em> fields are safe, but the
+            <em>semantic change</em> to existing methods could quietly flip a regression signal from
+            &ldquo;no change&rdquo; to &ldquo;improved&rdquo;.
           </p>
           <p>
-            If BuildFlow (or any other consumer) parses this report programmatically, we
-            should: (a) confirm the consumer keys off <code>TotalDurationMs</code> (unchanged,
-            safe) and not off <code>Summary()</code> output (changed), and (b) decide whether
-            the semantic change warrants a v0.2.0 minor bump with a migration note.
+            If BuildFlow (or any other consumer) parses this report programmatically, we should: (a)
+            confirm the consumer keys off <code>TotalDurationMs</code> (unchanged, safe) and not off
+            <code>Summary()</code> output (changed), and (b) decide whether the semantic change
+            warrants a v0.2.0 minor bump with a migration note.
           </p>
           <p class="why">
             I cannot determine this from the repo &mdash; it requires knowing who reads
@@ -715,7 +1150,9 @@
         </div>
 
         <footer class="footer">
-          Generated 2026-06-21 03:11 CEST &middot; Verified against <code>master @ b42a9d8</code> &middot; Tests PASS (race) &middot; Lint 0 issues &middot; Coverage 93.2%
+          Generated 2026-06-21 03:11 CEST &middot; Verified against
+          <code>master @ b42a9d8</code> &middot; Tests PASS (race) &middot; Lint 0 issues &middot;
+          Coverage 93.2%
         </footer>
       </main>
     </div>
@@ -726,22 +1163,33 @@
         var nav = document.querySelector("[data-nav]");
         if (!nav) return;
         var links = nav.querySelectorAll('a[href^="#"]');
-        var ids = Array.from(links).map(function (l) { return l.getAttribute("href").slice(1); });
-        var sections = ids.map(function (id) { return document.getElementById(id); }).filter(Boolean);
+        var ids = Array.from(links).map(function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
         if (!sections.length) return;
         var observer = new IntersectionObserver(
           function (entries) {
             entries.forEach(function (entry) {
               if (entry.isIntersecting) {
                 links.forEach(function (link) {
-                  link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id);
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href") === "#" + entry.target.id,
+                  );
                 });
               }
             });
           },
-          { rootMargin: "-80px 0px -60% 0px", threshold: 0 }
+          { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
         );
-        sections.forEach(function (s) { observer.observe(s); });
+        sections.forEach(function (s) {
+          observer.observe(s);
+        });
       })();
     </script>
   </body>
