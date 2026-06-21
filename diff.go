@@ -1,9 +1,7 @@
 package auditlog
 
 import (
-	"fmt"
 	"slices"
-	"time"
 )
 
 // DiffResult describes the differences between two workflow reports.
@@ -100,33 +98,4 @@ func diffStep(name string, step StepInfo, oldStatus StepStatus) StepDiff {
 		OldStatus: oldStatus,
 		Duration:  step.Duration(),
 	}
-}
-
-// Duration returns the total wall-clock duration spanned by all events,
-// from the earliest to the latest timestamp. This is different from
-// TotalDurationMs (which sums individual step durations and may overcount
-// when steps run in parallel). The same value is available as the
-// WallClockDurationMs JSON field.
-func (r WorkflowReport) Duration() time.Duration {
-	return time.Duration(computeWallClockDurationMs(r.Events) * float64(time.Millisecond))
-}
-
-// Summary returns a human-readable one-line summary of the report.
-// Uses wall-clock duration (actual elapsed time) rather than the summed
-// per-step duration, and includes the failure reason when the workflow
-// did not succeed.
-func (r WorkflowReport) Summary() string {
-	base := fmt.Sprintf("%s: %d steps (%d ok, %d failed, %d skipped) in %.1fms",
-		r.WorkflowID, r.StepCount, r.SucceededCount, r.FailedCount,
-		r.SkippedCount, r.WallClockDurationMs)
-
-	if r.WorkflowSucceeded {
-		return base
-	}
-
-	if r.FailureReason != "" {
-		return base + " — " + r.FailureReason
-	}
-
-	return base + " — failed"
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"time"
+
+	"github.com/larsartmann/go-output"
 )
 
 // Sentinel errors returned by [WorkflowReport.Validate]. Consumers can match
@@ -219,4 +221,86 @@ func (r WorkflowReport) WriteJSON(writer io.Writer) error {
 // Each line is a single Event object. This is the inverse of ReadEvents.
 func (r WorkflowReport) WriteNDJSON(writer io.Writer) error {
 	return writeEventsNDJSON(writer, r.Events)
+}
+
+// Duration returns the total wall-clock duration spanned by all events,
+// from the earliest to the latest timestamp. This is different from
+// TotalDurationMs (which sums individual step durations and may overcount
+// when steps run in parallel). The same value is available as the
+// WallClockDurationMs JSON field.
+func (r WorkflowReport) Duration() time.Duration {
+	return time.Duration(computeWallClockDurationMs(r.Events) * float64(time.Millisecond))
+}
+
+// Summary returns a human-readable one-line summary of the report.
+// Uses wall-clock duration (actual elapsed time) rather than the summed
+// per-step duration, and includes the failure reason when the workflow
+// did not succeed.
+func (r WorkflowReport) Summary() string {
+	base := fmt.Sprintf("%s: %d steps (%d ok, %d failed, %d skipped) in %.1fms",
+		r.WorkflowID, r.StepCount, r.SucceededCount, r.FailedCount,
+		r.SkippedCount, r.WallClockDurationMs)
+
+	if r.WorkflowSucceeded {
+		return base
+	}
+
+	if r.FailureReason != "" {
+		return base + " — " + r.FailureReason
+	}
+
+	return base + " — failed"
+}
+
+// --- File export methods (mirror Auditor.Export*) ---
+//
+// These let a caller holding a WorkflowReport — for example one rebuilt via
+// ReplayEvents from an NDJSON stream — write every format to a file without
+// needing an Auditor instance.
+
+// ExportJSON writes the report as indented JSON to path.
+func (r WorkflowReport) ExportJSON(path string) error {
+	return writeToFile(path, r.WriteJSON)
+}
+
+// ExportNDJSON writes the report's events as NDJSON to path.
+func (r WorkflowReport) ExportNDJSON(path string) error {
+	return writeToFile(path, r.WriteNDJSON)
+}
+
+// ExportMermaid writes the step DAG as a Mermaid diagram to path.
+func (r WorkflowReport) ExportMermaid(path string) error {
+	return writeToFile(path, r.WriteMermaid)
+}
+
+// ExportPlantUML writes the step DAG as a PlantUML diagram to path.
+func (r WorkflowReport) ExportPlantUML(path string) error {
+	return writeToFile(path, r.WritePlantUML)
+}
+
+// ExportGraphviz writes the step DAG as a Graphviz DOT diagram to path.
+func (r WorkflowReport) ExportGraphviz(path string) error {
+	return writeToFile(path, r.WriteGraphviz)
+}
+
+// ExportD2 writes the step DAG as a D2 diagram to path.
+func (r WorkflowReport) ExportD2(path string) error {
+	return writeToFile(path, r.WriteD2)
+}
+
+// ExportTable writes the step summary table to path in the given format.
+func (r WorkflowReport) ExportTable(path string, format output.Format, opts output.RenderOptions) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return r.WriteTable(w, format, opts)
+	})
+}
+
+// ExportTree writes the step DAG as an ASCII tree to path.
+func (r WorkflowReport) ExportTree(path string) error {
+	return writeToFile(path, r.WriteTree)
+}
+
+// ExportHTMLTree writes the step DAG as an HTML nested-list tree to path.
+func (r WorkflowReport) ExportHTMLTree(path string) error {
+	return writeToFile(path, r.WriteHTMLTree)
 }

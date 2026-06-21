@@ -221,6 +221,18 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 }
 ```
 
+### Three Duration Metrics
+
+The report carries three duration fields that answer different questions.
+**Always use `wall_clock_duration_ms` for user-facing summaries and
+regression detection.**
+
+| Field                       | What it measures                                 | When it differs                                                                                                                                          |
+| --------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `total_duration_ms`         | Sum of every step's individual duration          | Inflated for parallel workflows — counts overlapping time multiple times. A 36-step pipeline running in 64&nbsp;s wall-clock can report 265&nbsp;s here. |
+| `wall_clock_duration_ms`    | Actual elapsed time (earliest → latest event)    | The "how long did I wait?" number. Matches what a stopwatch would show. **Use this for summaries, `Summary()`, and `Diff()`.**                           |
+| `critical_path_duration_ms` | Longest dependency-chain duration (memoized DFS) | The bottleneck path. If you can only parallelize one thing, this tells you which.                                                                        |
+
 ## API Reference
 
 ### `auditlog.New(config Config) (*Auditor, error)`
@@ -338,9 +350,9 @@ flowchart TD
     validate[validate]
     transform[transform]
     save[save]
-    validate --> fetch
-    transform --> validate
-    save --> transform
+    fetch --> validate
+    validate --> transform
+    transform --> save
 
     %% Styling
     style fetch fill:#2d5a2d,color:#fff
@@ -361,9 +373,9 @@ digraph workflow {
   "transform" [label="transform" fillcolor=#2d5a2d];
   "save" [label="save" fillcolor=#2d5a2d];
 
-  "validate" -> "fetch";
-  "transform" -> "validate";
-  "save" -> "transform";
+  "fetch" -> "validate";
+  "validate" -> "transform";
+  "transform" -> "save";
 }
 ```
 

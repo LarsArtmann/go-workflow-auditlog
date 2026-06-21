@@ -1,6 +1,7 @@
 package auditlog_test
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -52,6 +53,7 @@ func TestD2_BasicDAG(t *testing.T) {
 	output := buf.String()
 
 	assertContains(t, output, "title:", "expected title block in D2 output")
+	assertContains(t, output, "test", "expected D2 title to derive from WorkflowID 'test'")
 	assertContains(t, output, "fetch", "expected 'fetch' node in output")
 	assertContains(t, output, "transform", "expected 'transform' node in output")
 	assertContains(t, output, "save", "expected 'save' node in output")
@@ -379,5 +381,101 @@ func TestExportHTMLTree(t *testing.T) {
 	err := a.ExportHTMLTree(path)
 	if err != nil {
 		t.Fatalf("ExportHTMLTree error: %v", err)
+	}
+}
+
+// TestWorkflowReport_ExportMethods verifies that a WorkflowReport (e.g. one
+// reconstructed via ReplayEvents without an Auditor) can export every format to
+// a file. This is the core value of adding Export* to WorkflowReport.
+func TestWorkflowReport_ExportMethods(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("report-export")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+	dir := t.TempDir()
+
+	for _, tc := range []struct {
+		name string
+		fn   func(string) error
+		ext  string
+	}{
+		{"JSON", report.ExportJSON, ".json"},
+		{"NDJSON", report.ExportNDJSON, ".ndjson"},
+		{"Mermaid", report.ExportMermaid, ".mmd"},
+		{"PlantUML", report.ExportPlantUML, ".puml"},
+		{"Graphviz", report.ExportGraphviz, ".dot"},
+		{"D2", report.ExportD2, ".d2"},
+		{"Tree", report.ExportTree, ".txt"},
+		{"HTMLTree", report.ExportHTMLTree, ".html"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			path := dir + "/out" + tc.ext
+
+			err := tc.fn(path)
+			if err != nil {
+				t.Fatalf("%s export error: %v", tc.name, err)
+			}
+
+			info, statErr := os.Stat(path)
+			if statErr != nil {
+				t.Fatalf("stat %s: %v", path, statErr)
+			}
+
+			if info.Size() == 0 {
+				t.Errorf("%s export wrote an empty file", tc.name)
+			}
+		})
+	}
+}
+
+// TestAuditor_WriteStringMethods verifies the Auditor.Write*String methods
+// mirror their WorkflowReport counterparts and return non-empty output.
+func TestAuditor_WriteStringMethods(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("str-methods")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	for _, tc := range []struct {
+		name string
+		fn   func() (string, error)
+	}{
+		{"Mermaid", a.WriteMermaidString},
+		{"PlantUML", a.WritePlantUMLString},
+		{"Graphviz", a.WriteGraphvizString},
+		{"D2", a.WriteD2String},
+		{"Tree", a.WriteTreeString},
+		{"HTMLTree", a.WriteHTMLTreeString},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			out, err := tc.fn()
+			if err != nil {
+				t.Fatalf("%s string error: %v", tc.name, err)
+			}
+
+			if out == "" {
+				t.Errorf("%s string returned empty output", tc.name)
+			}
+		})
+	}
+
+	// Table string variant needs format + opts.
+	tableOut, err := a.WriteTableString(output.FormatMarkdown, output.RenderOptions{})
+	if err != nil {
+		t.Fatalf("WriteTableString error: %v", err)
+	}
+
+	if tableOut == "" {
+		t.Error("WriteTableString returned empty output")
 	}
 }

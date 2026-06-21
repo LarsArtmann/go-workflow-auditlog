@@ -385,3 +385,126 @@ func TestMermaid_CanceledStep(t *testing.T) {
 
 	assertContains(t, output, "#5a3d2d", "expected orange fill color for canceled step")
 }
+
+// TestDiagram_EdgeDirectionFollowsExecutionFlow is the regression test for the
+// edge-direction bug: diagram edges must point dependency → step (forward
+// execution flow), matching the tree export. The DAG is fetch → transform →
+// save (execution order). Every diagram format AND the tree must agree.
+//
+// Before the fix, diagram edges pointed step → dependency (backward), so the
+// tree showed fetch→save top-down while diagrams showed save→fetch. This test
+// asserts the forward pair appears and the backward pair does not, in every
+// visual format.
+func TestDiagram_EdgeDirectionFollowsExecutionFlow(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	fetch := newSucceed("fetch")
+	transform := newSucceed("transform")
+	save := newSucceed("save")
+
+	addDependentStep(w, fetch, transform)
+	addDependentStep(w, transform, save)
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+
+	mermaidFwd := []string{"fetch --> transform", "transform --> save"}
+	mermaidBwd := []string{"transform --> fetch", "save --> transform"}
+
+	t.Run("mermaid", func(t *testing.T) {
+		t.Parallel()
+
+		var buf strings.Builder
+
+		err := report.WriteMermaid(&buf)
+		if err != nil {
+			t.Fatalf("WriteMermaid: %v", err)
+		}
+
+		assertEdgeDirections(t, "mermaid", buf.String(), mermaidFwd, mermaidBwd)
+	})
+
+	t.Run("d2", func(t *testing.T) {
+		t.Parallel()
+
+		var buf strings.Builder
+
+		err := report.WriteD2(&buf)
+		if err != nil {
+			t.Fatalf("WriteD2: %v", err)
+		}
+
+		assertEdgeDirections(t, "d2", buf.String(),
+			[]string{"fetch -> transform", "transform -> save"},
+			[]string{"transform -> fetch", "save -> transform"})
+	})
+
+	t.Run("graphviz", func(t *testing.T) {
+		t.Parallel()
+
+		var buf strings.Builder
+
+		err := report.WriteGraphviz(&buf)
+		if err != nil {
+			t.Fatalf("WriteGraphviz: %v", err)
+		}
+
+		assertEdgeDirections(t, "graphviz", buf.String(),
+			[]string{`"fetch" -> "transform"`, `"transform" -> "save"`},
+			[]string{`"transform" -> "fetch"`, `"save" -> "transform"`})
+	})
+
+	t.Run("tree_reads_top_down_execution_order", func(t *testing.T) {
+		t.Parallel()
+
+		var buf strings.Builder
+
+		err := report.WriteTree(&buf)
+		if err != nil {
+			t.Fatalf("WriteTree: %v", err)
+		}
+
+		assertTreeExecutionOrder(t, buf.String())
+	})
+}
+
+// assertEdgeDirections verifies that every forward edge appears in the rendered
+// output and no backward edge does — proving edges follow execution flow.
+func assertEdgeDirections(t *testing.T, format, out string, forward, backward []string) {
+	t.Helper()
+
+	for _, e := range forward {
+		assertContains(t, out, e, format+" edge should follow execution flow")
+	}
+
+	for _, e := range backward {
+		if strings.Contains(out, e) {
+			t.Errorf("%s must not contain backward edge %q (got it)", format, e)
+		}
+	}
+}
+
+// assertTreeExecutionOrder verifies the tree reads top-down in execution order
+// (fetch before transform before save).
+func assertTreeExecutionOrder(t *testing.T, out string) {
+	t.Helper()
+
+	fi := strings.Index(out, "fetch")
+	ti := strings.Index(out, "transform")
+	si := strings.Index(out, "save")
+
+	if fi < 0 || ti < 0 || si < 0 {
+		t.Fatalf("tree missing step names; got:\n%s", out)
+	}
+
+	if fi >= ti || ti >= si {
+		t.Errorf(
+			"tree should read fetch < transform < save (execution order); got fetch@%d transform@%d save@%d\n%s",
+			fi,
+			ti,
+			si,
+			out,
+		)
+	}
+}

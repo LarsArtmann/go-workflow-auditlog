@@ -36,8 +36,11 @@ func statusStyle(s StepStatus) output.GraphStyle {
 
 // buildGraph converts a WorkflowReport's step DAG into go-output graph nodes
 // and edges. Every step becomes a node (colored by status). Each dependency
-// becomes an edge pointing from the step to its dependency. Dependencies that
-// are not themselves steps in the report are added as plain (uncolored) nodes.
+// becomes an edge pointing from the dependency to the step that depends on it
+// (dependency → step), so arrows follow execution flow — matching the tree
+// export and the convention used by GitHub Actions, Airflow, and Tekton.
+// Dependencies that are not themselves steps in the report are added as plain
+// (uncolored) nodes.
 func buildGraph(report WorkflowReport) ([]output.GraphNode, []output.GraphEdge) {
 	seen := make(map[string]struct{})
 
@@ -64,7 +67,8 @@ func buildGraph(report WorkflowReport) ([]output.GraphNode, []output.GraphEdge) 
 	for _, step := range report.Steps {
 		for _, dep := range step.Dependencies {
 			addNode(dep.Name, dep.Name, StepStatusPending)
-			edges = append(edges, *output.NewGraphEdge(step.Name, dep.Name))
+			// Edge points dependency → step (forward execution flow).
+			edges = append(edges, *output.NewGraphEdge(dep.Name, step.Name))
 		}
 	}
 

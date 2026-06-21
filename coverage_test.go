@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -1039,6 +1040,88 @@ func TestReport_CriticalPathDuration_Empty(t *testing.T) {
 
 	if recomputed.CriticalPathDurationMs != 0 {
 		t.Errorf("expected CriticalPathDurationMs=0 for empty report, got %f", recomputed.CriticalPathDurationMs)
+	}
+}
+
+// TestReport_PeakConcurrency_HighFanOut verifies peak concurrency with 8+
+// independent slow steps. The existing test only covers 2 parallel steps; this
+// stress test ensures the event-stream scan correctly counts higher fan-out
+// (the report flagged "add a higher-fan-out case").
+func TestReport_PeakConcurrency_HighFanOut(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	// Wire 8 independent slow steps so they all overlap in time.
+	for i := range 8 {
+		w.Add(flow.Step(newSlow(fmt.Sprintf("parallel-%d", i), 50*time.Millisecond)))
+	}
+
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+	assertReportValid(t, report)
+
+	// With 8 independent 50ms steps, at least 4 must overlap on any machine
+	// fast enough to schedule goroutines within the step duration. Asserting
+	// >= 4 (rather than exactly 8) avoids CI-scheduling flakiness while still
+	// proving the scan captures high fan-out (the 2-step test asserts 2).
+	if report.PeakConcurrency < 4 {
+		t.Errorf("expected PeakConcurrency >= 4 for 8 parallel 50ms steps, got %d", report.PeakConcurrency)
+	}
+}
+
+// TestReport_CriticalPathDuration_DiamondDAG verifies the memoized DFS
+// critical-path computation on a non-linear topology:
+//
+//	root (10ms) → left (30ms) → bottom (5ms)
+//	     \→ right (5ms) ↗
+//
+// Critical path is root → left → bottom = 45ms (not root → right → bottom = 20ms).
+// The report flagged "CriticalPath test with diamond DAG" as missing.
+func TestReport_CriticalPathDuration_DiamondDAG(t *testing.T) {
+	t.Parallel()
+
+	rootD := 10.0
+	leftD := 30.0
+	rightD := 5.0
+	bottomD := 5.0
+
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{
+				StepRef:    auditlog.StepRef{Name: "root"},
+				Status:     auditlog.StepStatusSucceeded,
+				DurationMs: &rootD,
+			},
+			{
+				StepRef:      auditlog.StepRef{Name: "left"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &leftD,
+				Dependencies: []auditlog.StepRef{{Name: "root"}},
+			},
+			{
+				StepRef:      auditlog.StepRef{Name: "right"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &rightD,
+				Dependencies: []auditlog.StepRef{{Name: "root"}},
+			},
+			{
+				StepRef:      auditlog.StepRef{Name: "bottom"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &bottomD,
+				Dependencies: []auditlog.StepRef{{Name: "left"}, {Name: "right"}},
+			},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	// Critical path: root(10) → left(30) → bottom(5) = 45ms.
+	// NOT root(10) → right(5) → bottom(5) = 20ms.
+	want := 45.0
+	if recomputed.CriticalPathDurationMs != want {
+		t.Errorf("diamond DAG: expected CriticalPathDurationMs=%f (root→left→bottom), got %f",
+			want, recomputed.CriticalPathDurationMs)
 	}
 }
 

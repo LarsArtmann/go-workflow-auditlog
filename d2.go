@@ -40,14 +40,28 @@ func graphEdgesToD2(edges []output.GraphEdge) []d2.D2Edge {
 	return result
 }
 
+// d2DiagramTitle returns the title for the D2 diagram, derived from the
+// report's WorkflowID. Falls back to "Workflow DAG" when the ID is empty.
+func d2DiagramTitle(r WorkflowReport) string {
+	if r.WorkflowID != "" {
+		return r.WorkflowID
+	}
+
+	return "Workflow DAG"
+}
+
 // WriteD2 writes the step dependency DAG as a D2 diagram.
 // Nodes are colored by status (green=succeeded, red=failed, gray=skipped,
 // orange=canceled) via inline style attributes.
+//
+// The diagram title is derived from the report's WorkflowID so each rendered
+// diagram is self-labeling. When WorkflowID is empty the title falls back to
+// "Workflow DAG".
 func (r WorkflowReport) WriteD2(writer io.Writer) error {
 	nodes, edges := buildGraph(r)
 
 	diagram := d2.NewD2Diagram()
-	diagram.SetTitle("Workflow DAG")
+	diagram.SetTitle(d2DiagramTitle(r))
 
 	for _, node := range graphNodesToD2(nodes) {
 		diagram.AddNode(node)

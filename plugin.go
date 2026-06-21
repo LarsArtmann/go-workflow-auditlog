@@ -148,24 +148,56 @@ func (a *Auditor) DroppedEventCount() int64 {
 	return a.recorder.DroppedEventCount()
 }
 
-// WriteReportJSON writes the full WorkflowReport as indented JSON to writer.
-func (a *Auditor) WriteReportJSON(writer io.Writer) error {
+// WriteJSON writes the full WorkflowReport as indented JSON to writer.
+func (a *Auditor) WriteJSON(writer io.Writer) error {
 	return a.Report().WriteJSON(writer)
 }
 
-// WriteEventsNDJSON writes every captured event as line-delimited JSON to writer.
-func (a *Auditor) WriteEventsNDJSON(writer io.Writer) error {
+// WriteReportJSON writes the full WorkflowReport as indented JSON to writer.
+//
+// Deprecated: Use WriteJSON for naming consistency with the diagram/table/tree
+// Write* methods. This alias is kept for backward compatibility.
+func (a *Auditor) WriteReportJSON(writer io.Writer) error {
+	return a.WriteJSON(writer)
+}
+
+// WriteNDJSON writes every captured event as line-delimited JSON to writer.
+func (a *Auditor) WriteNDJSON(writer io.Writer) error {
 	return a.Report().WriteNDJSON(writer)
 }
 
+// WriteEventsNDJSON writes every captured event as line-delimited JSON to writer.
+//
+// Deprecated: Use WriteNDJSON for naming consistency. This alias is kept for
+// backward compatibility.
+func (a *Auditor) WriteEventsNDJSON(writer io.Writer) error {
+	return a.WriteNDJSON(writer)
+}
+
+// ExportJSON writes the full WorkflowReport as indented JSON to path.
+func (a *Auditor) ExportJSON(path string) error {
+	return writeToFile(path, a.WriteJSON)
+}
+
 // ExportToFile writes the full WorkflowReport as indented JSON to path.
+//
+// Deprecated: Use ExportJSON for naming consistency with the diagram/table/tree
+// Export* methods. This alias is kept for backward compatibility.
 func (a *Auditor) ExportToFile(path string) error {
-	return writeToFile(path, a.WriteReportJSON)
+	return a.ExportJSON(path)
+}
+
+// ExportNDJSON writes every event as NDJSON to path.
+func (a *Auditor) ExportNDJSON(path string) error {
+	return writeToFile(path, a.WriteNDJSON)
 }
 
 // ExportEventsToNDJSON writes every event as NDJSON to path.
+//
+// Deprecated: Use ExportNDJSON for naming consistency. This alias is kept for
+// backward compatibility.
 func (a *Auditor) ExportEventsToNDJSON(path string) error {
-	return writeToFile(path, a.WriteEventsNDJSON)
+	return a.ExportNDJSON(path)
 }
 
 // WriteMermaid writes the step DAG as a Mermaid diagram to the writer.
@@ -238,6 +270,43 @@ func (a *Auditor) WriteHTMLTree(writer io.Writer) error {
 // ExportHTMLTree writes the step DAG as an HTML tree to path.
 func (a *Auditor) ExportHTMLTree(path string) error {
 	return writeToFile(path, a.WriteHTMLTree)
+}
+
+// --- String-variant methods (mirror WorkflowReport.Write*String) ---
+
+// WriteMermaidString returns the Mermaid diagram as a string.
+func (a *Auditor) WriteMermaidString() (string, error) {
+	return a.Report().WriteMermaidString()
+}
+
+// WritePlantUMLString returns the PlantUML diagram as a string.
+func (a *Auditor) WritePlantUMLString() (string, error) {
+	return a.Report().WritePlantUMLString()
+}
+
+// WriteGraphvizString returns the Graphviz DOT diagram as a string.
+func (a *Auditor) WriteGraphvizString() (string, error) {
+	return a.Report().WriteGraphvizString()
+}
+
+// WriteD2String returns the D2 diagram as a string.
+func (a *Auditor) WriteD2String() (string, error) {
+	return a.Report().WriteD2String()
+}
+
+// WriteTableString returns the step summary table as a string in the given format.
+func (a *Auditor) WriteTableString(format output.Format, opts output.RenderOptions) (string, error) {
+	return a.Report().WriteTableString(format, opts)
+}
+
+// WriteTreeString returns the ASCII tree as a string.
+func (a *Auditor) WriteTreeString() (string, error) {
+	return a.Report().WriteTreeString()
+}
+
+// WriteHTMLTreeString returns the HTML tree as a string.
+func (a *Auditor) WriteHTMLTreeString() (string, error) {
+	return a.Report().WriteHTMLTreeString()
 }
 
 // writeToFile is a helper that creates a file, calls the writer function, and

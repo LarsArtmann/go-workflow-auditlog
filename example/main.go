@@ -262,8 +262,8 @@ func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.Workflo
 	}
 
 	tasks := []exportTask{
-		{"audit-report.json", func() error { return audit.ExportToFile("audit-report.json") }},
-		{"audit-events.ndjson", func() error { return audit.ExportEventsToNDJSON("audit-events.ndjson") }},
+		{"audit-report.json", func() error { return audit.ExportJSON("audit-report.json") }},
+		{"audit-events.ndjson", func() error { return audit.ExportNDJSON("audit-events.ndjson") }},
 		{"dag.mmd", func() error { return audit.ExportMermaid("dag.mmd") }},
 		{"dag.dot", func() error { return audit.ExportGraphviz("dag.dot") }},
 		{"dag.puml", func() error { return audit.ExportPlantUML("dag.puml") }},

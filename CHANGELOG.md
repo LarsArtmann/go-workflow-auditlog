@@ -8,9 +8,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Six new `WorkflowReport` aggregate fields**, all derived in the single
+  `buildReportFromCore()` construction path so `BuildReport`, `Filtered`, and
+  `ReplayEvents` stay consistent:
+  - `WallClockDurationMs` — actual elapsed time (earliest → latest event),
+    eliminating the up-to-4× inflation `TotalDurationMs` suffers for parallel
+    workflows.
+  - `PeakConcurrency` — maximum number of in-flight attempts at any instant
+    (computed from the event stream).
+  - `CriticalPathDurationMs` — longest dependency-chain duration (memoized DFS);
+    the bottleneck path.
+  - `FailureReason` — human-readable failure summary appended by `Summary()`.
+  - `PendingCount` and `RunningCount` — split from the combined counter so each
+    lifecycle state has its own denormalized field.
+- **`ErrCountMismatch`** sentinel error returned by `Validate()` when a
+  denormalized status-count field disagrees with the actual `Steps` slice.
+- **D2 diagram export** (`WriteD2` / `WriteD2String` / `ExportD2`) via the
+  [go-output](https://github.com/larsartmann/go-output) `d2` renderer.
+- **Table export** (`WriteTable` / `ExportTable`) supporting 16 formats via
+  `go-output.RenderTableData`: table, json, csv, tsv, markdown, xml, d2, yaml,
+  html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml.
+- **Tree export** — ASCII tree (`WriteTree` / `ExportTree`) and HTML nested-list
+  tree (`WriteHTMLTree` / `ExportHTMLTree`).
+- **Auditor file-export methods** for all new formats: `ExportD2`,
+  `ExportTable`, `ExportTree`, `ExportHTMLTree`.
+- **`Duration()`** method on `WorkflowReport` returning wall-clock elapsed time
+  as a `time.Duration`.
+
 ### Changed
 
+- **`Summary()` now reports wall-clock duration** and appends `FailureReason`
+  on failure, making the one-liner self-diagnosing.
+- **`Diff().DurationDelta` switched to wall-clock** so parallel-step
+  regressions are no longer masked by summed durations.
+- **`Validate()` now verifies all six status-count fields**
+  (`Succeeded`/`Failed`/`Skipped`/`Canceled`/`Pending`/`Running`) against the
+  actual `Steps` slice, extracted into `validateStatusCounts()`.
+- **All diagram renderers migrated to go-output** — Mermaid, PlantUML, and
+  Graphviz DOT now delegate to `graph.MermaidRenderer`,
+  `plantuml.PlantUMLDiagram`, and `graph.DOTRenderer` respectively. A single
+  `buildGraph()` translation layer feeds every diagram format.
+- **Status colors consolidated** into `StepStatus.Color()` in `types.go` — all
+  diagram renderers delegate to it (single source of truth).
+- **`stepLabel` unified** — the diagram and tree label functions are now one
+  shared `stepLabel()` that includes status text and retry indicator.
+
 ### Fixed
+
+- **Diagram edge direction reversed to match execution flow.** Edges previously
+  pointed step → dependency (backward against execution order), disagreeing
+  with the tree export (which shows forward execution flow). Edges now point
+  dependency → step, so diagrams and trees agree and arrows follow execution
+  order — the convention used by GitHub Actions, Airflow, and Tekton.
 
 ## [0.1.1] - 2026-06-20
 
