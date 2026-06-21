@@ -6,14 +6,14 @@
 
 ## Build & Quality Gates
 
-| Gate          | Status      | Detail                                       |
-| ------------- | ----------- | -------------------------------------------- |
-| Build         | ✅ PASS     | `go build ./...` exits 0                     |
-| Tests         | ✅ PASS     | 165 pass, 0 fail (`-race`)                   |
-| Coverage      | ✅ 93.2%    | auditlog package                             |
-| Lint          | ✅ 0 issues | `golangci-lint run ./...`                    |
-| Vet           | ✅ PASS     | `go vet ./...` exits 0                       |
-| Vulnerability | ✅ 0 vulns  | `govulncheck` — 0 in our code, 3 uncalled    |
+| Gate          | Status      | Detail                                    |
+| ------------- | ----------- | ----------------------------------------- |
+| Build         | ✅ PASS     | `go build ./...` exits 0                  |
+| Tests         | ✅ PASS     | 165 pass, 0 fail (`-race`)                |
+| Coverage      | ✅ 93.2%    | auditlog package                          |
+| Lint          | ✅ 0 issues | `golangci-lint run ./...`                 |
+| Vet           | ✅ PASS     | `go vet ./...` exits 0                    |
+| Vulnerability | ✅ 0 vulns  | `govulncheck` — 0 in our code, 3 uncalled |
 
 **Codebase**: 24 source files, 14 test files, ~7,535 LOC total. 12 direct deps, 28 transitive.
 
@@ -54,17 +54,17 @@
 
 ### Export Formats (all working, all tested)
 
-| Format | Write (writer) | WriteString | Export (file) | On Auditor | On Report |
-|--------|----------------|-------------|---------------|------------|-----------|
-| JSON report | `WriteJSON` | — | `ExportJSON` | ✅ | ✅ |
-| NDJSON events | `WriteNDJSON` | — | `ExportNDJSON` | ✅ | ✅ |
-| Mermaid | `WriteMermaid` | `WriteMermaidString` | `ExportMermaid` | ✅ | ✅ |
-| PlantUML | `WritePlantUML` | `WritePlantUMLString` | `ExportPlantUML` | ✅ | ✅ |
-| Graphviz DOT | `WriteGraphviz` | `WriteGraphvizString` | `ExportGraphviz` | ✅ | ✅ |
-| D2 | `WriteD2` | `WriteD2String` | `ExportD2` | ✅ | ✅ |
-| Table (16 sub-formats) | `WriteTable` | `WriteTableString` | `ExportTable` | ✅ | ✅ |
-| ASCII Tree | `WriteTree` | `WriteTreeString` | `ExportTree` | ✅ | ✅ |
-| HTML Tree | `WriteHTMLTree` | `WriteHTMLTreeString` | `ExportHTMLTree` | ✅ | ✅ |
+| Format                 | Write (writer)  | WriteString           | Export (file)    | On Auditor | On Report |
+| ---------------------- | --------------- | --------------------- | ---------------- | ---------- | --------- |
+| JSON report            | `WriteJSON`     | —                     | `ExportJSON`     | ✅         | ✅        |
+| NDJSON events          | `WriteNDJSON`   | —                     | `ExportNDJSON`   | ✅         | ✅        |
+| Mermaid                | `WriteMermaid`  | `WriteMermaidString`  | `ExportMermaid`  | ✅         | ✅        |
+| PlantUML               | `WritePlantUML` | `WritePlantUMLString` | `ExportPlantUML` | ✅         | ✅        |
+| Graphviz DOT           | `WriteGraphviz` | `WriteGraphvizString` | `ExportGraphviz` | ✅         | ✅        |
+| D2                     | `WriteD2`       | `WriteD2String`       | `ExportD2`       | ✅         | ✅        |
+| Table (16 sub-formats) | `WriteTable`    | `WriteTableString`    | `ExportTable`    | ✅         | ✅        |
+| ASCII Tree             | `WriteTree`     | `WriteTreeString`     | `ExportTree`     | ✅         | ✅        |
+| HTML Tree              | `WriteHTMLTree` | `WriteHTMLTreeString` | `ExportHTMLTree` | ✅         | ✅        |
 
 ### Architecture Quality
 
@@ -113,11 +113,11 @@
 
 No way to set Mermaid/D2/Graphviz layout direction (TD vs LR). All diagrams default to top-down.
 
-### 4. Error Stored as *string
+### 4. Error Stored as \*string
 
 `Event.Error` and `StepInfo.Error` are `*string`, not `error`. Deliberate for JSON serialization but consumers lose `errors.Is`/`errors.As`. Changing this breaks the JSON schema.
 
-### 5. *float64 for DurationMs
+### 5. \*float64 for DurationMs
 
 `DurationMs *float64` appears in 5 places. The pointer distinguishes "not measured" (nil) from "zero" (0.0) but forces heap allocation and nil-checking everywhere. A typed wrapper would be cleaner.
 
@@ -125,21 +125,21 @@ No way to set Mermaid/D2/Graphviz layout direction (TD vs LR). All diagrams defa
 
 ## C) NOT STARTED ❌
 
-| Item | Notes |
-|------|-------|
-| `flake.nix` | Does not exist. Project uses `.goreleaser.yml` + deprecated `justfile`. AGENTS policy mandates nix. |
-| `encoding/json/v2` migration | Go 1.25+ policy mandate. `v2` not yet in Go 1.26.3 stdlib — policy aspiration, not actionable today. |
-| Table column configuration | No way to customize columns. |
-| Configurable diagram direction | No TD vs LR option. |
-| `writeToFile` overwrite protection | `os.Create` truncates unconditionally. No `O_EXCL`. |
-| Streaming NDJSON export | Currently `Report()` materializes all events in memory. |
-| OpenTelemetry span bridge | Map `attempt_end` events to OTel spans. |
-| HTML dashboard report | Self-contained HTML combining table + diagram + tree. |
-| Sub-module split | Core (JSON/NDJSON) vs visualization (diagrams/tables/trees). Decision needed. |
-| Fuzz tests | No fuzz tests for diagram ID sanitization. |
-| Benchmarks for new render paths | WriteD2, WriteTable, WriteTree, `finalizeDenormalized` on 100+ steps. |
-| Integration/round-trip tests | report → JSON → LoadReport → report → diagram → verify. |
-| Cross-format consistency tests | Same report → Mermaid vs DOT vs D2 should have same graph structure. |
+| Item                               | Notes                                                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `flake.nix`                        | Does not exist. Project uses `.goreleaser.yml` + deprecated `justfile`. AGENTS policy mandates nix.  |
+| `encoding/json/v2` migration       | Go 1.25+ policy mandate. `v2` not yet in Go 1.26.3 stdlib — policy aspiration, not actionable today. |
+| Table column configuration         | No way to customize columns.                                                                         |
+| Configurable diagram direction     | No TD vs LR option.                                                                                  |
+| `writeToFile` overwrite protection | `os.Create` truncates unconditionally. No `O_EXCL`.                                                  |
+| Streaming NDJSON export            | Currently `Report()` materializes all events in memory.                                              |
+| OpenTelemetry span bridge          | Map `attempt_end` events to OTel spans.                                                              |
+| HTML dashboard report              | Self-contained HTML combining table + diagram + tree.                                                |
+| Sub-module split                   | Core (JSON/NDJSON) vs visualization (diagrams/tables/trees). Decision needed.                        |
+| Fuzz tests                         | No fuzz tests for diagram ID sanitization.                                                           |
+| Benchmarks for new render paths    | WriteD2, WriteTable, WriteTree, `finalizeDenormalized` on 100+ steps.                                |
+| Integration/round-trip tests       | report → JSON → LoadReport → report → diagram → verify.                                              |
+| Cross-format consistency tests     | Same report → Mermaid vs DOT vs D2 should have same graph structure.                                 |
 
 ---
 
@@ -178,7 +178,7 @@ The library went from 2 direct dependencies (go-workflow + backoff) to 12 direct
 
 ### Testing
 
-8. **Error-path coverage** — most Write* methods sit at ~83% coverage. Inject failing `io.Writer`s.
+8. **Error-path coverage** — most Write\* methods sit at ~83% coverage. Inject failing `io.Writer`s.
 9. **`WritePlantUMLString` at 0% coverage** — noted in prior report, still untested.
 10. **Push coverage 93.2% → 95%+** — target `validateStatusCounts` branches and `omitempty` paths.
 11. **Benchmarks for new render paths** — no perf regression detection for D2/table/tree.
@@ -196,33 +196,33 @@ The library went from 2 direct dependencies (go-workflow + backoff) to 12 direct
 
 Sorted by impact/effort ratio (highest first).
 
-| #  | Task | Impact | Effort | Category |
-|----|------|--------|--------|----------|
-| 1  | **Tag v0.2.0 release** — new public fields, API expansion, RunID type, edge-direction fix | Critical | Low | Release |
-| 2  | **Add error-path tests for all Write\* methods** — inject failing writers | High | Medium | Testing |
-| 3  | **Add `WritePlantUMLString` coverage test** — currently 0% | High | Low | Testing |
-| 4  | **Add `StepInfo.Type()` method** — expose StepType via method | Medium | Low | API |
-| 5  | **Add retry/timeout columns to table** — HasRetry/HasTimeout exist but not in table | Medium | Low | Feature |
-| 6  | **Push coverage 93.2% → 95%+** — target validateStatusCounts branches | Medium | Medium | Testing |
-| 7  | **Make table columns configurable** — column selection options | Medium | Medium | Feature |
-| 8  | **Add diagram layout direction option** — TD vs LR | Low | Low | Feature |
-| 9  | **Add `writeToFile` overwrite protection** — O_EXCL flag | Low | Low | Safety |
-| 10 | **Add integration/round-trip tests** — report → JSON → load → diagram → verify | Medium | Medium | Testing |
-| 11 | **Add cross-format consistency tests** — same report → all diagrams same graph | Low | Medium | Testing |
-| 12 | **Surface name collisions in diagrams** — warn when seen map merges | Low | Medium | UX |
-| 13 | **Offer `Name(step)` fallback helper** — type name when String() is pointer | Medium | Low | API |
-| 14 | **Add benchmarks for render paths** — WriteD2, WriteTable, WriteTree on 100+ steps | Low | Medium | Perf |
-| 15 | **Add fuzz tests for diagram ID sanitization** | Low | Medium | Testing |
-| 16 | **Add `flake.nix`** — migrate from deprecated justfile | Medium | Medium | Infra |
-| 17 | **Add `govulncheck` + `gosec` to CI** | High | Low | Security |
-| 18 | **Document table module `init()` pattern** in AGENTS.md gotchas | Low | Low | Docs |
-| 19 | **Add godoc `ExampleX` funcs** for WallClockDurationMs, PeakConcurrency, etc. | Low | Low | Docs |
-| 20 | **Consider sub-module split** — core (auditlog) + visualization | Medium | High | Arch |
-| 21 | **Consider streaming NDJSON export** — write events as captured | Low | High | Arch |
-| 22 | **Consider OpenTelemetry span bridge** | Low | High | Feature |
-| 23 | **Consider HTML dashboard report** | Medium | High | Feature |
-| 24 | **Consider `go-error-family` adoption** | Low | Medium | Arch |
-| 25 | **Consider branded `StepID` type** | Low | Low | Type |
+| #   | Task                                                                                      | Impact   | Effort | Category |
+| --- | ----------------------------------------------------------------------------------------- | -------- | ------ | -------- |
+| 1   | **Tag v0.2.0 release** — new public fields, API expansion, RunID type, edge-direction fix | Critical | Low    | Release  |
+| 2   | **Add error-path tests for all Write\* methods** — inject failing writers                 | High     | Medium | Testing  |
+| 3   | **Add `WritePlantUMLString` coverage test** — currently 0%                                | High     | Low    | Testing  |
+| 4   | **Add `StepInfo.Type()` method** — expose StepType via method                             | Medium   | Low    | API      |
+| 5   | **Add retry/timeout columns to table** — HasRetry/HasTimeout exist but not in table       | Medium   | Low    | Feature  |
+| 6   | **Push coverage 93.2% → 95%+** — target validateStatusCounts branches                     | Medium   | Medium | Testing  |
+| 7   | **Make table columns configurable** — column selection options                            | Medium   | Medium | Feature  |
+| 8   | **Add diagram layout direction option** — TD vs LR                                        | Low      | Low    | Feature  |
+| 9   | **Add `writeToFile` overwrite protection** — O_EXCL flag                                  | Low      | Low    | Safety   |
+| 10  | **Add integration/round-trip tests** — report → JSON → load → diagram → verify            | Medium   | Medium | Testing  |
+| 11  | **Add cross-format consistency tests** — same report → all diagrams same graph            | Low      | Medium | Testing  |
+| 12  | **Surface name collisions in diagrams** — warn when seen map merges                       | Low      | Medium | UX       |
+| 13  | **Offer `Name(step)` fallback helper** — type name when String() is pointer               | Medium   | Low    | API      |
+| 14  | **Add benchmarks for render paths** — WriteD2, WriteTable, WriteTree on 100+ steps        | Low      | Medium | Perf     |
+| 15  | **Add fuzz tests for diagram ID sanitization**                                            | Low      | Medium | Testing  |
+| 16  | **Add `flake.nix`** — migrate from deprecated justfile                                    | Medium   | Medium | Infra    |
+| 17  | **Add `govulncheck` + `gosec` to CI**                                                     | High     | Low    | Security |
+| 18  | **Document table module `init()` pattern** in AGENTS.md gotchas                           | Low      | Low    | Docs     |
+| 19  | **Add godoc `ExampleX` funcs** for WallClockDurationMs, PeakConcurrency, etc.             | Low      | Low    | Docs     |
+| 20  | **Consider sub-module split** — core (auditlog) + visualization                           | Medium   | High   | Arch     |
+| 21  | **Consider streaming NDJSON export** — write events as captured                           | Low      | High   | Arch     |
+| 22  | **Consider OpenTelemetry span bridge**                                                    | Low      | High   | Feature  |
+| 23  | **Consider HTML dashboard report**                                                        | Medium   | High   | Feature  |
+| 24  | **Consider `go-error-family` adoption**                                                   | Low      | Medium | Arch     |
+| 25  | **Consider branded `StepID` type**                                                        | Low      | Low    | Type     |
 
 ---
 

@@ -73,7 +73,13 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ### Infrastructure
 
 - **go-output** dependency at v0.17.0 (root + all sub-modules aligned)
-- **golangci-lint v2** with depguard allow-list, 0 issues
+- **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
+- **govulncheck** in CI (golang/govulncheck-action)
+- **actionlint** in CI (workflow linting)
+- **Coverage gate** at 93%
+- **flake.nix** devShell (Go 1.26, golangci-lint, govulncheck, actionlint)
+- **Pre-commit hook** (vet + lint + test)
+- **STABILITY.md** documenting API stability promises
 - **`.goreleaser.yml`** for automated GitHub releases
 
 ### Documentation
@@ -83,6 +89,13 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - `CHANGELOG.md` — v0.2.0 released 2026-06-21; `[Unreleased]` section ready for next cycle
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
 - `example/main.go` — demos all export formats via `--export` flag
+
+### Testing & Quality
+
+- **Fuzz test**: `FuzzDiagramSpecialChars` — diagram export structural integrity against injection payloads across Mermaid/PlantUML/DOT/D2
+- **Property-based tests**: Diff algebra (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output) — 200 iterations each, deterministic seeds
+- **Atomic file writes**: crash-safe export (temp file + rename + bufio)
+- **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
 
 ---
 

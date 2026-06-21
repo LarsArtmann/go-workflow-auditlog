@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# Pre-commit hook for go-workflow-auditlog.
+#
+# Install once (from the repo root):
+#   git config core.hooksPath scripts/hooks
+#
+# Then every commit runs: vet, lint, and tests.
+# Bypass with:  git commit --no-verify
+
+set -e
+
+echo "▶ go vet"
+go vet ./...
+
+echo "▶ golangci-lint"
+golangci-lint run --timeout=120s ./...
+
+echo "▶ go test -race"
+go test -race -count=1 ./...
+
+echo "✓ pre-commit checks passed"

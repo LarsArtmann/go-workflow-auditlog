@@ -5,8 +5,12 @@ on:
     branches: [master, main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,11 +18,15 @@ jobs:
         with:
           go-version: "1.26"
           cache: true
-      - run: go vet ./...
-      - run: go build ./...
-      - run: go test -race -count=1 ./...
+      - name: go vet
+        run: go vet ./...
+      - name: go build
+        run: go build ./...
+      - name: go test -race
+        run: go test -race -count=1 ./...
 
   coverage:
+    name: Coverage gate (≥93%)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,17 +34,18 @@ jobs:
         with:
           go-version: "1.26"
           cache: true
-      - run: go test -race -count=1 -coverprofile=cover.out -covermode=atomic -coverpkg=./ ./...
-      - name: Coverage gate (≥90% of auditlog package)
+      - name: go test -race with coverage
         run: |
-          COV=$(go tool cover -func=cover.out | awk '/^total/ {print $NF}' | tr -d '%')
-          echo "Coverage: ${COV}%"
-          if (( $(echo "$COV < 90" | bc -l) )); then
-            echo "::error::Coverage ${COV}% is below 90% gate"
+          go test -race -count=1 -coverprofile=cover.out -covermode=atomic ./...
+          coverage=$(go tool cover -func=cover.out | awk '/^total/ {print $NF}' | tr -d '%')
+          echo "Coverage: ${coverage}%"
+          if awk "BEGIN {exit !($coverage < 93.0)}"; then
+            echo "::error::Coverage ${coverage}% is below 93% gate"
             exit 1
           fi
 
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,12 +53,27 @@ jobs:
         with:
           go-version: "1.26"
           cache: true
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v7
+        run: golangci-lint run --timeout=10m ./...
+
+  vulncheck:
+    name: Vulnerability scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          version: latest
+          go-version: "1.26"
+          cache: true
+      - name: govulncheck
+        uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: "1.26"
 
   mod-tidy:
+    name: go mod tidy check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,6 +81,26 @@ jobs:
         with:
           go-version: "1.26"
           cache: true
-      - run: go mod tidy
-      - name: Check no drift
-        run: git diff --exit-code go.mod go.sum
+      - name: go mod tidy
+        run: go mod tidy
+      - name: Check for drift
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::go.sum is out of sync with go.mod. Run 'go mod tidy' and commit the result."
+            git diff --stat
+            exit 1
+          fi
+
+  actionlint:
+    name: Workflow lint (actionlint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+          cache: true
+      - name: Install actionlint
+        run: go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+      - name: Run actionlint
+        run: actionlint -color

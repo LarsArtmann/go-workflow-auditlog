@@ -27,7 +27,7 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 
 ## Short-term (high impact, low effort)
 
-- [ ] **Tag v0.2.0 release.** New public JSON fields, API expansion (Write\*String, Export\* on report), edge-direction fix, and go-output adoption warrant a minor bump. Requires explicit approval — semantic change to `Summary()`/`Diff()` duration. *(approval granted 2026-06-21; changelog promoted, all docs refreshed, ready to tag)*
+- [ ] **Tag v0.2.0 release.** New public JSON fields, API expansion (Write\*String, Export\* on report), edge-direction fix, and go-output adoption warrant a minor bump. Requires explicit approval — semantic change to `Summary()`/`Diff()` duration. _(approval granted 2026-06-21; changelog promoted, all docs refreshed, ready to tag)_
 - [ ] **Add `StepInfo.Type()` method** — expose `StepType` via a method for consistency with `Status.Label()` / `Icon()` / `Color()`. Low effort, API consistency.
 - [ ] **Add retry/timeout columns to table export** — `HasRetry` and `HasTimeout` are in `StepInfo` but not in the table. Low effort.
 - [ ] **Add error-path tests for all Write\* methods** — inject failing `io.Writer`s, verify error wrapping. Most Write\* methods sit at ~83% coverage.

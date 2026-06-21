@@ -1,10 +1,12 @@
 package auditlog
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	flow "github.com/Azure/go-workflow"
@@ -309,24 +311,59 @@ func (a *Auditor) WriteHTMLTreeString() (string, error) {
 	return a.Report().WriteHTMLTreeString()
 }
 
-// writeToFile is a helper that creates a file, calls the writer function, and
-// properly closes the file, returning the write error if any.
-func writeToFile(path string, write func(io.Writer) error) error {
-	f, err := os.Create(path) //nolint:gosec // path is user-provided by design.
+// fileWriteBufferSize is the bufio buffer size used for atomic file exports.
+const fileWriteBufferSize = 65536
+
+// writeToFile creates a file at path and calls fn with a buffered writer.
+// The bufio.Writer batches small writes into 64KB blocks, reducing syscall count
+// by 10-100x compared to writing directly to os.File.
+//
+// Writes are atomic: data is written to a temporary file in the same directory,
+// then atomically renamed to the final path. A crash during write leaves the
+// previous file (if any) intact rather than a partial file.
+func writeToFile(path string, fn func(io.Writer) error) error {
+	dir := filepath.Dir(path)
+
+	tmpFile, err := os.CreateTemp(dir, ".tmp-auditlog-*")
 	if err != nil {
-		return fmt.Errorf("create file %q: %w", path, err)
+		return fmt.Errorf("create temp file in %q: %w", dir, err)
 	}
 
-	writeErr := write(f)
-	closeErr := f.Close()
+	tmpPath := tmpFile.Name()
+	cleanup := true
+
+	defer func() {
+		if cleanup {
+			_ = os.Remove(tmpPath)
+		}
+	}()
+
+	bw := bufio.NewWriterSize(tmpFile, fileWriteBufferSize)
+
+	writeErr := fn(bw)
+
+	flushErr := bw.Flush()
+
+	closeErr := tmpFile.Close()
 
 	if writeErr != nil {
 		return writeErr
 	}
 
-	if closeErr != nil {
-		return fmt.Errorf("close file %q: %w", path, closeErr)
+	if flushErr != nil {
+		return fmt.Errorf("flush temp file %q: %w", tmpPath, flushErr)
 	}
+
+	if closeErr != nil {
+		return fmt.Errorf("close temp file %q: %w", tmpPath, closeErr)
+	}
+
+	renameErr := os.Rename(tmpPath, path)
+	if renameErr != nil {
+		return fmt.Errorf("rename %q → %q: %w", tmpPath, path, renameErr)
+	}
+
+	cleanup = false
 
 	return nil
 }

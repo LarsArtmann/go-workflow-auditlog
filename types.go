@@ -25,6 +25,13 @@ const (
 	EventTypeAttemptEnd EventType = "attempt_end"
 )
 
+// IsKnown returns true if the event type is a recognized value.
+func (e EventType) IsKnown() bool {
+	_, ok := eventTypeMeta[e]
+
+	return ok
+}
+
 // eventTypeMeta holds display metadata for each [EventType] value.
 // Centralizing the label/color here keeps the per-event-type presentation
 // in one place.
@@ -68,6 +75,11 @@ const (
 	PhaseBefore Phase = "before"
 	PhaseAfter  Phase = "after"
 )
+
+// IsKnown returns true if the phase is a recognized value.
+func (p Phase) IsKnown() bool {
+	return p == PhaseBefore || p == PhaseAfter
+}
 
 // StepStatus mirrors [flow.StepStatus] as a stable string enum for JSON export.
 type StepStatus string

@@ -813,8 +813,8 @@
           <div class="hero-badge">Brutal Self-Review</div>
           <h1>What I Forgot, What's Stupid, What Could Be Better</h1>
           <p class="hero-subtitle">
-            Honest reflection on the 2026-06-21 execution session. 165 tests
-            pass at 93.4% coverage. But tests passing ≠ excellent work.
+            Honest reflection on the 2026-06-21 execution session. 165 tests pass at 93.4% coverage.
+            But tests passing ≠ excellent work.
           </p>
         </div>
 
@@ -844,13 +844,12 @@
 
         <div class="callout callout-warning">
           <strong>Headline:</strong>
-          The prior session shipped 16 tasks, all tests green, all lint clean.
-          But underneath: a split brain between <code>stepRecord</code> and
-          <code>replayStep</code>, a plain-string <code>RunID</code> that
-          should be branded, <code>encoding/json</code> v1 used on Go 1.26
-          where v2 is policy, and <code>computeWallClockDurationMs</code>
-          stranded in <code>report_builder.go</code> after I moved the method
-          that calls it. Tests pass. The architecture limps.
+          The prior session shipped 16 tasks, all tests green, all lint clean. But underneath: a
+          split brain between <code>stepRecord</code> and <code>replayStep</code>, a plain-string
+          <code>RunID</code> that should be branded, <code>encoding/json</code> v1 used on Go 1.26
+          where v2 is policy, and <code>computeWallClockDurationMs</code> stranded in
+          <code>report_builder.go</code> after I moved the method that calls it. Tests pass. The
+          architecture limps.
         </div>
 
         <!-- ===== WHAT I FORGOT ===== -->
@@ -861,16 +860,15 @@
           <h3>Did not verify govulncheck or gosec</h3>
           <div class="where">CI / security</div>
           <p>
-            The <code>how-to-golang</code> policy mandates <code>govulncheck</code>
-            and <code>gosec</code> in CI. I never ran either during the prior
-            session. This session I ran <code>govulncheck</code> via nix &mdash;
-            0 vulnerabilities in our code, 3 in dependencies we don't call.
-            But I should have done this before declaring "done."
+            The <code>how-to-golang</code> policy mandates <code>govulncheck</code> and
+            <code>gosec</code> in CI. I never ran either during the prior session. This session I
+            ran <code>govulncheck</code> via nix &mdash; 0 vulnerabilities in our code, 3 in
+            dependencies we don't call. But I should have done this before declaring "done."
           </p>
           <div class="callout callout-solution">
             <strong>Fix:</strong>
-            Add <code>govulncheck</code> to the pre-commit / CI flow. Run it
-            now as part of every quality gate.
+            Add <code>govulncheck</code> to the pre-commit / CI flow. Run it now as part of every
+            quality gate.
           </div>
         </div>
 
@@ -879,17 +877,15 @@
           <h3>Stale LSP warnings on example/main.go</h3>
           <div class="where">example/main.go:265-266</div>
           <p>
-            The LSP shows <code>SA1019: audit.ExportToFile is deprecated</code>
-            on lines that now use <code>audit.ExportJSON</code>. The code is
-            correct (<code>golangci-lint run</code> = 0 issues), but the
-            golangci-lint LSP integration caches stale results. I noticed this
+            The LSP shows <code>SA1019: audit.ExportToFile is deprecated</code> on lines that now
+            use <code>audit.ExportJSON</code>. The code is correct (<code>golangci-lint run</code> =
+            0 issues), but the golangci-lint LSP integration caches stale results. I noticed this
             and did nothing.
           </p>
           <div class="callout callout-solution">
             <strong>Fix:</strong>
-            Document in AGENTS.md that the golangci-lint LSP cache can be stale
-            after renaming methods. <code>golangci-lint run</code> is the
-            source of truth.
+            Document in AGENTS.md that the golangci-lint LSP cache can be stale after renaming
+            methods. <code>golangci-lint run</code> is the source of truth.
           </div>
         </div>
 
@@ -902,8 +898,7 @@
           <div class="where">recorder.go:30-52 &middot; replay.go:13-22</div>
           <p>
             Two structs track <strong>the same domain concept</strong>
-            (accumulated step state during execution/replay) with nearly
-            identical fields:
+            (accumulated step state during execution/replay) with nearly identical fields:
           </p>
           <div class="compare-header">
             <div class="compare-before">stepRecord (recorder.go)</div>
@@ -939,16 +934,15 @@
             <code>replayStep</code> is a strict subset of <code>stepRecord</code>
             minus the live-only fields (<code>pendingAttempts</code>,
             <code>maxAttempts</code>, <code>hasRetry</code>, <code>hasTimeout</code>,
-            <code>dependencies</code>). The conversion logic from each to
-            <code>StepInfo</code> is duplicated. If we add a field to one and
-            forget the other, replay diverges from live capture silently.
+            <code>dependencies</code>). The conversion logic from each to <code>StepInfo</code> is
+            duplicated. If we add a field to one and forget the other, replay diverges from live
+            capture silently.
           </p>
           <div class="callout callout-solution">
             <strong>Fix:</strong>
-            Extract a shared <code>stepAccumulator</code> struct containing the
-            common fields. Both <code>stepRecord</code> (live) and
-            <code>replayStep</code> (replay) embed it. One conversion path to
-            <code>StepInfo</code>.
+            Extract a shared <code>stepAccumulator</code> struct containing the common fields. Both
+            <code>stepRecord</code> (live) and <code>replayStep</code> (replay) embed it. One
+            conversion path to <code>StepInfo</code>.
           </div>
         </div>
 
@@ -957,16 +951,15 @@
           <h3>computeWallClockDurationMs stranded in report_builder.go</h3>
           <div class="where">report_builder.go:308 &middot; report.go:234</div>
           <p>
-            I moved <code>Duration()</code> and <code>Summary()</code> from
-            <code>diff.go</code> to <code>report.go</code> for cohesion. But
-            <code>Duration()</code> calls <code>computeWallClockDurationMs()</code>
-            which still lives in <code>report_builder.go</code>. I moved the
-            caller but not the callee. Half-cohesive.
+            I moved <code>Duration()</code> and <code>Summary()</code> from <code>diff.go</code> to
+            <code>report.go</code> for cohesion. But <code>Duration()</code> calls
+            <code>computeWallClockDurationMs()</code> which still lives in
+            <code>report_builder.go</code>. I moved the caller but not the callee. Half-cohesive.
           </p>
           <div class="callout callout-solution">
             <strong>Fix:</strong>
-            Move <code>computeWallClockDurationMs</code> to <code>report.go</code>
-            alongside <code>Duration()</code>. Finish the job.
+            Move <code>computeWallClockDurationMs</code> to <code>report.go</code> alongside
+            <code>Duration()</code>. Finish the job.
           </div>
         </div>
 
@@ -976,17 +969,16 @@
           <div class="where">event.go:9 &middot; report.go:34 &middot; plugin.go:30</div>
           <p>
             <code>RunID</code> is <code>string</code> in <code>Event</code>,
-            <code>WorkflowReport</code>, <code>Config</code>, and 4+ method
-            signatures. Nothing stops you from passing a <code>WorkflowID</code>
-            where a <code>RunID</code> is expected. The
-            <code>how-to-golang</code> policy mandates branded types for domain
-            identifiers. This is the #1 type-model defect.
+            <code>WorkflowReport</code>, <code>Config</code>, and 4+ method signatures. Nothing
+            stops you from passing a <code>WorkflowID</code> where a <code>RunID</code> is expected.
+            The <code>how-to-golang</code> policy mandates branded types for domain identifiers.
+            This is the #1 type-model defect.
           </p>
           <div class="callout callout-solution">
             <strong>Fix:</strong>
             <code>type RunID string</code> with <code>MarshalText</code>/
-            <code>UnmarshalText</code> for JSON compatibility. Compile-time
-            safety, zero JSON break. The report flagged this; I deferred it.
+            <code>UnmarshalText</code> for JSON compatibility. Compile-time safety, zero JSON break.
+            The report flagged this; I deferred it.
           </div>
         </div>
 
@@ -997,42 +989,38 @@
           <h4>encoding/json v1 on Go 1.26</h4>
           <p>
             The project uses <code>encoding/json</code> (v1) in 5 files. The
-            <code>how-to-golang</code> policy says "Go 1.25+ &rarr;
-            <code>encoding/json/v2</code>." I checked &mdash; <code>v2</code>
-            is <strong>not yet in the Go 1.26.3 stdlib</strong> (the proposal
-            exists but isn't shipped). So this is a policy aspiration, not an
-            actionable violation today. Document it and revisit when Go ships
-            <code>v2</code>.
+            <code>how-to-golang</code> policy says "Go 1.25+ &rarr; <code>encoding/json/v2</code>."
+            I checked &mdash; <code>v2</code> is
+            <strong>not yet in the Go 1.26.3 stdlib</strong> (the proposal exists but isn't
+            shipped). So this is a policy aspiration, not an actionable violation today. Document it
+            and revisit when Go ships <code>v2</code>.
           </p>
         </div>
 
         <div class="card card-problem">
           <h4>Error as *string instead of error</h4>
           <p>
-            <code>Event.Error</code> and <code>StepInfo.Error</code> are
-            <code>*string</code>, not <code>error</code>. This was a deliberate
-            choice for JSON serialization (errors don't serialize), but it
-            means consumers lose <code>errors.Is</code>/<code>errors.As</code>
+            <code>Event.Error</code> and <code>StepInfo.Error</code> are <code>*string</code>, not
+            <code>error</code>. This was a deliberate choice for JSON serialization (errors don't
+            serialize), but it means consumers lose <code>errors.Is</code>/<code>errors.As</code>
             capability. The error is a dead string, not a structured value.
           </p>
           <div class="callout callout-warning">
             <strong>Tradeoff:</strong>
-            Changing this would break the JSON schema. For an ALPHA library
-            this is acceptable, but it's a bigger change than fits this session.
-            Ticket it.
+            Changing this would break the JSON schema. For an ALPHA library this is acceptable, but
+            it's a bigger change than fits this session. Ticket it.
           </div>
         </div>
 
         <div class="card card-problem">
           <h4>*float64 for DurationMs &mdash; pointer boilerplate</h4>
           <p>
-            <code>DurationMs *float64</code> appears in 5 places
-            (<code>Event</code>, <code>StepInfo</code>, <code>stepRecord</code>,
-            <code>replayStep</code>, local in <code>recordAfterStep</code>).
-            The pointer distinguishes "not measured" (nil) from "zero" (0.0).
-            But it forces heap allocation and nil-checking everywhere. A typed
-            wrapper (<code>type Millis float64</code> with a sentinel, or
-            <code>time.Duration</code> with zero-as-absent) would be cleaner.
+            <code>DurationMs *float64</code> appears in 5 places (<code>Event</code>,
+            <code>StepInfo</code>, <code>stepRecord</code>, <code>replayStep</code>, local in
+            <code>recordAfterStep</code>). The pointer distinguishes "not measured" (nil) from
+            "zero" (0.0). But it forces heap allocation and nil-checking everywhere. A typed wrapper
+            (<code>type Millis float64</code> with a sentinel, or <code>time.Duration</code> with
+            zero-as-absent) would be cleaner.
           </p>
         </div>
 
@@ -1041,10 +1029,9 @@
           <p>
             I added 6 deprecated methods (<code>WriteReportJSON</code>,
             <code>WriteEventsNDJSON</code>, <code>ExportToFile</code>,
-            <code>ExportEventsToNDJSON</code>). For an ALPHA library that
-            hasn't tagged v0.2.0 yet, this is premature backward compat. The
-            old names could just be renamed. But since external tests use them
-            (the test files call <code>ExportToFile</code> etc.), removing
+            <code>ExportEventsToNDJSON</code>). For an ALPHA library that hasn't tagged v0.2.0 yet,
+            this is premature backward compat. The old names could just be renamed. But since
+            external tests use them (the test files call <code>ExportToFile</code> etc.), removing
             would break consumers.
             <strong>Verdict: keep, but document a removal timeline.</strong>
           </p>
@@ -1057,10 +1044,9 @@
           <h4>What's good</h4>
           <p>
             <code>StepStatus</code> is a proper typed enum with
-            <code>Label()</code>/<code>Icon()</code>/<code>Color()</code> methods
-            and a centralized metadata map. <code>EventType</code> and
-            <code>Phase</code> follow the same pattern. <code>StepRef</code> is
-            embedded for JSON flattening. The single-construction-path
+            <code>Label()</code>/<code>Icon()</code>/<code>Color()</code> methods and a centralized
+            metadata map. <code>EventType</code> and <code>Phase</code> follow the same pattern.
+            <code>StepRef</code> is embedded for JSON flattening. The single-construction-path
             (<code>buildReportFromCore</code>) is excellent.
           </p>
         </div>
@@ -1078,9 +1064,15 @@
           <h4>What to consider later</h4>
           <ul>
             <li><strong>StepID</strong>: plain int, not branded. Low risk since it's internal.</li>
-            <li><strong>SchemaVersion</strong>: plain string "0.1.0". Should match semver module tag.</li>
-            <li><strong>Error *string</strong>: loses structured error info. Schema break to fix.</li>
-            <li><strong>DurationMs *float64</strong>: heap-allocated nullable. Consider time.Duration.</li>
+            <li>
+              <strong>SchemaVersion</strong>: plain string "0.1.0". Should match semver module tag.
+            </li>
+            <li>
+              <strong>Error *string</strong>: loses structured error info. Schema break to fix.
+            </li>
+            <li>
+              <strong>DurationMs *float64</strong>: heap-allocated nullable. Consider time.Duration.
+            </li>
           </ul>
         </div>
 
@@ -1101,7 +1093,10 @@
             <tr>
               <td>1</td>
               <td>Split Brain</td>
-              <td><code>stepRecord</code> vs <code>replayStep</code> &mdash; duplicate step-state tracking</td>
+              <td>
+                <code>stepRecord</code> vs <code>replayStep</code> &mdash; duplicate step-state
+                tracking
+              </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>Extract shared accumulator</td>
             </tr>
@@ -1131,9 +1126,9 @@
           <div class="migration-content">
             <h4>Move computeWallClockDurationMs to report.go</h4>
             <p>
-              <strong>Work:</strong> 5 min &middot; <strong>Impact:</strong> Medium
-              <br />Finish the cohesion job from the prior session. Move the
-              function next to <code>Duration()</code> which calls it.
+              <strong>Work:</strong> 5 min &middot; <strong>Impact:</strong> Medium <br />Finish the
+              cohesion job from the prior session. Move the function next to
+              <code>Duration()</code> which calls it.
             </p>
           </div>
         </div>
@@ -1143,13 +1138,14 @@
           <div class="migration-content">
             <h4>Create branded RunID type</h4>
             <p>
-              <strong>Work:</strong> 10 min &middot; <strong>Impact:</strong> High
-              <br /><code>type RunID string</code> with
-              <code>MarshalText</code>/<code>UnmarshalText</code>. Replace
-              all <code>string</code> RunID fields/params. Compile-time safety,
-              zero JSON break. Check <code>go-composable-business-types</code>
-              first for an existing branded ID pattern &mdash; but for a single
-              type, a local branded string is simpler and avoids a new dep.
+              <strong>Work:</strong> 10 min &middot; <strong>Impact:</strong> High <br /><code
+                >type RunID string</code
+              >
+              with <code>MarshalText</code>/<code>UnmarshalText</code>. Replace all
+              <code>string</code> RunID fields/params. Compile-time safety, zero JSON break. Check
+              <code>go-composable-business-types</code>
+              first for an existing branded ID pattern &mdash; but for a single type, a local
+              branded string is simpler and avoids a new dep.
             </p>
           </div>
         </div>
@@ -1159,12 +1155,11 @@
           <div class="migration-content">
             <h4>Consolidate stepRecord/replayStep split brain</h4>
             <p>
-              <strong>Work:</strong> 15 min &middot; <strong>Impact:</strong> High
-              <br />Extract shared <code>stepCore</code> struct with the 7 common
-              fields. <code>stepRecord</code> embeds it + adds live-only fields.
-              <code>replayStep</code> embeds it. Single <code>toStepInfo()</code>
-              method on <code>stepCore</code>. Eliminates the duplicate
-              conversion logic.
+              <strong>Work:</strong> 15 min &middot; <strong>Impact:</strong> High <br />Extract
+              shared <code>stepCore</code> struct with the 7 common fields.
+              <code>stepRecord</code> embeds it + adds live-only fields.
+              <code>replayStep</code> embeds it. Single <code>toStepInfo()</code> method on
+              <code>stepCore</code>. Eliminates the duplicate conversion logic.
             </p>
           </div>
         </div>
@@ -1174,10 +1169,9 @@
           <div class="migration-content">
             <h4>Run govulncheck + full verification</h4>
             <p>
-              <strong>Work:</strong> 5 min &middot; <strong>Impact:</strong> Critical
-              <br />Run <code>govulncheck</code>, <code>golangci-lint</code>,
-              <code>go test -race</code>, <code>go vet</code> after each change.
-              Confirm 0 vulns, 0 lint issues, all tests pass.
+              <strong>Work:</strong> 5 min &middot; <strong>Impact:</strong> Critical <br />Run
+              <code>govulncheck</code>, <code>golangci-lint</code>, <code>go test -race</code>,
+              <code>go vet</code> after each change. Confirm 0 vulns, 0 lint issues, all tests pass.
             </p>
           </div>
         </div>
@@ -1189,14 +1183,20 @@
             <div class="check">+</div>
             <div class="text">
               <strong>Single construction path (buildReportFromCore)</strong>
-              <span>BuildReport, Filtered, ReplayEvents all route through one place. New construction paths MUST use it.</span>
+              <span
+                >BuildReport, Filtered, ReplayEvents all route through one place. New construction
+                paths MUST use it.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Single sync.RWMutex concurrency model</strong>
-              <span>One lock protects all state. OnEvent fires outside the lock. Simple, correct, race-free.</span>
+              <span
+                >One lock protects all state. OnEvent fires outside the lock. Simple, correct,
+                race-free.</span
+              >
             </div>
           </div>
           <div class="strength">
@@ -1210,7 +1210,8 @@
 
         <footer class="footer">
           Generated 2026-06-21 04:45 CEST &middot; Verified against commit
-          <code>9f0426b</code> &middot; 165 tests PASS (race) &middot; Lint 0 issues &middot; Coverage 93.4%
+          <code>9f0426b</code> &middot; 165 tests PASS (race) &middot; Lint 0 issues &middot;
+          Coverage 93.4%
         </footer>
       </main>
     </div>
