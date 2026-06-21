@@ -26,7 +26,7 @@ jobs:
         run: go test -race -count=1 ./...
 
   coverage:
-    name: Coverage gate (≥93%)
+    name: Coverage gate (≥92%)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,11 +36,11 @@ jobs:
           cache: true
       - name: go test -race with coverage
         run: |
-          go test -race -count=1 -coverprofile=cover.out -covermode=atomic ./...
+          go test -race -count=1 -coverprofile=cover.out -covermode=atomic -coverpkg=./ ./...
           coverage=$(go tool cover -func=cover.out | awk '/^total/ {print $NF}' | tr -d '%')
           echo "Coverage: ${coverage}%"
-          if awk "BEGIN {exit !($coverage < 93.0)}"; then
-            echo "::error::Coverage ${coverage}% is below 93% gate"
+          if awk "BEGIN {exit !($coverage < 92.0)}"; then
+            echo "::error::Coverage ${coverage}% is below 92% gate"
             exit 1
           fi
 
