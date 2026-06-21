@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-21
+
+### Added
+
+- **Nix flake support** — `flake.nix` + `flake.lock` for a reproducible dev shell
+  and build environment.
+- **`StepStatus.IsKnown()`** — enum validation helper for parity with
+  samber-do-style unknown-value checks.
+- **NDJSON enum validation on ingest** — `ReadEvents` now rejects events with
+  unknown `event_type` or `phase` values instead of silently accepting invalid data.
+- **Atomic file writes** — `writeToFile` writes to a temp file and renames, so a
+  crash during export never leaves a partial file.
+- **Fuzz tests** — `FuzzReadEvents` fuzz target for NDJSON parsing resilience.
+- **Property tests** (`diff_property_test.go`) — 5 Diff algebra properties
+  (identity, added/removed duality, duration anti-symmetry, status-change
+  symmetry, sorted output) at 200 iterations each with deterministic seeds.
+- **Coverage gate script** (`scripts/coverage-gate.sh`) — CI-enforced 92%
+  statement-coverage floor.
+- **Pre-commit hook** (`scripts/hooks/pre-commit`) — runs tests, vet, and lint
+  before allowing commits.
+- **STABILITY.md** — stability policy document.
+
+### Changed
+
+- **Enhanced CI** — coverage reporting, coverage-gate enforcement, race detector
+  on all pushes, golangci-lint v2.4.0.
+
 ## [0.2.0] - 2026-06-21
 
 ### Added
