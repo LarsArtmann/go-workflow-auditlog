@@ -186,9 +186,14 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
   "failed_count": 0,
   "skipped_count": 0,
   "canceled_count": 0,
+  "pending_count": 0,
+  "running_count": 0,
   "total_duration_ms": 15.23,
+  "wall_clock_duration_ms": 15.23,
   "workflow_succeeded": true,
   "dropped_event_count": 0,
+  "peak_concurrency": 1,
+  "critical_path_duration_ms": 15.23,
   "steps": [
     {
       "step_name": "fetch",
@@ -291,6 +296,7 @@ These exported errors are returned by `Validate()` and `New()`. Match them with 
 | `auditlog.ErrEventCountMismatch` | Report `EventCount` ≠ `len(Events)`.                 |
 | `auditlog.ErrStepCountMismatch`  | Report `StepCount` ≠ `len(Steps)`.                   |
 | `auditlog.ErrStatusDrift`        | A step's `Status` disagrees with its derived status. |
+| `auditlog.ErrCountMismatch`      | A denormalized status-count field disagrees with actual step counts. |
 | `auditlog.ErrReplayNoEvents`     | `ReplayEvents` received zero events.                 |
 
 ## Config
