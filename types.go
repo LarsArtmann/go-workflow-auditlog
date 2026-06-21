@@ -92,13 +92,44 @@ var stepStatusMeta = map[StepStatus]struct {
 	FillColor string
 	FontColor string
 }{
-	StepStatusPending:   {Label: "Pending", Icon: "\u26AA"},
-	StepStatusRunning:   {Label: "Running", Icon: "\U0001F7E1"},
-	StepStatusSucceeded: {Label: "Succeeded", Icon: "\U0001F7E2", FillColor: "#2d5a2d", FontColor: "#fff"},
-	StepStatusFailed:    {Label: "Failed", Icon: "\U0001F534", FillColor: "#8b2d2d", FontColor: "#fff"},
-	StepStatusCanceled:  {Label: "Canceled", Icon: "\U0001F6AB", FillColor: "#5a3d2d", FontColor: "#fff"},
-	StepStatusSkipped:   {Label: "Skipped", Icon: "\u23ED\uFE0F", FillColor: "#4a4a4a", FontColor: "#ccc"},
+	StepStatusPending: {Label: "Pending", Icon: "\u26AA"},
+	StepStatusRunning: {Label: "Running", Icon: "\U0001F7E1"},
+	StepStatusSucceeded: {
+		Label:     "Succeeded",
+		Icon:      "\U0001F7E2",
+		FillColor: statusFillSucceeded,
+		FontColor: fontColorLight,
+	},
+	StepStatusFailed: {
+		Label:     "Failed",
+		Icon:      "\U0001F534",
+		FillColor: statusFillFailed,
+		FontColor: fontColorLight,
+	},
+	StepStatusCanceled: {
+		Label:     "Canceled",
+		Icon:      "\U0001F6AB",
+		FillColor: statusFillCanceled,
+		FontColor: fontColorLight,
+	},
+	StepStatusSkipped: {
+		Label:     "Skipped",
+		Icon:      "\u23ED\uFE0F",
+		FillColor: statusFillSkipped,
+		FontColor: fontColorDim,
+	},
 }
+
+// Status color constants shared across all diagram and tree renderers.
+const (
+	statusFillSucceeded = "#2d5a2d" // green
+	statusFillFailed    = "#8b2d2d" // red
+	statusFillSkipped   = "#4a4a4a" // gray
+	statusFillCanceled  = "#5a3d2d" // orange-brown
+
+	fontColorLight = "#fff" // white text on dark fills
+	fontColorDim   = "#ccc" // light gray for skipped (lower contrast)
+)
 
 // String returns the step status name.
 func (s StepStatus) String() string { return string(s) }
@@ -141,7 +172,7 @@ func (s StepStatus) Icon() string {
 // diagram renderers (Mermaid, Graphviz, PlantUML, D2). Terminal statuses get
 // colors; non-terminal statuses (pending/running) return empty strings (the
 // renderer uses its default appearance).
-func (s StepStatus) Color() (fill, fontColor string) {
+func (s StepStatus) Color() (string, string) {
 	if m, ok := stepStatusMeta[s]; ok {
 		return m.FillColor, m.FontColor
 	}

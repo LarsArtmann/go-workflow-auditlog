@@ -119,8 +119,8 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - Retry tests use fresh `backoff.NewExponentialBackOff()` to avoid the go-workflow race.
 - External test package (`auditlog_test`).
 - `t.Setenv()` for env var tests (runs sequentially).
-- 145+ tests covering: disabled/enabled, success/failure, dependencies, retry, timeout/cancel, skip, concurrent steps, fan-out/fan-in, event ordering, OnEvent callback, export formats (JSON/NDJSON/D2/table/tree), report validation, query methods, filter, diff, replay, load, diagrams (Mermaid/PlantUML/DOT/D2), edge cases, plus regression tests for fixed bugs (status drift, diff ordering, NDJSON line numbers, WorkflowSucceeded honesty about pending steps, stale error cleared on retry success).
-- Coverage: **92.8%** of statements (auditlog package).
+- 164 tests covering: disabled/enabled, success/failure, dependencies, retry, timeout/cancel, skip, concurrent steps, fan-out/fan-in, event ordering, OnEvent callback, export formats (JSON/NDJSON/D2/table/tree), report validation, query methods, filter, diff, replay, load, diagrams (Mermaid/PlantUML/DOT/D2), edge cases, plus regression tests for fixed bugs (status drift, diff ordering, NDJSON line numbers, WorkflowSucceeded honesty about pending steps, stale error cleared on retry success).
+- Coverage: **93.2%** of statements (auditlog package).
 
 ### Shared test helpers (in `auditlog_test.go`)
 
