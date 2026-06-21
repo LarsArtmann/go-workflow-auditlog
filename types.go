@@ -82,20 +82,22 @@ const (
 )
 
 // stepStatusMeta holds display metadata for each [StepStatus] value.
-// Centralizing the label/icon here keeps the per-status presentation in one
-// place and makes new statuses a one-line addition.
+// Centralizing the label, icon, and color here keeps per-status presentation
+// in one place and makes new statuses a one-line addition.
 //
 //nolint:gochecknoglobals // Lookup table, treated as immutable after init.
 var stepStatusMeta = map[StepStatus]struct {
-	Label string
-	Icon  string
+	Label     string
+	Icon      string
+	FillColor string
+	FontColor string
 }{
 	StepStatusPending:   {Label: "Pending", Icon: "\u26AA"},
 	StepStatusRunning:   {Label: "Running", Icon: "\U0001F7E1"},
-	StepStatusSucceeded: {Label: "Succeeded", Icon: "\U0001F7E2"},
-	StepStatusFailed:    {Label: "Failed", Icon: "\U0001F534"},
-	StepStatusCanceled:  {Label: "Canceled", Icon: "\U0001F6AB"},
-	StepStatusSkipped:   {Label: "Skipped", Icon: "\u23ED\uFE0F"},
+	StepStatusSucceeded: {Label: "Succeeded", Icon: "\U0001F7E2", FillColor: "#2d5a2d", FontColor: "#fff"},
+	StepStatusFailed:    {Label: "Failed", Icon: "\U0001F534", FillColor: "#8b2d2d", FontColor: "#fff"},
+	StepStatusCanceled:  {Label: "Canceled", Icon: "\U0001F6AB", FillColor: "#5a3d2d", FontColor: "#fff"},
+	StepStatusSkipped:   {Label: "Skipped", Icon: "\u23ED\uFE0F", FillColor: "#4a4a4a", FontColor: "#ccc"},
 }
 
 // String returns the step status name.
@@ -133,6 +135,18 @@ func (s StepStatus) Icon() string {
 	}
 
 	return ""
+}
+
+// Color returns the fill and font colors for this step status, used by all
+// diagram renderers (Mermaid, Graphviz, PlantUML, D2). Terminal statuses get
+// colors; non-terminal statuses (pending/running) return empty strings (the
+// renderer uses its default appearance).
+func (s StepStatus) Color() (fill, fontColor string) {
+	if m, ok := stepStatusMeta[s]; ok {
+		return m.FillColor, m.FontColor
+	}
+
+	return "", ""
 }
 
 // StepRef identifies a step within a workflow.

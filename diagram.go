@@ -17,34 +17,15 @@ func stepLabel(step StepInfo) string {
 }
 
 // statusStyle maps a StepStatus to an output.GraphStyle for diagram coloring.
-// Terminal statuses get fill + font colors; non-terminal statuses get no
-// styling (the renderer uses its default node appearance).
+// Delegates to StepStatus.Color() so all color definitions live in one place.
 func statusStyle(s StepStatus) output.GraphStyle {
-	switch s {
-	case StepStatusSucceeded:
-		return output.GraphStyle{Fill: statusColorSucceeded, FontColor: fontColorLight}
-	case StepStatusFailed:
-		return output.GraphStyle{Fill: statusColorFailed, FontColor: fontColorLight}
-	case StepStatusSkipped:
-		return output.GraphStyle{Fill: statusColorSkipped, FontColor: fontColorDim}
-	case StepStatusCanceled:
-		return output.GraphStyle{Fill: statusColorCanceled, FontColor: fontColorLight}
-	default:
+	fill, fontColor := s.Color()
+	if fill == "" {
 		return output.GraphStyle{}
 	}
+
+	return output.GraphStyle{Fill: fill, FontColor: fontColor}
 }
-
-// Status fill colors shared across all diagram formats. Font colors are set
-// per-status in statusStyle for contrast against the fill.
-const (
-	statusColorSucceeded = "#2d5a2d" // green
-	statusColorFailed    = "#8b2d2d" // red
-	statusColorSkipped   = "#4a4a4a" // gray
-	statusColorCanceled  = "#5a3d2d" // orange-brown
-
-	fontColorLight = "#fff" // white text on dark fills
-	fontColorDim   = "#ccc" // light gray for skipped (lower contrast)
-)
 
 // buildGraph converts a WorkflowReport's step DAG into go-output graph nodes
 // and edges. Every step becomes a node (colored by status). Each dependency

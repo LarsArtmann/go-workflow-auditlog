@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -1108,4 +1109,145 @@ func TestReport_FailureReason_Success(t *testing.T) {
 	if recomputed.FailureReason != "" {
 		t.Errorf("expected empty FailureReason for success, got %q", recomputed.FailureReason)
 	}
+}
+
+func TestReport_WallClockDuration_ParallelLessThanSum(t *testing.T) {
+	t.Parallel()
+
+	// Two parallel slow steps: wall-clock ≈ max(20ms, 20ms) = 20ms,
+	// but TotalDurationMs = 20 + 20 = 40ms. Wall-clock should be less.
+	a, w := newAuditAndWorkflow(t)
+	addParallelSteps(w, newSlow("a", 20*time.Millisecond), newSlow("b", 20*time.Millisecond))
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+	assertReportValid(t, report)
+
+	if report.WallClockDurationMs >= report.TotalDurationMs {
+		t.Errorf("wall-clock (%.1fms) should be less than sum (%.1fms) for parallel steps",
+			report.WallClockDurationMs, report.TotalDurationMs)
+	}
+
+	// Duration() method should agree with WallClockDurationMs field.
+	methodMs := float64(report.Duration().Microseconds()) / 1000.0
+	if absDiff(report.WallClockDurationMs, methodMs) > 1.0 {
+		t.Errorf("Duration() method (%.1fms) disagrees with WallClockDurationMs field (%.1fms)",
+			methodMs, report.WallClockDurationMs)
+	}
+}
+
+func TestReport_WallClockDuration_EmptyReport(t *testing.T) {
+	t.Parallel()
+
+	raw := auditlog.WorkflowReport{}
+	recomputed := raw.Filtered()
+
+	if recomputed.WallClockDurationMs != 0 {
+		t.Errorf("expected 0 wall-clock for empty report, got %f", recomputed.WallClockDurationMs)
+	}
+}
+
+func TestReport_Summary_WithFailureReason(t *testing.T) {
+	t.Parallel()
+
+	raw := auditlog.WorkflowReport{
+		WorkflowID: "test-wf",
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+			{StepRef: auditlog.StepRef{Name: "bad"}, Status: auditlog.StepStatusFailed},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	summary := recomputed.Summary()
+	assertContains(t, summary, "bad", "summary should contain failed step name")
+	assertContains(t, summary, "failed", "summary should mention failure")
+}
+
+func TestReport_Summary_SuccessNoReason(t *testing.T) {
+	t.Parallel()
+
+	raw := auditlog.WorkflowReport{
+		WorkflowID: "test-wf",
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	summary := recomputed.Summary()
+	if strings.Contains(summary, "—") {
+		t.Errorf("successful summary should not contain failure reason, got %q", summary)
+	}
+}
+
+func TestReport_Validate_CountMismatch(t *testing.T) {
+	t.Parallel()
+
+	// Construct a report where SucceededCount is wrong.
+	raw := auditlog.WorkflowReport{
+		SucceededCount: 2, // lie — only 1 succeeded step
+		StepCount:      1,
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	err := raw.Validate()
+	if err == nil {
+		t.Fatal("expected validation error for count mismatch")
+	}
+
+	if !errors.Is(err, auditlog.ErrCountMismatch) {
+		t.Errorf("expected ErrCountMismatch, got %v", err)
+	}
+}
+
+func TestReport_Validate_CountsMatch(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	addParallelSteps(w, newSucceed("a"), newFail("b", "boom"))
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+
+	err := report.Validate()
+	if err != nil {
+		t.Errorf("expected valid report, got %v", err)
+	}
+}
+
+func TestDiff_DurationDelta_UsesWallClock(t *testing.T) {
+	t.Parallel()
+
+	// Two reports with identical wall-clock but different summed durations.
+	// DurationDelta should be ~0 (wall-clock), not the sum difference.
+	base := auditlog.WorkflowReport{
+		WallClockDurationMs: 100.0,
+		TotalDurationMs:     150.0,
+	}
+	other := auditlog.WorkflowReport{
+		WallClockDurationMs: 102.0,
+		TotalDurationMs:     200.0,
+	}
+
+	result := base.Diff(other)
+
+	wantDelta := 2.0 // 102 - 100
+	if absDiff(result.DurationDelta, wantDelta) > 0.01 {
+		t.Errorf("expected DurationDelta=%.1f (wall-clock), got %.1f",
+			wantDelta, result.DurationDelta)
+	}
+}
+
+// absDiff returns the absolute difference between two floats.
+func absDiff(a, b float64) float64 {
+	if a > b {
+		return a - b
+	}
+
+	return b - a
 }

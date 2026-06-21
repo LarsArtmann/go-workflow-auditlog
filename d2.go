@@ -10,18 +10,16 @@ import (
 )
 
 // statusD2Style maps a StepStatus to a D2NodeStyle for diagram coloring.
+// Delegates to StepStatus.Color() so all color definitions live in one place.
 func statusD2Style(s StepStatus) d2.D2NodeStyle {
-	switch s {
-	case StepStatusSucceeded:
-		return d2.D2NodeStyle{Fill: statusColorSucceeded, D2StrokeStyle: d2.D2StrokeStyle{FontColor: fontColorLight}}
-	case StepStatusFailed:
-		return d2.D2NodeStyle{Fill: statusColorFailed, D2StrokeStyle: d2.D2StrokeStyle{FontColor: fontColorLight}}
-	case StepStatusSkipped:
-		return d2.D2NodeStyle{Fill: statusColorSkipped, D2StrokeStyle: d2.D2StrokeStyle{FontColor: fontColorDim}}
-	case StepStatusCanceled:
-		return d2.D2NodeStyle{Fill: statusColorCanceled, D2StrokeStyle: d2.D2StrokeStyle{FontColor: fontColorLight}}
-	default:
+	fill, fontColor := s.Color()
+	if fill == "" {
 		return d2.D2NodeStyle{}
+	}
+
+	return d2.D2NodeStyle{
+		Fill:          fill,
+		D2StrokeStyle: d2.D2StrokeStyle{FontColor: fontColor},
 	}
 }
 
