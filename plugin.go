@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	flow "github.com/Azure/go-workflow"
+	"github.com/larsartmann/go-output"
 )
 
 // EnvKeyEnabled is the environment variable that controls audit logging.
@@ -195,6 +196,48 @@ func (a *Auditor) ExportPlantUML(path string) error {
 // ExportGraphviz writes the step DAG as Graphviz DOT to path.
 func (a *Auditor) ExportGraphviz(path string) error {
 	return writeToFile(path, a.WriteGraphviz)
+}
+
+// WriteD2 writes the step DAG as a D2 diagram to the writer.
+func (a *Auditor) WriteD2(writer io.Writer) error {
+	return a.Report().WriteD2(writer)
+}
+
+// ExportD2 writes the step DAG as D2 to path.
+func (a *Auditor) ExportD2(path string) error {
+	return writeToFile(path, a.WriteD2)
+}
+
+// WriteTable writes the step summary as a table in the specified format.
+func (a *Auditor) WriteTable(writer io.Writer, format output.Format, opts output.RenderOptions) error {
+	return a.Report().WriteTable(writer, format, opts)
+}
+
+// ExportTable writes the step summary table to path in the specified format.
+func (a *Auditor) ExportTable(path string, format output.Format, opts output.RenderOptions) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return a.WriteTable(w, format, opts)
+	})
+}
+
+// WriteTree writes the step DAG as an ASCII tree to the writer.
+func (a *Auditor) WriteTree(writer io.Writer) error {
+	return a.Report().WriteTree(writer)
+}
+
+// ExportTree writes the step DAG as an ASCII tree to path.
+func (a *Auditor) ExportTree(path string) error {
+	return writeToFile(path, a.WriteTree)
+}
+
+// WriteHTMLTree writes the step DAG as an HTML nested list tree to the writer.
+func (a *Auditor) WriteHTMLTree(writer io.Writer) error {
+	return a.Report().WriteHTMLTree(writer)
+}
+
+// ExportHTMLTree writes the step DAG as an HTML tree to path.
+func (a *Auditor) ExportHTMLTree(path string) error {
+	return writeToFile(path, a.WriteHTMLTree)
 }
 
 // writeToFile is a helper that creates a file, calls the writer function, and

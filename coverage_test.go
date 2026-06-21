@@ -938,3 +938,174 @@ func TestWriteToFile_CloseError(t *testing.T) {
 		return
 	}
 }
+
+func TestReport_AggregateCounts_PendingRunning(t *testing.T) {
+	t.Parallel()
+
+	// Build a report with a non-terminal step directly.
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "pending-step"}, Status: auditlog.StepStatusPending},
+			{StepRef: auditlog.StepRef{Name: "running-step"}, Status: auditlog.StepStatusRunning},
+			{StepRef: auditlog.StepRef{Name: "done-step"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	assertCount(t, "PendingCount", recomputed.PendingCount, 1)
+	assertCount(t, "RunningCount", recomputed.RunningCount, 1)
+	assertCount(t, "SucceededCount", recomputed.SucceededCount, 1)
+}
+
+func TestReport_PeakConcurrency_ParallelSteps(t *testing.T) {
+	t.Parallel()
+
+	// Use slow steps to ensure true overlap in the event stream.
+	a, w := newAuditAndWorkflow(t)
+	addParallelSteps(w, newSlow("a", 20*time.Millisecond), newSlow("b", 20*time.Millisecond))
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+	assertReportValid(t, report)
+
+	// Two parallel slow steps should produce a peak concurrency of 2.
+	if report.PeakConcurrency != 2 {
+		t.Errorf("expected PeakConcurrency=2, got %d", report.PeakConcurrency)
+	}
+}
+
+func TestReport_PeakConcurrency_SequentialSteps(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	addDependentStep(w, newSucceed("parent"), newSucceed("child"))
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+	assertReportValid(t, report)
+
+	// Sequential steps should never overlap.
+	if report.PeakConcurrency != 1 {
+		t.Errorf("expected PeakConcurrency=1, got %d", report.PeakConcurrency)
+	}
+}
+
+func TestReport_CriticalPathDuration_DependentChain(t *testing.T) {
+	t.Parallel()
+
+	// Construct a report with a known dependency chain.
+	// parent (10ms) -> child (20ms) -> grandchild (30ms)
+	// plus an independent leaf (5ms)
+	// critical path = 10 + 20 + 30 = 60ms
+	d10 := 10.0
+	d20 := 20.0
+	d30 := 30.0
+	d5 := 5.0
+
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{
+				StepRef:    auditlog.StepRef{Name: "parent"},
+				Status:     auditlog.StepStatusSucceeded,
+				DurationMs: &d10,
+			},
+			{
+				StepRef:      auditlog.StepRef{Name: "child"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &d20,
+				Dependencies: []auditlog.StepRef{{Name: "parent"}},
+			},
+			{
+				StepRef:      auditlog.StepRef{Name: "grandchild"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &d30,
+				Dependencies: []auditlog.StepRef{{Name: "child"}},
+			},
+			{
+				StepRef:    auditlog.StepRef{Name: "leaf"},
+				Status:     auditlog.StepStatusSucceeded,
+				DurationMs: &d5,
+			},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	want := 60.0
+	if recomputed.CriticalPathDurationMs != want {
+		t.Errorf("expected CriticalPathDurationMs=%f, got %f", want, recomputed.CriticalPathDurationMs)
+	}
+}
+
+func TestReport_CriticalPathDuration_Empty(t *testing.T) {
+	t.Parallel()
+
+	raw := auditlog.WorkflowReport{Steps: []auditlog.StepInfo{}}
+	recomputed := raw.Filtered()
+
+	if recomputed.CriticalPathDurationMs != 0 {
+		t.Errorf("expected CriticalPathDurationMs=0 for empty report, got %f", recomputed.CriticalPathDurationMs)
+	}
+}
+
+func TestReport_FailureReason_FailedSteps(t *testing.T) {
+	t.Parallel()
+
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+			{StepRef: auditlog.StepRef{Name: "bad-a"}, Status: auditlog.StepStatusFailed},
+			{StepRef: auditlog.StepRef{Name: "bad-b"}, Status: auditlog.StepStatusFailed},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	if recomputed.WorkflowSucceeded {
+		t.Error("expected workflow to be failed")
+	}
+
+	want := "2 step(s) failed: bad-a, bad-b"
+	if recomputed.FailureReason != want {
+		t.Errorf("expected FailureReason=%q, got %q", want, recomputed.FailureReason)
+	}
+}
+
+func TestReport_FailureReason_CanceledSteps(t *testing.T) {
+	t.Parallel()
+
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+			{StepRef: auditlog.StepRef{Name: "cancel"}, Status: auditlog.StepStatusCanceled},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	want := "1 step(s) canceled: cancel"
+	if recomputed.FailureReason != want {
+		t.Errorf("expected FailureReason=%q, got %q", want, recomputed.FailureReason)
+	}
+}
+
+func TestReport_FailureReason_Success(t *testing.T) {
+	t.Parallel()
+
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	recomputed := raw.Filtered()
+
+	if !recomputed.WorkflowSucceeded {
+		t.Error("expected workflow to be succeeded")
+	}
+
+	if recomputed.FailureReason != "" {
+		t.Errorf("expected empty FailureReason for success, got %q", recomputed.FailureReason)
+	}
+}
