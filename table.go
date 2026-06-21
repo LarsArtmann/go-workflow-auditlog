@@ -67,8 +67,6 @@ func (r WorkflowReport) WriteTable(writer io.Writer, format output.Format, opts 
 func (r WorkflowReport) WriteTableString(format output.Format, opts output.RenderOptions) (string, error) {
 	var buf strings.Builder
 
-	opts.Writer = &buf
-
 	err := r.WriteTable(&buf, format, opts)
 	if err != nil {
 		return "", err
