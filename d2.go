@@ -9,77 +9,51 @@ import (
 	"github.com/larsartmann/go-output/d2"
 )
 
-// statusD2Style maps a StepStatus to a D2NodeStyle for diagram coloring.
-// Delegates to StepStatus.Color() so all color definitions live in one place.
-func statusD2Style(s StepStatus) d2.D2NodeStyle {
-	fill, fontColor := s.Color()
-	if fill == "" {
-		return d2.D2NodeStyle{}
+// graphNodesToD2 converts go-output GraphNodes to D2Nodes, preserving IDs,
+// labels, and fill/font colors from GraphStyle.
+func graphNodesToD2(nodes []output.GraphNode) []d2.D2Node {
+	result := make([]d2.D2Node, len(nodes))
+	for i, n := range nodes {
+		result[i] = d2.D2Node{
+			ID:    output.NewBrandedID[output.D2NodeIDBrand](n.ID.Get()),
+			Label: output.NewBrandedID[output.D2NodeLabelBrand](n.Label.Get()),
+			Style: d2.D2NodeStyle{
+				Fill:          n.Style.Fill,
+				D2StrokeStyle: d2.D2StrokeStyle{FontColor: n.Style.FontColor},
+			},
+		}
 	}
 
-	return d2.D2NodeStyle{
-		Fill:          fill,
-		D2StrokeStyle: d2.D2StrokeStyle{FontColor: fontColor},
-	}
+	return result
 }
 
-// buildD2Graph converts a WorkflowReport's step DAG into D2 nodes and edges.
-// Every step becomes a node (colored by status). Each dependency becomes an
-// edge pointing from the step to its dependency.
-func buildD2Graph(report WorkflowReport) ([]d2.D2Node, []d2.D2Edge) {
-	seen := make(map[string]struct{})
-
-	var (
-		nodes []d2.D2Node
-		edges []d2.D2Edge
-	)
-
-	addNode := func(name, label string, status StepStatus) {
-		if _, ok := seen[name]; ok {
-			return
-		}
-
-		seen[name] = struct{}{}
-
-		node := d2.D2Node{
-			ID:    output.NewBrandedID[output.D2NodeIDBrand](name),
-			Label: output.NewBrandedID[output.D2NodeLabelBrand](label),
-			Style: statusD2Style(status),
-		}
-		nodes = append(nodes, node)
-	}
-
-	for _, step := range report.Steps {
-		addNode(step.Name, stepLabel(step), step.Status)
-	}
-
-	for _, step := range report.Steps {
-		for _, dep := range step.Dependencies {
-			addNode(dep.Name, dep.Name, StepStatusPending)
-			edges = append(edges, d2.D2Edge{
-				From: output.NewBrandedID[output.D2NodeIDBrand](step.Name),
-				To:   output.NewBrandedID[output.D2NodeIDBrand](dep.Name),
-			})
+// graphEdgesToD2 converts go-output GraphEdges to D2Edges, preserving IDs.
+func graphEdgesToD2(edges []output.GraphEdge) []d2.D2Edge {
+	result := make([]d2.D2Edge, len(edges))
+	for i, e := range edges {
+		result[i] = d2.D2Edge{
+			From: output.NewBrandedID[output.D2NodeIDBrand](e.From.Get()),
+			To:   output.NewBrandedID[output.D2NodeIDBrand](e.To.Get()),
 		}
 	}
 
-	return nodes, edges
+	return result
 }
 
 // WriteD2 writes the step dependency DAG as a D2 diagram.
 // Nodes are colored by status (green=succeeded, red=failed, gray=skipped,
 // orange=canceled) via inline style attributes.
 func (r WorkflowReport) WriteD2(writer io.Writer) error {
-	nodes, edges := buildD2Graph(r)
+	nodes, edges := buildGraph(r)
 
 	diagram := d2.NewD2Diagram()
 	diagram.SetTitle("Workflow DAG")
 
-	for _, node := range nodes {
+	for _, node := range graphNodesToD2(nodes) {
 		diagram.AddNode(node)
 	}
 
-	for _, edge := range edges {
+	for _, edge := range graphEdgesToD2(edges) {
 		diagram.AddEdge(edge)
 	}
 
