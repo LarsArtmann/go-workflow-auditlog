@@ -71,13 +71,6 @@ into a single navigable page. Like the status reports in `docs/status/` but
 generated from a live `WorkflowReport`. Consumers get a shareable, offline
 artifact from any workflow run.
 
-### Type Safety
-
-**Direction**: Adopt a **branded `RunID` string type** — `type RunID string`
-with `MarshalText`/`UnmarshalText` so it serializes identically to a plain
-string but is type-checked at compile time. Prevents passing a step name where
-a run ID is expected. No JSON break.
-
 ---
 
 ## Raw Ideas (not yet scoped)

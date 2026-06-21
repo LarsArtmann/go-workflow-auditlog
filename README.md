@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/larsartmann/go-workflow-auditlog.svg)](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)
 [![Go Report Card](https://goreportcard.com/badge/github.com/larsartmann/go-workflow-auditlog)](https://goreportcard.com/report/github.com/larsartmann/go-workflow-auditlog)
 [![CI](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-94.7%25-brightgreen)](#)
+[![Coverage](https://img.shields.io/badge/coverage-93.2%25-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 
@@ -43,7 +43,7 @@ Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workfl
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
 - **Zero runtime dependencies** — only `go-workflow` + `backoff/v4`
-- **94.7% test coverage** with race detector, 0 lint issues
+- **93.2% test coverage** with race detector, 0 lint issues
 
 ## Installation
 

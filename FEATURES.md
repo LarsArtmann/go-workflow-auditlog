@@ -21,6 +21,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-06-21.
 ### Report & Query API
 
 - **`WorkflowReport`** with denormalized aggregates (counts, durations, peak concurrency, critical path)
+- **Branded `RunID` type** (`type RunID string`) — compile-time safety against confusing `RunID` with `WorkflowID`, serializes as a plain JSON string
 - **`Validate()`** — checks count consistency (event, step, 6 status-count fields) + status drift via sentinel errors
 - **`Filtered(opts...)`** — filter by step name, status, event type, time range
 - **`Diff(other)`** — compare two runs (added/removed/changed steps + wall-clock duration delta)
@@ -79,7 +80,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns)
 - `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer
-- `CHANGELOG.md` — [Unreleased] populated
+- `CHANGELOG.md` — v0.2.0 released 2026-06-21; `[Unreleased]` section ready for next cycle
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
 - `example/main.go` — demos all export formats via `--export` flag
 
@@ -105,7 +106,6 @@ No way to set Mermaid/D2/Graphviz layout direction (TD vs LR). All diagrams defa
 - OpenTelemetry span bridge
 - `encoding/json/v2` migration (Go 1.25+ policy)
 - HTML dashboard report (self-contained, combines table + diagram + tree)
-- Branded `RunID` string type (stronger types)
 - `Name(step)` fallback helper (deterministic step names when `String()` is unset)
 - Fuzz tests for diagram ID sanitization
 - Benchmarks for new render paths (WriteD2, WriteTable, WriteTree, analytics)
