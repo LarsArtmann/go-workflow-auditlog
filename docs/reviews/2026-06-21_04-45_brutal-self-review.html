@@ -1,0 +1,1255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brutal Self-Review — go-workflow-auditlog — 2026-06-21</title>
+    <style>
+      /* =========================================================================
+         BAUHAUS DARK — Dashboard template
+         Design language: form follows function. Primary colors on graphite.
+         Zero external dependencies: system fonts, no CDN, no build step.
+         Token architecture: see references/bauhaus-tokens.md
+         ========================================================================= */
+
+      :root {
+        /* --- Primitive palette (Bauhaus Dark) --- */
+        --color-graphite: #0e0e10;
+        --color-graphite-2: #18181d;
+        --color-graphite-3: #16161a;
+        --color-bone: #f4f4f0;
+        --color-red: #ff6b6b;
+        --color-blue: #6eb5ff;
+        --color-yellow: #f4d35e;
+        --color-amber: #ffb347;
+        --color-hairline: rgba(244, 244, 240, 0.12);
+        --color-hairline-strong: rgba(244, 244, 240, 0.25);
+
+        /* --- Semantic layer (shared vocabulary with editorial template) --- */
+        --surface: var(--color-graphite);
+        --surface-raised: var(--color-graphite-2);
+        --surface-sunken: var(--color-graphite-3);
+        --text: var(--color-bone);
+        --text-muted: rgba(244, 244, 240, 0.72);
+        --text-faint: rgba(244, 244, 240, 0.45);
+        --border: var(--color-hairline);
+        --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-amber);
+        --problem: var(--color-red);
+        --solution: var(--color-blue);
+        --warning: var(--color-yellow);
+
+        /* --- Backward-compatible aliases (do not break consumer skills) --- */
+        --bg: var(--surface);
+        --bg-elevated: var(--surface-raised);
+        --bg-sunken: var(--surface-sunken);
+        --bg-card: var(--surface-raised);
+        --bg-code: var(--surface-sunken);
+        --ink: var(--text);
+        --ink-secondary: var(--text-muted);
+        --ink-muted: var(--text-faint);
+        --rose: var(--problem);
+        --rose-glow: color-mix(in srgb, var(--problem) 15%, transparent);
+        --emerald: var(--solution);
+        --emerald-glow: color-mix(in srgb, var(--solution) 15%, transparent);
+        --amber-glow: color-mix(in srgb, var(--warning) 15%, transparent);
+        --coral: var(--problem);
+        --coral-light: color-mix(in srgb, var(--problem) 15%, transparent);
+        --teal: var(--solution);
+        --teal-light: color-mix(in srgb, var(--solution) 15%, transparent);
+        --amber-light: color-mix(in srgb, var(--warning) 20%, transparent);
+
+        /* --- Shape --- */
+        --radius: 0px; /* Bauhaus default: sharp corners */
+        --radius-sm: 0px;
+
+        /* --- Type stacks (system only — zero external fonts) --- */
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      /* Sticky-header offset for anchor jumps */
+      section[id],
+      [id] {
+        scroll-margin-top: 60px;
+      }
+
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* --- Full-bleed top bar --- */
+      .top-bar {
+        background: var(--text);
+        color: var(--surface);
+        padding: 0.6rem 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* --- Layout: optional sticky sidebar TOC --- */
+      .layout {
+        display: flex;
+        gap: 2.5rem;
+        padding: 2rem;
+      }
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+        height: calc(100vh - 2rem);
+        overflow-y: auto;
+        display: none;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .sidebar .label {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
+      .sidebar a {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 0.45rem 0.75rem;
+        border-left: 2px solid transparent;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+        font-weight: 500;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+      }
+      .main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* --- Headings --- */
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      h1 {
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        line-height: 1.1;
+        margin: 0 0 0.6rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+      }
+      h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h4 {
+        font-size: 0.98rem;
+        margin: 0 0 0.3rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
+
+      /* --- Hero --- */
+      .hero {
+        padding: 1.5rem 0 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
+      .hero-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--surface);
+        background: var(--accent);
+        padding: 0.3rem 0.7rem;
+        margin-bottom: 0.9rem;
+      }
+      .hero-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        max-width: 70ch;
+        margin: 0;
+      }
+
+      /* Bauhaus signature: geometric shape cluster (optional) */
+      .hero-shapes {
+        position: relative;
+        height: 80px;
+        margin-bottom: 1rem;
+      }
+      .hero-shapes .circle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 56px;
+        height: 56px;
+        background: var(--problem);
+        border-radius: 50%;
+      }
+      .hero-shapes .square {
+        position: absolute;
+        top: 24px;
+        left: 72px;
+        width: 48px;
+        height: 48px;
+        background: var(--solution);
+      }
+      .hero-shapes .tri {
+        position: absolute;
+        top: 8px;
+        left: 140px;
+        width: 0;
+        height: 0;
+        border-left: 28px solid transparent;
+        border-right: 28px solid transparent;
+        border-bottom: 48px solid var(--warning);
+      }
+
+      /* --- General cards --- */
+      .card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+
+      /* --- Issue cards --- */
+      .issue {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .issue-critical {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .issue-important {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+      .issue-nice {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .issue h3 {
+        margin-bottom: 0.3rem;
+      }
+      .issue .where {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        margin: 0.2rem 0 0.6rem;
+      }
+      .issue p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* --- Severity badges (used inside issue cards) --- */
+      .severity {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        margin-bottom: 0.6rem;
+        color: var(--surface);
+      }
+      .severity-critical {
+        background: var(--problem);
+      }
+      .severity-important {
+        background: var(--warning);
+      }
+      .severity-nice {
+        background: var(--solution);
+      }
+
+      /* --- Inline badges (used in tables) --- */
+      .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.18rem 0.5rem;
+        border: 1px solid var(--border-strong);
+        color: var(--text-muted);
+      }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-medium {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .badge-low {
+        color: var(--text-muted);
+      }
+      .badge-fixed {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
+
+      /* --- Callouts (used inside issues or standalone) --- */
+      .callout {
+        margin: 0.8rem 0 0;
+        padding: 0.7rem 0.9rem;
+        border-left: 3px solid var(--border-strong);
+        background: color-mix(in srgb, var(--text) 5%, transparent);
+        font-size: 0.9rem;
+      }
+      .callout strong {
+        display: inline-block;
+        margin-right: 0.4rem;
+      }
+      .callout-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 10%, transparent);
+      }
+      .callout-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 10%, transparent);
+      }
+
+      /* --- Stat cards / scorecards (aliased vocabulary) --- */
+      .stat-grid,
+      .scorecard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .stat-card,
+      .score-card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1rem;
+        position: relative;
+      }
+      .stat-card::before,
+      .score-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border-strong);
+      }
+      .stat-bad,
+      .score-bad {
+        /* default top bar already set */
+      }
+      .stat-bad::before,
+      .score-bad::before {
+        background: var(--problem);
+      }
+      .stat-good::before,
+      .score-good::before {
+        background: var(--solution);
+      }
+      .stat-warn::before,
+      .score-warn::before {
+        background: var(--warning);
+      }
+      .stat-value,
+      .score {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--text);
+      }
+      .stat-bad .stat-value,
+      .score-bad .score {
+        color: var(--problem);
+      }
+      .stat-good .stat-value,
+      .score-good .score {
+        color: var(--solution);
+      }
+      .stat-warn .stat-value,
+      .score-warn .score {
+        color: var(--warning);
+      }
+      .stat-label,
+      .score-card .label {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-faint);
+        margin-top: 0.5rem;
+      }
+
+      /* --- Strengths list --- */
+      .strengths {
+        display: grid;
+        gap: 0.5rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .strength {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.8rem;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .strength .check {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        color: var(--solution);
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+      .strength .text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+      .strength .text span {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      /* --- Tables --- */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.9rem;
+      }
+      th {
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        background: var(--surface-raised);
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      td {
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+      }
+      tr:hover td {
+        background: var(--surface-raised);
+      }
+
+      /* --- Before/After comparison --- */
+      .compare-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin: 1rem 0 0.5rem;
+      }
+      .compare-before,
+      .compare-after {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0.4rem 0.7rem;
+        color: var(--surface);
+      }
+      .compare-before {
+        background: var(--problem);
+      }
+      .compare-after {
+        background: var(--solution);
+      }
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .compare-row pre {
+        margin: 0;
+      }
+
+      /* --- Code blocks + syntax highlighting --- */
+      pre {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      .tok-keyword {
+        color: var(--accent);
+      } /* func, type, struct, if, return */
+      .tok-type {
+        color: var(--warning);
+      } /* int, string, bool, error */
+      .tok-string {
+        color: var(--solution);
+      } /* "quoted strings" */
+      .tok-comment {
+        color: var(--text-faint);
+        font-style: italic;
+      }
+      .tok-func {
+        color: #74a9ff;
+      } /* function names */
+      .tok-number {
+        color: var(--accent);
+      } /* 42, 3.14 */
+      .tok-generic {
+        color: var(--problem);
+      } /* T, ID in generics */
+      .tok-builtin {
+        color: #4dd9ff;
+      } /* make, len, append */
+      .tok-punct {
+        color: var(--text-muted);
+      } /* { } ( ) ; = : */
+      .tok-attr {
+        color: var(--accent);
+      } /* Nix attribute names */
+
+      /* --- Dependency tree / ASCII diagrams --- */
+      .dep-tree {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.7;
+        white-space: pre;
+        overflow-x: auto;
+      }
+      .dep-tree .root {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .dep-tree .ok {
+        color: var(--solution);
+      }
+      .dep-tree .unwanted {
+        color: var(--problem);
+      }
+
+      /* --- Inline node-and-arrow diagrams --- */
+      .diagram {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+      }
+      .node {
+        display: inline-block;
+        padding: 0.35rem 0.7rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--surface-sunken);
+        border: 1px solid var(--border-strong);
+      }
+      .node-core {
+        background: var(--accent);
+        color: var(--surface);
+        border-color: var(--accent);
+      }
+      .node-problem {
+        background: var(--problem);
+        color: var(--surface);
+        border-color: var(--problem);
+      }
+      .node-good {
+        background: var(--solution);
+        color: var(--surface);
+        border-color: var(--solution);
+      }
+      .arrow {
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+
+      /* --- Grids (responsive) --- */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+
+      /* --- Inline TOC (alternative to sidebar) --- */
+      .toc {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.3rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .toc h3 {
+        margin-bottom: 0.5rem;
+      }
+      .toc ul {
+        list-style: none;
+        padding: 0;
+      }
+      .toc li {
+        margin: 0.25rem 0;
+      }
+      .toc a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .toc a:hover {
+        color: var(--accent);
+      }
+
+      /* --- Migration / numbered steps --- */
+      .migration-step {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+      }
+      .migration-num {
+        font-family: var(--font-mono);
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .migration-content h4 {
+        margin-bottom: 0.2rem;
+      }
+      .migration-content p {
+        margin-bottom: 0;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      /* --- Footer --- */
+      .footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8rem;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+
+      /* --- Responsive --- */
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: block;
+        }
+      }
+      @media (max-width: 768px) {
+        .layout {
+          flex-direction: column;
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 0.6rem 1rem;
+          flex-wrap: wrap;
+          gap: 0.3rem;
+        }
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .compare-header,
+        .compare-row {
+          grid-template-columns: 1fr;
+        }
+        .stat-grid,
+        .scorecard {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .migration-step {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <span>BRUTAL SELF-REVIEW</span>
+      <span>2026-06-21</span>
+      <span>go-workflow-auditlog</span>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav>
+        <nav>
+          <div class="label">Contents</div>
+          <a href="#summary">Summary</a>
+          <a href="#forgotten">What I Forgot</a>
+          <a href="#stupid">What's Stupid</a>
+          <a href="#better">What Could Be Better</a>
+          <a href="#types">Type Model</a>
+          <a href="#ghosts">Ghost Systems</a>
+          <a href="#plan">Execution Plan</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <div class="hero">
+          <div class="hero-shapes">
+            <div class="circle"></div>
+            <div class="square"></div>
+            <div class="tri"></div>
+          </div>
+          <div class="hero-badge">Brutal Self-Review</div>
+          <h1>What I Forgot, What's Stupid, What Could Be Better</h1>
+          <p class="hero-subtitle">
+            Honest reflection on the 2026-06-21 execution session. 165 tests
+            pass at 93.4% coverage. But tests passing ≠ excellent work.
+          </p>
+        </div>
+
+        <h2 id="summary"><span class="num">00</span>Summary</h2>
+        <div class="stat-grid">
+          <div class="stat-card stat-good">
+            <div class="stat-value">165</div>
+            <div class="stat-label">Tests Passing</div>
+          </div>
+          <div class="stat-card stat-good">
+            <div class="stat-value">93.4%</div>
+            <div class="stat-label">Coverage</div>
+          </div>
+          <div class="stat-card stat-bad">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Split Brains</div>
+          </div>
+          <div class="stat-card stat-warn">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Policy Violations</div>
+          </div>
+          <div class="stat-card stat-bad">
+            <div class="stat-value">1</div>
+            <div class="stat-label">Ghost System</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <strong>Headline:</strong>
+          The prior session shipped 16 tasks, all tests green, all lint clean.
+          But underneath: a split brain between <code>stepRecord</code> and
+          <code>replayStep</code>, a plain-string <code>RunID</code> that
+          should be branded, <code>encoding/json</code> v1 used on Go 1.26
+          where v2 is policy, and <code>computeWallClockDurationMs</code>
+          stranded in <code>report_builder.go</code> after I moved the method
+          that calls it. Tests pass. The architecture limps.
+        </div>
+
+        <!-- ===== WHAT I FORGOT ===== -->
+        <h2 id="forgotten"><span class="num">01</span>What I Forgot</h2>
+
+        <div class="issue issue-important">
+          <span class="severity severity-important">Forgot</span>
+          <h3>Did not verify govulncheck or gosec</h3>
+          <div class="where">CI / security</div>
+          <p>
+            The <code>how-to-golang</code> policy mandates <code>govulncheck</code>
+            and <code>gosec</code> in CI. I never ran either during the prior
+            session. This session I ran <code>govulncheck</code> via nix &mdash;
+            0 vulnerabilities in our code, 3 in dependencies we don't call.
+            But I should have done this before declaring "done."
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix:</strong>
+            Add <code>govulncheck</code> to the pre-commit / CI flow. Run it
+            now as part of every quality gate.
+          </div>
+        </div>
+
+        <div class="issue issue-nice">
+          <span class="severity severity-nice">Forgot</span>
+          <h3>Stale LSP warnings on example/main.go</h3>
+          <div class="where">example/main.go:265-266</div>
+          <p>
+            The LSP shows <code>SA1019: audit.ExportToFile is deprecated</code>
+            on lines that now use <code>audit.ExportJSON</code>. The code is
+            correct (<code>golangci-lint run</code> = 0 issues), but the
+            golangci-lint LSP integration caches stale results. I noticed this
+            and did nothing.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix:</strong>
+            Document in AGENTS.md that the golangci-lint LSP cache can be stale
+            after renaming methods. <code>golangci-lint run</code> is the
+            source of truth.
+          </div>
+        </div>
+
+        <!-- ===== WHAT'S STUPID ===== -->
+        <h2 id="stupid"><span class="num">02</span>What's Stupid</h2>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Split Brain</span>
+          <h3>stepRecord (recorder.go) vs replayStep (replay.go)</h3>
+          <div class="where">recorder.go:30-52 &middot; replay.go:13-22</div>
+          <p>
+            Two structs track <strong>the same domain concept</strong>
+            (accumulated step state during execution/replay) with nearly
+            identical fields:
+          </p>
+          <div class="compare-header">
+            <div class="compare-before">stepRecord (recorder.go)</div>
+            <div class="compare-after">replayStep (replay.go)</div>
+          </div>
+          <div class="compare-row">
+            <div>
+              <pre><code><span class="tok-keyword">type</span> stepRecord <span class="tok-keyword">struct</span> {
+  StepRef
+  stepID       <span class="tok-type">int</span>
+  attemptCount <span class="tok-type">int</span>
+  startedAt    *<span class="tok-type">time.Time</span>
+  finishedAt   *<span class="tok-type">time.Time</span>
+  durationMs   *<span class="tok-type">float64</span>
+  attemptErr   *<span class="tok-type">string</span>
+  status       StepStatus
+  <span class="tok-comment">// + live-only fields</span>
+}</code></pre>
+            </div>
+            <div>
+              <pre><code><span class="tok-keyword">type</span> replayStep <span class="tok-keyword">struct</span> {
+  StepRef
+  attemptCount <span class="tok-type">int</span>
+  startedAt    *<span class="tok-type">time.Time</span>
+  finishedAt   *<span class="tok-type">time.Time</span>
+  durationMs   *<span class="tok-type">float64</span>
+  attemptErr   *<span class="tok-type">string</span>
+  status       StepStatus
+}</code></pre>
+            </div>
+          </div>
+          <p>
+            <code>replayStep</code> is a strict subset of <code>stepRecord</code>
+            minus the live-only fields (<code>pendingAttempts</code>,
+            <code>maxAttempts</code>, <code>hasRetry</code>, <code>hasTimeout</code>,
+            <code>dependencies</code>). The conversion logic from each to
+            <code>StepInfo</code> is duplicated. If we add a field to one and
+            forget the other, replay diverges from live capture silently.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix:</strong>
+            Extract a shared <code>stepAccumulator</code> struct containing the
+            common fields. Both <code>stepRecord</code> (live) and
+            <code>replayStep</code> (replay) embed it. One conversion path to
+            <code>StepInfo</code>.
+          </div>
+        </div>
+
+        <div class="issue issue-important">
+          <span class="severity severity-important">Ghost System</span>
+          <h3>computeWallClockDurationMs stranded in report_builder.go</h3>
+          <div class="where">report_builder.go:308 &middot; report.go:234</div>
+          <p>
+            I moved <code>Duration()</code> and <code>Summary()</code> from
+            <code>diff.go</code> to <code>report.go</code> for cohesion. But
+            <code>Duration()</code> calls <code>computeWallClockDurationMs()</code>
+            which still lives in <code>report_builder.go</code>. I moved the
+            caller but not the callee. Half-cohesive.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix:</strong>
+            Move <code>computeWallClockDurationMs</code> to <code>report.go</code>
+            alongside <code>Duration()</code>. Finish the job.
+          </div>
+        </div>
+
+        <div class="issue issue-important">
+          <span class="severity severity-important">Stringly Typed</span>
+          <h3>RunID is a plain string everywhere</h3>
+          <div class="where">event.go:9 &middot; report.go:34 &middot; plugin.go:30</div>
+          <p>
+            <code>RunID</code> is <code>string</code> in <code>Event</code>,
+            <code>WorkflowReport</code>, <code>Config</code>, and 4+ method
+            signatures. Nothing stops you from passing a <code>WorkflowID</code>
+            where a <code>RunID</code> is expected. The
+            <code>how-to-golang</code> policy mandates branded types for domain
+            identifiers. This is the #1 type-model defect.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix:</strong>
+            <code>type RunID string</code> with <code>MarshalText</code>/
+            <code>UnmarshalText</code> for JSON compatibility. Compile-time
+            safety, zero JSON break. The report flagged this; I deferred it.
+          </div>
+        </div>
+
+        <!-- ===== WHAT COULD BE BETTER ===== -->
+        <h2 id="better"><span class="num">03</span>What Could Be Better</h2>
+
+        <div class="card card-problem">
+          <h4>encoding/json v1 on Go 1.26</h4>
+          <p>
+            The project uses <code>encoding/json</code> (v1) in 5 files. The
+            <code>how-to-golang</code> policy says "Go 1.25+ &rarr;
+            <code>encoding/json/v2</code>." I checked &mdash; <code>v2</code>
+            is <strong>not yet in the Go 1.26.3 stdlib</strong> (the proposal
+            exists but isn't shipped). So this is a policy aspiration, not an
+            actionable violation today. Document it and revisit when Go ships
+            <code>v2</code>.
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>Error as *string instead of error</h4>
+          <p>
+            <code>Event.Error</code> and <code>StepInfo.Error</code> are
+            <code>*string</code>, not <code>error</code>. This was a deliberate
+            choice for JSON serialization (errors don't serialize), but it
+            means consumers lose <code>errors.Is</code>/<code>errors.As</code>
+            capability. The error is a dead string, not a structured value.
+          </p>
+          <div class="callout callout-warning">
+            <strong>Tradeoff:</strong>
+            Changing this would break the JSON schema. For an ALPHA library
+            this is acceptable, but it's a bigger change than fits this session.
+            Ticket it.
+          </div>
+        </div>
+
+        <div class="card card-problem">
+          <h4>*float64 for DurationMs &mdash; pointer boilerplate</h4>
+          <p>
+            <code>DurationMs *float64</code> appears in 5 places
+            (<code>Event</code>, <code>StepInfo</code>, <code>stepRecord</code>,
+            <code>replayStep</code>, local in <code>recordAfterStep</code>).
+            The pointer distinguishes "not measured" (nil) from "zero" (0.0).
+            But it forces heap allocation and nil-checking everywhere. A typed
+            wrapper (<code>type Millis float64</code> with a sentinel, or
+            <code>time.Duration</code> with zero-as-absent) would be cleaner.
+          </p>
+        </div>
+
+        <div class="card card-warning">
+          <h4>Deprecated aliases add maintenance surface</h4>
+          <p>
+            I added 6 deprecated methods (<code>WriteReportJSON</code>,
+            <code>WriteEventsNDJSON</code>, <code>ExportToFile</code>,
+            <code>ExportEventsToNDJSON</code>). For an ALPHA library that
+            hasn't tagged v0.2.0 yet, this is premature backward compat. The
+            old names could just be renamed. But since external tests use them
+            (the test files call <code>ExportToFile</code> etc.), removing
+            would break consumers.
+            <strong>Verdict: keep, but document a removal timeline.</strong>
+          </p>
+        </div>
+
+        <!-- ===== TYPE MODEL ===== -->
+        <h2 id="types"><span class="num">04</span>Type Model Assessment</h2>
+
+        <div class="card card-solution">
+          <h4>What's good</h4>
+          <p>
+            <code>StepStatus</code> is a proper typed enum with
+            <code>Label()</code>/<code>Icon()</code>/<code>Color()</code> methods
+            and a centralized metadata map. <code>EventType</code> and
+            <code>Phase</code> follow the same pattern. <code>StepRef</code> is
+            embedded for JSON flattening. The single-construction-path
+            (<code>buildReportFromCore</code>) is excellent.
+          </p>
+        </div>
+
+        <div class="card card-problem">
+          <h4>What needs fixing (this session)</h4>
+          <ul>
+            <li><strong>RunID</strong>: plain string &rarr; branded type</li>
+            <li><strong>stepRecord/replayStep</strong>: split brain &rarr; shared accumulator</li>
+            <li><strong>computeWallClockDurationMs</strong>: stranded &rarr; move to report.go</li>
+          </ul>
+        </div>
+
+        <div class="card card-warning">
+          <h4>What to consider later</h4>
+          <ul>
+            <li><strong>StepID</strong>: plain int, not branded. Low risk since it's internal.</li>
+            <li><strong>SchemaVersion</strong>: plain string "0.1.0". Should match semver module tag.</li>
+            <li><strong>Error *string</strong>: loses structured error info. Schema break to fix.</li>
+            <li><strong>DurationMs *float64</strong>: heap-allocated nullable. Consider time.Duration.</li>
+          </ul>
+        </div>
+
+        <!-- ===== GHOST SYSTEMS ===== -->
+        <h2 id="ghosts"><span class="num">05</span>Ghost Systems &amp; Split Brains</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Severity</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Split Brain</td>
+              <td><code>stepRecord</code> vs <code>replayStep</code> &mdash; duplicate step-state tracking</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>Extract shared accumulator</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Ghost System</td>
+              <td><code>computeWallClockDurationMs</code> in wrong file after move</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>Move to report.go</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Stringly Typed</td>
+              <td><code>RunID</code> has no compile-time identity</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>Branded type</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ===== EXECUTION PLAN ===== -->
+        <h2 id="plan"><span class="num">06</span>Execution Plan</h2>
+        <p>Sorted by work required vs impact (lowest effort, highest impact first).</p>
+
+        <div class="migration-step">
+          <div class="migration-num">1</div>
+          <div class="migration-content">
+            <h4>Move computeWallClockDurationMs to report.go</h4>
+            <p>
+              <strong>Work:</strong> 5 min &middot; <strong>Impact:</strong> Medium
+              <br />Finish the cohesion job from the prior session. Move the
+              function next to <code>Duration()</code> which calls it.
+            </p>
+          </div>
+        </div>
+
+        <div class="migration-step">
+          <div class="migration-num">2</div>
+          <div class="migration-content">
+            <h4>Create branded RunID type</h4>
+            <p>
+              <strong>Work:</strong> 10 min &middot; <strong>Impact:</strong> High
+              <br /><code>type RunID string</code> with
+              <code>MarshalText</code>/<code>UnmarshalText</code>. Replace
+              all <code>string</code> RunID fields/params. Compile-time safety,
+              zero JSON break. Check <code>go-composable-business-types</code>
+              first for an existing branded ID pattern &mdash; but for a single
+              type, a local branded string is simpler and avoids a new dep.
+            </p>
+          </div>
+        </div>
+
+        <div class="migration-step">
+          <div class="migration-num">3</div>
+          <div class="migration-content">
+            <h4>Consolidate stepRecord/replayStep split brain</h4>
+            <p>
+              <strong>Work:</strong> 15 min &middot; <strong>Impact:</strong> High
+              <br />Extract shared <code>stepCore</code> struct with the 7 common
+              fields. <code>stepRecord</code> embeds it + adds live-only fields.
+              <code>replayStep</code> embeds it. Single <code>toStepInfo()</code>
+              method on <code>stepCore</code>. Eliminates the duplicate
+              conversion logic.
+            </p>
+          </div>
+        </div>
+
+        <div class="migration-step">
+          <div class="migration-num">4</div>
+          <div class="migration-content">
+            <h4>Run govulncheck + full verification</h4>
+            <p>
+              <strong>Work:</strong> 5 min &middot; <strong>Impact:</strong> Critical
+              <br />Run <code>govulncheck</code>, <code>golangci-lint</code>,
+              <code>go test -race</code>, <code>go vet</code> after each change.
+              Confirm 0 vulns, 0 lint issues, all tests pass.
+            </p>
+          </div>
+        </div>
+
+        <!-- ===== STRENGTHS ===== -->
+        <h2>Strengths to Preserve</h2>
+        <div class="strengths">
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Single construction path (buildReportFromCore)</strong>
+              <span>BuildReport, Filtered, ReplayEvents all route through one place. New construction paths MUST use it.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Single sync.RWMutex concurrency model</strong>
+              <span>One lock protects all state. OnEvent fires outside the lock. Simple, correct, race-free.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>StepStatus.Color() single source of truth</strong>
+              <span>All diagram renderers delegate to one method. Adding a status = one line.</span>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          Generated 2026-06-21 04:45 CEST &middot; Verified against commit
+          <code>9f0426b</code> &middot; 165 tests PASS (race) &middot; Lint 0 issues &middot; Coverage 93.4%
+        </footer>
+      </main>
+    </div>
+
+    <!-- Progressive-enhancement scrollspy. Nav still works without JS via anchor links. -->
+    <script>
+      (function () {
+        if (!("IntersectionObserver" in window)) return;
+        var nav = document.querySelector("[data-nav]");
+        if (!nav) return;
+        var links = nav.querySelectorAll('a[href^="#"]');
+        var ids = Array.from(links).map(function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        if (!sections.length) return;
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                links.forEach(function (link) {
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href") === "#" + entry.target.id,
+                  );
+                });
+              }
+            });
+          },
+          { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
+        );
+        sections.forEach(function (s) {
+          observer.observe(s);
+        });
+      })();
+    </script>
+  </body>
+</html>
