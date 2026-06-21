@@ -300,28 +300,3 @@ func buildFailureReason(report WorkflowReport) string {
 
 	return strings.Join(parts, "; ")
 }
-
-// computeWallClockDurationMs returns the elapsed wall-clock time in
-// milliseconds from the earliest to the latest event timestamp. Unlike
-// TotalDurationMs (which sums per-step durations and overcounts for parallel
-// workflows), this reflects the actual time the workflow occupied.
-func computeWallClockDurationMs(events []Event) float64 {
-	if len(events) == 0 {
-		return 0
-	}
-
-	earliest := events[0].Timestamp
-	latest := events[0].Timestamp
-
-	for _, evt := range events {
-		if evt.Timestamp.Before(earliest) {
-			earliest = evt.Timestamp
-		}
-
-		if evt.Timestamp.After(latest) {
-			latest = evt.Timestamp
-		}
-	}
-
-	return float64(latest.Sub(earliest).Microseconds()) / microsPerMs
-}
