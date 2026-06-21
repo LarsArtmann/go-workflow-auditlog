@@ -14,6 +14,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -249,29 +250,41 @@ func printStepDetails(report auditlog.WorkflowReport) {
 	}
 }
 
-// maybeExport writes JSON + NDJSON artifacts and a sample event if --export is set.
+// maybeExport writes all export artifacts if --export is set.
 func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.WorkflowReport) {
 	if len(args) <= 1 || args[1] != "--export" {
 		return
 	}
 
-	const jsonPath = "audit-report.json"
-
-	err := audit.ExportToFile(jsonPath)
-	if err != nil {
-		log.Fatalf("export error: %v", err)
+	type exportTask struct {
+		name string
+		fn   func() error
 	}
 
-	fmt.Printf("\nReport exported to %s\n", jsonPath)
-
-	const ndjsonPath = "audit-events.ndjson"
-
-	err = audit.ExportEventsToNDJSON(ndjsonPath)
-	if err != nil {
-		log.Fatalf("ndjson export error: %v", err)
+	tasks := []exportTask{
+		{"audit-report.json", func() error { return audit.ExportToFile("audit-report.json") }},
+		{"audit-events.ndjson", func() error { return audit.ExportEventsToNDJSON("audit-events.ndjson") }},
+		{"dag.mmd", func() error { return audit.ExportMermaid("dag.mmd") }},
+		{"dag.dot", func() error { return audit.ExportGraphviz("dag.dot") }},
+		{"dag.puml", func() error { return audit.ExportPlantUML("dag.puml") }},
+		{"dag.d2", func() error { return audit.ExportD2("dag.d2") }},
+		{"steps.csv", func() error {
+			return audit.ExportTable("steps.csv", output.FormatCSV, output.RenderOptions{})
+		}},
+		{"steps.md", func() error {
+			return audit.ExportTable("steps.md", output.FormatMarkdown, output.RenderOptions{})
+		}},
+		{"tree.txt", func() error { return audit.ExportTree("tree.txt") }},
 	}
 
-	fmt.Printf("Events exported to %s\n", ndjsonPath)
+	for _, task := range tasks {
+		err := task.fn()
+		if err != nil {
+			log.Fatalf("export %s: %v", task.name, err)
+		}
+
+		fmt.Printf("Exported %s\n", task.name)
+	}
 
 	printSampleEvent(report)
 }
