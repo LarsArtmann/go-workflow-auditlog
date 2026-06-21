@@ -36,7 +36,7 @@ Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workfl
 - **Full DAG structure** — captures dependency graph (upstream + dependents), retry/timeout config, and step types
 - **Skipped & canceled detection** — reads post-execution state to catch steps that bypass callbacks entirely
 - **Cross-system correlation** — 128-bit `RunID` stamped on every event for trace/log correlation
-- **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT diagrams
+- **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT / D2 diagrams, step summary tables (16 formats), ASCII + HTML tree views
 - **Report filtering** — slice reports by step name, status, event type, or time range
 - **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration delta)
 - **Event replay** — reconstruct a report from a flat NDJSON event stream
@@ -246,9 +246,17 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                  |
 | `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                 |
 | `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                             |
+| `ExportD2(path string) error`                          | Writes D2 DAG to file.                                       |
+| `ExportTable(path string, format, opts) error`        | Writes step summary table (CSV/Markdown/JSON/HTML/...).     |
+| `ExportTree(path string) error`                        | Writes ASCII tree to file.                                   |
+| `ExportHTMLTree(path string) error`                    | Writes HTML tree to file.                                    |
 | `WriteMermaid(w io.Writer) error`                     | Writes Mermaid DAG to writer.                                |
 | `WritePlantUML(w io.Writer) error`                    | Writes PlantUML DAG to writer.                               |
 | `WriteGraphviz(w io.Writer) error`                    | Writes Graphviz DOT DAG to writer.                           |
+| `WriteD2(w io.Writer) error`                           | Writes D2 DAG to writer.                                     |
+| `WriteTable(w io.Writer, format, opts) error`         | Writes step summary table to writer.                         |
+| `WriteTree(w io.Writer) error`                         | Writes ASCII tree to writer.                                 |
+| `WriteHTMLTree(w io.Writer) error`                     | Writes HTML tree to writer.                                  |
 
 ### `WorkflowReport` Methods
 
@@ -270,9 +278,17 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `report.WriteMermaid(w io.Writer) error`               | Mermaid diagram.                                                     |
 | `report.WritePlantUML(w io.Writer) error`              | PlantUML diagram.                                                    |
 | `report.WriteGraphviz(w io.Writer) error`              | Graphviz DOT diagram.                                                |
+| `report.WriteD2(w io.Writer) error`                     | D2 diagram.                                                          |
 | `report.WriteMermaidString() (string, error)`          | Mermaid diagram as string.                                           |
 | `report.WritePlantUMLString() (string, error)`         | PlantUML diagram as string.                                          |
 | `report.WriteGraphvizString() (string, error)`         | Graphviz DOT diagram as string.                                      |
+| `report.WriteD2String() (string, error)`                | D2 diagram as string.                                                |
+| `report.WriteTable(w, format, opts) error`             | Step summary table (16 formats via go-output).                       |
+| `report.WriteTableString(format, opts) (string, error)` | Step summary table as string.                                        |
+| `report.WriteTree(w io.Writer) error`                   | ASCII tree of step DAG.                                              |
+| `report.WriteTreeString() (string, error)`              | ASCII tree as string.                                                |
+| `report.WriteHTMLTree(w io.Writer) error`               | HTML nested-list tree of step DAG.                                   |
+| `report.WriteHTMLTreeString() (string, error)`          | HTML tree as string.                                                 |
 | `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
 
 ### Package-Level Functions
@@ -357,6 +373,10 @@ Generate diagrams from any report:
 _ = report.WriteMermaid(os.Stdout)      // or audit.ExportMermaid("dag.mmd")
 _ = report.WriteGraphviz(os.Stdout)     // or audit.ExportGraphviz("dag.dot")
 _ = report.WritePlantUML(os.Stdout)     // or audit.ExportPlantUML("dag.puml")
+_ = report.WriteD2(os.Stdout)           // or audit.ExportD2("dag.d2")
+_ = report.WriteTable(os.Stdout, output.FormatCSV, output.RenderOptions{})  // step summary table
+_ = report.WriteTree(os.Stdout)         // ASCII tree of step DAG
+_ = report.WriteHTMLTree(os.Stdout)     // HTML nested-list tree
 ```
 
 ## Concurrency Model
