@@ -54,7 +54,12 @@ func (r WorkflowReport) WriteTable(writer io.Writer, format output.Format, opts 
 
 	opts.Writer = writer
 
-	return output.RenderTableData(data, format, opts)
+	err := output.RenderTableData(data, format, opts)
+	if err != nil {
+		return fmt.Errorf("render table: %w", err)
+	}
+
+	return nil
 }
 
 // WriteTableString returns the step summary table as a string in the

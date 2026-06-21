@@ -134,8 +134,15 @@ linters:
             - github.com/Azure/go-workflow
             - github.com/cenkalti/backoff/v4
             - github.com/larsartmann/go-output
+            - github.com/larsartmann/go-output/d2
+            - github.com/larsartmann/go-output/delimited
             - github.com/larsartmann/go-output/graph
+            - github.com/larsartmann/go-output/markdown
+            - github.com/larsartmann/go-output/markup
             - github.com/larsartmann/go-output/plantuml
+            - github.com/larsartmann/go-output/serialization
+            - github.com/larsartmann/go-output/table
+            - github.com/larsartmann/go-output/tree
             - github.com/larsartmann/go-workflow-auditlog
     exhaustruct:
       exclude:
@@ -145,6 +152,10 @@ linters:
         - github.com/larsartmann/go-output.GraphNode
         - github.com/larsartmann/go-output.GraphEdge
         - github.com/larsartmann/go-output.GraphStyle
+        - github.com/larsartmann/go-output/d2.D2Node
+        - github.com/larsartmann/go-output/d2.D2Edge
+        - github.com/larsartmann/go-output/d2.D2NodeStyle
+        - github.com/larsartmann/go-output/d2.D2StrokeStyle
         - github.com/larsartmann/go-workflow-auditlog.*
     exhaustive:
       default-signifies-exhaustive: true
