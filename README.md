@@ -246,50 +246,50 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                  |
 | `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                 |
 | `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                             |
-| `ExportD2(path string) error`                          | Writes D2 DAG to file.                                       |
-| `ExportTable(path string, format, opts) error`        | Writes step summary table (CSV/Markdown/JSON/HTML/...).     |
-| `ExportTree(path string) error`                        | Writes ASCII tree to file.                                   |
-| `ExportHTMLTree(path string) error`                    | Writes HTML tree to file.                                    |
+| `ExportD2(path string) error`                         | Writes D2 DAG to file.                                       |
+| `ExportTable(path string, format, opts) error`        | Writes step summary table (CSV/Markdown/JSON/HTML/...).      |
+| `ExportTree(path string) error`                       | Writes ASCII tree to file.                                   |
+| `ExportHTMLTree(path string) error`                   | Writes HTML tree to file.                                    |
 | `WriteMermaid(w io.Writer) error`                     | Writes Mermaid DAG to writer.                                |
 | `WritePlantUML(w io.Writer) error`                    | Writes PlantUML DAG to writer.                               |
 | `WriteGraphviz(w io.Writer) error`                    | Writes Graphviz DOT DAG to writer.                           |
-| `WriteD2(w io.Writer) error`                           | Writes D2 DAG to writer.                                     |
+| `WriteD2(w io.Writer) error`                          | Writes D2 DAG to writer.                                     |
 | `WriteTable(w io.Writer, format, opts) error`         | Writes step summary table to writer.                         |
-| `WriteTree(w io.Writer) error`                         | Writes ASCII tree to writer.                                 |
-| `WriteHTMLTree(w io.Writer) error`                     | Writes HTML tree to writer.                                  |
+| `WriteTree(w io.Writer) error`                        | Writes ASCII tree to writer.                                 |
+| `WriteHTMLTree(w io.Writer) error`                    | Writes HTML tree to writer.                                  |
 
 ### `WorkflowReport` Methods
 
-| Method                                                 | Description                                                          |
-| ------------------------------------------------------ | -------------------------------------------------------------------- |
-| `report.StepByName(name)`                              | Find a step by name.                                                 |
-| `report.EventsByStep(name)`                            | Filter events by step.                                               |
-| `report.EventsByType(type)`                            | Filter events by type.                                               |
-| `report.FailedSteps()`                                 | All failed/canceled steps.                                           |
-| `report.SucceededSteps()`                              | All succeeded steps.                                                 |
-| `report.SkippedSteps()`                                | All skipped steps.                                                   |
-| `report.RetriedSteps()`                                | All steps with >1 attempt.                                           |
-| `report.Filtered(opts ...ReportOption) WorkflowReport` | Returns a filtered copy of the report.                               |
-| `report.Diff(other WorkflowReport) DiffResult`         | Compares two reports (added/removed/changed steps + duration delta). |
-| `report.Duration() time.Duration`                      | Wall-clock duration spanned by all events (earliest → latest).       |
-| `report.Summary() string`                              | One-line human-readable summary.                                     |
-| `report.WriteJSON(w io.Writer) error`                  | Serialize report as JSON.                                            |
-| `report.WriteNDJSON(w io.Writer) error`                | Serialize events as NDJSON.                                          |
-| `report.WriteMermaid(w io.Writer) error`               | Mermaid diagram.                                                     |
-| `report.WritePlantUML(w io.Writer) error`              | PlantUML diagram.                                                    |
-| `report.WriteGraphviz(w io.Writer) error`              | Graphviz DOT diagram.                                                |
+| Method                                                  | Description                                                          |
+| ------------------------------------------------------- | -------------------------------------------------------------------- |
+| `report.StepByName(name)`                               | Find a step by name.                                                 |
+| `report.EventsByStep(name)`                             | Filter events by step.                                               |
+| `report.EventsByType(type)`                             | Filter events by type.                                               |
+| `report.FailedSteps()`                                  | All failed/canceled steps.                                           |
+| `report.SucceededSteps()`                               | All succeeded steps.                                                 |
+| `report.SkippedSteps()`                                 | All skipped steps.                                                   |
+| `report.RetriedSteps()`                                 | All steps with >1 attempt.                                           |
+| `report.Filtered(opts ...ReportOption) WorkflowReport`  | Returns a filtered copy of the report.                               |
+| `report.Diff(other WorkflowReport) DiffResult`          | Compares two reports (added/removed/changed steps + duration delta). |
+| `report.Duration() time.Duration`                       | Wall-clock duration spanned by all events (earliest → latest).       |
+| `report.Summary() string`                               | One-line human-readable summary.                                     |
+| `report.WriteJSON(w io.Writer) error`                   | Serialize report as JSON.                                            |
+| `report.WriteNDJSON(w io.Writer) error`                 | Serialize events as NDJSON.                                          |
+| `report.WriteMermaid(w io.Writer) error`                | Mermaid diagram.                                                     |
+| `report.WritePlantUML(w io.Writer) error`               | PlantUML diagram.                                                    |
+| `report.WriteGraphviz(w io.Writer) error`               | Graphviz DOT diagram.                                                |
 | `report.WriteD2(w io.Writer) error`                     | D2 diagram.                                                          |
-| `report.WriteMermaidString() (string, error)`          | Mermaid diagram as string.                                           |
-| `report.WritePlantUMLString() (string, error)`         | PlantUML diagram as string.                                          |
-| `report.WriteGraphvizString() (string, error)`         | Graphviz DOT diagram as string.                                      |
+| `report.WriteMermaidString() (string, error)`           | Mermaid diagram as string.                                           |
+| `report.WritePlantUMLString() (string, error)`          | PlantUML diagram as string.                                          |
+| `report.WriteGraphvizString() (string, error)`          | Graphviz DOT diagram as string.                                      |
 | `report.WriteD2String() (string, error)`                | D2 diagram as string.                                                |
-| `report.WriteTable(w, format, opts) error`             | Step summary table (16 formats via go-output).                       |
+| `report.WriteTable(w, format, opts) error`              | Step summary table (16 formats via go-output).                       |
 | `report.WriteTableString(format, opts) (string, error)` | Step summary table as string.                                        |
 | `report.WriteTree(w io.Writer) error`                   | ASCII tree of step DAG.                                              |
 | `report.WriteTreeString() (string, error)`              | ASCII tree as string.                                                |
 | `report.WriteHTMLTree(w io.Writer) error`               | HTML nested-list tree of step DAG.                                   |
 | `report.WriteHTMLTreeString() (string, error)`          | HTML tree as string.                                                 |
-| `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
+| `report.Validate() error`                               | Checks internal consistency (counts, status drift).                  |
 
 ### Package-Level Functions
 
@@ -306,14 +306,14 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 These exported errors are returned by `Validate()` and `New()`. Match them with `errors.Is`:
 
-| Error                            | Returned when                                        |
-| -------------------------------- | ---------------------------------------------------- |
-| `auditlog.ErrWorkflowIDPathSep`  | `Config.WorkflowID` contains `/` or `\`.             |
-| `auditlog.ErrEventCountMismatch` | Report `EventCount` ≠ `len(Events)`.                 |
-| `auditlog.ErrStepCountMismatch`  | Report `StepCount` ≠ `len(Steps)`.                   |
-| `auditlog.ErrStatusDrift`        | A step's `Status` disagrees with its derived status. |
+| Error                            | Returned when                                                        |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `auditlog.ErrWorkflowIDPathSep`  | `Config.WorkflowID` contains `/` or `\`.                             |
+| `auditlog.ErrEventCountMismatch` | Report `EventCount` ≠ `len(Events)`.                                 |
+| `auditlog.ErrStepCountMismatch`  | Report `StepCount` ≠ `len(Steps)`.                                   |
+| `auditlog.ErrStatusDrift`        | A step's `Status` disagrees with its derived status.                 |
 | `auditlog.ErrCountMismatch`      | A denormalized status-count field disagrees with actual step counts. |
-| `auditlog.ErrReplayNoEvents`     | `ReplayEvents` received zero events.                 |
+| `auditlog.ErrReplayNoEvents`     | `ReplayEvents` received zero events.                                 |
 
 ## Config
 
