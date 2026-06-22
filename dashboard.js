@@ -1,6 +1,27 @@
 const report = JSON.parse(document.getElementById("report-data").textContent);
 const meta = JSON.parse(document.getElementById("type-metadata").textContent);
 
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+function humanizeDuration(ms) {
+  if (ms == null || ms < 0) return "\u2014";
+  if (ms < 1) return ms.toFixed(3) + "ms";
+  if (ms < 1000) return ms.toFixed(1) + "ms";
+  var s = ms / 1000;
+  if (s < 60) return s.toFixed(1) + "s";
+  var m = Math.floor(s / 60);
+  var rem = s - m * 60;
+  if (m < 60) return m + "m " + Math.round(rem) + "s";
+  var h = Math.floor(m / 60);
+  var remM = m - h * 60;
+  return h + "h " + remM + "m";
+}
+
 const statusIcons = Object.fromEntries(Object.entries(meta.statuses).map(([k, v]) => [k, v.icon]));
 const statusLabels = Object.fromEntries(
   Object.entries(meta.statuses).map(([k, v]) => [k, v.label]),
@@ -15,6 +36,74 @@ if (report.run_id) {
   document.getElementById("run-id").textContent = "\u2014";
 }
 document.getElementById("exported-at").textContent = new Date(report.exported_at).toLocaleString();
+
+// Workflow status hero badge
+(function renderWorkflowStatus() {
+  var el = document.getElementById("workflow-status");
+  if (report.workflow_succeeded) {
+    el.className = "workflow-status passed";
+    el.innerHTML = "&#10003; Passed";
+  } else {
+    el.className = "workflow-status failed";
+    el.innerHTML = "&#10007; Failed";
+  }
+})();
+
+// Failure summary banner
+(function renderFailureBanner() {
+  if (report.workflow_succeeded) return;
+  var banner = document.getElementById("failure-banner");
+  var reasonEl = document.getElementById("failure-reason");
+  var listEl = document.getElementById("failure-list");
+  if (report.failure_reason) {
+    reasonEl.textContent = report.failure_reason;
+  } else if (report.failed_count > 0) {
+    reasonEl.textContent = report.failed_count + " step(s) failed.";
+  } else {
+    return;
+  }
+  var failedSteps = (report.steps || []).filter(function (s) {
+    return s.status === "failed" || s.status === "canceled";
+  });
+  listEl.innerHTML = failedSteps
+    .map(function (s) {
+      return (
+        '<div class="failure-item"><span class="failure-item-name">' +
+        esc(s.step_name) +
+        '</span><span class="failure-item-error">' +
+        esc(s.error || "(no error message)") +
+        "</span></div>"
+      );
+    })
+    .join("");
+  banner.classList.add("visible");
+})();
+
+// Compute failure-impact: steps skipped/canceled because a dependency failed
+var impactedSteps = {};
+(function computeImpact() {
+  var failedNames = {};
+  (report.steps || []).forEach(function (s) {
+    if (s.status === "failed" || s.status === "canceled") {
+      failedNames[s.step_name] = true;
+    }
+  });
+  (report.steps || []).forEach(function (s) {
+    if (s.status === "skipped" || s.status === "canceled" || s.status === "pending") {
+      var deps = s.dependencies || [];
+      var blockedBy = deps.filter(function (d) {
+        return failedNames[d.step_name];
+      });
+      if (blockedBy.length) {
+        impactedSteps[s.step_name] = blockedBy
+          .map(function (d) {
+            return d.step_name;
+          })
+          .join(", ");
+      }
+    }
+  });
+})();
 
 // Status legend with counts
 const statusCounts = {};
@@ -70,7 +159,7 @@ document.getElementById("legend").innerHTML = statusOrder
         (e.step_name ? " " + e.step_name : "") +
         (e.phase ? " " + e.phase : "") +
         (e.attempt ? " attempt " + e.attempt : "") +
-        (dur > 0 ? " " + dur.toFixed(2) + "ms" : "");
+        (dur > 0 ? " " + humanizeDuration(dur) : "");
       return (
         '<div class="wf-event" style="left:' +
         pct.toFixed(2) +
@@ -93,10 +182,10 @@ document.getElementById("stats").innerHTML = [
   { label: "Events", value: report.event_count },
   { label: "Succeeded", value: report.succeeded_count, cls: "success" },
   { label: "Failed", value: errorCount, cls: errorCount > 0 ? "error" : "success" },
-  { label: "Wall Clock", value: (report.wall_clock_duration_ms || 0).toFixed(1) + "ms" },
+  { label: "Wall Clock", value: humanizeDuration(report.wall_clock_duration_ms) },
   report.peak_concurrency ? { label: "Peak Concurrency", value: report.peak_concurrency } : null,
   report.critical_path_duration_ms
-    ? { label: "Critical Path", value: report.critical_path_duration_ms.toFixed(1) + "ms" }
+    ? { label: "Critical Path", value: humanizeDuration(report.critical_path_duration_ms) }
     : null,
 ]
   .filter(Boolean)
@@ -165,6 +254,14 @@ document.addEventListener("keydown", function (e) {
     }
   }
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON") return;
+  if (e.key === "e" || e.key === "E") {
+    var stepsActive = document.getElementById("tab-steps").classList.contains("active");
+    if (stepsActive) {
+      e.preventDefault();
+      toggleErrorsOnly();
+      return;
+    }
+  }
   var tab = tabMap[e.key];
   if (tab) {
     var btn = document.querySelector('.tab[data-tab="' + tab + '"]');
@@ -240,9 +337,24 @@ var allSteps = report.steps.map(function (s) {
     esc(s.status) +
     "</span>";
   var hasError = s.status === "failed" || s.status === "canceled" ? "1" : "0";
+  var rowCls =
+    s.status === "failed" ? " row-failed" : s.status === "canceled" ? " row-canceled" : "";
   return (
     '<tr data-search="' +
-    esc((s.step_name + " " + (s.step_type || "") + " " + s.status).toLowerCase()) +
+    esc(
+      (
+        s.step_name +
+        " " +
+        (s.step_type || "") +
+        " " +
+        s.status +
+        " " +
+        (s.error || "")
+      ).toLowerCase(),
+    ) +
+    '"' +
+    ' class="' +
+    rowCls.trim() +
     '"' +
     ' data-sort-name="' +
     esc((s.step_name || "").toLowerCase()) +
@@ -279,7 +391,7 @@ var allSteps = report.steps.map(function (s) {
     (s.max_attempts > 1 ? "/" + s.max_attempts : "") +
     "</td>" +
     "<td>" +
-    (s.duration_ms ? s.duration_ms.toFixed(3) : "\u2014") +
+    (s.duration_ms ? humanizeDuration(s.duration_ms) : "\u2014") +
     "</td>" +
     '<td class="deps-list">' +
     (deps || "\u2014") +
@@ -289,6 +401,18 @@ var allSteps = report.steps.map(function (s) {
     "</td>" +
     "<td>" +
     configBadges(s) +
+    "</td>" +
+    '<td class="error-cell' +
+    (errMsg ? "" : " empty") +
+    '"' +
+    (errMsg ? ' title="' + errMsg + '"' : "") +
+    ">" +
+    (errMsg ||
+      (impactedSteps[s.step_name]
+        ? '<span class="impact-badge" title="Blocked by: ' +
+          esc(impactedSteps[s.step_name]) +
+          '">&#9888; blocked</span>'
+        : "\u2014")) +
     "</td>" +
     "</tr>"
   );
@@ -391,12 +515,27 @@ document.querySelectorAll("#tab-steps th.sortable").forEach(function (th) {
   });
 });
 
-document.getElementById("step-errors-only").addEventListener("click", function () {
-  var pressed = this.getAttribute("aria-pressed") === "true";
-  this.setAttribute("aria-pressed", !pressed);
-  this.classList.toggle("active", !pressed);
+document.getElementById("step-errors-only").addEventListener("click", toggleErrorsOnly);
+
+(function setupErrorsOnlyBadge() {
+  var errorSteps = report.steps.filter(function (s) {
+    return s.status === "failed" || s.status === "canceled";
+  }).length;
+  if (errorSteps > 0) {
+    var btn = document.getElementById("step-errors-only");
+    btn.innerHTML = "Errors only <strong>(" + errorSteps + ")</strong>";
+    btn.style.borderColor = "var(--error)";
+    btn.style.color = "var(--error)";
+  }
+})();
+
+function toggleErrorsOnly() {
+  var btn = document.getElementById("step-errors-only");
+  var pressed = btn.getAttribute("aria-pressed") === "true";
+  btn.setAttribute("aria-pressed", !pressed);
+  btn.classList.toggle("active", !pressed);
   applyStepView();
-});
+}
 
 var searchTimer;
 document.getElementById("step-search").addEventListener("input", function () {
@@ -415,7 +554,7 @@ var allEvents = report.events.map(function (e) {
     '">' +
     esc(eventLabels[e.event_type] || e.event_type) +
     "</span>";
-  var dur = e.duration_ms != null ? e.duration_ms.toFixed(3) + "ms" : "";
+  var dur = e.duration_ms != null ? humanizeDuration(e.duration_ms) : "";
   var errTip = e.error ? ' data-error="' + esc(e.error) + '"' : "";
   return (
     '<tr data-type="' +
@@ -449,7 +588,9 @@ var allEvents = report.events.map(function (e) {
     "<td" +
     errTip +
     ">" +
-    (e.error ? '<span class="status-badge failed"' + errTip + ">error</span>" : "") +
+    (e.error
+      ? '<span class="inline-error" data-error="' + esc(e.error) + '">' + esc(e.error) + "</span>"
+      : "") +
     "</td>" +
     "</tr>"
   );
@@ -548,6 +689,9 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
     visited[step.step_name] = true;
     var div = document.createElement("div");
     div.className = "scope-node";
+    if (step.status === "failed" || step.status === "canceled") {
+      div.className += " has-failure";
+    }
     var hdr = document.createElement("div");
     hdr.className = "scope-node-header";
     var icon = statusIcons[step.status] || "";
@@ -565,11 +709,18 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
       (depCount !== 1 ? "s" : "") +
       " \u00B7 " +
       esc(step.status) +
-      (step.duration_ms ? " \u00B7 " + step.duration_ms.toFixed(1) + "ms" : "") +
+      (step.duration_ms ? " \u00B7 " + humanizeDuration(step.duration_ms) : "") +
       "</span>";
     hdr.setAttribute("role", "button");
     hdr.setAttribute("tabindex", "0");
     div.appendChild(hdr);
+
+    if (step.error) {
+      var errDiv = document.createElement("div");
+      errDiv.className = "scope-node-error";
+      errDiv.textContent = step.error;
+      div.appendChild(errDiv);
+    }
 
     var deps = (step.dependents || [])
       .map(function (d) {
@@ -608,62 +759,87 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
   });
 })();
 
-// Timeline
-var tlSteps = report.steps
-  .filter(function (s) {
-    return s.duration_ms;
-  })
-  .sort(function (a, b) {
-    return (b.duration_ms || 0) - (a.duration_ms || 0);
+// Gantt-style timeline (time-positioned bars showing actual parallelism)
+(function renderGantt() {
+  var tlSteps = report.steps.filter(function (s) {
+    return s.started_at;
   });
-if (!tlSteps.length) {
-  document.getElementById("timeline-container").innerHTML =
-    '<div class="panel-empty"><div class="empty-icon">\u23F1</div><div class="empty-text">No timing data recorded</div><div class="empty-hint">Step durations appear here after workflow execution</div></div>';
-} else {
-  var tlMax = Math.max.apply(
+  if (!tlSteps.length) {
+    document.getElementById("timeline-container").innerHTML =
+      '<div class="panel-empty"><div class="empty-icon">\u23F1</div><div class="empty-text">No timing data recorded</div><div class="empty-hint">Step durations appear here after workflow execution</div></div>';
+    return;
+  }
+  tlSteps.sort(function (a, b) {
+    return new Date(a.started_at) - new Date(b.started_at);
+  });
+  var minT = new Date(tlSteps[0].started_at).getTime();
+  var maxT = Math.max.apply(
     null,
-    tlSteps
-      .map(function (s) {
-        return s.duration_ms;
-      })
-      .concat([1]),
+    tlSteps.map(function (s) {
+      return new Date(s.finished_at || s.started_at).getTime();
+    }),
   );
-  var statusBarColors = {
-    succeeded: "var(--success)",
-    failed: "var(--error)",
-    running: "var(--warning)",
-    pending: "var(--text-muted)",
-    canceled: "var(--transient)",
-    skipped: "var(--text-dim)",
-  };
-  document.getElementById("timeline-container").innerHTML = tlSteps
+  var range = maxT - minT || 1;
+
+  function pct(ts) {
+    return ((ts - minT) / range) * 100;
+  }
+  function pctStr(ts) {
+    return pct(ts).toFixed(2);
+  }
+
+  var axisStart = new Date(minT).toLocaleTimeString();
+  var axisMid = new Date(minT + range / 2).toLocaleTimeString();
+  var axisEnd = new Date(maxT).toLocaleTimeString();
+
+  var rowsHtml = tlSteps
     .map(function (s) {
+      var st = new Date(s.started_at).getTime();
+      var ft = s.finished_at ? new Date(s.finished_at).getTime() : st;
+      var left = pctStr(st);
+      var width = Math.max(0.3, pct(ft) - pct(st)).toFixed(2);
       var icon = statusIcons[s.status] || "";
-      var pct = s.duration_ms ? ((s.duration_ms / tlMax) * 100).toFixed(1) : 0;
-      var color = statusBarColors[s.status] || "var(--accent)";
+      var tip =
+        esc(s.step_name) +
+        " | " +
+        s.status +
+        (s.duration_ms ? " | " + humanizeDuration(s.duration_ms) : "") +
+        (s.attempt_count > 1 ? " | " + s.attempt_count + " attempts" : "") +
+        (s.error ? " | " + esc(s.error) : "");
       return (
-        '<div class="timeline-row">' +
-        '<div class="timeline-label">' +
+        '<div class="gantt-row">' +
+        '<div class="gantt-label">' +
         (icon ? icon + " " : "") +
         esc(s.step_name) +
-        (s.attempt_count > 1 ? " (\u00D7" + s.attempt_count + ")" : "") +
         "</div>" +
-        '<div class="timeline-track">' +
-        '<div class="timeline-bar" style="width:' +
-        pct +
-        "%;background:" +
-        color +
-        '" title="' +
-        (s.duration_ms || 0).toFixed(3) +
-        'ms"></div>' +
+        '<div class="gantt-track">' +
+        '<div class="gantt-bar ' +
+        esc(s.status) +
+        '" style="left:' +
+        left +
+        "%;width:" +
+        width +
+        '%" title="' +
+        tip +
+        '"></div>' +
         "</div>" +
-        '<div style="width:120px;text-align:right;font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono)">' +
-        (s.duration_ms ? s.duration_ms.toFixed(2) + "ms" : "") +
-        "</div></div>"
+        "</div>"
       );
     })
     .join("");
-}
+
+  document.getElementById("timeline-container").innerHTML =
+    '<div class="gantt-axis"><span>' +
+    axisStart +
+    "</span><span>" +
+    axisMid +
+    "</span><span>" +
+    axisEnd +
+    "</span></div>" +
+    '<div class="gantt-grid">' +
+    rowsHtml +
+    "</div>";
+})();
 
 // Dependency Graph \u2014 Sugiyama layered DAG layout
 function renderGraph() {
@@ -978,6 +1154,17 @@ function renderGraph() {
     accent.setAttribute("fill", n.color);
     g.appendChild(accent);
 
+    if (n.status === "failed" || n.status === "canceled") {
+      var dot = document.createElementNS(ns, "circle");
+      dot.setAttribute("cx", n.w - 8);
+      dot.setAttribute("cy", 8);
+      dot.setAttribute("r", 4);
+      dot.setAttribute("fill", "var(--error)");
+      dot.setAttribute("stroke", "var(--bg-elevated)");
+      dot.setAttribute("stroke-width", 1.5);
+      g.appendChild(dot);
+    }
+
     var text = document.createElementNS(ns, "text");
     text.setAttribute("x", n.w / 2 + 2);
     text.setAttribute("y", n.h / 2);
@@ -991,7 +1178,7 @@ function renderGraph() {
     if (n.step_type) tip += " | type: " + n.step_type;
     tip += " | status: " + n.status;
     tip += " | attempts: " + n.attempt_count;
-    if (n.duration_ms) tip += " | duration: " + n.duration_ms.toFixed(3) + "ms";
+    if (n.duration_ms) tip += " | duration: " + humanizeDuration(n.duration_ms);
     if (n.error) tip += " | error: " + n.error;
     if (n.has_retry) tip += " | retry: yes";
     if (n.has_timeout) tip += " | timeout: yes";
@@ -1169,10 +1356,3 @@ document.getElementById("footer-stats").textContent =
   " events \u00b7 " +
   report.step_count +
   " steps";
-
-function esc(s) {
-  if (!s) return "";
-  return String(s).replace(/[&<>"']/g, function (c) {
-    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-  });
-}

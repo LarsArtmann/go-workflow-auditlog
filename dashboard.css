@@ -580,47 +580,6 @@ tr:hover td {
   font-family: var(--font-mono);
 }
 
-.timeline-bar {
-  height: 8px;
-  border-radius: 4px;
-  transition: width 0.3s;
-}
-.timeline-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 0.5rem 0;
-  padding: 0.35rem 0;
-  border-radius: var(--radius);
-  transition: background var(--transition);
-}
-.timeline-row:hover {
-  background: var(--surface);
-}
-.timeline-label {
-  width: 220px;
-  font-size: 0.8rem;
-  font-family: var(--font-mono);
-  text-align: right;
-  flex-shrink: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  justify-content: flex-end;
-}
-.timeline-track {
-  flex: 1;
-  background: var(--surface);
-  border-radius: 4px;
-  height: 8px;
-  position: relative;
-  display: flex;
-  gap: 2px;
-}
-
 .scope-tree {
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -783,6 +742,239 @@ tr:hover td {
   color: var(--text-dim);
 }
 
+.workflow-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+}
+.workflow-status.passed {
+  background: var(--success-dim);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+.workflow-status.failed {
+  background: var(--error-dim);
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+
+.failure-banner {
+  background: var(--error-dim);
+  border: 1px solid var(--error);
+  border-left: 4px solid var(--error);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+  display: none;
+}
+.failure-banner.visible {
+  display: block;
+}
+.failure-banner-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.failure-banner-icon {
+  font-size: 1.1rem;
+}
+.failure-banner-title {
+  font-weight: 700;
+  color: var(--error);
+  font-size: 0.9rem;
+}
+.failure-banner-reason {
+  font-size: 0.82rem;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+  font-family: var(--font-mono);
+}
+.failure-banner-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.failure-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(20, 17, 13, 0.5);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.failure-item-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--error);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.failure-item-error {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  word-break: break-word;
+}
+
+.error-cell {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--error);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  cursor: help;
+}
+.error-cell.empty {
+  color: var(--text-dim);
+  cursor: default;
+}
+
+tr.row-failed td,
+tr.row-canceled td {
+  background: rgba(224, 112, 96, 0.04);
+}
+tr.row-failed:hover td,
+tr.row-canceled:hover td {
+  background: rgba(224, 112, 96, 0.08);
+}
+
+.inline-error {
+  color: var(--error);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  word-break: break-word;
+  cursor: help;
+  display: inline-block;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.scope-node.has-failure > .scope-node-header {
+  background: rgba(224, 112, 96, 0.06);
+}
+.scope-node-error {
+  color: var(--error);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+  padding-left: 1.5rem;
+  word-break: break-word;
+}
+
+.impact-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  background: var(--transient-dim);
+  color: var(--transient);
+  margin-left: 0.4rem;
+}
+
+.gantt-grid {
+  position: relative;
+  padding: 0.5rem 0;
+}
+.gantt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.3rem 0;
+  height: 24px;
+}
+.gantt-label {
+  width: 200px;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  text-align: right;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  justify-content: flex-end;
+}
+.gantt-track {
+  flex: 1;
+  position: relative;
+  height: 20px;
+  background: var(--surface);
+  border-radius: 4px;
+}
+.gantt-bar {
+  position: absolute;
+  top: 2px;
+  height: 16px;
+  border-radius: 3px;
+  min-width: 2px;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+  cursor: help;
+}
+.gantt-bar:hover {
+  opacity: 0.8;
+  transform: scaleY(1.1);
+}
+.gantt-bar.failed {
+  background: var(--error);
+}
+.gantt-bar.succeeded {
+  background: var(--success);
+}
+.gantt-bar.skipped {
+  background: var(--text-dim);
+}
+.gantt-bar.canceled {
+  background: var(--transient);
+}
+.gantt-bar.running {
+  background: var(--warning);
+}
+.gantt-bar.pending {
+  background: var(--text-muted);
+}
+.gantt-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 200px;
+  padding: 0.3rem 0.75rem 0.3rem 0;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.3rem;
+}
+.gantt-now-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--accent);
+  opacity: 0.4;
+}
+
 @media (max-width: 768px) {
   .stats {
     grid-template-columns: repeat(2, 1fr);
@@ -794,9 +986,12 @@ tr:hover td {
   .stat-card .value {
     font-size: 1.25rem;
   }
-  .timeline-label {
-    width: 140px;
+  .gantt-label {
+    width: 120px;
     font-size: 0.72rem;
+  }
+  .gantt-axis {
+    margin-left: 120px;
   }
   header {
     flex-direction: column;

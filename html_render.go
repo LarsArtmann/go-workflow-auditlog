@@ -33,11 +33,19 @@ const htmlTemplate = `<!DOCTYPE html>
 <body>
 <header>
   <div class="header-left">
-    <h1><span class="logo-dot"></span>workflow-auditlog<span class="version">v%s</span></h1>
+    <h1><span class="logo-dot"></span>workflow-auditlog<span class="version">v%s</span> <span class="workflow-status" id="workflow-status"></span></h1>
     <p class="subtitle">Workflow <span class="mono" id="workflow-id"></span> &middot; Run <span class="mono" id="run-id"></span> &mdash; exported <span id="exported-at"></span></p>
   </div>
   <div class="legend" id="legend"></div>
 </header>
+<div class="failure-banner" id="failure-banner">
+  <div class="failure-banner-header">
+    <span class="failure-banner-icon">&#9888;</span>
+    <span class="failure-banner-title">Workflow Failed</span>
+  </div>
+  <div class="failure-banner-reason" id="failure-reason"></div>
+  <div class="failure-banner-list" id="failure-list"></div>
+</div>
 <div class="waveform-section">
   <span class="waveform-label">Event Timeline</span>
   <div class="waveform" id="waveform"></div>
@@ -70,14 +78,15 @@ const htmlTemplate = `<!DOCTYPE html>
           <th class="sortable" data-sort="type">Type</th>
           <th class="sortable" data-sort="status">Status</th>
           <th class="sortable" data-sort="attempts">Attempts</th>
-          <th class="sortable" data-sort="duration">Duration (ms)</th>
+          <th class="sortable" data-sort="duration">Duration</th>
           <th>Dependencies</th>
           <th>Dependents</th>
           <th>Config</th>
+          <th>Error</th>
         </tr>
       </thead>
       <tbody id="steps-tbody"></tbody>
-      <tbody id="steps-empty" class="empty-state" style="display:none"><tr><td colspan="8">No steps recorded.</td></tr></tbody>
+      <tbody id="steps-empty" class="empty-state" style="display:none"><tr><td colspan="9">No steps recorded.</td></tr></tbody>
     </table>
   </div>
 </div>
