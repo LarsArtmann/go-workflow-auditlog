@@ -73,12 +73,12 @@ func (r WorkflowReport) WriteD2(writer io.Writer) error {
 
 	out, err := diagram.Render()
 	if err != nil {
-		return fmt.Errorf("render d2 diagram: %w", err)
+		return fmt.Errorf("%w: render d2 diagram: %w", ErrRenderFailed, err)
 	}
 
 	_, err = fmt.Fprintln(writer, out)
 	if err != nil {
-		return fmt.Errorf("write d2 output: %w", err)
+		return fmt.Errorf("%w: write d2 output: %w", ErrExportWriteFailed, err)
 	}
 
 	return nil

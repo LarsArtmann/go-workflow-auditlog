@@ -49,6 +49,12 @@ type Config struct {
 // export paths. Consumers can match on it with [errors.Is].
 var ErrWorkflowIDPathSep = errors.New("config.WorkflowID must not contain path separators")
 
+// ErrExportWriteFailed wraps errors encountered while writing exported output
+// to a file or io.Writer (file creation, buffer flush, atomic rename, direct
+// writes). Classified as Infrastructure — these are system-level failures not
+// retryable by the caller. Consumers can match on it with [errors.Is].
+var ErrExportWriteFailed = errors.New("export write failed")
+
 // Validate returns an error if the config is invalid.
 func (c Config) Validate() error {
 	if strings.ContainsAny(c.WorkflowID, "/\\") {
@@ -341,7 +347,7 @@ func writeToFile(path string, fn func(io.Writer) error) error {
 
 	tmpFile, err := os.CreateTemp(dir, ".tmp-auditlog-*")
 	if err != nil {
-		return fmt.Errorf("create temp file in %q: %w", dir, err)
+		return fmt.Errorf("%w: create temp file in %q: %w", ErrExportWriteFailed, dir, err)
 	}
 
 	tmpPath := tmpFile.Name()
@@ -366,16 +372,16 @@ func writeToFile(path string, fn func(io.Writer) error) error {
 	}
 
 	if flushErr != nil {
-		return fmt.Errorf("flush temp file %q: %w", tmpPath, flushErr)
+		return fmt.Errorf("%w: flush temp file %q: %w", ErrExportWriteFailed, tmpPath, flushErr)
 	}
 
 	if closeErr != nil {
-		return fmt.Errorf("close temp file %q: %w", tmpPath, closeErr)
+		return fmt.Errorf("%w: close temp file %q: %w", ErrExportWriteFailed, tmpPath, closeErr)
 	}
 
 	renameErr := os.Rename(tmpPath, path)
 	if renameErr != nil {
-		return fmt.Errorf("rename %q → %q: %w", tmpPath, path, renameErr)
+		return fmt.Errorf("%w: rename %q → %q: %w", ErrExportWriteFailed, tmpPath, path, renameErr)
 	}
 
 	cleanup = false

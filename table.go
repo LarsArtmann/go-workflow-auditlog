@@ -56,7 +56,7 @@ func (r WorkflowReport) WriteTable(writer io.Writer, format output.Format, opts 
 
 	err := output.RenderTableData(data, format, opts)
 	if err != nil {
-		return fmt.Errorf("render table: %w", err)
+		return fmt.Errorf("%w: render table: %w", ErrRenderFailed, err)
 	}
 
 	return nil

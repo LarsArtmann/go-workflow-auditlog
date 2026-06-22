@@ -27,6 +27,13 @@ var (
 	// (SucceededCount, FailedCount, etc.) disagrees with the actual count
 	// derived from the Steps slice.
 	ErrCountMismatch = errors.New("status count does not match steps")
+
+	// ErrRenderFailed wraps errors encountered while rendering or marshaling a
+	// report for output (JSON encoding, diagram rendering, HTML generation,
+	// table/tree rendering). Classified as Infrastructure — these failures are
+	// not retryable (programming error or resource exhaustion).
+	// Consumers can match on it with [errors.Is].
+	ErrRenderFailed = errors.New("render failed")
 )
 
 // WorkflowReport is a consolidated, machine-readable snapshot of the audit log.
@@ -211,7 +218,7 @@ func (r WorkflowReport) WriteJSON(writer io.Writer) error {
 
 	err := encoder.Encode(r)
 	if err != nil {
-		return fmt.Errorf("encode report: %w", err)
+		return fmt.Errorf("%w: encode report: %w", ErrRenderFailed, err)
 	}
 
 	return nil

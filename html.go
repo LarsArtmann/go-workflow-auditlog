@@ -17,7 +17,7 @@ func (r WorkflowReport) WriteHTML(writer io.Writer) error {
 
 	_, err = writer.Write([]byte(html))
 	if err != nil {
-		return fmt.Errorf("write HTML report: %w", err)
+		return fmt.Errorf("%w: write HTML report: %w", ErrExportWriteFailed, err)
 	}
 
 	return nil

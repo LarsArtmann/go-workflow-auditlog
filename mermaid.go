@@ -24,12 +24,12 @@ func (r WorkflowReport) WriteMermaid(writer io.Writer) error {
 
 	out, err := renderer.Render()
 	if err != nil {
-		return fmt.Errorf("render mermaid diagram: %w", err)
+		return fmt.Errorf("%w: render mermaid diagram: %w", ErrRenderFailed, err)
 	}
 
 	_, err = fmt.Fprintln(writer, out)
 	if err != nil {
-		return fmt.Errorf("write mermaid output: %w", err)
+		return fmt.Errorf("%w: write mermaid output: %w", ErrExportWriteFailed, err)
 	}
 
 	return nil

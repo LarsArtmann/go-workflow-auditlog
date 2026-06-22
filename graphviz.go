@@ -22,12 +22,12 @@ func (r WorkflowReport) WriteGraphviz(writer io.Writer) error {
 
 	out, err := renderer.Render()
 	if err != nil {
-		return fmt.Errorf("render graphviz diagram: %w", err)
+		return fmt.Errorf("%w: render graphviz diagram: %w", ErrRenderFailed, err)
 	}
 
 	_, err = fmt.Fprintln(writer, out)
 	if err != nil {
-		return fmt.Errorf("write graphviz output: %w", err)
+		return fmt.Errorf("%w: write graphviz output: %w", ErrExportWriteFailed, err)
 	}
 
 	return nil

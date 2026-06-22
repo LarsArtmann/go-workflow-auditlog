@@ -137,12 +137,12 @@ const htmlTemplate = `<!DOCTYPE html>
 func renderHTML(report WorkflowReport) (string, error) {
 	reportJSON, err := json.Marshal(report)
 	if err != nil {
-		return "", fmt.Errorf("marshal report for HTML: %w", err)
+		return "", fmt.Errorf("%w: marshal report: %w", ErrRenderFailed, err)
 	}
 
 	metadataJSON, err := json.Marshal(BuildTypeMetadata())
 	if err != nil {
-		return "", fmt.Errorf("marshal type metadata for HTML: %w", err)
+		return "", fmt.Errorf("%w: marshal metadata: %w", ErrRenderFailed, err)
 	}
 
 	return fmt.Sprintf(

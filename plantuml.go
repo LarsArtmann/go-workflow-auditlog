@@ -19,12 +19,12 @@ func (r WorkflowReport) WritePlantUML(writer io.Writer) error {
 
 	out, err := renderer.Render()
 	if err != nil {
-		return fmt.Errorf("render plantuml diagram: %w", err)
+		return fmt.Errorf("%w: render plantuml diagram: %w", ErrRenderFailed, err)
 	}
 
 	_, err = fmt.Fprintln(writer, out)
 	if err != nil {
-		return fmt.Errorf("write plantuml output: %w", err)
+		return fmt.Errorf("%w: write plantuml output: %w", ErrExportWriteFailed, err)
 	}
 
 	return nil

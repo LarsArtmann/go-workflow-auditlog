@@ -5,6 +5,7 @@ go 1.26.3
 require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/larsartmann/go-error-family v0.5.0
 	github.com/larsartmann/go-output v0.17.2
 	github.com/larsartmann/go-output/d2 v0.17.2
 	github.com/larsartmann/go-output/delimited v0.17.2

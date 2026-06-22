@@ -84,12 +84,12 @@ func (r WorkflowReport) WriteTree(writer io.Writer) error {
 
 	out, err := renderer.Render()
 	if err != nil {
-		return fmt.Errorf("render tree: %w", err)
+		return fmt.Errorf("%w: render tree: %w", ErrRenderFailed, err)
 	}
 
 	_, err = fmt.Fprintln(writer, out)
 	if err != nil {
-		return fmt.Errorf("write tree output: %w", err)
+		return fmt.Errorf("%w: write tree output: %w", ErrExportWriteFailed, err)
 	}
 
 	return nil
@@ -118,12 +118,12 @@ func (r WorkflowReport) WriteHTMLTree(writer io.Writer) error {
 
 	out, err := renderer.Render()
 	if err != nil {
-		return fmt.Errorf("render html tree: %w", err)
+		return fmt.Errorf("%w: render html tree: %w", ErrRenderFailed, err)
 	}
 
 	_, err = fmt.Fprintln(writer, out)
 	if err != nil {
-		return fmt.Errorf("write html tree output: %w", err)
+		return fmt.Errorf("%w: write html tree output: %w", ErrExportWriteFailed, err)
 	}
 
 	return nil
