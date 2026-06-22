@@ -1,0 +1,109 @@
+direction: down
+
+# ── Tier 1: 1% effort → 51% value ──
+t1: Tier 1 — Critical Path (1% → 51%) {
+  shape: package
+  style.fill: "#1a3a1a"
+  style.font-color: "#e0e0e0"
+  style.stroke: "#2d5a2d"
+  style.stroke-width: 2
+
+  t1_1: "go get @v0.5.0" {style.fill: "#2d5a2d"; style.font-color: "#fff"}
+  t1_2: "Create classify.go\n(11 sentinel registrations)" {style.fill: "#2d5a2d"; style.font-color: "#fff"}
+  t1_3: "go mod tidy" {style.fill: "#2d5a2d"; style.font-color: "#fff"}
+  t1_4: "go build ./... ✓" {style.fill: "#2d5a2d"; style.font-color: "#fff"}
+
+  t1_1 -> t1_2 -> t1_3 -> t1_4
+}
+
+# ── Tier 2: 4% effort → 64% value ──
+t2: Tier 2 — Verification (4% → 64%) {
+  shape: package
+  style.fill: "#1a2a3a"
+  style.font-color: "#e0e0e0"
+  style.stroke: "#3a6ea5"
+  style.stroke-width: 2
+
+  t2_1: "Classify() table test\n(9 public sentinels)"
+  t2_2: "IsRetryable() test"
+  t2_3: "ExitCode() test"
+  t2_4: "Wrapped error chain test"
+  t2_5: "go test -race ✓" {style.fill: "#3a6ea5"; style.font-color: "#fff"}
+
+  t2_1 -> t2_5
+  t2_2 -> t2_5
+  t2_3 -> t2_5
+  t2_4 -> t2_5
+}
+
+# ── Tier 3: 20% effort → 80% value ──
+t3: Tier 3 — Ship-Ready (20% → 80%) {
+  shape: package
+  style.fill: "#3a2a1a"
+  style.font-color: "#e0e0e0"
+  style.stroke: "#b8860b"
+  style.stroke-width: 2
+
+  t3_1: "AGENTS.md update\n(architecture + gotchas)"
+  t3_2: "golangci-lint ✓"
+  t3_3: "Coverage check ✓"
+
+  t3_1 -> t3_2 -> t3_3
+}
+
+# ── Tier 4: I/O Classification ──
+t4: Tier 4 — I/O Error Classification {
+  shape: package
+  style.fill: "#2a1a2a"
+  style.font-color: "#e0e0e0"
+  style.stroke: "#8b2d8b"
+  style.stroke-width: 2
+
+  t4_1: "Loader sentinels\n+ Transient registration"
+  t4_2: "Export sentinels\n+ Infrastructure registration"
+  t4_3: "Render sentinels\n(diagram/table/tree/html)"
+  t4_4: "Register + test all new"
+  t4_5: "go test -race ✓" {style.fill: "#8b2d8b"; style.font-color: "#fff"}
+
+  t4_1 -> t4_4
+  t4_2 -> t4_4
+  t4_3 -> t4_4
+  t4_4 -> t4_5
+}
+
+# ── Tier 5: Polish ──
+t5: Tier 5 — Polish & Documentation {
+  shape: package
+  style.fill: "#1a1a1a"
+  style.font-color: "#e0e0e0"
+  style.stroke: "#555"
+  style.stroke-width: 2
+
+  t5_1: "FEATURES.md + adoption report"
+  t5_2: "Example demo"
+  t5_3: "Final quality gates\n(lint + coverage + dupl)"
+
+  t5_1 -> t5_2 -> t5_3
+}
+
+# ── Inter-tier dependencies ──
+t1 -> t2: "blocks" {
+  style.stroke-dash: 4
+  style.stroke-width: 2
+  style.stroke: "#ff6b6b"
+}
+t2 -> t3: "blocks" {
+  style.stroke-dash: 4
+  style.stroke-width: 2
+  style.stroke: "#ff6b6b"
+}
+t3 -> t4: "optional\nbut recommended" {
+  style.stroke-dash: 4
+  style.stroke-width: 2
+  style.stroke: "#f4d35e"
+}
+t4 -> t5: "wraps up" {
+  style.stroke-dash: 4
+  style.stroke-width: 2
+  style.stroke: "#6eb5ff"
+}
