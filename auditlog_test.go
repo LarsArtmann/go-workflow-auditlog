@@ -129,6 +129,18 @@ func addSlowParallelSteps(w *flow.Workflow, d time.Duration) {
 	addParallelSteps(w, newSlow("a", d), newSlow("b", d))
 }
 
+// addLinearChain wires a 3-step linear dependency chain (a → b → c) into the
+// workflow. Centralizes the `w.Add(flow.Step(a), flow.Step(b).DependsOn(a),
+// flow.Step(c).DependsOn(b))` idiom used by diagram and HTML tests that need
+// a sequential pipeline with clear directional flow.
+func addLinearChain(w *flow.Workflow, a, b, c flow.Steper) {
+	w.Add(
+		flow.Step(a),
+		flow.Step(b).DependsOn(a),
+		flow.Step(c).DependsOn(b),
+	)
+}
+
 // --- Helpers ---
 
 func mustNew(t *testing.T, cfg auditlog.Config) *auditlog.Auditor {

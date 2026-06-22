@@ -17,11 +17,7 @@ func TestMermaid_BasicDAG(t *testing.T) {
 	fetch := newSucceed("fetch")
 	transform := newSucceed("transform")
 	save := newSucceed("save")
-	w.Add(
-		flow.Step(fetch),
-		flow.Step(transform).DependsOn(fetch),
-		flow.Step(save).DependsOn(transform),
-	)
+	addLinearChain(w, fetch, transform, save)
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
@@ -47,10 +43,7 @@ func TestMermaid_FailedStepRedColor(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	ok := newSucceed("ok")
 	bad := newFail("bad", "boom")
-	w.Add(
-		flow.Step(ok),
-		flow.Step(bad).DependsOn(ok),
-	)
+	addDependentStep(w, ok, bad)
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder

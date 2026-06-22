@@ -140,7 +140,9 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 | `mustNew`, `newAuditAndWorkflow` | Construct auditor + workflow fixtures                         |
 | `retryOpts`, `addRetryStep`      | Wrap a step with retry config (fresh backoff)                 |
 | `addParallelSteps`               | Wire two independent steps (no dependency edge)               |
+| `addSlowParallelSteps`           | Wire two parallel slow steps of the same duration             |
 | `addDependentStep`               | Wire a parent→child dependency chain                          |
+| `addLinearChain`                 | Wire a 3-step linear chain (`a → b → c`)                       |
 | `runWorkflow`                    | `Attach` + `Do` + `Snapshot` in one call                      |
 | `findStep`, `assertReportValid`  | Step lookup + structural validation                           |
 | `assertStepCount`                | Required step count (uses `Fatalf` to stop on mismatch)       |
@@ -165,7 +167,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 
 #### Acceptable clones (documented in source)
 
-At `-t 15` two clone groups remain after the deduplication pass; both are
+At `-t 15` ten clone groups remain after the deduplication pass; all are
 classified as `idiom` by art-dupl and would only disappear at higher
 thresholds (`-t 30` reports zero). Documented here so the next reader
 knows they were considered.
@@ -179,12 +181,71 @@ knows they were considered.
   merging into a generic `assertField(t, name, got, want)` would replace
   named call sites with stringly-typed lookups and harm test readability.
   Keeping typed helpers is the correct trade-off.
-- **`WriteTable` API surface (plugin.go:212, table.go:52)**: The
-  `(a *Auditor).WriteTable` method is a 1-line delegating wrapper around
-  `(r WorkflowReport).WriteTable`. The signature match is intrinsic to
-  the consistent `Write*` / `Export*` method surface that Auditor exposes
-  for every format (WriteMermaid, WritePlantUML, WriteGraphviz, WriteD2,
-  WriteTree, WriteHTMLTree, WriteTable all follow the same delegation
-  pattern). Removing the convenience method would force callers to write
-  `a.Report().WriteTable(...)` instead of `a.WriteTable(...)` for this
-  one format only, breaking the API symmetry.
+
+- **`WriteTable` API surface (plugin.go:246, table.go:52)** +
+  **`WriteTableString` API surface (plugin.go:300, table.go:67)** +
+  **`ExportTable` API surface (plugin.go:251, report.go:317)**: Each is a
+  1-line delegating wrapper around the corresponding `WorkflowReport`
+  method. The signature match is intrinsic to the consistent `Write*` /
+  `Export*` method surface that `Auditor` exposes for every format
+  (WriteMermaid, WritePlantUML, WriteGraphviz, WriteD2, WriteTree,
+  WriteHTMLTree, WriteTable all follow the same delegation pattern).
+  Removing the convenience methods would force callers to write
+  `a.Report().Write*(...)` instead of `a.Write*(...)` for these formats
+  only, breaking the API symmetry.
+
+- **Workflow-fixture step literals (coverage_test.go, html_test.go)**:
+  Two `StepRef: auditlog.StepRef{Name: "..."}` field literals inside
+  larger `Steps: []auditlog.StepInfo{...}` literals. These are
+  single-field struct initializers nested in composite test fixtures with
+  many other fields (`Status`, `DurationMs`, `Dependencies`, etc.); the
+  `StepRef` field is not the focal point of the assertion. Extracting a
+  `stepRef("name")` helper would obscure the surrounding test data and
+  add an indirection that is shorter than the field name itself.
+
+- **`CriticalPathDurationMs` assertion (coverage_test.go)**: Two
+  `if recomputed.CriticalPathDurationMs != want { t.Errorf(...) }` blocks
+  with one providing a "diamond DAG:" prefix in the message for
+  diagnostic context. The shared shape is the idiomatic Go
+  `t.Errorf("expected X=%v, got %v", want, got)` pattern; merging would
+  force callers to pass a context string for marginal benefit.
+
+- **Test-table subtests for diagram formats (diagram_test.go:431-448)**:
+  Two `assertEdgeDirections(t, "d2"/"graphviz", buf, expectedEdges,
+  forbiddenEdges)` calls with format-specific edge syntax
+  (`fetch -> transform` vs `"fetch" -> "transform"`). This is the
+  canonical table-driven test pattern: same harness, different data per
+  subtest. Extracting would replace the existing helper call with a more
+  parameterized one and reduce clarity.
+
+- **`if err != nil { t.Fatalf }` in table-driven test (output_test.go)**:
+  Two `t.Fatalf("%s X error: %v", tc.name, err)` calls inside the
+  export-vs-string table of `TestExport_StringSymmetry`. The message
+  encodes the operation ("export" vs "string") for diagnostic context;
+  extracting would just produce `assertNoError(t, tc.name, op, err)` —
+  adds parameter noise for a 1-line check.
+
+- **`StepStatus` literal slice (diff_property_test.go:14, display_test.go:56)**:
+  Two `[]auditlog.StepStatus{...}` literals enumerate the same six
+  statuses but for different purposes: the diff-property test samples
+  from the slice to build random reports; the display test iterates it
+  to verify `String()` returns non-empty. Different domain use of the
+  same enum membership; not duplication.
+
+- **HTML file-contains assertions (html_test.go:137-189)**: Two
+  `if !strings.Contains(string(data), "...") { t.Error(...) }` checks
+  asserting different step-name substrings after reading a file written
+  to disk. The two checks serve different subtests (`ExportHTML` and
+  `Auditor.ExportHTML` delegation); the step names differ by design.
+  Idiomatic file-content assertion; extracting a
+  `assertFileContains(t, path, substr, msg)` helper would marginally
+  shorten the call sites at the cost of an extra parameter.
+
+#### Helper additions
+
+- **`addLinearChain(w, a, b, c)`** (auditlog_test.go): wires a 3-step
+  linear dependency chain (`a → b → c`) into a workflow. Centralizes
+  the `w.Add(flow.Step(a), flow.Step(b).DependsOn(a),
+  flow.Step(c).DependsOn(b))` idiom previously duplicated across
+  `diagram_test.go` and `html_test.go`. Companion to the existing
+  `addDependentStep` (2-step chain) and `addParallelSteps` (no edges).

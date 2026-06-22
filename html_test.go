@@ -16,11 +16,7 @@ func TestWriteHTML_BasicReport(t *testing.T) {
 	fetch := newSucceed("fetch")
 	transform := newSucceed("transform")
 	save := newSucceed("save")
-	w.Add(
-		flow.Step(fetch),
-		flow.Step(transform).DependsOn(fetch),
-		flow.Step(save).DependsOn(transform),
-	)
+	addLinearChain(w, fetch, transform, save)
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
@@ -76,10 +72,7 @@ func TestWriteHTML_FailedStepWithError(t *testing.T) {
 	a, w := newAuditAndWorkflow(t)
 	ok := newSucceed("ok-step")
 	bad := newFail("bad-step", "explosion")
-	w.Add(
-		flow.Step(ok),
-		flow.Step(bad).DependsOn(ok),
-	)
+	addDependentStep(w, ok, bad)
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder
