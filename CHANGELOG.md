@@ -11,8 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Interactive HTML dashboard** (`WriteHTML` / `ExportHTML` / `WriteHTMLString`) —
   self-contained 5-tab report (Steps table, DAG Tree, interactive SVG DAG Graph
   with Sugiyama layout + pan/zoom/click-highlight, Timeline bar chart, Events
-  stream) with embedded CSS/JS, no external dependencies. Strict CSP, XSS-tested
-  via fuzz target. Available on both `Auditor` and `WorkflowReport`.
+  stream) with embedded CSS/JS via `go:embed`, no external dependencies. Strict
+  CSP, XSS-tested via fuzz target. Available on both `Auditor` and
+  `WorkflowReport`.
 - **Type metadata injection** (`BuildTypeMetadata` / `metadata.go`) — single
   source of truth for enum display metadata (icons, labels, colors) consumed by
   the HTML dashboard's JavaScript.
@@ -20,6 +21,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   with `UPDATE_GOLDEN=1` pattern.
 - **XSS fuzz target** (`FuzzHTMLSpecialChars`) — verifies XSS payloads are
   contained within JSON script tags and never rendered as executable HTML.
+  Includes structural integrity validation (balanced tags, DOCTYPE, CSP).
+- **HTML export tests** — replay-to-HTML, loaded-report-to-HTML, diamond DAG,
+  high fan-out (10 steps), determinism, and structural integrity.
+- **Benchmarks** — `BenchmarkRenderHTML_LargeReport` (1000 steps) and
+  `BenchmarkRenderHTML_SmallReport` (3 steps).
+
+### Changed
+
+- **HTML dashboard architecture** — CSS and JS extracted from Go string
+  constants to `dashboard.css` and `dashboard.js` files embedded via
+  `go:embed`. The `renderHTML` function uses `fmt.Sprintf` on a template const
+  instead of manual `strings.Builder` assembly. `html_render.go` shrank from
+  1419 → 142 lines (90% reduction). Removes all `//nolint:lll` and
+  `//nolint:funlen,varnamelen` suppressions.
+- **API symmetry** — `WriteHTML` / `ExportHTML` added to table-driven
+  `TestWorkflowReport_ExportMethods` and `TestAuditor_WriteStringMethods`.
 
 ## [0.2.1] - 2026-06-21
 

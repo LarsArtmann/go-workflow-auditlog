@@ -2,6 +2,7 @@ package auditlog_test
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -411,11 +412,12 @@ func TestWorkflowReport_ExportMethods(t *testing.T) {
 		{"D2", report.ExportD2, ".d2"},
 		{"Tree", report.ExportTree, ".txt"},
 		{"HTMLTree", report.ExportHTMLTree, ".html"},
+		{"HTML", report.ExportHTML, ".html"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			path := dir + "/out" + tc.ext
+			path := filepath.Join(dir, strings.ToLower(tc.name)+tc.ext)
 
 			err := tc.fn(path)
 			if err != nil {
@@ -454,6 +456,7 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 		{"D2", a.WriteD2String},
 		{"Tree", a.WriteTreeString},
 		{"HTMLTree", a.WriteHTMLTreeString},
+		{"HTML", a.WriteHTMLString},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()

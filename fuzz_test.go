@@ -172,6 +172,7 @@ func FuzzHTMLSpecialChars(f *testing.F) {
 
 		output := buf.String()
 		assertNoRawScriptInjection(t, output, input)
+		assertHTMLStructure(t, output)
 	})
 }
 

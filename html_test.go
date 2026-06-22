@@ -1,6 +1,8 @@
 package auditlog_test
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -286,5 +288,211 @@ func TestWriteHTML_AllSixStatuses(t *testing.T) {
 	output := buf.String()
 	for _, status := range []string{"succeeded", "failed", "skipped", "canceled", "pending", "running"} {
 		assertContains(t, output, status, "expected status '"+status+"' in HTML output")
+	}
+}
+
+func TestWriteHTML_FromReplay(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	s1 := newSucceed("replay-html-a")
+	s2 := newSucceed("replay-html-b")
+
+	addDependentStep(w, s1, s2)
+	runWorkflow(t, a, w)
+
+	events := a.Events()
+
+	report, err := auditlog.ReplayEvents(events)
+	if err != nil {
+		t.Fatalf("ReplayEvents: %v", err)
+	}
+
+	var buf strings.Builder
+
+	err = report.WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML from replay: %v", err)
+	}
+
+	output := buf.String()
+	assertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE from replayed report")
+	assertContains(t, output, "replay-html-a", "expected step name from replayed report")
+	assertContains(t, output, "replay-html-b", "expected step name from replayed report")
+	assertContains(t, output, `"reconstructed":true`, "expected reconstructed flag in JSON data")
+}
+
+func TestWriteHTML_FromLoadedReport(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("loaded-html-step")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	var jsonBuf bytes.Buffer
+
+	err := a.Report().WriteJSON(&jsonBuf)
+	if err != nil {
+		t.Fatalf("WriteJSON: %v", err)
+	}
+
+	loaded, err := auditlog.LoadReportFromBytes(jsonBuf.Bytes())
+	if err != nil {
+		t.Fatalf("LoadReportFromBytes: %v", err)
+	}
+
+	var buf strings.Builder
+
+	err = loaded.WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML from loaded: %v", err)
+	}
+
+	output := buf.String()
+	assertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE from loaded report")
+	assertContains(t, output, "loaded-html-step", "expected step name from loaded report")
+}
+
+func TestWriteHTML_DiamondDAG(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	root := newSucceed("diamond-root")
+	left := newSucceed("diamond-left")
+	right := newSucceed("diamond-right")
+	sink := newSucceed("diamond-sink")
+
+	w.Add(
+		flow.Step(root),
+		flow.Step(left).DependsOn(root),
+		flow.Step(right).DependsOn(root),
+		flow.Step(sink).DependsOn(left, right),
+	)
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+	assertContains(t, output, "diamond-root", "expected root step in HTML")
+	assertContains(t, output, "diamond-left", "expected left branch step in HTML")
+	assertContains(t, output, "diamond-right", "expected right branch step in HTML")
+	assertContains(t, output, "diamond-sink", "expected sink step in HTML")
+}
+
+func TestWriteHTML_HighFanOut(t *testing.T) {
+	t.Parallel()
+
+	dur := 2.0
+	steps := make([]auditlog.StepInfo, 11)
+	steps[0] = auditlog.StepInfo{
+		StepRef:    auditlog.StepRef{Name: "fan-root", StepType: "RootStep"},
+		Status:     auditlog.StepStatusSucceeded,
+		DurationMs: &dur,
+	}
+
+	for i := 1; i <= 10; i++ {
+		steps[i] = auditlog.StepInfo{
+			StepRef:      auditlog.StepRef{Name: fmt.Sprintf("fan-%d", i-1), StepType: "LeafStep"},
+			Status:       auditlog.StepStatusSucceeded,
+			DurationMs:   &dur,
+			Dependencies: []auditlog.StepRef{{Name: "fan-root"}},
+		}
+	}
+
+	report := auditlog.WorkflowReport{
+		Version:        auditlog.SchemaVersion,
+		WorkflowID:     "fanout-test",
+		StepCount:      11,
+		SucceededCount: 11,
+		Steps:          steps,
+	}
+
+	var buf strings.Builder
+
+	err := report.WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+	assertContains(t, output, "fan-root", "expected root step in HTML")
+	assertContains(t, output, "fan-0", "expected first fan-out step in HTML")
+	assertContains(t, output, "fan-9", "expected last fan-out step in HTML")
+}
+
+func TestWriteHTML_Determinism(t *testing.T) {
+	t.Parallel()
+
+	report := goldenHTMLReport()
+
+	var buf1 strings.Builder
+
+	err := report.WriteHTML(&buf1)
+	if err != nil {
+		t.Fatalf("first WriteHTML: %v", err)
+	}
+
+	var buf2 strings.Builder
+
+	err = report.WriteHTML(&buf2)
+	if err != nil {
+		t.Fatalf("second WriteHTML: %v", err)
+	}
+
+	if buf1.String() != buf2.String() {
+		t.Error("WriteHTML is not deterministic: same report produced different HTML on two calls")
+	}
+}
+
+func TestWriteHTML_StructuralIntegrity(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("structure-test")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+	assertHTMLStructure(t, output)
+}
+
+// assertHTMLStructure validates the structural integrity of rendered HTML
+// output: proper document type, balanced script tags, required elements, and
+// a Content-Security-Policy meta tag. Used by HTML tests and the fuzz target.
+func assertHTMLStructure(t *testing.T, output string) {
+	t.Helper()
+
+	if !strings.HasPrefix(output, "<!DOCTYPE html>") {
+		t.Error("expected output to start with <!DOCTYPE html>")
+	}
+
+	for _, tag := range []string{"<html", "<head>", "<body>", "</html>", "Content-Security-Policy"} {
+		if !strings.Contains(output, tag) {
+			t.Errorf("expected %q in HTML output", tag)
+		}
+	}
+
+	openCount := strings.Count(output, "<script")
+	closeCount := strings.Count(output, "</script>")
+
+	if openCount != 3 {
+		t.Errorf("expected exactly 3 <script> tags, got %d", openCount)
+	}
+
+	if closeCount != 3 {
+		t.Errorf("expected exactly 3 </script> tags, got %d", closeCount)
 	}
 }
