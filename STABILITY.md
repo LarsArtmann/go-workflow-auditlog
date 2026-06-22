@@ -31,6 +31,9 @@ These surfaces are functional but their exact shape may change:
 | `Event`, `StepInfo`, `StepRef` field set        | New fields may be added. Existing JSON tags are stable. |
 | Diagram / Table / Tree export output            | Output format may evolve as go-output updates.          |
 | `ReportIndex` query methods                     | New lookup methods may be added.                        |
+| `ErrorClassifications()` / `RegisterClassifications(reg)` | Classification mapping may grow as new sentinels are added. |
+| I/O sentinel errors (`ErrReportLoadFailed`, `ErrRenderFailed`, `ErrExportWriteFailed`) | Sentinel set is stable; wrapping messages may evolve. |
+| `go-error-family` dependency (v0.5.0)           | Transitive: classification metadata depends on this external library. Pinned in go.mod. |
 
 ## Unstable / Internal (no stability guarantee)
 

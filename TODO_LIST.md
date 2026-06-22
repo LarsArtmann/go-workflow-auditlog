@@ -22,12 +22,19 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 - [x] Add CriticalPath diamond DAG test (non-linear topology)
 - [x] Document 3 duration metrics in README
 - [x] Create FEATURES.md, TODO_LIST.md, ROADMAP.md
+- [x] **Adopt go-error-family for structured error classification** — all 14 sentinels
+      classified (Corruption/Rejection/Transient/Infrastructure), 3 new I/O sentinels
+      (`ErrReportLoadFailed`/`ErrRenderFailed`/`ErrExportWriteFailed`), 22 error paths wrapped,
+      `ErrorClassifications()` + `RegisterClassifications(reg)` API, 18 error-path tests
 
 ---
 
 ## Short-term (high impact, low effort)
 
-- [ ] **Tag v0.2.0 release.** New public JSON fields, API expansion (Write\*String, Export\* on report), edge-direction fix, and go-output adoption warrant a minor bump. Requires explicit approval — semantic change to `Summary()`/`Diff()` duration. _(approval granted 2026-06-21; changelog promoted, all docs refreshed, ready to tag)_
+- [ ] **Tag v0.5.0 release.** Error classification adoption (go-error-family v0.5.0),
+      3 new I/O sentinels, 22 wrapped error paths, configurable table columns, diagram
+      layout direction, and StepInfo.Type() API expansion warrant a minor bump.
+      _(changelog populated, all docs refreshed, ready to tag)_
 - [ ] **Add `StepInfo.Type()` method** — expose `StepType` via a method for consistency with `Status.Label()` / `Icon()` / `Color()`. Low effort, API consistency.
 - [ ] **Add retry/timeout columns to table export** — `HasRetry` and `HasTimeout` are in `StepInfo` but not in the table. Low effort.
 - [ ] **Add error-path tests for all Write\* methods** — inject failing `io.Writer`s, verify error wrapping. Most Write\* methods sit at ~83% coverage.
@@ -55,4 +62,3 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 - [ ] Streaming NDJSON export option
 - [ ] OpenTelemetry span bridge
 - [ ] `encoding/json/v2` migration
-- [ ] `go-error-family` adoption for structured errors

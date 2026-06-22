@@ -55,11 +55,11 @@ Five behavioral categories, each carrying actionable metadata:
 
 | Family | Retry? | Exit code | HTTP | Meaning |
 |--------|--------|-----------|------|---------|
-| Rejection | No | 64 | 400 | Caller's fault — bad input |
-| Conflict | No | 66 | 409 | State conflict — concurrent modification |
+| Rejection | No | 1 | 400 | Caller's fault — bad input |
+| Conflict | No | 1 | 409 | State conflict — concurrent modification |
 | Transient | Yes | 75 | 503 | Temporary failure — retry with backoff |
-| Corruption | No | 70 | 500 | Data integrity violation |
-| Infrastructure | No | 76 | 503 | System-level failure — ops needed |
+| Corruption | No | 65 | 500 | Data integrity violation |
+| Infrastructure | No | 69 | 503 | System-level failure — ops needed |
 
 ### Key capabilities for auditlog
 

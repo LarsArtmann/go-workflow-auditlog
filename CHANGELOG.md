@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Error Classification via [go-error-family](https://github.com/larsartmann/go-error-family)** — all
+  12 public sentinel errors (+ 2 private) are now classified into behavioral
+  families (Corruption, Rejection, Transient, Infrastructure). Consumers can
+  call `errorfamily.Classify(err)`, `errorfamily.IsRetryable(err)`, and
+  `errorfamily.ExitCode(err)` on any auditlog error without additional setup
+  (auto-registered via `init()`).
+  - `ErrorClassifications()` — canonical `map[error]Family` (single source of truth)
+  - `RegisterClassifications(reg)` — explicit registration into a custom registry
+  - New dependency: `github.com/larsartmann/go-error-family v0.5.0`
+- **3 new I/O sentinel errors** — all export/write/load paths now wrap matchable
+  sentinels:
+  - `ErrReportLoadFailed` (Transient, exit 75, retryable) — `LoadReport`,
+    `LoadReportFromReader`, `LoadReportFromBytes`
+  - `ErrRenderFailed` (Infrastructure, exit 69) — all render/marshal paths
+    (`WriteJSON`, `WriteHTML`, `WriteTable`, diagrams, trees)
+  - `ErrExportWriteFailed` (Infrastructure, exit 69) — all file-write paths
+    (`Export*`, `WriteMermaid`, `WriteD2`, etc.)
+- **22 I/O error paths wrapped** across 13 files — every `fmt.Errorf` in
+  export/render/load paths now carries a matchable sentinel via `errors.Is`.
+
+### Tests
+
+- 18 error-path tests covering all Write*/Export*/Load* sentinel wrapping paths
+  with failing `io.Writer` injection and unwritable directories.
+
 ## [0.4.0] - 2026-06-22
 
 ### Added
