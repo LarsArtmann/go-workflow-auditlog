@@ -106,8 +106,8 @@ func main() {
     fmt.Println(report.Summary())
 
     // Export
-    _ = audit.ExportToFile("audit.json")
-    _ = audit.ExportEventsToNDJSON("events.ndjson")
+    _ = audit.ExportJSON("audit.json")
+    _ = audit.ExportNDJSON("events.ndjson")
 }
 ```
 
@@ -252,10 +252,10 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `DroppedEventCount() int64`                           | Events dropped due to `MaxEvents` cap.                       |
 | `RunID() string`                                      | The run identifier stamped on every event (for correlation). |
 | `ReportFiltered(opts ...ReportOption) WorkflowReport` | Returns a filtered report (by name/status/event-type/time).  |
-| `ExportToFile(path string) error`                     | Writes report as JSON.                                       |
-| `ExportEventsToNDJSON(path string) error`             | Writes events as NDJSON.                                     |
-| `WriteReportJSON(w io.Writer) error`                  | Writes report JSON to writer.                                |
-| `WriteEventsNDJSON(w io.Writer) error`                | Writes NDJSON to writer.                                     |
+| `ExportJSON(path string) error`                       | Writes report as JSON.                                       |
+| `ExportNDJSON(path string) error`                     | Writes events as NDJSON.                                     |
+| `WriteJSON(w io.Writer) error`                        | Writes report JSON to writer.                                |
+| `WriteNDJSON(w io.Writer) error`                      | Writes NDJSON to writer.                                     |
 | `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                  |
 | `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                 |
 | `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                             |
@@ -316,7 +316,7 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `auditlog.LoadReport(path string) (WorkflowReport, error)`           | Load a JSON report from a file.                      |
 | `auditlog.LoadReportFromReader(r io.Reader) (WorkflowReport, error)` | Load a JSON report from a reader.                    |
 | `auditlog.LoadReportFromBytes(b []byte) (WorkflowReport, error)`     | Load a JSON report from bytes.                       |
-| `auditlog.ReadEvents(r io.Reader) ([]Event, error)`                  | Read NDJSON events (inverse of `WriteEventsNDJSON`). |
+| `auditlog.ReadEvents(r io.Reader) ([]Event, error)`                  | Read NDJSON events (inverse of `WriteNDJSON`). |
 | `auditlog.ReplayEvents(events []Event) (WorkflowReport, error)`      | Reconstruct a report from a flat event stream.       |
 | `auditlog.NewReportIndex(r WorkflowReport) *ReportIndex`             | Precompute O(1) lookup maps over a report.           |
 

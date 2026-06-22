@@ -18,5 +18,5 @@
 //	audit.Snapshot(w)        // capture final DAG state AFTER Do
 //
 //	report := audit.Report() // machine-readable snapshot
-//	_ = audit.ExportToFile("audit.json")
+//	_ = audit.ExportJSON("audit.json")
 package auditlog

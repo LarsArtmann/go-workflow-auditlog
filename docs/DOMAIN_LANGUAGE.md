@@ -66,7 +66,7 @@ Actions the system can perform.
 | `Filtered(opts)`                                  | Return a filtered copy of a report.                  | Aggregates recomputed.              |
 | `Diff(other)`                                     | Compare two reports.                                 | Returns added/removed/changed.      |
 | `ReplayEvents(events)`                            | Reconstruct a report from a flat event stream.       | `Reconstructed=true` on the result. |
-| `LoadReport(path)`                                | Read a JSON report from disk.                        | Inverse of `ExportToFile`.          |
+| `LoadReport(path)`                                | Read a JSON report from disk.                        | Inverse of `ExportJSON`.          |
 | `WriteMermaid(w)` / `PlantUML(w)` / `Graphviz(w)` | Serialize the step DAG as a diagram.                 | For visualization tools.            |
 
 ## Bounded Contexts

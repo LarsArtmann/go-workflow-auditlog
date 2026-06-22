@@ -78,7 +78,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ### API Symmetry
 
 - **Full `Write*` / `Write*String` / `Export*` on both `Auditor` and `WorkflowReport`**
-- **Canonical JSON/NDJSON names** (`WriteJSON`, `WriteNDJSON`, `ExportJSON`, `ExportNDJSON`) with deprecated backward-compat aliases (`WriteReportJSON`, `ExportToFile`, etc.)
+- **Canonical JSON/NDJSON names** (`WriteJSON`, `WriteNDJSON`, `ExportJSON`, `ExportNDJSON`)
 
 ### Infrastructure
 

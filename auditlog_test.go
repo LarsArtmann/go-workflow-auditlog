@@ -634,9 +634,9 @@ func TestExport_JSON(t *testing.T) {
 	dir := t.TempDir()
 	path := dir + "/report.json"
 
-	err := a.ExportToFile(path)
+	err := a.ExportJSON(path)
 	if err != nil {
-		t.Fatalf("ExportToFile error: %v", err)
+		t.Fatalf("ExportJSON error: %v", err)
 	}
 
 	report := a.Report()
@@ -656,9 +656,9 @@ func TestExport_NDJSON(t *testing.T) {
 	dir := t.TempDir()
 	path := dir + "/events.ndjson"
 
-	err := a.ExportEventsToNDJSON(path)
+	err := a.ExportNDJSON(path)
 	if err != nil {
-		t.Fatalf("ExportEventsToNDJSON error: %v", err)
+		t.Fatalf("ExportNDJSON error: %v", err)
 	}
 
 	assertEventsRecorded(t, a, 2)

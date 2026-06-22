@@ -11,7 +11,7 @@ var ErrReplayNoEvents = errors.New("no events to replay")
 
 // ReplayEvents reconstructs a WorkflowReport from a flat event stream.
 //
-// This is the inverse of ExportEventsToNDJSON: write events to NDJSON, then
+// This is the inverse of ExportNDJSON: write events to NDJSON, then
 // later read them back and reconstruct the report for offline analysis.
 //
 // Limitations:

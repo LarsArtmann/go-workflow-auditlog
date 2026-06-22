@@ -52,7 +52,7 @@ func Example_exportToFile() {
 	_ = w.Do(context.Background())
 	audit.Snapshot(w)
 
-	_ = audit.ExportToFile(os.TempDir() + "/audit-example.json")
+	_ = audit.ExportJSON(os.TempDir() + "/audit-example.json")
 
 	fmt.Println("exported")
 

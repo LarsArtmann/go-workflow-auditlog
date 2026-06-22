@@ -21,9 +21,9 @@ func TestReadEvents_RoundTrip(t *testing.T) {
 	// Export events as NDJSON.
 	var buf bytes.Buffer
 
-	err := a.WriteEventsNDJSON(&buf)
+	err := a.WriteNDJSON(&buf)
 	if err != nil {
-		t.Fatalf("WriteEventsNDJSON: %v", err)
+		t.Fatalf("WriteNDJSON: %v", err)
 	}
 
 	// Read them back.
@@ -209,7 +209,7 @@ func TestReplayEvents_FullRoundTrip(t *testing.T) {
 	// Export NDJSON.
 	var buf bytes.Buffer
 
-	_ = a.WriteEventsNDJSON(&buf)
+	_ = a.WriteNDJSON(&buf)
 
 	// Read back + replay.
 	events, err := auditlog.ReadEvents(&buf)

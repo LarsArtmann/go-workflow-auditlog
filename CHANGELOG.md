@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Removed
+
+- **Deprecated API aliases removed** — the four backward-compat aliases that
+  were never in a released v1.0 are now deleted. Use the canonical names:
+  - `WriteReportJSON` → `WriteJSON`
+  - `WriteEventsNDJSON` → `WriteNDJSON`
+  - `ExportToFile` → `ExportJSON`
+  - `ExportEventsToNDJSON` → `ExportNDJSON`
+
 ## [0.5.0] - 2026-06-23
 
 ### Added

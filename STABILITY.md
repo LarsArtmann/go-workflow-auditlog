@@ -15,7 +15,7 @@ the 0.x series:
 | `Auditor.Attach(w)` / `Auditor.Snapshot(w)` / `Auditor.Report()`               | Stable — this is the primary integration lifecycle.                           |
 | `Auditor.Events()` / `Auditor.EventsCount()` / `Auditor.DroppedEventCount()`   | Stable.                                                                       |
 | `Auditor.RunID()` / `RunID` type                                               | Stable. Branded string type, serializes as plain JSON string.                 |
-| `ExportToFile`, `ExportEventsToNDJSON`, `Export*` methods                      | Stable method signatures. Output format may evolve.                           |
+| `ExportJSON`, `ExportNDJSON`, `Export*` methods                                | Stable method signatures. Output format may evolve.                           |
 | `WorkflowReport` struct                                                        | Existing fields keep their JSON keys. New fields may be added.                |
 | `ReadEvents`, `LoadReport`, `LoadReportFromReader`, `LoadReportFromBytes`      | Stable.                                                                       |
 | `Config{Enabled, WorkflowID, RunID, MaxEvents, InitialEventCapacity, OnEvent}` | All current fields are stable. New fields may be added.                       |

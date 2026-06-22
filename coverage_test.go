@@ -360,7 +360,7 @@ func TestReport_Validate_StatusDrift(t *testing.T) {
 
 // --- Export tests ---
 
-func TestWriteReportJSON_ToBuffer(t *testing.T) {
+func TestWriteJSON_ToBuffer(t *testing.T) {
 	t.Parallel()
 
 	a, w := newAuditAndWorkflow(t)
@@ -370,9 +370,9 @@ func TestWriteReportJSON_ToBuffer(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	err := a.WriteReportJSON(&buf)
+	err := a.WriteJSON(&buf)
 	if err != nil {
-		t.Fatalf("WriteReportJSON error: %v", err)
+		t.Fatalf("WriteJSON error: %v", err)
 	}
 
 	var report auditlog.WorkflowReport
@@ -385,7 +385,7 @@ func TestWriteReportJSON_ToBuffer(t *testing.T) {
 	assertStepCount(t, report, 1)
 }
 
-func TestWriteEventsNDJSON_ToBuffer(t *testing.T) {
+func TestWriteNDJSON_ToBuffer(t *testing.T) {
 	t.Parallel()
 
 	a, w := newAuditAndWorkflow(t)
@@ -395,9 +395,9 @@ func TestWriteEventsNDJSON_ToBuffer(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	err := a.WriteEventsNDJSON(&buf)
+	err := a.WriteNDJSON(&buf)
 	if err != nil {
-		t.Fatalf("WriteEventsNDJSON error: %v", err)
+		t.Fatalf("WriteNDJSON error: %v", err)
 	}
 
 	lines := bytes.Split(bytes.TrimSpace(buf.Bytes()), []byte("\n"))
@@ -413,23 +413,23 @@ func TestWriteEventsNDJSON_ToBuffer(t *testing.T) {
 	}
 }
 
-func TestExportToFile_Error(t *testing.T) {
+func TestExportJSON_Error(t *testing.T) {
 	t.Parallel()
 
 	a := mustNew(t, auditlog.Config{Enabled: true})
 
-	err := a.ExportToFile("/nonexistent/dir/file.json")
+	err := a.ExportJSON("/nonexistent/dir/file.json")
 	if err == nil {
 		t.Fatal("expected error writing to nonexistent directory")
 	}
 }
 
-func TestExportEventsToNDJSON_Error(t *testing.T) {
+func TestExportNDJSON_Error(t *testing.T) {
 	t.Parallel()
 
 	a := mustNew(t, auditlog.Config{Enabled: true})
 
-	err := a.ExportEventsToNDJSON("/nonexistent/dir/file.ndjson")
+	err := a.ExportNDJSON("/nonexistent/dir/file.ndjson")
 	if err == nil {
 		t.Fatal("expected error writing to nonexistent directory")
 	}
@@ -735,9 +735,9 @@ func TestReport_JSONRoundTrip(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	err := a.WriteReportJSON(&buf)
+	err := a.WriteJSON(&buf)
 	if err != nil {
-		t.Fatalf("WriteReportJSON error: %v", err)
+		t.Fatalf("WriteJSON error: %v", err)
 	}
 
 	var report auditlog.WorkflowReport
@@ -930,7 +930,7 @@ func TestWriteToFile_CloseError(t *testing.T) {
 
 	a := mustNew(t, auditlog.Config{Enabled: true})
 
-	err := a.ExportToFile(path)
+	err := a.ExportJSON(path)
 	if err == nil {
 		// Some filesystems allow writing to read-only files; skip if no error.
 		return

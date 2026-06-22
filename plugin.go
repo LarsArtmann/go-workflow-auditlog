@@ -161,25 +161,9 @@ func (a *Auditor) WriteJSON(writer io.Writer) error {
 	return a.Report().WriteJSON(writer)
 }
 
-// WriteReportJSON writes the full WorkflowReport as indented JSON to writer.
-//
-// Deprecated: Use WriteJSON for naming consistency with the diagram/table/tree
-// Write* methods. This alias is kept for backward compatibility.
-func (a *Auditor) WriteReportJSON(writer io.Writer) error {
-	return a.WriteJSON(writer)
-}
-
 // WriteNDJSON writes every captured event as line-delimited JSON to writer.
 func (a *Auditor) WriteNDJSON(writer io.Writer) error {
 	return a.Report().WriteNDJSON(writer)
-}
-
-// WriteEventsNDJSON writes every captured event as line-delimited JSON to writer.
-//
-// Deprecated: Use WriteNDJSON for naming consistency. This alias is kept for
-// backward compatibility.
-func (a *Auditor) WriteEventsNDJSON(writer io.Writer) error {
-	return a.WriteNDJSON(writer)
 }
 
 // ExportJSON writes the full WorkflowReport as indented JSON to path.
@@ -187,25 +171,9 @@ func (a *Auditor) ExportJSON(path string) error {
 	return writeToFile(path, a.WriteJSON)
 }
 
-// ExportToFile writes the full WorkflowReport as indented JSON to path.
-//
-// Deprecated: Use ExportJSON for naming consistency with the diagram/table/tree
-// Export* methods. This alias is kept for backward compatibility.
-func (a *Auditor) ExportToFile(path string) error {
-	return a.ExportJSON(path)
-}
-
 // ExportNDJSON writes every event as NDJSON to path.
 func (a *Auditor) ExportNDJSON(path string) error {
 	return writeToFile(path, a.WriteNDJSON)
-}
-
-// ExportEventsToNDJSON writes every event as NDJSON to path.
-//
-// Deprecated: Use ExportNDJSON for naming consistency. This alias is kept for
-// backward compatibility.
-func (a *Auditor) ExportEventsToNDJSON(path string) error {
-	return a.ExportNDJSON(path)
 }
 
 // WriteMermaid writes the step DAG as a Mermaid diagram to the writer.

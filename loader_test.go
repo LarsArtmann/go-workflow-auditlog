@@ -20,9 +20,9 @@ func TestLoadReport_RoundTrip(t *testing.T) {
 	// Export to JSON.
 	var buf bytes.Buffer
 
-	err := a.WriteReportJSON(&buf)
+	err := a.WriteJSON(&buf)
 	if err != nil {
-		t.Fatalf("WriteReportJSON: %v", err)
+		t.Fatalf("WriteJSON: %v", err)
 	}
 
 	// Load it back.
@@ -52,9 +52,9 @@ func TestLoadReport_FromFile(t *testing.T) {
 
 	path := t.TempDir() + "/report.json"
 
-	err := a.ExportToFile(path)
+	err := a.ExportJSON(path)
 	if err != nil {
-		t.Fatalf("ExportToFile: %v", err)
+		t.Fatalf("ExportJSON: %v", err)
 	}
 
 	loaded, err := auditlog.LoadReport(path)
@@ -75,7 +75,7 @@ func TestLoadReport_FromReader(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	_ = a.WriteReportJSON(&buf)
+	_ = a.WriteJSON(&buf)
 
 	loaded, err := auditlog.LoadReportFromReader(&buf)
 	if err != nil {
