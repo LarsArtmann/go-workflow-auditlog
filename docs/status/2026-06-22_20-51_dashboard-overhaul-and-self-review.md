@@ -10,46 +10,46 @@ The HTML dashboard went from **hiding failure reasons behind click-tooltips** to
 
 ### Phase 1: Feature Implementation (14 tasks)
 
-| # | Feature | Impact |
-|---|---------|--------|
-| 1 | **Failure Summary banner** — prominent red banner with `failure_reason` + per-step error list when `workflow_succeeded=false` | 🔴 Critical |
-| 2 | **Error column in steps table** — inline truncated error text, full text on hover (was click-tooltip only) | 🔴 Critical |
-| 3 | **Workflow PASS/FAIL hero badge** — green ✓ / red ✗ next to title in header | 🔴 High |
-| 4 | **Gantt-style timeline** — real time-positioned bars showing parallelism (was fake duration-sorted bars) | 🔴 High |
-| 5 | **Humanized durations** — `48811ms` → `48.8s`, `317799ms` → `5m 18s` everywhere | 🟡 High |
-| 6 | **Color-coded failed rows** — subtle red-tinted background on failed/canceled rows | 🟡 Medium |
-| 7 | **Inline errors in events table** — actual error text instead of "error" badge | 🟡 Medium |
-| 8 | **Error text in tree nodes** — failed steps show error inline in DAG tree | 🟡 Medium |
-| 9 | **Failure-impact badges** — "⚠ blocked" on steps skipped because a dependency failed | 🟡 Medium |
-| 10 | **Graph error dots** — red dot indicator on failed/canceled nodes in SVG graph | 🟢 Polish |
-| 11 | **"Errors only (N)" button** — count badge + red border when failures exist | 🟢 Polish |
-| 12 | **Keyboard "e" shortcut** — toggle errors-only filter without mouse | 🟢 Polish |
-| 13 | **`humanizeDuration()` helper** — shared duration formatting function | 🟢 Foundation |
-| 14 | **Golden file updated** | — |
+| #   | Feature                                                                                                                       | Impact        |
+| --- | ----------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 1   | **Failure Summary banner** — prominent red banner with `failure_reason` + per-step error list when `workflow_succeeded=false` | 🔴 Critical   |
+| 2   | **Error column in steps table** — inline truncated error text, full text on hover (was click-tooltip only)                    | 🔴 Critical   |
+| 3   | **Workflow PASS/FAIL hero badge** — green ✓ / red ✗ next to title in header                                                   | 🔴 High       |
+| 4   | **Gantt-style timeline** — real time-positioned bars showing parallelism (was fake duration-sorted bars)                      | 🔴 High       |
+| 5   | **Humanized durations** — `48811ms` → `48.8s`, `317799ms` → `5m 18s` everywhere                                               | 🟡 High       |
+| 6   | **Color-coded failed rows** — subtle red-tinted background on failed/canceled rows                                            | 🟡 Medium     |
+| 7   | **Inline errors in events table** — actual error text instead of "error" badge                                                | 🟡 Medium     |
+| 8   | **Error text in tree nodes** — failed steps show error inline in DAG tree                                                     | 🟡 Medium     |
+| 9   | **Failure-impact badges** — "⚠ blocked" on steps skipped because a dependency failed                                          | 🟡 Medium     |
+| 10  | **Graph error dots** — red dot indicator on failed/canceled nodes in SVG graph                                                | 🟢 Polish     |
+| 11  | **"Errors only (N)" button** — count badge + red border when failures exist                                                   | 🟢 Polish     |
+| 12  | **Keyboard "e" shortcut** — toggle errors-only filter without mouse                                                           | 🟢 Polish     |
+| 13  | **`humanizeDuration()` helper** — shared duration formatting function                                                         | 🟢 Foundation |
+| 14  | **Golden file updated**                                                                                                       | —             |
 
 ### Phase 2: Self-Review Fixes (5 tasks)
 
-| # | Fix | Root Cause |
-|---|-----|------------|
-| 1 | **Removed dead timeline CSS** (.timeline-bar/row/label/track) | Left behind after Gantt replacement — 6 unused selectors |
-| 2 | **Consolidated split-brain error handler** | `toggleErrorsOnly()` existed alongside a duplicate inline click handler |
-| 3 | **Moved `esc()` + `humanizeDuration()` to top of JS** | Were at bottom of file, called before definition in source order |
-| 4 | **Added max-width to `.inline-error` CSS** | Long error strings could break events table layout |
-| 5 | **Fixed Gantt to handle skipped steps** (no `finished_at`) | Skipped steps with `started_at` but no `finished_at` were invisible |
+| #   | Fix                                                           | Root Cause                                                              |
+| --- | ------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| 1   | **Removed dead timeline CSS** (.timeline-bar/row/label/track) | Left behind after Gantt replacement — 6 unused selectors                |
+| 2   | **Consolidated split-brain error handler**                    | `toggleErrorsOnly()` existed alongside a duplicate inline click handler |
+| 3   | **Moved `esc()` + `humanizeDuration()` to top of JS**         | Were at bottom of file, called before definition in source order        |
+| 4   | **Added max-width to `.inline-error` CSS**                    | Long error strings could break events table layout                      |
+| 5   | **Fixed Gantt to handle skipped steps** (no `finished_at`)    | Skipped steps with `started_at` but no `finished_at` were invisible     |
 
 ### Phase 3: Test Coverage (9 new tests)
 
-| Test | Verifies |
-|------|----------|
-| `TestWriteHTML_FailureBanner_WhenFailed` | Banner container + `workflow_succeeded` + `failure_reason` in JSON |
-| `TestWriteHTML_FailureBanner_HiddenWhenSucceeded` | Banner template exists but `workflow_succeeded=true` |
-| `TestWriteHTML_ErrorColumn` | Error `<th>`, colspan=9, error-cell CSS, error text in JSON |
-| `TestWriteHTML_WorkflowStatusBadge` | workflow-status element + passed/failed CSS classes |
-| `TestWriteHTML_GanttChart` | gantt-axis, gantt-grid, gantt-bar CSS + renderGantt function |
-| `TestWriteHTML_ImpactBadge` | impact-badge CSS + impactedSteps + computeImpact |
-| `TestWriteHTML_HumanizedDurations` | humanizeDuration function + usage in stats and steps |
-| `TestWriteHTML_GraphFailedNodeDot` | Failed status check triggers error dot rendering |
-| `TestWriteHTML_TreeInlineError` | scope-node-error CSS + has-failure class + error in JSON |
+| Test                                              | Verifies                                                           |
+| ------------------------------------------------- | ------------------------------------------------------------------ |
+| `TestWriteHTML_FailureBanner_WhenFailed`          | Banner container + `workflow_succeeded` + `failure_reason` in JSON |
+| `TestWriteHTML_FailureBanner_HiddenWhenSucceeded` | Banner template exists but `workflow_succeeded=true`               |
+| `TestWriteHTML_ErrorColumn`                       | Error `<th>`, colspan=9, error-cell CSS, error text in JSON        |
+| `TestWriteHTML_WorkflowStatusBadge`               | workflow-status element + passed/failed CSS classes                |
+| `TestWriteHTML_GanttChart`                        | gantt-axis, gantt-grid, gantt-bar CSS + renderGantt function       |
+| `TestWriteHTML_ImpactBadge`                       | impact-badge CSS + impactedSteps + computeImpact                   |
+| `TestWriteHTML_HumanizedDurations`                | humanizeDuration function + usage in stats and steps               |
+| `TestWriteHTML_GraphFailedNodeDot`                | Failed status check triggers error dot rendering                   |
+| `TestWriteHTML_TreeInlineError`                   | scope-node-error CSS + has-failure class + error in JSON           |
 
 ---
 
@@ -92,33 +92,33 @@ Nothing. All issues from the self-review were fixed before committing.
 
 ### f) Top 25 Things to Do Next
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 1 | Add unit tests for `humanizeDuration()` edge cases | Medium | Low |
-| 2 | Add eslint/biome config for dashboard.js + dashboard.css | Medium | Low |
-| 3 | Group failures by error type in the failure banner | High | Medium |
-| 4 | Show per-retry-attempt bars in Gantt timeline | High | Medium |
-| 5 | Add light theme support (CSS custom properties already in place) | Medium | Low |
-| 6 | Make Gantt bars clickable → navigate to step in steps table | Medium | Medium |
-| 7 | Add "Copy failure summary" button to failure banner | Medium | Low |
-| 8 | Add filter for Gantt (show only failed, only slow, etc.) | Medium | Medium |
-| 9 | Split dashboard.js into modules (graph.js, gantt.js, table.js) | Medium | Medium |
-| 10 | Add step search by error text (already in data-search, verify works) | Low | Low |
-| 11 | Add total wall-clock time axis labels to Gantt (not just timestamps) | Low | Low |
-| 12 | Add "shareable link" with step highlighted via URL hash | Low | Medium |
-| 13 | Add print-friendly CSS for PDF export | Low | Medium |
-| 14 | Consider branded type for `ErrorMessage` instead of `*string` | Medium | Medium |
-| 15 | Add workflow comparison view (diff two reports in browser) | High | High |
-| 16 | Add real-time updates via Server-Sent Events for live monitoring | High | High |
-| 17 | Add keyboard shortcuts help overlay ("?" to toggle) | Low | Low |
-| 18 | Add accessibility audit (ARIA roles on Gantt, graph, tree) | Medium | Medium |
-| 19 | Add color-blind-friendly mode (patterns instead of just colors) | Medium | Medium |
-| 20 | Add step duration percentile chart (p50, p90, p99) | Medium | Medium |
-| 21 | Add "critical path" highlight in Gantt (bottleneck chain) | High | Medium |
-| 22 | Add zoom/brush to Gantt timeline for large workflows | Medium | Medium |
-| 23 | Consider `templ` for HTML template instead of `fmt.Sprintf` | Medium | Medium |
-| 24 | Add OpenGraph meta tags for shareable report links | Low | Low |
-| 25 | Add JSON schema validation for embedded report data | Medium | Medium |
+| #   | Task                                                                 | Impact | Effort |
+| --- | -------------------------------------------------------------------- | ------ | ------ |
+| 1   | Add unit tests for `humanizeDuration()` edge cases                   | Medium | Low    |
+| 2   | Add eslint/biome config for dashboard.js + dashboard.css             | Medium | Low    |
+| 3   | Group failures by error type in the failure banner                   | High   | Medium |
+| 4   | Show per-retry-attempt bars in Gantt timeline                        | High   | Medium |
+| 5   | Add light theme support (CSS custom properties already in place)     | Medium | Low    |
+| 6   | Make Gantt bars clickable → navigate to step in steps table          | Medium | Medium |
+| 7   | Add "Copy failure summary" button to failure banner                  | Medium | Low    |
+| 8   | Add filter for Gantt (show only failed, only slow, etc.)             | Medium | Medium |
+| 9   | Split dashboard.js into modules (graph.js, gantt.js, table.js)       | Medium | Medium |
+| 10  | Add step search by error text (already in data-search, verify works) | Low    | Low    |
+| 11  | Add total wall-clock time axis labels to Gantt (not just timestamps) | Low    | Low    |
+| 12  | Add "shareable link" with step highlighted via URL hash              | Low    | Medium |
+| 13  | Add print-friendly CSS for PDF export                                | Low    | Medium |
+| 14  | Consider branded type for `ErrorMessage` instead of `*string`        | Medium | Medium |
+| 15  | Add workflow comparison view (diff two reports in browser)           | High   | High   |
+| 16  | Add real-time updates via Server-Sent Events for live monitoring     | High   | High   |
+| 17  | Add keyboard shortcuts help overlay ("?" to toggle)                  | Low    | Low    |
+| 18  | Add accessibility audit (ARIA roles on Gantt, graph, tree)           | Medium | Medium |
+| 19  | Add color-blind-friendly mode (patterns instead of just colors)      | Medium | Medium |
+| 20  | Add step duration percentile chart (p50, p90, p99)                   | Medium | Medium |
+| 21  | Add "critical path" highlight in Gantt (bottleneck chain)            | High   | Medium |
+| 22  | Add zoom/brush to Gantt timeline for large workflows                 | Medium | Medium |
+| 23  | Consider `templ` for HTML template instead of `fmt.Sprintf`          | Medium | Medium |
+| 24  | Add OpenGraph meta tags for shareable report links                   | Low    | Low    |
+| 25  | Add JSON schema validation for embedded report data                  | Medium | Medium |
 
 ### g) Top Question I Cannot Figure Out Myself
 
