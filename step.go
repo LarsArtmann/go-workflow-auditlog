@@ -58,6 +58,12 @@ type StepInfo struct {
 // HasError returns true if the step recorded an error.
 func (s StepInfo) HasError() bool { return s.Error != nil }
 
+// Type returns the step's Go type name (e.g., "FetchStep"). This is the
+// programmatic identifier of the step implementation. Provides method-style
+// access for API consistency with [StepStatus.Label], [StepStatus.Icon],
+// and [StepStatus.Color].
+func (s StepInfo) Type() string { return s.StepType }
+
 // Duration returns the step duration in milliseconds, or 0 if unavailable.
 func (s StepInfo) Duration() float64 {
 	if s.DurationMs == nil {

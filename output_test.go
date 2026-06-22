@@ -165,7 +165,7 @@ func TestWriteTable_CSV(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "Step,Status,Duration,Attempts,Error", "expected CSV header")
+	assertContains(t, output, "Step,Status,Duration,Attempts,Retry,Timeout,Error", "expected CSV header")
 	assertContains(t, output, "csv-step", "expected step name in CSV")
 	assertContains(t, output, "succeeded", "expected status in CSV")
 }

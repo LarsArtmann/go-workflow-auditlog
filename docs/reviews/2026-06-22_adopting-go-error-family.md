@@ -397,3 +397,39 @@ This is where Family adds the most value: **retry decisions on I/O failures**. B
 | 10 | `errUnknownEventType` | ndjson.go:18 | private sentinel | Rejection | A (register, private) |
 | 11 | `errUnknownPhase` | ndjson.go:19 | private sentinel | Rejection | A (register, private) |
 | 12+ | I/O/export errors | loader.go, plugin.go, all diagram files | `fmt.Errorf` only | Transient / Infrastructure | Follow-up |
+
+---
+
+## Strategy B Migration Path (Future, if ever needed)
+
+**Current state:** Strategy A (Registration) is adopted. Sentinels are plain `error`
+values classified via `RegisterClassifications`. `errors.Is` works unchanged.
+
+**Strategy B (Full Replacement)** would change sentinels from `errors.New(...)`
+to `errorfamily.NewError(family, message)` structs. This enables:
+- Structured context on each error (call site, timestamps, metadata)
+- JSON serialization of the error itself (`Error.JSON()`)
+- Automatic exit-code-aware CLI handler (`HandleError`)
+
+**Tradeoffs:**
+- `errors.Is` semantics change: `errorfamily.Error` uses code+family matching,
+  not pointer identity. Existing consumer `errors.Is(err, sentinel)` checks may
+  need updating.
+- All `var ErrX = errors.New(...)` become `var ErrX = errorfamily.NewError(...)`.
+- Every test that asserts on error identity needs review.
+- Public API contract change: consumers importing `auditlog.ErrX` get a
+  different type.
+
+**Migration steps (if pursued):**
+1. Keep `RegisterClassifications` as-is (it still works with Error sentinels).
+2. Change each sentinel from `errors.New` to `errorfamily.NewError`.
+3. Update tests: `errors.Is` checks still work via the code+family path, but
+   verify behavior with `Test_Classify_ErrorsIsUnchanged`.
+4. Add context fields to sentinels where useful (e.g., `ErrReportLoadFailed`
+   with file path, `ErrRenderFailed` with format name).
+5. Consider exposing `HandleError` as a convenience for CLI consumers.
+
+**Recommendation:** Do NOT pursue Strategy B until a concrete consumer need
+for structured error context or JSON error serialization arises. Strategy A
+delivers 90% of the value (classification, retryability, exit codes) at 10%
+of the risk.

@@ -15,9 +15,9 @@ import (
 )
 
 // buildTableData converts a WorkflowReport into go-output TableData.
-// Columns: Step, Status, Duration, Attempts, Error.
+// Columns: Step, Status, Duration, Attempts, Retry, Timeout, Error.
 func (r WorkflowReport) buildTableData() *output.TableData {
-	data := output.NewTableData([]string{"Step", "Status", "Duration", "Attempts", "Error"})
+	data := output.NewTableData([]string{"Step", "Status", "Duration", "Attempts", "Retry", "Timeout", "Error"})
 
 	for _, step := range r.Steps {
 		errStr := ""
@@ -30,11 +30,16 @@ func (r WorkflowReport) buildTableData() *output.TableData {
 			durStr = fmt.Sprintf("%.2fms", *step.DurationMs)
 		}
 
+		retryStr := strconv.FormatBool(step.HasRetry)
+		timeoutStr := strconv.FormatBool(step.HasTimeout)
+
 		data.AddRow([]string{
 			step.Name,
 			string(step.Status),
 			durStr,
 			strconv.Itoa(step.AttemptCount),
+			retryStr,
+			timeoutStr,
 			errStr,
 		})
 	}
