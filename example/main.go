@@ -14,6 +14,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	"github.com/cenkalti/backoff/v4"
+	errorfamily "github.com/larsartmann/go-error-family"
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
@@ -306,6 +307,30 @@ func printSampleEvent(report auditlog.WorkflowReport) {
 	fmt.Printf("\nSample event:\n%s\n", sample)
 }
 
+// printErrorClassification demonstrates go-error-family integration: every
+// auditlog sentinel is automatically classified, so consumers get IsRetryable,
+// ExitCode, and Classify without importing go-error-family themselves.
+func printErrorClassification() {
+	fmt.Println()
+	fmt.Println("━━━ Error Classification ━━━")
+	fmt.Println("(via github.com/larsartmann/go-error-family)")
+
+	demos := []struct {
+		label string
+		err   error
+	}{
+		{"Corruption  (exit 65)", fmt.Errorf("%w: got 5, want 3", auditlog.ErrEventCountMismatch)},
+		{"Rejection   (exit  1)", auditlog.ErrEmpty},
+		{"Transient   (exit 75)", auditlog.ErrReportLoadFailed},
+		{"Infra       (exit 69)", auditlog.ErrRenderFailed},
+	}
+
+	for _, d := range demos {
+		fmt.Printf("  %s → family=%s retryable=%v exit=%d\n",
+			d.label, errorfamily.Classify(d.err), errorfamily.IsRetryable(d.err), errorfamily.ExitCode(d.err))
+	}
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -331,6 +356,7 @@ func main() {
 	report := audit.Report()
 	printReportSummary(report)
 	printStepDetails(report)
+	printErrorClassification()
 
 	if runErr != nil {
 		fmt.Printf("\nWorkflow error: %v\n", runErr)

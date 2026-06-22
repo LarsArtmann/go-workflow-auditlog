@@ -32,6 +32,15 @@ Honest feature inventory by status. Verified against the codebase on 2026-06-21.
 - **`LoadReport()` / `LoadReportFromReader()` / `LoadReportFromBytes()`**
 - **`ReadEvents()`** — NDJSON reader (inverse of WriteNDJSON)
 
+### Error Classification
+
+- **[go-error-family](https://github.com/larsartmann/go-error-family) integration** — all 12 public sentinel errors auto-registered with behavioral `Family` classification on import via `init()` into `DefaultRegistry`
+- **12 public sentinels** classified: 4 Corruption (exit 65), 5 Rejection (exit 1), 1 Transient (exit 75, retryable), 2 Infrastructure (exit 69)
+- **`Classify(err)`**, **`IsRetryable(err)`**, **`ExitCode(err)`** work on any auditlog error — no consumer-side setup needed
+- **`errors.Is` semantics unchanged** — registration is additive metadata, not replacement (Strategy A)
+- **`RegisterClassifications(reg)`** for custom registries; **`ErrorClassifications()`** returns the canonical mapping
+- **All I/O error paths wrapped** — render, write, load, flush, rename failures carry matchable sentinels
+
 ### Report Aggregate Fields
 
 - `WallClockDurationMs` — actual elapsed time (earliest → latest event)

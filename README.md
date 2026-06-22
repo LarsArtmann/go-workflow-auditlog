@@ -322,7 +322,7 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 ### Sentinel Errors
 
-These exported errors are returned by `Validate()` and `New()`. Match them with `errors.Is`:
+These exported errors are returned by `Validate()`, `New()`, `LoadReport()`, and export methods. Match them with `errors.Is`:
 
 | Error                            | Returned when                                                        |
 | -------------------------------- | -------------------------------------------------------------------- |
@@ -332,6 +332,49 @@ These exported errors are returned by `Validate()` and `New()`. Match them with 
 | `auditlog.ErrStatusDrift`        | A step's `Status` disagrees with its derived status.                 |
 | `auditlog.ErrCountMismatch`      | A denormalized status-count field disagrees with actual step counts. |
 | `auditlog.ErrReplayNoEvents`     | `ReplayEvents` received zero events.                                 |
+| `auditlog.ErrEmpty`              | `ReadEvents` input is empty.                                         |
+| `auditlog.ErrNoEvents`           | `ReadEvents` input contains no events (all blank lines).             |
+| `auditlog.ErrOversizedLine`      | `ReadEvents` line exceeds 1 MB.                                      |
+| `auditlog.ErrReportLoadFailed`   | `LoadReport`/`LoadReportFromReader`/`LoadReportFromBytes` failed.    |
+| `auditlog.ErrRenderFailed`       | Diagram/table/HTML/JSON rendering or marshaling failed.              |
+| `auditlog.ErrExportWriteFailed`  | File write or I/O flush failed during export.                        |
+
+### Error Classification
+
+All sentinel errors are automatically registered with [go-error-family](https://github.com/larsartmann/go-error-family) on import. Consumers can call `errorfamily.Classify(err)`, `errorfamily.IsRetryable(err)`, or `errorfamily.ExitCode(err)` on any auditlog error without additional setup:
+
+```go
+import (
+    "github.com/larsartmann/go-error-family"
+    "github.com/larsartmann/go-workflow-auditlog"
+)
+
+err := auditlog.LoadReport("report.json")
+
+if errorfamily.IsRetryable(err) {
+    // Transient failure — back off and retry
+}
+
+switch errorfamily.Classify(err) {
+case errorfamily.Corruption:
+    // Data integrity violation (ErrEventCountMismatch, ErrStatusDrift, etc.)
+case errorfamily.Rejection:
+    // Bad caller input (ErrEmpty, ErrNoEvents, ErrOversizedLine, etc.)
+case errorfamily.Transient:
+    // Retryable failure (ErrReportLoadFailed)
+case errorfamily.Infrastructure:
+    // System-level failure (ErrRenderFailed, ErrExportWriteFailed)
+}
+```
+
+| Family | Retry? | Exit | Sentinel errors                                              |
+|--------|--------|------|--------------------------------------------------------------|
+| Corruption | No | 65 | `ErrEventCountMismatch`, `ErrStepCountMismatch`, `ErrStatusDrift`, `ErrCountMismatch` |
+| Rejection | No | 1 | `ErrEmpty`, `ErrNoEvents`, `ErrOversizedLine`, `ErrWorkflowIDPathSep`, `ErrReplayNoEvents` |
+| Transient | Yes | 75 | `ErrReportLoadFailed` |
+| Infrastructure | No | 69 | `ErrRenderFailed`, `ErrExportWriteFailed` |
+
+For custom registries, call `auditlog.RegisterClassifications(reg)` explicitly.
 
 ## Config
 

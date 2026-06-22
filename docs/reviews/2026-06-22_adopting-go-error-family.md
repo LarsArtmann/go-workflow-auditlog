@@ -2,6 +2,10 @@
 
 **Date:** 2026-06-22 · **Decision needed:** Should auditlog adopt `github.com/larsartmann/go-error-family` for structured error classification?
 
+> **STATUS: ADOPTED — Strategy A (Registration) + I/O Classification fully implemented on 2026-06-22.**
+>
+> All 12 public sentinels classified (4 Corruption, 5 Rejection, 1 Transient, 2 Infrastructure). 22 I/O error paths wrapped with sentinels. 8 classify tests passing. See `classify.go` and `classify_test.go`.
+
 ---
 
 ## Executive Summary
