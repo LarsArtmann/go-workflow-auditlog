@@ -275,6 +275,7 @@ func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.Workflo
 			return audit.ExportTable("steps.md", output.FormatMarkdown, output.RenderOptions{})
 		}},
 		{"tree.txt", func() error { return audit.ExportTree("tree.txt") }},
+		{"dashboard.html", func() error { return audit.ExportHTML("dashboard.html") }},
 	}
 
 	for _, task := range tasks {

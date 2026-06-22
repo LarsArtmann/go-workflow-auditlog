@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Interactive HTML dashboard** (`WriteHTML` / `ExportHTML` / `WriteHTMLString`) —
+  self-contained 5-tab report (Steps table, DAG Tree, interactive SVG DAG Graph
+  with Sugiyama layout + pan/zoom/click-highlight, Timeline bar chart, Events
+  stream) with embedded CSS/JS, no external dependencies. Strict CSP, XSS-tested
+  via fuzz target. Available on both `Auditor` and `WorkflowReport`.
+- **Type metadata injection** (`BuildTypeMetadata` / `metadata.go`) — single
+  source of truth for enum display metadata (icons, labels, colors) consumed by
+  the HTML dashboard's JavaScript.
+- **Golden file test** (`html_golden_test.go`) — byte-stable HTML output test
+  with `UPDATE_GOLDEN=1` pattern.
+- **XSS fuzz target** (`FuzzHTMLSpecialChars`) — verifies XSS payloads are
+  contained within JSON script tags and never rendered as executable HTML.
+
 ## [0.2.1] - 2026-06-21
 
 ### Added

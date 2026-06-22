@@ -311,6 +311,21 @@ func (a *Auditor) WriteHTMLTreeString() (string, error) {
 	return a.Report().WriteHTMLTreeString()
 }
 
+// WriteHTML writes a self-contained interactive HTML dashboard to writer.
+func (a *Auditor) WriteHTML(writer io.Writer) error {
+	return a.Report().WriteHTML(writer)
+}
+
+// ExportHTML writes the HTML dashboard to path.
+func (a *Auditor) ExportHTML(path string) error {
+	return writeToFile(path, a.WriteHTML)
+}
+
+// WriteHTMLString returns the HTML dashboard as a string.
+func (a *Auditor) WriteHTMLString() (string, error) {
+	return a.Report().WriteHTMLString()
+}
+
 // fileWriteBufferSize is the bufio buffer size used for atomic file exports.
 const fileWriteBufferSize = 65536
 

@@ -22,6 +22,7 @@ Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workfl
 - [API Reference](#api-reference)
 - [Config](#config)
 - [Diagrams](#diagrams)
+- [HTML Dashboard](#html-dashboard)
 - [Concurrency Model](#concurrency-model)
 - [Step Naming](#step-naming)
 - [Known Limitations](#known-limitations)
@@ -36,7 +37,7 @@ Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workfl
 - **Full DAG structure** — captures dependency graph (upstream + dependents), retry/timeout config, and step types
 - **Skipped & canceled detection** — reads post-execution state to catch steps that bypass callbacks entirely
 - **Cross-system correlation** — 128-bit `RunID` stamped on every event for trace/log correlation
-- **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT / D2 diagrams, step summary tables (16 formats), ASCII + HTML tree views
+- **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT / D2 diagrams, step summary tables (16 formats), ASCII + HTML tree views, **interactive HTML dashboard** (5-tab self-contained report with DAG graph engine, timeline, waveform)
 - **Report filtering** — slice reports by step name, status, event type, or time range
 - **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration delta)
 - **Event replay** — reconstruct a report from a flat NDJSON event stream
@@ -262,6 +263,7 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `ExportTable(path string, format, opts) error`        | Writes step summary table (CSV/Markdown/JSON/HTML/...).      |
 | `ExportTree(path string) error`                       | Writes ASCII tree to file.                                   |
 | `ExportHTMLTree(path string) error`                   | Writes HTML tree to file.                                    |
+| `ExportHTML(path string) error`                       | Writes interactive HTML dashboard to file.                   |
 | `WriteMermaid(w io.Writer) error`                     | Writes Mermaid DAG to writer.                                |
 | `WritePlantUML(w io.Writer) error`                    | Writes PlantUML DAG to writer.                               |
 | `WriteGraphviz(w io.Writer) error`                    | Writes Graphviz DOT DAG to writer.                           |
@@ -269,6 +271,7 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `WriteTable(w io.Writer, format, opts) error`         | Writes step summary table to writer.                         |
 | `WriteTree(w io.Writer) error`                        | Writes ASCII tree to writer.                                 |
 | `WriteHTMLTree(w io.Writer) error`                    | Writes HTML tree to writer.                                  |
+| `WriteHTML(w io.Writer) error`                        | Writes interactive HTML dashboard to writer.                 |
 
 ### `WorkflowReport` Methods
 
@@ -301,6 +304,9 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `report.WriteTreeString() (string, error)`              | ASCII tree as string.                                                |
 | `report.WriteHTMLTree(w io.Writer) error`               | HTML nested-list tree of step DAG.                                   |
 | `report.WriteHTMLTreeString() (string, error)`          | HTML tree as string.                                                 |
+| `report.WriteHTML(w io.Writer) error`                   | Interactive HTML dashboard (5-tab report with DAG graph).            |
+| `report.WriteHTMLString() (string, error)`              | HTML dashboard as string.                                            |
+| `report.ExportHTML(path string) error`                  | Writes HTML dashboard to file.                                       |
 | `report.Validate() error`                               | Checks internal consistency (counts, status drift).                  |
 
 ### Package-Level Functions
@@ -389,6 +395,32 @@ _ = report.WriteD2(os.Stdout)           // or audit.ExportD2("dag.d2")
 _ = report.WriteTable(os.Stdout, output.FormatCSV, output.RenderOptions{})  // step summary table
 _ = report.WriteTree(os.Stdout)         // ASCII tree of step DAG
 _ = report.WriteHTMLTree(os.Stdout)     // HTML nested-list tree
+_ = audit.ExportHTML("dashboard.html")  // interactive HTML dashboard
+```
+
+## HTML Dashboard
+
+The `WriteHTML` / `ExportHTML` methods produce a **self-contained interactive HTML dashboard** — a single file with embedded CSS and JavaScript, no external dependencies. Open it in any browser or attach it to a report/email.
+
+**Five tabs:**
+
+1. **Steps** — sortable, filterable table with pagination (step name, type, status, attempts, duration, dependencies, dependents, retry/timeout config)
+2. **DAG Tree** — collapsible tree of the step dependency graph (root = no dependencies, children = dependents)
+3. **DAG Graph** — interactive SVG with Sugiyama layered layout (pan/zoom/touch/click-to-highlight), built from the same DAG as the other exports
+4. **Timeline** — horizontal bar chart of step durations, sorted by duration, color-coded by status
+5. **Events** — sortable event stream with type filters and pagination
+
+**Security:** Report data is injected via `<script type="application/json">` tags (never parsed as HTML). Dynamic content is escaped via a JS `esc()` function. Strict CSP: `default-src 'none'`. XSS-tested via fuzz target `FuzzHTMLSpecialChars`.
+
+```go
+// From an Auditor (live workflow):
+audit.ExportHTML("dashboard.html")
+
+// From a WorkflowReport (e.g. loaded from JSON):
+report.ExportHTML("dashboard.html")
+
+// To a string:
+html, _ := report.WriteHTMLString()
 ```
 
 ## Concurrency Model

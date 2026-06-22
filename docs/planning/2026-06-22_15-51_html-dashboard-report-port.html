@@ -1,0 +1,1894 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plan: Port HTML Dashboard from samber-do-auditlog → go-workflow-auditlog</title>
+    <style>
+      :root {
+        --surface: #0e0e10;
+        --surface-raised: #18181d;
+        --surface-sunken: #16161a;
+        --text: #f4f4f0;
+        --text-muted: rgba(244, 244, 240, 0.72);
+        --text-faint: rgba(244, 244, 240, 0.45);
+        --border: rgba(244, 244, 240, 0.12);
+        --border-strong: rgba(244, 244, 240, 0.25);
+        --accent: #ffb347;
+        --problem: #ff6b6b;
+        --solution: #6eb5ff;
+        --warning: #f4d35e;
+        --radius: 0px;
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        padding: 0;
+      }
+      .top-bar {
+        background: var(--text);
+        color: var(--surface);
+        padding: 0.6rem 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      .hero {
+        margin-bottom: 2.5rem;
+      }
+      .hero-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        padding: 0.25rem 0.6rem;
+        border: 1px solid var(--accent);
+        margin-bottom: 0.75rem;
+      }
+      .hero h1 {
+        font-size: 2.2rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 0.6rem;
+      }
+      .hero .subtitle {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        max-width: 70ch;
+      }
+      .meta-row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+      }
+      .tag {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+        border: 1px solid var(--border-strong);
+        color: var(--text-muted);
+      }
+      .tag.amber {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1px;
+        background: var(--border);
+        margin-bottom: 2.5rem;
+        border: 1px solid var(--border);
+      }
+      .stat-card {
+        background: var(--surface-raised);
+        padding: 1.2rem 1rem;
+        text-align: center;
+      }
+      .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 900;
+        font-family: var(--font-mono);
+        letter-spacing: -0.02em;
+      }
+      .stat-card .stat-label {
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-top: 0.25rem;
+      }
+      .stat-card.t1 .stat-value {
+        color: var(--accent);
+      }
+      .stat-card.t2 .stat-value {
+        color: var(--solution);
+      }
+      .stat-card.t3 .stat-value {
+        color: var(--text-muted);
+      }
+
+      section {
+        margin-bottom: 3rem;
+      }
+      section h2 {
+        font-size: 1.3rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border-strong);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      section h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .graph-wrap {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1rem;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+      }
+      .graph-wrap svg {
+        max-width: 100%;
+        height: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.87rem;
+      }
+      table thead th {
+        background: var(--surface-sunken);
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-faint);
+        padding: 0.6rem 0.7rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-strong);
+        position: sticky;
+        top: 0;
+      }
+      table tbody td {
+        padding: 0.55rem 0.7rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .td-id {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        white-space: nowrap;
+      }
+      .td-time {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--accent);
+        white-space: nowrap;
+        font-weight: 600;
+      }
+      .tier-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border-radius: 0;
+        letter-spacing: 0.05em;
+      }
+      .tier-1 {
+        background: var(--accent);
+        color: var(--surface);
+      }
+      .tier-2 {
+        background: var(--solution);
+        color: var(--surface);
+      }
+      .tier-3 {
+        background: var(--surface-sunken);
+        color: var(--text-muted);
+        border: 1px solid var(--border-strong);
+      }
+
+      .impact-bar {
+        display: inline-flex;
+        gap: 2px;
+      }
+      .impact-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--border-strong);
+      }
+      .impact-dot.on {
+        background: var(--accent);
+      }
+
+      .file-ref {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--solution);
+      }
+
+      .card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+      }
+      .card h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+      }
+      .card-problem {
+        border-left: 3px solid var(--problem);
+      }
+      .card-solution {
+        border-left: 3px solid var(--solution);
+      }
+      .card-warning {
+        border-left: 3px solid var(--warning);
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      @media (max-width: 768px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .callout {
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.88rem;
+      }
+      .callout strong {
+        font-weight: 700;
+      }
+      .callout-teal {
+        background: rgba(110, 181, 255, 0.1);
+        border-left: 3px solid var(--solution);
+      }
+      .callout-amber {
+        background: rgba(255, 179, 71, 0.1);
+        border-left: 3px solid var(--accent);
+      }
+
+      .mapping-table th,
+      .mapping-table td {
+        font-size: 0.82rem;
+      }
+      .mapping-table .arrow {
+        color: var(--accent);
+        text-align: center;
+      }
+
+      ul.task-list {
+        list-style: none;
+      }
+      ul.task-list li {
+        padding: 0.4rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 0.88rem;
+      }
+      ul.task-list li::before {
+        content: "▸";
+        position: absolute;
+        left: 0;
+        color: var(--accent);
+      }
+
+      .footer {
+        border-top: 1px solid var(--border);
+        padding: 1.5rem 2rem;
+        text-align: center;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <span>PARETO PLAN · GO-WORKFLOW-AUDITLOG</span>
+      <span>2026-06-22</span>
+    </div>
+
+    <div class="container">
+      <div class="hero">
+        <div class="hero-badge">PARETO PLAN · 50 TASKS · MAX 12 MIN EACH</div>
+        <h1>
+          Port HTML Dashboard Report<br />from
+          <code style="font-family: var(--font-mono); font-size: 0.7em; color: var(--accent)"
+            >samber-do-auditlog</code
+          >
+          →
+          <code style="font-family: var(--font-mono); font-size: 0.7em; color: var(--solution)"
+            >go-workflow-auditlog</code
+          >
+        </h1>
+        <p class="subtitle">
+          A self-contained, interactive, single-file HTML dashboard that combines the step table,
+          dependency DAG graph (Sugiyama layout), execution timeline, collapsible tree, and event
+          stream into one navigable page. The crown jewel feature that turns an audit log into a
+          shareable artifact.
+        </p>
+        <div class="meta-row">
+          <span class="tag amber">50 tasks</span>
+          <span class="tag">~7h total estimated</span>
+          <span class="tag">9 phases</span>
+          <span class="tag">3 Pareto tiers</span>
+          <span class="tag">0 new dependencies</span>
+          <span class="tag">Target: v0.3.0</span>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card t1">
+          <div class="stat-value">24</div>
+          <div class="stat-label">Tier 1 (1%→51%)</div>
+        </div>
+        <div class="stat-card t2">
+          <div class="stat-value">17</div>
+          <div class="stat-label">Tier 2 (4%→64%)</div>
+        </div>
+        <div class="stat-card t3">
+          <div class="stat-value">9</div>
+          <div class="stat-label">Tier 3 (20%→80%)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">~5</div>
+          <div class="stat-label">New files</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">0</div>
+          <div class="stat-label">New deps</div>
+        </div>
+      </div>
+
+      <!-- EXECUTION GRAPH -->
+      <section id="graph">
+        <h2><span class="num">◆</span>Execution Graph</h2>
+        <div class="graph-wrap">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMinYMin meet"
+            viewBox="0 0 2680 100"
+          >
+            <!-- Phase 0 -->
+            <rect
+              x="0"
+              y="0"
+              width="130"
+              height="80"
+              fill="#ffb347"
+              stroke="#ff6b6b"
+              stroke-width="2"
+            />
+            <text
+              x="65"
+              y="25"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 0
+            </text>
+            <text x="65" y="42" text-anchor="middle" fill="#0e0e10" font-size="10">Foundation</text>
+            <text x="65" y="56" text-anchor="middle" fill="#0e0e10" font-size="9">6 tasks</text>
+            <!-- Phase 1 -->
+            <rect
+              x="190"
+              y="0"
+              width="110"
+              height="80"
+              fill="#ffb347"
+              stroke="#ff6b6b"
+              stroke-width="2"
+            />
+            <text
+              x="245"
+              y="25"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 1
+            </text>
+            <text x="245" y="42" text-anchor="middle" fill="#0e0e10" font-size="10">CSS Theme</text>
+            <text x="245" y="56" text-anchor="middle" fill="#0e0e10" font-size="9">5 tasks</text>
+            <!-- Phase 2 -->
+            <rect
+              x="370"
+              y="0"
+              width="120"
+              height="80"
+              fill="#ffb347"
+              stroke="#ff6b6b"
+              stroke-width="2"
+            />
+            <text
+              x="430"
+              y="25"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 2
+            </text>
+            <text x="430" y="42" text-anchor="middle" fill="#0e0e10" font-size="10">
+              HTML Structure
+            </text>
+            <text x="430" y="56" text-anchor="middle" fill="#0e0e10" font-size="9">5 tasks</text>
+            <!-- Phase 3 -->
+            <rect
+              x="560"
+              y="0"
+              width="115"
+              height="80"
+              fill="#ffb347"
+              stroke="#ff6b6b"
+              stroke-width="2"
+            />
+            <text
+              x="617"
+              y="25"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 3
+            </text>
+            <text x="617" y="42" text-anchor="middle" fill="#0e0e10" font-size="10">
+              JS: Data/UI
+            </text>
+            <text x="617" y="56" text-anchor="middle" fill="#0e0e10" font-size="9">8 tasks</text>
+            <!-- MVP milestone -->
+            <rect
+              x="745"
+              y="5"
+              width="120"
+              height="70"
+              fill="#ff6b6b"
+              stroke="#fff"
+              stroke-width="3"
+            />
+            <text
+              x="805"
+              y="30"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="12"
+              font-weight="bold"
+            >
+              ★ MVP
+            </text>
+            <text x="805" y="48" text-anchor="middle" fill="#0e0e10" font-size="10">
+              Working HTML
+            </text>
+            <text x="805" y="62" text-anchor="middle" fill="#0e0e10" font-size="9">Dashboard</text>
+            <!-- Phase 4 -->
+            <rect
+              x="935"
+              y="0"
+              width="130"
+              height="80"
+              fill="#6eb5ff"
+              stroke="#f4d35e"
+              stroke-width="2"
+            />
+            <text
+              x="1000"
+              y="25"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 4
+            </text>
+            <text x="1000" y="42" text-anchor="middle" fill="#0e0e10" font-size="10">
+              JS: Graph Eng.
+            </text>
+            <text x="1000" y="56" text-anchor="middle" fill="#0e0e10" font-size="9">7 tasks</text>
+            <!-- Phase 5 -->
+            <rect
+              x="1135"
+              y="0"
+              width="95"
+              height="80"
+              fill="#6eb5ff"
+              stroke="#f4d35e"
+              stroke-width="2"
+            />
+            <text
+              x="1182"
+              y="25"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 5
+            </text>
+            <text x="1182" y="42" text-anchor="middle" fill="#0e0e10" font-size="10">Assembly</text>
+            <text x="1182" y="56" text-anchor="middle" fill="#0e0e10" font-size="9">2 tasks</text>
+            <!-- Phase 6 -->
+            <rect
+              x="1300"
+              y="0"
+              width="90"
+              height="80"
+              fill="#6eb5ff"
+              stroke="#f4d35e"
+              stroke-width="2"
+            />
+            <text
+              x="1345"
+              y="25"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 6
+            </text>
+            <text x="1345" y="42" text-anchor="middle" fill="#0e0e10" font-size="10">Tests</text>
+            <text x="1345" y="56" text-anchor="middle" fill="#0e0e10" font-size="9">8 tasks</text>
+            <!-- Tested milestone -->
+            <rect
+              x="1460"
+              y="10"
+              width="105"
+              height="60"
+              fill="#ff6b6b"
+              stroke="#fff"
+              stroke-width="3"
+            />
+            <text
+              x="1512"
+              y="35"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="11"
+              font-weight="bold"
+            >
+              ★ Tested
+            </text>
+            <text x="1512" y="52" text-anchor="middle" fill="#0e0e10" font-size="9">
+              &amp; Hardened
+            </text>
+            <!-- Phase 7 -->
+            <rect
+              x="1635"
+              y="0"
+              width="85"
+              height="80"
+              fill="#2d2d35"
+              stroke="#6eb5ff"
+              stroke-width="1"
+            />
+            <text
+              x="1677"
+              y="25"
+              text-anchor="middle"
+              fill="#f4f4f0"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 7
+            </text>
+            <text x="1677" y="42" text-anchor="middle" fill="#f4f4f0" font-size="10">Docs</text>
+            <text x="1677" y="56" text-anchor="middle" fill="#f4f4f0" font-size="9">5 tasks</text>
+            <!-- Phase 8 -->
+            <rect
+              x="1780"
+              y="0"
+              width="110"
+              height="80"
+              fill="#2d2d35"
+              stroke="#6eb5ff"
+              stroke-width="1"
+            />
+            <text
+              x="1835"
+              y="25"
+              text-anchor="middle"
+              fill="#f4f4f0"
+              font-size="12"
+              font-weight="bold"
+            >
+              Phase 8
+            </text>
+            <text x="1835" y="42" text-anchor="middle" fill="#f4f4f0" font-size="10">
+              Verification
+            </text>
+            <text x="1835" y="56" text-anchor="middle" fill="#f4f4f0" font-size="9">4 tasks</text>
+            <!-- Shipped milestone -->
+            <rect
+              x="1960"
+              y="10"
+              width="85"
+              height="60"
+              fill="#ff6b6b"
+              stroke="#fff"
+              stroke-width="3"
+            />
+            <text
+              x="2002"
+              y="35"
+              text-anchor="middle"
+              fill="#0e0e10"
+              font-size="11"
+              font-weight="bold"
+            >
+              ★ Shipped
+            </text>
+            <text x="2002" y="52" text-anchor="middle" fill="#0e0e10" font-size="9">v0.3.0</text>
+            <!-- Arrows -->
+            <g stroke="#6eb5ff" stroke-width="1.5" fill="none">
+              <path d="M 130 40 L 190 40" marker-end="url(#arr)" />
+              <path d="M 300 40 L 370 40" marker-end="url(#arr)" />
+              <path d="M 490 40 L 560 40" marker-end="url(#arr)" />
+              <path d="M 675 40 L 745 40" marker-end="url(#arr)" />
+              <path d="M 865 40 L 935 40" marker-end="url(#arr)" />
+              <path d="M 1065 40 L 1135 40" marker-end="url(#arr)" />
+              <path d="M 1230 40 L 1300 40" marker-end="url(#arr)" />
+              <path d="M 1390 40 L 1460 40" marker-end="url(#arr)" />
+              <path d="M 1565 40 L 1635 40" marker-end="url(#arr)" />
+              <path d="M 1720 40 L 1780 40" marker-end="url(#arr)" />
+              <path d="M 1890 40 L 1960 40" marker-end="url(#arr)" />
+            </g>
+            <defs>
+              <marker
+                id="arr"
+                markerWidth="8"
+                markerHeight="8"
+                refX="6"
+                refY="4"
+                viewBox="0 0 8 8"
+                orient="auto"
+              >
+                <polygon points="0,0 8,4 0,8" fill="#6eb5ff" />
+              </marker>
+            </defs>
+          </svg>
+        </div>
+      </section>
+
+      <!-- ARCHITECTURE DECISION -->
+      <section id="architecture">
+        <h2><span class="num">◆</span>Architecture Decision: Raw String Builder (No templ)</h2>
+        <div class="card card-solution">
+          <h3>
+            Approach: Go <code style="font-size: 0.85em">strings.Builder</code> + JSON Injection
+          </h3>
+          <p style="margin-bottom: 0.5rem">
+            <strong>Why not templ?</strong> The project has zero templ dependencies today. Adding
+            templ means a build-time code generator, a runtime import
+            (<code>github.com/a-h/templ</code>), and a <code>templ generate</code> step in the build
+            pipeline. The library philosophy favors minimal deps.
+          </p>
+          <p>
+            <strong>How it works:</strong> CSS and JS are embedded as Go <code>const</code> strings.
+            Report data is <code>json.Marshal</code>'ed into
+            <code>&lt;script type="application/json"&gt;</code> tags (same security model as
+            samber's <code>@templ.JSONScript</code>). The JS reads data via
+            <code>JSON.parse(document.getElementById(...))</code>. XSS safety comes from JSON
+            injection (never interpolated into HTML) + the JS <code>esc()</code> function for
+            dynamic content + CSP meta tag.
+          </p>
+        </div>
+        <div class="callout callout-teal">
+          <strong>Key insight:</strong> This is exactly how samber's template works internally — the
+          data goes in as JSON script tags, not as interpolated template variables. The only
+          difference is templ generates the boilerplate HTML. We replace that with
+          <code>fmt.Fprintf</code> + <code>strings.Builder</code>. Zero new deps.
+        </div>
+      </section>
+
+      <!-- DOMAIN MAPPING -->
+      <section id="mapping">
+        <h2><span class="num">◆</span>Domain Mapping: samber → go-workflow</h2>
+        <table class="mapping-table">
+          <thead>
+            <tr>
+              <th>samber-do-auditlog concept</th>
+              <th class="arrow">→</th>
+              <th>go-workflow-auditlog equivalent</th>
+              <th>Adaptation notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Service</td>
+              <td class="arrow">→</td>
+              <td><strong>Step</strong></td>
+              <td>Steps have attempts, not invocations</td>
+            </tr>
+            <tr>
+              <td>Service name</td>
+              <td class="arrow">→</td>
+              <td><strong>Step name</strong> (StepRef.Name)</td>
+              <td>Same concept</td>
+            </tr>
+            <tr>
+              <td>Service type (lazy/eager/transient/alias)</td>
+              <td class="arrow">→</td>
+              <td><strong>Step type</strong> (StepRef.StepType)</td>
+              <td>Go struct type name (TypeName)</td>
+            </tr>
+            <tr>
+              <td>Service status (registered/active/shutdown/error)</td>
+              <td class="arrow">→</td>
+              <td>
+                <strong>Step status</strong> (pending/running/succeeded/failed/canceled/skipped)
+              </td>
+              <td>6 statuses vs 5; icons already defined</td>
+            </tr>
+            <tr>
+              <td>Scope tree</td>
+              <td class="arrow">→</td>
+              <td><strong>Dependency tree</strong> (DAG)</td>
+              <td>Reuse existing tree.go logic concept</td>
+            </tr>
+            <tr>
+              <td>Dependencies / Dependents</td>
+              <td class="arrow">→</td>
+              <td><strong>Dependencies / Dependents</strong> (StepRef)</td>
+              <td>Direct match — already in StepInfo</td>
+            </tr>
+            <tr>
+              <td>Invocation count</td>
+              <td class="arrow">→</td>
+              <td><strong>Attempt count</strong></td>
+              <td>Includes retries</td>
+            </tr>
+            <tr>
+              <td>Build duration</td>
+              <td class="arrow">→</td>
+              <td><strong>Step duration</strong> (DurationMs)</td>
+              <td>Single metric per attempt</td>
+            </tr>
+            <tr>
+              <td>Shutdown duration</td>
+              <td class="arrow">→</td>
+              <td><strong>N/A</strong></td>
+              <td>Remove — no shutdown concept</td>
+            </tr>
+            <tr>
+              <td>Health check</td>
+              <td class="arrow">→</td>
+              <td><strong>HasTimeout / HasRetry</strong></td>
+              <td>Replace with retry/timeout badges</td>
+            </tr>
+            <tr>
+              <td>Events (registration/invocation/shutdown/health_check)</td>
+              <td class="arrow">→</td>
+              <td><strong>Events</strong> (attempt_start/attempt_end)</td>
+              <td>2 event types instead of 4</td>
+            </tr>
+            <tr>
+              <td>Container ID</td>
+              <td class="arrow">→</td>
+              <td><strong>Workflow ID</strong></td>
+              <td>Header display</td>
+            </tr>
+            <tr>
+              <td>Provider type legend</td>
+              <td class="arrow">→</td>
+              <td><strong>Step status legend</strong></td>
+              <td>Icons already defined in stepStatusMeta</td>
+            </tr>
+            <tr>
+              <td>N/A</td>
+              <td class="arrow">→</td>
+              <td><strong>PeakConcurrency</strong></td>
+              <td>New stat card — max parallel steps</td>
+            </tr>
+            <tr>
+              <td>N/A</td>
+              <td class="arrow">→</td>
+              <td><strong>CriticalPathDurationMs</strong></td>
+              <td>New stat — bottleneck path duration</td>
+            </tr>
+            <tr>
+              <td>N/A</td>
+              <td class="arrow">→</td>
+              <td><strong>WallClockDurationMs</strong></td>
+              <td>Primary user-facing duration metric</td>
+            </tr>
+            <tr>
+              <td>N/A</td>
+              <td class="arrow">→</td>
+              <td><strong>RunID</strong></td>
+              <td>128-bit hex identifier shown in header</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- COMPREHENSIVE TASK TABLE -->
+      <section id="tasks">
+        <h2><span class="num">◆</span>Comprehensive Task Table — All 50 Tasks (max 12 min each)</h2>
+
+        <table id="task-table">
+          <thead>
+            <tr>
+              <th style="width: 50px">#</th>
+              <th style="width: 70px">Tier</th>
+              <th style="width: 80px">Time</th>
+              <th>Task</th>
+              <th style="width: 100px">Impact</th>
+              <th style="width: 160px">File(s)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- PHASE 0: FOUNDATION -->
+            <tr>
+              <td class="td-id">01</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>Create <code>metadata.go</code></strong> —
+                <code>BuildTypeMetadata()</code> with <code>TypeMetadata</code> struct (Statuses map
+                + Events map). Maps StepStatus→icon/label, EventType→label/color. Single source of
+                truth for JS display metadata.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span>
+              </td>
+              <td><span class="file-ref">metadata.go (new)</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">02</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">6 min</td>
+              <td>
+                <strong>Create <code>html.go</code> API surface</strong> —
+                <code>WorkflowReport.WriteHTML(w)</code>, <code>ExportHTML(path)</code>,
+                <code>WriteHTMLString()</code>. Delegate <code>WriteHTML</code> to
+                <code>renderHTML(report)</code> in html_render.go. Use existing
+                <code>writeToFile</code> for ExportHTML.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html.go (new)</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">03</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Add Auditor delegation methods</strong> to <code>plugin.go</code> —
+                <code>WriteHTML</code>, <code>ExportHTML</code>, <code>WriteHTMLString</code>.
+                Follow exact same delegation pattern as WriteD2/WriteTree/etc.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">plugin.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">04</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">7 min</td>
+              <td>
+                <strong>Create <code>html_render.go</code> skeleton</strong> —
+                <code>renderHTML(report WorkflowReport) (string, error)</code> using
+                <code>strings.Builder</code>. Marshal report + metadata to JSON. Wire template
+                constants (CSS + JS) as <code>const</code> blocks. Return assembled HTML string.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go (new)</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">05</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Wire <code>renderHTML</code> into <code>WriteHTML</code></strong> — Write to
+                <code>io.Writer</code>, verify compilation, verify <code>go vet</code> clean. This
+                is the "hello world" moment — a blank HTML page renders.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html.go</span></td>
+            </tr>
+
+            <!-- PHASE 1: CSS -->
+            <tr>
+              <td class="td-id">06</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>Write CSS: theme tokens + global styles</strong> —
+                <code>const cssTheme</code>: <code>:root</code> variables (dark amber theme from
+                samber adapted: <code>--bg:#14110d</code>, <code>--accent:#e8a838</code>, status
+                colors), resets, body typography, focus-visible, scrollbar styling.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">07</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>Write CSS: header + waveform + stats + tabs</strong> —
+                <code>const cssLayout</code>: header layout (logo dot, version badge, subtitle,
+                legend), waveform section (event strip bars), stats grid (auto-fit stat cards), tab
+                bar + tab-content panels.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">08</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>Write CSS: tables + badges + filter bar</strong> —
+                <code>const cssComponents</code>: data table (sortable headers, hover, sticky
+                thead), status badges (succeeded/failed/canceled/skipped colors), filter bar (search
+                input, chip buttons), retry/timeout mini-badges, error tooltips.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">09</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>Write CSS: graph + tree + timeline + empty states</strong> —
+                <code>const cssGraph</code>: SVG graph container, graph-node (rect + accent bar +
+                text), graph-edge (bezier path), zoom controls buttons, timeline bar chart rows,
+                collapsible tree nodes, empty-state panels, footer.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">10</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">7 min</td>
+              <td>
+                <strong>Write CSS: responsive + accessibility + reduced-motion</strong> —
+                <code>const cssResponsive</code>: <code>@media (max-width:768px)</code> and
+                <code>(max-width:480px)</code> breakpoints, <code>prefers-reduced-motion</code>,
+                <code>.sr-only</code> screen-reader text, print styles, ARIA focus states.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+
+            <!-- PHASE 2: HTML STRUCTURE -->
+            <tr>
+              <td class="td-id">11</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>Build HTML: head + header + waveform</strong> — DOCTYPE,
+                <code>&lt;meta charset&gt;</code>, CSP meta tag (<code
+                  >default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';
+                  base-uri 'none'; frame-ancestors 'none'</code
+                >), title with WorkflowID, header (logo dot, title, version badge, subtitle with
+                workflow ID + exported-at, legend container), waveform section.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">12</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">6 min</td>
+              <td>
+                <strong>Build HTML: stats grid + tab bar</strong> — Stats grid container (populated
+                by JS), 5-tab bar with ARIA <code>role="tablist"</code>: Steps, Tree, DAG Graph,
+                Timeline, Events. Each tab has <code>aria-selected</code>,
+                <code>aria-controls</code>, keyboard nav support.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">13</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>Build HTML: Steps tab</strong> — Filter bar (search input + errors-only
+                toggle chip + result count), sortable table with columns: Step, Type, Status,
+                Attempts, Max, Duration (ms), Dependencies, Dependents, Retry, Timeout, Error.
+                Empty-state row.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">14</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">7 min</td>
+              <td>
+                <strong>Build HTML: Tree + Graph + Timeline tabs</strong> — Tree tab: collapsible
+                container. Graph tab: SVG container + zoom controls (+/−/fit buttons) + info hint.
+                Timeline tab: bar chart container.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">15</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">7 min</td>
+              <td>
+                <strong>Build HTML: Events tab + JSON injection + footer</strong> — Events tab:
+                filter chips container + event table (#, Sequence, Time, Type, Phase, Step, Attempt,
+                Duration, Error). Inject report-data + type-metadata as
+                <code>&lt;script type="application/json"&gt;</code>. Footer with timestamp + schema
+                stats.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+
+            <!-- PHASE 3: JAVASCRIPT — DATA & UI -->
+            <tr>
+              <td class="td-id">16</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">7 min</td>
+              <td>
+                <strong>JS: data loading + legend + header population</strong> — Parse JSON from
+                script tags, build lookup maps (statusIcons, eventLabels, eventColors). Populate
+                workflow ID, exported-at, render status legend (icon + label + count per status).
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">17</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>JS: waveform renderer</strong> — Event timeline strip: position events by
+                timestamp (min→max range), color by event type or error, height by duration. Tooltip
+                on hover with event type + step name + phase + duration.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">18</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">6 min</td>
+              <td>
+                <strong>JS: stats renderer</strong> — 6 stat cards: Steps, Events, Succeeded,
+                Failed, Wall Clock (ms), Peak Concurrency. Color-code: green for succeeded, red for
+                failed. Use <code>report.wall_clock_duration_ms</code> as primary duration.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">19</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">7 min</td>
+              <td>
+                <strong>JS: tab switching + keyboard navigation</strong> — Click tabs to switch
+                panels. Keyboard: number keys 1–5 jump to tabs, left/right arrows cycle. Update
+                <code>aria-selected</code>. Lazy-render graph on first visit.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">20</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>JS: Steps table (render + sort + filter + paginate)</strong> — Render rows
+                with status badge, type badge, attempt count, retry (×N) / timeout icons,
+                dependency/dependent counts, error tooltip. Sort on header click (name, status,
+                duration, attempts). Filter by search input + errors-only toggle. Paginate at 100
+                rows.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">21</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>JS: Events table (render + type filters + paginate)</strong> — Render event
+                rows: sequence, timestamp (relative + absolute), type badge (attempt_start=green,
+                attempt_end=amber), phase, step name, attempt number, duration, error tooltip. Type
+                filter chips (all / attempt_start / attempt_end). Paginate at 100.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">22</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>JS: Timeline bar chart</strong> — Step durations sorted descending. Each
+                row: step name + status icon, bar chart (width proportional to max duration, colored
+                by status). Dual bars: step duration vs wall-clock for context. Tooltip with exact
+                ms.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">23</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>JS: Tree renderer (collapsible)</strong> — Recursive function building
+                nested <code>&lt;ul&gt;</code> from step DAG. Roots = steps with no dependencies.
+                Children = dependents. Collapsible nodes with expand/collapse toggle. Status icon +
+                retry indicator per node.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">24</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>JS: XSS <code>esc()</code> + error tooltips + footer</strong> —
+                <code>esc(s)</code> function escaping <code>&amp; &lt; &gt; " '</code>. Error
+                tooltip with viewport edge detection. Footer timestamp + schema stats.
+                <strong>This completes the MVP.</strong>
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+
+            <!-- PHASE 4: GRAPH ENGINE -->
+            <tr>
+              <td class="td-id">25</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>JS: Sugiyama Phase 1 — rank assignment</strong> — Kahn's algorithm
+                topological sort. Compute longest-path rank for each node (roots = rank 0,
+                dependents = max(parent+1)). Build layers array. Handle disconnected nodes (rank 0).
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">26</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>JS: Sugiyama Phase 2 — barycenter ordering</strong> — 4-pass
+                forward+backward crossing reduction. For each layer, compute barycenter from
+                neighbor positions in adjacent layer. Sort by barycenter. Reduces edge crossings
+                significantly.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">27</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>JS: Sugiyama Phase 3 — position computation</strong> — Center nodes within
+                each layer (equal spacing). Then median-alignment pass: for each node, align
+                x-position to median of predecessors' positions, clamped to not overlap neighbors.
+                Straightens edges.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">28</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>JS: SVG graph builder</strong> — Create SVG element with computed viewBox.
+                Build <code>&lt;defs&gt;</code> arrow markers (normal + highlight). Render edges as
+                cubic bezier paths. Render nodes as <code>&lt;g&gt;</code> with rect (surface fill,
+                status-color stroke) + accent bar + text label + <code>&lt;title&gt;</code> tooltip.
+                Layer depth labels (L0, L1, ...).
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">29</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>JS: pan/zoom</strong> — Mouse wheel zoom (prevent default, zoom toward
+                cursor). Click-drag pan (track mousedown/move/up on window). Zoom in/out/fit
+                buttons. Maintain viewBox state, apply on change.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">30</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>JS: touch support</strong> — 1-finger touch = pan (track
+                touchstart/move/end). 2-finger pinch = zoom (compute distance ratio, scale viewBox).
+                <code>{passive:false}</code> to allow preventDefault.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">31</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">7 min</td>
+              <td>
+                <strong>JS: click-to-highlight connected subgraph</strong> — Click node: find all
+                connected nodes/edges via BFS over edges array. Dim unconnected, highlight
+                connected, highlight clicked. Click again or click empty SVG = clear. Use CSS
+                classes + arrow marker swap.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+
+            <!-- PHASE 5: ASSEMBLY -->
+            <tr>
+              <td class="td-id">32</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Assemble <code>renderHTML()</code></strong> — Concatenate: DOCTYPE + head
+                (meta + title + all CSS consts in <code>&lt;style&gt;</code>) + body (header +
+                waveform + stats + tabs + all tab content + JSON script tags + all JS consts in
+                <code>&lt;script&gt;</code> + footer). Verify <code>go build</code> +
+                <code>go vet</code>.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span>
+              </td>
+              <td><span class="file-ref">html_render.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">33</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Visual smoke test</strong> — Run <code>go run ./example</code>, export HTML,
+                open in browser. Verify: tabs switch, steps table renders, graph lays out, events
+                display. Fix any obvious rendering issues.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">example/main.go</span></td>
+            </tr>
+
+            <!-- PHASE 6: TESTS -->
+            <tr>
+              <td class="td-id">34</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">7 min</td>
+              <td>
+                <strong>Test: basic WriteHTML</strong> — <code>TestWriteHTML_BasicReport</code>:
+                render report with 2+ steps. Assert DOCTYPE present, HTML >500 bytes, step names
+                present in output, CSP meta tag present, all 5 tab IDs present.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_test.go (new)</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">35</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">6 min</td>
+              <td>
+                <strong>Test: ExportHTML file write</strong> — <code>TestExportHTML</code>: write to
+                temp dir, read file, assert DOCTYPE + content. Verify
+                <code>writeToFile</code> atomic write path is exercised.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_test.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">36</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>Test: multi-step DAG</strong> — <code>TestWriteHTML_MultiStepDAG</code>:
+                workflow with dependencies, retry, failure, skip, cancel. Assert: all step names in
+                HTML, status badges present, type-metadata injected, graph container present,
+                event-filters present.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_test.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">37</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Test: empty report</strong> — <code>TestWriteHTML_EmptyReport</code>: zero
+                steps, zero events. Assert no crash, DOCTYPE present, empty-state elements present.
+                Edge case coverage.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_test.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">38</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>Test: golden file (byte-stable)</strong> —
+                <code>TestReport_WriteHTML_GoldenFile</code>: build deterministic report via
+                ReplayEvents with fixed timestamps, pin ExportedAt, render HTML, compare
+                byte-for-byte against committed golden file. <code>UPDATE_GOLDEN=1</code> to
+                regenerate.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td>
+                <span class="file-ref"
+                  >html_golden_test.go (new)<br />testdata/golden/report.html</span
+                >
+              </td>
+            </tr>
+            <tr>
+              <td class="td-id">39</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">10 min</td>
+              <td>
+                <strong>Test: XSS fuzz</strong> — <code>FuzzHTML</code>: seed with malicious
+                payloads (<code>&lt;script&gt;</code>, <code>onload=</code>, SQL injection, null
+                bytes, template injection). Inject via step names + error messages. Assert no raw
+                XSS in output (<code>&lt;script&gt;</code> tags from JSON injection don't count —
+                strip them first).
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_fuzz_test.go (new)</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">40</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Test: error-path + API symmetry</strong> — Failing
+                <code>io.Writer</code> test (verify error wrapping). <code>WriteHTMLString</code> ==
+                <code>WriteHTML</code> output. <code>Auditor.WriteHTML</code> ==
+                <code>Auditor.Report().WriteHTML</code>.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_test.go</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">41</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Test: type metadata injection</strong> — Assert
+                <code>type-metadata</code> script tag present, contains <code>"statuses"</code> and
+                <code>"events"</code> keys, values match StepStatus/EventType enums. Verify
+                JSONScript pattern works without templ.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">html_test.go</span></td>
+            </tr>
+
+            <!-- PHASE 7: DOCS -->
+            <tr>
+              <td class="td-id">42</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>Update README.md</strong> — Add "HTML Dashboard" section under Export
+                Formats with usage example (<code>a.ExportHTML("report.html")</code>),
+                screenshot/description of 5 tabs, mention CSP + XSS hardening. Update export format
+                table.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">README.md</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">43</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">6 min</td>
+              <td>
+                <strong>Update FEATURES.md + CHANGELOG.md</strong> — FEATURES.md: move "HTML
+                dashboard report" from PLANNED → DONE. CHANGELOG.md: add under [Unreleased] — "feat:
+                add self-contained interactive HTML dashboard report (WriteHTML/ExportHTML) with
+                Sugiyama DAG graph, sortable step table, timeline, event stream, and collapsible
+                tree".
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td>
+                <span class="file-ref">FEATURES.md<br />CHANGELOG.md</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-id">44</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">8 min</td>
+              <td>
+                <strong>Update AGENTS.md</strong> — Add html.go/metadata.go/html_render.go to
+                architecture file list. Add gotcha: "HTML dashboard uses raw string builder (no
+                templ dep) — CSS/JS are Go const blocks, data injected via JSON script tags". Add to
+                test patterns: golden file + XSS fuzz count.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">AGENTS.md</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">45</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Update TODO_LIST.md + ROADMAP.md</strong> — TODO_LIST.md: remove "HTML
+                dashboard report" from Deferred section. ROADMAP.md: move "HTML dashboard report"
+                from "Direction" to "Done" (or remove since it's shipped). Add any follow-up TODOs
+                discovered during implementation.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td>
+                <span class="file-ref">TODO_LIST.md<br />ROADMAP.md</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-id">46</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Add HTML export to example/main.go</strong> — After the existing
+                JSON/diagram exports, add <code>a.ExportHTML("audit-report.html")</code> so the demo
+                produces a shareable dashboard. Verify it renders correctly.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">example/main.go</span></td>
+            </tr>
+
+            <!-- PHASE 8: VERIFICATION -->
+            <tr>
+              <td class="td-id">47</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Run full test suite with race detector</strong> —
+                <code>go test -race ./...</code>. Fix any failures. The HTML rendering path is pure
+                CPU (no goroutines), so races are unlikely, but verify.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">—</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">48</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Run golangci-lint</strong> — <code>golangci-lint run ./...</code>. Fix any
+                issues in new files (likely: gosec G304 for file paths, errcheck on writer writes,
+                gochecknoglobals for CSS/JS consts — use <code>//nolint</code> where justified).
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">—</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">49</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Run coverage check</strong> —
+                <code>go test -race -coverprofile=cover.out -covermode=atomic ./...</code>. Ensure
+                HTML paths (renderHTML, WriteHTML, ExportHTML, metadata) are covered. Target:
+                overall coverage stays ≥93%.
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">—</span></td>
+            </tr>
+            <tr>
+              <td class="td-id">50</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td class="td-time">5 min</td>
+              <td>
+                <strong>Final visual review</strong> — Open generated HTML in browser. Click through
+                all 5 tabs. Test sort/filter on Steps table. Test graph zoom/pan/click. Test event
+                filters. Verify responsive layout at 768px and 480px. Verify CSP doesn't block
+                anything. <strong>Ship it.</strong>
+              </td>
+              <td>
+                <span class="impact-dot on"></span><span class="impact-dot on"></span
+                ><span class="impact-dot on"></span><span class="impact-dot"></span
+                ><span class="impact-dot"></span>
+              </td>
+              <td><span class="file-ref">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- SUMMARY BY PHASE -->
+      <section id="summary">
+        <h2><span class="num">◆</span>Phase Summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Tasks</th>
+              <th>Est. Time</th>
+              <th>Tier</th>
+              <th>Milestone</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>0. Foundation & API</strong></td>
+              <td>5</td>
+              <td>~31 min</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td>Compiles, renders blank HTML</td>
+            </tr>
+            <tr>
+              <td><strong>1. CSS Theme</strong></td>
+              <td>5</td>
+              <td>~47 min</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td>Styled shell, no content</td>
+            </tr>
+            <tr>
+              <td><strong>2. HTML Structure</strong></td>
+              <td>5</td>
+              <td>~36 min</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td>All tabs + data injection</td>
+            </tr>
+            <tr>
+              <td><strong>3. JS: Data & UI</strong></td>
+              <td>9</td>
+              <td>~67 min</td>
+              <td><span class="tier-badge tier-1">1%→51%</span></td>
+              <td><strong>★ MVP — working dashboard (no graph)</strong></td>
+            </tr>
+            <tr>
+              <td><strong>4. JS: Graph Engine</strong></td>
+              <td>7</td>
+              <td>~61 min</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td>Interactive Sugiyama DAG graph</td>
+            </tr>
+            <tr>
+              <td><strong>5. Assembly</strong></td>
+              <td>2</td>
+              <td>~10 min</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td>All pieces wired, smoke tested</td>
+            </tr>
+            <tr>
+              <td><strong>6. Tests</strong></td>
+              <td>8</td>
+              <td>~56 min</td>
+              <td><span class="tier-badge tier-2">4%→64%</span></td>
+              <td><strong>★ Tested & hardened</strong></td>
+            </tr>
+            <tr>
+              <td><strong>7. Docs</strong></td>
+              <td>5</td>
+              <td>~32 min</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td>All docs current</td>
+            </tr>
+            <tr>
+              <td><strong>8. Verification</strong></td>
+              <td>4</td>
+              <td>~20 min</td>
+              <td><span class="tier-badge tier-3">20%→80%</span></td>
+              <td><strong>★ Shipped v0.3.0</strong></td>
+            </tr>
+            <tr style="font-weight: 700; border-top: 2px solid var(--border-strong)">
+              <td>TOTAL</td>
+              <td>50</td>
+              <td>~6h 40m</td>
+              <td colspan="2"></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- RISKS -->
+      <section id="risks">
+        <h2><span class="num">◆</span>Risks & Mitigations</h2>
+        <div class="grid-2">
+          <div class="card card-warning">
+            <h3>CSS/JS as Go string constants</h3>
+            <p style="font-size: 0.88rem">
+              Large string constants (CSS ~400 lines, JS ~700 lines) in a single .go file may
+              trigger linter warnings (funlen, gocyclo). <strong>Mitigation:</strong> Use
+              <code>//nolint:funlen</code> on the const blocks, or split into multiple const
+              declarations across logical sections.
+            </p>
+          </div>
+          <div class="card card-warning">
+            <h3>XSS without templ auto-escaping</h3>
+            <p style="font-size: 0.88rem">
+              Raw string builder doesn't have templ's compile-time HTML escaping.
+              <strong>Mitigation:</strong> Data goes in as JSON script tags (inherently safe — never
+              parsed as HTML). The JS <code>esc()</code> function handles all dynamic HTML
+              generation. CSP meta tag blocks inline event handlers. Fuzz test validates.
+            </p>
+          </div>
+          <div class="card card-problem">
+            <h3>Step name collisions in graph</h3>
+            <p style="font-size: 0.88rem">
+              Two steps with identical <code>String()</code> output merge in the graph node map.
+              <strong>Mitigation:</strong> Already documented as a known limitation. Use StepID as
+              the SVG node ID internally, display Name as the label. Same approach as existing
+              diagram.go's <code>seen</code> map.
+            </p>
+          </div>
+          <div class="card card-solution">
+            <h3>Golden file brittleness</h3>
+            <p style="font-size: 0.88rem">
+              Byte-stable golden files break on any template change.
+              <strong>Mitigation:</strong> Pin ExportedAt to fixed timestamp. Use ReplayEvents with
+              fixed event timestamps. <code>UPDATE_GOLDEN=1</code> for regeneration. Intentional —
+              catches unintended output changes.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">
+      Generated 2026-06-22 · Pareto Plan · go-workflow-auditlog HTML Dashboard Port
+    </div>
+  </body>
+</html>

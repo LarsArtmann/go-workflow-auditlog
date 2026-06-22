@@ -55,5 +55,4 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 - [ ] Streaming NDJSON export option
 - [ ] OpenTelemetry span bridge
 - [ ] `encoding/json/v2` migration
-- [ ] HTML dashboard report (self-contained, combines table + diagram + tree)
 - [ ] `go-error-family` adoption for structured errors

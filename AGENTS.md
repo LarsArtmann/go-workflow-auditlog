@@ -48,6 +48,9 @@ graphviz.go        — Graphviz DOT digraph export (delegates to go-output graph
 d2.go              — D2 diagram export (delegates to go-output d2.D2Diagram, title "Workflow DAG")
 table.go           — Step summary table export via go-output RenderTableData: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml
 tree.go            — Step DAG tree export: ASCII tree (go-output/tree.ASCIITreeRenderer) + HTML nested list tree (go-output/markup.HTMLTreeRenderer)
+metadata.go        — TypeMetadata struct + BuildTypeMetadata(): single source of truth for enum display metadata (icons/labels/colors) consumed by HTML dashboard JS
+html.go            — Public API: WorkflowReport.WriteHTML / ExportHTML / WriteHTMLString (delegates to renderHTML)
+html_render.go     — renderHTML(): assembles self-contained HTML dashboard (CSS const + JS const + HTML structure); 5-tab report with Sugiyama DAG graph engine
 example/           — Data pipeline demo (fetch → validate → transform → save + retry); version ldflags
 .goreleaser.yml    — Automated GitHub releases with grouped changelog + demo binary
 ```
@@ -59,7 +62,7 @@ example/           — Data pipeline demo (fetch → validate → transform → 
 3. During `w.Do(ctx)`, callbacks fire per-attempt → `Recorder` captures timestamped `Event`s
 4. `Snapshot(w)` reads `w.StateOf(step)` + `w.UpstreamOf(step)` to fill in DAG structure and skipped/canceled statuses
 5. `Report()` assembles `StepInfo` slice (with forward + reverse deps) and event stream
-6. Export methods serialize to JSON, NDJSON, diagrams (Mermaid/PlantUML/DOT/D2), tables (16 formats via go-output), and trees (ASCII/HTML) via [go-output](https://github.com/larsartmann/go-output)
+6. Export methods serialize to JSON, NDJSON, diagrams (Mermaid/PlantUML/DOT/D2), tables (16 formats via go-output), trees (ASCII/HTML), and interactive HTML dashboard (5-tab report with embedded CSS/JS) via [go-output](https://github.com/larsartmann/go-output)
 
 ### Concurrency Model
 
@@ -113,6 +116,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - **`StepInfo.Error` reflects the FINAL outcome only.** For a step that fails on attempts 1–2 and succeeds on attempt 3, the `Error` field is `nil` (not "transient failure" from the last failed attempt). The per-attempt error history is preserved in the `Event` stream — each `attempt_end` event carries its own `Error`. Rationale: the step-level `Error` is the answer to "why did this step end in its final state?", and a succeeded step ended successfully. See `recorder.go:recordAfterStep` and the regression test `TestRetry_StepErrorClearedOnSuccess`.
 - **`RunID` is a branded string type** (`type RunID string`) defined in `types.go`. It serializes to/from JSON as a plain string but the type system prevents accidentally passing a `WorkflowID` (also a string) where a `RunID` is expected. Convert with `RunID("value")` or `string(id)`. The `len()` built-in works directly on `RunID`; `hex.DecodeString` and similar stdlib functions need `string(runID)`.
 - **`stepCore` is the shared step-state accumulator** (`step.go`) embedded by both `stepRecord` (live capture, `recorder.go`) and the replay accumulator (`replay.go`). The single `toStepInfo()` method produces the public `StepInfo` from the common fields. Live-only fields (stepID, pendingAttempts, maxAttempts, hasRetry, hasTimeout, dependencies) live on `stepRecord` only. Any new step-state field MUST go on `stepCore` so both paths stay synchronized.
+- **HTML dashboard** (`html_render.go`) uses raw Go string builders (NOT templ) — CSS and JS are embedded as `const` string blocks. Report data is injected via `<script type="application/json">` tags (never parsed as HTML by the browser), and dynamic content in JS is escaped via the `esc()` function. Strict CSP: `default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'`. The JS Sugiyama graph engine (~200 lines) does rank assignment (Kahn's), 4-pass barycenter crossing reduction, and median-alignment positioning, then renders SVG with cubic bezier edges, pan/zoom/touch/click-highlight. `BuildTypeMetadata()` in `metadata.go` is the single source of truth for enum display metadata consumed by the JS. Golden file test at `testdata/golden/report.html` — run `UPDATE_GOLDEN=1 go test -run TestReport_WriteHTML_GoldenFile` to update.
 
 ---
 
@@ -126,6 +130,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - 178 tests covering: disabled/enabled, success/failure, dependencies, retry, timeout/cancel, skip, concurrent steps, fan-out/fan-in, event ordering, OnEvent callback, export formats (JSON/NDJSON/D2/table/tree), report validation, query methods, filter, diff, replay, load, diagrams (Mermaid/PlantUML/DOT/D2), edge-direction consistency (diagrams vs tree), API symmetry (Write\*String on Auditor, Export\* on WorkflowReport), high-fan-out peak concurrency, diamond-DAG critical path, edge cases, plus regression tests for fixed bugs (status drift, diff ordering, NDJSON line numbers, WorkflowSucceeded honesty about pending steps, stale error cleared on retry success), **fuzz tests** (diagram special-char injection across Mermaid/PlantUML/DOT/D2), and **property-based tests** (Diff algebra: identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output — 200 iterations each, deterministic seeds).
 - Coverage: **~93%** of statements (auditlog package).
 - **Fuzz target**: `FuzzDiagramSpecialChars` — diagram export structural integrity against injection payloads.
+- **Fuzz target**: `FuzzHTMLSpecialChars` — HTML dashboard XSS containment (payloads injected via step names, errors, dependency names).
 - **Property tests**: 5 Diff algebra properties with 200 random report pairs each.
 
 ### Shared test helpers (in `auditlog_test.go`)

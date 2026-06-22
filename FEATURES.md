@@ -54,6 +54,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-06-21.
 | Table (16 sub-formats) | `WriteTable`    | `WriteTableString`    | `ExportTable`    | ✅         | ✅        |
 | ASCII Tree             | `WriteTree`     | `WriteTreeString`     | `ExportTree`     | ✅         | ✅        |
 | HTML Tree              | `WriteHTMLTree` | `WriteHTMLTreeString` | `ExportHTMLTree` | ✅         | ✅        |
+| HTML Dashboard         | `WriteHTML`     | `WriteHTMLString`     | `ExportHTML`     | ✅         | ✅        |
 
 Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml
 
@@ -118,7 +119,6 @@ No way to set Mermaid/D2/Graphviz layout direction (TD vs LR). All diagrams defa
 - Streaming NDJSON export (write events as captured, not buffered)
 - OpenTelemetry span bridge
 - `encoding/json/v2` migration (Go 1.25+ policy)
-- HTML dashboard report (self-contained, combines table + diagram + tree)
 - `Name(step)` fallback helper (deterministic step names when `String()` is unset)
 - Fuzz tests for diagram ID sanitization
 - Benchmarks for new render paths (WriteD2, WriteTable, WriteTree, analytics)

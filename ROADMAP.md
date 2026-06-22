@@ -65,11 +65,10 @@ existing observability stacks rather than requiring a separate dashboard.
 
 ### Replay & Visualization
 
-**Direction**: An **HTML dashboard report** — a self-contained HTML file that
-combines the step table, dependency diagram (Mermaid/D2), and execution tree
-into a single navigable page. Like the status reports in `docs/status/` but
-generated from a live `WorkflowReport`. Consumers get a shareable, offline
-artifact from any workflow run.
+**Done**: The **HTML dashboard report** (`WriteHTML` / `ExportHTML`) is a
+self-contained HTML file with 5 tabs (Steps table, DAG Tree, interactive SVG
+DAG Graph with Sugiyama layout, Timeline, Events), embedded CSS/JS, and strict
+CSP. Consumers get a shareable, offline artifact from any workflow run.
 
 ---
 
