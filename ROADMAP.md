@@ -75,8 +75,8 @@ CSP. Consumers get a shareable, offline artifact from any workflow run.
 ## Raw Ideas (not yet scoped)
 
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
-- `encoding/json/v2` migration (Go 1.25+ policy mandate)
-- `go-error-family` adoption for structured, classified errors
+- `encoding/json/v2` migration (Go 1.25+ policy mandate) — **audit**: 5 source files use `encoding/json` (html_render.go, ndjson.go, report.go, loader.go, export.go). Migration is mechanical: swap `json.Marshal`→`json.Marshal_v2`, `json.Unmarshal`→`json.Unmarshal_v2`, `json.Encoder`→`json.Encoder_v2`. Benefit: ordered maps, ~2x faster, smaller allocations. Risk: v2 API not yet stable in Go 1.26.
+- ~~`go-error-family` adoption for structured, classified errors~~ — **DONE v0.5.0** (Strategy A registration + 3 I/O sentinels + 22 wrapped paths)
 - `FailureReason` structured categories (typed categories, not just a string)
 - `Diff()` on PeakConcurrency / CriticalPath (currently only duration)
 - `ReplayEvents` round-trip property/fuzz test (export → read → replay = equivalent)
@@ -84,3 +84,81 @@ CSP. Consumers get a shareable, offline artifact from any workflow run.
 - `CONTRIBUTING.md` documenting the HTML-vs-Markdown snapshot rule
 - Configurable node shapes/icons per step type in diagrams
 - Workflow-level retry/timeout surfacing in the report
+
+---
+
+## Feature Designs (scoped, awaiting implementation)
+
+### Configurable Table Columns (P4-27)
+
+Currently `WriteTable` hardcodes 7 columns. Design:
+
+```go
+type TableColumn int
+const (
+    ColumnStep TableColumn = iota
+    ColumnStatus
+    ColumnDuration
+    ColumnAttempts
+    ColumnRetry
+    ColumnTimeout
+    ColumnError
+    ColumnType
+    ColumnDependencies
+)
+```
+
+**Deferred**: `go-output`'s `RenderOptions` doesn't support column selection.
+Requires either upstream go-output support or a pre-filter in `buildTableData`.
+
+### Diagram Layout Direction (P4-28)
+
+Currently Mermaid/D2/Graphviz use default TD layout.
+
+```go
+type DiagramDirection string
+const ( DirectionTD = "TD"; DirectionLR = "LR" )
+```
+
+**Deferred**: go-output renderers don't expose direction config. Requires
+upstream support or post-processing the rendered string.
+
+---
+
+## Strategic First-Chunk Audits
+
+### justfile → flake.nix (P6-37) — DONE
+
+The justfile no longer exists. `flake.nix` is present and BuildFlow runs all
+checks via it. This item is complete.
+
+### Module Split (P6-38) — Scope Map
+
+**Current**: single-package library, 55 .go files in root.
+**Proposed**: `auditlog-core` (~20 files, 3 deps) + `auditlog-viz` (~11 files,
+go-output deps). **Defer** until a consumer requests the lighter footprint.
+
+### Streaming NDJSON Export (P6-39) — API Design
+
+```go
+func (a *Auditor) StreamEvents(w io.Writer) func() error
+```
+
+Writes events as NDJSON as captured via `OnEvent`. **Defer** until real-time
+tailing need arises — current buffer handles 10k+ events fine.
+
+### OpenTelemetry Span Bridge (P6-40) — Mapping
+
+`attempt_start` → span start, `attempt_end` → span end with attributes.
+**Defer** until a consumer has an OTel stack.
+
+### encoding/json/v2 Migration (P6-41) — Audit
+
+5 source files use `encoding/json`. Migration is mechanical once v2 stabilizes.
+**Defer** until Go 1.27+ where v2 is stable.
+
+### init() Auto-Registration Decision (P6-36) — Recommendation
+
+**KEEP the `init()` auto-registration.** Follows standard Go pattern
+(database/sql, image codecs). Zero setup for consumers. Escape hatch exists
+via `RegisterClassifications(reg)`. No consumer has reported issues.
