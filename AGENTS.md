@@ -144,7 +144,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 | `addParallelSteps`               | Wire two independent steps (no dependency edge)               |
 | `addSlowParallelSteps`           | Wire two parallel slow steps of the same duration             |
 | `addDependentStep`               | Wire a parent→child dependency chain                          |
-| `addLinearChain`                 | Wire a 3-step linear chain (`a → b → c`)                       |
+| `addLinearChain`                 | Wire a 3-step linear chain (`a → b → c`)                      |
 | `runWorkflow`                    | `Attach` + `Do` + `Snapshot` in one call                      |
 | `findStep`, `assertReportValid`  | Step lookup + structural validation                           |
 | `assertStepCount`                | Required step count (uses `Fatalf` to stop on mismatch)       |
@@ -214,7 +214,7 @@ knows they were considered.
 
 - **Test-table subtests for diagram formats (diagram_test.go:431-448)**:
   Two `assertEdgeDirections(t, "d2"/"graphviz", buf, expectedEdges,
-  forbiddenEdges)` calls with format-specific edge syntax
+forbiddenEdges)` calls with format-specific edge syntax
   (`fetch -> transform` vs `"fetch" -> "transform"`). This is the
   canonical table-driven test pattern: same harness, different data per
   subtest. Extracting would replace the existing helper call with a more
@@ -248,6 +248,6 @@ knows they were considered.
 - **`addLinearChain(w, a, b, c)`** (auditlog_test.go): wires a 3-step
   linear dependency chain (`a → b → c`) into a workflow. Centralizes
   the `w.Add(flow.Step(a), flow.Step(b).DependsOn(a),
-  flow.Step(c).DependsOn(b))` idiom previously duplicated across
+flow.Step(c).DependsOn(b))` idiom previously duplicated across
   `diagram_test.go` and `html_test.go`. Companion to the existing
   `addDependentStep` (2-step chain) and `addParallelSteps` (no edges).
