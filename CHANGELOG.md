@@ -6,6 +6,56 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-22
+
+### Added
+
+- **Failure Summary banner** — prominent red banner at the top of the HTML
+  dashboard when `workflow_succeeded` is false, showing `failure_reason` and
+  per-step error messages for every failed/canceled step. Previously failure
+  reasons were hidden behind click-only tooltips on status badges.
+- **Workflow PASS/FAIL hero badge** — green checkmark or red cross next to the
+  report title for at-a-glance status.
+- **Error column in steps table** — inline truncated error text with full text
+  on hover. Replaces the hidden tooltip-only approach.
+- **Gantt-style timeline** — replaces the fake duration-sorted bar chart with a
+  real time-positioned Gantt chart showing actual parallelism and step overlaps.
+  Includes time axis labels.
+- **Humanized durations** — all durations now display as `48.8s`, `5m 18s`,
+  `2h 15m` instead of raw milliseconds.
+- **Failure-impact badges** — "blocked" marker on steps skipped or canceled
+  because a dependency failed, with the blocking step name.
+- **Graph error dots** — red dot indicator on failed/canceled nodes in the SVG
+  dependency graph.
+- **Keyboard "e" shortcut** — toggles the "Errors only" filter in the steps
+  table without mouse interaction.
+- **"Errors only (N)" button** — shows count badge with red border when
+  failures exist.
+- **Inline errors in events table** — actual error text instead of a generic
+  "error" badge.
+- **Inline errors in DAG tree** — failed steps show error text directly in the
+  tree node.
+- **Color-coded failed rows** — subtle red-tinted background on failed/canceled
+  rows in the steps and events tables.
+
+### Changed
+
+- **`esc()` and `humanizeDuration()` moved to top of `dashboard.js`** for
+  readability — they are shared utilities called throughout.
+
+### Removed
+
+- **Dead timeline CSS** (`.timeline-bar`, `.timeline-row`, `.timeline-label`,
+  `.timeline-track`) — left over from the old duration-sorted timeline, now
+  replaced by the Gantt chart.
+
+### Tests
+
+- 9 new HTML feature tests (26 HTML tests total, 266 total tests, 92.9% coverage):
+  failure banner (visible/hidden), error column, workflow status badge, Gantt
+  chart, impact badge, humanized durations, graph failed-node dot, tree inline
+  error.
+
 ## [0.3.0] - 2026-06-22
 
 ### Added
