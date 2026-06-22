@@ -5,16 +5,16 @@ go 1.26.3
 require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/larsartmann/go-output v0.17.1
-	github.com/larsartmann/go-output/d2 v0.17.1
-	github.com/larsartmann/go-output/delimited v0.17.1
-	github.com/larsartmann/go-output/graph v0.17.1
-	github.com/larsartmann/go-output/markdown v0.17.1
-	github.com/larsartmann/go-output/markup v0.17.1
-	github.com/larsartmann/go-output/plantuml v0.17.1
-	github.com/larsartmann/go-output/serialization v0.17.1
-	github.com/larsartmann/go-output/table v0.17.1
-	github.com/larsartmann/go-output/tree v0.17.1
+	github.com/larsartmann/go-output v0.17.2
+	github.com/larsartmann/go-output/d2 v0.17.2
+	github.com/larsartmann/go-output/delimited v0.17.2
+	github.com/larsartmann/go-output/graph v0.17.2
+	github.com/larsartmann/go-output/markdown v0.17.2
+	github.com/larsartmann/go-output/markup v0.17.2
+	github.com/larsartmann/go-output/plantuml v0.17.2
+	github.com/larsartmann/go-output/serialization v0.17.2
+	github.com/larsartmann/go-output/table v0.17.2
+	github.com/larsartmann/go-output/tree v0.17.2
 )
 
 require (
