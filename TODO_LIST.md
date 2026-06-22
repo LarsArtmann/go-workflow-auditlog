@@ -1,8 +1,8 @@
 # TODO List — go-workflow-auditlog
 
 Actionable short- and mid-term tasks. Derived from the 2026-06-21 status reports
-after verifying against the codebase. Items already resolved by the 2026-06-21
-execution session are marked `[DONE]`.
+after verifying against the codebase. Items already resolved by execution
+sessions are marked `[DONE]`.
 
 Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 
@@ -22,42 +22,48 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 - [x] Add CriticalPath diamond DAG test (non-linear topology)
 - [x] Document 3 duration metrics in README
 - [x] Create FEATURES.md, TODO_LIST.md, ROADMAP.md
+
+---
+
+## [DONE] — 2026-06-23 execution session (v0.5.0 release)
+
 - [x] **Adopt go-error-family for structured error classification** — all 14 sentinels
       classified (Corruption/Rejection/Transient/Infrastructure), 3 new I/O sentinels
       (`ErrReportLoadFailed`/`ErrRenderFailed`/`ErrExportWriteFailed`), 22 error paths wrapped,
       `ErrorClassifications()` + `RegisterClassifications(reg)` API, 18 error-path tests
+- [x] **Tag v0.5.0 release** — tagged. CHANGELOG promoted, docs refreshed.
+- [x] **Add `StepInfo.Type()` method** — API consistency with `Status.Label()`/`Icon()`/`Color()`
+- [x] **Add retry/timeout columns to table export** — table now has 7 columns (Step, Status, Duration, Attempts, Retry, Timeout, Error)
+- [x] **Add error-path tests for all Write\* methods** — 18 tests injecting failing `io.Writer`, unwritable dirs, bad input
+- [x] **Document the table module `init()` registration pattern** — already in AGENTS.md:117
+- [x] **Add `writeToFile` overwrite protection** — `CheckNoClobber(path)` + `ErrFileExists` sentinel
+- [x] **Add benchmarks for render paths** — 6 benchmarks (WriteD2/Table/Tree/JSON/Mermaid 100-step + JSON 3-step)
+- [x] **Add integration / round-trip tests** — JSON round-trip + NDJSON replay round-trip
+- [x] **Add cross-format consistency tests** — Mermaid vs DOT vs D2 same nodes/edges
+- [x] **Surface name collisions in diagrams** — `WorkflowReport.NameCollisions()` method
+- [x] **Offer `Name(step)` fallback helper** — `HasPointerAddress(name)` detects unoverridden `String()`
+- [x] **Add godoc `ExampleX` funcs** — `ExampleWorkflowReport_Duration` + `ExampleWorkflowReport_Filtered`
+- [x] **Classification property tests** — wrapping preserves Family (200 iterations), identity matches map, fuzz target
+- [x] **Strategy B migration path documented** in adoption report
+- [x] **ROADMAP strategic designs** — all 6 strategic items scoped with first-chunk designs
 
 ---
 
 ## Short-term (high impact, low effort)
 
-- [ ] **Tag v0.5.0 release.** Error classification adoption (go-error-family v0.5.0),
-      3 new I/O sentinels, 22 wrapped error paths, configurable table columns, diagram
-      layout direction, and StepInfo.Type() API expansion warrant a minor bump.
-      _(changelog populated, all docs refreshed, ready to tag)_
-- [ ] **Add `StepInfo.Type()` method** — expose `StepType` via a method for consistency with `Status.Label()` / `Icon()` / `Color()`. Low effort, API consistency.
-- [ ] **Add retry/timeout columns to table export** — `HasRetry` and `HasTimeout` are in `StepInfo` but not in the table. Low effort.
-- [ ] **Add error-path tests for all Write\* methods** — inject failing `io.Writer`s, verify error wrapping. Most Write\* methods sit at ~83% coverage.
-- [ ] **Add `WritePlantUMLString` coverage test** — currently 0% coverage per the 02:12 report.
-- [ ] **Push coverage 93.2% → 95%+** — target `validateStatusCounts` branches and `omitempty` field paths.
-- [ ] **Document the table module `init()` registration pattern** in AGENTS.md gotchas.
+- [ ] **Add `WritePlantUMLString` coverage test** — currently at 80% coverage (unreachable error branch from `strings.Builder`). Low value — the 20% gap is a defensive error path that can't fire in practice.
+- [ ] **Push coverage 93.9% → 95%+** — target `writeToFile` close/rename branches and `renderHTML` marshal error paths.
+- [ ] **Add godoc `ExampleX` for `PeakConcurrency` and `CriticalPathDurationMs`** — 2 remaining examples (Duration and Filtered done).
+- [ ] **Add godoc `ExampleX` for `WallClockDurationMs`** — field-level example (Duration uses `Duration()` method, field example is separate).
 
 ## Mid-term (medium impact, medium effort)
 
-- [ ] **Make table columns configurable** — `WriteTable` currently hardcodes 5 columns. Add column-selection options.
-- [ ] **Add diagram layout direction option** — let caller choose TD vs LR for Mermaid/D2/Graphviz.
-- [ ] **Add `writeToFile` overwrite protection** — `os.Create` truncates unconditionally; add `O_EXCL` or "file exists" error option.
-- [ ] **Add benchmarks for new render paths** — WriteD2, WriteTable, WriteTree, `finalizeDenormalized()` on 100+ step flows.
-- [ ] **Add fuzz tests for diagram ID sanitization** — arbitrary step names (special chars, unicode, empty) through go-output escape functions.
-- [ ] **Add integration / round-trip tests** — report → JSON → LoadReport → report → diagram → structural verify.
-- [ ] **Add cross-format consistency tests** — same report → Mermaid vs DOT vs D2 should have same node/edge structure.
-- [ ] **Surface name collisions in diagrams** — when two steps share `String()`, the `seen` map silently merges them; should warn.
-- [ ] **Offer `Name(step)` fallback helper** — falls back to type name when `String()` returns a pointer address.
-- [ ] **Add godoc `ExampleX` funcs** for `WallClockDurationMs`, `PeakConcurrency`, `CriticalPathDurationMs`.
+- [ ] **Make table columns configurable** — `WriteTable` currently hardcodes 7 columns. Add column-selection options. **Blocked**: needs upstream go-output `RenderOptions` support for column filtering. Design documented in ROADMAP.md.
+- [ ] **Add diagram layout direction option** — let caller choose TD vs LR for Mermaid/D2/Graphviz. **Blocked**: needs upstream go-output renderer direction config. Design documented in ROADMAP.md.
+- [ ] **Add fuzz tests for diagram ID sanitization** — arbitrary step names (special chars, unicode, empty) through go-output escape functions. `FuzzDiagramSpecialChars` exists but could go deeper into sanitization edge cases.
 
 ## Deferred (high effort or needs architectural decision — see ROADMAP.md)
 
-- [ ] Migrate `justfile` → `flake.nix` (build automation)
 - [ ] Split library into core (auditlog) + visualization (diagrams/tables) sub-modules
 - [ ] Streaming NDJSON export option
 - [ ] OpenTelemetry span bridge
