@@ -496,3 +496,212 @@ func assertHTMLStructure(t *testing.T, output string) {
 		t.Errorf("expected exactly 3 </script> tags, got %d", closeCount)
 	}
 }
+
+func TestWriteHTML_FailureBanner_WhenFailed(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	ok := newSucceed("ok-step")
+	bad := newFail("bad-step", "explosion")
+	addDependentStep(w, ok, bad)
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, "failure-banner", "expected failure-banner container in template")
+	assertContains(t, output, `"workflow_succeeded":false`, "expected workflow_succeeded=false in JSON")
+	assertContains(t, output, `"failure_reason"`, "expected failure_reason field in JSON")
+	assertContains(t, output, `"bad-step"`, "expected failed step name in JSON")
+	assertContains(t, output, "explosion", "expected error message in JSON data")
+}
+
+func TestWriteHTML_FailureBanner_HiddenWhenSucceeded(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("happy-step")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, `"workflow_succeeded":true`, "expected workflow_succeeded=true in JSON")
+	assertContains(t, output, "failure-banner", "failure-banner template element should still exist (hidden by JS)")
+}
+
+func TestWriteHTML_ErrorColumn(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	bad := newFail("crash-step", "disk full")
+	w.Add(flow.Step(bad))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, ">Error</th>", "expected Error column header in template")
+	assertContains(t, output, `colspan="9"`, "expected colspan=9 for empty state row")
+	assertContains(t, output, `"error":"disk full"`, "expected error text in JSON data")
+	assertContains(t, output, "error-cell", "expected error-cell CSS class reference")
+}
+
+func TestWriteHTML_WorkflowStatusBadge(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("pass-step")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, "workflow-status", "expected workflow-status badge element in template")
+	assertContains(t, output, `"workflow_succeeded":true`, "expected success status in JSON")
+	assertContains(t, output, "workflow-status passed", "expected passed CSS class in JS")
+	assertContains(t, output, "workflow-status failed", "expected failed CSS class in JS")
+}
+
+func TestWriteHTML_GanttChart(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("timed-step")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, "gantt-axis", "expected gantt-axis CSS in template")
+	assertContains(t, output, "gantt-grid", "expected gantt-grid CSS in template")
+	assertContains(t, output, "gantt-bar", "expected gantt-bar CSS in template")
+	assertContains(t, output, "renderGantt", "expected Gantt render function in JS")
+	assertContains(t, output, `"started_at"`, "expected started_at in JSON")
+	assertContains(t, output, `"finished_at"`, "expected finished_at in JSON")
+}
+
+func TestWriteHTML_ImpactBadge(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	root := newFail("root-fail", "root broken")
+	child := newSucceed("child-step")
+	addDependentStep(w, root, child)
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, "impact-badge", "expected impact-badge CSS class")
+	assertContains(t, output, "impactedSteps", "expected impactedSteps computation in JS")
+	assertContains(t, output, "computeImpact", "expected computeImpact function in JS")
+}
+
+func TestWriteHTML_HumanizedDurations(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	step := newSucceed("duration-step")
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, "function humanizeDuration", "expected humanizeDuration function definition")
+	assertContains(
+		t,
+		output,
+		"humanizeDuration(report.wall_clock_duration_ms)",
+		"expected humanized wall clock in stats",
+	)
+	assertContains(t, output, "humanizeDuration(s.duration_ms)", "expected humanized duration in steps table")
+}
+
+func TestWriteHTML_GraphFailedNodeDot(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	bad := newFail("graph-fail", "node error")
+	w.Add(flow.Step(bad))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, `n.status === "failed"`, "expected failed status check for graph error dot")
+}
+
+func TestWriteHTML_TreeInlineError(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	bad := newFail("tree-fail", "tree error here")
+	w.Add(flow.Step(bad))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	output := buf.String()
+
+	assertContains(t, output, "scope-node-error", "expected scope-node-error CSS class for tree inline errors")
+	assertContains(t, output, "has-failure", "expected has-failure class for failed tree nodes")
+	assertContains(t, output, `"tree error here"`, "expected error text in JSON data")
+}
