@@ -311,14 +311,14 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 ### Package-Level Functions
 
-| Function                                                             | Description                                          |
-| -------------------------------------------------------------------- | ---------------------------------------------------- |
-| `auditlog.LoadReport(path string) (WorkflowReport, error)`           | Load a JSON report from a file.                      |
-| `auditlog.LoadReportFromReader(r io.Reader) (WorkflowReport, error)` | Load a JSON report from a reader.                    |
-| `auditlog.LoadReportFromBytes(b []byte) (WorkflowReport, error)`     | Load a JSON report from bytes.                       |
+| Function                                                             | Description                                    |
+| -------------------------------------------------------------------- | ---------------------------------------------- |
+| `auditlog.LoadReport(path string) (WorkflowReport, error)`           | Load a JSON report from a file.                |
+| `auditlog.LoadReportFromReader(r io.Reader) (WorkflowReport, error)` | Load a JSON report from a reader.              |
+| `auditlog.LoadReportFromBytes(b []byte) (WorkflowReport, error)`     | Load a JSON report from bytes.                 |
 | `auditlog.ReadEvents(r io.Reader) ([]Event, error)`                  | Read NDJSON events (inverse of `WriteNDJSON`). |
-| `auditlog.ReplayEvents(events []Event) (WorkflowReport, error)`      | Reconstruct a report from a flat event stream.       |
-| `auditlog.NewReportIndex(r WorkflowReport) *ReportIndex`             | Precompute O(1) lookup maps over a report.           |
+| `auditlog.ReplayEvents(events []Event) (WorkflowReport, error)`      | Reconstruct a report from a flat event stream. |
+| `auditlog.NewReportIndex(r WorkflowReport) *ReportIndex`             | Precompute O(1) lookup maps over a report.     |
 
 ### Sentinel Errors
 
@@ -367,12 +367,12 @@ case errorfamily.Infrastructure:
 }
 ```
 
-| Family | Retry? | Exit | Sentinel errors                                              |
-|--------|--------|------|--------------------------------------------------------------|
-| Corruption | No | 65 | `ErrEventCountMismatch`, `ErrStepCountMismatch`, `ErrStatusDrift`, `ErrCountMismatch` |
-| Rejection | No | 1 | `ErrEmpty`, `ErrNoEvents`, `ErrOversizedLine`, `ErrWorkflowIDPathSep`, `ErrReplayNoEvents` |
-| Transient | Yes | 75 | `ErrReportLoadFailed` |
-| Infrastructure | No | 69 | `ErrRenderFailed`, `ErrExportWriteFailed` |
+| Family         | Retry? | Exit | Sentinel errors                                                                            |
+| -------------- | ------ | ---- | ------------------------------------------------------------------------------------------ |
+| Corruption     | No     | 65   | `ErrEventCountMismatch`, `ErrStepCountMismatch`, `ErrStatusDrift`, `ErrCountMismatch`      |
+| Rejection      | No     | 1    | `ErrEmpty`, `ErrNoEvents`, `ErrOversizedLine`, `ErrWorkflowIDPathSep`, `ErrReplayNoEvents` |
+| Transient      | Yes    | 75   | `ErrReportLoadFailed`                                                                      |
+| Infrastructure | No     | 69   | `ErrRenderFailed`, `ErrExportWriteFailed`                                                  |
 
 For custom registries, call `auditlog.RegisterClassifications(reg)` explicitly.
 

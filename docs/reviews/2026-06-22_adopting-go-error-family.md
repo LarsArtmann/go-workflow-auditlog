@@ -14,14 +14,14 @@
 
 auditlog currently has 9 public sentinel errors with no behavioral metadata. go-error-family provides a behavioral taxonomy (Family) that maps naturally onto these errors. The registration approach (`RegisterClassification`) adds classification without changing the public API, costing one zero-dependency import. The strongest argument against is over-engineering risk — but the taxonomy fits cleanly and the ALPHA status means now is the right time.
 
-| Factor | Assessment |
-|--------|-----------|
-| Go version compatibility | Identical (both `go 1.26.3`) |
-| Dependency cost | Root module = stdlib only in production code |
-| Breaking change risk | Zero (registration approach) |
-| Taxonomy fit | Natural — validation → Rejection/Corruption, I/O → Transient |
-| Timing | Correct — auditlog is ALPHA (v0.4.0), pre-stability |
-| Effort | ~1 hour (registration + tests + AGENTS.md update) |
+| Factor                   | Assessment                                                   |
+| ------------------------ | ------------------------------------------------------------ |
+| Go version compatibility | Identical (both `go 1.26.3`)                                 |
+| Dependency cost          | Root module = stdlib only in production code                 |
+| Breaking change risk     | Zero (registration approach)                                 |
+| Taxonomy fit             | Natural — validation → Rejection/Corruption, I/O → Transient |
+| Timing                   | Correct — auditlog is ALPHA (v0.4.0), pre-stability          |
+| Effort                   | ~1 hour (registration + tests + AGENTS.md update)            |
 
 ---
 
@@ -37,13 +37,13 @@ auditlog currently has 9 public sentinel errors with no behavioral metadata. go-
 
 ### What's missing
 
-| Gap | Impact |
-|-----|--------|
-| No retry hint on any error | Consumers can't decide whether to retry `LoadReport` failures |
-| No machine-readable error code | Consumers must string-match or `errors.Is` each sentinel individually |
-| No structured context | Error details are baked into the message string via `fmt.Errorf` verbs |
-| No severity/priority signal | All errors look the same to the caller |
-| I/O errors are opaque | `LoadReport`, all `Export*`, all `Write*` errors are untyped wrappers |
+| Gap                            | Impact                                                                 |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| No retry hint on any error     | Consumers can't decide whether to retry `LoadReport` failures          |
+| No machine-readable error code | Consumers must string-match or `errors.Is` each sentinel individually  |
+| No structured context          | Error details are baked into the message string via `fmt.Errorf` verbs |
+| No severity/priority signal    | All errors look the same to the caller                                 |
+| I/O errors are opaque          | `LoadReport`, all `Export*`, all `Write*` errors are untyped wrappers  |
 
 ---
 
@@ -53,13 +53,13 @@ auditlog currently has 9 public sentinel errors with no behavioral metadata. go-
 
 Five behavioral categories, each carrying actionable metadata:
 
-| Family | Retry? | Exit code | HTTP | Meaning |
-|--------|--------|-----------|------|---------|
-| Rejection | No | 1 | 400 | Caller's fault — bad input |
-| Conflict | No | 1 | 409 | State conflict — concurrent modification |
-| Transient | Yes | 75 | 503 | Temporary failure — retry with backoff |
-| Corruption | No | 65 | 500 | Data integrity violation |
-| Infrastructure | No | 69 | 503 | System-level failure — ops needed |
+| Family         | Retry? | Exit code | HTTP | Meaning                                  |
+| -------------- | ------ | --------- | ---- | ---------------------------------------- |
+| Rejection      | No     | 1         | 400  | Caller's fault — bad input               |
+| Conflict       | No     | 1         | 409  | State conflict — concurrent modification |
+| Transient      | Yes    | 75        | 503  | Temporary failure — retry with backoff   |
+| Corruption     | No     | 65        | 500  | Data integrity violation                 |
+| Infrastructure | No     | 69        | 503  | System-level failure — ops needed        |
 
 ### Key capabilities for auditlog
 
@@ -100,17 +100,17 @@ func init() {
 
 auditlog's errors map cleanly onto the Family taxonomy with zero ambiguity:
 
-| Error | Family | Reasoning |
-|-------|--------|-----------|
+| Error                   | Family     | Reasoning                                                              |
+| ----------------------- | ---------- | ---------------------------------------------------------------------- |
 | `ErrEventCountMismatch` | Corruption | Internal data integrity violation — the report is structurally invalid |
-| `ErrStepCountMismatch` | Corruption | Same — structural invalidity |
-| `ErrStatusDrift` | Corruption | Stored state disagrees with derived state |
-| `ErrCountMismatch` | Corruption | Aggregate disagrees with actual count |
-| `ErrEmpty` | Rejection | Caller sent empty input — caller's fault |
-| `ErrNoEvents` | Rejection | Caller sent input with no events — caller's fault |
-| `ErrOversizedLine` | Rejection | Input exceeds size limit — caller's fault |
-| `ErrWorkflowIDPathSep` | Rejection | Config validation failure — caller's fault |
-| `ErrReplayNoEvents` | Rejection | No events to replay — caller's fault |
+| `ErrStepCountMismatch`  | Corruption | Same — structural invalidity                                           |
+| `ErrStatusDrift`        | Corruption | Stored state disagrees with derived state                              |
+| `ErrCountMismatch`      | Corruption | Aggregate disagrees with actual count                                  |
+| `ErrEmpty`              | Rejection  | Caller sent empty input — caller's fault                               |
+| `ErrNoEvents`           | Rejection  | Caller sent input with no events — caller's fault                      |
+| `ErrOversizedLine`      | Rejection  | Input exceeds size limit — caller's fault                              |
+| `ErrWorkflowIDPathSep`  | Rejection  | Config validation failure — caller's fault                             |
+| `ErrReplayNoEvents`     | Rejection  | No events to replay — caller's fault                                   |
 
 No error requires a stretch or judgment call. The split is: **data integrity → Corruption, bad caller input → Rejection**.
 
@@ -152,11 +152,13 @@ Both libraries are `github.com/larsartmann/*`, both use Go 1.26.3, both follow i
 ### 8. Structured context replaces string interpolation
 
 Current approach bakes diagnostic data into the message string:
+
 ```go
 return fmt.Errorf("%w: got %d, want %d", ErrEventCountMismatch, r.EventCount, len(r.Events))
 ```
 
 With Family's `WithContext`, context is machine-readable:
+
 ```go
 return errorfamily.WrapCorruption(ErrEventCountMismatch, "event_count_mismatch",
     "event_count does not match len(events)").
@@ -180,7 +182,7 @@ If a consumer wants a different classification (e.g., they want `ErrOversizedLin
 
 ### 1. Library vs application boundary mismatch
 
-go-error-family's headline features — exit codes, HTTP status mapping, CLI handler (`HandleError`), diagnostic runner — live at the **application** boundary. auditlog is a **library**. It doesn't exit processes, serve HTTP, or run diagnostics. The Family metadata is metadata *for the consumer*, which means auditlog is doing work the consumer could do themselves.
+go-error-family's headline features — exit codes, HTTP status mapping, CLI handler (`HandleError`), diagnostic runner — live at the **application** boundary. auditlog is a **library**. It doesn't exit processes, serve HTTP, or run diagnostics. The Family metadata is metadata _for the consumer_, which means auditlog is doing work the consumer could do themselves.
 
 **Counter:** The library knows its error semantics better than any consumer. Only auditlog knows `ErrStatusDrift` is corruption, not a transient retry. Delegating classification to consumers guarantees misclassification.
 
@@ -200,7 +202,7 @@ auditlog has 9 public sentinels. A 5-family taxonomy with 4 interfaces, a Regist
 
 Only 9 of ~30+ error return paths have sentinels. The rest are `fmt.Errorf("render X: %w", err)` with no identity. Adopting Family for only the 9 sentinels means most errors remain unclassified — the taxonomy covers validation/parse errors but ignores the majority of I/O/export errors. This is worse than no taxonomy, because it creates a false impression of completeness.
 
-**Counter:** This is an argument for *full* adoption (wrap I/O errors too), not against adoption. The current state already has this inconsistency — sentinels exist for some paths, not others.
+**Counter:** This is an argument for _full_ adoption (wrap I/O errors too), not against adoption. The current state already has this inconsistency — sentinels exist for some paths, not others.
 
 ### 5. Global state mutation on import
 
@@ -236,7 +238,7 @@ Calling `ErrEventCountMismatch` "Corruption" is correct but not enriching — an
 
 auditlog already has domain-specific error vocabulary: `StepStatus.IsError()`, `StepInfo.HasError()`, `Event.HasError()`, `StepInfo.DeriveStatus()`. These are orthogonal to Family classification but create conceptual overlap — "error" means different things in different parts of the codebase. Adding Family introduces a third error vocabulary.
 
-**Counter:** No overlap exists. Domain error concepts (`HasError`, `DeriveStatus`) describe *workflow step outcomes*. Family classification describes *library operation failures*. They operate on different error populations and answer different questions.
+**Counter:** No overlap exists. Domain error concepts (`HasError`, `DeriveStatus`) describe _workflow step outcomes_. Family classification describes _library operation failures_. They operate on different error populations and answer different questions.
 
 ---
 
@@ -246,16 +248,17 @@ auditlog already has domain-specific error vocabulary: `StepStatus.IsError()`, `
 
 **Approach:** Keep all sentinels unchanged. Add `classify.go` with `RegisterClassification` calls.
 
-| Aspect | Rating |
-|--------|--------|
-| Breaking changes | None |
-| Lines of code | ~15 |
-| Public API impact | None |
-| Consumer benefit | `Classify()`, `IsRetryable()`, `ExitCode()` work on auditlog errors |
-| Reversibility | Delete one file |
-| Risk | Minimal — side-effect-on-import is the only concern |
+| Aspect            | Rating                                                              |
+| ----------------- | ------------------------------------------------------------------- |
+| Breaking changes  | None                                                                |
+| Lines of code     | ~15                                                                 |
+| Public API impact | None                                                                |
+| Consumer benefit  | `Classify()`, `IsRetryable()`, `ExitCode()` work on auditlog errors |
+| Reversibility     | Delete one file                                                     |
+| Risk              | Minimal — side-effect-on-import is the only concern                 |
 
 **Implementation:**
+
 ```go
 // classify.go
 package auditlog
@@ -281,38 +284,38 @@ func init() {
 
 **Approach:** Replace sentinels with `*errorfamily.Error`. All error returns become `family.NewCorruption(...)` or `family.NewRejection(...)`.
 
-| Aspect | Rating |
-|--------|--------|
-| Breaking changes | Yes — `errors.Is(err, ErrX)` semantics change |
-| Lines of code | ~50 (rewrite error definitions + all return sites) |
-| Public API impact | Errors change type; consumers must adapt |
-| Consumer benefit | Full structured errors with context, JSON, codes |
-| Reversibility | Difficult — touches every error return |
-| Risk | Moderate — `errors.Is` breakage, test rewrites |
+| Aspect            | Rating                                             |
+| ----------------- | -------------------------------------------------- |
+| Breaking changes  | Yes — `errors.Is(err, ErrX)` semantics change      |
+| Lines of code     | ~50 (rewrite error definitions + all return sites) |
+| Public API impact | Errors change type; consumers must adapt           |
+| Consumer benefit  | Full structured errors with context, JSON, codes   |
+| Reversibility     | Difficult — touches every error return             |
+| Risk              | Moderate — `errors.Is` breakage, test rewrites     |
 
 ### Strategy C: Consumer-side classification only
 
 **Approach:** auditlog changes nothing. Document recommended Family mappings in AGENTS.md. Consumers register classifications in their own code.
 
-| Aspect | Rating |
-|--------|--------|
-| Breaking changes | None |
-| Lines of code | 0 |
-| Public API impact | None |
-| Consumer benefit | Only for consumers who read the docs and register manually |
-| Reversibility | N/A (nothing to reverse) |
-| Risk | None — but minimal value |
+| Aspect            | Rating                                                     |
+| ----------------- | ---------------------------------------------------------- |
+| Breaking changes  | None                                                       |
+| Lines of code     | 0                                                          |
+| Public API impact | None                                                       |
+| Consumer benefit  | Only for consumers who read the docs and register manually |
+| Reversibility     | N/A (nothing to reverse)                                   |
+| Risk              | None — but minimal value                                   |
 
 ### Strategy D: Do not adopt
 
 **Approach:** Stay with plain sentinels. Document the status quo.
 
-| Aspect | Rating |
-|--------|--------|
-| Breaking changes | None |
-| Consumer benefit | None |
-| Reversibility | N/A |
-| Risk | None — but misses the opportunity to add behavioral metadata while it's cheap |
+| Aspect           | Rating                                                                        |
+| ---------------- | ----------------------------------------------------------------------------- |
+| Breaking changes | None                                                                          |
+| Consumer benefit | None                                                                          |
+| Reversibility    | N/A                                                                           |
+| Risk             | None — but misses the opportunity to add behavioral metadata while it's cheap |
 
 ---
 
@@ -344,15 +347,15 @@ This is where Family adds the most value: **retry decisions on I/O failures**. B
 
 ## Cost Estimate
 
-| Task | Effort | Files |
-|------|--------|-------|
-| Strategy A: Registration | ~30 min | `classify.go` (new), `go.mod`, `classify_test.go` (new) |
-| Update AGENTS.md | ~15 min | `AGENTS.md` |
-| Update FEATURES.md | ~10 min | `FEATURES.md` |
-| Tests: verify Classify() per sentinel | ~30 min | `classify_test.go` |
-| **Total (Strategy A)** | **~1.5 hours** | 3-4 files |
-| Strategy B: Full replacement | ~4-6 hours | ~10 files + all tests |
-| I/O error classification (follow-up) | ~3-4 hours | ~8 files |
+| Task                                  | Effort         | Files                                                   |
+| ------------------------------------- | -------------- | ------------------------------------------------------- |
+| Strategy A: Registration              | ~30 min        | `classify.go` (new), `go.mod`, `classify_test.go` (new) |
+| Update AGENTS.md                      | ~15 min        | `AGENTS.md`                                             |
+| Update FEATURES.md                    | ~10 min        | `FEATURES.md`                                           |
+| Tests: verify Classify() per sentinel | ~30 min        | `classify_test.go`                                      |
+| **Total (Strategy A)**                | **~1.5 hours** | 3-4 files                                               |
+| Strategy B: Full replacement          | ~4-6 hours     | ~10 files + all tests                                   |
+| I/O error classification (follow-up)  | ~3-4 hours     | ~8 files                                                |
 
 ---
 
@@ -383,20 +386,20 @@ This is where Family adds the most value: **retry decisions on I/O failures**. B
 
 ## Appendix: Full Error Inventory with Proposed Classification
 
-| # | Error | File | Current Pattern | Proposed Family | Strategy |
-|---|-------|------|-----------------|-----------------|----------|
-| 1 | `ErrEventCountMismatch` | report.go:22 | sentinel + `%w` wrap | Corruption | A (register) |
-| 2 | `ErrStepCountMismatch` | report.go:25 | sentinel + `%w` wrap | Corruption | A (register) |
-| 3 | `ErrStatusDrift` | report.go:29 | sentinel + `%w` wrap | Corruption | A (register) |
-| 4 | `ErrCountMismatch` | report.go:29 | sentinel + `%w` wrap | Corruption | A (register) |
-| 5 | `ErrEmpty` | ndjson.go:14 | direct return | Rejection | A (register) |
-| 6 | `ErrNoEvents` | ndjson.go:15 | direct return | Rejection | A (register) |
-| 7 | `ErrOversizedLine` | ndjson.go:16 | sentinel + `%w` wrap | Rejection | A (register) |
-| 8 | `ErrWorkflowIDPathSep` | plugin.go:50 | sentinel + `%w` wrap | Rejection | A (register) |
-| 9 | `ErrReplayNoEvents` | replay.go:10 | direct return | Rejection | A (register) |
-| 10 | `errUnknownEventType` | ndjson.go:18 | private sentinel | Rejection | A (register, private) |
-| 11 | `errUnknownPhase` | ndjson.go:19 | private sentinel | Rejection | A (register, private) |
-| 12+ | I/O/export errors | loader.go, plugin.go, all diagram files | `fmt.Errorf` only | Transient / Infrastructure | Follow-up |
+| #   | Error                   | File                                    | Current Pattern      | Proposed Family            | Strategy              |
+| --- | ----------------------- | --------------------------------------- | -------------------- | -------------------------- | --------------------- |
+| 1   | `ErrEventCountMismatch` | report.go:22                            | sentinel + `%w` wrap | Corruption                 | A (register)          |
+| 2   | `ErrStepCountMismatch`  | report.go:25                            | sentinel + `%w` wrap | Corruption                 | A (register)          |
+| 3   | `ErrStatusDrift`        | report.go:29                            | sentinel + `%w` wrap | Corruption                 | A (register)          |
+| 4   | `ErrCountMismatch`      | report.go:29                            | sentinel + `%w` wrap | Corruption                 | A (register)          |
+| 5   | `ErrEmpty`              | ndjson.go:14                            | direct return        | Rejection                  | A (register)          |
+| 6   | `ErrNoEvents`           | ndjson.go:15                            | direct return        | Rejection                  | A (register)          |
+| 7   | `ErrOversizedLine`      | ndjson.go:16                            | sentinel + `%w` wrap | Rejection                  | A (register)          |
+| 8   | `ErrWorkflowIDPathSep`  | plugin.go:50                            | sentinel + `%w` wrap | Rejection                  | A (register)          |
+| 9   | `ErrReplayNoEvents`     | replay.go:10                            | direct return        | Rejection                  | A (register)          |
+| 10  | `errUnknownEventType`   | ndjson.go:18                            | private sentinel     | Rejection                  | A (register, private) |
+| 11  | `errUnknownPhase`       | ndjson.go:19                            | private sentinel     | Rejection                  | A (register, private) |
+| 12+ | I/O/export errors       | loader.go, plugin.go, all diagram files | `fmt.Errorf` only    | Transient / Infrastructure | Follow-up             |
 
 ---
 
@@ -407,11 +410,13 @@ values classified via `RegisterClassifications`. `errors.Is` works unchanged.
 
 **Strategy B (Full Replacement)** would change sentinels from `errors.New(...)`
 to `errorfamily.NewError(family, message)` structs. This enables:
+
 - Structured context on each error (call site, timestamps, metadata)
 - JSON serialization of the error itself (`Error.JSON()`)
 - Automatic exit-code-aware CLI handler (`HandleError`)
 
 **Tradeoffs:**
+
 - `errors.Is` semantics change: `errorfamily.Error` uses code+family matching,
   not pointer identity. Existing consumer `errors.Is(err, sentinel)` checks may
   need updating.
@@ -421,6 +426,7 @@ to `errorfamily.NewError(family, message)` structs. This enables:
   different type.
 
 **Migration steps (if pursued):**
+
 1. Keep `RegisterClassifications` as-is (it still works with Error sentinels).
 2. Change each sentinel from `errors.New` to `errorfamily.NewError`.
 3. Update tests: `errors.Is` checks still work via the code+family path, but

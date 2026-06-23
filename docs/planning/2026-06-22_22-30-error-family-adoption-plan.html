@@ -32,94 +32,495 @@
         --solution: var(--color-blue);
         --warning: var(--color-yellow);
         --radius: 0px;
-        --font-heading: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas, monospace;
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
       }
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      html { scroll-behavior: smooth; }
-      section[id], [id] { scroll-margin-top: 60px; }
-      body { background: var(--surface); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
-      .top-bar { background: var(--text); color: var(--surface); padding: 0.6rem 2rem; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
-      .layout { display: flex; gap: 2.5rem; padding: 2rem; }
-      .sidebar { width: 220px; flex-shrink: 0; position: sticky; top: 1rem; align-self: flex-start; height: calc(100vh - 2rem); overflow-y: auto; display: none; }
-      .sidebar nav { display: flex; flex-direction: column; gap: 0; }
-      .sidebar .label { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border-strong); }
-      .sidebar a { font-size: 0.85rem; color: var(--text-muted); text-decoration: none; padding: 0.45rem 0.75rem; border-left: 2px solid transparent; transition: all 0.15s ease; font-weight: 500; }
-      .sidebar a:hover, .sidebar a.active { color: var(--accent); border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
-      .main { flex: 1; min-width: 0; }
-      h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.02em; }
-      h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 0.6rem; }
-      h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border-strong); display: flex; align-items: baseline; gap: 0.6rem; }
-      h2 .num { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); font-weight: 700; }
-      h3 { font-size: 1.1rem; margin: 0 0 0.4rem; font-weight: 700; }
-      h4 { font-size: 0.98rem; margin: 0 0 0.3rem; font-weight: 700; }
-      p { margin: 0 0 1rem; }
-      .hero { padding: 1.5rem 0 1.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-strong); }
-      .hero-badge { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--surface); background: var(--accent); padding: 0.3rem 0.7rem; margin-bottom: 0.9rem; }
-      .hero-subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 70ch; margin: 0; }
-      .hero-shapes { position: relative; height: 80px; margin-bottom: 1rem; }
-      .hero-shapes .circle { position: absolute; top: 0; left: 0; width: 56px; height: 56px; background: var(--problem); border-radius: 50%; }
-      .hero-shapes .square { position: absolute; top: 24px; left: 72px; width: 48px; height: 48px; background: var(--solution); }
-      .hero-shapes .tri { position: absolute; top: 8px; left: 140px; width: 0; height: 0; border-left: 28px solid transparent; border-right: 28px solid transparent; border-bottom: 48px solid var(--warning); }
-      .card { background: var(--surface-raised); border: 1px solid var(--border); padding: 1.1rem 1.3rem; margin-bottom: 1rem; border-left: 4px solid var(--border-strong); }
-      .card-problem { border-left-color: var(--problem); background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised)); }
-      .card-solution { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised)); }
-      .card-warning { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised)); }
-      .stat-grid, .scorecard { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin: 1rem 0 1.5rem; }
-      .stat-card, .score-card { background: var(--surface-raised); border: 1px solid var(--border); padding: 1.1rem 1rem; position: relative; }
-      .stat-card::before, .score-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--border-strong); }
-      .stat-bad::before, .score-bad::before { background: var(--problem); }
-      .stat-good::before, .score-good::before { background: var(--solution); }
-      .stat-warn::before, .score-warn::before { background: var(--warning); }
-      .stat-value, .score { font-family: var(--font-heading); font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
-      .stat-bad .stat-value, .score-bad .score { color: var(--problem); }
-      .stat-good .stat-value, .score-good .score { color: var(--solution); }
-      .stat-warn .stat-value, .score-warn .score { color: var(--warning); }
-      .stat-label, .score-card .label { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin-top: 0.5rem; }
-      table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.88rem; }
-      th { text-align: left; padding: 0.6rem 0.9rem; background: var(--surface-raised); color: var(--text-faint); font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--border-strong); }
-      td { padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-      tr:hover td { background: var(--surface-raised); }
-      .badge { display: inline-block; font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.18rem 0.5rem; border: 1px solid var(--border-strong); color: var(--text-muted); }
-      .badge-critical { color: var(--problem); border-color: var(--problem); }
-      .badge-high { color: var(--warning); border-color: var(--warning); }
-      .badge-medium { color: var(--accent); border-color: var(--accent); }
-      .badge-low { color: var(--text-muted); }
-      .badge-fixed { color: var(--solution); border-color: var(--solution); }
-      .badge-p0 { color: var(--problem); border-color: var(--problem); background: color-mix(in srgb, var(--problem) 15%, transparent); }
-      .badge-p1 { color: var(--warning); border-color: var(--warning); background: color-mix(in srgb, var(--warning) 15%, transparent); }
-      .badge-p2 { color: var(--accent); border-color: var(--accent); }
-      .badge-p3 { color: var(--text-muted); }
-      .badge-p4 { color: var(--text-faint); }
-      .callout { margin: 0.8rem 0 0; padding: 0.7rem 0.9rem; border-left: 3px solid var(--border-strong); background: color-mix(in srgb, var(--text) 5%, transparent); font-size: 0.9rem; }
-      .callout strong { display: inline-block; margin-right: 0.4rem; }
-      .callout-solution { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 10%, transparent); }
-      .callout-warning { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 10%, transparent); }
-      pre { background: var(--surface-sunken); border: 1px solid var(--border); padding: 1rem 1.2rem; margin: 1rem 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65; overflow-x: auto; }
-      code { font-family: var(--font-mono); }
-      .tok-keyword { color: var(--accent); }
-      .tok-type { color: var(--warning); }
-      .tok-string { color: var(--solution); }
-      .tok-comment { color: var(--text-faint); font-style: italic; }
-      .tok-func { color: #74a9ff; }
-      .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-faint); font-family: var(--font-mono); }
-      .svg-container { background: var(--surface-raised); border: 1px solid var(--border); padding: 1rem; margin: 1rem 0; overflow-x: auto; }
-      .svg-container svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
-      .tier-section { margin-bottom: 0.5rem; }
-      .tier-header { display: flex; align-items: center; gap: 0.75rem; margin: 1.5rem 0 0.5rem; padding: 0.6rem 1rem; background: var(--surface-raised); border: 1px solid var(--border); border-left: 4px solid var(--accent); }
-      .tier-header h3 { margin: 0; font-size: 1rem; }
-      .tier-header .tier-stat { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-faint); margin-left: auto; }
-      .migration-step { display: grid; grid-template-columns: 48px 1fr; gap: 1rem; margin: 1rem 0; padding: 1rem; background: var(--surface-raised); border: 1px solid var(--border); border-left: 3px solid var(--accent); }
-      .migration-num { font-family: var(--font-mono); font-weight: 800; font-size: 1.5rem; color: var(--accent); line-height: 1; }
-      .migration-content h4 { margin-bottom: 0.2rem; }
-      .migration-content p { margin-bottom: 0; color: var(--text-muted); font-size: 0.92rem; }
-      @media (min-width: 1024px) { .sidebar { display: block; } }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      section[id],
+      [id] {
+        scroll-margin-top: 60px;
+      }
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .top-bar {
+        background: var(--text);
+        color: var(--surface);
+        padding: 0.6rem 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .layout {
+        display: flex;
+        gap: 2.5rem;
+        padding: 2rem;
+      }
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+        height: calc(100vh - 2rem);
+        overflow-y: auto;
+        display: none;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .sidebar .label {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
+      .sidebar a {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 0.45rem 0.75rem;
+        border-left: 2px solid transparent;
+        transition: all 0.15s ease;
+        font-weight: 500;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+      }
+      .main {
+        flex: 1;
+        min-width: 0;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      h1 {
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        line-height: 1.1;
+        margin: 0 0 0.6rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+      }
+      h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h4 {
+        font-size: 0.98rem;
+        margin: 0 0 0.3rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
+      .hero {
+        padding: 1.5rem 0 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
+      .hero-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--surface);
+        background: var(--accent);
+        padding: 0.3rem 0.7rem;
+        margin-bottom: 0.9rem;
+      }
+      .hero-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        max-width: 70ch;
+        margin: 0;
+      }
+      .hero-shapes {
+        position: relative;
+        height: 80px;
+        margin-bottom: 1rem;
+      }
+      .hero-shapes .circle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 56px;
+        height: 56px;
+        background: var(--problem);
+        border-radius: 50%;
+      }
+      .hero-shapes .square {
+        position: absolute;
+        top: 24px;
+        left: 72px;
+        width: 48px;
+        height: 48px;
+        background: var(--solution);
+      }
+      .hero-shapes .tri {
+        position: absolute;
+        top: 8px;
+        left: 140px;
+        width: 0;
+        height: 0;
+        border-left: 28px solid transparent;
+        border-right: 28px solid transparent;
+        border-bottom: 48px solid var(--warning);
+      }
+      .card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+      .stat-grid,
+      .scorecard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .stat-card,
+      .score-card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1rem;
+        position: relative;
+      }
+      .stat-card::before,
+      .score-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border-strong);
+      }
+      .stat-bad::before,
+      .score-bad::before {
+        background: var(--problem);
+      }
+      .stat-good::before,
+      .score-good::before {
+        background: var(--solution);
+      }
+      .stat-warn::before,
+      .score-warn::before {
+        background: var(--warning);
+      }
+      .stat-value,
+      .score {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+      .stat-bad .stat-value,
+      .score-bad .score {
+        color: var(--problem);
+      }
+      .stat-good .stat-value,
+      .score-good .score {
+        color: var(--solution);
+      }
+      .stat-warn .stat-value,
+      .score-warn .score {
+        color: var(--warning);
+      }
+      .stat-label,
+      .score-card .label {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-faint);
+        margin-top: 0.5rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.88rem;
+      }
+      th {
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        background: var(--surface-raised);
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      td {
+        padding: 0.55rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      tr:hover td {
+        background: var(--surface-raised);
+      }
+      .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.18rem 0.5rem;
+        border: 1px solid var(--border-strong);
+        color: var(--text-muted);
+      }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-medium {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .badge-low {
+        color: var(--text-muted);
+      }
+      .badge-fixed {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
+      .badge-p0 {
+        color: var(--problem);
+        border-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 15%, transparent);
+      }
+      .badge-p1 {
+        color: var(--warning);
+        border-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 15%, transparent);
+      }
+      .badge-p2 {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .badge-p3 {
+        color: var(--text-muted);
+      }
+      .badge-p4 {
+        color: var(--text-faint);
+      }
+      .callout {
+        margin: 0.8rem 0 0;
+        padding: 0.7rem 0.9rem;
+        border-left: 3px solid var(--border-strong);
+        background: color-mix(in srgb, var(--text) 5%, transparent);
+        font-size: 0.9rem;
+      }
+      .callout strong {
+        display: inline-block;
+        margin-right: 0.4rem;
+      }
+      .callout-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 10%, transparent);
+      }
+      .callout-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 10%, transparent);
+      }
+      pre {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      .tok-keyword {
+        color: var(--accent);
+      }
+      .tok-type {
+        color: var(--warning);
+      }
+      .tok-string {
+        color: var(--solution);
+      }
+      .tok-comment {
+        color: var(--text-faint);
+        font-style: italic;
+      }
+      .tok-func {
+        color: #74a9ff;
+      }
+      .footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8rem;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+      .svg-container {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1rem;
+        margin: 1rem 0;
+        overflow-x: auto;
+      }
+      .svg-container svg {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+      }
+      .tier-section {
+        margin-bottom: 0.5rem;
+      }
+      .tier-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 1.5rem 0 0.5rem;
+        padding: 0.6rem 1rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--accent);
+      }
+      .tier-header h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+      .tier-header .tier-stat {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--text-faint);
+        margin-left: auto;
+      }
+      .migration-step {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+      }
+      .migration-num {
+        font-family: var(--font-mono);
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .migration-content h4 {
+        margin-bottom: 0.2rem;
+      }
+      .migration-content p {
+        margin-bottom: 0;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: block;
+        }
+      }
       @media (max-width: 768px) {
-        .layout { flex-direction: column; padding: 1rem; }
-        .top-bar { padding: 0.6rem 1rem; flex-wrap: wrap; gap: 0.3rem; }
-        .stat-grid, .scorecard { grid-template-columns: repeat(2, 1fr); }
-        .migration-step { grid-template-columns: 1fr; }
+        .layout {
+          flex-direction: column;
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 0.6rem 1rem;
+          flex-wrap: wrap;
+          gap: 0.3rem;
+        }
+        .stat-grid,
+        .scorecard {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .migration-step {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -157,7 +558,8 @@
           <h1>Adopting go-error-family in go-workflow-auditlog</h1>
           <p class="hero-subtitle">
             41 tasks across 5 Pareto tiers. From 1% effort delivering 51% value (core registration)
-            through full I/O error classification and polish. Each task &le; 12 minutes. Total ~3.7 hours.
+            through full I/O error classification and polish. Each task &le; 12 minutes. Total ~3.7
+            hours.
           </p>
         </div>
 
@@ -203,11 +605,11 @@
         <div class="card card-solution">
           <h4>Strategy: Registration (Zero-Breakage)</h4>
           <p>
-            Keep all 9 public sentinels + 2 private sentinels unchanged. Add <code>classify.go</code>
-            with <code>RegisterClassifications</code> mapping each to a behavioral <code>Family</code>.
-            Consumers immediately inherit <code>Classify()</code>, <code>IsRetryable()</code>,
-            <code>ExitCode()</code> on every auditlog error. No breaking changes. Reversible by
-            deleting one file.
+            Keep all 9 public sentinels + 2 private sentinels unchanged. Add
+            <code>classify.go</code> with <code>RegisterClassifications</code> mapping each to a
+            behavioral <code>Family</code>. Consumers immediately inherit <code>Classify()</code>,
+            <code>IsRetryable()</code>, <code>ExitCode()</code> on every auditlog error. No breaking
+            changes. Reversible by deleting one file.
           </p>
         </div>
 
@@ -229,25 +631,36 @@
               <td><span class="badge badge-critical">Tier 1</span></td>
               <td>1% (~16 min)</td>
               <td>51%</td>
-              <td>Dependency + classify.go + build check. Core registration delivers all classification capability.</td>
+              <td>
+                Dependency + classify.go + build check. Core registration delivers all
+                classification capability.
+              </td>
             </tr>
             <tr>
               <td><span class="badge badge-high">Tier 2</span></td>
               <td>4% (~33 min)</td>
               <td>64%</td>
-              <td>Test suite proving every sentinel maps to the correct Family. Prevents regressions.</td>
+              <td>
+                Test suite proving every sentinel maps to the correct Family. Prevents regressions.
+              </td>
             </tr>
             <tr>
               <td><span class="badge badge-medium">Tier 3</span></td>
               <td>20% (~62 min)</td>
               <td>80%</td>
-              <td>AGENTS.md documentation + quality gates (lint, vet, coverage). Ship-ready Strategy A.</td>
+              <td>
+                AGENTS.md documentation + quality gates (lint, vet, coverage). Ship-ready Strategy
+                A.
+              </td>
             </tr>
             <tr>
               <td><span class="badge badge-low">Tier 4</span></td>
               <td>50% (~105 min)</td>
               <td>90%</td>
-              <td>I/O error classification: loader, export, diagram, table, tree, HTML errors get sentinels + Family.</td>
+              <td>
+                I/O error classification: loader, export, diagram, table, tree, HTML errors get
+                sentinels + Family.
+              </td>
             </tr>
             <tr>
               <td><span class="badge badge-low">Tier 5</span></td>
@@ -260,9 +673,10 @@
 
         <div class="callout callout-solution">
           <strong>The 1% insight:</strong>
-          Tasks 1-4 alone (16 minutes) deliver more value than the remaining 37 tasks combined.
-          The <code>init()</code> registration in <code>classify.go</code> is the single highest-leverage
-          change in the entire plan. Everything else is verification, documentation, and incremental value.
+          Tasks 1-4 alone (16 minutes) deliver more value than the remaining 37 tasks combined. The
+          <code>init()</code> registration in <code>classify.go</code> is the single
+          highest-leverage change in the entire plan. Everything else is verification,
+          documentation, and incremental value.
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -271,12 +685,22 @@
 
         <div class="card card-problem">
           <h4>These 4 tasks block everything else</h4>
-          <p>Without the dependency and classify.go, no other task can start. Without a clean build, no test can pass.</p>
+          <p>
+            Without the dependency and classify.go, no other task can start. Without a clean build,
+            no test can pass.
+          </p>
         </div>
 
         <table>
           <thead>
-            <tr><th>#</th><th>Priority</th><th>Task</th><th>Impact</th><th>Effort</th><th>Files</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Priority</th>
+              <th>Task</th>
+              <th>Impact</th>
+              <th>Effort</th>
+              <th>Files</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
@@ -290,7 +714,11 @@
             <tr>
               <td>2</td>
               <td><span class="badge badge-p0">P0</span></td>
-              <td>Create <code>classify.go</code>: package doc + <code>init()</code> with <code>RegisterClassifications</code> for all 9 public + 2 private sentinels (4→Corruption, 5→Rejection, 2→Rejection private)</td>
+              <td>
+                Create <code>classify.go</code>: package doc + <code>init()</code> with
+                <code>RegisterClassifications</code> for all 9 public + 2 private sentinels
+                (4→Corruption, 5→Rejection, 2→Rejection private)
+              </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>10 min</td>
               <td><code>classify.go</code> (new)</td>
@@ -298,7 +726,9 @@
             <tr>
               <td>3</td>
               <td><span class="badge badge-p0">P0</span></td>
-              <td><code>go mod tidy</code> to resolve dependency tree + verify <code>go.sum</code></td>
+              <td>
+                <code>go mod tidy</code> to resolve dependency tree + verify <code>go.sum</code>
+              </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>2 min</td>
               <td><code>go.mod</code>, <code>go.sum</code></td>
@@ -341,13 +771,23 @@
 
         <table>
           <thead>
-            <tr><th>#</th><th>Priority</th><th>Task</th><th>Impact</th><th>Effort</th><th>Files</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Priority</th>
+              <th>Task</th>
+              <th>Impact</th>
+              <th>Effort</th>
+              <th>Files</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
               <td>5</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Create <code>classify_test.go</code>: table-driven <code>Classify()</code> test for all 9 public sentinels (4 Corruption + 5 Rejection)</td>
+              <td>
+                Create <code>classify_test.go</code>: table-driven <code>Classify()</code> test for
+                all 9 public sentinels (4 Corruption + 5 Rejection)
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>10 min</td>
               <td><code>classify_test.go</code> (new)</td>
@@ -355,7 +795,10 @@
             <tr>
               <td>6</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Test <code>IsRetryable()</code> returns <code>false</code> for all Corruption/Rejection sentinels (non-retryable by design)</td>
+              <td>
+                Test <code>IsRetryable()</code> returns <code>false</code> for all
+                Corruption/Rejection sentinels (non-retryable by design)
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>5 min</td>
               <td><code>classify_test.go</code></td>
@@ -363,7 +806,10 @@
             <tr>
               <td>7</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Test <code>ExitCode()</code> returns correct BSD sysexits code per Family (Corruption=70, Rejection=64)</td>
+              <td>
+                Test <code>ExitCode()</code> returns correct BSD sysexits code per Family
+                (Corruption=70, Rejection=64)
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
               <td><code>classify_test.go</code></td>
@@ -371,7 +817,10 @@
             <tr>
               <td>8</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Test <code>Classify()</code> traverses <code>fmt.Errorf("%w")</code> wrapping chains (proves auditlog's existing wrapped errors classify correctly)</td>
+              <td>
+                Test <code>Classify()</code> traverses <code>fmt.Errorf("%w")</code> wrapping chains
+                (proves auditlog's existing wrapped errors classify correctly)
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>8 min</td>
               <td><code>classify_test.go</code></td>
@@ -393,7 +842,14 @@
 
         <table>
           <thead>
-            <tr><th>#</th><th>Priority</th><th>Task</th><th>Impact</th><th>Effort</th><th>Files</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Priority</th>
+              <th>Task</th>
+              <th>Impact</th>
+              <th>Effort</th>
+              <th>Files</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
@@ -407,7 +863,10 @@
             <tr>
               <td>11</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Update AGENTS.md: add "Error Classification" subsection to Gotchas with full sentinel→Family mapping table</td>
+              <td>
+                Update AGENTS.md: add "Error Classification" subsection to Gotchas with full
+                sentinel→Family mapping table
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>8 min</td>
               <td><code>AGENTS.md</code></td>
@@ -415,7 +874,10 @@
             <tr>
               <td>12</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Update AGENTS.md: add <code>init()</code> side-effect note (global <code>DefaultRegistry</code> mutation on import)</td>
+              <td>
+                Update AGENTS.md: add <code>init()</code> side-effect note (global
+                <code>DefaultRegistry</code> mutation on import)
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>3 min</td>
               <td><code>AGENTS.md</code></td>
@@ -439,7 +901,10 @@
             <tr>
               <td>15</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Check coverage: <code>go test -race -coverprofile=cover.out ./...</code> — confirm &ge;93% maintained</td>
+              <td>
+                Check coverage: <code>go test -race -coverprofile=cover.out ./...</code> — confirm
+                &ge;93% maintained
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
               <td>—</td>
@@ -450,8 +915,8 @@
         <div class="callout callout-solution">
           <strong>Milestone:</strong>
           After task 15, Strategy A (registration) is ship-ready. The library now exports
-          classifiable errors, the documentation reflects it, and all quality gates pass.
-          Tiers 4-5 are incremental value.
+          classifiable errors, the documentation reflects it, and all quality gates pass. Tiers 4-5
+          are incremental value.
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -470,7 +935,12 @@
         <h3>New Sentinels</h3>
         <table>
           <thead>
-            <tr><th>Sentinel</th><th>Family</th><th>Retry?</th><th>Scope</th></tr>
+            <tr>
+              <th>Sentinel</th>
+              <th>Family</th>
+              <th>Retry?</th>
+              <th>Scope</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
@@ -497,7 +967,14 @@
         <h3>Tasks</h3>
         <table>
           <thead>
-            <tr><th>#</th><th>Priority</th><th>Task</th><th>Impact</th><th>Effort</th><th>Files</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Priority</th>
+              <th>Task</th>
+              <th>Impact</th>
+              <th>Effort</th>
+              <th>Files</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
@@ -511,7 +988,10 @@
             <tr>
               <td>17</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Wrap <code>LoadReport</code> / <code>LoadReportFromReader</code> / <code>LoadReportFromBytes</code> errors with <code>ErrReportLoadFailed</code></td>
+              <td>
+                Wrap <code>LoadReport</code> / <code>LoadReportFromReader</code> /
+                <code>LoadReportFromBytes</code> errors with <code>ErrReportLoadFailed</code>
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>8 min</td>
               <td><code>loader.go</code></td>
@@ -527,7 +1007,10 @@
             <tr>
               <td>19</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Wrap <code>writeToFile</code> errors (create/flush/close/rename) with <code>ErrExportWriteFailed</code></td>
+              <td>
+                Wrap <code>writeToFile</code> errors (create/flush/close/rename) with
+                <code>ErrExportWriteFailed</code>
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>10 min</td>
               <td><code>plugin.go</code></td>
@@ -535,7 +1018,10 @@
             <tr>
               <td>20</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Add sentinel <code>ErrRenderFailed</code> for diagram/table/tree/HTML exports (define in a shared location)</td>
+              <td>
+                Add sentinel <code>ErrRenderFailed</code> for diagram/table/tree/HTML exports
+                (define in a shared location)
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>3 min</td>
               <td><code>report.go</code> or <code>types.go</code></td>
@@ -543,7 +1029,9 @@
             <tr>
               <td>21</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap <code>mermaid.go</code> render+write errors with <code>ErrRenderFailed</code></td>
+              <td>
+                Wrap <code>mermaid.go</code> render+write errors with <code>ErrRenderFailed</code>
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
               <td><code>mermaid.go</code></td>
@@ -551,7 +1039,9 @@
             <tr>
               <td>22</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap <code>plantuml.go</code> render+write errors with <code>ErrRenderFailed</code></td>
+              <td>
+                Wrap <code>plantuml.go</code> render+write errors with <code>ErrRenderFailed</code>
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
               <td><code>plantuml.go</code></td>
@@ -559,7 +1049,9 @@
             <tr>
               <td>23</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap <code>graphviz.go</code> render+write errors with <code>ErrRenderFailed</code></td>
+              <td>
+                Wrap <code>graphviz.go</code> render+write errors with <code>ErrRenderFailed</code>
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
               <td><code>graphviz.go</code></td>
@@ -575,7 +1067,9 @@
             <tr>
               <td>25</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap <code>table.go</code> render+write errors with <code>ErrRenderFailed</code></td>
+              <td>
+                Wrap <code>table.go</code> render+write errors with <code>ErrRenderFailed</code>
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
               <td><code>table.go</code></td>
@@ -583,7 +1077,9 @@
             <tr>
               <td>26</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap <code>tree.go</code> render+write errors with <code>ErrRenderFailed</code></td>
+              <td>
+                Wrap <code>tree.go</code> render+write errors with <code>ErrRenderFailed</code>
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
               <td><code>tree.go</code></td>
@@ -591,7 +1087,10 @@
             <tr>
               <td>27</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap <code>html_render.go</code> render+write errors with <code>ErrRenderFailed</code></td>
+              <td>
+                Wrap <code>html_render.go</code> render+write errors with
+                <code>ErrRenderFailed</code>
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
               <td><code>html_render.go</code></td>
@@ -599,7 +1098,12 @@
             <tr>
               <td>28</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Register all new I/O sentinels in <code>classify.go</code>: <code>ErrReportLoadFailed</code>→Transient, <code>ErrExportWriteFailed</code>→Infrastructure, <code>ErrRenderFailed</code>→Infrastructure</td>
+              <td>
+                Register all new I/O sentinels in <code>classify.go</code>:
+                <code>ErrReportLoadFailed</code>→Transient,
+                <code>ErrExportWriteFailed</code>→Infrastructure,
+                <code>ErrRenderFailed</code>→Infrastructure
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>5 min</td>
               <td><code>classify.go</code></td>
@@ -607,7 +1111,9 @@
             <tr>
               <td>29</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Test: <code>Classify(ErrReportLoadFailed)</code> returns <code>Transient</code></td>
+              <td>
+                Test: <code>Classify(ErrReportLoadFailed)</code> returns <code>Transient</code>
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>5 min</td>
               <td><code>classify_test.go</code></td>
@@ -615,7 +1121,10 @@
             <tr>
               <td>30</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Test: <code>Classify(ErrExportWriteFailed)</code> returns <code>Infrastructure</code></td>
+              <td>
+                Test: <code>Classify(ErrExportWriteFailed)</code> returns
+                <code>Infrastructure</code>
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>5 min</td>
               <td><code>classify_test.go</code></td>
@@ -623,7 +1132,10 @@
             <tr>
               <td>31</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Test: <code>IsRetryable(ErrReportLoadFailed)</code> returns <code>true</code> — proves retry hint works</td>
+              <td>
+                Test: <code>IsRetryable(ErrReportLoadFailed)</code> returns <code>true</code> —
+                proves retry hint works
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>3 min</td>
               <td><code>classify_test.go</code></td>
@@ -631,7 +1143,9 @@
             <tr>
               <td>32</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Test: <code>IsRetryable(ErrExportWriteFailed)</code> returns <code>false</code></td>
+              <td>
+                Test: <code>IsRetryable(ErrExportWriteFailed)</code> returns <code>false</code>
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>3 min</td>
               <td><code>classify_test.go</code></td>
@@ -653,13 +1167,23 @@
 
         <table>
           <thead>
-            <tr><th>#</th><th>Priority</th><th>Task</th><th>Impact</th><th>Effort</th><th>Files</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Priority</th>
+              <th>Task</th>
+              <th>Impact</th>
+              <th>Effort</th>
+              <th>Files</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
               <td>34</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Update AGENTS.md: add I/O sentinel inventory + classification mapping (extend the table from task 11)</td>
+              <td>
+                Update AGENTS.md: add I/O sentinel inventory + classification mapping (extend the
+                table from task 11)
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>8 min</td>
               <td><code>AGENTS.md</code></td>
@@ -667,7 +1191,10 @@
             <tr>
               <td>35</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Update <code>FEATURES.md</code>: add "Error Classification" feature row with DONE status</td>
+              <td>
+                Update <code>FEATURES.md</code>: add "Error Classification" feature row with DONE
+                status
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
               <td><code>FEATURES.md</code></td>
@@ -683,7 +1210,10 @@
             <tr>
               <td>37</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Update <code>example/main.go</code>: demonstrate <code>errorfamily.Classify</code> on a workflow error (shows consumer value)</td>
+              <td>
+                Update <code>example/main.go</code>: demonstrate
+                <code>errorfamily.Classify</code> on a workflow error (shows consumer value)
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>10 min</td>
               <td><code>example/main.go</code></td>
@@ -699,7 +1229,10 @@
             <tr>
               <td>39</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Run coverage: <code>go test -race -coverprofile=cover.out ./...</code> — final report</td>
+              <td>
+                Run coverage: <code>go test -race -coverprofile=cover.out ./...</code> — final
+                report
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
               <td>—</td>
@@ -707,7 +1240,9 @@
             <tr>
               <td>40</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Run <code>art-dupl --semantic --sort total-tokens -t 15</code> on all changed files</td>
+              <td>
+                Run <code>art-dupl --semantic --sort total-tokens -t 15</code> on all changed files
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
               <td>—</td>
@@ -728,119 +1263,1032 @@
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <div class="svg-container">
-          <?xml version="1.0" encoding="utf-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" data-d2-version="v0.7.1" preserveAspectRatio="xMinYMin meet" viewBox="0 0 1401 3312"><svg class="d2-250480077 d2-svg" width="1401" height="3312" viewBox="-134 -141 1401 3312"><rect x="-134.000000" y="-141.000000" width="1401.000000" height="3312.000000" rx="0.000000" fill="#FFFFFF" class=" fill-N7" stroke-width="0" /><style type="text/css"><![CDATA[
-.d2-250480077 .text {
-	font-family: "d2-250480077-font-regular";
-}
-@font-face {
-	font-family: d2-250480077-font-regular;
-	src: url("data:application/font-woff;base64,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");
-}
-.d2-250480077 .text-bold {
-	font-family: "d2-250480077-font-bold";
-}
-@font-face {
-	font-family: d2-250480077-font-bold;
-	src: url("data:application/font-woff;base64,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");
-}
-.d2-250480077 .text-italic {
-	font-family: "d2-250480077-font-italic";
-}
-@font-face {
-	font-family: d2-250480077-font-italic;
-	src: url("data:application/font-woff;base64,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");
-}]]></style><style type="text/css"><![CDATA[.shape {
-  shape-rendering: geometricPrecision;
-  stroke-linejoin: round;
-}
-.connection {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.blend {
-  mix-blend-mode: multiply;
-  opacity: 0.5;
-}
+          <?xml version="1.0" encoding="utf-8"?><svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            data-d2-version="v0.7.1"
+            preserveAspectRatio="xMinYMin meet"
+            viewBox="0 0 1401 3312"
+          >
+            <svg
+              class="d2-250480077 d2-svg"
+              width="1401"
+              height="3312"
+              viewBox="-134 -141 1401 3312"
+            >
+              <rect
+                x="-134.000000"
+                y="-141.000000"
+                width="1401.000000"
+                height="3312.000000"
+                rx="0.000000"
+                fill="#FFFFFF"
+                class="fill-N7"
+                stroke-width="0"
+              />
+              <style type="text/css">
+                <![CDATA[
+                .d2-250480077 .text {
+                	font-family: "d2-250480077-font-regular";
+                }
+                @font-face {
+                	font-family: d2-250480077-font-regular;
+                	src: url("data:application/font-woff;base64,d09GRgABAAAAABaoAAoAAAAAIbQAAguFAAAAAAAAAAAAAAAAAAAAAAAAAABPUy8yAAAA9AAAAGAAAABgXd/Vo2NtYXAAAAFUAAAA6wAAAVR0VgXSZ2x5ZgAAAkAAAA8tAAAVCFQJzgNoZWFkAAARcAAAADYAAAA2G4Ue32hoZWEAABGoAAAAJAAAACQKhAYGaG10eAAAEcwAAADqAAABEINEDERsb2NhAAASuAAAAIoAAACKuBCyqG1heHAAABNEAAAAIAAAACAAXAD2bmFtZQAAE2QAAAMjAAAIFAbDVU1wb3N0AAAWiAAAAB0AAAAg/9EAMgADAgkBkAAFAAACigJYAAAASwKKAlgAAAFeADIBIwAAAgsFAwMEAwICBGAAAvcAAAADAAAAAAAAAABBREJPAEAAIP//Au7/BgAAA9gBESAAAZ8AAAAAAeYClAAAACAAA3iclM+7TppxAMbh5ytQSqGUAi0996O0BQqlZwTPxkFNjDEuzo7GK/A2vA4XXdWol+Fi9Dow+Zt8UXbf+Rl+LyIpEQrS0TJ6YmlFsa++aev4oeenvqF5C5asWLVu07bduFrfa1ZC4M63xv6XQeIXE79mw5adex+u1WSUlOVk5cNNGIVROA9n4TSchONwFA7DwVXjcv+im9Q9ZJFpHQNDM/r+m9QdN/32x1//THkkJS3jsawncp7KK3im6LmSF8oqql56pea1N956570PPvokVvdZw5fkc1NL23cTZs1xCwAA//8BAAD//96OMXoAeJyMeHt0G+WZ/vd9ki3bki+yLmPJus7YM7pL1mg0siRLtm6WL7JsKY5vsZ04duxcSwIhv0BI6I+QpMBSUWjhQIC0cE7hLGzp9pwAJ4c9u2TJOtsC254ulLZJ2f7hciBLF6+6lItHe2YkOzZs9+wfPpoz/ua9PM/7Pu87A6rABACIQY8AEagFjaAZqACg5WZ5u5miCAlLsyyBiVgKyiUT8LdcAcI+n9jvF3fEPoodP3UKjp9Ej6wdCJ5eXHxj5tgx7q9WPuC88K0PAAIiAJAeFUAtkAOgkNAUSVJEdbVIQSsIipD81PiGsdnUJG40/fr6zPWJyB+j8Bvz8+zBzs6D3CQqrN2yvAwAABD4SkXUis4DPQBVOEkyPr+f9qoxCUkSeHW1SqlW014/i1VXw1zumwODp/PhHTqnNmaLTNPeqYi73+ii5mQjj+3f91iuw+TX4T2353LHYxbc5/QCABCYBAD5UAHU8HHSctqrVimrCYr2+hkfSRCTzz721JPfHR249dZbbx1AhefPP/k3iftPnLhXiG0SAHgdFYBUwExlVtEqQmVWTcI7uPc++wx2oELqrd6PezfO/lLA4+ZZuXDy889RIXU9xf16I18SnQemv5Qvny5DMLS8uhru2H5mcOjcWGJa59LEvLE55vBeoltx/7vGvZWUaYNf29Zze+7EQ6rmv05yN8z2SizgRVTgOaLltHwyzwNeifFnqACqyvfNqsk8NKLC2su9YD0H5EQFoBD+r8BokmTktJwQUYRarZJPbv/3XrFIkt3+ca9YLEEFbv6cd78P5tdugU+e7Vjycc8DJOS3gM6Dxq8wysNeTXn9Auy4QCwczJ3q7T2Vy59Mp0/mQ2OefePj+zzjsm2P79376MjIo3v3Pr6tL348d8eDD96ROx4HG3xKBU6UFT4FQgm5fIPSS/2HImcOHJjbnh/bPoMKbaPpxXnuS5juSfWyGzZMqAAaALbJhkRBiDabeTO+FBpO/HDmqWOHMrlc5hAqECOJwWk593uo4j6CE9HuHl8ZN1upCP+IzgOnkDHFCjXL+EiSolxoK8N83hhmQDwasCl5u91LzNI9aX2HccbYZWVmQqF5wmnoc7Fxs1c7TXa1+edljCPY7gx5cIuuwVpvi3m8Waezza83+xxGq1ZqaXL2dPhGvQACHQDwS1QAEj4rgjGrCPnvr8D3r6D+VGrtYjnWsVIRuVCB1wGBHTktL/eYX7isrobx+P5I3pq0O1LW4cg+mf/EXvhN7q7sFElOZeE93Km9J/wACmSIUAHUA0CLaIVajdF+P6ugRb/4xcTe5laFuFkn3zv6L6jAPRVcCAYXgnBOqEEMAPQ5KgDzV57bZIEQlbVEIvrB/duTtcpasbRFOjU4JWuRiWub65LD5+Z31zbWiCXNNbtQgXuC2ccw+31wgXvCt798tXYLvJ/sI8k+kjtarkn4Y7gKtKANAAznS5L1CXRIKIEclZzgHVJ86wlN+HrXyLefkNsttn69Cd8dnBhOSET4iJqIEMd3eWV9PcOjcmOAMCk71daDU9w7QZ0thhvPNobd1naAQK5UhF+gZaCodDlFSAg5rZKUfZX7oNwGEpVaDa14n0kkieWQOWuZnQvNpsLZUNLYTZiiMrPei5ZfH9dTZw7nb48kFyeHd+Omkg4rc+kqFeGP4CrP+1/WEl46m7uXwj37I56kxqZy6x1JKh/Hg+o287AsfGQ4dySMY35Fi3s0kF/UK1m9me8Rd6kI31vPoYyZYJxi6HWwWGbD0Z+nDoV2sbaISZxPSES6QU132NhpoKJkSnbv8eytEYM2f2kt0KmzJuOcDnPnA2O7ARLi/2e4ClqAcUsGfDOaN4RfZBaggljPvkh0np1egIh7pWosRYRa9cbsT6E42kmPyLqOZIePRE4s1WtqMztUcr/SAMn+TFbAyQAAjKJflmcfwbCMr4ITgasEnd4ZiyX7MFtTc6susbgIn4lUZfrHaiVR2Uwmzk0DAETAWTLBG3AVdIAukNmoIobc9CMYpVVEWesInCpzUOFc5L0pfYqKxuBk+cx/TdxCmps1uKKF8m7rULbVPz8vxzzDXgqvb27vmBkdDR8atHWF7fZwlz+1jXZvazA3aVsG3k9EjZ1qsdSiM7rqxcqEnRmySaqiTYzRN2iVS1uVmIHtcg664Y+jDBMOM0yUO9dF4lqxWGFTUS4BmxwA8F20XFHT9RqVE/JyfcpzORGR8WZ6cw5Pe6gdLb8+b3bvmuZ+Bq2JCNnOXQClEkgCAH6CLiISdAMAqkHPCbBhewUtA1l53tAKWqIgKIkqNyJ6e+qZVycfnELLnAGCy9y1D/fdXXmmVAS/QsugsYyxIE+VQnjeZc011IolEmmNWtbJoD1rjyjkEEbE4rIv9AlcFXRFTvNSwrOxJRvJxm8uIRGZBu2BaCM55Bjoyzlc/kTO4fYn4EqKcHc4rL71FAe4C5WfdazgagWrio/NWCUkImJoAyzB2BasKjX/H3AVNILW/3E+btQIbAwtRqOLofCeaHRPOJrJRCNDQ5V+DR/JDR8JJxbz25aWtuUXgaA5NPwCrlb69WZ0QiWSFKZSbNYcPlJz1j4zF5oN4HEcHRMkJ9pmjryJfhLQWc4ezt0eMWhHn4XVWzSH1wUavrfup4phBfMbxc/SctFmXYBnxPoBW1kcus2oJvb2hjC8+eK4ziKIg17vWsvA6pvKsF47M3C1srWVs6koWxloTdqqx5pkykZjXANXxl3+urRY7I1wlb1SVyrCe+AqsAl1tHkmCyP5KxO5PJB/7pshrKaE3eMx0614zDaRdQ7pLBq/yWU3eFqJhNOalVE6VmN2GjU4VldvZqyhrAnzKVpsOkyvktabWRcVswj+W0pFmESH+Hkn1DHBsCwtiM1GPX801JUerEvec4/ZVm+QNSndssk0rI9UnTsX51adHbXiiEQq2BooFeFbcIWvuy09Ia9I8fuZdN7uIUM4jws+KNs1DX3cu4kIZYcTnHbQ4gGQ70H4T3Dl6/P60o9Gd0gxqViK1e0YeQGucDfa0gSRboNKTsvnAQC6CFf+b/P66bPb0jUNEnFNU+3A8GCtvEZc0yjpHfr/86naxlpxTVNdAq5wf8DjOB7HoWbTlRZWEYn29iTBfQkgaAAAvgRXgAYAmqVorOKKpSUYUXnPkEgann54okfaUi+WqqWh7Q8/NdFbr20Q17fIYtwH+xU2pdKm2P/Jnw6rHSqVHTss4CgruQUMWjfXBMtugaMBTTbpZU01ylqrv1F6eXS3VCMVS5V1Y8Mvy93Jn1eLe1BVyNkG/8D9pzGNm9MmWL+26hl08jPCVCqiHDoPpIABPQAolLwAlZtOUel0dvOQq5ao+RMsXb6SkPw4oMrcCtevyRuccb253WEPTXnbg7gSI5POroQj3m4adxncjRlFJ4VHWtV4xtI+87cDfjyq80wQuAeh1qDB0GPX2/1rV905xpHwY9ZMmyNlTQftiUCrd5ay7gp0H/NhpppEXbsOt15iYzqNbZ7RdQEEHKUifAPdB6Tr1eurBLxZnz7befDgztmDB2cDiUQgkEzKXrzw/eee+/6FF2OnHnjgzjsfeOCUgHkWAPgyOinMAH51YPh85bQq+53bHD3a6OkEfIepwZrWriTKfdsGAPxHdB/PEc1EUEWyqJuQ+f00rbLsPJMKd1kSOrdlKjKxJ350UBvQvNqx86GjNJtymtwOZnE0fOfZLBL3Agi0pSL8O3Tf17WAYDZeSG664PWR93RjcI/Jph8KBPupicFEFg/Rlrje0T4ZyB/o9gWHA7MylvAbXN0M2WmKmvxmt79N7yOco5lgv1Jcn48Fcg6AeP2C/4pOglq+e1ma3xb48lUwZgbyOBCqpWUxFMu0DTT3b1C+Y2xs9VVtWoM5MM73kh8+xt0We4nHRVMqwn9AJyvb2M0chNAVZhUhuTlGPhycN1v0g4HQSH/E7NY7VDD6qRxz6dkJf9eczG/265zZeKxfqdBBuvc1WYN9PJnc5S3ru6dUhFcF7i0AQJwvzLIj0dc3zJsLLawypg01vV3u7pAvMh9MfiPqG2h1KQIGZ78bGYap/G7fKExbHNNzmWikj3sh8a09d5/vpfQ01kofW2i3757r2uET9ixrqQiX0X3ACBygU8i13DfM1sZRlRVbtPl9UlQReGHyfB6eYQnWQPg9OTq/S2dR6r0melpuIoKMI2RNVAWSnqyLpLMy57DX1tPRJNakvR391p395pC7Udzk6LK7h5xwSd9NuGMBN+kluCvRDquPbNakHEyyjJWlVIR/v46VYr1vy91eYci/ZUAKsR8NhUy9xpp0l6tnnM5oXUrWwO9ohmFLbrdvlI7OdyYPwdcifRbn9K7M2p8pnQ/T+f7fHtIhgJQ4t3j3+cr7ek+pCF4BR4B0a5fepSEITQtByIhWPUHoWwn+rBX8BjZCLRABwDK0yrrym2i0fP936FPYUr5vVlnRW7/r7BT2sGFYi37LzwusvORiAq7YO5FUKkIHOzuDLy1cO336+nzL7LUjR67NAgjI0jC4VnmGEpjhUVApqyeE83QklXqpcrpl/vrp09cABHWlnXAEXeH9Y5CGdVAa5v50QbTny8fLGNOlBZEOnQHdYGh9X4qgdSj5zYaoACzc5TcQSTVd7mqSwBvQpi9IIl7sb64mD89dmIkd/d62hYeHIztclmAV0nSb6WSrt9ehtdYjKUsZtpm6rNE7p+J3zQeHzo66crjaPptSuTT6BoOS6jRanshduG3hmdui+e/uHjsWptr1VF/CkkvYMI1l+WjHdM/IybR/4cHxXd9KaxUdWg2U6YxPYwr/EOmx8XszUSqK1Og8oEAMAFgHKBCHRwAAEhCDV0GZYxwswbeRg+dY+CzECEuE6lcXL/ZcvLh0OXL5cuQyf44qfYKySAJqAaiiWDNjplioglH7Va4fXrxqh02NrkuJSy7uU3HZLijdQEvoBdDE88vThNERxGINSPJoaEfAmsDEbYe/PeTPPnSUVP7gXjJyLn7sw7cy3r4rH59d38/As3Bl/RtTLgdX+H2hdBX1AxZd5OOVb6rJFqOxpcVoRP16TYvB0KLR89wSpSLMwO/873PmlXguF+f/SI+HpDwe2YH5uQMH5uYP0NmhoUxmaEh4xytNlIrgC3Sej0cCafhDuC/AfU+GnlsbBwD8NwAAAP//AQAA///q1IH9AAAAAAEAAAACC4WIfAx/Xw889QADA+gAAAAA2F2goQAAAADdZi82/jr+2whvA8gAAAADAAIAAAAAAAAAAQAAA9j+7wAACJj+Ov46CG8AAQAAAAAAAAAAAAAAAAAAAER4nBzKu0ozQQCG4ff7pvjhRxQtNEoIiwnqekgEFw+IhYWVRWAKJSMIgiBi4VWIlb2992EdGxvvwVKdJsQqwnZP8fiJAUNwQfAhlW9IniHpi+RbKv0j6ZPkR5KfqbxL8gHJ86y7QdMPnDtAmGNBYyqXRA3peoOefuiqQ0tjtlwQGXGibyITYjgiuk10q76x/hdEvdBUpOGCU30w5XcaemW69hWFMpvK9JXpKLOkzKwyi8psK1Mqs8Yvx9qjDAWlekT1WNEl/0OfnbBPW5ll37Hqa2BEhMmb7mlzNhn8AQAA//8BAAD//1d1MuYAAAAAACwALABQAIAAngC0AMgA+gEGARYBOAFoAYoBsgH2AggCLAJIAoICugLuAxwDTgOCA6QEEAQyBD4EWAR0BKYEyAT0BSgFXAV8BbwF4gYEBiAGWgaGBrYHGgdAB1gHggfAB+QIGAhYCK4I7gkECRAJHAk2CVAJYAnOCeAJ9AoMCiwKOApOCnQKhAAAAAEAAABEAIwADABmAAcAAQAAAAAAAAAAAAAAAAAEAAN4nJyU3U4bVxSFPwfbbVQ1FxWKyA06l22VjN0IogSuTAmKVYRTj9Mfqao0eMY/Yjwz8gxQqj5Ar/sWfYtc9Tn6EFWvq7O8DTaqFIEQsM6cvfdZZ6+1D7DJv2xQqz8E/mr+YLjGdnPP8AMeNZ8a3uC48bfh+kpMg7jxm+EmXzb6hj/iff0Pwx+zU//Z8EO26keGP+F5fdPwpxuOfww/Yof3C1yDl/xuuMYWheEHbPKT4Q0eYzVrdR7TNtzgM7YNN9kGBkypSJmSMcYxYsqYc+YklIQkzJkyIiHG0aVDSqWvGZGQY/y/XyNCKuZEqjihwpESkhJRMrGKvyor561OHGk1t70OFRMiTpVxRkSGI2dMTkbCmepUVBTs0aJFyVB8CypKAkqmpATkzBnToscRxwyYMKXEcaRKnllIzoiKSyKd7yzCd2ZIQkZprM7JiMXTiV+i7C7HOHoUil2tfLxW4SmO75TtueWK/YpAv26F2fq5SzYRF+pnqq6k2rmUghPt+nM7fCtcsYe7V3/WmXy4R7H+V6p8yrn0j6VUJiYZzm3RIZSDQvcEx4HWXUJ15Hu6DHhDj3cMtO7Qp0+HEwZ0ea3cHn0cX9PjhENldIUXe0dyzAk/4viGrmJ87cT6s1As4RcKc3cpjnPdY0ahnnvmge6a6IZ3V9jPUL7mjlI5Q82Rj3TSL9OcRYzNFYUYztTLpTdK619sjpjpLl7bm30/DRc2e8spviLXDHu3Ljh55RaMPqRqcMszl/oJiIjJOVXEkJwZLSquxPstEeekOA7VvTeakorOdY4/50ouSZiJQZdMdeYU+huZb0LjPlzzvbO3JFa+Z3p2fav7nOLUqxuN3ql7y73QupysKNAyVfMVNw3FNTPvJ5qpVf6hcku9bjnP6JNI9VQ3uP0OPCegzQ677DPROUPtXNgb0dY70eYV++rBGYmiRnJ1YhV2CXjBLru84sVazQ6HHNBj/w4cF1k9Dnh9a2ddp2UVZ3X+FJu2+DqeXa9e3luvz+/gyy80UTcvY1/a+G5fWLUb/58QMfNc3NbqndwTgv8AAAD//wEAAP//B1tMMAB4nGJgZgCD/+cYjBiwAAAAAAD//wEAAP//LwECAwAAAA==");
+                }
+                .d2-250480077 .text-bold {
+                	font-family: "d2-250480077-font-bold";
+                }
+                @font-face {
+                	font-family: d2-250480077-font-bold;
+                	src: url("data:application/font-woff;base64,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");
+                }
+                .d2-250480077 .text-italic {
+                	font-family: "d2-250480077-font-italic";
+                }
+                @font-face {
+                	font-family: d2-250480077-font-italic;
+                	src: url("data:application/font-woff;base64,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");
+                }]]>
+              </style>
+              <style type="text/css">
+                <![CDATA[.shape {
+                  shape-rendering: geometricPrecision;
+                  stroke-linejoin: round;
+                }
+                .connection {
+                  stroke-linecap: round;
+                  stroke-linejoin: round;
+                }
+                .blend {
+                  mix-blend-mode: multiply;
+                  opacity: 0.5;
+                }
 
-		.d2-250480077 .fill-N1{fill:#0A0F25;}
-		.d2-250480077 .fill-N2{fill:#676C7E;}
-		.d2-250480077 .fill-N3{fill:#9499AB;}
-		.d2-250480077 .fill-N4{fill:#CFD2DD;}
-		.d2-250480077 .fill-N5{fill:#DEE1EB;}
-		.d2-250480077 .fill-N6{fill:#EEF1F8;}
-		.d2-250480077 .fill-N7{fill:#FFFFFF;}
-		.d2-250480077 .fill-B1{fill:#0D32B2;}
-		.d2-250480077 .fill-B2{fill:#0D32B2;}
-		.d2-250480077 .fill-B3{fill:#E3E9FD;}
-		.d2-250480077 .fill-B4{fill:#E3E9FD;}
-		.d2-250480077 .fill-B5{fill:#EDF0FD;}
-		.d2-250480077 .fill-B6{fill:#F7F8FE;}
-		.d2-250480077 .fill-AA2{fill:#4A6FF3;}
-		.d2-250480077 .fill-AA4{fill:#EDF0FD;}
-		.d2-250480077 .fill-AA5{fill:#F7F8FE;}
-		.d2-250480077 .fill-AB4{fill:#EDF0FD;}
-		.d2-250480077 .fill-AB5{fill:#F7F8FE;}
-		.d2-250480077 .stroke-N1{stroke:#0A0F25;}
-		.d2-250480077 .stroke-N2{stroke:#676C7E;}
-		.d2-250480077 .stroke-N3{stroke:#9499AB;}
-		.d2-250480077 .stroke-N4{stroke:#CFD2DD;}
-		.d2-250480077 .stroke-N5{stroke:#DEE1EB;}
-		.d2-250480077 .stroke-N6{stroke:#EEF1F8;}
-		.d2-250480077 .stroke-N7{stroke:#FFFFFF;}
-		.d2-250480077 .stroke-B1{stroke:#0D32B2;}
-		.d2-250480077 .stroke-B2{stroke:#0D32B2;}
-		.d2-250480077 .stroke-B3{stroke:#E3E9FD;}
-		.d2-250480077 .stroke-B4{stroke:#E3E9FD;}
-		.d2-250480077 .stroke-B5{stroke:#EDF0FD;}
-		.d2-250480077 .stroke-B6{stroke:#F7F8FE;}
-		.d2-250480077 .stroke-AA2{stroke:#4A6FF3;}
-		.d2-250480077 .stroke-AA4{stroke:#EDF0FD;}
-		.d2-250480077 .stroke-AA5{stroke:#F7F8FE;}
-		.d2-250480077 .stroke-AB4{stroke:#EDF0FD;}
-		.d2-250480077 .stroke-AB5{stroke:#F7F8FE;}
-		.d2-250480077 .background-color-N1{background-color:#0A0F25;}
-		.d2-250480077 .background-color-N2{background-color:#676C7E;}
-		.d2-250480077 .background-color-N3{background-color:#9499AB;}
-		.d2-250480077 .background-color-N4{background-color:#CFD2DD;}
-		.d2-250480077 .background-color-N5{background-color:#DEE1EB;}
-		.d2-250480077 .background-color-N6{background-color:#EEF1F8;}
-		.d2-250480077 .background-color-N7{background-color:#FFFFFF;}
-		.d2-250480077 .background-color-B1{background-color:#0D32B2;}
-		.d2-250480077 .background-color-B2{background-color:#0D32B2;}
-		.d2-250480077 .background-color-B3{background-color:#E3E9FD;}
-		.d2-250480077 .background-color-B4{background-color:#E3E9FD;}
-		.d2-250480077 .background-color-B5{background-color:#EDF0FD;}
-		.d2-250480077 .background-color-B6{background-color:#F7F8FE;}
-		.d2-250480077 .background-color-AA2{background-color:#4A6FF3;}
-		.d2-250480077 .background-color-AA4{background-color:#EDF0FD;}
-		.d2-250480077 .background-color-AA5{background-color:#F7F8FE;}
-		.d2-250480077 .background-color-AB4{background-color:#EDF0FD;}
-		.d2-250480077 .background-color-AB5{background-color:#F7F8FE;}
-		.d2-250480077 .color-N1{color:#0A0F25;}
-		.d2-250480077 .color-N2{color:#676C7E;}
-		.d2-250480077 .color-N3{color:#9499AB;}
-		.d2-250480077 .color-N4{color:#CFD2DD;}
-		.d2-250480077 .color-N5{color:#DEE1EB;}
-		.d2-250480077 .color-N6{color:#EEF1F8;}
-		.d2-250480077 .color-N7{color:#FFFFFF;}
-		.d2-250480077 .color-B1{color:#0D32B2;}
-		.d2-250480077 .color-B2{color:#0D32B2;}
-		.d2-250480077 .color-B3{color:#E3E9FD;}
-		.d2-250480077 .color-B4{color:#E3E9FD;}
-		.d2-250480077 .color-B5{color:#EDF0FD;}
-		.d2-250480077 .color-B6{color:#F7F8FE;}
-		.d2-250480077 .color-AA2{color:#4A6FF3;}
-		.d2-250480077 .color-AA4{color:#EDF0FD;}
-		.d2-250480077 .color-AA5{color:#F7F8FE;}
-		.d2-250480077 .color-AB4{color:#EDF0FD;}
-		.d2-250480077 .color-AB5{color:#F7F8FE;}.appendix text.text{fill:#0A0F25}.md{--color-fg-default:#0A0F25;--color-fg-muted:#676C7E;--color-fg-subtle:#9499AB;--color-canvas-default:#FFFFFF;--color-canvas-subtle:#EEF1F8;--color-border-default:#0D32B2;--color-border-muted:#0D32B2;--color-neutral-muted:#EEF1F8;--color-accent-fg:#0D32B2;--color-accent-emphasis:#0D32B2;--color-attention-subtle:#676C7E;--color-danger-fg:red;}.sketch-overlay-B1{fill:url(#streaks-darker-d2-250480077);mix-blend-mode:lighten}.sketch-overlay-B2{fill:url(#streaks-darker-d2-250480077);mix-blend-mode:lighten}.sketch-overlay-B3{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-B4{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-B5{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-B6{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-AA2{fill:url(#streaks-dark-d2-250480077);mix-blend-mode:overlay}.sketch-overlay-AA4{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-AA5{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-AB4{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-AB5{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-N1{fill:url(#streaks-darker-d2-250480077);mix-blend-mode:lighten}.sketch-overlay-N2{fill:url(#streaks-dark-d2-250480077);mix-blend-mode:overlay}.sketch-overlay-N3{fill:url(#streaks-normal-d2-250480077);mix-blend-mode:color-burn}.sketch-overlay-N4{fill:url(#streaks-normal-d2-250480077);mix-blend-mode:color-burn}.sketch-overlay-N5{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-N6{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-N7{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.light-code{display: block}.dark-code{display: none}]]></style><g class="dDE="><g class="shape" ><path d="M 0 0 L 150 0 L 150 55 L 308 55 L 308 680 L 0 680 Z" stroke="#2d5a2d" fill="#1a3a1a" style="stroke-width:2;" /></g><text x="154.000000" y="-13.000000" fill="#e0e0e0" class="text" style="text-anchor:middle;font-size:28px">Tier 1 — Critical Path (1% → 51%)</text></g><g class="dDI="><g class="shape" ><path d="M 23 801 L 173 801 L 173 856 L 1003 856 L 1003 1149 L 23 1149 Z" stroke="#3a6ea5" fill="#1a2a3a" style="stroke-width:2;" /></g><text x="513.000000" y="788.000000" fill="#e0e0e0" class="text" style="text-anchor:middle;font-size:28px">Tier 2 — Verification (4% → 64%)</text></g><g class="dDM="><g class="shape" ><path d="M 278 1270 L 426 1270 L 426 1325 L 573 1325 L 573 1784 L 278 1784 Z" stroke="#b8860b" fill="#3a2a1a" style="stroke-width:2;" /></g><text x="425.500000" y="1257.000000" fill="#e0e0e0" class="text" style="text-anchor:middle;font-size:28px">Tier 3 — Ship-Ready (20% → 80%)</text></g><g class="dDQ="><g class="shape" ><path d="M 279 1921 L 429 1921 L 429 1976 L 1166 1976 L 1166 2435 L 279 2435 Z" stroke="#8b2d8b" fill="#2a1a2a" style="stroke-width:2;" /></g><text x="722.500000" y="1908.000000" fill="#e0e0e0" class="text" style="text-anchor:middle;font-size:28px">Tier 4 — I/O Error Classification</text></g><g class="dDU="><g class="shape" ><path d="M 610 2556 L 760 2556 L 760 2611 L 963 2611 L 963 3070 L 610 3070 Z" stroke="#555" fill="#1a1a1a" style="stroke-width:2;" /></g><text x="786.500000" y="2543.000000" fill="#e0e0e0" class="text" style="text-anchor:middle;font-size:28px">Tier 5 — Polish &amp; Documentation</text></g><g class="dDEudDFfMQ=="><g class="shape" ><rect x="79.000000" y="50.000000" width="150.000000" height="66.000000" stroke="#0D32B2" fill="#2d5a2d" class=" stroke-B1" style="stroke-width:2;" /></g><text x="154.000000" y="88.500000" fill="#fff" class="text-bold" style="text-anchor:middle;font-size:16px">go get @v0.5.0</text></g><g class="dDEudDFfMg=="><g class="shape" ><rect x="40.000000" y="216.000000" width="228.000000" height="82.000000" stroke="#0D32B2" fill="#2d5a2d" class=" stroke-B1" style="stroke-width:2;" /></g><text x="154.000000" y="254.500000" fill="#fff" class="text-bold" style="text-anchor:middle;font-size:16px"><tspan x="154.000000" dy="0.000000">Create classify.go</tspan><tspan x="154.000000" dy="18.500000">(11 sentinel registrations)</tspan></text></g><g class="dDEudDFfMw=="><g class="shape" ><rect x="89.000000" y="398.000000" width="130.000000" height="66.000000" stroke="#0D32B2" fill="#2d5a2d" class=" stroke-B1" style="stroke-width:2;" /></g><text x="154.000000" y="436.500000" fill="#fff" class="text-bold" style="text-anchor:middle;font-size:16px">go mod tidy</text></g><g class="dDEudDFfNA=="><g class="shape" ><rect x="82.000000" y="564.000000" width="144.000000" height="66.000000" stroke="#0D32B2" fill="#2d5a2d" class=" stroke-B1" style="stroke-width:2;" /></g><text x="154.000000" y="602.500000" fill="#fff" class="text-bold" style="text-anchor:middle;font-size:16px">go build ./... ✓</text></g><g class="dDIudDJfMQ=="><g class="shape" ><rect x="63.000000" y="851.000000" width="182.000000" height="82.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="154.000000" y="889.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px"><tspan x="154.000000" dy="0.000000">Classify() table test</tspan><tspan x="154.000000" dy="18.500000">(9 public sentinels)</tspan></text></g><g class="dDIudDJfMg=="><g class="shape" ><rect x="305.000000" y="859.000000" width="168.000000" height="66.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="389.000000" y="897.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px">IsRetryable() test</text></g><g class="dDIudDJfMw=="><g class="shape" ><rect x="533.000000" y="859.000000" width="149.000000" height="66.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="607.500000" y="897.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px">ExitCode() test</text></g><g class="dDIudDJfNA=="><g class="shape" ><rect x="742.000000" y="859.000000" width="221.000000" height="66.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="852.500000" y="897.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px">Wrapped error chain test</text></g><g class="dDIudDJfNQ=="><g class="shape" ><rect x="352.000000" y="1033.000000" width="146.000000" height="66.000000" stroke="#0D32B2" fill="#3a6ea5" class=" stroke-B1" style="stroke-width:2;" /></g><text x="425.000000" y="1071.500000" fill="#fff" class="text-bold" style="text-anchor:middle;font-size:16px">go test -race ✓</text></g><g class="dDMudDNfMQ=="><g class="shape" ><rect x="318.000000" y="1320.000000" width="215.000000" height="82.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="425.500000" y="1358.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px"><tspan x="425.500000" dy="0.000000">AGENTS.md update</tspan><tspan x="425.500000" dy="18.500000">(architecture + gotchas)</tspan></text></g><g class="dDMudDNfMg=="><g class="shape" ><rect x="351.000000" y="1502.000000" width="148.000000" height="66.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="425.000000" y="1540.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px">golangci-lint ✓</text></g><g class="dDMudDNfMw=="><g class="shape" ><rect x="340.000000" y="1668.000000" width="170.000000" height="66.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="425.000000" y="1706.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px">Coverage check ✓</text></g><g class="dDQudDRfMQ=="><g class="shape" ><rect x="319.000000" y="1971.000000" width="212.000000" height="82.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="425.000000" y="2009.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px"><tspan x="425.000000" dy="0.000000">Loader sentinels</tspan><tspan x="425.000000" dy="18.500000">+ Transient registration</tspan></text></g><g class="dDQudDRfMg=="><g class="shape" ><rect x="591.000000" y="1971.000000" width="245.000000" height="82.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="713.500000" y="2009.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px"><tspan x="713.500000" dy="0.000000">Export sentinels</tspan><tspan x="713.500000" dy="18.500000">+ Infrastructure registration</tspan></text></g><g class="dDQudDRfMw=="><g class="shape" ><rect x="896.000000" y="1971.000000" width="230.000000" height="82.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="1011.000000" y="2009.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px"><tspan x="1011.000000" dy="0.000000">Render sentinels</tspan><tspan x="1011.000000" dy="18.500000">(diagram/table/tree/html)</tspan></text></g><g class="dDQudDRfNA=="><g class="shape" ><rect x="687.000000" y="2153.000000" width="200.000000" height="66.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="787.000000" y="2191.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px">Register + test all new</text></g><g class="dDQudDRfNQ=="><g class="shape" ><rect x="714.000000" y="2319.000000" width="146.000000" height="66.000000" stroke="#0D32B2" fill="#8b2d8b" class=" stroke-B1" style="stroke-width:2;" /></g><text x="787.000000" y="2357.500000" fill="#fff" class="text-bold" style="text-anchor:middle;font-size:16px">go test -race ✓</text></g><g class="dDUudDVfMQ=="><g class="shape" ><rect x="650.000000" y="2606.000000" width="273.000000" height="66.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="786.500000" y="2644.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px">FEATURES.md + adoption report</text></g><g class="dDUudDVfMg=="><g class="shape" ><rect x="712.000000" y="2772.000000" width="149.000000" height="66.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="786.500000" y="2810.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px">Example demo</text></g><g class="dDUudDVfMw=="><g class="shape" ><rect x="684.000000" y="2938.000000" width="206.000000" height="82.000000" stroke="#0D32B2" fill="#EDF0FD" class=" stroke-B1 fill-B5" style="stroke-width:2;" /></g><text x="787.000000" y="2976.500000" fill="#0A0F25" class="text-bold fill-N1" style="text-anchor:middle;font-size:16px"><tspan x="787.000000" dy="0.000000">Final quality gates</tspan><tspan x="787.000000" dy="18.500000">(lint + coverage + dupl)</tspan></text></g><g class="dDEuKHQxXzEgLSZndDsgdDFfMilbMF0="><marker id="mk-d2-250480077-3488378134" markerWidth="10.000000" markerHeight="12.000000" refX="7.000000" refY="6.000000" viewBox="0.000000 0.000000 10.000000 12.000000" orient="auto" markerUnits="userSpaceOnUse"> <polygon points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000" fill="#0D32B2" class="connection fill-B1" stroke-width="2" /> </marker><path d="M 154.000000 118.000000 C 154.000000 156.000000 154.000000 176.000000 154.000000 212.000000" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDEuKHQxXzIgLSZndDsgdDFfMylbMF0="><path d="M 154.000000 300.000000 C 154.000000 338.000000 154.000000 358.000000 154.000000 394.000000" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDEuKHQxXzMgLSZndDsgdDFfNClbMF0="><path d="M 154.000000 466.000000 C 154.000000 504.000000 154.000000 524.000000 154.000000 560.000000" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDIuKHQyXzEgLSZndDsgdDJfNSlbMF0="><path d="M 154.000000 935.000000 C 154.000000 973.000000 193.600006 995.200012 348.177302 1042.822300" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDIuKHQyXzIgLSZndDsgdDJfNSlbMF0="><path d="M 389.000000 927.000000 C 389.000000 971.400024 393.399994 993.000000 409.389045 1029.338740" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDIuKHQyXzMgLSZndDsgdDJfNSlbMF0="><path d="M 607.500000 927.000000 C 607.500000 971.400024 585.500000 993.000000 501.141466 1031.344788" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDIuKHQyXzQgLSZndDsgdDJfNSlbMF0="><path d="M 852.500000 927.000000 C 852.500000 971.400024 781.650024 996.763000 502.176593 1051.055190" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDMuKHQzXzEgLSZndDsgdDNfMilbMF0="><path d="M 425.250000 1404.000000 C 425.250000 1442.000000 425.250000 1462.000000 425.250000 1498.000000" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDMuKHQzXzIgLSZndDsgdDNfMylbMF0="><path d="M 425.250000 1570.000000 C 425.250000 1608.000000 425.250000 1628.000000 425.250000 1664.000000" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDQuKHQ0XzEgLSZndDsgdDRfNClbMF0="><path d="M 425.250000 2055.000000 C 425.250000 2093.000000 477.549988 2115.008057 682.851438 2162.144935" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDQuKHQ0XzIgLSZndDsgdDRfNClbMF0="><path d="M 713.750000 2055.000000 C 713.750000 2093.000000 722.549988 2113.000000 755.107488 2149.997146" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDQuKHQ0XzMgLSZndDsgdDRfNClbMF0="><path d="M 1011.250000 2055.000000 C 1011.250000 2093.000000 984.250000 2113.000000 880.000995 2151.610743" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDQuKHQ0XzQgLSZndDsgdDRfNSlbMF0="><path d="M 786.750000 2221.000000 C 786.750000 2259.000000 786.750000 2279.000000 786.750000 2315.000000" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDUuKHQ1XzEgLSZndDsgdDVfMilbMF0="><path d="M 786.750000 2674.000000 C 786.750000 2712.000000 786.750000 2732.000000 786.750000 2768.000000" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="dDUuKHQ1XzIgLSZndDsgdDVfMylbMF0="><path d="M 786.750000 2840.000000 C 786.750000 2878.000000 786.750000 2898.000000 786.750000 2934.000000" stroke="#0D32B2" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-250480077-3488378134)" mask="url(#d2-250480077)" /></g><g class="KHQxIC0mZ3Q7IHQyKVswXQ=="><marker id="mk-d2-250480077-928906380" markerWidth="10.000000" markerHeight="12.000000" refX="7.000000" refY="6.000000" viewBox="0.000000 0.000000 10.000000 12.000000" orient="auto" markerUnits="userSpaceOnUse"> <polygon points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000" fill="#ff6b6b" class="connection" stroke-width="2" /> </marker><path d="M 154.000000 682.000000 C 154.000000 728.400024 154.000000 752.599976 154.000000 797.000000" stroke="#ff6b6b" fill="none" class="connection" style="stroke-width:2;stroke-dasharray:8.000000,7.892511;" marker-end="url(#mk-d2-250480077-928906380)" mask="url(#d2-250480077)" /><text x="154.500000" y="746.000000" fill="#676C7E" class="text-italic fill-N2" style="text-anchor:middle;font-size:16px">blocks</text></g><g class="KHQyIC0mZ3Q7IHQzKVswXQ=="><path d="M 425.008265 1150.999983 C 425.200012 1197.400024 425.250000 1213.500000 425.250000 1225.500000" stroke="#ff6b6b" fill="none" class="connection" style="stroke-width:2;stroke-dasharray:8.000000,7.892511;" marker-end="url(#mk-d2-250480077-928906380)" mask="url(#d2-250480077)" /><text x="425.500000" y="1195.000000" fill="#676C7E" class="text-italic fill-N2" style="text-anchor:middle;font-size:16px">blocks</text></g><g class="KHQzIC0mZ3Q7IHQ0KVswXQ=="><marker id="mk-d2-250480077-1214512035" markerWidth="10.000000" markerHeight="12.000000" refX="7.000000" refY="6.000000" viewBox="0.000000 0.000000 10.000000 12.000000" orient="auto" markerUnits="userSpaceOnUse"> <polygon points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000" fill="#f4d35e" class="connection" stroke-width="2" /> </marker><path d="M 425.007300 1785.999987 C 425.200012 1838.800049 425.200012 1866.199951 425.014599 1917.000027" stroke="#f4d35e" fill="none" class="connection" style="stroke-width:2;stroke-dasharray:8.000000,7.892511;" marker-end="url(#mk-d2-250480077-1214512035)" mask="url(#d2-250480077)" /><text x="425.500000" y="1850.000000" fill="#676C7E" class="text-italic fill-N2" style="text-anchor:middle;font-size:16px"><tspan x="425.500000" dy="0.000000">optional</tspan><tspan x="425.500000" dy="18.500000">but recommended</tspan></text></g><g class="KHQ0IC0mZ3Q7IHQ1KVswXQ=="><marker id="mk-d2-250480077-2775305428" markerWidth="10.000000" markerHeight="12.000000" refX="7.000000" refY="6.000000" viewBox="0.000000 0.000000 10.000000 12.000000" orient="auto" markerUnits="userSpaceOnUse"> <polygon points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000" fill="#6eb5ff" class="connection" stroke-width="2" /> </marker><path d="M 786.991735 2436.999983 C 786.799988 2483.399902 786.750000 2499.500000 786.750000 2511.500000" stroke="#6eb5ff" fill="none" class="connection" style="stroke-width:2;stroke-dasharray:8.000000,7.892511;" marker-end="url(#mk-d2-250480077-2775305428)" mask="url(#d2-250480077)" /><text x="787.000000" y="2481.000000" fill="#676C7E" class="text-italic fill-N2" style="text-anchor:middle;font-size:16px">wraps up</text></g><mask id="d2-250480077" maskUnits="userSpaceOnUse" x="-134" y="-141" width="1401" height="3312">
-<rect x="-134" y="-141" width="1401" height="3312" fill="white"></rect>
-<rect x="131.000000" y="730.000000" width="47" height="21" fill="black"></rect>
-<rect x="402.000000" y="1179.000000" width="47" height="21" fill="black"></rect>
-<rect x="363.000000" y="1834.000000" width="125" height="37" fill="black"></rect>
-<rect x="755.000000" y="2465.000000" width="64" height="21" fill="black"></rect>
-</mask></svg></svg>
-
+                		.d2-250480077 .fill-N1{fill:#0A0F25;}
+                		.d2-250480077 .fill-N2{fill:#676C7E;}
+                		.d2-250480077 .fill-N3{fill:#9499AB;}
+                		.d2-250480077 .fill-N4{fill:#CFD2DD;}
+                		.d2-250480077 .fill-N5{fill:#DEE1EB;}
+                		.d2-250480077 .fill-N6{fill:#EEF1F8;}
+                		.d2-250480077 .fill-N7{fill:#FFFFFF;}
+                		.d2-250480077 .fill-B1{fill:#0D32B2;}
+                		.d2-250480077 .fill-B2{fill:#0D32B2;}
+                		.d2-250480077 .fill-B3{fill:#E3E9FD;}
+                		.d2-250480077 .fill-B4{fill:#E3E9FD;}
+                		.d2-250480077 .fill-B5{fill:#EDF0FD;}
+                		.d2-250480077 .fill-B6{fill:#F7F8FE;}
+                		.d2-250480077 .fill-AA2{fill:#4A6FF3;}
+                		.d2-250480077 .fill-AA4{fill:#EDF0FD;}
+                		.d2-250480077 .fill-AA5{fill:#F7F8FE;}
+                		.d2-250480077 .fill-AB4{fill:#EDF0FD;}
+                		.d2-250480077 .fill-AB5{fill:#F7F8FE;}
+                		.d2-250480077 .stroke-N1{stroke:#0A0F25;}
+                		.d2-250480077 .stroke-N2{stroke:#676C7E;}
+                		.d2-250480077 .stroke-N3{stroke:#9499AB;}
+                		.d2-250480077 .stroke-N4{stroke:#CFD2DD;}
+                		.d2-250480077 .stroke-N5{stroke:#DEE1EB;}
+                		.d2-250480077 .stroke-N6{stroke:#EEF1F8;}
+                		.d2-250480077 .stroke-N7{stroke:#FFFFFF;}
+                		.d2-250480077 .stroke-B1{stroke:#0D32B2;}
+                		.d2-250480077 .stroke-B2{stroke:#0D32B2;}
+                		.d2-250480077 .stroke-B3{stroke:#E3E9FD;}
+                		.d2-250480077 .stroke-B4{stroke:#E3E9FD;}
+                		.d2-250480077 .stroke-B5{stroke:#EDF0FD;}
+                		.d2-250480077 .stroke-B6{stroke:#F7F8FE;}
+                		.d2-250480077 .stroke-AA2{stroke:#4A6FF3;}
+                		.d2-250480077 .stroke-AA4{stroke:#EDF0FD;}
+                		.d2-250480077 .stroke-AA5{stroke:#F7F8FE;}
+                		.d2-250480077 .stroke-AB4{stroke:#EDF0FD;}
+                		.d2-250480077 .stroke-AB5{stroke:#F7F8FE;}
+                		.d2-250480077 .background-color-N1{background-color:#0A0F25;}
+                		.d2-250480077 .background-color-N2{background-color:#676C7E;}
+                		.d2-250480077 .background-color-N3{background-color:#9499AB;}
+                		.d2-250480077 .background-color-N4{background-color:#CFD2DD;}
+                		.d2-250480077 .background-color-N5{background-color:#DEE1EB;}
+                		.d2-250480077 .background-color-N6{background-color:#EEF1F8;}
+                		.d2-250480077 .background-color-N7{background-color:#FFFFFF;}
+                		.d2-250480077 .background-color-B1{background-color:#0D32B2;}
+                		.d2-250480077 .background-color-B2{background-color:#0D32B2;}
+                		.d2-250480077 .background-color-B3{background-color:#E3E9FD;}
+                		.d2-250480077 .background-color-B4{background-color:#E3E9FD;}
+                		.d2-250480077 .background-color-B5{background-color:#EDF0FD;}
+                		.d2-250480077 .background-color-B6{background-color:#F7F8FE;}
+                		.d2-250480077 .background-color-AA2{background-color:#4A6FF3;}
+                		.d2-250480077 .background-color-AA4{background-color:#EDF0FD;}
+                		.d2-250480077 .background-color-AA5{background-color:#F7F8FE;}
+                		.d2-250480077 .background-color-AB4{background-color:#EDF0FD;}
+                		.d2-250480077 .background-color-AB5{background-color:#F7F8FE;}
+                		.d2-250480077 .color-N1{color:#0A0F25;}
+                		.d2-250480077 .color-N2{color:#676C7E;}
+                		.d2-250480077 .color-N3{color:#9499AB;}
+                		.d2-250480077 .color-N4{color:#CFD2DD;}
+                		.d2-250480077 .color-N5{color:#DEE1EB;}
+                		.d2-250480077 .color-N6{color:#EEF1F8;}
+                		.d2-250480077 .color-N7{color:#FFFFFF;}
+                		.d2-250480077 .color-B1{color:#0D32B2;}
+                		.d2-250480077 .color-B2{color:#0D32B2;}
+                		.d2-250480077 .color-B3{color:#E3E9FD;}
+                		.d2-250480077 .color-B4{color:#E3E9FD;}
+                		.d2-250480077 .color-B5{color:#EDF0FD;}
+                		.d2-250480077 .color-B6{color:#F7F8FE;}
+                		.d2-250480077 .color-AA2{color:#4A6FF3;}
+                		.d2-250480077 .color-AA4{color:#EDF0FD;}
+                		.d2-250480077 .color-AA5{color:#F7F8FE;}
+                		.d2-250480077 .color-AB4{color:#EDF0FD;}
+                		.d2-250480077 .color-AB5{color:#F7F8FE;}.appendix text.text{fill:#0A0F25}.md{--color-fg-default:#0A0F25;--color-fg-muted:#676C7E;--color-fg-subtle:#9499AB;--color-canvas-default:#FFFFFF;--color-canvas-subtle:#EEF1F8;--color-border-default:#0D32B2;--color-border-muted:#0D32B2;--color-neutral-muted:#EEF1F8;--color-accent-fg:#0D32B2;--color-accent-emphasis:#0D32B2;--color-attention-subtle:#676C7E;--color-danger-fg:red;}.sketch-overlay-B1{fill:url(#streaks-darker-d2-250480077);mix-blend-mode:lighten}.sketch-overlay-B2{fill:url(#streaks-darker-d2-250480077);mix-blend-mode:lighten}.sketch-overlay-B3{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-B4{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-B5{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-B6{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-AA2{fill:url(#streaks-dark-d2-250480077);mix-blend-mode:overlay}.sketch-overlay-AA4{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-AA5{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-AB4{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-AB5{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-N1{fill:url(#streaks-darker-d2-250480077);mix-blend-mode:lighten}.sketch-overlay-N2{fill:url(#streaks-dark-d2-250480077);mix-blend-mode:overlay}.sketch-overlay-N3{fill:url(#streaks-normal-d2-250480077);mix-blend-mode:color-burn}.sketch-overlay-N4{fill:url(#streaks-normal-d2-250480077);mix-blend-mode:color-burn}.sketch-overlay-N5{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-N6{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.sketch-overlay-N7{fill:url(#streaks-bright-d2-250480077);mix-blend-mode:darken}.light-code{display: block}.dark-code{display: none}]]>
+              </style>
+              <g class="dDE=">
+                <g class="shape">
+                  <path
+                    d="M 0 0 L 150 0 L 150 55 L 308 55 L 308 680 L 0 680 Z"
+                    stroke="#2d5a2d"
+                    fill="#1a3a1a"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="154.000000"
+                  y="-13.000000"
+                  fill="#e0e0e0"
+                  class="text"
+                  style="text-anchor: middle; font-size: 28px"
+                >
+                  Tier 1 — Critical Path (1% → 51%)
+                </text>
+              </g>
+              <g class="dDI=">
+                <g class="shape">
+                  <path
+                    d="M 23 801 L 173 801 L 173 856 L 1003 856 L 1003 1149 L 23 1149 Z"
+                    stroke="#3a6ea5"
+                    fill="#1a2a3a"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="513.000000"
+                  y="788.000000"
+                  fill="#e0e0e0"
+                  class="text"
+                  style="text-anchor: middle; font-size: 28px"
+                >
+                  Tier 2 — Verification (4% → 64%)
+                </text>
+              </g>
+              <g class="dDM=">
+                <g class="shape">
+                  <path
+                    d="M 278 1270 L 426 1270 L 426 1325 L 573 1325 L 573 1784 L 278 1784 Z"
+                    stroke="#b8860b"
+                    fill="#3a2a1a"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="425.500000"
+                  y="1257.000000"
+                  fill="#e0e0e0"
+                  class="text"
+                  style="text-anchor: middle; font-size: 28px"
+                >
+                  Tier 3 — Ship-Ready (20% → 80%)
+                </text>
+              </g>
+              <g class="dDQ=">
+                <g class="shape">
+                  <path
+                    d="M 279 1921 L 429 1921 L 429 1976 L 1166 1976 L 1166 2435 L 279 2435 Z"
+                    stroke="#8b2d8b"
+                    fill="#2a1a2a"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="722.500000"
+                  y="1908.000000"
+                  fill="#e0e0e0"
+                  class="text"
+                  style="text-anchor: middle; font-size: 28px"
+                >
+                  Tier 4 — I/O Error Classification
+                </text>
+              </g>
+              <g class="dDU=">
+                <g class="shape">
+                  <path
+                    d="M 610 2556 L 760 2556 L 760 2611 L 963 2611 L 963 3070 L 610 3070 Z"
+                    stroke="#555"
+                    fill="#1a1a1a"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="786.500000"
+                  y="2543.000000"
+                  fill="#e0e0e0"
+                  class="text"
+                  style="text-anchor: middle; font-size: 28px"
+                >
+                  Tier 5 — Polish &amp; Documentation
+                </text>
+              </g>
+              <g class="dDEudDFfMQ==">
+                <g class="shape">
+                  <rect
+                    x="79.000000"
+                    y="50.000000"
+                    width="150.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#2d5a2d"
+                    class="stroke-B1"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="154.000000"
+                  y="88.500000"
+                  fill="#fff"
+                  class="text-bold"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  go get @v0.5.0
+                </text>
+              </g>
+              <g class="dDEudDFfMg==">
+                <g class="shape">
+                  <rect
+                    x="40.000000"
+                    y="216.000000"
+                    width="228.000000"
+                    height="82.000000"
+                    stroke="#0D32B2"
+                    fill="#2d5a2d"
+                    class="stroke-B1"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="154.000000"
+                  y="254.500000"
+                  fill="#fff"
+                  class="text-bold"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  <tspan x="154.000000" dy="0.000000">Create classify.go</tspan>
+                  <tspan x="154.000000" dy="18.500000">(11 sentinel registrations)</tspan>
+                </text>
+              </g>
+              <g class="dDEudDFfMw==">
+                <g class="shape">
+                  <rect
+                    x="89.000000"
+                    y="398.000000"
+                    width="130.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#2d5a2d"
+                    class="stroke-B1"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="154.000000"
+                  y="436.500000"
+                  fill="#fff"
+                  class="text-bold"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  go mod tidy
+                </text>
+              </g>
+              <g class="dDEudDFfNA==">
+                <g class="shape">
+                  <rect
+                    x="82.000000"
+                    y="564.000000"
+                    width="144.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#2d5a2d"
+                    class="stroke-B1"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="154.000000"
+                  y="602.500000"
+                  fill="#fff"
+                  class="text-bold"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  go build ./... ✓
+                </text>
+              </g>
+              <g class="dDIudDJfMQ==">
+                <g class="shape">
+                  <rect
+                    x="63.000000"
+                    y="851.000000"
+                    width="182.000000"
+                    height="82.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="154.000000"
+                  y="889.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  <tspan x="154.000000" dy="0.000000">Classify() table test</tspan>
+                  <tspan x="154.000000" dy="18.500000">(9 public sentinels)</tspan>
+                </text>
+              </g>
+              <g class="dDIudDJfMg==">
+                <g class="shape">
+                  <rect
+                    x="305.000000"
+                    y="859.000000"
+                    width="168.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="389.000000"
+                  y="897.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  IsRetryable() test
+                </text>
+              </g>
+              <g class="dDIudDJfMw==">
+                <g class="shape">
+                  <rect
+                    x="533.000000"
+                    y="859.000000"
+                    width="149.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="607.500000"
+                  y="897.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  ExitCode() test
+                </text>
+              </g>
+              <g class="dDIudDJfNA==">
+                <g class="shape">
+                  <rect
+                    x="742.000000"
+                    y="859.000000"
+                    width="221.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="852.500000"
+                  y="897.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  Wrapped error chain test
+                </text>
+              </g>
+              <g class="dDIudDJfNQ==">
+                <g class="shape">
+                  <rect
+                    x="352.000000"
+                    y="1033.000000"
+                    width="146.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#3a6ea5"
+                    class="stroke-B1"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="425.000000"
+                  y="1071.500000"
+                  fill="#fff"
+                  class="text-bold"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  go test -race ✓
+                </text>
+              </g>
+              <g class="dDMudDNfMQ==">
+                <g class="shape">
+                  <rect
+                    x="318.000000"
+                    y="1320.000000"
+                    width="215.000000"
+                    height="82.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="425.500000"
+                  y="1358.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  <tspan x="425.500000" dy="0.000000">AGENTS.md update</tspan>
+                  <tspan x="425.500000" dy="18.500000">(architecture + gotchas)</tspan>
+                </text>
+              </g>
+              <g class="dDMudDNfMg==">
+                <g class="shape">
+                  <rect
+                    x="351.000000"
+                    y="1502.000000"
+                    width="148.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="425.000000"
+                  y="1540.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  golangci-lint ✓
+                </text>
+              </g>
+              <g class="dDMudDNfMw==">
+                <g class="shape">
+                  <rect
+                    x="340.000000"
+                    y="1668.000000"
+                    width="170.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="425.000000"
+                  y="1706.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  Coverage check ✓
+                </text>
+              </g>
+              <g class="dDQudDRfMQ==">
+                <g class="shape">
+                  <rect
+                    x="319.000000"
+                    y="1971.000000"
+                    width="212.000000"
+                    height="82.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="425.000000"
+                  y="2009.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  <tspan x="425.000000" dy="0.000000">Loader sentinels</tspan>
+                  <tspan x="425.000000" dy="18.500000">+ Transient registration</tspan>
+                </text>
+              </g>
+              <g class="dDQudDRfMg==">
+                <g class="shape">
+                  <rect
+                    x="591.000000"
+                    y="1971.000000"
+                    width="245.000000"
+                    height="82.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="713.500000"
+                  y="2009.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  <tspan x="713.500000" dy="0.000000">Export sentinels</tspan>
+                  <tspan x="713.500000" dy="18.500000">+ Infrastructure registration</tspan>
+                </text>
+              </g>
+              <g class="dDQudDRfMw==">
+                <g class="shape">
+                  <rect
+                    x="896.000000"
+                    y="1971.000000"
+                    width="230.000000"
+                    height="82.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="1011.000000"
+                  y="2009.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  <tspan x="1011.000000" dy="0.000000">Render sentinels</tspan>
+                  <tspan x="1011.000000" dy="18.500000">(diagram/table/tree/html)</tspan>
+                </text>
+              </g>
+              <g class="dDQudDRfNA==">
+                <g class="shape">
+                  <rect
+                    x="687.000000"
+                    y="2153.000000"
+                    width="200.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="787.000000"
+                  y="2191.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  Register + test all new
+                </text>
+              </g>
+              <g class="dDQudDRfNQ==">
+                <g class="shape">
+                  <rect
+                    x="714.000000"
+                    y="2319.000000"
+                    width="146.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#8b2d8b"
+                    class="stroke-B1"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="787.000000"
+                  y="2357.500000"
+                  fill="#fff"
+                  class="text-bold"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  go test -race ✓
+                </text>
+              </g>
+              <g class="dDUudDVfMQ==">
+                <g class="shape">
+                  <rect
+                    x="650.000000"
+                    y="2606.000000"
+                    width="273.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="786.500000"
+                  y="2644.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  FEATURES.md + adoption report
+                </text>
+              </g>
+              <g class="dDUudDVfMg==">
+                <g class="shape">
+                  <rect
+                    x="712.000000"
+                    y="2772.000000"
+                    width="149.000000"
+                    height="66.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="786.500000"
+                  y="2810.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  Example demo
+                </text>
+              </g>
+              <g class="dDUudDVfMw==">
+                <g class="shape">
+                  <rect
+                    x="684.000000"
+                    y="2938.000000"
+                    width="206.000000"
+                    height="82.000000"
+                    stroke="#0D32B2"
+                    fill="#EDF0FD"
+                    class="stroke-B1 fill-B5"
+                    style="stroke-width: 2"
+                  />
+                </g>
+                <text
+                  x="787.000000"
+                  y="2976.500000"
+                  fill="#0A0F25"
+                  class="text-bold fill-N1"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  <tspan x="787.000000" dy="0.000000">Final quality gates</tspan>
+                  <tspan x="787.000000" dy="18.500000">(lint + coverage + dupl)</tspan>
+                </text>
+              </g>
+              <g class="dDEuKHQxXzEgLSZndDsgdDFfMilbMF0=">
+                <marker
+                  id="mk-d2-250480077-3488378134"
+                  markerWidth="10.000000"
+                  markerHeight="12.000000"
+                  refX="7.000000"
+                  refY="6.000000"
+                  viewBox="0.000000 0.000000 10.000000 12.000000"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <polygon
+                    points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000"
+                    fill="#0D32B2"
+                    class="connection fill-B1"
+                    stroke-width="2"
+                  />
+                </marker>
+                <path
+                  d="M 154.000000 118.000000 C 154.000000 156.000000 154.000000 176.000000 154.000000 212.000000"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDEuKHQxXzIgLSZndDsgdDFfMylbMF0=">
+                <path
+                  d="M 154.000000 300.000000 C 154.000000 338.000000 154.000000 358.000000 154.000000 394.000000"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDEuKHQxXzMgLSZndDsgdDFfNClbMF0=">
+                <path
+                  d="M 154.000000 466.000000 C 154.000000 504.000000 154.000000 524.000000 154.000000 560.000000"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDIuKHQyXzEgLSZndDsgdDJfNSlbMF0=">
+                <path
+                  d="M 154.000000 935.000000 C 154.000000 973.000000 193.600006 995.200012 348.177302 1042.822300"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDIuKHQyXzIgLSZndDsgdDJfNSlbMF0=">
+                <path
+                  d="M 389.000000 927.000000 C 389.000000 971.400024 393.399994 993.000000 409.389045 1029.338740"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDIuKHQyXzMgLSZndDsgdDJfNSlbMF0=">
+                <path
+                  d="M 607.500000 927.000000 C 607.500000 971.400024 585.500000 993.000000 501.141466 1031.344788"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDIuKHQyXzQgLSZndDsgdDJfNSlbMF0=">
+                <path
+                  d="M 852.500000 927.000000 C 852.500000 971.400024 781.650024 996.763000 502.176593 1051.055190"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDMuKHQzXzEgLSZndDsgdDNfMilbMF0=">
+                <path
+                  d="M 425.250000 1404.000000 C 425.250000 1442.000000 425.250000 1462.000000 425.250000 1498.000000"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDMuKHQzXzIgLSZndDsgdDNfMylbMF0=">
+                <path
+                  d="M 425.250000 1570.000000 C 425.250000 1608.000000 425.250000 1628.000000 425.250000 1664.000000"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDQuKHQ0XzEgLSZndDsgdDRfNClbMF0=">
+                <path
+                  d="M 425.250000 2055.000000 C 425.250000 2093.000000 477.549988 2115.008057 682.851438 2162.144935"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDQuKHQ0XzIgLSZndDsgdDRfNClbMF0=">
+                <path
+                  d="M 713.750000 2055.000000 C 713.750000 2093.000000 722.549988 2113.000000 755.107488 2149.997146"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDQuKHQ0XzMgLSZndDsgdDRfNClbMF0=">
+                <path
+                  d="M 1011.250000 2055.000000 C 1011.250000 2093.000000 984.250000 2113.000000 880.000995 2151.610743"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDQuKHQ0XzQgLSZndDsgdDRfNSlbMF0=">
+                <path
+                  d="M 786.750000 2221.000000 C 786.750000 2259.000000 786.750000 2279.000000 786.750000 2315.000000"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDUuKHQ1XzEgLSZndDsgdDVfMilbMF0=">
+                <path
+                  d="M 786.750000 2674.000000 C 786.750000 2712.000000 786.750000 2732.000000 786.750000 2768.000000"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="dDUuKHQ1XzIgLSZndDsgdDVfMylbMF0=">
+                <path
+                  d="M 786.750000 2840.000000 C 786.750000 2878.000000 786.750000 2898.000000 786.750000 2934.000000"
+                  stroke="#0D32B2"
+                  fill="none"
+                  class="connection stroke-B1"
+                  style="stroke-width: 2"
+                  marker-end="url(#mk-d2-250480077-3488378134)"
+                  mask="url(#d2-250480077)"
+                />
+              </g>
+              <g class="KHQxIC0mZ3Q7IHQyKVswXQ==">
+                <marker
+                  id="mk-d2-250480077-928906380"
+                  markerWidth="10.000000"
+                  markerHeight="12.000000"
+                  refX="7.000000"
+                  refY="6.000000"
+                  viewBox="0.000000 0.000000 10.000000 12.000000"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <polygon
+                    points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000"
+                    fill="#ff6b6b"
+                    class="connection"
+                    stroke-width="2"
+                  />
+                </marker>
+                <path
+                  d="M 154.000000 682.000000 C 154.000000 728.400024 154.000000 752.599976 154.000000 797.000000"
+                  stroke="#ff6b6b"
+                  fill="none"
+                  class="connection"
+                  style="stroke-width: 2; stroke-dasharray: 8, 7.892511"
+                  marker-end="url(#mk-d2-250480077-928906380)"
+                  mask="url(#d2-250480077)"
+                />
+                <text
+                  x="154.500000"
+                  y="746.000000"
+                  fill="#676C7E"
+                  class="text-italic fill-N2"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  blocks
+                </text>
+              </g>
+              <g class="KHQyIC0mZ3Q7IHQzKVswXQ==">
+                <path
+                  d="M 425.008265 1150.999983 C 425.200012 1197.400024 425.250000 1213.500000 425.250000 1225.500000"
+                  stroke="#ff6b6b"
+                  fill="none"
+                  class="connection"
+                  style="stroke-width: 2; stroke-dasharray: 8, 7.892511"
+                  marker-end="url(#mk-d2-250480077-928906380)"
+                  mask="url(#d2-250480077)"
+                />
+                <text
+                  x="425.500000"
+                  y="1195.000000"
+                  fill="#676C7E"
+                  class="text-italic fill-N2"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  blocks
+                </text>
+              </g>
+              <g class="KHQzIC0mZ3Q7IHQ0KVswXQ==">
+                <marker
+                  id="mk-d2-250480077-1214512035"
+                  markerWidth="10.000000"
+                  markerHeight="12.000000"
+                  refX="7.000000"
+                  refY="6.000000"
+                  viewBox="0.000000 0.000000 10.000000 12.000000"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <polygon
+                    points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000"
+                    fill="#f4d35e"
+                    class="connection"
+                    stroke-width="2"
+                  />
+                </marker>
+                <path
+                  d="M 425.007300 1785.999987 C 425.200012 1838.800049 425.200012 1866.199951 425.014599 1917.000027"
+                  stroke="#f4d35e"
+                  fill="none"
+                  class="connection"
+                  style="stroke-width: 2; stroke-dasharray: 8, 7.892511"
+                  marker-end="url(#mk-d2-250480077-1214512035)"
+                  mask="url(#d2-250480077)"
+                />
+                <text
+                  x="425.500000"
+                  y="1850.000000"
+                  fill="#676C7E"
+                  class="text-italic fill-N2"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  <tspan x="425.500000" dy="0.000000">optional</tspan>
+                  <tspan x="425.500000" dy="18.500000">but recommended</tspan>
+                </text>
+              </g>
+              <g class="KHQ0IC0mZ3Q7IHQ1KVswXQ==">
+                <marker
+                  id="mk-d2-250480077-2775305428"
+                  markerWidth="10.000000"
+                  markerHeight="12.000000"
+                  refX="7.000000"
+                  refY="6.000000"
+                  viewBox="0.000000 0.000000 10.000000 12.000000"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <polygon
+                    points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000"
+                    fill="#6eb5ff"
+                    class="connection"
+                    stroke-width="2"
+                  />
+                </marker>
+                <path
+                  d="M 786.991735 2436.999983 C 786.799988 2483.399902 786.750000 2499.500000 786.750000 2511.500000"
+                  stroke="#6eb5ff"
+                  fill="none"
+                  class="connection"
+                  style="stroke-width: 2; stroke-dasharray: 8, 7.892511"
+                  marker-end="url(#mk-d2-250480077-2775305428)"
+                  mask="url(#d2-250480077)"
+                />
+                <text
+                  x="787.000000"
+                  y="2481.000000"
+                  fill="#676C7E"
+                  class="text-italic fill-N2"
+                  style="text-anchor: middle; font-size: 16px"
+                >
+                  wraps up
+                </text>
+              </g>
+              <mask
+                id="d2-250480077"
+                maskUnits="userSpaceOnUse"
+                x="-134"
+                y="-141"
+                width="1401"
+                height="3312"
+              >
+                <rect x="-134" y="-141" width="1401" height="3312" fill="white"></rect>
+                <rect x="131.000000" y="730.000000" width="47" height="21" fill="black"></rect>
+                <rect x="402.000000" y="1179.000000" width="47" height="21" fill="black"></rect>
+                <rect x="363.000000" y="1834.000000" width="125" height="37" fill="black"></rect>
+                <rect x="755.000000" y="2465.000000" width="64" height="21" fill="black"></rect>
+              </mask>
+            </svg>
+          </svg>
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -861,51 +2309,379 @@
           </thead>
           <tbody>
             <!-- P0 tasks -->
-            <tr><td>1</td><td>T1</td><td><span class="badge badge-p0">P0</span></td><td><code>go get @v0.5.0</code></td><td><span class="badge badge-critical">Critical</span></td><td>2m</td><td>go.mod</td></tr>
-            <tr><td>2</td><td>T1</td><td><span class="badge badge-p0">P0</span></td><td>Create classify.go (11 registrations)</td><td><span class="badge badge-critical">Critical</span></td><td>10m</td><td>classify.go</td></tr>
-            <tr><td>3</td><td>T1</td><td><span class="badge badge-p0">P0</span></td><td>go mod tidy</td><td><span class="badge badge-critical">Critical</span></td><td>2m</td><td>go.mod</td></tr>
-            <tr><td>4</td><td>T1</td><td><span class="badge badge-p0">P0</span></td><td>go build ./... ✓</td><td><span class="badge badge-critical">Critical</span></td><td>2m</td><td>—</td></tr>
-            <tr><td>9</td><td>T2</td><td><span class="badge badge-p0">P0</span></td><td>go test -race ./... ✓</td><td><span class="badge badge-critical">Critical</span></td><td>5m</td><td>—</td></tr>
-            <tr><td>33</td><td>T4</td><td><span class="badge badge-p0">P0</span></td><td>go test -race ./... ✓ (after I/O)</td><td><span class="badge badge-critical">Critical</span></td><td>5m</td><td>—</td></tr>
+            <tr>
+              <td>1</td>
+              <td>T1</td>
+              <td><span class="badge badge-p0">P0</span></td>
+              <td><code>go get @v0.5.0</code></td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>2m</td>
+              <td>go.mod</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>T1</td>
+              <td><span class="badge badge-p0">P0</span></td>
+              <td>Create classify.go (11 registrations)</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>10m</td>
+              <td>classify.go</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>T1</td>
+              <td><span class="badge badge-p0">P0</span></td>
+              <td>go mod tidy</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>2m</td>
+              <td>go.mod</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>T1</td>
+              <td><span class="badge badge-p0">P0</span></td>
+              <td>go build ./... ✓</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>2m</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>T2</td>
+              <td><span class="badge badge-p0">P0</span></td>
+              <td>go test -race ./... ✓</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>5m</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>33</td>
+              <td>T4</td>
+              <td><span class="badge badge-p0">P0</span></td>
+              <td>go test -race ./... ✓ (after I/O)</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>5m</td>
+              <td>—</td>
+            </tr>
             <!-- P1 tasks -->
-            <tr><td>5</td><td>T2</td><td><span class="badge badge-p1">P1</span></td><td>Classify() table test (9 sentinels)</td><td><span class="badge badge-high">High</span></td><td>10m</td><td>classify_test.go</td></tr>
-            <tr><td>6</td><td>T2</td><td><span class="badge badge-p1">P1</span></td><td>IsRetryable() returns false test</td><td><span class="badge badge-high">High</span></td><td>5m</td><td>classify_test.go</td></tr>
-            <tr><td>8</td><td>T2</td><td><span class="badge badge-p1">P1</span></td><td>Wrapped error chain Classify test</td><td><span class="badge badge-high">High</span></td><td>8m</td><td>classify_test.go</td></tr>
-            <tr><td>11</td><td>T3</td><td><span class="badge badge-p1">P1</span></td><td>AGENTS.md: Error Classification gotcha</td><td><span class="badge badge-high">High</span></td><td>8m</td><td>AGENTS.md</td></tr>
-            <tr><td>13</td><td>T3</td><td><span class="badge badge-p1">P1</span></td><td>golangci-lint run ./... ✓</td><td><span class="badge badge-high">High</span></td><td>5m</td><td>—</td></tr>
-            <tr><td>17</td><td>T4</td><td><span class="badge badge-p1">P1</span></td><td>Wrap LoadReport errors + ErrReportLoadFailed</td><td><span class="badge badge-high">High</span></td><td>8m</td><td>loader.go</td></tr>
-            <tr><td>19</td><td>T4</td><td><span class="badge badge-p1">P1</span></td><td>Wrap writeToFile errors + ErrExportWriteFailed</td><td><span class="badge badge-high">High</span></td><td>10m</td><td>plugin.go</td></tr>
-            <tr><td>28</td><td>T4</td><td><span class="badge badge-p1">P1</span></td><td>Register I/O sentinels in classify.go</td><td><span class="badge badge-high">High</span></td><td>5m</td><td>classify.go</td></tr>
-            <tr><td>29</td><td>T4</td><td><span class="badge badge-p1">P1</span></td><td>Test Classify(loader) == Transient</td><td><span class="badge badge-high">High</span></td><td>5m</td><td>classify_test.go</td></tr>
-            <tr><td>30</td><td>T4</td><td><span class="badge badge-p1">P1</span></td><td>Test Classify(export) == Infrastructure</td><td><span class="badge badge-high">High</span></td><td>5m</td><td>classify_test.go</td></tr>
-            <tr><td>31</td><td>T4</td><td><span class="badge badge-p1">P1</span></td><td>Test IsRetryable(loader) == true</td><td><span class="badge badge-high">High</span></td><td>3m</td><td>classify_test.go</td></tr>
-            <tr><td>38</td><td>T5</td><td><span class="badge badge-p1">P1</span></td><td>Final golangci-lint ✓</td><td><span class="badge badge-high">High</span></td><td>5m</td><td>—</td></tr>
+            <tr>
+              <td>5</td>
+              <td>T2</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Classify() table test (9 sentinels)</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>10m</td>
+              <td>classify_test.go</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>T2</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>IsRetryable() returns false test</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>5m</td>
+              <td>classify_test.go</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>T2</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Wrapped error chain Classify test</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>8m</td>
+              <td>classify_test.go</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>T3</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>AGENTS.md: Error Classification gotcha</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>8m</td>
+              <td>AGENTS.md</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>T3</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>golangci-lint run ./... ✓</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>5m</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>17</td>
+              <td>T4</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Wrap LoadReport errors + ErrReportLoadFailed</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>8m</td>
+              <td>loader.go</td>
+            </tr>
+            <tr>
+              <td>19</td>
+              <td>T4</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Wrap writeToFile errors + ErrExportWriteFailed</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>10m</td>
+              <td>plugin.go</td>
+            </tr>
+            <tr>
+              <td>28</td>
+              <td>T4</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Register I/O sentinels in classify.go</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>5m</td>
+              <td>classify.go</td>
+            </tr>
+            <tr>
+              <td>29</td>
+              <td>T4</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Test Classify(loader) == Transient</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>5m</td>
+              <td>classify_test.go</td>
+            </tr>
+            <tr>
+              <td>30</td>
+              <td>T4</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Test Classify(export) == Infrastructure</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>5m</td>
+              <td>classify_test.go</td>
+            </tr>
+            <tr>
+              <td>31</td>
+              <td>T4</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Test IsRetryable(loader) == true</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>3m</td>
+              <td>classify_test.go</td>
+            </tr>
+            <tr>
+              <td>38</td>
+              <td>T5</td>
+              <td><span class="badge badge-p1">P1</span></td>
+              <td>Final golangci-lint ✓</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>5m</td>
+              <td>—</td>
+            </tr>
             <!-- P2 tasks -->
-            <tr><td>7</td><td>T2</td><td><span class="badge badge-p2">P2</span></td><td>ExitCode() BSD sysexits test</td><td><span class="badge badge-medium">Medium</span></td><td>5m</td><td>classify_test.go</td></tr>
-            <tr><td>10</td><td>T3</td><td><span class="badge badge-p2">P2</span></td><td>AGENTS.md: classify.go in file table</td><td><span class="badge badge-medium">Medium</span></td><td>4m</td><td>AGENTS.md</td></tr>
-            <tr><td>14</td><td>T3</td><td><span class="badge badge-p2">P2</span></td><td>go vet ./... ✓</td><td><span class="badge badge-medium">Medium</span></td><td>2m</td><td>—</td></tr>
-            <tr><td>15</td><td>T3</td><td><span class="badge badge-p2">P2</span></td><td>Coverage check ≥93% ✓</td><td><span class="badge badge-medium">Medium</span></td><td>5m</td><td>—</td></tr>
-            <tr><td>16</td><td>T4</td><td><span class="badge badge-p2">P2</span></td><td>Add ErrReportLoadFailed sentinel</td><td><span class="badge badge-medium">Medium</span></td><td>3m</td><td>loader.go</td></tr>
-            <tr><td>18</td><td>T4</td><td><span class="badge badge-p2">P2</span></td><td>Add ErrExportWriteFailed sentinel</td><td><span class="badge badge-medium">Medium</span></td><td>3m</td><td>plugin.go</td></tr>
-            <tr><td>20</td><td>T4</td><td><span class="badge badge-p2">P2</span></td><td>Add ErrRenderFailed sentinel</td><td><span class="badge badge-medium">Medium</span></td><td>3m</td><td>report.go</td></tr>
-            <tr><td>32</td><td>T4</td><td><span class="badge badge-p2">P2</span></td><td>Test IsRetryable(export) == false</td><td><span class="badge badge-medium">Medium</span></td><td>3m</td><td>classify_test.go</td></tr>
-            <tr><td>34</td><td>T5</td><td><span class="badge badge-p2">P2</span></td><td>AGENTS.md: I/O sentinel inventory</td><td><span class="badge badge-medium">Medium</span></td><td>8m</td><td>AGENTS.md</td></tr>
-            <tr><td>35</td><td>T5</td><td><span class="badge badge-p2">P2</span></td><td>FEATURES.md: Error Classification row</td><td><span class="badge badge-medium">Medium</span></td><td>5m</td><td>FEATURES.md</td></tr>
-            <tr><td>39</td><td>T5</td><td><span class="badge badge-p2">P2</span></td><td>Final coverage report</td><td><span class="badge badge-medium">Medium</span></td><td>5m</td><td>—</td></tr>
-            <tr><td>40</td><td>T5</td><td><span class="badge badge-p2">P2</span></td><td>art-dupl on changed files</td><td><span class="badge badge-medium">Medium</span></td><td>5m</td><td>—</td></tr>
+            <tr>
+              <td>7</td>
+              <td>T2</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>ExitCode() BSD sysexits test</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>5m</td>
+              <td>classify_test.go</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>T3</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>AGENTS.md: classify.go in file table</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>4m</td>
+              <td>AGENTS.md</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>T3</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>go vet ./... ✓</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>2m</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>T3</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>Coverage check ≥93% ✓</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>5m</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>16</td>
+              <td>T4</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>Add ErrReportLoadFailed sentinel</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>3m</td>
+              <td>loader.go</td>
+            </tr>
+            <tr>
+              <td>18</td>
+              <td>T4</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>Add ErrExportWriteFailed sentinel</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>3m</td>
+              <td>plugin.go</td>
+            </tr>
+            <tr>
+              <td>20</td>
+              <td>T4</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>Add ErrRenderFailed sentinel</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>3m</td>
+              <td>report.go</td>
+            </tr>
+            <tr>
+              <td>32</td>
+              <td>T4</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>Test IsRetryable(export) == false</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>3m</td>
+              <td>classify_test.go</td>
+            </tr>
+            <tr>
+              <td>34</td>
+              <td>T5</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>AGENTS.md: I/O sentinel inventory</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>8m</td>
+              <td>AGENTS.md</td>
+            </tr>
+            <tr>
+              <td>35</td>
+              <td>T5</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>FEATURES.md: Error Classification row</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>5m</td>
+              <td>FEATURES.md</td>
+            </tr>
+            <tr>
+              <td>39</td>
+              <td>T5</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>Final coverage report</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>5m</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>40</td>
+              <td>T5</td>
+              <td><span class="badge badge-p2">P2</span></td>
+              <td>art-dupl on changed files</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>5m</td>
+              <td>—</td>
+            </tr>
             <!-- P3 tasks -->
-            <tr><td>12</td><td>T3</td><td><span class="badge badge-p3">P3</span></td><td>AGENTS.md: init() side-effect note</td><td><span class="badge badge-low">Low</span></td><td>3m</td><td>AGENTS.md</td></tr>
-            <tr><td>21</td><td>T4</td><td><span class="badge badge-p3">P3</span></td><td>Wrap mermaid.go errors</td><td><span class="badge badge-medium">Medium</span></td><td>5m</td><td>mermaid.go</td></tr>
-            <tr><td>22</td><td>T4</td><td><span class="badge badge-p3">P3</span></td><td>Wrap plantuml.go errors</td><td><span class="badge badge-low">Low</span></td><td>5m</td><td>plantuml.go</td></tr>
-            <tr><td>23</td><td>T4</td><td><span class="badge badge-p3">P3</span></td><td>Wrap graphviz.go errors</td><td><span class="badge badge-low">Low</span></td><td>5m</td><td>graphviz.go</td></tr>
-            <tr><td>24</td><td>T4</td><td><span class="badge badge-p3">P3</span></td><td>Wrap d2.go errors</td><td><span class="badge badge-low">Low</span></td><td>5m</td><td>d2.go</td></tr>
-            <tr><td>25</td><td>T4</td><td><span class="badge badge-p3">P3</span></td><td>Wrap table.go errors</td><td><span class="badge badge-low">Low</span></td><td>5m</td><td>table.go</td></tr>
-            <tr><td>26</td><td>T4</td><td><span class="badge badge-p3">P3</span></td><td>Wrap tree.go errors</td><td><span class="badge badge-low">Low</span></td><td>5m</td><td>tree.go</td></tr>
-            <tr><td>27</td><td>T4</td><td><span class="badge badge-p3">P3</span></td><td>Wrap html_render.go errors</td><td><span class="badge badge-low">Low</span></td><td>5m</td><td>html_render.go</td></tr>
-            <tr><td>37</td><td>T5</td><td><span class="badge badge-p3">P3</span></td><td>Example: demo errorfamily.Classify</td><td><span class="badge badge-low">Low</span></td><td>10m</td><td>example/main.go</td></tr>
-            <tr><td>41</td><td>T5</td><td><span class="badge badge-p3">P3</span></td><td>Final go mod tidy + go.sum check</td><td><span class="badge badge-low">Low</span></td><td>3m</td><td>go.mod</td></tr>
+            <tr>
+              <td>12</td>
+              <td>T3</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>AGENTS.md: init() side-effect note</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>3m</td>
+              <td>AGENTS.md</td>
+            </tr>
+            <tr>
+              <td>21</td>
+              <td>T4</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Wrap mermaid.go errors</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>5m</td>
+              <td>mermaid.go</td>
+            </tr>
+            <tr>
+              <td>22</td>
+              <td>T4</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Wrap plantuml.go errors</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>5m</td>
+              <td>plantuml.go</td>
+            </tr>
+            <tr>
+              <td>23</td>
+              <td>T4</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Wrap graphviz.go errors</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>5m</td>
+              <td>graphviz.go</td>
+            </tr>
+            <tr>
+              <td>24</td>
+              <td>T4</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Wrap d2.go errors</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>5m</td>
+              <td>d2.go</td>
+            </tr>
+            <tr>
+              <td>25</td>
+              <td>T4</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Wrap table.go errors</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>5m</td>
+              <td>table.go</td>
+            </tr>
+            <tr>
+              <td>26</td>
+              <td>T4</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Wrap tree.go errors</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>5m</td>
+              <td>tree.go</td>
+            </tr>
+            <tr>
+              <td>27</td>
+              <td>T4</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Wrap html_render.go errors</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>5m</td>
+              <td>html_render.go</td>
+            </tr>
+            <tr>
+              <td>37</td>
+              <td>T5</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Example: demo errorfamily.Classify</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>10m</td>
+              <td>example/main.go</td>
+            </tr>
+            <tr>
+              <td>41</td>
+              <td>T5</td>
+              <td><span class="badge badge-p3">P3</span></td>
+              <td>Final go mod tidy + go.sum check</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>3m</td>
+              <td>go.mod</td>
+            </tr>
             <!-- P4 tasks -->
-            <tr><td>36</td><td>T5</td><td><span class="badge badge-p4">P4</span></td><td>Update adoption report: mark DONE</td><td><span class="badge badge-low">Low</span></td><td>3m</td><td>docs/reviews/</td></tr>
+            <tr>
+              <td>36</td>
+              <td>T5</td>
+              <td><span class="badge badge-p4">P4</span></td>
+              <td>Update adoption report: mark DONE</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>3m</td>
+              <td>docs/reviews/</td>
+            </tr>
           </tbody>
         </table>
 
@@ -913,21 +2689,57 @@
           <h4>Effort Distribution</h4>
           <table>
             <thead>
-              <tr><th>Priority</th><th>Tasks</th><th>Total Effort</th><th>% of Plan</th></tr>
+              <tr>
+                <th>Priority</th>
+                <th>Tasks</th>
+                <th>Total Effort</th>
+                <th>% of Plan</th>
+              </tr>
             </thead>
             <tbody>
-              <tr><td><span class="badge badge-p0">P0</span></td><td>6</td><td>26 min</td><td>12%</td></tr>
-              <tr><td><span class="badge badge-p1">P1</span></td><td>12</td><td>82 min</td><td>37%</td></tr>
-              <tr><td><span class="badge badge-p2">P2</span></td><td>12</td><td>57 min</td><td>26%</td></tr>
-              <tr><td><span class="badge badge-p3">P3</span></td><td>10</td><td>51 min</td><td>23%</td></tr>
-              <tr><td><span class="badge badge-p4">P4</span></td><td>1</td><td>3 min</td><td>1%</td></tr>
-              <tr style="font-weight: 700;"><td>Total</td><td>41</td><td>219 min (~3.7h)</td><td>100%</td></tr>
+              <tr>
+                <td><span class="badge badge-p0">P0</span></td>
+                <td>6</td>
+                <td>26 min</td>
+                <td>12%</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-p1">P1</span></td>
+                <td>12</td>
+                <td>82 min</td>
+                <td>37%</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-p2">P2</span></td>
+                <td>12</td>
+                <td>57 min</td>
+                <td>26%</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-p3">P3</span></td>
+                <td>10</td>
+                <td>51 min</td>
+                <td>23%</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-p4">P4</span></td>
+                <td>1</td>
+                <td>3 min</td>
+                <td>1%</td>
+              </tr>
+              <tr style="font-weight: 700">
+                <td>Total</td>
+                <td>41</td>
+                <td>219 min (~3.7h)</td>
+                <td>100%</td>
+              </tr>
             </tbody>
           </table>
         </div>
 
         <footer class="footer">
-          Generated 2026-06-22 &middot; Pareto plan for go-error-family adoption in go-workflow-auditlog v0.4.0
+          Generated 2026-06-22 &middot; Pareto plan for go-error-family adoption in
+          go-workflow-auditlog v0.4.0
         </footer>
       </main>
     </div>
@@ -942,7 +2754,9 @@
           return l.getAttribute("href").slice(1);
         });
         var sections = ids
-          .map(function (id) { return document.getElementById(id); })
+          .map(function (id) {
+            return document.getElementById(id);
+          })
           .filter(Boolean);
         if (!sections.length) return;
         var observer = new IntersectionObserver(
@@ -960,7 +2774,9 @@
           },
           { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
         );
-        sections.forEach(function (s) { observer.observe(s); });
+        sections.forEach(function (s) {
+          observer.observe(s);
+        });
       })();
     </script>
   </body>

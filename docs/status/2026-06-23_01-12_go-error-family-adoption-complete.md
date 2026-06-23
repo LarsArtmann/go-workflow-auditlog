@@ -12,17 +12,17 @@ The entire go-error-family adoption plan was executed end-to-end: Strategy A (Re
 
 ## Quality Gates (all verified at session end)
 
-| Gate | Result | Details |
-|------|--------|---------|
-| `go build ./...` | ✅ PASS | Clean compile, zero warnings |
-| `go vet ./...` | ✅ PASS | No issues |
-| `golangci-lint run ./...` | ✅ PASS | 0 issues (v2, ~120 linters enabled) |
-| `golangci-lint fmt` | ✅ PASS | All files formatted |
-| `go test -race -count=1 ./...` | ✅ PASS | 212 test functions, 74 subtests, 0 failures |
-| Coverage | ✅ 92.9% | classify.go: **100%** on all 3 functions |
-| `go mod tidy` | ✅ PASS | Clean, no diff |
-| `art-dupl -t 15` | ✅ 13 groups | 0 classify clones (deduped via `allPublicSentinels()` helper) |
-| `go run ./example` | ✅ PASS | Error Classification demo output correct |
+| Gate                           | Result       | Details                                                       |
+| ------------------------------ | ------------ | ------------------------------------------------------------- |
+| `go build ./...`               | ✅ PASS      | Clean compile, zero warnings                                  |
+| `go vet ./...`                 | ✅ PASS      | No issues                                                     |
+| `golangci-lint run ./...`      | ✅ PASS      | 0 issues (v2, ~120 linters enabled)                           |
+| `golangci-lint fmt`            | ✅ PASS      | All files formatted                                           |
+| `go test -race -count=1 ./...` | ✅ PASS      | 212 test functions, 74 subtests, 0 failures                   |
+| Coverage                       | ✅ 92.9%     | classify.go: **100%** on all 3 functions                      |
+| `go mod tidy`                  | ✅ PASS      | Clean, no diff                                                |
+| `art-dupl -t 15`               | ✅ 13 groups | 0 classify clones (deduped via `allPublicSentinels()` helper) |
+| `go run ./example`             | ✅ PASS      | Error Classification demo output correct                      |
 
 ---
 
@@ -58,28 +58,28 @@ The entire go-error-family adoption plan was executed end-to-end: Strategy A (Re
 
 **3 new public sentinels added:**
 
-| Sentinel | File | Family | Exit | Retryable |
-|----------|------|--------|------|-----------|
-| `ErrReportLoadFailed` | `loader.go:15` | Transient | 75 | **Yes** |
-| `ErrRenderFailed` | `report.go:36` | Infrastructure | 69 | No |
-| `ErrExportWriteFailed` | `plugin.go:56` | Infrastructure | 69 | No |
+| Sentinel               | File           | Family         | Exit | Retryable |
+| ---------------------- | -------------- | -------------- | ---- | --------- |
+| `ErrReportLoadFailed`  | `loader.go:15` | Transient      | 75   | **Yes**   |
+| `ErrRenderFailed`      | `report.go:36` | Infrastructure | 69   | No        |
+| `ErrExportWriteFailed` | `plugin.go:56` | Infrastructure | 69   | No        |
 
 **22 bare `fmt.Errorf` paths wrapped** across 13 files:
 
-| File | Paths wrapped | Pattern |
-|------|--------------|---------|
-| `loader.go` | 3 (open, decode, unmarshal) | `ErrReportLoadFailed` |
-| `plugin.go` (writeToFile) | 4 (create temp, flush, close, rename) | `ErrExportWriteFailed` |
-| `report.go` | 1 (WriteJSON encode) | `ErrRenderFailed` |
-| `export.go` | 2 (NDJSON encode, flush) | `ErrRenderFailed` + `ErrExportWriteFailed` |
-| `mermaid.go` | 2 (render, write) | `ErrRenderFailed` + `ErrExportWriteFailed` |
-| `plantuml.go` | 2 (render, write) | `ErrRenderFailed` + `ErrExportWriteFailed` |
-| `graphviz.go` | 2 (render, write) | `ErrRenderFailed` + `ErrExportWriteFailed` |
-| `d2.go` | 2 (render, write) | `ErrRenderFailed` + `ErrExportWriteFailed` |
-| `table.go` | 1 (render) | `ErrRenderFailed` |
-| `tree.go` | 4 (ASCII render+write, HTML render+write) | `ErrRenderFailed` + `ErrExportWriteFailed` |
-| `html_render.go` | 2 (marshal report, marshal metadata) | `ErrRenderFailed` |
-| `html.go` | 1 (write HTML) | `ErrExportWriteFailed` |
+| File                      | Paths wrapped                             | Pattern                                    |
+| ------------------------- | ----------------------------------------- | ------------------------------------------ |
+| `loader.go`               | 3 (open, decode, unmarshal)               | `ErrReportLoadFailed`                      |
+| `plugin.go` (writeToFile) | 4 (create temp, flush, close, rename)     | `ErrExportWriteFailed`                     |
+| `report.go`               | 1 (WriteJSON encode)                      | `ErrRenderFailed`                          |
+| `export.go`               | 2 (NDJSON encode, flush)                  | `ErrRenderFailed` + `ErrExportWriteFailed` |
+| `mermaid.go`              | 2 (render, write)                         | `ErrRenderFailed` + `ErrExportWriteFailed` |
+| `plantuml.go`             | 2 (render, write)                         | `ErrRenderFailed` + `ErrExportWriteFailed` |
+| `graphviz.go`             | 2 (render, write)                         | `ErrRenderFailed` + `ErrExportWriteFailed` |
+| `d2.go`                   | 2 (render, write)                         | `ErrRenderFailed` + `ErrExportWriteFailed` |
+| `table.go`                | 1 (render)                                | `ErrRenderFailed`                          |
+| `tree.go`                 | 4 (ASCII render+write, HTML render+write) | `ErrRenderFailed` + `ErrExportWriteFailed` |
+| `html_render.go`          | 2 (marshal report, marshal metadata)      | `ErrRenderFailed`                          |
+| `html.go`                 | 1 (write HTML)                            | `ErrExportWriteFailed`                     |
 
 ### Tier 5 — Polish (Docs, Example, Final Gates)
 
@@ -90,12 +90,12 @@ The entire go-error-family adoption plan was executed end-to-end: Strategy A (Re
 
 ### Sentinel Classification Summary (14 total)
 
-| Family | Count | Exit | Retry | Sentinels |
-|--------|-------|------|-------|-----------|
-| **Corruption** | 4 | 65 | No | `ErrEventCountMismatch`, `ErrStepCountMismatch`, `ErrStatusDrift`, `ErrCountMismatch` |
-| **Rejection** | 5+2 private | 1 | No | `ErrEmpty`, `ErrNoEvents`, `ErrOversizedLine`, `ErrWorkflowIDPathSep`, `ErrReplayNoEvents` + `errUnknownEventType`, `errUnknownPhase` |
-| **Transient** | 1 | 75 | **Yes** | `ErrReportLoadFailed` |
-| **Infrastructure** | 2 | 69 | No | `ErrRenderFailed`, `ErrExportWriteFailed` |
+| Family             | Count       | Exit | Retry   | Sentinels                                                                                                                             |
+| ------------------ | ----------- | ---- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Corruption**     | 4           | 65   | No      | `ErrEventCountMismatch`, `ErrStepCountMismatch`, `ErrStatusDrift`, `ErrCountMismatch`                                                 |
+| **Rejection**      | 5+2 private | 1    | No      | `ErrEmpty`, `ErrNoEvents`, `ErrOversizedLine`, `ErrWorkflowIDPathSep`, `ErrReplayNoEvents` + `errUnknownEventType`, `errUnknownPhase` |
+| **Transient**      | 1           | 75   | **Yes** | `ErrReportLoadFailed`                                                                                                                 |
+| **Infrastructure** | 2           | 69   | No      | `ErrRenderFailed`, `ErrExportWriteFailed`                                                                                             |
 
 ---
 
@@ -147,53 +147,53 @@ The entire go-error-family adoption plan was executed end-to-end: Strategy A (Re
 
 ### Immediate (this session's loose ends)
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 1 | Add CHANGELOG `[Unreleased]` entry for go-error-family adoption | Medium | 5 min |
-| 2 | Mark `TODO_LIST.md` go-error-family item as `[DONE]` | Low | 2 min |
-| 3 | Update `STABILITY.md` with 3 new sentinels + dependency note | Medium | 5 min |
-| 4 | Fix PRO/CONTRA report exit codes (Rejection=1, Corruption=65, Infrastructure=69, Transient=75) | Low | 5 min |
+| #   | Task                                                                                           | Impact | Effort |
+| --- | ---------------------------------------------------------------------------------------------- | ------ | ------ |
+| 1   | Add CHANGELOG `[Unreleased]` entry for go-error-family adoption                                | Medium | 5 min  |
+| 2   | Mark `TODO_LIST.md` go-error-family item as `[DONE]`                                           | Low    | 2 min  |
+| 3   | Update `STABILITY.md` with 3 new sentinels + dependency note                                   | Medium | 5 min  |
+| 4   | Fix PRO/CONTRA report exit codes (Rejection=1, Corruption=65, Infrastructure=69, Transient=75) | Low    | 5 min  |
 
 ### Error handling deepening
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 5 | Add error-path tests: inject failing `io.Writer` into all `Write*` methods, verify `ErrRenderFailed`/`ErrExportWriteFailed` wrapping | High | 45 min |
-| 6 | Add `LoadReport("nonexistent.json")` test verifying `ErrReportLoadFailed` + `errors.Is` | High | 10 min |
-| 7 | Add fuzz test for `Classify()` — adversarial wrapped error chains, deeply nested `fmt.Errorf("%w")` | Medium | 20 min |
-| 8 | Add property test: "wrapping preserves family through arbitrary depth" | Medium | 15 min |
+| #   | Task                                                                                                                                 | Impact | Effort |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------ | ------ | ------ |
+| 5   | Add error-path tests: inject failing `io.Writer` into all `Write*` methods, verify `ErrRenderFailed`/`ErrExportWriteFailed` wrapping | High   | 45 min |
+| 6   | Add `LoadReport("nonexistent.json")` test verifying `ErrReportLoadFailed` + `errors.Is`                                              | High   | 10 min |
+| 7   | Add fuzz test for `Classify()` — adversarial wrapped error chains, deeply nested `fmt.Errorf("%w")`                                  | Medium | 20 min |
+| 8   | Add property test: "wrapping preserves family through arbitrary depth"                                                               | Medium | 15 min |
 
 ### Pre-release polish
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 9 | Push coverage 92.9% → 95%+ (target: error-path branches in Write\* methods) | High | 60 min |
-| 10 | Tag v0.5.0 release (go-error-family adoption + I/O sentinels warrant a minor bump) | High | 10 min |
-| 11 | Add `StepInfo.Type()` method for API consistency with `Status.Label()` | Low | 10 min |
-| 12 | Add retry/timeout columns to table export | Medium | 20 min |
+| #   | Task                                                                               | Impact | Effort |
+| --- | ---------------------------------------------------------------------------------- | ------ | ------ |
+| 9   | Push coverage 92.9% → 95%+ (target: error-path branches in Write\* methods)        | High   | 60 min |
+| 10  | Tag v0.5.0 release (go-error-family adoption + I/O sentinels warrant a minor bump) | High   | 10 min |
+| 11  | Add `StepInfo.Type()` method for API consistency with `Status.Label()`             | Low    | 10 min |
+| 12  | Add retry/timeout columns to table export                                          | Medium | 20 min |
 
 ### Feature work (from TODO_LIST.md)
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 13 | Make table columns configurable (column-selection options) | Medium | 45 min |
-| 14 | Add diagram layout direction option (TD vs LR) | Medium | 30 min |
-| 15 | Add `writeToFile` overwrite protection (`O_EXCL` / "file exists" error) | Low | 15 min |
-| 16 | Add benchmarks for WriteD2, WriteTable, WriteTree | Medium | 30 min |
-| 17 | Add fuzz tests for diagram ID sanitization | Medium | 25 min |
-| 18 | Add integration/round-trip tests (report → JSON → Load → diagram → verify) | High | 45 min |
-| 19 | Surface name collisions in diagrams (warn when `String()` collides) | Low | 20 min |
-| 20 | Offer `Name(step)` fallback helper | Low | 15 min |
+| #   | Task                                                                       | Impact | Effort |
+| --- | -------------------------------------------------------------------------- | ------ | ------ |
+| 13  | Make table columns configurable (column-selection options)                 | Medium | 45 min |
+| 14  | Add diagram layout direction option (TD vs LR)                             | Medium | 30 min |
+| 15  | Add `writeToFile` overwrite protection (`O_EXCL` / "file exists" error)    | Low    | 15 min |
+| 16  | Add benchmarks for WriteD2, WriteTable, WriteTree                          | Medium | 30 min |
+| 17  | Add fuzz tests for diagram ID sanitization                                 | Medium | 25 min |
+| 18  | Add integration/round-trip tests (report → JSON → Load → diagram → verify) | High   | 45 min |
+| 19  | Surface name collisions in diagrams (warn when `String()` collides)        | Low    | 20 min |
+| 20  | Offer `Name(step)` fallback helper                                         | Low    | 15 min |
 
 ### Strategic (from ROADMAP.md)
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 21 | Migrate `justfile` → `flake.nix` | Medium | 60 min |
-| 22 | Split library into core + visualization sub-modules | High | 2-4 hours |
-| 23 | Streaming NDJSON export option | High | 2 hours |
-| 24 | OpenTelemetry span bridge | High | 3 hours |
-| 25 | `encoding/json/v2` migration | Medium | 1 hour |
+| #   | Task                                                | Impact | Effort    |
+| --- | --------------------------------------------------- | ------ | --------- |
+| 21  | Migrate `justfile` → `flake.nix`                    | Medium | 60 min    |
+| 22  | Split library into core + visualization sub-modules | High   | 2-4 hours |
+| 23  | Streaming NDJSON export option                      | High   | 2 hours   |
+| 24  | OpenTelemetry span bridge                           | High   | 3 hours   |
+| 25  | `encoding/json/v2` migration                        | Medium | 1 hour    |
 
 ---
 

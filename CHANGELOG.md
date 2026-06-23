@@ -41,7 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Tests
 
-- 18 error-path tests covering all Write*/Export*/Load* sentinel wrapping paths
+- 18 error-path tests covering all Write*/Export*/Load\* sentinel wrapping paths
   with failing `io.Writer` injection and unwritable directories.
 
 ## [0.4.0] - 2026-06-22

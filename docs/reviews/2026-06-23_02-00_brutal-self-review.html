@@ -782,6 +782,7 @@
       }
     </style>
   </head>
+  <body>
     <div class="top-bar">
       <span>BRUTAL SELF-REVIEW</span>
       <span>2026-06-23</span>
@@ -814,7 +815,10 @@
           </div>
           <div class="hero-badge">Brutal Self-Review</div>
           <h1>go-workflow-auditlog</h1>
-          <p class="hero-subtitle">Honest reflection on v0.5.0 — what was missed, what was stupid, what was fixed, and what remains.</p>
+          <p class="hero-subtitle">
+            Honest reflection on v0.5.0 — what was missed, what was stupid, what was fixed, and what
+            remains.
+          </p>
         </div>
 
         <h2 id="summary"><span class="num">00</span>Summary</h2>
@@ -841,39 +845,76 @@
 
         <div class="card card-problem">
           <h4>doc.go taught deprecated API to every new user</h4>
-          <p>The package doc comment — the <strong>first code example anyone sees</strong> — used <code>audit.ExportToFile("audit.json")</code> while that method was deprecated. The quick-start example lied about the correct API. Fixed: now uses <code>ExportJSON</code>.</p>
+          <p>
+            The package doc comment — the <strong>first code example anyone sees</strong> — used
+            <code>audit.ExportToFile("audit.json")</code> while that method was deprecated. The
+            quick-start example lied about the correct API. Fixed: now uses <code>ExportJSON</code>.
+          </p>
         </div>
 
         <div class="card card-problem">
           <h4>20+ internal references to deprecated methods</h4>
-          <p>After deprecating <code>WriteReportJSON</code>, <code>WriteEventsNDJSON</code>, <code>ExportToFile</code>, <code>ExportEventsToNDJSON</code>, the internal codebase still used them in tests, comments, README, DOMAIN_LANGUAGE.md, FEATURES.md, and STABILITY.md. The deprecation was incomplete — we deprecated the methods but didn't eat our own dog food.</p>
+          <p>
+            After deprecating <code>WriteReportJSON</code>, <code>WriteEventsNDJSON</code>,
+            <code>ExportToFile</code>, <code>ExportEventsToNDJSON</code>, the internal codebase
+            still used them in tests, comments, README, DOMAIN_LANGUAGE.md, FEATURES.md, and
+            STABILITY.md. The deprecation was incomplete — we deprecated the methods but didn't eat
+            our own dog food.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>No gosec in CI</h4>
-          <p>CI has <code>govulncheck</code> (dependency CVEs) but not <code>gosec</code> (code-level security analysis). The how-to-golang skill recommends both. govulncheck catches vulnerable dependencies; gosec catches insecure code patterns. Not blocking but should be added.</p>
+          <p>
+            CI has <code>govulncheck</code> (dependency CVEs) but not <code>gosec</code> (code-level
+            security analysis). The how-to-golang skill recommends both. govulncheck catches
+            vulnerable dependencies; gosec catches insecure code patterns. Not blocking but should
+            be added.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>encoding/json v2 not available</h4>
-          <p>The how-to-golang skill says Go 1.25+ should use <code>encoding/json/v2</code>, but it is <strong>not in the Go 1.26 standard library</strong>. The JSON v2 proposal has not been accepted into stdlib. This is blocked on upstream Go — documented but cannot be implemented.</p>
+          <p>
+            The how-to-golang skill says Go 1.25+ should use <code>encoding/json/v2</code>, but it
+            is <strong>not in the Go 1.26 standard library</strong>. The JSON v2 proposal has not
+            been accepted into stdlib. This is blocked on upstream Go — documented but cannot be
+            implemented.
+          </p>
         </div>
 
         <h2 id="stupid"><span class="num">02</span>What Is Stupid That We Do Anyway?</h2>
 
         <div class="card card-problem">
           <h4>Deprecated aliases for an ALPHA library — FIXED</h4>
-          <p>Four deprecated backward-compat aliases (<code>WriteReportJSON</code>, <code>WriteEventsNDJSON</code>, <code>ExportToFile</code>, <code>ExportEventsToNDJSON</code>) existed in an ALPHA library. Nobody has a production dependency on these. They added noise to IDE autocomplete, confused new users, and were never in a released v1.0. <strong>Removed.</strong></p>
+          <p>
+            Four deprecated backward-compat aliases (<code>WriteReportJSON</code>,
+            <code>WriteEventsNDJSON</code>, <code>ExportToFile</code>,
+            <code>ExportEventsToNDJSON</code>) existed in an ALPHA library. Nobody has a production
+            dependency on these. They added noise to IDE autocomplete, confused new users, and were
+            never in a released v1.0. <strong>Removed.</strong>
+          </p>
         </div>
 
         <div class="card card-problem">
           <h4>Two benchmark files with nearly identical names — FIXED</h4>
-          <p><code>benchmarks_test.go</code> (runtime overhead benchmarks) and <code>benchmark_test.go</code> (export rendering benchmarks + godoc examples). The names differ by one letter. This is a split brain — anyone searching for benchmarks would find both and not know which is which. <strong>Consolidated into <code>benchmarks_test.go</code></strong> with clear section headers.</p>
+          <p>
+            <code>benchmarks_test.go</code> (runtime overhead benchmarks) and
+            <code>benchmark_test.go</code> (export rendering benchmarks + godoc examples). The names
+            differ by one letter. This is a split brain — anyone searching for benchmarks would find
+            both and not know which is which.
+            <strong>Consolidated into <code>benchmarks_test.go</code></strong> with clear section
+            headers.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>result symlink in working tree — FIXED</h4>
-          <p>The nix build output symlink (<code>result → /nix/store/...</code>) sat in the repo root. It's gitignored but BuildFlow flags it as ERROR. <strong>Removed.</strong> It will reappear on <code>nix build</code> — this is expected nix behavior.</p>
+          <p>
+            The nix build output symlink (<code>result → /nix/store/...</code>) sat in the repo
+            root. It's gitignored but BuildFlow flags it as ERROR. <strong>Removed.</strong> It will
+            reappear on <code>nix build</code> — this is expected nix behavior.
+          </p>
         </div>
 
         <h2 id="split"><span class="num">03</span>Split Brains</h2>
@@ -881,10 +922,19 @@
         <div class="issue issue-critical">
           <span class="severity severity-critical">Fixed</span>
           <h3>Deprecated methods used in our own codebase</h3>
-          <div class="where">doc.go, README.md, loader_test.go, replay_test.go, coverage_test.go, auditlog_test.go, example_test.go, loader.go, replay.go</div>
-          <p>We deprecated <code>WriteReportJSON</code> etc. but 20+ internal references kept using them. The deprecation comment said "kept for backward compatibility" but we were the only consumers. Classic split brain: the code says "don't use this" while the code uses this.</p>
+          <div class="where">
+            doc.go, README.md, loader_test.go, replay_test.go, coverage_test.go, auditlog_test.go,
+            example_test.go, loader.go, replay.go
+          </div>
+          <p>
+            We deprecated <code>WriteReportJSON</code> etc. but 20+ internal references kept using
+            them. The deprecation comment said "kept for backward compatibility" but we were the
+            only consumers. Classic split brain: the code says "don't use this" while the code uses
+            this.
+          </p>
           <div class="callout callout-solution">
-            <strong>Fixed</strong> — All references updated to canonical names. Deprecated methods deleted.
+            <strong>Fixed</strong> — All references updated to canonical names. Deprecated methods
+            deleted.
           </div>
         </div>
 
@@ -892,7 +942,11 @@
           <span class="severity severity-nice">Fixed</span>
           <h3>benchmark_test.go vs benchmarks_test.go</h3>
           <div class="where">benchmark_test.go, benchmarks_test.go</div>
-          <p>Two files with names differing by one letter, serving different purposes (runtime overhead vs export rendering). Creating the second file without noticing the first was a naming collision.</p>
+          <p>
+            Two files with names differing by one letter, serving different purposes (runtime
+            overhead vs export rendering). Creating the second file without noticing the first was a
+            naming collision.
+          </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> — Merged into one file with clear section headers.
           </div>
@@ -902,7 +956,10 @@
           <span class="severity severity-nice">Fixed</span>
           <h3>doc.go vs plugin.go disagreement</h3>
           <div class="where">doc.go:21, plugin.go:190</div>
-          <p>doc.go recommended <code>ExportToFile</code> in the quick-start example while plugin.go marked it deprecated. The first thing new users read contradicted the API documentation.</p>
+          <p>
+            doc.go recommended <code>ExportToFile</code> in the quick-start example while plugin.go
+            marked it deprecated. The first thing new users read contradicted the API documentation.
+          </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> — doc.go now uses <code>ExportJSON</code>.
           </div>
@@ -912,53 +969,108 @@
 
         <div class="card card-problem">
           <h4>Deprecated API aliases — ghost system eliminated</h4>
-          <p>The four deprecated aliases were a ghost system: code that exists for an imagined future need (backward compatibility with nonexistent consumers). They added:</p>
+          <p>
+            The four deprecated aliases were a ghost system: code that exists for an imagined future
+            need (backward compatibility with nonexistent consumers). They added:
+          </p>
           <ul>
             <li>4 methods of noise to the Auditor API surface</li>
             <li>Confusion to IDE autocomplete (8 methods for 4 operations)</li>
             <li>Maintenance burden — any new Write* method needed a deprecated alias</li>
             <li>A false signal that this library has real consumers depending on the old names</li>
           </ul>
-          <p><strong>Status: Eliminated.</strong> For an ALPHA library, breaking changes are expected. The deprecated aliases were dead weight.</p>
+          <p>
+            <strong>Status: Eliminated.</strong> For an ALPHA library, breaking changes are
+            expected. The deprecated aliases were dead weight.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>helpers.go utilities — borderline ghost</h4>
-          <p><code>CheckNoClobber</code>, <code>HasPointerAddress</code>, and <code>NameCollisions</code> are standalone utilities not integrated into the Export pipeline. They're "here if you need them" functions. <code>CheckNoClobber</code> in particular could be integrated into Export methods as an opt-in via Config, but currently sits as an orphan utility.</p>
-          <p><strong>Assessment:</strong> These are legitimate library utilities. Not ghost systems — they're documented, tested, and provide real value. The integration question (should CheckNoClobber be a Config option?) is a design decision, not a ghost.</p>
+          <p>
+            <code>CheckNoClobber</code>, <code>HasPointerAddress</code>, and
+            <code>NameCollisions</code> are standalone utilities not integrated into the Export
+            pipeline. They're "here if you need them" functions. <code>CheckNoClobber</code> in
+            particular could be integrated into Export methods as an opt-in via Config, but
+            currently sits as an orphan utility.
+          </p>
+          <p>
+            <strong>Assessment:</strong> These are legitimate library utilities. Not ghost systems —
+            they're documented, tested, and provide real value. The integration question (should
+            CheckNoClobber be a Config option?) is a design decision, not a ghost.
+          </p>
         </div>
 
         <h2 id="better"><span class="num">05</span>What Could Be Better?</h2>
 
         <div class="card card-solution">
           <h4>Type model: denormalized status counts</h4>
-          <p><code>WorkflowReport</code> has 6 manually-denormalized status count fields (<code>SucceededCount</code>, <code>FailedCount</code>, <code>SkippedCount</code>, <code>CanceledCount</code>, <code>PendingCount</code>, <code>RunningCount</code>). The <code>finalizeDenormalized</code> function has a 12-line switch statement to recompute them. Adding a new status requires touching 4+ files.</p>
-          <p><strong>Verdict: Justified.</strong> These fields exist for JSON consumers (Python, JS, shell scripts) that can't call Go methods. The flat fields are the right trade-off for serialization. A <code>StatusCount(status StepStatus) int</code> method for programmatic access would be a nice addition but is not urgent.</p>
+          <p>
+            <code>WorkflowReport</code> has 6 manually-denormalized status count fields
+            (<code>SucceededCount</code>, <code>FailedCount</code>, <code>SkippedCount</code>,
+            <code>CanceledCount</code>, <code>PendingCount</code>, <code>RunningCount</code>). The
+            <code>finalizeDenormalized</code> function has a 12-line switch statement to recompute
+            them. Adding a new status requires touching 4+ files.
+          </p>
+          <p>
+            <strong>Verdict: Justified.</strong> These fields exist for JSON consumers (Python, JS,
+            shell scripts) that can't call Go methods. The flat fields are the right trade-off for
+            serialization. A <code>StatusCount(status StepStatus) int</code> method for programmatic
+            access would be a nice addition but is not urgent.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Duration uses *float64 (nullable pointer)</h4>
-          <p><code>DurationMs *float64</code> uses a nullable pointer for "duration not measured" semantics. This is awkward in Go — callers must check for nil. A dedicated <code>Duration</code> value type with <code>Valid bool</code> + <code>Ms float64</code> would be more idiomatic, but it changes the JSON schema.</p>
-          <p><strong>Verdict: Acceptable for now.</strong> The pointer pattern is standard Go for nullable JSON fields. Changing it is a breaking schema change for marginal ergonomic benefit.</p>
+          <p>
+            <code>DurationMs *float64</code> uses a nullable pointer for "duration not measured"
+            semantics. This is awkward in Go — callers must check for nil. A dedicated
+            <code>Duration</code> value type with <code>Valid bool</code> +
+            <code>Ms float64</code> would be more idiomatic, but it changes the JSON schema.
+          </p>
+          <p>
+            <strong>Verdict: Acceptable for now.</strong> The pointer pattern is standard Go for
+            nullable JSON fields. Changing it is a breaking schema change for marginal ergonomic
+            benefit.
+          </p>
         </div>
 
         <div class="card">
           <h4>encoding/json v1 on Go 1.26</h4>
-          <p>The how-to-golang skill recommends <code>encoding/json/v2</code> for Go 1.25+, but this package is <strong>not in the Go 1.26 standard library</strong>. The JSON v2 proposal (go-json-experiment) has not been accepted into stdlib. Migration is blocked on upstream Go.</p>
-          <p><strong>Verdict: Blocked.</strong> Document in ROADMAP. No action possible until Go stdlib ships v2.</p>
+          <p>
+            The how-to-golang skill recommends <code>encoding/json/v2</code> for Go 1.25+, but this
+            package is <strong>not in the Go 1.26 standard library</strong>. The JSON v2 proposal
+            (go-json-experiment) has not been accepted into stdlib. Migration is blocked on upstream
+            Go.
+          </p>
+          <p>
+            <strong>Verdict: Blocked.</strong> Document in ROADMAP. No action possible until Go
+            stdlib ships v2.
+          </p>
         </div>
 
         <h2 id="lie"><span class="num">06</span>Did I Lie?</h2>
 
         <div class="card card-problem">
           <h4>YES — doc.go lied about the correct API</h4>
-          <p>The package doc comment showed <code>audit.ExportToFile("audit.json")</code> as the recommended way to export a report. This method was deprecated. Every new user who read the godoc was taught the wrong API.</p>
-          <p>This is the most damaging kind of lie: the documentation contradicts the code's own deprecation warnings. <strong>Fixed.</strong></p>
+          <p>
+            The package doc comment showed <code>audit.ExportToFile("audit.json")</code> as the
+            recommended way to export a report. This method was deprecated. Every new user who read
+            the godoc was taught the wrong API.
+          </p>
+          <p>
+            This is the most damaging kind of lie: the documentation contradicts the code's own
+            deprecation warnings. <strong>Fixed.</strong>
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Coverage claim verified: 93.9%</h4>
-          <p>Verified: <code>go test -race -coverprofile=cover.out -covermode=atomic ./...</code> reports 93.9% for the auditlog package. 244 tests pass. No lie here.</p>
+          <p>
+            Verified:
+            <code>go test -race -coverprofile=cover.out -covermode=atomic ./...</code> reports 93.9%
+            for the auditlog package. 244 tests pass. No lie here.
+          </p>
         </div>
 
         <h2 id="testing"><span class="num">07</span>Testing Assessment</h2>
@@ -986,9 +1098,19 @@
           <h4>What can be better</h4>
           <ul>
             <li><strong>Add gosec to CI</strong> — currently only govulncheck runs</li>
-            <li><strong>Remaining 6.1%</strong> is in defensive error branches (e.g. <code>json.Marshal</code> failures on valid types). Hard to test without mocking stdlib.</li>
-            <li><strong>Property-based tests</strong> exist for Diff algebra and classification — good. Could add property tests for the replay/rebuild round-trip.</li>
-            <li><strong>No integration test for the HTML dashboard</strong> in a browser — golden file test checks structure but not rendering correctness.</li>
+            <li>
+              <strong>Remaining 6.1%</strong> is in defensive error branches (e.g.
+              <code>json.Marshal</code> failures on valid types). Hard to test without mocking
+              stdlib.
+            </li>
+            <li>
+              <strong>Property-based tests</strong> exist for Diff algebra and classification —
+              good. Could add property tests for the replay/rebuild round-trip.
+            </li>
+            <li>
+              <strong>No integration test for the HTML dashboard</strong> in a browser — golden file
+              test checks structure but not rendering correctness.
+            </li>
           </ul>
         </div>
 
@@ -999,21 +1121,30 @@
             <div class="check">+</div>
             <div class="text">
               <strong>Removed 4 deprecated API aliases</strong>
-              <span>WriteReportJSON, WriteEventsNDJSON, ExportToFile, ExportEventsToNDJSON — deleted from plugin.go. All 20+ internal references updated across 14 files.</span>
+              <span
+                >WriteReportJSON, WriteEventsNDJSON, ExportToFile, ExportEventsToNDJSON — deleted
+                from plugin.go. All 20+ internal references updated across 14 files.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Consolidated benchmark files</strong>
-              <span>Merged benchmark_test.go into benchmarks_test.go. One file, three clear sections: Runtime Benchmarks, Godoc Examples, Export Benchmarks.</span>
+              <span
+                >Merged benchmark_test.go into benchmarks_test.go. One file, three clear sections:
+                Runtime Benchmarks, Godoc Examples, Export Benchmarks.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Fixed all documentation</strong>
-              <span>doc.go, README.md, DOMAIN_LANGUAGE.md, FEATURES.md, STABILITY.md, CHANGELOG.md — all references to deprecated methods updated to canonical names.</span>
+              <span
+                >doc.go, README.md, DOMAIN_LANGUAGE.md, FEATURES.md, STABILITY.md, CHANGELOG.md —
+                all references to deprecated methods updated to canonical names.</span
+              >
             </div>
           </div>
           <div class="strength">
@@ -1072,11 +1203,14 @@
 
         <div class="callout callout-warning">
           <strong>Blocked items</strong>
-          <code>encoding/json/v2</code> migration is blocked on the Go stdlib accepting the JSON v2 proposal. Configurable table columns and diagram layout direction are blocked on upstream go-output support. These are documented in ROADMAP.md.
+          <code>encoding/json/v2</code> migration is blocked on the Go stdlib accepting the JSON v2
+          proposal. Configurable table columns and diagram layout direction are blocked on upstream
+          go-output support. These are documented in ROADMAP.md.
         </div>
 
         <footer class="footer">
-          Generated 2026-06-23 &middot; Reviewed against v0.5.0 + 3 post-review commits &middot; 244 tests, 93.9% coverage, 0 lint issues
+          Generated 2026-06-23 &middot; Reviewed against v0.5.0 + 3 post-review commits &middot; 244
+          tests, 93.9% coverage, 0 lint issues
         </footer>
       </main>
     </div>
@@ -1086,20 +1220,23 @@
       if (window.IntersectionObserver) {
         const links = document.querySelectorAll('[data-nav] a[href^="#"]');
         const sections = new Map();
-        links.forEach(link => {
-          const id = link.getAttribute('href').slice(1);
+        links.forEach((link) => {
+          const id = link.getAttribute("href").slice(1);
           const el = document.getElementById(id);
           if (el) sections.set(el, link);
         });
-        const observer = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              links.forEach(l => l.style.color = '');
-              const link = sections.get(entry.target);
-              if (link) link.style.color = 'var(--accent)';
-            }
-          });
-        }, { rootMargin: '-20% 0px -60% 0px' });
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                links.forEach((l) => (l.style.color = ""));
+                const link = sections.get(entry.target);
+                if (link) link.style.color = "var(--accent)";
+              }
+            });
+          },
+          { rootMargin: "-20% 0px -60% 0px" },
+        );
         sections.forEach((_, el) => observer.observe(el));
       }
     </script>
