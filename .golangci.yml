@@ -2,6 +2,12 @@ version: "2"
 run:
   timeout: 5m
   go: 1.26.3
+  build-tags:
+    - goexperiment.arenas
+    - goexperiment.goroutineleakprofile
+    - goexperiment.jsonv2
+    - goexperiment.runtimesecret
+    - goexperiment.simd
   allow-parallel-runners: true
   allow-serial-runners: true
   issues-exit-code: 1
@@ -126,9 +132,6 @@ linters:
     depguard:
       rules:
         main:
-          list-mode: strict
-          files:
-            - "$all"
           allow:
             - $gostd
             - github.com/Azure/go-workflow
@@ -145,6 +148,11 @@ linters:
             - github.com/larsartmann/go-output/tree
             - github.com/larsartmann/go-error-family
             - github.com/larsartmann/go-workflow-auditlog
+          files:
+            - $all
+          list-mode: strict
+    exhaustive:
+      default-signifies-exhaustive: true
     exhaustruct:
       exclude:
         - os/exec.Cmd
@@ -158,8 +166,6 @@ linters:
         - github.com/larsartmann/go-output/d2.D2NodeStyle
         - github.com/larsartmann/go-output/d2.D2StrokeStyle
         - github.com/larsartmann/go-workflow-auditlog.*
-    exhaustive:
-      default-signifies-exhaustive: true
     ginkgolinter:
       forbid-focus-container: true
       forbid-spec-pollution: true
@@ -175,6 +181,8 @@ linters:
         - anon
         - stdlib
         - generic
+    makezero:
+      always: true
     revive:
       rules:
         - disabled: true
@@ -213,6 +221,8 @@ linters:
         - rs
       ignore-type-assert-ok: true
     wrapcheck:
+      ignore-package-globs:
+        - github.com/larsartmann/go-workflow-auditlog
       ignore-sigs:
         - .Errorf(
         - errors.New(
@@ -221,8 +231,6 @@ linters:
         - .Wrapf(
         - .WithMessage(
         - .WithMessagef(
-      ignore-package-globs:
-        - github.com/larsartmann/go-workflow-auditlog
   exclusions:
     generated: lax
     rules:

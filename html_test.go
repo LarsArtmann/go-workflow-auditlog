@@ -453,19 +453,7 @@ func TestWriteHTML_Determinism(t *testing.T) {
 func TestWriteHTML_StructuralIntegrity(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("structure-test")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	output := buf.String()
+	output := writeSingleStepHTML(t, newSucceed("structure-test"))
 	assertHTMLStructure(t, output)
 }
 
@@ -525,19 +513,7 @@ func TestWriteHTML_FailureBanner_WhenFailed(t *testing.T) {
 func TestWriteHTML_FailureBanner_HiddenWhenSucceeded(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("happy-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	output := buf.String()
+	output := writeSingleStepHTML(t, newSucceed("happy-step"))
 
 	assertContains(t, output, `"workflow_succeeded":true`, "expected workflow_succeeded=true in JSON")
 	assertContains(t, output, "failure-banner", "failure-banner template element should still exist (hidden by JS)")
@@ -546,19 +522,7 @@ func TestWriteHTML_FailureBanner_HiddenWhenSucceeded(t *testing.T) {
 func TestWriteHTML_ErrorColumn(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	bad := newFail("crash-step", "disk full")
-	w.Add(flow.Step(bad))
-	runWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	output := buf.String()
+	output := writeSingleStepHTML(t, newFail("crash-step", "disk full"))
 
 	assertContains(t, output, ">Error</th>", "expected Error column header in template")
 	assertContains(t, output, `colspan="9"`, "expected colspan=9 for empty state row")
@@ -569,19 +533,7 @@ func TestWriteHTML_ErrorColumn(t *testing.T) {
 func TestWriteHTML_WorkflowStatusBadge(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("pass-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	output := buf.String()
+	output := writeSingleStepHTML(t, newSucceed("pass-step"))
 
 	assertContains(t, output, "workflow-status", "expected workflow-status badge element in template")
 	assertContains(t, output, `"workflow_succeeded":true`, "expected success status in JSON")
@@ -592,19 +544,7 @@ func TestWriteHTML_WorkflowStatusBadge(t *testing.T) {
 func TestWriteHTML_GanttChart(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("timed-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	output := buf.String()
+	output := writeSingleStepHTML(t, newSucceed("timed-step"))
 
 	assertContains(t, output, "gantt-axis", "expected gantt-axis CSS in template")
 	assertContains(t, output, "gantt-grid", "expected gantt-grid CSS in template")
@@ -640,19 +580,7 @@ func TestWriteHTML_ImpactBadge(t *testing.T) {
 func TestWriteHTML_HumanizedDurations(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("duration-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	output := buf.String()
+	output := writeSingleStepHTML(t, newSucceed("duration-step"))
 
 	assertContains(t, output, "function humanizeDuration", "expected humanizeDuration function definition")
 	assertContains(
@@ -667,19 +595,7 @@ func TestWriteHTML_HumanizedDurations(t *testing.T) {
 func TestWriteHTML_GraphFailedNodeDot(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	bad := newFail("graph-fail", "node error")
-	w.Add(flow.Step(bad))
-	runWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	output := buf.String()
+	output := writeSingleStepHTML(t, newFail("graph-fail", "node error"))
 
 	assertContains(t, output, `n.status === "failed"`, "expected failed status check for graph error dot")
 }
@@ -687,19 +603,7 @@ func TestWriteHTML_GraphFailedNodeDot(t *testing.T) {
 func TestWriteHTML_TreeInlineError(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	bad := newFail("tree-fail", "tree error here")
-	w.Add(flow.Step(bad))
-	runWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	output := buf.String()
+	output := writeSingleStepHTML(t, newFail("tree-fail", "tree error here"))
 
 	assertContains(t, output, "scope-node-error", "expected scope-node-error CSS class for tree inline errors")
 	assertContains(t, output, "has-failure", "expected has-failure class for failed tree nodes")

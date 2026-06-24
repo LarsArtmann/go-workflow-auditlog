@@ -319,6 +319,29 @@ func runWorkflow(t *testing.T, a *auditlog.Auditor, w *flow.Workflow) {
 	a.Snapshot(w)
 }
 
+// writeSingleStepHTML runs a workflow containing exactly the given step and
+// renders the resulting audit log to an HTML buffer, returning the rendered
+// string. Centralizes the
+// `newAuditAndWorkflow + w.Add(flow.Step(step)) + runWorkflow + WriteHTML`
+// boilerplate shared by 8 dashboard tests that each assert on rendered HTML
+// for a single-step workflow.
+func writeSingleStepHTML(t *testing.T, step flow.Steper) string {
+	t.Helper()
+
+	a, w := newAuditAndWorkflow(t)
+	w.Add(flow.Step(step))
+	runWorkflow(t, a, w)
+
+	var buf strings.Builder
+
+	err := a.Report().WriteHTML(&buf)
+	if err != nil {
+		t.Fatalf("WriteHTML: %v", err)
+	}
+
+	return buf.String()
+}
+
 // --- Tests ---
 
 func TestNew_DefaultWorkflowID(t *testing.T) {
