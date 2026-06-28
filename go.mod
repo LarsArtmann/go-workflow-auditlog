@@ -1,12 +1,12 @@
 module github.com/larsartmann/go-workflow-auditlog
 
-go 1.26.3
+go 1.26.4
 
 require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/larsartmann/go-error-family v0.5.1
-	github.com/larsartmann/go-output v0.18.0
+	github.com/larsartmann/go-output v0.19.0
 	github.com/larsartmann/go-output/d2 v0.18.0
 	github.com/larsartmann/go-output/delimited v0.18.0
 	github.com/larsartmann/go-output/graph v0.18.0
