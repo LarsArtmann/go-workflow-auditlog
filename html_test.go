@@ -389,20 +389,20 @@ func TestWriteHTML_HighFanOut(t *testing.T) {
 	t.Parallel()
 
 	dur := 2.0
-	steps := make([]auditlog.StepInfo, 11)
-	steps[0] = auditlog.StepInfo{
+	steps := make([]auditlog.StepInfo, 0, 11)
+	steps = append(steps, auditlog.StepInfo{
 		StepRef:    auditlog.StepRef{Name: "fan-root", StepType: "RootStep"},
 		Status:     auditlog.StepStatusSucceeded,
 		DurationMs: &dur,
-	}
+	})
 
-	for i := 1; i <= 10; i++ {
-		steps[i] = auditlog.StepInfo{
-			StepRef:      auditlog.StepRef{Name: fmt.Sprintf("fan-%d", i-1), StepType: "LeafStep"},
+	for i := range 10 {
+		steps = append(steps, auditlog.StepInfo{
+			StepRef:      auditlog.StepRef{Name: fmt.Sprintf("fan-%d", i), StepType: "LeafStep"},
 			Status:       auditlog.StepStatusSucceeded,
 			DurationMs:   &dur,
 			Dependencies: []auditlog.StepRef{{Name: "fan-root"}},
-		}
+		})
 	}
 
 	report := auditlog.WorkflowReport{

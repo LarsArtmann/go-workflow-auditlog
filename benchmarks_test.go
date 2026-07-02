@@ -237,12 +237,12 @@ func ExampleWorkflowReport_Filtered() {
 
 // benchmarkReport builds a report with n steps for benchmarking.
 func benchmarkReport(n int) auditlog.WorkflowReport {
-	steps := make([]auditlog.StepInfo, n)
+	steps := make([]auditlog.StepInfo, 0, n)
 
-	for i := range steps {
+	for i := range n {
 		dur := float64(i * 100)
 
-		steps[i] = auditlog.StepInfo{
+		steps = append(steps, auditlog.StepInfo{
 			StepRef:      auditlog.StepRef{Name: "step-" + itoa(i), StepType: "BenchStep"},
 			Status:       auditlog.StepStatusSucceeded,
 			AttemptCount: 1,
@@ -251,7 +251,7 @@ func benchmarkReport(n int) auditlog.WorkflowReport {
 			DurationMs:   &dur,
 			Dependencies: deps(i),
 			Dependents:   dependents(i, n),
-		}
+		})
 	}
 
 	return auditlog.WorkflowReport{

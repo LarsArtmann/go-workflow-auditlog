@@ -6,16 +6,26 @@ import (
 	"github.com/larsartmann/go-output/daghtml"
 )
 
-// stepStatusDAGColor maps a StepStatus to the CSS color token used by the
-// daghtml visualization. Mirrors the status color mapping in the former
-// dashboard.js renderGraph() function.
-var stepStatusDAGColor = map[StepStatus]string{
-	StepStatusSucceeded: "var(--success)",
-	StepStatusFailed:    "var(--error)",
-	StepStatusRunning:   "var(--warning)",
-	StepStatusPending:   "var(--text-muted)",
-	StepStatusCanceled:  "var(--transient)",
-	StepStatusSkipped:   "var(--text-dim)",
+// stepStatusDAGColor returns the CSS color token used by the daghtml
+// visualization for the given StepStatus. Mirrors the status color mapping
+// in the former dashboard.js renderGraph() function.
+func stepStatusDAGColor(status StepStatus) string {
+	switch status {
+	case StepStatusSucceeded:
+		return "var(--success)"
+	case StepStatusFailed:
+		return "var(--error)"
+	case StepStatusRunning:
+		return "var(--warning)"
+	case StepStatusPending:
+		return "var(--text-muted)"
+	case StepStatusCanceled:
+		return "var(--transient)"
+	case StepStatusSkipped:
+		return "var(--text-dim)"
+	default:
+		return "var(--accent)"
+	}
 }
 
 // buildDAGHTML converts a WorkflowReport into a daghtml.DAG suitable for the
@@ -35,10 +45,7 @@ func buildDAGHTML(report WorkflowReport) daghtml.DAG {
 			label = icon + " " + label
 		}
 
-		color := stepStatusDAGColor[step.Status]
-		if color == "" {
-			color = "var(--accent)"
-		}
+		color := stepStatusDAGColor(step.Status)
 
 		dag.Nodes = append(dag.Nodes, daghtml.Node{
 			ID:      step.Name,

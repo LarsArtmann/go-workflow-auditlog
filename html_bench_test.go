@@ -12,18 +12,19 @@ import (
 // 1000-step report — the worst-case payload for the JSON marshal + template
 // formatting pipeline.
 func BenchmarkRenderHTML_LargeReport(b *testing.B) {
-	steps := make([]auditlog.StepInfo, 1000)
-	for i := range steps {
+	steps := make([]auditlog.StepInfo, 0, 1000)
+
+	for i := range 1000 {
 		dur := float64(i) * 0.1
 
-		steps[i] = auditlog.StepInfo{
+		steps = append(steps, auditlog.StepInfo{
 			StepRef:      auditlog.StepRef{Name: fmt.Sprintf("step-%04d", i), StepType: "BenchStep"},
 			StepID:       i + 1,
 			Status:       auditlog.StepStatusSucceeded,
 			AttemptCount: 1,
 			DurationMs:   &dur,
 			Dependencies: []auditlog.StepRef{{Name: fmt.Sprintf("step-%04d", i-1)}},
-		}
+		})
 	}
 
 	steps[0].Dependencies = nil // root step has no deps

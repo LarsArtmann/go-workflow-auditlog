@@ -12,16 +12,16 @@ import (
 // graphNodesToD2 converts go-output GraphNodes to D2Nodes, preserving IDs,
 // labels, and fill/font colors from GraphStyle.
 func graphNodesToD2(nodes []output.GraphNode) []d2.D2Node {
-	result := make([]d2.D2Node, len(nodes))
-	for i, node := range nodes {
-		result[i] = d2.D2Node{
+	result := make([]d2.D2Node, 0, len(nodes))
+	for _, node := range nodes {
+		result = append(result, d2.D2Node{
 			ID:    output.NewBrandedID[output.D2NodeIDBrand](node.ID.Get()),
 			Label: output.NewBrandedID[output.D2NodeLabelBrand](node.Label.Get()),
 			Style: d2.D2NodeStyle{
 				Fill:          node.Style.Fill,
 				D2StrokeStyle: d2.D2StrokeStyle{FontColor: node.Style.FontColor},
 			},
-		}
+		})
 	}
 
 	return result
@@ -29,12 +29,12 @@ func graphNodesToD2(nodes []output.GraphNode) []d2.D2Node {
 
 // graphEdgesToD2 converts go-output GraphEdges to D2Edges, preserving IDs.
 func graphEdgesToD2(edges []output.GraphEdge) []d2.D2Edge {
-	result := make([]d2.D2Edge, len(edges))
-	for i, edge := range edges {
-		result[i] = d2.D2Edge{
+	result := make([]d2.D2Edge, 0, len(edges))
+	for _, edge := range edges {
+		result = append(result, d2.D2Edge{
 			From: output.NewBrandedID[output.D2NodeIDBrand](edge.From.Get()),
 			To:   output.NewBrandedID[output.D2NodeIDBrand](edge.To.Get()),
-		}
+		})
 	}
 
 	return result

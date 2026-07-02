@@ -17,7 +17,7 @@ const runIDBytes = 16
 // for any practical workload and compatible with observability tooling that
 // keys on trace-style IDs.
 func newRunID() RunID {
-	b := make([]byte, runIDBytes)
+	b := make([]byte, runIDBytes) //nolint:makezero // crypto/rand.Read fills the buffer; zero-init is required
 	// crypto/rand.Read is documented to always succeed with a nil error when
 	// the slice is non-empty; a failure would indicate a broken entropy source.
 	_, _ = rand.Read(b)

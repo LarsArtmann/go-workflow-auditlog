@@ -175,9 +175,9 @@ func stepNamesEqual(a, b []auditlog.StepDiff) bool {
 }
 
 func stepDiffNames(diffs []auditlog.StepDiff) []string {
-	names := make([]string, len(diffs))
-	for i, d := range diffs {
-		names[i] = d.Name
+	names := make([]string, 0, len(diffs))
+	for _, d := range diffs {
+		names = append(names, d.Name)
 	}
 
 	return names

@@ -138,6 +138,7 @@ linters:
             - github.com/cenkalti/backoff/v4
             - github.com/larsartmann/go-output
             - github.com/larsartmann/go-output/d2
+            - github.com/larsartmann/go-output/daghtml
             - github.com/larsartmann/go-output/delimited
             - github.com/larsartmann/go-output/graph
             - github.com/larsartmann/go-output/markdown
