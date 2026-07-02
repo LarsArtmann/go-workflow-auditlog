@@ -4,6 +4,8 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+
+	"github.com/larsartmann/go-output/daghtml"
 )
 
 //go:embed dashboard.css
@@ -12,9 +14,10 @@ var dashboardCSS string
 //go:embed dashboard.js
 var dashboardJS string
 
-// htmlTemplate is the static HTML skeleton. The six %s verbs receive:
+// htmlTemplate is the static HTML skeleton. The eight %s verbs receive:
 // 1) dashboardCSS, 2) schema version (header), 3) report JSON,
-// 4) type-metadata JSON, 5) dashboardJS, 6) schema version (footer).
+// 4) type-metadata JSON, 5) DAG JSON data, 6) dashboardJS,
+// 7) daghtml graph JS, 8) schema version (footer).
 //
 // Report data is injected via <script type="application/json"> tags (never
 // parsed as HTML). Dynamic content in the JS is escaped via the esc()
@@ -96,9 +99,9 @@ const htmlTemplate = `<!DOCTYPE html>
 <div class="tab-content" id="tab-graph" role="tabpanel" aria-labelledby="tab-btn-graph">
   <div id="graph-container">
     <div class="graph-controls">
-      <button id="graph-zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
-      <button id="graph-zoom-out" title="Zoom out" aria-label="Zoom out">&minus;</button>
-      <button id="graph-fit" title="Fit to view" aria-label="Fit to view">&#8982;</button>
+      <button class="graph-zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+      <button class="graph-zoom-out" title="Zoom out" aria-label="Zoom out">&minus;</button>
+      <button class="graph-fit" title="Fit to view" aria-label="Fit to view">&#8982;</button>
     </div>
     <div class="graph-info">Scroll/pinch to zoom &middot; Drag to pan &middot; Click node to highlight</div>
   </div>
@@ -121,6 +124,9 @@ const htmlTemplate = `<!DOCTYPE html>
 <div id="error-tooltip" class="tooltip"></div>
 <script type="application/json" id="report-data">%s</script>
 <script type="application/json" id="type-metadata">%s</script>
+<script type="application/json" id="dag-data">%s</script>
+<script>
+%s</script>
 <script>
 %s</script>
 <div class="footer">
@@ -128,12 +134,11 @@ const htmlTemplate = `<!DOCTYPE html>
   <span id="footer-stats">Schema v%s</span>
 </div>
 </body>
-</html>
-`
+</html>`
 
 // renderHTML builds a complete, self-contained HTML dashboard string from the
 // workflow report. The output embeds all CSS (dashboard.css) and JavaScript
-// (dashboard.js) inline — no external dependencies, no network requests.
+// (dashboard.js + daghtml graph JS) inline — no external dependencies.
 func renderHTML(report WorkflowReport) (string, error) {
 	reportJSON, err := json.Marshal(report)
 	if err != nil {
@@ -145,8 +150,15 @@ func renderHTML(report WorkflowReport) (string, error) {
 		return "", fmt.Errorf("%w: marshal metadata: %w", ErrRenderFailed, err)
 	}
 
+	dag := buildDAGHTML(report)
+	dagJSON, err := json.Marshal(dag)
+	if err != nil {
+		return "", fmt.Errorf("%w: marshal DAG: %w", ErrRenderFailed, err)
+	}
+
 	return fmt.Sprintf(
 		htmlTemplate,
-		dashboardCSS, report.Version, reportJSON, metadataJSON, dashboardJS, report.Version,
+		dashboardCSS, report.Version, reportJSON, metadataJSON,
+		dagJSON, dashboardJS, daghtml.Script(), report.Version,
 	), nil
 }

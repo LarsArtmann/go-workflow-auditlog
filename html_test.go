@@ -476,12 +476,12 @@ func assertHTMLStructure(t *testing.T, output string) {
 	openCount := strings.Count(output, "<script")
 	closeCount := strings.Count(output, "</script>")
 
-	if openCount != 3 {
-		t.Errorf("expected exactly 3 <script> tags, got %d", openCount)
+	if openCount != 5 {
+		t.Errorf("expected exactly 5 <script> tags, got %d", openCount)
 	}
 
-	if closeCount != 3 {
-		t.Errorf("expected exactly 3 </script> tags, got %d", closeCount)
+	if closeCount != 5 {
+		t.Errorf("expected exactly 5 </script> tags, got %d", closeCount)
 	}
 }
 
@@ -597,7 +597,9 @@ func TestWriteHTML_GraphFailedNodeDot(t *testing.T) {
 
 	output := writeSingleStepHTML(t, newFail("graph-fail", "node error"))
 
-	assertContains(t, output, `n.status === "failed"`, "expected failed status check for graph error dot")
+	// Error dot rendering is now in the daghtml SDK JS, triggered by the
+	// "error":true field in the DAG JSON data.
+	assertContains(t, output, `"error":true`, "expected error:true in DAG JSON for failed step")
 }
 
 func TestWriteHTML_TreeInlineError(t *testing.T) {

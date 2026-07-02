@@ -8,6 +8,7 @@ require (
 	github.com/larsartmann/go-error-family v0.5.1
 	github.com/larsartmann/go-output v0.21.0
 	github.com/larsartmann/go-output/d2 v0.21.0
+	github.com/larsartmann/go-output/daghtml v0.0.0-00010101000000-000000000000
 	github.com/larsartmann/go-output/delimited v0.21.0
 	github.com/larsartmann/go-output/graph v0.21.0
 	github.com/larsartmann/go-output/markdown v0.21.0
@@ -17,6 +18,8 @@ require (
 	github.com/larsartmann/go-output/table v0.21.0
 	github.com/larsartmann/go-output/tree v0.21.0
 )
+
+replace github.com/larsartmann/go-output/daghtml => ../go-output/daghtml
 
 require (
 	charm.land/lipgloss/v2 v2.0.4 // indirect
