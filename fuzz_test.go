@@ -215,12 +215,14 @@ func assertNoRawScriptInjection(t *testing.T, output, input string) {
 // and </script> tags. Returns empty string if the block is not found.
 func extractJSONBlock(output, idAttr string) string {
 	openTag := `<script type="application/json" id=` + idAttr + `>`
+
 	start := strings.Index(output, openTag)
 	if start < 0 {
 		return ""
 	}
 
 	start += len(openTag)
+
 	end := strings.Index(output[start:], "</script>")
 	if end < 0 {
 		return ""

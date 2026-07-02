@@ -29,6 +29,7 @@ func buildDAGHTML(report WorkflowReport) daghtml.DAG {
 
 	for _, step := range report.Steps {
 		icon := stepStatusMeta[step.Status].Icon
+
 		label := step.Name
 		if icon != "" {
 			label = icon + " " + label
@@ -65,19 +66,25 @@ func buildStepTooltip(step StepInfo) string {
 	if step.StepType != "" {
 		tip += " | type: " + step.StepType
 	}
+
 	tip += " | status: " + string(step.Status)
+
 	tip += fmt.Sprintf(" | attempts: %d", step.AttemptCount)
 	if step.DurationMs != nil {
 		tip += fmt.Sprintf(" | duration: %.1fms", *step.DurationMs)
 	}
+
 	if step.Error != nil {
 		tip += " | error: " + *step.Error
 	}
+
 	if step.HasRetry {
 		tip += " | retry: yes"
 	}
+
 	if step.HasTimeout {
 		tip += " | timeout: yes"
 	}
+
 	return tip
 }

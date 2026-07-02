@@ -151,6 +151,7 @@ func renderHTML(report WorkflowReport) (string, error) {
 	}
 
 	dag := buildDAGHTML(report)
+
 	dagJSON, err := json.Marshal(dag)
 	if err != nil {
 		return "", fmt.Errorf("%w: marshal DAG: %w", ErrRenderFailed, err)
