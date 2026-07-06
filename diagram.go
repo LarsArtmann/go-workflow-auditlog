@@ -23,15 +23,15 @@ func stepLabel(step StepInfo) string {
 	return label
 }
 
-// statusStyle maps a StepStatus to an output.GraphStyle for diagram coloring.
+// statusStyle maps a StepStatus to an output.NodeStyle for diagram coloring.
 // Delegates to StepStatus.Color() so all color definitions live in one place.
-func statusStyle(s StepStatus) output.GraphStyle {
+func statusStyle(s StepStatus) output.NodeStyle {
 	fill, fontColor := s.Color()
 	if fill == "" {
-		return output.GraphStyle{}
+		return output.NodeStyle{}
 	}
 
-	return output.GraphStyle{Fill: fill, FontColor: fontColor}
+	return output.NodeStyle{Fill: fill, FontColor: fontColor}
 }
 
 // buildGraph converts a WorkflowReport's step DAG into go-output graph nodes

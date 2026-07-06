@@ -7,17 +7,17 @@ import (
 	"strings"
 
 	"github.com/larsartmann/go-output"
-	// Blank imports register table data renderers for RenderTableData dispatch.
+	// Blank imports register table data renderers for RenderTable dispatch.
 	_ "github.com/larsartmann/go-output/delimited"
 	_ "github.com/larsartmann/go-output/markdown"
 	_ "github.com/larsartmann/go-output/serialization"
 	_ "github.com/larsartmann/go-output/table"
 )
 
-// buildTableData converts a WorkflowReport into go-output TableData.
+// buildTableData converts a WorkflowReport into go-output Table.
 // Columns: Step, Status, Duration, Attempts, Retry, Timeout, Error.
-func (r WorkflowReport) buildTableData() *output.TableData {
-	data := output.NewTableData([]string{"Step", "Status", "Duration", "Attempts", "Retry", "Timeout", "Error"})
+func (r WorkflowReport) buildTableData() *output.Table {
+	data := output.NewTable([]string{"Step", "Status", "Duration", "Attempts", "Retry", "Timeout", "Error"})
 
 	for _, step := range r.Steps {
 		errStr := ""
@@ -59,7 +59,7 @@ func (r WorkflowReport) WriteTable(writer io.Writer, format output.Format, opts 
 
 	opts.Writer = writer
 
-	err := output.RenderTableData(data, format, opts)
+	err := output.RenderTable(data, format, opts)
 	if err != nil {
 		return fmt.Errorf("%w: render table: %w", ErrRenderFailed, err)
 	}

@@ -153,7 +153,7 @@ func TestErrorPath_WriteHTMLTree_FailingWriter_ErrExportWriteFailed(t *testing.T
 
 // =============================================================================
 // P0-5: WriteTable — failing writer triggers ErrRenderFailed
-// (go-output RenderTableData writes directly to the writer)
+// (go-output RenderTable writes directly to the writer)
 // =============================================================================
 
 func TestErrorPath_WriteTable_FailingWriter_ErrRenderFailed(t *testing.T) {

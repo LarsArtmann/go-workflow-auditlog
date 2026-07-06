@@ -10,16 +10,16 @@ import (
 )
 
 // graphNodesToD2 converts go-output GraphNodes to D2Nodes, preserving IDs,
-// labels, and fill/font colors from GraphStyle.
-func graphNodesToD2(nodes []output.GraphNode) []d2.D2Node {
-	result := make([]d2.D2Node, 0, len(nodes))
+// labels, and fill/font colors from NodeStyle.
+func graphNodesToD2(nodes []output.GraphNode) []d2.Node {
+	result := make([]d2.Node, 0, len(nodes))
 	for _, node := range nodes {
-		result = append(result, d2.D2Node{
+		result = append(result, d2.Node{
 			ID:    output.NewBrandedID[output.D2NodeIDBrand](node.ID.Get()),
 			Label: output.NewBrandedID[output.D2NodeLabelBrand](node.Label.Get()),
-			Style: d2.D2NodeStyle{
-				Fill:          node.Style.Fill,
-				D2StrokeStyle: d2.D2StrokeStyle{FontColor: node.Style.FontColor},
+			Style: d2.NodeStyle{
+				Fill:        node.Style.Fill,
+				StrokeStyle: d2.StrokeStyle{FontColor: node.Style.FontColor},
 			},
 		})
 	}
@@ -28,10 +28,10 @@ func graphNodesToD2(nodes []output.GraphNode) []d2.D2Node {
 }
 
 // graphEdgesToD2 converts go-output GraphEdges to D2Edges, preserving IDs.
-func graphEdgesToD2(edges []output.GraphEdge) []d2.D2Edge {
-	result := make([]d2.D2Edge, 0, len(edges))
+func graphEdgesToD2(edges []output.GraphEdge) []d2.Edge {
+	result := make([]d2.Edge, 0, len(edges))
 	for _, edge := range edges {
-		result = append(result, d2.D2Edge{
+		result = append(result, d2.Edge{
 			From: output.NewBrandedID[output.D2NodeIDBrand](edge.From.Get()),
 			To:   output.NewBrandedID[output.D2NodeIDBrand](edge.To.Get()),
 		})
@@ -60,7 +60,7 @@ func d2DiagramTitle(r WorkflowReport) string {
 func (r WorkflowReport) WriteD2(writer io.Writer) error {
 	nodes, edges := buildGraph(r)
 
-	diagram := d2.NewD2Diagram()
+	diagram := d2.NewDiagram()
 	diagram.SetTitle(d2DiagramTitle(r))
 
 	for _, node := range graphNodesToD2(nodes) {
