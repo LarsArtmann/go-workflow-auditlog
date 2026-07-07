@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/larsartmann/go-error-family v0.6.0
+	github.com/larsartmann/go-error-family v0.6.1
 	github.com/larsartmann/go-output v0.30.1
 	github.com/larsartmann/go-output/d2 v0.30.1
 	github.com/larsartmann/go-output/daghtml v0.30.1
