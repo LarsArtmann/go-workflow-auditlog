@@ -1,62 +1,73 @@
 {
-  description = "DevShell for go-workflow-auditlog — Go 1.26, golangci-lint, govulncheck";
+  description = "Audit logging library for Azure/go-workflow";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+
+    systems.url = "github:nix-systems/default";
+
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { nixpkgs, flake-utils, self, ... }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            # Core toolchain — pinned to match go.mod (Go 1.26.3).
-            go_1_26
+    inputs@{ self, flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = import inputs.systems;
 
-            # Linting and analysis.
-            golangci-lint
+      imports = [ inputs.treefmt-nix.flakeModule ];
 
-            # GitHub Actions workflow validation.
-            actionlint
-
-            # Vulnerability scanning.
-            govulncheck
-
-            # Code formatting.
-            golines
-            nixpkgs-fmt
-          ];
-
-          # buildflow auto-detects "nix" when flake.nix is present; force Go.
-          BUILDFLOW_LANGUAGE = "go";
-        };
-
-        # This is a Go library — there is no buildable binary. The package
-        # output provides metadata so `nix build` succeeds for tooling that
-        # expects a default derivation.
-        packages.default = pkgs.runCommand "go-workflow-auditlog"
-          {
-            meta = with pkgs.lib; {
-              description = "Audit logging library for Azure/go-workflow";
-              homepage = "https://github.com/larsartmann/go-workflow-auditlog";
-              license = licenses.mit;
-              platforms = platforms.unix;
+      perSystem =
+        {
+          config,
+          pkgs,
+          lib,
+          ...
+        }:
+        {
+          devShells.default = pkgs.mkShellNoCC {
+            packages = builtins.attrValues {
+              inherit (pkgs)
+                go_1_26
+                golangci-lint
+                actionlint
+                govulncheck
+                golines
+                ;
             };
-          } ''
-          mkdir -p $out
-          cat > $out/README <<EOF
-          go-workflow-auditlog — audit logging library for Azure/go-workflow.
-          This is a library; use devShells.default for development.
-          EOF
-        '';
 
-        formatter = pkgs.nixpkgs-fmt;
-      }
-    );
+            BUILDFLOW_LANGUAGE = "go";
+          };
+
+          packages.default =
+            pkgs.runCommand "go-workflow-auditlog"
+              {
+                meta = with lib; {
+                  description = "Audit logging library for Azure/go-workflow";
+                  homepage = "https://github.com/larsartmann/go-workflow-auditlog";
+                  license = licenses.mit;
+                  platforms = platforms.unix;
+                };
+              }
+              ''
+                mkdir -p $out
+              '';
+
+          treefmt = {
+            programs = {
+              nixfmt.enable = true;
+              gofmt.enable = true;
+            };
+          };
+
+          checks.format = config.treefmt.build.check self;
+        };
+    };
 }
