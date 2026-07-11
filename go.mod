@@ -6,17 +6,17 @@ require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/larsartmann/go-error-family v0.7.0
-	github.com/larsartmann/go-output v0.30.1
-	github.com/larsartmann/go-output/d2 v0.30.1
-	github.com/larsartmann/go-output/daghtml v0.30.1
-	github.com/larsartmann/go-output/delimited v0.30.1
-	github.com/larsartmann/go-output/graph v0.30.1
-	github.com/larsartmann/go-output/markdown v0.30.1
-	github.com/larsartmann/go-output/markup v0.30.1
-	github.com/larsartmann/go-output/plantuml v0.30.1
-	github.com/larsartmann/go-output/serialization v0.30.1
-	github.com/larsartmann/go-output/table v0.30.1
-	github.com/larsartmann/go-output/tree v0.30.1
+	github.com/larsartmann/go-output v0.30.4
+	github.com/larsartmann/go-output/d2 v0.30.4
+	github.com/larsartmann/go-output/daghtml v0.30.4
+	github.com/larsartmann/go-output/delimited v0.30.4
+	github.com/larsartmann/go-output/graph v0.30.4
+	github.com/larsartmann/go-output/markdown v0.30.4
+	github.com/larsartmann/go-output/markup v0.30.4
+	github.com/larsartmann/go-output/plantuml v0.30.4
+	github.com/larsartmann/go-output/serialization v0.30.4
+	github.com/larsartmann/go-output/table v0.30.4
+	github.com/larsartmann/go-output/tree v0.30.4
 )
 
 require (
@@ -34,9 +34,7 @@ require (
 	github.com/go-faster/jx v1.2.0 // indirect
 	github.com/go-faster/yaml v0.4.6 // indirect
 	github.com/larsartmann/go-branded-id v0.3.1 // indirect
-	github.com/larsartmann/go-output/escape v0.30.1 // indirect
-	github.com/larsartmann/go-output/testhelpers v0.30.1 // indirect
-	github.com/larsartmann/go-output/testhelpers/graphtest v0.30.1 // indirect
+	github.com/larsartmann/go-output/escape v0.30.4 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-runewidth v0.0.24 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect

@@ -44,6 +44,7 @@
             };
 
             BUILDFLOW_LANGUAGE = "go";
+            GOEXPERIMENT = "jsonv2";
           };
 
           packages.default =

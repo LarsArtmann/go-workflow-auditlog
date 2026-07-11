@@ -2,6 +2,7 @@ package auditlog
 
 import (
 	_ "embed"
+	"encoding/json/jsontext"
 	"encoding/json/v2"
 	"fmt"
 
@@ -140,19 +141,31 @@ const htmlTemplate = `<!DOCTYPE html>
 // workflow report. The output embeds all CSS (dashboard.css) and JavaScript
 // (dashboard.js + daghtml graph JS) inline — no external dependencies.
 func renderHTML(report WorkflowReport) (string, error) {
-	reportJSON, err := json.Marshal(report)
+	reportJSON, err := json.Marshal(report,
+		json.Deterministic(true),
+		jsontext.EscapeForHTML(true),
+		jsontext.EscapeForJS(true),
+	)
 	if err != nil {
 		return "", fmt.Errorf("%w: marshal report: %w", ErrRenderFailed, err)
 	}
 
-	metadataJSON, err := json.Marshal(BuildTypeMetadata())
+	metadataJSON, err := json.Marshal(BuildTypeMetadata(),
+		json.Deterministic(true),
+		jsontext.EscapeForHTML(true),
+		jsontext.EscapeForJS(true),
+	)
 	if err != nil {
 		return "", fmt.Errorf("%w: marshal metadata: %w", ErrRenderFailed, err)
 	}
 
 	dag := buildDAGHTML(report)
 
-	dagJSON, err := json.Marshal(dag)
+	dagJSON, err := json.Marshal(dag,
+		json.Deterministic(true),
+		jsontext.EscapeForHTML(true),
+		jsontext.EscapeForJS(true),
+	)
 	if err != nil {
 		return "", fmt.Errorf("%w: marshal DAG: %w", ErrRenderFailed, err)
 	}

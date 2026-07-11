@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"encoding/json/jsontext"
 	"encoding/json/v2"
 	"errors"
 	"fmt"
@@ -12,7 +13,6 @@ import (
 	"os"
 	"time"
 
-	"encoding/json/jsontext"
 	flow "github.com/Azure/go-workflow"
 	"github.com/cenkalti/backoff/v4"
 	errorfamily "github.com/larsartmann/go-error-family"
@@ -298,7 +298,12 @@ func printSampleEvent(report auditlog.WorkflowReport) {
 		return
 	}
 
-	sample, err := json.Marshal(report.Events[0], jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
+	sample, err := json.Marshal(report.Events[0],
+		jsontext.WithIndentPrefix(""),
+		jsontext.WithIndent("  "),
+		jsontext.EscapeForHTML(true),
+		jsontext.EscapeForJS(true),
+	)
 	if err != nil {
 		log.Printf("marshal sample event: %v", err)
 

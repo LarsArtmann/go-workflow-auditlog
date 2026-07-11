@@ -14,7 +14,10 @@ func writeEventsNDJSON(writer io.Writer, events []Event) error {
 	encoder := jsontext.NewEncoder(buf)
 
 	for _, evt := range events {
-		err := json.MarshalEncode(encoder, evt)
+		err := json.MarshalEncode(encoder, evt,
+			jsontext.EscapeForHTML(true),
+			jsontext.EscapeForJS(true),
+		)
 		if err != nil {
 			return fmt.Errorf("%w: encode event %d: %w", ErrRenderFailed, evt.Sequence, err)
 		}
