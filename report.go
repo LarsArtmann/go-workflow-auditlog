@@ -1,12 +1,13 @@
 package auditlog
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
 	"time"
 
+	"encoding/json/jsontext"
 	"github.com/larsartmann/go-output"
 )
 
@@ -213,10 +214,10 @@ func (r WorkflowReport) RetriedSteps() []StepInfo {
 
 // WriteJSON writes the report as indented JSON to the writer.
 func (r WorkflowReport) WriteJSON(writer io.Writer) error {
-	encoder := json.NewEncoder(writer)
+	encoder := jsontext.NewEncoder(writer)
 	encoder.SetIndent("", "  ")
 
-	err := encoder.Encode(r)
+	err := json.MarshalEncode(encoder, r)
 	if err != nil {
 		return fmt.Errorf("%w: encode report: %w", ErrRenderFailed, err)
 	}

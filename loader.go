@@ -1,7 +1,8 @@
 package auditlog
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -32,9 +33,9 @@ func LoadReport(path string) (WorkflowReport, error) {
 func LoadReportFromReader(reader io.Reader) (WorkflowReport, error) {
 	var report WorkflowReport
 
-	decoder := json.NewDecoder(reader)
+	decoder := jsontext.NewDecoder(reader)
 
-	err := decoder.Decode(&report)
+	err := json.UnmarshalDecode(decoder, &report)
 	if err != nil {
 		return WorkflowReport{}, fmt.Errorf("%w: decode: %w", ErrReportLoadFailed, err)
 	}

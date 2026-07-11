@@ -2,7 +2,7 @@ package auditlog
 
 import (
 	_ "embed"
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 
 	"github.com/larsartmann/go-output/daghtml"
