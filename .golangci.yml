@@ -162,10 +162,11 @@ linters:
         - github.com/larsartmann/go-output.GraphNode
         - github.com/larsartmann/go-output.GraphEdge
         - github.com/larsartmann/go-output.GraphStyle
-        - github.com/larsartmann/go-output/d2.D2Node
-        - github.com/larsartmann/go-output/d2.D2Edge
-        - github.com/larsartmann/go-output/d2.D2NodeStyle
-        - github.com/larsartmann/go-output/d2.D2StrokeStyle
+        - github.com/larsartmann/go-output.NodeStyle
+        - github.com/larsartmann/go-output/d2.Node
+        - github.com/larsartmann/go-output/d2.Edge
+        - github.com/larsartmann/go-output/d2.NodeStyle
+        - github.com/larsartmann/go-output/d2.StrokeStyle
         - github.com/larsartmann/go-workflow-auditlog.*
     ginkgolinter:
       forbid-focus-container: true
