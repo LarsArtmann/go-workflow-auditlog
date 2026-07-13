@@ -1,0 +1,130 @@
+---
+title: Quick Start
+description: Get started with go-workflow-auditlog in under a minute.
+---
+
+## The Three-Step Lifecycle
+
+Every audit-logged workflow follows the same pattern: **Attach**, **Do**, **Snapshot**.
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    flow "github.com/Azure/go-workflow"
+
+    "github.com/larsartmann/go-workflow-auditlog"
+)
+
+type FetchStep struct{ Data []byte }
+func (s *FetchStep) Do(_ context.Context) error { s.Data = []byte("hello"); return nil }
+func (s *FetchStep) String() string             { return "fetch" }
+
+type SaveStep struct{ Input []byte }
+func (s *SaveStep) Do(_ context.Context) error  { return nil }
+func (s *SaveStep) String() string              { return "save" }
+
+func main() {
+    audit, _ := auditlog.New(auditlog.Config{
+        Enabled:    true,
+        WorkflowID: "data-pipeline",
+    })
+
+    fetch := &FetchStep{}
+    save := &SaveStep{}
+
+    w := &flow.Workflow{}
+    w.Add(
+        flow.Step(fetch),
+        flow.Step(save).DependsOn(fetch),
+    )
+
+    // 1. Attach audit callbacks BEFORE running
+    audit.Attach(w)
+
+    // 2. Run the workflow
+    _ = w.Do(context.Background())
+
+    // 3. Snapshot final state AFTER running
+    audit.Snapshot(w)
+
+    // 4. Read the report
+    report := audit.Report()
+    fmt.Printf("Steps: %d, Events: %d\n", report.StepCount, report.EventCount)
+    fmt.Println(report.Summary())
+
+    // Export
+    _ = audit.ExportJSON("audit.json")
+    _ = audit.ExportHTML("dashboard.html")
+}
+```
+
+## What Each Step Does
+
+| Step       | When        | What it captures                                |
+| ---------- | ----------- | ----------------------------------------------- |
+| `Attach`   | Before `Do` | Injects audit callbacks into every step         |
+| `Do`       | Execution   | Callbacks fire per-attempt, recording events    |
+| `Snapshot` | After `Do`  | Reads DAG structure + skipped/canceled statuses |
+
+## Reading the Report
+
+After `Snapshot`, `audit.Report()` returns a `WorkflowReport` with everything:
+
+```go
+report := audit.Report()
+
+// Summary string
+fmt.Println(report.Summary())
+// → "6 steps | 6 succeeded | 0 failed | 16 events | 911ms"
+
+// Query specific steps
+failed := report.FailedSteps()
+retried := report.RetriedSteps()
+
+// Find by name
+step, ok := report.StepByName("fetch")
+if ok {
+    fmt.Printf("Duration: %.2fms\n", step.DurationMs)
+}
+
+// Wall-clock duration
+fmt.Println(report.Duration())
+```
+
+## Export Formats
+
+```go
+// Structured data
+_ = audit.ExportJSON("report.json")
+_ = audit.ExportNDJSON("events.ndjson")
+
+// Diagrams
+_ = audit.ExportMermaid("dag.mmd")
+_ = audit.ExportD2("dag.d2")
+_ = audit.ExportGraphviz("dag.dot")
+_ = audit.ExportPlantUML("dag.puml")
+
+// Tables (16 formats: CSV, Markdown, JSON, HTML, ...)
+_ = audit.ExportTable("summary.csv", output.FormatCSV, output.RenderOptions{})
+
+// Trees
+_ = audit.ExportTree("tree.txt")
+_ = audit.ExportHTMLTree("tree.html")
+
+// Interactive dashboard
+_ = audit.ExportHTML("dashboard.html")
+```
+
+## Step Naming
+
+go-workflow uses `flow.String(step)` for display names. By default this returns `*TypeName(0xpointer)` which is non-deterministic. Implement `String()` on your step types for clean output:
+
+```go
+func (s *MyStep) String() string { return "my-meaningful-name" }
+```
+
+Or use `flow.Name(step, "name")` when adding to the workflow.

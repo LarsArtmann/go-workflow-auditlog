@@ -1,0 +1,75 @@
+---
+title: Changelog
+description: All notable changes to go-workflow-auditlog.
+---
+
+## [Unreleased]
+
+### Removed
+
+- **Deprecated API aliases removed** — the four backward-compat aliases that were never in a released v1.0 are now deleted. Use the canonical names:
+  - `WriteReportJSON` to `WriteJSON`
+  - `WriteEventsNDJSON` to `WriteNDJSON`
+  - `ExportToFile` to `ExportJSON`
+  - `ExportEventsToNDJSON` to `ExportNDJSON`
+
+## [0.5.0] - 2026-06-23
+
+### Added
+
+- **Error Classification via [go-error-family](https://github.com/larsartmann/go-error-family)** — all 12 public sentinel errors (+ 2 private) are now classified into behavioral families (Corruption, Rejection, Transient, Infrastructure). Consumers can call `errorfamily.Classify(err)`, `errorfamily.IsRetryable(err)`, and `errorfamily.ExitCode(err)` on any auditlog error without additional setup (auto-registered via `init()`).
+- **3 new I/O sentinel errors** — all export/write/load paths now wrap matchable sentinels: `ErrReportLoadFailed`, `ErrRenderFailed`, `ErrExportWriteFailed`.
+- **22 I/O error paths wrapped** across 13 files — every `fmt.Errorf` in export/render/load paths now carries a matchable sentinel via `errors.Is`.
+
+## [0.4.0] - 2026-06-22
+
+### Added
+
+- **Failure Summary banner** — prominent red banner at the top of the HTML dashboard when `workflow_succeeded` is false.
+- **Workflow PASS/FAIL hero badge** — green checkmark or red cross next to the report title.
+- **Error column in steps table** — inline truncated error text with full text on hover.
+- **Gantt-style timeline** — real time-positioned Gantt chart showing actual parallelism and step overlaps.
+- **DAG Tree tab** — collapsible tree of the step dependency graph.
+- **Peak concurrency metric** — highest number of steps running simultaneously.
+- **Critical path duration** — longest dependency-chain duration (memoized DFS).
+- **D2 diagram export** — delegates to go-output `d2.D2Diagram`.
+
+### Changed
+
+- Timeline chart upgraded from duration-sorted bars to a real Gantt chart with time-positioned bars.
+
+## [0.3.0] - 2026-06-20
+
+### Added
+
+- **Report diffing** — `Diff()` method compares two reports for regression detection.
+- **Report filtering** — `Filtered()` with `WithStepsByName`, `WithStepsByStatus`, `WithEventsByType`, `WithTimeRange`.
+- **Report index** — `NewReportIndex()` for O(1) lookup maps.
+- **NDJSON reader** — `ReadEvents()` with enum validation on ingest.
+- **Event replay** — `ReplayEvents()` reconstructs a report from a flat event stream.
+- **ASCII tree and HTML tree exports**.
+
+## [0.2.0] - 2026-06-19
+
+### Added
+
+- **Mermaid, PlantUML, Graphviz DOT diagram exports** with status-based coloring.
+- **Table export** via go-output (16 formats: CSV, Markdown, JSON, HTML, ...).
+- **RunID** branded string type for type-safe run identification.
+- **128-bit crypto-random RunID** stamped on every event.
+
+### Fixed
+
+- `BeforeStep` callback now passes through context correctly, preserving step-level timeouts.
+
+## [0.1.0] - 2026-06-18
+
+### Added
+
+- Per-attempt event capture (`attempt_start` / `attempt_end`) with timestamp, duration, error, and status.
+- Full DAG structure capture via `Snapshot(w)` — dependencies, retry/timeout config, step types.
+- Skipped and canceled step detection.
+- JSON report and NDJSON event stream export.
+- Interactive HTML dashboard with 5 tabs.
+- `Validate()` for internal consistency checks.
+- 244 tests, ~94% coverage, race detector clean.

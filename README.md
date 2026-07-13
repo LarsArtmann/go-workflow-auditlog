@@ -3,11 +3,34 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/larsartmann/go-workflow-auditlog.svg)](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)
 [![Go Report Card](https://goreportcard.com/badge/github.com/larsartmann/go-workflow-auditlog)](https://goreportcard.com/report/github.com/larsartmann/go-workflow-auditlog)
 [![CI](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-93.2%25-brightgreen)](#)
+[![Coverage](https://img.shields.io/badge/coverage-~94%25-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 
-Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workflow) — records every step execution event (attempts, retries, durations, errors, dependencies, final statuses) with timestamped events and export to JSON / NDJSON.
+**[Documentation](https://auditlog.lars.software)** · **[API Reference](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)** · **[Interactive Demo](./example)**
+
+---
+
+Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workflow) — records every step execution event (attempts, retries, durations, errors, dependencies, final statuses) with timestamped events and export to JSON / NDJSON / diagrams / interactive HTML dashboard.
+
+```go
+audit.Attach(w)                      // 1. Inject callbacks
+_ = w.Do(context.Background())       // 2. Run workflow
+audit.Snapshot(w)                    // 3. Capture final state
+
+_ = audit.ExportHTML("report.html")  // Interactive dashboard
+```
+
+## Why?
+
+[Azure/go-workflow](https://github.com/Azure/go-workflow) is a powerful DAG-based workflow engine, but it provides **zero visibility** into what happened during execution:
+
+- **No per-attempt events** — you see the final error, not which retry failed or how long each attempt took
+- **No DAG structure** — the dependency graph exists at runtime but is never recorded
+- **No skipped/canceled detection** — steps settled by Conditions bypass all callbacks
+- **No exportable reports** — the workflow state vanishes when the process exits
+
+**go-workflow-auditlog fixes all of this** with three lines of code. Every retry, every duration, every error — captured automatically as timestamped events and exportable to 12+ formats including an interactive HTML dashboard.
 
 ---
 
@@ -43,8 +66,8 @@ Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workfl
 - **Event replay** — reconstruct a report from a flat NDJSON event stream
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
-- **Zero runtime dependencies** — only `go-workflow` + `backoff/v4`
-- **93.2% test coverage** with race detector, 0 lint issues
+- **Error classification** — auto-registered with [go-error-family](https://github.com/larsartmann/go-error-family) for `Classify()`, `IsRetryable()`, `ExitCode()`
+- **244 tests, ~94% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
 
 ## Installation
 

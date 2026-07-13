@@ -1,0 +1,94 @@
+---
+title: Contributing
+description: How to contribute to go-workflow-auditlog.
+---
+
+## Development Setup
+
+**Requirements:** Go 1.26+, [`golangci-lint` v2](https://golangci-lint.run/)
+
+```bash
+git clone https://github.com/larsartmann/go-workflow-auditlog.git
+cd go-workflow-auditlog
+go build ./...
+```
+
+## Commands
+
+| Command                                                         | Purpose                           |
+| --------------------------------------------------------------- | --------------------------------- |
+| `go test ./...`                                                 | Run all tests                     |
+| `go test -race ./...`                                           | Run all tests with race detector  |
+| `go test -race -coverprofile=cover.out -covermode=atomic ./...` | Tests with coverage (~94%)        |
+| `go vet ./...`                                                  | Static analysis                   |
+| `golangci-lint run ./...`                                       | Lint (golangci-lint v2, 0 issues) |
+| `go run ./example`                                              | Run the demo pipeline             |
+
+## Building
+
+```bash
+go build ./...
+```
+
+## Testing
+
+```bash
+# Run all tests
+go test ./...
+
+# With race detector
+go test -race ./...
+```
+
+## Linting
+
+Uses golangci-lint v2 with strict defaults. Configuration lives in `.golangci.yml`.
+
+```bash
+# Run all configured linters — MUST exit with 0 issues before merging
+golangci-lint run ./...
+
+# Auto-fix formatting/imports
+golangci-lint run ./... --fix
+```
+
+## Code Style
+
+- Standard `testing` package — no testify or other test utilities
+- Table-driven tests with `t.Run` subtests
+- External test package (`auditlog_test`)
+- Early returns over nested conditionals
+- Strong types over runtime checks
+- `t.Setenv()` for env var tests (runs sequentially)
+
+## Testing Patterns
+
+The test suite uses shared helpers (in `auditlog_test.go`) for common workflow fixtures:
+
+- `mustNew`, `newAuditAndWorkflow` — construct auditor + workflow
+- `addRetryStep`, `addParallelSteps`, `addDependentStep`, `addLinearChain` — wire step DAG patterns
+- `runWorkflow` — Attach + Do + Snapshot in one call
+- `assertStepCount`, `assertEventCount`, `assertStatus`, etc. — typed assertions
+
+Retry tests use fresh `backoff.NewExponentialBackOff()` instances to avoid a known data race in go-workflow v0.1.13.
+
+## CI
+
+All pull requests must pass:
+
+- `go build ./...` — compiles cleanly
+- `go test -race ./...` — tests pass with race detection
+- `go vet ./...` — no vet warnings
+- `golangci-lint run ./...` — no lint issues
+
+## Pull Requests
+
+1. Fork the repository and create a feature branch from `master`.
+2. Make your changes with tests.
+3. Ensure all checks pass.
+4. Submit a pull request describing the **what** and **why**.
+
+- Ensure all tests pass: `go test -race ./...`
+- Ensure linting passes: `golangci-lint run ./...`
+- Add tests for new functionality
+- Keep changes focused and atomic

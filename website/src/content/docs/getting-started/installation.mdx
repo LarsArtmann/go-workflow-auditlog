@@ -1,0 +1,62 @@
+---
+title: Installation
+description: Install go-workflow-auditlog in your Go project.
+---
+
+## Requirements
+
+- Go 1.26 or later
+- `github.com/Azure/go-workflow v0.1.13` or later
+- An active Go module (`go.mod`)
+
+## Install
+
+Run this in your project directory:
+
+```bash
+go get github.com/larsartmann/go-workflow-auditlog@latest
+```
+
+## Verify Installation
+
+```bash
+go list -m github.com/larsartmann/go-workflow-auditlog
+```
+
+## Quick Usage
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    flow "github.com/Azure/go-workflow"
+
+    "github.com/larsartmann/go-workflow-auditlog"
+)
+
+func main() {
+    audit, _ := auditlog.New(auditlog.Config{
+        Enabled:    true,
+        WorkflowID: "my-pipeline",
+    })
+
+    w := &flow.Workflow{}
+    // add your steps...
+
+    audit.Attach(w)
+    _ = w.Do(context.Background())
+    audit.Snapshot(w)
+
+    report := audit.Report()
+    fmt.Println(report.Summary())
+}
+```
+
+## Next Steps
+
+- Follow the [Quick Start](/getting-started/quick-start/) for a complete pipeline example
+- Learn about the [Event Stream](/guides/event-stream/) for per-attempt visibility
+- See [Export Formats](/guides/export-formats/) for JSON, NDJSON, diagrams, and HTML

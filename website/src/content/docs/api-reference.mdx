@@ -1,0 +1,123 @@
+---
+title: API Reference
+description: Public API for go-workflow-auditlog.
+---
+
+## Core Types
+
+### Auditor
+
+The main type. Created via `New(config)`. Orchestrates event capture, report assembly, and exports.
+
+```go
+audit, err := auditlog.New(auditlog.Config{
+    Enabled:    true,
+    WorkflowID: "my-pipeline",
+})
+```
+
+### WorkflowReport
+
+The consolidated report. Returned by `audit.Report()`. Contains steps, events, and aggregate metrics.
+
+### Event
+
+A single timestamped event in the audit trail. Each step attempt produces two events: `attempt_start` and `attempt_end`.
+
+```go
+type Event struct {
+    RunID     auditlog.RunID  `json:"run_id"`
+    Sequence  int64           `json:"sequence"`
+    Timestamp time.Time       `json:"timestamp"`
+    EventType EventType       `json:"event_type"`
+    Phase     Phase           `json:"phase"`
+    StepRef                   // step_name, step_type, step_id
+    Attempt   int             `json:"attempt"`
+    Error     string          `json:"error,omitempty"`
+}
+```
+
+## Auditor Methods
+
+| Method                                                | Description                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------------ |
+| `Attach(w *flow.Workflow) *flow.Workflow`             | Injects audit callbacks into all steps. Call before `Do`.    |
+| `Snapshot(w *flow.Workflow)`                          | Captures final DAG state. Call after `Do`.                   |
+| `Report() WorkflowReport`                             | Returns the consolidated report.                             |
+| `Events() []Event`                                    | Returns all captured events.                                 |
+| `EventsCount() int`                                   | Event count without copying.                                 |
+| `DroppedEventCount() int64`                           | Events dropped due to `MaxEvents` cap.                       |
+| `RunID() string`                                      | The run identifier stamped on every event (for correlation). |
+| `ReportFiltered(opts ...ReportOption) WorkflowReport` | Returns a filtered report.                                   |
+| `ExportJSON(path string) error`                       | Writes report as JSON.                                       |
+| `ExportNDJSON(path string) error`                     | Writes events as NDJSON.                                     |
+| `ExportHTML(path string) error`                       | Writes interactive HTML dashboard.                           |
+| `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                  |
+| `ExportD2(path string) error`                         | Writes D2 DAG to file.                                       |
+| `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                             |
+| `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                 |
+| `ExportTable(path, format, opts) error`               | Writes step summary table (CSV/Markdown/...).                |
+| `ExportTree(path string) error`                       | Writes ASCII tree to file.                                   |
+
+See the [Full API on pkg.go.dev](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog) for all methods including `Write*` variants (to `io.Writer` instead of file).
+
+## WorkflowReport Methods
+
+| Method                                                 | Description                                                          |
+| ------------------------------------------------------ | -------------------------------------------------------------------- |
+| `report.StepByName(name)`                              | Find a step by name.                                                 |
+| `report.EventsByStep(name)`                            | Filter events by step.                                               |
+| `report.EventsByType(type)`                            | Filter events by type.                                               |
+| `report.FailedSteps()`                                 | All failed/canceled steps.                                           |
+| `report.SucceededSteps()`                              | All succeeded steps.                                                 |
+| `report.RetriedSteps()`                                | All steps with >1 attempt.                                           |
+| `report.Filtered(opts ...ReportOption) WorkflowReport` | Returns a filtered copy of the report.                               |
+| `report.Diff(other WorkflowReport) DiffResult`         | Compares two reports (added/removed/changed steps + duration delta). |
+| `report.Duration() time.Duration`                      | Wall-clock duration spanned by all events.                           |
+| `report.Summary() string`                              | One-line human-readable summary.                                     |
+| `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
+
+## Package-Level Functions
+
+| Function                                                             | Description                                    |
+| -------------------------------------------------------------------- | ---------------------------------------------- |
+| `auditlog.LoadReport(path string) (WorkflowReport, error)`           | Load a JSON report from a file.                |
+| `auditlog.LoadReportFromReader(r io.Reader) (WorkflowReport, error)` | Load a JSON report from a reader.              |
+| `auditlog.LoadReportFromBytes(b []byte) (WorkflowReport, error)`     | Load a JSON report from bytes.                 |
+| `auditlog.ReadEvents(r io.Reader) ([]Event, error)`                  | Read NDJSON events (inverse of `WriteNDJSON`). |
+| `auditlog.ReplayEvents(events []Event) (WorkflowReport, error)`      | Reconstruct a report from a flat event stream. |
+| `auditlog.NewReportIndex(r WorkflowReport) *ReportIndex`             | Precompute O(1) lookup maps over a report.     |
+
+## Config
+
+| Field                  | Default                      | Description                                                                                                    |
+| ---------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `Enabled`              | `false` (checks env var)     | Turns audit logging on/off.                                                                                    |
+| `WorkflowID`           | `"default"`                  | Human-readable identifier.                                                                                     |
+| `RunID`                | auto-generated (128-bit hex) | Identifier for one execution; stamped on every event for trace correlation. Override to use your own trace ID. |
+| `OnEvent`              | `nil`                        | Callback fired after each event. Fires concurrently — must be goroutine-safe.                                  |
+| `MaxEvents`            | `0` (unlimited)              | Caps stored events to prevent OOM. Excess counted in `DroppedEventCount`.                                      |
+| `InitialEventCapacity` | `256`                        | Pre-allocates event slice.                                                                                     |
+
+## Sentinel Errors
+
+All errors are matchable via `errors.Is`:
+
+| Error                            | Returned when                                                        |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `auditlog.ErrWorkflowIDPathSep`  | `Config.WorkflowID` contains `/` or `\`.                             |
+| `auditlog.ErrEventCountMismatch` | Report `EventCount` differs from `len(Events)`.                      |
+| `auditlog.ErrStepCountMismatch`  | Report `StepCount` differs from `len(Steps)`.                        |
+| `auditlog.ErrStatusDrift`        | A step's `Status` disagrees with its derived status.                 |
+| `auditlog.ErrCountMismatch`      | A denormalized status-count field disagrees with actual step counts. |
+| `auditlog.ErrReplayNoEvents`     | `ReplayEvents` received zero events.                                 |
+| `auditlog.ErrEmpty`              | `ReadEvents` input is empty.                                         |
+| `auditlog.ErrNoEvents`           | `ReadEvents` input contains no events (all blank lines).             |
+| `auditlog.ErrOversizedLine`      | `ReadEvents` line exceeds 1 MB.                                      |
+| `auditlog.ErrReportLoadFailed`   | `LoadReport` failed.                                                 |
+| `auditlog.ErrRenderFailed`       | Rendering or marshaling failed.                                      |
+| `auditlog.ErrExportWriteFailed`  | File write or I/O flush failed during export.                        |
+
+## Full API on pkg.go.dev
+
+For the complete, always-up-to-date API documentation, see [pkg.go.dev](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog).

@@ -1,0 +1,87 @@
+---
+title: HTML Dashboard
+description: Generate self-contained interactive HTML reports with DAG graph, timeline, and tables.
+---
+
+## Overview
+
+The `WriteHTML` / `ExportHTML` methods produce a **self-contained interactive HTML dashboard** — a single file with embedded CSS and JavaScript, no external dependencies. Open it in any browser, attach it to a CI artifact, or email it.
+
+```go
+// From an Auditor (live workflow):
+audit.ExportHTML("dashboard.html")
+
+// From a WorkflowReport (e.g. loaded from JSON):
+report.ExportHTML("dashboard.html")
+
+// To a string:
+html, _ := report.WriteHTMLString()
+```
+
+## Five Tabs
+
+### 1. Steps
+
+Sortable, filterable table with pagination. Columns: step name, type, status, attempts, duration, dependencies, dependents, retry/timeout config, and inline error text.
+
+### 2. DAG Tree
+
+Collapsible tree of the step dependency graph. Root = steps with no dependencies. Children = dependents (execution flow).
+
+### 3. DAG Graph
+
+Interactive SVG with a Sugiyama layered layout algorithm:
+
+- **Rank assignment** via Kahn's algorithm
+- **4-pass barycenter crossing reduction**
+- **Median alignment positioning**
+- Pan, zoom, touch gestures, and click-to-highlight
+
+Edges rendered as cubic bezier curves with status-based node coloring.
+
+### 4. Timeline
+
+Gantt-style bar chart showing actual step durations positioned by start time — reveals parallelism, overlaps, and bottlenecks at a glance.
+
+### 5. Events
+
+Sortable event stream with type filters and pagination. Every `attempt_start` and `attempt_end` with timestamp, step, attempt number, and error.
+
+## Failure Summary
+
+When `workflow_succeeded` is `false`, a prominent red banner appears at the top showing the `failure_reason` and per-step error messages for every failed/canceled step.
+
+## Security
+
+The HTML dashboard is designed for safe sharing:
+
+- Report data is injected via `<script type="application/json">` tags — never parsed as HTML by the browser
+- Dynamic content in JS is escaped via the `esc()` function
+- Strict CSP: `default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'`
+- XSS-tested via fuzz target `FuzzHTMLSpecialChars` with structural integrity validation
+
+## From Any Source
+
+The dashboard works from any report, regardless of origin:
+
+```go
+// From a live workflow
+audit.ExportHTML("live.html")
+
+// From a JSON report loaded from disk
+report, _ := auditlog.LoadReport("old-run.json")
+report.ExportHTML("historical.html")
+
+// From replayed events
+events, _ := auditlog.ReadEvents(file)
+report, _ := auditlog.ReplayEvents(events)
+report.ExportHTML("replayed.html")
+```
+
+## Run the Demo
+
+```bash
+go run ./example
+```
+
+This runs a data pipeline (fetch, validate, transform, save + retry) and prints the audit report. Add an `ExportHTML` call to see the interactive dashboard.

@@ -1,0 +1,26 @@
+---
+title: Related Tools
+description: Tools that complement go-workflow-auditlog in your Go toolchain.
+---
+
+## Azure/go-workflow
+
+[Azure/go-workflow](https://github.com/Azure/go-workflow) is the workflow engine this library audits. It provides step-based DAG execution with retries, timeouts, conditions, and sub-workflows.
+
+go-workflow-auditlog adds the observability layer that go-workflow itself does not provide.
+
+## go-output
+
+[go-output](https://github.com/larsartmann/go-output) is the rendering engine behind the diagram, table, and tree exports. go-workflow-auditlog delegates Mermaid, DOT, D2, PlantUML, table, and tree rendering to go-output's registered formatters.
+
+## go-error-family
+
+[go-error-family](https://github.com/larsartmann/go-error-family) provides behavioral error classification. go-workflow-auditlog auto-registers all its sentinel errors so consumers get `Classify()`, `IsRetryable()`, and `ExitCode()` for free on import.
+
+## go-atomic-write
+
+[go-atomic-write](https://github.com/larsartmann/go-atomic-write) provides crash-safe, race-free file writes. Use it alongside go-workflow-auditlog when writing audit reports to disk to guarantee no partial writes on crash.
+
+## gogenfilter
+
+[gogenfilter](https://github.com/LarsArtmann/gogenfilter) detects and filters auto-generated Go code files. Useful in CI pipelines alongside audit reports to separate generated from hand-written code.

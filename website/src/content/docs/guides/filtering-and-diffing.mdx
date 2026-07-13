@@ -1,0 +1,120 @@
+---
+title: Filtering & Diffing
+description: Slice reports by criteria and compare two runs for regression detection.
+---
+
+## Report Filtering
+
+Slice a report by step name, status, event type, or time range. Filtered reports are independent copies — the original is untouched.
+
+```go
+report := audit.Report()
+
+// By step name
+fetchOnly := report.Filtered(
+    auditlog.WithStepsByName("fetch", "validate"),
+)
+
+// By status
+failures := report.Filtered(auditlog.WithStepsByStatus(auditlog.StatusFailed))
+
+// By event type
+starts := report.Filtered(auditlog.WithEventsByType(auditlog.EventAttemptStart))
+
+// By time range
+window := report.Filtered(
+    auditlog.WithTimeRange(startTime, endTime),
+)
+
+// Combine filters
+filtered := report.Filtered(
+    auditlog.WithStepsByStatus(auditlog.StatusSucceeded),
+    auditlog.WithStepsByName("fetch", "save"),
+)
+```
+
+### Available Filters
+
+| Filter                         | Description                                  |
+| ------------------------------ | -------------------------------------------- |
+| `WithStepsByName(names...)`    | Include only steps matching the given names. |
+| `WithStepsByStatus(status...)` | Include only steps with the given statuses.  |
+| `WithEventsByType(type...)`    | Include only events of the given types.      |
+| `WithTimeRange(start, end)`    | Include only events within the time window.  |
+
+## Report Diffing
+
+Compare two runs to detect regressions — added, removed, and changed steps with duration deltas and status changes.
+
+```go
+baseline, _ := auditlog.LoadReport("baseline.json")
+current, _ := auditlog.LoadReport("current.json")
+
+diff := baseline.Diff(current)
+
+for _, step := range diff.Added {
+    fmt.Printf("+ %s\n", step.StepName)
+}
+for _, step := range diff.Removed {
+    fmt.Printf("- %s\n", step.StepName)
+}
+for _, change := range diff.Changed {
+    fmt.Printf("~ %s: %v -> %v (%.2fms delta)\n",
+        change.StepName,
+        change.From.Status,
+        change.To.Status,
+        change.To.DurationMs - change.From.DurationMs,
+    )
+}
+```
+
+### DiffResult Structure
+
+```go
+type DiffResult struct {
+    Added   []StepInfo   // Steps in current but not in baseline
+    Removed []StepInfo   // Steps in baseline but not in current
+    Changed []StepDiff   // Steps present in both but with different status or duration
+}
+```
+
+### Regression Detection in CI
+
+```go
+// Load the last known-good baseline
+baseline, _ := auditlog.LoadReport("baseline.json")
+
+// After running the workflow
+audit.Snapshot(w)
+current := audit.Report()
+
+diff := baseline.Diff(current)
+
+// Check for regressions
+for _, change := range diff.Changed {
+    if change.To.Status == auditlog.StatusFailed &&
+       change.From.Status == auditlog.StatusSucceeded {
+        log.Fatalf("REGRESSION: %s started failing", change.StepName)
+    }
+    // Duration regression: >50% slower
+    if change.From.DurationMs > 0 {
+        ratio := change.To.DurationMs / change.From.DurationMs
+        if ratio > 1.5 {
+            log.Printf("SLOWDOWN: %s went from %.0fms to %.0fms",
+                change.StepName, change.From.DurationMs, change.To.DurationMs)
+        }
+    }
+}
+```
+
+## O(1) Lookups with ReportIndex
+
+For repeated queries on the same report, precompute lookup maps:
+
+```go
+index := auditlog.NewReportIndex(report)
+
+step := index.StepByName("fetch")           // O(1) instead of O(n)
+events := index.EventsByStep("fetch")        // O(1)
+byType := index.EventsByType(auditlog.EventAttemptStart)
+```

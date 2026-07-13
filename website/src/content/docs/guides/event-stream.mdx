@@ -1,0 +1,115 @@
+---
+title: Event Stream
+description: Understanding per-attempt events and the NDJSON event format.
+---
+
+## Per-Attempt Events
+
+Every step execution produces two events: `attempt_start` (before phase) and `attempt_end` (after phase). If a step retries, each retry attempt generates its own pair.
+
+```
+#1  attempt_start  attempt=1  step=fetch           (before)
+#2  attempt_end    attempt=1  step=fetch  (10ms)   (after)
+#3  attempt_start  attempt=1  step=flaky-api       (before)
+#4  attempt_end    attempt=1  step=flaky-api  error (after)
+#5  attempt_start  attempt=2  step=flaky-api       (before)
+#6  attempt_end    attempt=2  step=flaky-api  error (after)
+#7  attempt_start  attempt=3  step=flaky-api       (before)
+#8  attempt_end    attempt=3  step=flaky-api  (0ms) (after)
+```
+
+## Event Structure
+
+Each event carries a sequence number, timestamp, event type, phase, step reference, and attempt number:
+
+```go
+type Event struct {
+    RunID     auditlog.RunID `json:"run_id"`      // 128-bit hex, same for all events in a run
+    Sequence  int64          `json:"sequence"`    // Global ordering (atomic counter)
+    Timestamp time.Time      `json:"timestamp"`   // When the event was captured
+    EventType EventType      `json:"event_type"`  // "attempt_start" or "attempt_end"
+    Phase     Phase          `json:"phase"`       // "before" or "after"
+    StepRef                                           // step_name, step_type, step_id
+    Attempt   int            `json:"attempt"`     // 1-based attempt number
+    Error     string         `json:"error,omitempty"` // Present only on failed attempt_end
+}
+```
+
+## OnEvent Callback
+
+For real-time monitoring, pass an `OnEvent` callback. It fires after each event is recorded, **concurrently** from parallel step goroutines:
+
+```go
+audit, _ := auditlog.New(auditlog.Config{
+    Enabled:    true,
+    WorkflowID: "realtime-pipeline",
+    OnEvent: func(e auditlog.Event) {
+        // Send to metrics, logs, or streaming pipeline
+        // MUST be goroutine-safe
+        log.Printf("[%s] %s attempt=%d step=%s",
+            e.EventType, e.Phase, e.Attempt, e.StepName)
+    },
+})
+```
+
+:::caution[Concurrency]
+`OnEvent` fires concurrently from parallel step goroutines. It must be goroutine-safe. Delivery order is not guaranteed to match event Sequence — sort if needed.
+:::
+
+## NDJSON Export
+
+Export events as newline-delimited JSON for streaming pipelines:
+
+```go
+_ = audit.ExportNDJSON("events.ndjson")
+```
+
+Each line is a complete JSON object:
+
+```json
+{"run_id":"a1b2c3d4...","sequence":1,"timestamp":"2026-06-18T15:21:09Z","event_type":"attempt_start","phase":"before","step_name":"fetch","step_type":"FetchStep","step_id":1,"attempt":1}
+{"run_id":"a1b2c3d4...","sequence":2,"timestamp":"2026-06-18T15:21:09Z","event_type":"attempt_end","phase":"after","step_name":"fetch","step_type":"FetchStep","step_id":1,"attempt":1}
+```
+
+## Reading Events Back
+
+```go
+// From NDJSON
+events, err := auditlog.ReadEvents(file)
+
+// From the auditor
+events := audit.Events()
+count := audit.EventsCount() // without copying
+
+// From a report
+fetchEvents := report.EventsByStep("fetch")
+startEvents := report.EventsByType(auditlog.EventAttemptStart)
+```
+
+## Replay
+
+Reconstruct a report from a flat event stream:
+
+```go
+events, _ := auditlog.ReadEvents(file)
+report, err := auditlog.ReplayEvents(events)
+```
+
+:::note[Replay Limitations]
+Replay reconstructs step statuses, attempt counts, durations, and the event stream from events alone. Dependencies, `MaxAttempts`, `HasRetry`, and `HasTimeout` are not available — use a Snapshot-captured report for full fidelity.
+:::
+
+## Cross-System Correlation
+
+Every event carries the same 128-bit `RunID`. Use it to join workflow events with distributed traces, logs, or metrics:
+
+```go
+runID := audit.RunID() // "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+
+// Override with your own trace ID:
+audit, _ := auditlog.New(auditlog.Config{
+    Enabled:    true,
+    WorkflowID: "checkout-flow",
+    RunID:      auditlog.RunID(traceID),
+})
+```
