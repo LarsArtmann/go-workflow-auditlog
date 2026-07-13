@@ -39,12 +39,11 @@ observability suite.
 
 ### Build Automation
 
-The project uses `.goreleaser.yml` + a deprecated `justfile`. The global
-AGENTS policy mandates `flake.nix` for build/task automation.
+The project uses `flake.nix` (flake-parts + treefmt-nix) for build/task
+automation. `.goreleaser.yml` handles releases.
 
-**Direction**: Migrate to `flake.nix` — `nix build`, `nix flake check`,
-`nix run .#test`, `nix run .#lint`. The BuildFlow pre-commit hook already runs
-the checks; nix makes them canonical and reproducible.
+**Direction**: Keep `flake.nix` canonical. The pre-commit hook runs all
+checks via it; nix makes them reproducible.
 
 ### Streaming & Scale
 
@@ -75,7 +74,7 @@ CSP. Consumers get a shareable, offline artifact from any workflow run.
 ## Raw Ideas (not yet scoped)
 
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
-- `encoding/json/v2` migration (Go 1.25+ policy mandate) — **audit**: 5 source files use `encoding/json` (html_render.go, ndjson.go, report.go, loader.go, export.go). Migration is mechanical: swap `json.Marshal`→`json.Marshal_v2`, `json.Unmarshal`→`json.Unmarshal_v2`, `json.Encoder`→`json.Encoder_v2`. Benefit: ordered maps, ~2x faster, smaller allocations. Risk: v2 API not yet stable in Go 1.26.
+- `encoding/json/v2` migration (Go 1.26+ GOEXPERIMENT=jsonv2) — **DONE** (unreleased): migrated all 5 source files from `encoding/json` to `encoding/json/v2` + `jsontext`. Benefits: ordered maps, ~2x faster, smaller allocations, deterministic output, built-in XSS hardening.
 - ~~`go-error-family` adoption for structured, classified errors~~ — **DONE v0.5.0** (Strategy A registration + 3 I/O sentinels + 22 wrapped paths)
 - `FailureReason` structured categories (typed categories, not just a string)
 - `Diff()` on PeakConcurrency / CriticalPath (currently only duration)
@@ -152,10 +151,11 @@ tailing need arises — current buffer handles 10k+ events fine.
 `attempt_start` → span start, `attempt_end` → span end with attributes.
 **Defer** until a consumer has an OTel stack.
 
-### encoding/json/v2 Migration (P6-41) — Audit
+### encoding/json/v2 Migration (P6-41) — DONE
 
-5 source files use `encoding/json`. Migration is mechanical once v2 stabilizes.
-**Defer** until Go 1.27+ where v2 is stable.
+Migrated to `encoding/json/v2` + `encoding/json/jsontext` via `GOEXPERIMENT=jsonv2`.
+All 5 source files (export.go, html_render.go, loader.go, ndjson.go, report.go)
+now use the v2 API. Set in `flake.nix` devShell.
 
 ### init() Auto-Registration Decision (P6-36) — Recommendation
 

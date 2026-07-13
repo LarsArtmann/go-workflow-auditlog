@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 
-**[Documentation](https://auditlog.lars.software)** · **[API Reference](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)** · **[Interactive Demo](./example)**
+**[Documentation](https://go-workflow-auditlog.lars.software)** · **[API Reference](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)** · **[Interactive Demo](./example)**
 
 ---
 
@@ -67,7 +67,7 @@ _ = audit.ExportHTML("report.html")  // Interactive dashboard
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
 - **Error classification** — auto-registered with [go-error-family](https://github.com/larsartmann/go-error-family) for `Classify()`, `IsRetryable()`, `ExitCode()`
-- **244 tests, ~94% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
+- **234 tests, ~94% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
 
 ## Installation
 

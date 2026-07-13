@@ -1,6 +1,6 @@
 # Features — go-workflow-auditlog
 
-Honest feature inventory by status. Verified against the codebase on 2026-06-21.
+Honest feature inventory by status. Verified against the codebase on 2026-07-13.
 
 **Module**: `github.com/larsartmann/go-workflow-auditlog` · **Go**: 1.26+ · **Status**: ALPHA
 
@@ -57,7 +57,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-06-21.
 | JSON report            | `WriteJSON`     | —                     | `ExportJSON`     | ✅         | ✅        |
 | NDJSON events          | `WriteNDJSON`   | —                     | `ExportNDJSON`   | ✅         | ✅        |
 | Mermaid                | `WriteMermaid`  | `WriteMermaidString`  | `ExportMermaid`  | ✅         | ✅        |
-| PlantUML               | `WritePlantUML` | `WritePlantUMLString` | `ExportPlantUML  | ✅         | ✅        |
+| PlantUML               | `WritePlantUML` | `WritePlantUMLString` | `ExportPlantUML` | ✅         | ✅        |
 | Graphviz DOT           | `WriteGraphviz` | `WriteGraphvizString` | `ExportGraphviz` | ✅         | ✅        |
 | D2                     | `WriteD2`       | `WriteD2String`       | `ExportD2`       | ✅         | ✅        |
 | Table (16 sub-formats) | `WriteTable`    | `WriteTableString`    | `ExportTable`    | ✅         | ✅        |
@@ -82,12 +82,14 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 ### Infrastructure
 
-- **go-output** dependency at v0.17.0 (root + all sub-modules aligned)
+- **go-output** dependency at v0.30.4 (root + all sub-modules aligned)
+- **go-error-family** at v0.7.0
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
 - **govulncheck** in CI (golang/govulncheck-action)
 - **actionlint** in CI (workflow linting)
-- **Coverage gate** at 93%
-- **flake.nix** devShell (Go 1.26, golangci-lint, govulncheck, actionlint)
+- **Coverage gate** at 92%
+- **flake.nix** devShell (Go 1.26.4, golangci-lint, govulncheck, actionlint; GOEXPERIMENT=jsonv2)
+- **flake-parts** + **treefmt-nix** for build automation
 - **Pre-commit hook** (vet + lint + test)
 - **STABILITY.md** documenting API stability promises
 - **`.goreleaser.yml`** for automated GitHub releases
@@ -96,16 +98,18 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns)
 - `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer
-- `CHANGELOG.md` — v0.2.0 released 2026-06-21; `[Unreleased]` section ready for next cycle
+- `CHANGELOG.md` — v0.6.0 tagged; `[Unreleased]` section covers json/v2 migration + website launch
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
 - `example/main.go` — demos all export formats via `--export` flag
 
 ### Testing & Quality
 
-- **Fuzz test**: `FuzzDiagramSpecialChars` — diagram export structural integrity against injection payloads across Mermaid/PlantUML/DOT/D2
-- **Property-based tests**: Diff algebra (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output) — 200 iterations each, deterministic seeds
+- **`encoding/json/v2` migration** — migrated to Go 1.26 `encoding/json/v2` + `jsontext` (GOEXPERIMENT=jsonv2), full XSS hardening, deterministic output
+- **Fuzz tests**: `FuzzDiagramSpecialChars` (diagram injection), `FuzzHTMLSpecialChars` (HTML XSS, 12 seed payloads), `FuzzReadEvents` (NDJSON resilience), `FuzzClassify` (adversarial error chains)
+- **Property-based tests**: Diff algebra (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output) — 200 iterations each, deterministic seeds; Classify wrapping-preserves-family + identity matches map
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
+- **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + godoc examples
 
 ---
 
@@ -113,7 +117,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 ### Table Column Configuration
 
-`buildTableData()` hardcodes 5 columns: Step, Status, Duration, Attempts, Error. No way for users to customize which columns appear or add custom columns. The `HasRetry`, `HasTimeout`, and `StepType` fields exist on `StepInfo` but are not available as table columns.
+`buildTableData()` hardcodes 7 columns: Step, Status, Duration, Attempts, Retry, Timeout, Error. No way for users to customize which columns appear or add custom columns. The `StepType` field exists on `StepInfo` but is not available as a table column.
 
 ### Diagram Layout Direction
 
@@ -123,11 +127,7 @@ No way to set Mermaid/D2/Graphviz layout direction (TD vs LR). All diagrams defa
 
 ## PLANNED (see TODO_LIST.md and ROADMAP.md)
 
-- `flake.nix` migration (replace deprecated justfile)
 - Make heavy deps optional (split into core + visualization sub-modules, or build tags)
 - Streaming NDJSON export (write events as captured, not buffered)
 - OpenTelemetry span bridge
-- `encoding/json/v2` migration (Go 1.25+ policy)
-- `Name(step)` fallback helper (deterministic step names when `String()` is unset)
-- Fuzz tests for diagram ID sanitization
-- Benchmarks for new render paths (WriteD2, WriteTable, WriteTree, analytics)
+- CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports

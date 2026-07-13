@@ -67,4 +67,3 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 - [ ] Split library into core (auditlog) + visualization (diagrams/tables) sub-modules
 - [ ] Streaming NDJSON export option
 - [ ] OpenTelemetry span bridge
-- [ ] `encoding/json/v2` migration

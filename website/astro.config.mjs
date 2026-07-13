@@ -5,7 +5,7 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: "https://auditlog.lars.software",
+  site: "https://go-workflow-auditlog.lars.software",
 
   compressHTML: true,
 

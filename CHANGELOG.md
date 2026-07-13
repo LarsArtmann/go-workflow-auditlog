@@ -6,6 +6,65 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Public documentation website** at
+  [go-workflow-auditlog.lars.software](https://go-workflow-auditlog.lars.software) —
+  full Astro + Starlight site with 10 doc pages, landing page, and API reference.
+
+### Changed
+
+- **`encoding/json/v2` migration** — all JSON serialization now uses Go's
+  `encoding/json/v2` + `encoding/json/jsontext` packages (`GOEXPERIMENT=jsonv2`).
+  Benefits: deterministic key ordering, ~2x faster marshaling, smaller
+  allocations, and built-in HTML escaping for XSS hardening.
+- **go-error-family bumped to v0.7.0** (was v0.5.0).
+- **go-output bumped to v0.30.4** (was v0.30.1).
+- **flake-parts + treefmt-nix** — migrated from flake-utils to flake-parts with
+  treefmt-nix integration for build automation.
+- **golangci-lint exhaustruct excludes** aligned with go-output v0.30.1 API
+  (`d2.Node`, `d2.NodeStyle`, `d2.StrokeStyle`, `d2.Edge`, `output.NodeStyle`).
+- **Build check added to flake.nix** to catch derivation errors early.
+
+## [0.6.0] - 2026-07-06
+
+### Changed
+
+- **go-output upgraded to v0.30.1** (was v0.21.0) — brings daghtml SDK, refined
+  graph/plantuml/d2 renderers, and tree/table/markup sub-module alignment.
+
+## [0.5.1] - 2026-07-02
+
+### Added
+
+- **`StepInfo.Type()` method** — API consistency with `Status.Label()`/`Icon()`/`Color()`.
+- **Retry & timeout columns in table export** — table now has 7 columns (Step,
+  Status, Duration, Attempts, Retry, Timeout, Error).
+- **Helper methods** — `CheckNoClobber(path)` (anti-overwrite guard),
+  `HasPointerAddress(name)` (detect unoverridden `String()`),
+  `WorkflowReport.NameCollisions()` (find duplicate step names).
+- **`ErrFileExists` sentinel** — wraps `ErrExportWriteFailed` for clobber prevention.
+- **Benchmarks** — runtime overhead (Invocation, Attach, BuildReport, EventsCopy,
+  OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid
+  on 100-step reports) + renderHTML (small 3-step + large 1000-step).
+- **Integration / round-trip tests** — JSON round-trip + NDJSON replay round-trip.
+- **Cross-format consistency tests** — Mermaid vs DOT vs D2 same nodes/edges.
+- **Godoc `ExampleX` funcs** — `ExampleWorkflowReport_Duration` +
+  `ExampleWorkflowReport_Filtered`.
+- **ROADMAP strategic designs** — all 6 strategic items scoped with first-chunk designs.
+
+### Changed
+
+- **Go upgraded to 1.26.4** (was 1.26).
+- **go-output upgraded** from v0.17.0 → v0.18.0 → v0.19.0 → v0.21.0 across this cycle.
+- **HTML dashboard refactored** — replaced inline Sugiyama DAG JavaScript engine
+  (~200 lines) with the [daghtml](https://github.com/larsartmann/go-output/daghtml)
+  SDK from go-output. Smaller binary, maintained graph engine, same features
+  (rank assignment, crossing reduction, pan/zoom/click-highlight).
+- **Benchmark files consolidated** — fixed split brain where benchmarks were
+  spread across multiple files.
+- **HTML test helpers deduplicated** — removed shared helper duplication.
+
 ### Removed
 
 - **Deprecated API aliases removed** — the four backward-compat aliases that
@@ -14,6 +73,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `WriteEventsNDJSON` → `WriteNDJSON`
   - `ExportToFile` → `ExportJSON`
   - `ExportEventsToNDJSON` → `ExportNDJSON`
+- **makezero slice pre-allocation** replaced with idiomatic `append`.
 
 ## [0.5.0] - 2026-06-23
 
