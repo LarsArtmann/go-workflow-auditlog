@@ -14,7 +14,7 @@
     "starlight",
     "workflow"
   ],
-  "homepage": "https://auditlog.lars.software",
+  "homepage": "https://go-workflow-auditlog.lars.software",
   "bugs": "https://github.com/larsartmann/go-workflow-auditlog/issues",
   "license": "MIT",
   "author": "LarsArtmann <lars@larsartmann.com> (https://larsartmann.com/)",

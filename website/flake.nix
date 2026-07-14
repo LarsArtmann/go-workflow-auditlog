@@ -49,7 +49,7 @@
                 ]
                 ''
                   npm run build
-                  firebase deploy --only hosting
+                  firebase deploy --only hosting:auditlog --project lars-software
                 '';
           };
 

@@ -96,7 +96,7 @@ export const useCases: UseCase[] = [
   {
     title: "Microservice Orchestration",
     desc: "Correlate workflow runs with distributed traces via 128-bit RunID",
-    icon: "link",
+    icon: "bolt",
   },
   {
     title: "Compliance & Audit Trails",
