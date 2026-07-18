@@ -1,7 +1,6 @@
 # go-workflow-auditlog
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/larsartmann/go-workflow-auditlog.svg)](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)
-[![Go Report Card](https://goreportcard.com/badge/github.com/larsartmann/go-workflow-auditlog)](https://goreportcard.com/report/github.com/larsartmann/go-workflow-auditlog)
 [![CI](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-~94%25-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
