@@ -1,7 +1,6 @@
 package auditlog
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -17,17 +16,7 @@ func (r WorkflowReport) WritePlantUML(writer io.Writer) error {
 	renderer.SetNodes(nodes)
 	renderer.SetEdges(edges)
 
-	out, err := renderer.Render()
-	if err != nil {
-		return fmt.Errorf("%w: render plantuml diagram: %w", ErrRenderFailed, err)
-	}
-
-	_, err = fmt.Fprintln(writer, out)
-	if err != nil {
-		return fmt.Errorf("%w: write plantuml output: %w", ErrExportWriteFailed, err)
-	}
-
-	return nil
+	return writeRendered(writer, "plantuml diagram", renderer.Render)
 }
 
 // WritePlantUMLString returns the PlantUML diagram as a string.

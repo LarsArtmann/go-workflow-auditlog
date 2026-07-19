@@ -1,7 +1,6 @@
 package auditlog
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -71,17 +70,7 @@ func (r WorkflowReport) WriteD2(writer io.Writer) error {
 		diagram.AddEdge(edge)
 	}
 
-	out, err := diagram.Render()
-	if err != nil {
-		return fmt.Errorf("%w: render d2 diagram: %w", ErrRenderFailed, err)
-	}
-
-	_, err = fmt.Fprintln(writer, out)
-	if err != nil {
-		return fmt.Errorf("%w: write d2 output: %w", ErrExportWriteFailed, err)
-	}
-
-	return nil
+	return writeRendered(writer, "d2 diagram", diagram.Render)
 }
 
 // WriteD2String returns the D2 diagram as a string.

@@ -99,10 +99,7 @@ func TestD2_EmptyReport(t *testing.T) {
 func TestWriteD2String(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("d2-string")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "d2-string")
 
 	output, err := a.Report().WriteD2String()
 	if err != nil {
@@ -115,10 +112,7 @@ func TestWriteD2String(t *testing.T) {
 func TestExportD2(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("export-d2")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "export-d2")
 
 	path := t.TempDir() + "/dag.d2"
 
@@ -151,10 +145,7 @@ func TestWriteTable_Markdown(t *testing.T) {
 func TestWriteTable_CSV(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("csv-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "csv-step")
 
 	var buf strings.Builder
 
@@ -173,10 +164,7 @@ func TestWriteTable_CSV(t *testing.T) {
 func TestWriteTable_JSON(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("json-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "json-step")
 
 	var buf strings.Builder
 
@@ -194,10 +182,7 @@ func TestWriteTable_JSON(t *testing.T) {
 func TestWriteTable_JSONL(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("jsonl-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "jsonl-step")
 
 	var buf strings.Builder
 
@@ -229,10 +214,7 @@ func TestWriteTable_EmptyReport(t *testing.T) {
 func TestWriteTableString(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("table-string")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "table-string")
 
 	output, err := a.Report().WriteTableString(output.FormatMarkdown, output.RenderOptions{})
 	if err != nil {
@@ -245,10 +227,7 @@ func TestWriteTableString(t *testing.T) {
 func TestExportTable(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("export-table")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "export-table")
 
 	path := t.TempDir() + "/report.csv"
 
@@ -301,10 +280,7 @@ func TestWriteTree_EmptyReport(t *testing.T) {
 func TestWriteTreeString(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("tree-string")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "tree-string")
 
 	output, err := a.Report().WriteTreeString()
 	if err != nil {
@@ -340,10 +316,7 @@ func TestWriteHTMLTree_BasicDAG(t *testing.T) {
 func TestWriteHTMLTreeString(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("html-tree-string")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "html-tree-string")
 
 	output, err := a.Report().WriteHTMLTreeString()
 	if err != nil {
@@ -356,10 +329,7 @@ func TestWriteHTMLTreeString(t *testing.T) {
 func TestExportTree(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("export-tree")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "export-tree")
 
 	path := t.TempDir() + "/tree.txt"
 
@@ -372,10 +342,7 @@ func TestExportTree(t *testing.T) {
 func TestExportHTMLTree(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("export-html-tree")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "export-html-tree")
 
 	path := t.TempDir() + "/tree.html"
 
@@ -391,10 +358,7 @@ func TestExportHTMLTree(t *testing.T) {
 func TestWorkflowReport_ExportMethods(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("report-export")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "report-export")
 
 	report := a.Report()
 	dir := t.TempDir()
@@ -441,10 +405,7 @@ func TestWorkflowReport_ExportMethods(t *testing.T) {
 func TestAuditor_WriteStringMethods(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("str-methods")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "str-methods")
 
 	for _, tc := range []struct {
 		name string

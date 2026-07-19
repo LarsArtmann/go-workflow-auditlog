@@ -1,7 +1,6 @@
 package auditlog
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -20,17 +19,7 @@ func (r WorkflowReport) WriteGraphviz(writer io.Writer) error {
 	renderer.SetNodes(nodes)
 	renderer.SetEdges(edges)
 
-	out, err := renderer.Render()
-	if err != nil {
-		return fmt.Errorf("%w: render graphviz diagram: %w", ErrRenderFailed, err)
-	}
-
-	_, err = fmt.Fprintln(writer, out)
-	if err != nil {
-		return fmt.Errorf("%w: write graphviz output: %w", ErrExportWriteFailed, err)
-	}
-
-	return nil
+	return writeRendered(writer, "graphviz diagram", renderer.Render)
 }
 
 // WriteGraphvizString returns the Graphviz DOT diagram as a string.

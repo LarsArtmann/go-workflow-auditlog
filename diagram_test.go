@@ -147,10 +147,7 @@ func TestPlantUML_BasicDAG(t *testing.T) {
 func TestExportMermaid(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("export-mmd")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "export-mmd")
 
 	path := t.TempDir() + "/dag.mmd"
 
@@ -163,10 +160,7 @@ func TestExportMermaid(t *testing.T) {
 func TestExportPlantUML(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("export-puml")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "export-puml")
 
 	path := t.TempDir() + "/dag.puml"
 
@@ -238,10 +232,7 @@ func TestGraphviz_EmptyReport(t *testing.T) {
 func TestExportGraphviz(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("export-dot")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "export-dot")
 
 	path := t.TempDir() + "/dag.dot"
 
@@ -283,10 +274,7 @@ func TestMermaid_FanOutFanIn(t *testing.T) {
 func TestWriteMermaidString(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("string-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "string-step")
 
 	output, err := a.Report().WriteMermaidString()
 	// WriteMermaidString currently wraps nil errors; verify the output is usable.
@@ -298,10 +286,7 @@ func TestWriteMermaidString(t *testing.T) {
 func TestWriteGraphvizString(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("string-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "string-step")
 
 	output, err := a.Report().WriteGraphvizString()
 	if err != nil {
@@ -336,8 +321,7 @@ func TestPlantUML_NoMermaidClasses(t *testing.T) {
 	t.Parallel()
 
 	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("puml-step")
-	w.Add(flow.Step(step))
+	addSingleStep(w, "puml-step")
 	runWorkflow(t, a, w)
 
 	var buf strings.Builder

@@ -182,10 +182,7 @@ func TestReplayEvents_NoEvents(t *testing.T) {
 func TestReplayEvents_PreservesEventCount(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("count-step")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "count-step")
 
 	report, err := auditlog.ReplayEvents(a.Events())
 	if err != nil {

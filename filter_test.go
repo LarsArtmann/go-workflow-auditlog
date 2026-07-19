@@ -62,10 +62,7 @@ func TestFiltered_ByEventType(t *testing.T) {
 func TestFiltered_ByTimeRange(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("time-step")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "time-step")
 
 	before := time.Now().Add(-1 * time.Hour)
 	after := time.Now().Add(1 * time.Hour)

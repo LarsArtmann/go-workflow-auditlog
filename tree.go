@@ -1,7 +1,6 @@
 package auditlog
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -77,22 +76,10 @@ func (r WorkflowReport) buildTreeNodes() *output.TreeNode {
 // WriteTree writes the step dependency DAG as an ASCII tree.
 // Nodes are labeled with step name, status, and retry count.
 func (r WorkflowReport) WriteTree(writer io.Writer) error {
-	root := r.buildTreeNodes()
-
 	renderer := tree.NewASCIITreeRenderer()
-	renderer.SetRoot(root)
+	renderer.SetRoot(r.buildTreeNodes())
 
-	out, err := renderer.Render()
-	if err != nil {
-		return fmt.Errorf("%w: render tree: %w", ErrRenderFailed, err)
-	}
-
-	_, err = fmt.Fprintln(writer, out)
-	if err != nil {
-		return fmt.Errorf("%w: write tree output: %w", ErrExportWriteFailed, err)
-	}
-
-	return nil
+	return writeRendered(writer, "tree", renderer.Render)
 }
 
 // WriteTreeString returns the ASCII tree as a string.
@@ -111,22 +98,10 @@ func (r WorkflowReport) WriteTreeString() (string, error) {
 // WriteHTMLTree writes the step dependency DAG as an HTML nested list tree.
 // Nodes are labeled with step name, status, and retry count.
 func (r WorkflowReport) WriteHTMLTree(writer io.Writer) error {
-	root := r.buildTreeNodes()
-
 	renderer := markup.NewHTMLTreeRenderer()
-	renderer.SetRoot(root)
+	renderer.SetRoot(r.buildTreeNodes())
 
-	out, err := renderer.Render()
-	if err != nil {
-		return fmt.Errorf("%w: render html tree: %w", ErrRenderFailed, err)
-	}
-
-	_, err = fmt.Fprintln(writer, out)
-	if err != nil {
-		return fmt.Errorf("%w: write html tree output: %w", ErrExportWriteFailed, err)
-	}
-
-	return nil
+	return writeRendered(writer, "html tree", renderer.Render)
 }
 
 // WriteHTMLTreeString returns the HTML tree as a string.

@@ -805,10 +805,7 @@ func TestEnvEnabledFalse(t *testing.T) {
 func TestEventsCount_NoCopy(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("count-step")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "count-step")
 
 	count := a.EventsCount()
 

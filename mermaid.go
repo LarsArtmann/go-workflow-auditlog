@@ -1,7 +1,6 @@
 package auditlog
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -22,17 +21,7 @@ func (r WorkflowReport) WriteMermaid(writer io.Writer) error {
 	renderer.SetNodes(nodes)
 	renderer.SetEdges(edges)
 
-	out, err := renderer.Render()
-	if err != nil {
-		return fmt.Errorf("%w: render mermaid diagram: %w", ErrRenderFailed, err)
-	}
-
-	_, err = fmt.Fprintln(writer, out)
-	if err != nil {
-		return fmt.Errorf("%w: write mermaid output: %w", ErrExportWriteFailed, err)
-	}
-
-	return nil
+	return writeRendered(writer, "mermaid diagram", renderer.Render)
 }
 
 // WriteMermaidString returns the Mermaid diagram as a string.

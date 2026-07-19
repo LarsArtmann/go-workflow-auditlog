@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"testing"
 
-	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -45,10 +44,7 @@ func TestLoadReport_RoundTrip(t *testing.T) {
 func TestLoadReport_FromFile(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("file-load-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "file-load-step")
 
 	path := t.TempDir() + "/report.json"
 
@@ -68,10 +64,7 @@ func TestLoadReport_FromFile(t *testing.T) {
 func TestLoadReport_FromReader(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("reader-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "reader-step")
 
 	var buf bytes.Buffer
 
@@ -106,10 +99,7 @@ func TestLoadReport_NonexistentFile(t *testing.T) {
 func TestReportWriteNDJSON(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("ndjson-report-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "ndjson-report-step")
 
 	report := a.Report()
 

@@ -93,10 +93,7 @@ func TestWriteHTML_FailedStepWithError(t *testing.T) {
 func TestWriteHTMLString_ReturnsContent(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("only-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "only-step")
 
 	output, err := a.Report().WriteHTMLString()
 	if err != nil {
@@ -115,10 +112,7 @@ func TestWriteHTMLString_ReturnsContent(t *testing.T) {
 func TestExportHTML_WritesFile(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("exported-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "exported-step")
 
 	path := t.TempDir() + "/report.html"
 
@@ -144,10 +138,7 @@ func TestExportHTML_WritesFile(t *testing.T) {
 func TestAuditor_WriteHTML_DelegatesToReport(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("delegate-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "delegate-step")
 
 	var buf strings.Builder
 
@@ -162,10 +153,7 @@ func TestAuditor_WriteHTML_DelegatesToReport(t *testing.T) {
 func TestAuditor_ExportHTML_DelegatesToReport(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("auditor-export")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "auditor-export")
 
 	path := t.TempDir() + "/auditor-report.html"
 
@@ -187,10 +175,7 @@ func TestAuditor_ExportHTML_DelegatesToReport(t *testing.T) {
 func TestAuditor_WriteHTMLString_DelegatesToReport(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("string-delegate")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "string-delegate")
 
 	output, err := a.WriteHTMLString()
 	if err != nil {
@@ -325,10 +310,7 @@ func TestWriteHTML_FromReplay(t *testing.T) {
 func TestWriteHTML_FromLoadedReport(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newSucceed("loaded-html-step")
-	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	a := runSingleSucceed(t, "loaded-html-step")
 
 	var jsonBuf bytes.Buffer
 

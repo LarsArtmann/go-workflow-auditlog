@@ -141,6 +141,30 @@ func addLinearChain(w *flow.Workflow, a, b, c flow.Steper) {
 	)
 }
 
+// addSingleStep wires a single succeed step with the given name into the
+// workflow. Centralizes the `step := newSucceed(name); w.Add(flow.Step(step))`
+// idiom used by tests that only need a minimal single-step workflow (the
+// overwhelming majority of export/format tests).
+func addSingleStep(w *flow.Workflow, name string) {
+	w.Add(flow.Step(newSucceed(name)))
+}
+
+// runSingleSucceed runs a minimal single-succeed-step workflow end-to-end:
+// creates the audit+workflow fixture, wires a single step with the given
+// name, attaches the auditor, runs the workflow, and snapshots state.
+// Returns the auditor for the test to operate on. Centralizes the 4-line
+// `t.Parallel + newAuditAndWorkflow + addSingleStep + runWorkflow` boilerplate
+// shared by every export/format test.
+func runSingleSucceed(t *testing.T, name string) *auditlog.Auditor {
+	t.Helper()
+
+	a, w := newAuditAndWorkflow(t)
+	addSingleStep(w, name)
+	runWorkflow(t, a, w)
+
+	return a
+}
+
 // --- Helpers ---
 
 func mustNew(t *testing.T, cfg auditlog.Config) *auditlog.Auditor {
