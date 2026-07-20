@@ -12,14 +12,10 @@ import (
 // orange=canceled) via fillcolor attributes.
 // The output is valid DOT, consumable by `dot -Tsvg` or any Graphviz renderer.
 func (r WorkflowReport) WriteGraphviz(writer io.Writer) error {
-	nodes, edges := buildGraph(r)
-
 	renderer := graph.NewDOTRenderer()
 	renderer.SetGraphID("workflow")
-	renderer.SetNodes(nodes)
-	renderer.SetEdges(edges)
 
-	return writeRendered(writer, "graphviz diagram", renderer.Render)
+	return writeGraph(writer, r, "graphviz diagram", renderer)
 }
 
 // WriteGraphvizString returns the Graphviz DOT diagram as a string.

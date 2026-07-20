@@ -43,6 +43,7 @@ ndjson.go          — ReadEvents NDJSON reader (sentinel errors, enum validatio
 replay.go          — ReplayEvents: reconstruct Report from event stream (uses stepCore from step.go, preserves RunID + assigns StepIDs)
 classify.go        — Error classification: RegisterClassifications() + ErrorClassifications() map sentinel errors → go-error-family Family (Corruption/Rejection) via init() auto-registration into DefaultRegistry
 helpers.go         — Utility helpers: CheckNoClobber (anti-overwrite guard), HasPointerAddress (detect unoverridden String()), NameCollisions (find duplicate step names) + ErrFileExists sentinel
+render.go          — Shared render helpers: writeRendered (render + write with sentinel wrapping) + writeGraph (buildGraph + SetNodes + SetEdges + writeRendered for graph-format Write* methods)
 diagram.go         — Translation layer: buildGraph() converts WorkflowReport → go-output GraphNode/GraphEdge + statusStyle() maps StepStatus → GraphStyle colors
 mermaid.go         — Mermaid flowchart export (delegates to go-output graph.MermaidRenderer, code fence off)
 plantuml.go        — PlantUML component diagram export (delegates to go-output plantuml.PlantUMLDiagram)
@@ -168,83 +169,21 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
   sharing the same parameter shape) are intentional: each helper asserts a
   different field with different semantics and merging would harm clarity.
 - Production-code duplication is never acceptable: extract helpers (see
-  `sortByName`, `sortStepsByName`, `diffStep`).
+  `sortByName`, `sortStepsByName`, `diffStep`, `writeGraph`).
+- **Current state**: zero clone groups at any threshold from `-t 3` through
+  `-t 30` (production code extracted via `writeGraph` in `render.go`; test
+  Export* preamble extracted via `singleSucceedExportPath` in
+  `auditlog_test.go`). The formerly-documented "ten acceptable clones"
+  section below was retired when the refactor landed — those patterns no
+  longer appear in the report.
 
 #### Acceptable clones (documented in source)
 
-At `-t 15` ten clone groups remain after the deduplication pass; all are
-classified as `idiom` by art-dupl and would only disappear at higher
-thresholds (`-t 30` reports zero). Documented here so the next reader
-knows they were considered.
-
-- **`assert*` test helpers (auditlog_test.go)**: 7 helpers
-  (`assertStepCount`, `assertEventCount`, `assertWorkflowID`,
-  `assertFirstStepName`, `assertPeakConcurrency`, `assertFailureReason`,
-  `assertFailedCount`) share the signature shape
-  `func assertX(t *testing.T, report auditlog.WorkflowReport, want T)`.
-  Each asserts a distinct field on the report with its own error message;
-  merging into a generic `assertField(t, name, got, want)` would replace
-  named call sites with stringly-typed lookups and harm test readability.
-  Keeping typed helpers is the correct trade-off.
-
-- **`WriteTable` API surface (plugin.go:246, table.go:52)** +
-  **`WriteTableString` API surface (plugin.go:300, table.go:67)** +
-  **`ExportTable` API surface (plugin.go:251, report.go:317)**: Each is a
-  1-line delegating wrapper around the corresponding `WorkflowReport`
-  method. The signature match is intrinsic to the consistent `Write*` /
-  `Export*` method surface that `Auditor` exposes for every format
-  (WriteMermaid, WritePlantUML, WriteGraphviz, WriteD2, WriteTree,
-  WriteHTMLTree, WriteTable all follow the same delegation pattern).
-  Removing the convenience methods would force callers to write
-  `a.Report().Write*(...)` instead of `a.Write*(...)` for these formats
-  only, breaking the API symmetry.
-
-- **Workflow-fixture step literals (coverage_test.go, html_test.go)**:
-  Two `StepRef: auditlog.StepRef{Name: "..."}` field literals inside
-  larger `Steps: []auditlog.StepInfo{...}` literals. These are
-  single-field struct initializers nested in composite test fixtures with
-  many other fields (`Status`, `DurationMs`, `Dependencies`, etc.); the
-  `StepRef` field is not the focal point of the assertion. Extracting a
-  `stepRef("name")` helper would obscure the surrounding test data and
-  add an indirection that is shorter than the field name itself.
-
-- **`CriticalPathDurationMs` assertion (coverage_test.go)**: Two
-  `if recomputed.CriticalPathDurationMs != want { t.Errorf(...) }` blocks
-  with one providing a "diamond DAG:" prefix in the message for
-  diagnostic context. The shared shape is the idiomatic Go
-  `t.Errorf("expected X=%v, got %v", want, got)` pattern; merging would
-  force callers to pass a context string for marginal benefit.
-
-- **Test-table subtests for diagram formats (diagram_test.go:431-448)**:
-  Two `assertEdgeDirections(t, "d2"/"graphviz", buf, expectedEdges,
-forbiddenEdges)` calls with format-specific edge syntax
-  (`fetch -> transform` vs `"fetch" -> "transform"`). This is the
-  canonical table-driven test pattern: same harness, different data per
-  subtest. Extracting would replace the existing helper call with a more
-  parameterized one and reduce clarity.
-
-- **`if err != nil { t.Fatalf }` in table-driven test (output_test.go)**:
-  Two `t.Fatalf("%s X error: %v", tc.name, err)` calls inside the
-  export-vs-string table of `TestExport_StringSymmetry`. The message
-  encodes the operation ("export" vs "string") for diagnostic context;
-  extracting would just produce `assertNoError(t, tc.name, op, err)` —
-  adds parameter noise for a 1-line check.
-
-- **`StepStatus` literal slice (diff_property_test.go:14, display_test.go:56)**:
-  Two `[]auditlog.StepStatus{...}` literals enumerate the same six
-  statuses but for different purposes: the diff-property test samples
-  from the slice to build random reports; the display test iterates it
-  to verify `String()` returns non-empty. Different domain use of the
-  same enum membership; not duplication.
-
-- **HTML file-contains assertions (html_test.go:137-189)**: Two
-  `if !strings.Contains(string(data), "...") { t.Error(...) }` checks
-  asserting different step-name substrings after reading a file written
-  to disk. The two checks serve different subtests (`ExportHTML` and
-  `Auditor.ExportHTML` delegation); the step names differ by design.
-  Idiomatic file-content assertion; extracting a
-  `assertFileContains(t, path, substr, msg)` helper would marginally
-  shorten the call sites at the cost of an extra parameter.
+At `-t 15` **zero** clone groups remain. The patterns previously listed here
+(`assert*` test helpers, `WriteTable`/`ExportTable` API-surface pairs, fixture
+field literals, edge-direction assertions, etc.) were either eliminated by
+the `writeGraph` + `singleSucceedExportPath` extractions or were classified by
+art-dupl as non-clones at the current threshold.
 
 #### Helper additions
 
@@ -254,3 +193,11 @@ forbiddenEdges)` calls with format-specific edge syntax
 flow.Step(c).DependsOn(b))` idiom previously duplicated across
   `diagram_test.go` and `html_test.go`. Companion to the existing
   `addDependentStep` (2-step chain) and `addParallelSteps` (no edges).
+
+- **`singleSucceedExportPath(t, stepName, fileName)`** (auditlog_test.go):
+  runs a single-succeed workflow with the given step name and returns
+  the auditor plus a `t.TempDir()`-anchored output path. Centralizes the
+  `runSingleSucceed + t.TempDir + path` boilerplate shared by every
+  Export\* test (Mermaid, PlantUML, Graphviz, D2, JSON, HTML, table,
+  tree, HTML tree — 10 call sites). Callers still invoke `t.Parallel()`
+  at the test level so the paralleltest linter stays satisfied.

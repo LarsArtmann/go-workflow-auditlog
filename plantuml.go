@@ -10,13 +10,9 @@ import (
 // WritePlantUML writes the step dependency DAG as a PlantUML component diagram.
 // Nodes are colored by status via inline color specifications.
 func (r WorkflowReport) WritePlantUML(writer io.Writer) error {
-	nodes, edges := buildGraph(r)
-
 	renderer := plantuml.NewPlantUMLDiagram()
-	renderer.SetNodes(nodes)
-	renderer.SetEdges(edges)
 
-	return writeRendered(writer, "plantuml diagram", renderer.Render)
+	return writeGraph(writer, r, "plantuml diagram", renderer)
 }
 
 // WritePlantUMLString returns the PlantUML diagram as a string.

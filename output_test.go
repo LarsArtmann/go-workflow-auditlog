@@ -112,9 +112,7 @@ func TestWriteD2String(t *testing.T) {
 func TestExportD2(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "export-d2")
-
-	path := t.TempDir() + "/dag.d2"
+	a, path := singleSucceedExportPath(t, "export-d2", "dag.d2")
 
 	err := a.ExportD2(path)
 	if err != nil {
@@ -227,9 +225,7 @@ func TestWriteTableString(t *testing.T) {
 func TestExportTable(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "export-table")
-
-	path := t.TempDir() + "/report.csv"
+	a, path := singleSucceedExportPath(t, "export-table", "report.csv")
 
 	err := a.ExportTable(path, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
@@ -329,9 +325,7 @@ func TestWriteHTMLTreeString(t *testing.T) {
 func TestExportTree(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "export-tree")
-
-	path := t.TempDir() + "/tree.txt"
+	a, path := singleSucceedExportPath(t, "export-tree", "tree.txt")
 
 	err := a.ExportTree(path)
 	if err != nil {
@@ -342,9 +336,7 @@ func TestExportTree(t *testing.T) {
 func TestExportHTMLTree(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "export-html-tree")
-
-	path := t.TempDir() + "/tree.html"
+	a, path := singleSucceedExportPath(t, "export-html-tree", "tree.html")
 
 	err := a.ExportHTMLTree(path)
 	if err != nil {

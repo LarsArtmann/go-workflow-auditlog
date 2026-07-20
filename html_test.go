@@ -112,9 +112,7 @@ func TestWriteHTMLString_ReturnsContent(t *testing.T) {
 func TestExportHTML_WritesFile(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "exported-step")
-
-	path := t.TempDir() + "/report.html"
+	a, path := singleSucceedExportPath(t, "exported-step", "report.html")
 
 	err := a.Report().ExportHTML(path)
 	if err != nil {
@@ -153,9 +151,7 @@ func TestAuditor_WriteHTML_DelegatesToReport(t *testing.T) {
 func TestAuditor_ExportHTML_DelegatesToReport(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "auditor-export")
-
-	path := t.TempDir() + "/auditor-report.html"
+	a, path := singleSucceedExportPath(t, "auditor-export", "auditor-report.html")
 
 	err := a.ExportHTML(path)
 	if err != nil {

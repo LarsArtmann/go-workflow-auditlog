@@ -3,6 +3,8 @@ package auditlog
 import (
 	"fmt"
 	"io"
+
+	"github.com/larsartmann/go-output"
 )
 
 // writeRendered invokes render, then writes the resulting string to writer with
@@ -23,4 +25,20 @@ func writeRendered(writer io.Writer, format string, render func() (string, error
 	}
 
 	return nil
+}
+
+// writeGraph writes the step DAG of r through the given pre-configured
+// go-output GraphRenderer. It centralizes the SetNodes/SetEdges + writeRendered
+// sequence shared by every graph-format Write method (Mermaid, PlantUML,
+// Graphviz). Each caller is responsible for constructing the renderer and
+// applying any format-specific configuration (e.g. SetCodeFence, SetGraphID)
+// before invoking this helper — keeping those one-line differences visible at
+// the call site rather than hiding them behind an interface-widening wrapper.
+func writeGraph(writer io.Writer, r WorkflowReport, format string, renderer output.GraphRenderer) error {
+	nodes, edges := buildGraph(r)
+
+	renderer.SetNodes(nodes)
+	renderer.SetEdges(edges)
+
+	return writeRendered(writer, format, renderer.Render)
 }

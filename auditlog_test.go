@@ -165,6 +165,24 @@ func runSingleSucceed(t *testing.T, name string) *auditlog.Auditor {
 	return a
 }
 
+// singleSucceedExportPath is the shared fixture for every Export* test:
+// runs a single-succeed workflow with the given step name and returns the
+// auditor plus a t.TempDir-anchored output file path. Centralizes the
+// 2-line `runSingleSucceed + t.TempDir + path` block duplicated across every
+// format export test (Mermaid, PlantUML, Graphviz, D2, JSON, HTML, table,
+// tree, HTML tree).
+//
+// Callers are responsible for invoking t.Parallel() before calling this
+// helper — keeping the parallel call at the test level satisfies the
+// paralleltest linter and keeps the test's parallel participation visible.
+func singleSucceedExportPath(t *testing.T, stepName, fileName string) (*auditlog.Auditor, string) {
+	t.Helper()
+
+	a := runSingleSucceed(t, stepName)
+
+	return a, t.TempDir() + "/" + fileName
+}
+
 // --- Helpers ---
 
 func mustNew(t *testing.T, cfg auditlog.Config) *auditlog.Auditor {

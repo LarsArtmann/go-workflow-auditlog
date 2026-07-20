@@ -147,9 +147,7 @@ func TestPlantUML_BasicDAG(t *testing.T) {
 func TestExportMermaid(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "export-mmd")
-
-	path := t.TempDir() + "/dag.mmd"
+	a, path := singleSucceedExportPath(t, "export-mmd", "dag.mmd")
 
 	err := a.ExportMermaid(path)
 	if err != nil {
@@ -160,9 +158,7 @@ func TestExportMermaid(t *testing.T) {
 func TestExportPlantUML(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "export-puml")
-
-	path := t.TempDir() + "/dag.puml"
+	a, path := singleSucceedExportPath(t, "export-puml", "dag.puml")
 
 	err := a.ExportPlantUML(path)
 	if err != nil {
@@ -232,9 +228,7 @@ func TestGraphviz_EmptyReport(t *testing.T) {
 func TestExportGraphviz(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "export-dot")
-
-	path := t.TempDir() + "/dag.dot"
+	a, path := singleSucceedExportPath(t, "export-dot", "dag.dot")
 
 	err := a.ExportGraphviz(path)
 	if err != nil {

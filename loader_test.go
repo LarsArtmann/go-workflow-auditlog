@@ -44,9 +44,7 @@ func TestLoadReport_RoundTrip(t *testing.T) {
 func TestLoadReport_FromFile(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "file-load-step")
-
-	path := t.TempDir() + "/report.json"
+	a, path := singleSucceedExportPath(t, "file-load-step", "report.json")
 
 	err := a.ExportJSON(path)
 	if err != nil {

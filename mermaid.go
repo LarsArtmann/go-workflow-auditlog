@@ -14,14 +14,10 @@ import (
 // The output is raw flowchart syntax (no ```mermaid code fence) so it can be
 // written to .mmd files or embedded directly.
 func (r WorkflowReport) WriteMermaid(writer io.Writer) error {
-	nodes, edges := buildGraph(r)
-
 	renderer := graph.NewMermaidRenderer()
 	renderer.SetCodeFence(false)
-	renderer.SetNodes(nodes)
-	renderer.SetEdges(edges)
 
-	return writeRendered(writer, "mermaid diagram", renderer.Render)
+	return writeGraph(writer, r, "mermaid diagram", renderer)
 }
 
 // WriteMermaidString returns the Mermaid diagram as a string.
