@@ -87,7 +87,7 @@ func NewNDJSONStreamer(w io.Writer, opts ...NDJSONStreamerOption) *NDJSONStreame
 // Unlike [Auditor.ExportNDJSON] (which uses atomic temp-file + rename), this
 // writes directly to path so consumers can tail the file in real time.
 func CreateNDJSONStreamer(path string, opts ...NDJSONStreamerOption) (*NDJSONStreamer, error) {
-	file, err := os.Create(path)
+	file, err := os.Create(path) //nolint:gosec // path is user-provided by design
 	if err != nil {
 		return nil, fmt.Errorf("%w: create %q: %w", ErrExportWriteFailed, path, err)
 	}
@@ -114,11 +114,13 @@ func (s *NDJSONStreamer) OnEvent(evt Event) {
 	)
 	if err != nil {
 		s.err = fmt.Errorf("%w: encode event %d: %w", ErrRenderFailed, evt.Sequence, err)
+
 		return
 	}
 
 	if s.autoFlush {
-		if flushErr := s.buf.Flush(); flushErr != nil {
+		flushErr := s.buf.Flush()
+		if flushErr != nil {
 			s.err = fmt.Errorf("%w: flush ndjson stream: %w", ErrExportWriteFailed, flushErr)
 		}
 	}
@@ -134,8 +136,10 @@ func (s *NDJSONStreamer) Flush() error {
 		return s.err
 	}
 
-	if err := s.buf.Flush(); err != nil {
+	err := s.buf.Flush()
+	if err != nil {
 		s.err = fmt.Errorf("%w: flush ndjson stream: %w", ErrExportWriteFailed, err)
+
 		return s.err
 	}
 
@@ -157,15 +161,20 @@ func (s *NDJSONStreamer) Close() error {
 	s.closed = true
 
 	if s.err == nil {
-		if err := s.buf.Flush(); err != nil {
+		err := s.buf.Flush()
+		if err != nil {
 			s.err = fmt.Errorf("%w: flush ndjson stream on close: %w", ErrExportWriteFailed, err)
 		}
 	}
 
-	if closer, ok := s.writer.(io.Closer); ok {
-		if err := closer.Close(); err != nil && s.err == nil {
-			s.err = fmt.Errorf("%w: close ndjson stream writer: %w", ErrExportWriteFailed, err)
-		}
+	closer, ok := s.writer.(io.Closer)
+	if !ok {
+		return s.err
+	}
+
+	err := closer.Close()
+	if err != nil && s.err == nil {
+		s.err = fmt.Errorf("%w: close ndjson stream writer: %w", ErrExportWriteFailed, err)
 	}
 
 	return s.err
