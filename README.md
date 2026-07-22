@@ -26,6 +26,12 @@ import viz "github.com/larsartmann/go-workflow-auditlog/viz"
 _ = viz.ExportHTML(audit.Report(), "report.html")
 ```
 
+The `viz.ExportHTML` call produces a self-contained interactive dashboard:
+
+<img src="docs/screenshots/example-steps.png" alt="HTML Dashboard — Steps tab showing the data-pipeline demo run" width="600">
+
+---
+
 ## Why?
 
 [Azure/go-workflow](https://github.com/Azure/go-workflow) is a powerful DAG-based workflow engine, but it provides **zero visibility** into what happened during execution:
@@ -528,8 +534,6 @@ out, _ := viz.WriteTableString(report, output.FormatCSV, output.RenderOptions{},
 
 ## HTML Dashboard
 
-## HTML Dashboard
-
 The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained interactive HTML dashboard** — a single file with embedded CSS and JavaScript, no external dependencies. Open it in any browser or attach it to a report/email.
 
 **Five tabs:**
@@ -541,6 +545,25 @@ The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained inte
 5. **Events** — sortable event stream with type filters and pagination
 
 **Security:** Report data is injected via `<script type="application/json">` tags (never parsed as HTML). Dynamic content is escaped via a JS `esc()` function. Strict CSP: `default-src 'none'`. XSS-tested via fuzz target `FuzzHTMLSpecialChars`.
+
+<table>
+  <tr>
+    <td width="50%" align="center"><b>DAG Graph</b> — interactive SVG with pan/zoom</td>
+    <td width="50%" align="center"><b>Timeline</b> — duration bar chart by status</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/example-graph.png" alt="DAG Graph tab" width="400"></td>
+    <td><img src="docs/screenshots/example-timeline.png" alt="Timeline tab" width="400"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Steps Table</b> — sortable, filterable</td>
+    <td align="center"><b>DAG Tree</b> — collapsible dependency tree</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/example-steps.png" alt="Steps tab" width="400"></td>
+    <td><img src="docs/screenshots/example-tree.png" alt="Tree tab" width="400"></td>
+  </tr>
+</table>
 
 ```go
 // From an Auditor (live workflow):
