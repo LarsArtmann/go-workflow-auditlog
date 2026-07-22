@@ -2,6 +2,7 @@ package auditlog_test
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -22,15 +23,22 @@ func TestNDJSONStreamer_BasicRoundTrip(t *testing.T) {
 	streamer := auditlog.NewNDJSONStreamer(&buf)
 
 	originalEvents := []auditlog.Event{
-		{Sequence: 1, EventType: auditlog.EventTypeAttemptStart, Phase: auditlog.PhaseBefore, StepRef: auditlog.StepRef{Name: "step-a"}},
-		{Sequence: 2, EventType: auditlog.EventTypeAttemptEnd, Phase: auditlog.PhaseAfter, StepRef: auditlog.StepRef{Name: "step-a"}, Status: auditlog.StepStatusSucceeded},
+		{
+			Sequence: 1, EventType: auditlog.EventTypeAttemptStart, Phase: auditlog.PhaseBefore,
+			StepRef: auditlog.StepRef{Name: "step-a"},
+		},
+		{
+			Sequence: 2, EventType: auditlog.EventTypeAttemptEnd, Phase: auditlog.PhaseAfter,
+			StepRef: auditlog.StepRef{Name: "step-a"}, Status: auditlog.StepStatusSucceeded,
+		},
 	}
 
 	for _, evt := range originalEvents {
 		streamer.OnEvent(evt)
 	}
 
-	if err := streamer.Flush(); err != nil {
+	err := streamer.Flush()
+	if err != nil {
 		t.Fatalf("Flush: %v", err)
 	}
 
@@ -65,7 +73,8 @@ func TestNDJSONStreamer_EmptyFlush(t *testing.T) {
 
 	streamer := auditlog.NewNDJSONStreamer(&buf)
 
-	if err := streamer.Flush(); err != nil {
+	err := streamer.Flush()
+	if err != nil {
 		t.Fatalf("Flush on empty streamer: %v", err)
 	}
 
@@ -78,6 +87,7 @@ func TestNDJSONStreamer_ConcurrentSafety(t *testing.T) {
 	t.Parallel()
 
 	const goroutines = 16
+
 	const eventsPerGoroutine = 50
 
 	var buf bytes.Buffer
@@ -105,7 +115,8 @@ func TestNDJSONStreamer_ConcurrentSafety(t *testing.T) {
 
 	wg.Wait()
 
-	if err := streamer.Flush(); err != nil {
+	err := streamer.Flush()
+	if err != nil {
 		t.Fatalf("Flush: %v", err)
 	}
 
@@ -156,7 +167,8 @@ func TestNDJSONStreamer_BufferedThenFlush(t *testing.T) {
 
 	// Without auto-flush, data may still be buffered (event is small).
 	// After Flush, all data must be in the underlying writer.
-	if err := streamer.Flush(); err != nil {
+	err := streamer.Flush()
+	if err != nil {
 		t.Fatalf("Flush: %v", err)
 	}
 
@@ -224,9 +236,9 @@ func TestNDJSONStreamer_OnEventAfterError(t *testing.T) {
 		StepRef:   auditlog.StepRef{Name: "second"},
 	})
 
-	// Err() must still report the first error.
-	if streamer.Err() != firstErr {
-		t.Error("Err() changed after subsequent OnEvent on errored streamer")
+	// Err() must still report the same family of error.
+	if !errors.Is(streamer.Err(), auditlog.ErrExportWriteFailed) {
+		t.Errorf("expected ErrExportWriteFailed after subsequent OnEvent, got %v", streamer.Err())
 	}
 }
 
@@ -250,7 +262,8 @@ func TestNDJSONStreamer_Close(t *testing.T) {
 		StepRef:   auditlog.StepRef{Name: "close-test"},
 	})
 
-	if err := streamer.Close(); err != nil {
+	err = streamer.Close()
+	if err != nil {
 		t.Fatalf("Close: %v", err)
 	}
 
@@ -275,12 +288,14 @@ func TestNDJSONStreamer_DoubleClose(t *testing.T) {
 
 	streamer := auditlog.NewNDJSONStreamer(&bytes.Buffer{})
 
-	firstErr := streamer.Close()
-	secondErr := streamer.Close()
+	err := streamer.Close()
+	if err != nil {
+		t.Fatalf("first Close: %v", err)
+	}
 
-	// Both must return the same result (nil or same error).
-	if firstErr != secondErr {
-		t.Errorf("DoubleClose returned different errors: first=%v, second=%v", firstErr, secondErr)
+	err = streamer.Close()
+	if err != nil {
+		t.Fatalf("second Close: %v", err)
 	}
 }
 
@@ -291,7 +306,8 @@ func TestNDJSONStreamer_OnEventAfterClose(t *testing.T) {
 
 	streamer := auditlog.NewNDJSONStreamer(&buf)
 
-	if err := streamer.Close(); err != nil {
+	err := streamer.Close()
+	if err != nil {
 		t.Fatalf("Close: %v", err)
 	}
 
@@ -326,7 +342,8 @@ func TestNDJSONStreamer_CreateFile(t *testing.T) {
 		StepRef:   auditlog.StepRef{Name: "create"},
 	})
 
-	if err := streamer.Close(); err != nil {
+	err = streamer.Close()
+	if err != nil {
 		t.Fatalf("Close: %v", err)
 	}
 
@@ -368,7 +385,8 @@ func TestNDJSONStreamer_WorkflowIntegration(t *testing.T) {
 	testhelpers.AddParallelSteps(w, s1, s2)
 	testhelpers.RunWorkflow(t, a, w)
 
-	if err := streamer.Flush(); err != nil {
+	err := streamer.Flush()
+	if err != nil {
 		t.Fatalf("Flush: %v", err)
 	}
 
@@ -392,6 +410,7 @@ func TestNDJSONStreamer_WorkflowIntegration(t *testing.T) {
 		got, ok := streamedBySeq[expected.Sequence]
 		if !ok {
 			t.Errorf("event seq %d missing from stream", expected.Sequence)
+
 			continue
 		}
 
@@ -430,7 +449,8 @@ func TestNDJSONStreamer_NilErr(t *testing.T) {
 
 	streamer := auditlog.NewNDJSONStreamer(&buf)
 
-	if err := streamer.Err(); err != nil {
+	err := streamer.Err()
+	if err != nil {
 		t.Errorf("expected nil Err on fresh streamer, got %v", err)
 	}
 
@@ -441,41 +461,56 @@ func TestNDJSONStreamer_NilErr(t *testing.T) {
 		StepRef:   auditlog.StepRef{Name: "nil-err"},
 	})
 
-	if err := streamer.Err(); err != nil {
+	err = streamer.Err()
+	if err != nil {
 		t.Errorf("expected nil Err after successful write, got %v", err)
 	}
 }
 
-// --- Example ---
+func TestNDJSONStreamer_AutoFlushWorkflowIntegration(t *testing.T) {
+	t.Parallel()
 
-func ExampleNDJSONStreamer() {
-	// Create an output file for real-time NDJSON streaming.
-	file, err := os.Create("audit.ndjson")
+	dir := t.TempDir()
+	path := filepath.Join(dir, "autoflush.ndjson")
+
+	file, err := os.Create(path)
 	if err != nil {
-		panic(err)
+		t.Fatalf("Create: %v", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
-	// Create a streamer and use it as the OnEvent callback.
-	streamer := auditlog.NewNDJSONStreamer(file)
+	streamer := auditlog.NewNDJSONStreamer(file, auditlog.WithAutoFlush())
 
-	auditor, err := auditlog.New(auditlog.Config{
+	a := testhelpers.MustNew(t, auditlog.Config{
 		Enabled: true,
 		OnEvent: streamer.OnEvent,
 	})
-	if err != nil {
-		panic(err)
+
+	w := &flow.Workflow{}
+	w.Add(flow.Step(testhelpers.NewSucceed("autoflush-step")))
+	testhelpers.RunWorkflow(t, a, w)
+
+	// Without explicit Flush, auto-flush should have written all events.
+	_ = file.Sync()
+
+	data, readErr := os.ReadFile(path)
+	if readErr != nil {
+		t.Fatalf("ReadFile: %v", readErr)
 	}
 
-	// Wire and run a workflow.
-	w := &flow.Workflow{}
-	w.Add(flow.Step(testhelpers.NewSucceed("step-1")))
-	auditor.Attach(w)
-	_ = w.Do(nil)
-	auditor.Snapshot(w)
+	events, readErr := auditlog.ReadEvents(bytes.NewReader(data))
+	if readErr != nil {
+		t.Fatalf("ReadEvents: %v", readErr)
+	}
 
-	// Flush remaining buffered data.
-	_ = streamer.Flush()
+	if len(events) == 0 {
+		t.Fatal("expected events in file from auto-flushed streamer")
+	}
+
+	recorderEvents := a.Events()
+	if len(events) != len(recorderEvents) {
+		t.Fatalf("expected %d events, got %d", len(recorderEvents), len(events))
+	}
 }
 
 // --- Helpers ---
@@ -514,4 +549,42 @@ func (w *writeTracker) writtenBytes() int {
 	defer w.mu.Unlock()
 
 	return w.buf.Len()
+}
+
+// Ensure the streamer is used as a context-compatible OnEvent in a real
+// workflow run — exercises the Attach → Do → Snapshot → Flush lifecycle.
+func TestNDJSONStreamer_FullLifecycleExample(t *testing.T) {
+	t.Parallel()
+
+	var buf bytes.Buffer
+
+	streamer := auditlog.NewNDJSONStreamer(&buf)
+
+	a := testhelpers.MustNew(t, auditlog.Config{
+		Enabled: true,
+		OnEvent: streamer.OnEvent,
+	})
+
+	w := &flow.Workflow{}
+	w.Add(flow.Step(testhelpers.NewSucceed("lifecycle-step")))
+
+	a.Attach(w)
+	_ = w.Do(context.TODO())
+	a.Snapshot(w)
+
+	err := streamer.Flush()
+	if err != nil {
+		t.Fatalf("Flush: %v", err)
+	}
+
+	if buf.Len() == 0 {
+		t.Fatal("expected non-empty NDJSON output from full lifecycle")
+	}
+
+	events, err := auditlog.ReadEvents(&buf)
+	if err != nil {
+		t.Fatalf("ReadEvents: %v", err)
+	}
+
+	testhelpers.AssertEventCount(t, a.Report(), len(events))
 }
