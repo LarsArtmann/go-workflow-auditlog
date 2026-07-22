@@ -625,6 +625,66 @@ func TestNDJSONStreamer_CloseError(t *testing.T) {
 	}
 }
 
+// When Close is called after a prior streaming error, it must skip the
+// buf.Flush() call (s.err != nil) and still return the existing error.
+func TestNDJSONStreamer_CloseAfterError(t *testing.T) {
+	t.Parallel()
+
+	streamer := auditlog.NewNDJSONStreamer(
+		&testhelpers.FailingWriter{},
+		auditlog.WithBufferSize(1),
+	)
+
+	streamer.OnEvent(auditlog.Event{
+		Sequence:  1,
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+		StepRef:   auditlog.StepRef{Name: "err-before-close"},
+	})
+
+	if streamer.Err() == nil {
+		t.Fatal("expected error before Close")
+	}
+
+	err := streamer.Close()
+	if err == nil {
+		t.Fatal("expected error from Close after prior error")
+	}
+
+	if !errors.Is(err, auditlog.ErrRenderFailed) {
+		t.Errorf("expected ErrRenderFailed from Close, got %v", err)
+	}
+}
+
+// Close must surface a deferred flush error even when no prior error was set
+// (event fit in the 64 KB buffer, so OnEvent never saw the write failure).
+func TestNDJSONStreamer_CloseFlushError(t *testing.T) {
+	t.Parallel()
+
+	streamer := auditlog.NewNDJSONStreamer(&testhelpers.FailingWriter{})
+
+	streamer.OnEvent(auditlog.Event{
+		Sequence:  1,
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+		StepRef:   auditlog.StepRef{Name: "deferred-flush"},
+	})
+
+	// No error yet — event was buffered.
+	if streamer.Err() != nil {
+		t.Fatalf("unexpected error before Close: %v", streamer.Err())
+	}
+
+	err := streamer.Close()
+	if err == nil {
+		t.Fatal("expected error from Close when flush fails")
+	}
+
+	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
+		t.Errorf("expected ErrExportWriteFailed, got %v", err)
+	}
+}
+
 // --- Helpers ---
 
 // closeFailWriter is an io.ReadWriteCloser whose Write succeeds (delegating to
