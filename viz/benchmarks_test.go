@@ -281,7 +281,7 @@ func ExampleWorkflowReport_wallClockDurationMs() {
 
 // ExampleWorkflowReport_WriteTable demonstrates selecting a subset of columns
 // for table export using WithColumns.
-func ExampleWorkflowReport_WriteTable() {
+func ExampleWriteTable() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
@@ -306,7 +306,7 @@ func ExampleWorkflowReport_WriteTable() {
 
 // ExampleWorkflowReport_WriteMermaid demonstrates setting a left-to-right
 // layout direction on a Mermaid diagram using WithDirection.
-func ExampleWorkflowReport_WriteMermaid() {
+func ExampleWriteMermaid() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{StepRef: auditlog.StepRef{Name: "a"}},
