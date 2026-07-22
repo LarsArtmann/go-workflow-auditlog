@@ -1,0 +1,54 @@
+digraph workflow {
+  // Graph attributes
+  rankdir=TB;
+  splines=ortho;
+  nodesep=0.5;
+  ranksep=0.5;
+
+  // Default node attributes
+  node [
+    shape=box
+    fontname="Helvetica"
+    fontsize=12
+  ];
+
+  // Nodes
+  "fetch" [
+    label="fetch [Succeeded]"
+    shape="box"
+    fillcolor="#2d5a2d"
+  ];
+  "flaky-api-call" [
+    label="flaky-api-call [Succeeded] (×3)"
+    shape="box"
+    fillcolor="#2d5a2d"
+  ];
+  "notify" [
+    label="notify [Succeeded]"
+    shape="box"
+    fillcolor="#2d5a2d"
+  ];
+  "save" [
+    label="save [Succeeded]"
+    shape="box"
+    fillcolor="#2d5a2d"
+  ];
+  "transform" [
+    label="transform [Succeeded]"
+    shape="box"
+    fillcolor="#2d5a2d"
+  ];
+  "validate" [
+    label="validate [Succeeded]"
+    shape="box"
+    fillcolor="#2d5a2d"
+  ];
+
+  // Edges
+  "fetch" -> "flaky-api-call";
+  "save" -> "notify";
+  "transform" -> "save";
+  "validate" -> "transform";
+  "fetch" -> "validate";
+}
+

@@ -1,0 +1,8 @@
+└── Workflow
+    └── fetch [Succeeded]
+        ├── flaky-api-call [Succeeded] (×3)
+        └── validate [Succeeded]
+            └── transform [Succeeded]
+                └── save [Succeeded]
+                    └── notify [Succeeded]
+

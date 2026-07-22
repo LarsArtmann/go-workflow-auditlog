@@ -1,0 +1,33 @@
+title: {
+  label: data-pipeline
+}
+
+fetch: fetch [Succeeded] {
+  style.fill: #2d5a2d
+  style.font-color: #fff
+}
+flaky-api-call: flaky-api-call [Succeeded] (×3) {
+  style.fill: #2d5a2d
+  style.font-color: #fff
+}
+notify: notify [Succeeded] {
+  style.fill: #2d5a2d
+  style.font-color: #fff
+}
+save: save [Succeeded] {
+  style.fill: #2d5a2d
+  style.font-color: #fff
+}
+transform: transform [Succeeded] {
+  style.fill: #2d5a2d
+  style.font-color: #fff
+}
+validate: validate [Succeeded] {
+  style.fill: #2d5a2d
+  style.font-color: #fff
+}
+fetch -> flaky-api-call
+save -> notify
+transform -> save
+validate -> transform
+fetch -> validate
