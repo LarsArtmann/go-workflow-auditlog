@@ -3,7 +3,6 @@ package auditlog
 import (
 	"bufio"
 	"encoding/json/jsontext"
-	"encoding/json/v2"
 	"fmt"
 	"io"
 	"os"
@@ -43,12 +42,13 @@ import (
 type NDJSONStreamer struct {
 	mu sync.Mutex
 
-	writer    io.Writer
-	buf       *bufio.Writer
-	encoder   *jsontext.Encoder
-	err       error
-	autoFlush bool
-	closed    bool
+	writer      io.Writer
+	buf         *bufio.Writer
+	encoder     *jsontext.Encoder
+	err         error
+	bufferSize  int
+	autoFlush   bool
+	closed      bool
 }
 
 // NDJSONStreamerOption configures an [NDJSONStreamer].
@@ -61,21 +61,34 @@ func WithAutoFlush() NDJSONStreamerOption {
 	return func(s *NDJSONStreamer) { s.autoFlush = true }
 }
 
-// NewNDJSONStreamer creates an [NDJSONStreamer] that writes NDJSON lines to w.
-// The streamer uses a 64 KB internal buffer; call [NDJSONStreamer.Flush] or
-// [NDJSONStreamer.Close] to guarantee all buffered data is written.
-func NewNDJSONStreamer(w io.Writer, opts ...NDJSONStreamerOption) *NDJSONStreamer {
-	buf := bufio.NewWriterSize(w, fileWriteBufferSize)
+// WithBufferSize sets the internal buffer size in bytes. The default is 64 KB
+// (matching the atomic-file export path). Use a larger buffer for high-throughput
+// bursty writes, or a smaller buffer for lower-latency streaming. Values <= 0
+// are ignored and keep the default.
+func WithBufferSize(size int) NDJSONStreamerOption {
+	return func(s *NDJSONStreamer) {
+		if size > 0 {
+			s.bufferSize = size
+		}
+	}
+}
 
+// NewNDJSONStreamer creates an [NDJSONStreamer] that writes NDJSON lines to w.
+// The streamer uses a 64 KB internal buffer by default; call
+// [NDJSONStreamer.Flush] or [NDJSONStreamer.Close] to guarantee all buffered
+// data is written.
+func NewNDJSONStreamer(w io.Writer, opts ...NDJSONStreamerOption) *NDJSONStreamer {
 	s := &NDJSONStreamer{
-		writer:  w,
-		buf:     buf,
-		encoder: jsontext.NewEncoder(buf),
+		writer:     w,
+		bufferSize: fileWriteBufferSize,
 	}
 
 	for _, opt := range opts {
 		opt(s)
 	}
+
+	s.buf = bufio.NewWriterSize(w, s.bufferSize)
+	s.encoder = jsontext.NewEncoder(s.buf)
 
 	return s
 }
@@ -108,12 +121,9 @@ func (s *NDJSONStreamer) OnEvent(evt Event) {
 		return
 	}
 
-	err := json.MarshalEncode(s.encoder, evt,
-		jsontext.EscapeForHTML(true),
-		jsontext.EscapeForJS(true),
-	)
+	err := encodeEvent(s.encoder, evt)
 	if err != nil {
-		s.err = fmt.Errorf("%w: encode event %d: %w", ErrRenderFailed, evt.Sequence, err)
+		s.err = err
 
 		return
 	}
