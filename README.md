@@ -527,8 +527,9 @@ out, _ := viz.WriteTableString(report, output.FormatCSV, output.RenderOptions{},
 ```
 
 ## HTML Dashboard
+## HTML Dashboard
 
-The `WriteHTML` / `ExportHTML` methods produce a **self-contained interactive HTML dashboard** — a single file with embedded CSS and JavaScript, no external dependencies. Open it in any browser or attach it to a report/email.
+The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained interactive HTML dashboard** — a single file with embedded CSS and JavaScript, no external dependencies. Open it in any browser or attach it to a report/email.
 
 **Five tabs:**
 
@@ -542,13 +543,14 @@ The `WriteHTML` / `ExportHTML` methods produce a **self-contained interactive HT
 
 ```go
 // From an Auditor (live workflow):
-viz.ExportHTML(report, "dashboard.html")
+viz.ExportHTML(audit.Report(), "dashboard.html")
 
 // From a WorkflowReport (e.g. loaded from JSON):
-report.ExportHTML("dashboard.html")
+report, _ := auditlog.LoadReport("report.json")
+viz.ExportHTML(report, "dashboard.html")
 
 // To a string:
-html, _ := report.WriteHTMLString()
+html, _ := viz.WriteHTMLString(report)
 ```
 
 ## Concurrency Model
