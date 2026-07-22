@@ -8,20 +8,20 @@ Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that re
 
 ## Commands
 
-| Command                                                                                              | Purpose                                                           |
-| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `GOEXPERIMENT=jsonv2 go test ./...`                                                                 | Run core tests (requires jsonv2)                                  |
-| `GOEXPERIMENT=jsonv2 go test -race ./...`                                                           | Run core tests with race detector                                 |
-| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic ./...`                 | Core tests with coverage (~95.6%)                                 |
-| `GOEXPERIMENT=jsonv2 go vet ./...`                                                                  | Core static analysis                                              |
-| `golangci-lint run ./...`                                                                            | Lint core (golangci-lint v2, 0 issues)                            |
-| `cd viz && GOEXPERIMENT=jsonv2 go test ./...`                                                        | Run viz tests (requires jsonv2)                                 |
-| `cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go test ./...`                                           | Run viz tests in standalone mode (no workspace)                   |
-| `cd viz && GOEXPERIMENT=jsonv2 go vet ./...`                                                         | Viz static analysis                                               |
-| `cd viz && golangci-lint run ./...`                                                                  | Lint viz                                                          |
-| `go run ./viz/example`                                                                               | Run the demo pipeline                                             |
-| `go run ./example`                                                                                   | Run the demo pipeline (legacy path; now `./viz/example`)          |
-| `go work sync`                                                                                       | Sync `go.work` and `go.work.sum` with module state                |
+| Command                                                                             | Purpose                                                  |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `GOEXPERIMENT=jsonv2 go test ./...`                                                 | Run core tests (requires jsonv2)                         |
+| `GOEXPERIMENT=jsonv2 go test -race ./...`                                           | Run core tests with race detector                        |
+| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic ./...` | Core tests with coverage (~95.6%)                        |
+| `GOEXPERIMENT=jsonv2 go vet ./...`                                                  | Core static analysis                                     |
+| `golangci-lint run ./...`                                                           | Lint core (golangci-lint v2, 0 issues)                   |
+| `cd viz && GOEXPERIMENT=jsonv2 go test ./...`                                       | Run viz tests (requires jsonv2)                          |
+| `cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go test ./...`                            | Run viz tests in standalone mode (no workspace)          |
+| `cd viz && GOEXPERIMENT=jsonv2 go vet ./...`                                        | Viz static analysis                                      |
+| `cd viz && golangci-lint run ./...`                                                 | Lint viz                                                 |
+| `go run ./viz/example`                                                              | Run the demo pipeline                                    |
+| `go run ./example`                                                                  | Run the demo pipeline (legacy path; now `./viz/example`) |
+| `go work sync`                                                                      | Sync `go.work` and `go.work.sum` with module state       |
 
 ---
 
@@ -168,27 +168,27 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 
 ### Shared test helpers (in `testhelpers` package)
 
-| Helper                           | Purpose                                                                                 |
-| -------------------------------- | --------------------------------------------------------------------------------------- |
-| `NewSucceed`, `NewFail`, `NewFlaky`, `NewSlow` | Construct test step instances                                                |
-| `SucceedStep`, `FailStep`, `FlakyStep`, `SlowStep` | Test step types exported for direct use in tests                        |
-| `StepFixture`                    | Build a minimal `auditlog.StepInfo` for visualization/table tests                       |
-| `RetryOpts`                      | Build retry config with a fresh backoff instance                                        |
-| `AddRetryStep`                   | Wrap a step with retry config (fresh backoff)                                           |
-| `AddSingleStep`                  | Wire a single succeed step into a workflow                                              |
-| `RunSingleSucceed`               | Run minimal single-succeed-step workflow (auditor + wf + step + Attach + Do + Snapshot) |
-| `RunSingleSucceedWithBuffer`     | `RunSingleSucceed` + fresh `*strings.Builder` for `Write*`-into-buffer tests            |
-| `RunWorkflow`                    | `Attach` + `Do` + `Snapshot` in one call                                                |
-| `SingleSucceedExportPath`        | `RunSingleSucceed` + `t.TempDir`-anchored path for `Export*` tests                      |
-| `FindStep`, `AssertReportValid`  | Step lookup + structural validation                                                     |
-| `AssertStepCount`                | Required step count (uses `Fatalf` to stop on mismatch)                                 |
-| `AssertEventCount`               | Required event count (`Errorf` — multiple counts may co-fail)                           |
-| `AssertCount(name, got, want)`   | Generic named-count assertion                                                           |
-| `AssertWorkflowID`               | Required WorkflowID                                                                     |
-| `AssertAttemptCount`             | Required attempt count for a StepInfo                                                   |
-| `AssertStatus`                   | Required status for a StepInfo                                                          |
-| `AssertFirstStepName`            | Required name of `report.Steps[0]`                                                      |
-| `AssertContains`                 | `strings.Contains` check with custom failure message                                    |
+| Helper                                             | Purpose                                                                                 |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `NewSucceed`, `NewFail`, `NewFlaky`, `NewSlow`     | Construct test step instances                                                           |
+| `SucceedStep`, `FailStep`, `FlakyStep`, `SlowStep` | Test step types exported for direct use in tests                                        |
+| `StepFixture`                                      | Build a minimal `auditlog.StepInfo` for visualization/table tests                       |
+| `RetryOpts`                                        | Build retry config with a fresh backoff instance                                        |
+| `AddRetryStep`                                     | Wrap a step with retry config (fresh backoff)                                           |
+| `AddSingleStep`                                    | Wire a single succeed step into a workflow                                              |
+| `RunSingleSucceed`                                 | Run minimal single-succeed-step workflow (auditor + wf + step + Attach + Do + Snapshot) |
+| `RunSingleSucceedWithBuffer`                       | `RunSingleSucceed` + fresh `*strings.Builder` for `Write*`-into-buffer tests            |
+| `RunWorkflow`                                      | `Attach` + `Do` + `Snapshot` in one call                                                |
+| `SingleSucceedExportPath`                          | `RunSingleSucceed` + `t.TempDir`-anchored path for `Export*` tests                      |
+| `FindStep`, `AssertReportValid`                    | Step lookup + structural validation                                                     |
+| `AssertStepCount`                                  | Required step count (uses `Fatalf` to stop on mismatch)                                 |
+| `AssertEventCount`                                 | Required event count (`Errorf` — multiple counts may co-fail)                           |
+| `AssertCount(name, got, want)`                     | Generic named-count assertion                                                           |
+| `AssertWorkflowID`                                 | Required WorkflowID                                                                     |
+| `AssertAttemptCount`                               | Required attempt count for a StepInfo                                                   |
+| `AssertStatus`                                     | Required status for a StepInfo                                                          |
+| `AssertFirstStepName`                              | Required name of `report.Steps[0]`                                                      |
+| `AssertContains`                                   | `strings.Contains` check with custom failure message                                    |
 
 ### Duplicate-code policy
 

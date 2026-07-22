@@ -301,55 +301,55 @@ _ = viz.ExportHTML(report, "dashboard.html")
 
 ### `WorkflowReport` Methods
 
-| Method                                                                            | Description                                                          |
-| --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `report.StepByName(name)`                                                         | Find a step by name.                                                 |
-| `report.EventsByStep(name)`                                                       | Filter events by step.                                               |
-| `report.EventsByType(type)`                                                       | Filter events by type.                                               |
-| `report.FailedSteps()`                                                            | All failed/canceled steps.                                           |
-| `report.SucceededSteps()`                                                         | All succeeded steps.                                                 |
-| `report.SkippedSteps()`                                                           | All skipped steps.                                                   |
-| `report.RetriedSteps()`                                                           | All steps with >1 attempt.                                           |
-| `report.Filtered(opts ...ReportOption) WorkflowReport`                            | Returns a filtered copy of the report.                               |
-| `report.Diff(other WorkflowReport) DiffResult`                                    | Compares two reports (added/removed/changed steps + duration delta). |
-| `report.Duration() time.Duration`                                                 | Wall-clock duration spanned by all events (earliest → latest).       |
-| `report.Summary() string`                                                         | One-line human-readable summary.                                     |
-| `report.WriteJSON(w io.Writer) error`                                             | Serialize report as JSON.                                            |
-| `report.WriteNDJSON(w io.Writer) error`                                           | Serialize events as NDJSON.                                          |
-| `report.ExportJSON(path string) error`                                            | Writes JSON report to file.                                          |
-| `report.ExportNDJSON(path string) error`                                          | Writes NDJSON events to file.                                        |
-| `report.Validate() error`                                                           | Checks internal consistency (counts, status drift).                  |
+| Method                                                 | Description                                                          |
+| ------------------------------------------------------ | -------------------------------------------------------------------- |
+| `report.StepByName(name)`                              | Find a step by name.                                                 |
+| `report.EventsByStep(name)`                            | Filter events by step.                                               |
+| `report.EventsByType(type)`                            | Filter events by type.                                               |
+| `report.FailedSteps()`                                 | All failed/canceled steps.                                           |
+| `report.SucceededSteps()`                              | All succeeded steps.                                                 |
+| `report.SkippedSteps()`                                | All skipped steps.                                                   |
+| `report.RetriedSteps()`                                | All steps with >1 attempt.                                           |
+| `report.Filtered(opts ...ReportOption) WorkflowReport` | Returns a filtered copy of the report.                               |
+| `report.Diff(other WorkflowReport) DiffResult`         | Compares two reports (added/removed/changed steps + duration delta). |
+| `report.Duration() time.Duration`                      | Wall-clock duration spanned by all events (earliest → latest).       |
+| `report.Summary() string`                              | One-line human-readable summary.                                     |
+| `report.WriteJSON(w io.Writer) error`                  | Serialize report as JSON.                                            |
+| `report.WriteNDJSON(w io.Writer) error`                | Serialize events as NDJSON.                                          |
+| `report.ExportJSON(path string) error`                 | Writes JSON report to file.                                          |
+| `report.ExportNDJSON(path string) error`               | Writes NDJSON events to file.                                        |
+| `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
 
 ### `viz` Package Functions
 
 All visualization functions take the report as the first argument:
 
-| Function                                                                              | Description                                                        |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `viz.WriteMermaid(r, w io.Writer, opts ...DiagramOption) error`                       | Mermaid diagram (supports `viz.WithDirection`).                   |
-| `viz.WritePlantUML(r, w io.Writer, opts ...DiagramOption) error`                      | PlantUML diagram (supports `viz.WithDirection`).                  |
-| `viz.WriteGraphviz(r, w io.Writer, opts ...DiagramOption) error`                      | Graphviz DOT diagram (supports `viz.WithDirection`).              |
-| `viz.WriteD2(r, w io.Writer, opts ...DiagramOption) error`                            | D2 diagram (supports `viz.WithDirection`).                        |
-| `viz.WriteMermaidString(r, opts ...DiagramOption) (string, error)`                    | Mermaid diagram as string.                                        |
-| `viz.WritePlantUMLString(r, opts ...DiagramOption) (string, error)`                   | PlantUML diagram as string.                                       |
-| `viz.WriteGraphvizString(r, opts ...DiagramOption) (string, error)`                   | Graphviz DOT diagram as string.                                   |
-| `viz.WriteD2String(r, opts ...DiagramOption) (string, error)`                         | D2 diagram as string.                                              |
-| `viz.WriteTable(r, w, format, opts, tableOpts ...TableOption) error`                | Step summary table (16 formats, supports `viz.WithColumns`).       |
-| `viz.WriteTableString(r, format, opts, tableOpts ...TableOption) (string, error)`     | Step summary table as string (supports `viz.WithColumns`).        |
-| `viz.WriteTree(r, w io.Writer) error`                                               | ASCII tree of step DAG.                                            |
-| `viz.WriteTreeString(r) (string, error)`                                              | ASCII tree as string.                                              |
-| `viz.WriteHTMLTree(r, w io.Writer) error`                                             | HTML nested-list tree of step DAG.                                   |
-| `viz.WriteHTMLTreeString(r) (string, error)`                                          | HTML tree as string.                                               |
-| `viz.WriteHTML(r, w io.Writer) error`                                                 | Interactive HTML dashboard (5-tab report with DAG graph).          |
-| `viz.WriteHTMLString(r) (string, error)`                                              | HTML dashboard as string.                                          |
-| `viz.ExportMermaid(r, path string) error`                                               | Writes Mermaid DAG to file.                                        |
-| `viz.ExportPlantUML(r, path string) error`                                              | Writes PlantUML DAG to file.                                       |
-| `viz.ExportGraphviz(r, path string) error`                                              | Writes Graphviz DOT DAG to file.                                   |
-| `viz.ExportD2(r, path string) error`                                                    | Writes D2 DAG to file.                                             |
-| `viz.ExportTable(r, path string, format, opts, tableOpts ...TableOption) error`       | Writes step summary table to file.                                   |
-| `viz.ExportTree(r, path string) error`                                                  | Writes ASCII tree to file.                                         |
-| `viz.ExportHTMLTree(r, path string) error`                                              | Writes HTML tree to file.                                          |
-| `viz.ExportHTML(r, path string) error`                                                  | Writes interactive HTML dashboard to file.                         |
+| Function                                                                          | Description                                                  |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `viz.WriteMermaid(r, w io.Writer, opts ...DiagramOption) error`                   | Mermaid diagram (supports `viz.WithDirection`).              |
+| `viz.WritePlantUML(r, w io.Writer, opts ...DiagramOption) error`                  | PlantUML diagram (supports `viz.WithDirection`).             |
+| `viz.WriteGraphviz(r, w io.Writer, opts ...DiagramOption) error`                  | Graphviz DOT diagram (supports `viz.WithDirection`).         |
+| `viz.WriteD2(r, w io.Writer, opts ...DiagramOption) error`                        | D2 diagram (supports `viz.WithDirection`).                   |
+| `viz.WriteMermaidString(r, opts ...DiagramOption) (string, error)`                | Mermaid diagram as string.                                   |
+| `viz.WritePlantUMLString(r, opts ...DiagramOption) (string, error)`               | PlantUML diagram as string.                                  |
+| `viz.WriteGraphvizString(r, opts ...DiagramOption) (string, error)`               | Graphviz DOT diagram as string.                              |
+| `viz.WriteD2String(r, opts ...DiagramOption) (string, error)`                     | D2 diagram as string.                                        |
+| `viz.WriteTable(r, w, format, opts, tableOpts ...TableOption) error`              | Step summary table (16 formats, supports `viz.WithColumns`). |
+| `viz.WriteTableString(r, format, opts, tableOpts ...TableOption) (string, error)` | Step summary table as string (supports `viz.WithColumns`).   |
+| `viz.WriteTree(r, w io.Writer) error`                                             | ASCII tree of step DAG.                                      |
+| `viz.WriteTreeString(r) (string, error)`                                          | ASCII tree as string.                                        |
+| `viz.WriteHTMLTree(r, w io.Writer) error`                                         | HTML nested-list tree of step DAG.                           |
+| `viz.WriteHTMLTreeString(r) (string, error)`                                      | HTML tree as string.                                         |
+| `viz.WriteHTML(r, w io.Writer) error`                                             | Interactive HTML dashboard (5-tab report with DAG graph).    |
+| `viz.WriteHTMLString(r) (string, error)`                                          | HTML dashboard as string.                                    |
+| `viz.ExportMermaid(r, path string) error`                                         | Writes Mermaid DAG to file.                                  |
+| `viz.ExportPlantUML(r, path string) error`                                        | Writes PlantUML DAG to file.                                 |
+| `viz.ExportGraphviz(r, path string) error`                                        | Writes Graphviz DOT DAG to file.                             |
+| `viz.ExportD2(r, path string) error`                                              | Writes D2 DAG to file.                                       |
+| `viz.ExportTable(r, path string, format, opts, tableOpts ...TableOption) error`   | Writes step summary table to file.                           |
+| `viz.ExportTree(r, path string) error`                                            | Writes ASCII tree to file.                                   |
+| `viz.ExportHTMLTree(r, path string) error`                                        | Writes HTML tree to file.                                    |
+| `viz.ExportHTML(r, path string) error`                                            | Writes interactive HTML dashboard to file.                   |
 
 ### Package-Level Functions
 
@@ -503,8 +503,8 @@ _ = viz.ExportHTML(report, "dashboard.html")  // interactive HTML dashboard
 
 The `viz.WriteTable` / `viz.WriteTableString` / `viz.ExportTable` functions accept `viz.WithColumns` to control which columns appear. Ten columns are available:
 
-| Column       | Constant             | Default? |
-| ------------ | -------------------- | -------- |
+| Column       | Constant                 | Default? |
+| ------------ | ------------------------ | -------- |
 | Step name    | `viz.ColumnStep`         | Yes      |
 | Status       | `viz.ColumnStatus`       | Yes      |
 | Duration     | `viz.ColumnDuration`     | Yes      |
@@ -527,6 +527,7 @@ out, _ := viz.WriteTableString(report, output.FormatCSV, output.RenderOptions{},
 ```
 
 ## HTML Dashboard
+
 ## HTML Dashboard
 
 The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained interactive HTML dashboard** — a single file with embedded CSS and JavaScript, no external dependencies. Open it in any browser or attach it to a report/email.

@@ -92,32 +92,32 @@ _ = viz.ExportMermaid(report, "dag.mmd")
 _ = viz.ExportHTML(report, "dashboard.html")
 ```
 
-| Function                                                                                 | Description                                                        |
-| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `viz.WriteMermaid(r, w io.Writer, opts ...DiagramOption) error`                            | Mermaid diagram (supports `viz.WithDirection`).                   |
-| `viz.WritePlantUML(r, w io.Writer, opts ...DiagramOption) error`                         | PlantUML diagram (supports `viz.WithDirection`).                  |
-| `viz.WriteGraphviz(r, w io.Writer, opts ...DiagramOption) error`                         | Graphviz DOT diagram (supports `viz.WithDirection`).              |
-| `viz.WriteD2(r, w io.Writer, opts ...DiagramOption) error`                               | D2 diagram (supports `viz.WithDirection`).                        |
-| `viz.WriteMermaidString(r, opts ...DiagramOption) (string, error)`                       | Mermaid diagram as string.                                        |
-| `viz.WritePlantUMLString(r, opts ...DiagramOption) (string, error)`                      | PlantUML diagram as string.                                       |
-| `viz.WriteGraphvizString(r, opts ...DiagramOption) (string, error)`                      | Graphviz DOT diagram as string.                                   |
-| `viz.WriteD2String(r, opts ...DiagramOption) (string, error)`                            | D2 diagram as string.                                                |
-| `viz.WriteTable(r, w, format, opts, tableOpts ...TableOption) error`                     | Step summary table (16 formats, supports `viz.WithColumns`).       |
-| `viz.WriteTableString(r, format, opts, tableOpts ...TableOption) (string, error)`        | Step summary table as string (supports `viz.WithColumns`).         |
-| `viz.WriteTree(r, w io.Writer) error`                                                    | ASCII tree of step DAG.                                            |
-| `viz.WriteTreeString(r) (string, error)`                                                 | ASCII tree as string.                                              |
-| `viz.WriteHTMLTree(r, w io.Writer) error`                                                | HTML nested-list tree of step DAG.                                 |
-| `viz.WriteHTMLTreeString(r) (string, error)`                                               | HTML tree as string.                                               |
-| `viz.WriteHTML(r, w io.Writer) error`                                                    | Interactive HTML dashboard.                                        |
-| `viz.WriteHTMLString(r) (string, error)`                                                 | HTML dashboard as string.                                          |
-| `viz.ExportMermaid(r, path string) error`                                                  | Writes Mermaid DAG to file.                                        |
-| `viz.ExportPlantUML(r, path string) error`                                                 | Writes PlantUML DAG to file.                                       |
-| `viz.ExportGraphviz(r, path string) error`                                                 | Writes Graphviz DOT DAG to file.                                   |
-| `viz.ExportD2(r, path string) error`                                                       | Writes D2 DAG to file.                                             |
-| `viz.ExportTable(r, path string, format, opts, tableOpts ...TableOption) error`            | Writes step summary table to file.                                   |
-| `viz.ExportTree(r, path string) error`                                                       | Writes ASCII tree to file.                                         |
-| `viz.ExportHTMLTree(r, path string) error`                                                 | Writes HTML tree to file.                                          |
-| `viz.ExportHTML(r, path string) error`                                                     | Writes interactive HTML dashboard to file.                         |
+| Function                                                                          | Description                                                  |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `viz.WriteMermaid(r, w io.Writer, opts ...DiagramOption) error`                   | Mermaid diagram (supports `viz.WithDirection`).              |
+| `viz.WritePlantUML(r, w io.Writer, opts ...DiagramOption) error`                  | PlantUML diagram (supports `viz.WithDirection`).             |
+| `viz.WriteGraphviz(r, w io.Writer, opts ...DiagramOption) error`                  | Graphviz DOT diagram (supports `viz.WithDirection`).         |
+| `viz.WriteD2(r, w io.Writer, opts ...DiagramOption) error`                        | D2 diagram (supports `viz.WithDirection`).                   |
+| `viz.WriteMermaidString(r, opts ...DiagramOption) (string, error)`                | Mermaid diagram as string.                                   |
+| `viz.WritePlantUMLString(r, opts ...DiagramOption) (string, error)`               | PlantUML diagram as string.                                  |
+| `viz.WriteGraphvizString(r, opts ...DiagramOption) (string, error)`               | Graphviz DOT diagram as string.                              |
+| `viz.WriteD2String(r, opts ...DiagramOption) (string, error)`                     | D2 diagram as string.                                        |
+| `viz.WriteTable(r, w, format, opts, tableOpts ...TableOption) error`              | Step summary table (16 formats, supports `viz.WithColumns`). |
+| `viz.WriteTableString(r, format, opts, tableOpts ...TableOption) (string, error)` | Step summary table as string (supports `viz.WithColumns`).   |
+| `viz.WriteTree(r, w io.Writer) error`                                             | ASCII tree of step DAG.                                      |
+| `viz.WriteTreeString(r) (string, error)`                                          | ASCII tree as string.                                        |
+| `viz.WriteHTMLTree(r, w io.Writer) error`                                         | HTML nested-list tree of step DAG.                           |
+| `viz.WriteHTMLTreeString(r) (string, error)`                                      | HTML tree as string.                                         |
+| `viz.WriteHTML(r, w io.Writer) error`                                             | Interactive HTML dashboard.                                  |
+| `viz.WriteHTMLString(r) (string, error)`                                          | HTML dashboard as string.                                    |
+| `viz.ExportMermaid(r, path string) error`                                         | Writes Mermaid DAG to file.                                  |
+| `viz.ExportPlantUML(r, path string) error`                                        | Writes PlantUML DAG to file.                                 |
+| `viz.ExportGraphviz(r, path string) error`                                        | Writes Graphviz DOT DAG to file.                             |
+| `viz.ExportD2(r, path string) error`                                              | Writes D2 DAG to file.                                       |
+| `viz.ExportTable(r, path string, format, opts, tableOpts ...TableOption) error`   | Writes step summary table to file.                           |
+| `viz.ExportTree(r, path string) error`                                            | Writes ASCII tree to file.                                   |
+| `viz.ExportHTMLTree(r, path string) error`                                        | Writes HTML tree to file.                                    |
+| `viz.ExportHTML(r, path string) error`                                            | Writes interactive HTML dashboard to file.                   |
 
 ## Package-Level Functions
 
