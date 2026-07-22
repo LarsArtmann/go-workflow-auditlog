@@ -136,11 +136,9 @@ func TestExportHTML_WritesFile(t *testing.T) {
 func TestAuditor_WriteHTML_DelegatesToReport(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "delegate-step")
+	a, buf := runSingleSucceedWithBuffer(t, "delegate-step")
 
-	var buf strings.Builder
-
-	err := a.WriteHTML(&buf)
+	err := a.WriteHTML(buf)
 	if err != nil {
 		t.Fatalf("Auditor.WriteHTML error: %v", err)
 	}

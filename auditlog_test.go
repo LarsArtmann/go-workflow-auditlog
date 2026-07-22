@@ -165,6 +165,28 @@ func runSingleSucceed(t *testing.T, name string) *auditlog.Auditor {
 	return a
 }
 
+// runSingleSucceedWithBuffer is the Write* (non-String) variant of
+// runSingleSucceed: returns the auditor plus a fresh strings.Builder for
+// capturing rendered output. Centralizes the
+// `t.Parallel + runSingleSucceed + var buf strings.Builder` preamble
+// shared by every Write*-into-buffer test (Mermaid, PlantUML, Graphviz,
+// D2, HTML, CSV, JSON, JSONL tables, Auditor-delegate tests, HTML tree,
+// step names, and the WriteMermaid/WriteGraphviz/WriHTML auditor
+// delegates). Tests that only need the auditor for Write*String-style
+// paths may discard the returned builder with `_`.
+//
+// Callers stay responsible for invoking t.Parallel() before calling this
+// helper so the paralleltest linter remains satisfied at the test level.
+func runSingleSucceedWithBuffer(t *testing.T, name string) (*auditlog.Auditor, *strings.Builder) {
+	t.Helper()
+
+	a := runSingleSucceed(t, name)
+
+	buf := &strings.Builder{}
+
+	return a, buf
+}
+
 // singleSucceedExportPath is the shared fixture for every Export* test:
 // runs a single-succeed workflow with the given step name and returns the
 // auditor plus a t.TempDir-anchored output file path. Centralizes the

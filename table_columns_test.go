@@ -161,11 +161,9 @@ func TestTable_MaxAttemptsColumn(t *testing.T) {
 func TestTable_ColumnsOnAuditor(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "auditor-col-step")
+	a, buf := runSingleSucceedWithBuffer(t, "auditor-col-step")
 
-	var buf strings.Builder
-
-	err := a.WriteTable(&buf, output.FormatCSV, output.RenderOptions{},
+	err := a.WriteTable(buf, output.FormatCSV, output.RenderOptions{},
 		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus),
 	)
 	if err != nil {

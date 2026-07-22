@@ -32,8 +32,8 @@ plugin.go          — Public API: New(), Attach(), Snapshot(), Report(), Export
 recorder.go        — Core state machine: event capture, step records, attempt tracking, RunID + StepID counters
 runid.go           — newRunID(): 128-bit crypto-random hex run identifier
 attach.go          — Attach/Snapshot logic: callback injection + post-run DAG capture (incl. sub-workflows)
-report.go          — WorkflowReport type (carries RunID) + Validate() + sentinel errors (incl. ErrRenderFailed) + query methods + Duration()/Summary()/CriticalPath()/PeakConcurrencySteps() + WriteJSON + Export*() + computeWallClockDurationMs
-report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates (WorkflowSucceeded, finalizeDenormalized) + computeCriticalPath/computePeakConcurrency/computePeakConcurrencySteps
+report.go          — WorkflowReport type (carries RunID) + Validate() + sentinel errors (incl. ErrRenderFailed) + query methods + Duration()/Summary()/CriticalPath()/PeakConcurrencySteps() + stepsByName (shared name→StepInfo resolver for CriticalPath + PeakConcurrencySteps) + WriteJSON + Export*() + computeWallClockDurationMs
+report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates (WorkflowSucceeded, finalizeDenormalized) + computeCriticalPath/computePeakConcurrency/computePeakConcurrencySteps + sortEventsByTime (shared timestamp+sequence sorter for the two peak-concurrency passes)
 filter.go          — Report filtering (Filtered, ReportOption, WithStepsByStatus, etc.)
 diff.go            — Diff API: DiffResult/StepDiff, Diff() between reports
 index.go           — ReportIndex: opt-in O(1) lookup maps over a report
@@ -43,7 +43,7 @@ ndjson.go          — ReadEvents NDJSON reader (sentinel errors, enum validatio
 replay.go          — ReplayEvents: reconstruct Report from event stream (uses stepCore from step.go, preserves RunID + assigns StepIDs)
 classify.go        — Error classification: RegisterClassifications() + ErrorClassifications() map sentinel errors → go-error-family Family (Corruption/Rejection) via init() auto-registration into DefaultRegistry
 helpers.go         — Utility helpers: CheckNoClobber (anti-overwrite guard), HasPointerAddress (detect unoverridden String()), NameCollisions (find duplicate step names) + ErrFileExists sentinel
-render.go          — Shared render helpers: writeRendered + writeRenderedTransformed (render + optional transform + write with sentinel wrapping) + writeGraph (buildGraph + SetNodes + SetEdges + writeRendered for graph-format Write* methods)
+render.go          — Shared render helpers: writeRendered + writeRenderedTransformed (render + optional transform + write with sentinel wrapping) + writeGraph (buildGraph + SetNodes + SetEdges + writeRenderedTransformed — single helper for ALL graph-format Write* methods: Mermaid, PlantUML, DOT; nil transform skips post-processing)
 diagram.go         — Translation layer: buildGraph() converts WorkflowReport → go-output GraphNode/GraphEdge + statusStyle() maps StepStatus → GraphStyle colors
 diagram_options.go — DiagramOption type + WithDirection(output.Direction) option + per-format direction mapping helpers (mermaidDirection, plantumlDirectionCommand, applyPlantumlDirection)
 mermaid.go         — Mermaid flowchart export (delegates to go-output graph.MermaidRenderer, code fence off)
@@ -143,25 +143,28 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 
 ### Shared test helpers (in `auditlog_test.go`)
 
-| Helper                           | Purpose                                                       |
-| -------------------------------- | ------------------------------------------------------------- |
-| `mustNew`, `newAuditAndWorkflow` | Construct auditor + workflow fixtures                         |
-| `retryOpts`, `addRetryStep`      | Wrap a step with retry config (fresh backoff)                 |
-| `addParallelSteps`               | Wire two independent steps (no dependency edge)               |
-| `addSlowParallelSteps`           | Wire two parallel slow steps of the same duration             |
-| `addDependentStep`               | Wire a parent→child dependency chain                          |
-| `addLinearChain`                 | Wire a 3-step linear chain (`a → b → c`)                      |
-| `runWorkflow`                    | `Attach` + `Do` + `Snapshot` in one call                      |
-| `findStep`, `assertReportValid`  | Step lookup + structural validation                           |
-| `assertStepCount`                | Required step count (uses `Fatalf` to stop on mismatch)       |
-| `assertEventCount`               | Required event count (`Errorf` — multiple counts may co-fail) |
-| `assertCount(name, got, want)`   | Generic named-count assertion                                 |
-| `assertWorkflowID`               | Required WorkflowID                                           |
-| `assertAttemptCount`             | Required attempt count for a StepInfo                         |
-| `assertStatus`                   | Required status for a StepInfo                                |
-| `assertFirstStepName`            | Required name of `report.Steps[0]`                            |
-| `assertContains`                 | `strings.Contains` check with custom failure message          |
-| `assertEventsRecorded`           | `a.EventsCount() >= want` (loose event-count check)           |
+| Helper                           | Purpose                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------- |
+| `mustNew`, `newAuditAndWorkflow` | Construct auditor + workflow fixtures                                                   |
+| `retryOpts`, `addRetryStep`      | Wrap a step with retry config (fresh backoff)                                           |
+| `addParallelSteps`               | Wire two independent steps (no dependency edge)                                         |
+| `addSlowParallelSteps`           | Wire two parallel slow steps of the same duration                                       |
+| `addDependentStep`               | Wire a parent→child dependency chain                                                    |
+| `addLinearChain`                 | Wire a 3-step linear chain (`a → b → c`)                                                |
+| `runSingleSucceed`               | Run minimal single-succeed-step workflow (auditor + wf + step + Attach + Do + Snapshot) |
+| `runSingleSucceedWithBuffer`     | `runSingleSucceed` + fresh `*strings.Builder` for `Write*`-into-buffer tests            |
+| `runWorkflow`                    | `Attach` + `Do` + `Snapshot` in one call                                                |
+| `singleSucceedExportPath`        | `runSingleSucceed` + `t.TempDir`-anchored path for `Export*` tests                      |
+| `findStep`, `assertReportValid`  | Step lookup + structural validation                                                     |
+| `assertStepCount`                | Required step count (uses `Fatalf` to stop on mismatch)                                 |
+| `assertEventCount`               | Required event count (`Errorf` — multiple counts may co-fail)                           |
+| `assertCount(name, got, want)`   | Generic named-count assertion                                                           |
+| `assertWorkflowID`               | Required WorkflowID                                                                     |
+| `assertAttemptCount`             | Required attempt count for a StepInfo                                                   |
+| `assertStatus`                   | Required status for a StepInfo                                                          |
+| `assertFirstStepName`            | Required name of `report.Steps[0]`                                                      |
+| `assertContains`                 | `strings.Contains` check with custom failure message                                    |
+| `assertEventsRecorded`           | `a.EventsCount() >= want` (loose event-count check)                                     |
 
 ### Duplicate-code policy
 
@@ -174,10 +177,14 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
   `sortByName`, `sortStepsByName`, `diffStep`, `writeGraph`).
 - **Current state**: zero clone groups at any threshold from `-t 3` through
   `-t 30` (production code extracted via `writeGraph` in `render.go`; test
-  Export* preamble extracted via `singleSucceedExportPath` in
-  `auditlog_test.go`). The formerly-documented "ten acceptable clones"
-  section below was retired when the refactor landed — those patterns no
-  longer appear in the report.
+  `Write*`-into-buffer preamble extracted via
+  `runSingleSucceedWithBuffer` in `auditlog_test.go`, eliminating the
+  23-occurrence `t.Parallel + runSingleSucceed + var buf strings.Builder`
+  clone group that previously appeared at `-t 3`; test `Export*` preamble
+  extracted via `singleSucceedExportPath` in `auditlog_test.go`). The
+  formerly-documented "ten acceptable clones" section below was retired
+  when the refactor landed — those patterns no longer appear in the
+  report.
 
 #### Acceptable clones (documented in source)
 
@@ -203,3 +210,13 @@ flow.Step(c).DependsOn(b))` idiom previously duplicated across
   Export\* test (Mermaid, PlantUML, Graphviz, D2, JSON, HTML, table,
   tree, HTML tree — 10 call sites). Callers still invoke `t.Parallel()`
   at the test level so the paralleltest linter stays satisfied.
+
+- **`runSingleSucceedWithBuffer(t, name)`** (auditlog_test.go): runs a
+  single-succeed workflow and returns the auditor plus a fresh
+  `*strings.Builder` ready to receive `Write*` (non-String) output.
+  Centralizes the `t.Parallel + runSingleSucceed + var buf strings.Builder`
+  preamble previously duplicated across 23 sites in
+  `diagram_direction_test.go` (18), `output_test.go` (3),
+  `table_columns_test.go` (1), and `html_test.go` (1). Tests that only
+  call `Write*String` variants may discard the buffer with `_`.
+  Callers still invoke `t.Parallel()` at the test level.

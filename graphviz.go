@@ -24,7 +24,7 @@ func (r WorkflowReport) WriteGraphviz(writer io.Writer, opts ...DiagramOption) e
 		renderer.SetDirection(cfg.direction)
 	}
 
-	return writeGraph(writer, r, "graphviz diagram", renderer)
+	return writeGraph(writer, r, "graphviz diagram", renderer, nil)
 }
 
 // WriteGraphvizString returns the Graphviz DOT diagram as a string.

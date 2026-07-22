@@ -17,19 +17,17 @@ import (
 func (r WorkflowReport) WritePlantUML(writer io.Writer, opts ...DiagramOption) error {
 	renderer := plantuml.NewPlantUMLDiagram()
 
-	nodes, edges := buildGraph(r)
-	renderer.SetNodes(nodes)
-	renderer.SetEdges(edges)
-
 	cfg := applyDiagramOpts(opts)
 
-	return writeRenderedTransformed(writer, "plantuml diagram", renderer.Render, func(out string) string {
+	transform := func(out string) string {
 		if cfg.hasDirection() {
 			return applyPlantumlDirection(out, plantumlDirectionCommand(cfg.direction))
 		}
 
 		return out
-	})
+	}
+
+	return writeGraph(writer, r, "plantuml diagram", renderer, transform)
 }
 
 // WritePlantUMLString returns the PlantUML diagram as a string.

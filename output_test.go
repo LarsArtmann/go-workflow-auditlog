@@ -143,11 +143,9 @@ func TestWriteTable_Markdown(t *testing.T) {
 func TestWriteTable_CSV(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "csv-step")
+	a, buf := runSingleSucceedWithBuffer(t, "csv-step")
 
-	var buf strings.Builder
-
-	err := a.Report().WriteTable(&buf, output.FormatCSV, output.RenderOptions{})
+	err := a.Report().WriteTable(buf, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable csv error: %v", err)
 	}
@@ -162,11 +160,9 @@ func TestWriteTable_CSV(t *testing.T) {
 func TestWriteTable_JSON(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "json-step")
+	a, buf := runSingleSucceedWithBuffer(t, "json-step")
 
-	var buf strings.Builder
-
-	err := a.Report().WriteTable(&buf, output.FormatJSON, output.RenderOptions{})
+	err := a.Report().WriteTable(buf, output.FormatJSON, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable json error: %v", err)
 	}
@@ -180,11 +176,9 @@ func TestWriteTable_JSON(t *testing.T) {
 func TestWriteTable_JSONL(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "jsonl-step")
+	a, buf := runSingleSucceedWithBuffer(t, "jsonl-step")
 
-	var buf strings.Builder
-
-	err := a.Report().WriteTable(&buf, output.FormatJSONL, output.RenderOptions{})
+	err := a.Report().WriteTable(buf, output.FormatJSONL, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable jsonl error: %v", err)
 	}

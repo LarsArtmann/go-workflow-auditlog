@@ -21,19 +21,17 @@ func (r WorkflowReport) WriteMermaid(writer io.Writer, opts ...DiagramOption) er
 	renderer := graph.NewMermaidRenderer()
 	renderer.SetCodeFence(false)
 
-	nodes, edges := buildGraph(r)
-	renderer.SetNodes(nodes)
-	renderer.SetEdges(edges)
-
 	cfg := applyDiagramOpts(opts)
 
-	return writeRenderedTransformed(writer, "mermaid diagram", renderer.Render, func(out string) string {
+	transform := func(out string) string {
 		if cfg.hasDirection() {
 			return strings.Replace(out, "flowchart TD", "flowchart "+mermaidDirection(cfg.direction), 1)
 		}
 
 		return out
-	})
+	}
+
+	return writeGraph(writer, r, "mermaid diagram", renderer, transform)
 }
 
 // WriteMermaidString returns the Mermaid diagram as a string.

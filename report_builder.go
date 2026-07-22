@@ -161,14 +161,10 @@ func finalizeDenormalized(report *WorkflowReport) {
 	report.FailureReason = buildFailureReason(*report)
 }
 
-// computePeakConcurrency scans the event stream and returns the maximum number
-// of attempts that were in-flight simultaneously.
-func computePeakConcurrency(events []Event) int {
-	if len(events) == 0 {
-		return 0
-	}
-
-	// Sort by timestamp, using sequence as tiebreaker for determinism.
+// sortEventsByTime returns a copy of events sorted by timestamp ascending,
+// using sequence as a deterministic tiebreaker. The copy avoids mutating the
+// caller's slice.
+func sortEventsByTime(events []Event) []Event {
 	sorted := append([]Event(nil), events...)
 	slices.SortFunc(sorted, func(a, b Event) int {
 		if cmp := a.Timestamp.Compare(b.Timestamp); cmp != 0 {
@@ -178,10 +174,20 @@ func computePeakConcurrency(events []Event) int {
 		return a.Sequence - b.Sequence
 	})
 
+	return sorted
+}
+
+// computePeakConcurrency scans the event stream and returns the maximum number
+// of attempts that were in-flight simultaneously.
+func computePeakConcurrency(events []Event) int {
+	if len(events) == 0 {
+		return 0
+	}
+
 	peak := 0
 	inFlight := 0
 
-	for _, evt := range sorted {
+	for _, evt := range sortEventsByTime(events) {
 		switch evt.EventType {
 		case EventTypeAttemptStart:
 			inFlight++
@@ -207,22 +213,13 @@ func computePeakConcurrencySteps(events []Event) []string {
 		return nil
 	}
 
-	sorted := append([]Event(nil), events...)
-	slices.SortFunc(sorted, func(a, b Event) int {
-		if cmp := a.Timestamp.Compare(b.Timestamp); cmp != 0 {
-			return cmp
-		}
-
-		return a.Sequence - b.Sequence
-	})
-
 	peakAttempts := 0
 	attemptsInFlight := 0
 	stepRefCounts := make(map[string]int)
 
 	var peakSteps []string
 
-	for _, evt := range sorted {
+	for _, evt := range sortEventsByTime(events) {
 		switch evt.EventType {
 		case EventTypeAttemptStart:
 			attemptsInFlight++

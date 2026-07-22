@@ -54,15 +54,23 @@ func writeRenderedTransformed(
 }
 
 // writeGraph writes the step DAG of r through the given pre-configured
-// go-output GraphRenderer. It centralizes the SetNodes/SetEdges + writeRendered
-// sequence for the Graphviz DOT writer. Mermaid and PlantUML use
-// writeRenderedTransformed instead because they post-process the rendered
-// output for direction overrides.
-func writeGraph(writer io.Writer, r WorkflowReport, format string, renderer output.GraphRenderer) error {
+// go-output GraphRenderer. It centralizes the buildGraph + SetNodes + SetEdges
+// + sentinel-wrapped write sequence shared by every graph-format exporter
+// (Mermaid, PlantUML, Graphviz DOT). Pass an optional transform to post-process
+// the rendered output — used by Mermaid (direction rewrite) and PlantUML
+// (direction command injection). Pass nil for no transform (used by DOT, whose
+// go-output renderer handles direction natively via SetDirection).
+func writeGraph(
+	writer io.Writer,
+	r WorkflowReport,
+	format string,
+	renderer output.GraphRenderer,
+	transform func(string) string,
+) error {
 	nodes, edges := buildGraph(r)
 
 	renderer.SetNodes(nodes)
 	renderer.SetEdges(edges)
 
-	return writeRendered(writer, format, renderer.Render)
+	return writeRenderedTransformed(writer, format, renderer.Render, transform)
 }

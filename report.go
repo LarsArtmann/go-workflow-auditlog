@@ -243,12 +243,12 @@ func (r WorkflowReport) Duration() time.Duration {
 	return time.Duration(computeWallClockDurationMs(r.Events) * float64(time.Millisecond))
 }
 
-// CriticalPath returns the ordered step chain (root-to-leaf) of the longest
-// dependency path — the bottleneck that determines the minimum possible
-// wall-clock time. The total duration of this chain equals
-// CriticalPathDurationMs. Returns nil for empty reports.
-func (r WorkflowReport) CriticalPath() []StepInfo {
-	_, names := computeCriticalPath(r.Steps)
+// stepsByName resolves a list of step names to their StepInfo values from r.
+// Names that don't resolve to a known step are silently skipped. Returns nil
+// when names is empty so callers can distinguish "no result" from "empty
+// result" (the latter never happens in practice because StepInfo slices are
+// only built from resolved names).
+func (r WorkflowReport) stepsByName(names []string) []StepInfo {
 	if len(names) == 0 {
 		return nil
 	}
@@ -263,23 +263,21 @@ func (r WorkflowReport) CriticalPath() []StepInfo {
 	return result
 }
 
+// CriticalPath returns the ordered step chain (root-to-leaf) of the longest
+// dependency path — the bottleneck that determines the minimum possible
+// wall-clock time. The total duration of this chain equals
+// CriticalPathDurationMs. Returns nil for empty reports.
+func (r WorkflowReport) CriticalPath() []StepInfo {
+	_, names := computeCriticalPath(r.Steps)
+
+	return r.stepsByName(names)
+}
+
 // PeakConcurrencySteps returns the unique step names that were in-flight at
 // the moment of peak concurrency — when the most attempts were running
 // simultaneously. Returns nil for reports with no events.
 func (r WorkflowReport) PeakConcurrencySteps() []StepInfo {
-	names := computePeakConcurrencySteps(r.Events)
-	if len(names) == 0 {
-		return nil
-	}
-
-	result := make([]StepInfo, 0, len(names))
-	for _, name := range names {
-		if step := r.StepByName(name); step != nil {
-			result = append(result, *step)
-		}
-	}
-
-	return result
+	return r.stepsByName(computePeakConcurrencySteps(r.Events))
 }
 
 // computeWallClockDurationMs returns the elapsed wall-clock time in
