@@ -1,7 +1,7 @@
 Step,Status,Duration,Attempts,Retry,Timeout,Error
-fetch,succeeded,11.13ms,1,false,false,
-flaky-api-call,succeeded,0.05ms,3,true,false,
-notify,succeeded,0.02ms,1,false,false,
-save,succeeded,5.21ms,1,false,false,
-transform,succeeded,8.19ms,1,false,false,
-validate,succeeded,10.65ms,1,false,false,
+fetch,succeeded,10.22ms,1,false,false,
+flaky-api-call,succeeded,0.09ms,3,true,false,
+notify,succeeded,0.03ms,1,false,false,
+save,succeeded,5.24ms,1,false,false,
+transform,succeeded,9.86ms,1,false,false,
+validate,succeeded,5.33ms,1,false,false,

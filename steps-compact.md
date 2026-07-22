@@ -1,9 +1,9 @@
 | Step           | Status    | Duration |
 |---------------|----------|---------|
-| fetch          | succeeded | 11.13ms  |
-| flaky-api-call | succeeded | 0.05ms   |
-| notify         | succeeded | 0.02ms   |
-| save           | succeeded | 5.21ms   |
-| transform      | succeeded | 8.19ms   |
-| validate       | succeeded | 10.65ms  |
+| fetch          | succeeded | 10.22ms  |
+| flaky-api-call | succeeded | 0.09ms   |
+| notify         | succeeded | 0.03ms   |
+| save           | succeeded | 5.24ms   |
+| transform      | succeeded | 9.86ms   |
+| validate       | succeeded | 5.33ms   |
 

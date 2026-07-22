@@ -44,6 +44,9 @@ func buildDAGHTML(report WorkflowReport) daghtml.DAG {
 		if icon != "" {
 			label = icon + " " + label
 		}
+		if step.DurationMs != nil && *step.DurationMs > 0 {
+			label += " \u00b7 " + humanizeMs(*step.DurationMs)
+		}
 
 		color := stepStatusDAGColor(step.Status)
 
