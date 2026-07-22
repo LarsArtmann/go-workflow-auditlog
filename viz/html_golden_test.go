@@ -230,4 +230,26 @@ func TestReport_WriteHTML_GoldenContent(t *testing.T) {
 	if !strings.Contains(html, csp) {
 		t.Errorf("expected strict CSP policy %q in HTML output", csp)
 	}
+
+	// --- Graph visualization enhancements present ---
+	for _, marker := range []string{
+		`id="graph-search"`,          // search/filter input
+		`id="graph-critical-path"`,   // critical path toggle button
+		"computeCriticalPathSteps",   // critical path algorithm
+		"enhanceGraph",               // post-render enhancement function
+		"critical-path-bar",          // Gantt timeline critical path CSS class
+	} {
+		if !strings.Contains(html, marker) {
+			t.Errorf("expected graph enhancement marker %q in HTML output", marker)
+		}
+	}
+
+	// --- Duration labels in DAG node data ---
+	// The golden report has fetch=5.2ms, transform=8.7ms, save=3.1ms
+	// These should appear as compact labels in the dag-data JSON.
+	for _, dur := range []string{"5ms", "9ms", "3ms"} {
+		if !strings.Contains(html, dur) {
+			t.Errorf("expected compact duration label %q in DAG data", dur)
+		}
+	}
 }

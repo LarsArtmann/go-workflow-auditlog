@@ -101,13 +101,12 @@ func buildStepTooltip(step StepInfo) string {
 
 // humanizeMs formats a millisecond duration for compact display in graph nodes.
 func humanizeMs(ms float64) string {
-	if ms < 1 {
-		return fmt.Sprintf("%.1fms", ms)
-	}
-
-	if ms < 1000 {
+	switch {
+	case ms < 1:
+		return "<1ms"
+	case ms < 1000:
 		return fmt.Sprintf("%.0fms", ms)
+	default:
+		return fmt.Sprintf("%.1fs", ms/1000)
 	}
-
-	return fmt.Sprintf("%.1fs", ms/1000)
 }
