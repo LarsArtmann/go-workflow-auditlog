@@ -17,7 +17,7 @@ import (
 // When columns is empty, DefaultTableColumns is used.
 func (r WorkflowReport) buildTableData(columns []TableColumn) *output.Table {
 	if len(columns) == 0 {
-		columns = DefaultTableColumns
+		columns = defaultColumnsCopy()
 	}
 
 	headers := make([]string, 0, len(columns))

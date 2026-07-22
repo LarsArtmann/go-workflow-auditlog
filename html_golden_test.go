@@ -2,8 +2,7 @@ package auditlog_test
 
 import (
 	"bytes"
-	"os"
-	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -22,8 +21,8 @@ var (
 )
 
 // goldenHTMLReport builds a deterministic, valid WorkflowReport with a
-// fetch → transform → save pipeline and fixed timestamps so the golden file
-// is byte-stable across runs.
+// fetch → transform → save pipeline and fixed timestamps so the golden
+// test is stable across runs.
 func goldenHTMLReport() auditlog.WorkflowReport {
 	fetchStarted := goldenExportedAt
 	fetchFinished := goldenExportedAt.Add(5 * time.Millisecond)
@@ -140,10 +139,11 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 	}
 }
 
-// TestReport_WriteHTML_GoldenFile renders the deterministic golden report to
-// HTML and compares it against the committed golden file. Run with
-// UPDATE_GOLDEN=1 to regenerate testdata/golden/report.html.
-func TestReport_WriteHTML_GoldenFile(t *testing.T) {
+// TestReport_WriteHTML_GoldenContent renders the deterministic golden report
+// and validates its structural and semantic content. This replaces the former
+// byte-for-byte golden file comparison, which broke on every CSS/JS whitespace
+// change or dependency update without catching real bugs.
+func TestReport_WriteHTML_GoldenContent(t *testing.T) {
 	t.Parallel()
 
 	report := goldenHTMLReport()
@@ -155,44 +155,78 @@ func TestReport_WriteHTML_GoldenFile(t *testing.T) {
 		t.Fatalf("WriteHTML: %v", err)
 	}
 
-	got := buf.Bytes()
-	goldenPath := filepath.Join("testdata", "golden", "report.html")
+	html := buf.String()
 
-	if os.Getenv("UPDATE_GOLDEN") == "1" {
-		err := os.MkdirAll(filepath.Dir(goldenPath), 0o755)
-		if err != nil {
-			t.Fatalf("mkdir: %v", err)
-		}
-
-		err = os.WriteFile(goldenPath, got, 0o644)
-		if err != nil {
-			t.Fatalf("write golden: %v", err)
-		}
-
-		t.Skipf("golden file updated: %s", goldenPath)
-
-		return
+	// --- Structural integrity ---
+	if !strings.HasPrefix(html, "<!DOCTYPE html>") {
+		t.Error("expected output to start with <!DOCTYPE html>")
 	}
 
-	want, err := os.ReadFile(goldenPath)
-	if err != nil {
-		t.Fatalf("read golden file (%s): %v\n"+
-			"hint: run UPDATE_GOLDEN=1 go test -run %s to create it",
-			goldenPath, err, t.Name())
+	for _, tag := range []string{"<html", "<head>", "<body>", "</html>", "Content-Security-Policy"} {
+		if !strings.Contains(html, tag) {
+			t.Errorf("expected %q in HTML output", tag)
+		}
 	}
 
-	if !bytes.Equal(got, want) {
-		diffPath := filepath.Join(t.TempDir(), "report.actual.html")
+	if openScripts := strings.Count(html, "<script"); openScripts != 5 {
+		t.Errorf("expected exactly 5 <script> tags, got %d", openScripts)
+	}
 
-		err := os.WriteFile(diffPath, got, 0o644)
-		if err != nil {
-			t.Fatalf("write actual: %v", err)
+	if closeScripts := strings.Count(html, "</script>"); closeScripts != 5 {
+		t.Errorf("expected exactly 5 </script> tags, got %d", closeScripts)
+	}
+
+	// --- JSON data blocks present ---
+	for _, id := range []string{`id="report-data"`, `id="type-metadata"`, `id="dag-data"`} {
+		if !strings.Contains(html, id) {
+			t.Errorf("expected JSON data block %q in HTML output", id)
 		}
+	}
 
-		t.Errorf("HTML output does not match golden file.\n"+
-			"  golden: %s (%d bytes)\n"+
-			"  actual: %s (%d bytes)\n"+
-			"hint: run UPDATE_GOLDEN=1 go test -run TestReport_WriteHTML_GoldenFile to update",
-			goldenPath, len(want), diffPath, len(got))
+	// --- All 5 dashboard tabs present ---
+	for _, tabID := range []string{`id="tab-steps"`, `id="tab-tree"`, `id="tab-graph"`, `id="tab-timeline"`, `id="tab-events"`} {
+		if !strings.Contains(html, tabID) {
+			t.Errorf("expected tab panel %q in HTML output", tabID)
+		}
+	}
+
+	// --- Golden report content injected ---
+	for _, stepName := range []string{"fetch", "transform", "save"} {
+		if !strings.Contains(html, stepName) {
+			t.Errorf("expected step name %q in HTML output (report JSON)", stepName)
+		}
+	}
+
+	if !strings.Contains(html, "golden-pipeline") {
+		t.Error("expected WorkflowID \"golden-pipeline\" in HTML output")
+	}
+
+	if !strings.Contains(html, "abcdef0123456789abcdef0123456789") {
+		t.Error("expected RunID in HTML output")
+	}
+
+	if !strings.Contains(html, auditlog.SchemaVersion) {
+		t.Error("expected schema version in HTML output")
+	}
+
+	// --- CSS and JS embedded ---
+	if !strings.Contains(html, "<style>") || !strings.Contains(html, "</style>") {
+		t.Error("expected <style> block with embedded CSS")
+	}
+
+	// Check for a known CSS variable to confirm dashboard.css is embedded
+	if !strings.Contains(html, "--success") {
+		t.Error("expected dashboard CSS variables in embedded <style> block")
+	}
+
+	// Check for a known JS function/variable to confirm dashboard.js is embedded
+	if !strings.Contains(html, "addEventListener") {
+		t.Error("expected dashboard JS in embedded <script> block")
+	}
+
+	// --- CSP policy is strict ---
+	csp := "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
+	if !strings.Contains(html, csp) {
+		t.Errorf("expected strict CSP policy %q in HTML output", csp)
 	}
 }

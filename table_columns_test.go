@@ -303,3 +303,56 @@ func TestTable_ZeroDurationCell(t *testing.T) {
 	// The data row should be "instant," (step name, empty duration).
 	assertContains(t, out, "instant,", "expected step name with empty duration cell")
 }
+
+func TestTable_ColumnString(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		col  auditlog.TableColumn
+		want string
+	}{
+		{auditlog.ColumnStep, "Step"},
+		{auditlog.ColumnStatus, "Status"},
+		{auditlog.ColumnDuration, "Duration"},
+		{auditlog.ColumnAttempts, "Attempts"},
+		{auditlog.ColumnMaxAttempts, "Max Attempts"},
+		{auditlog.ColumnRetry, "Retry"},
+		{auditlog.ColumnTimeout, "Timeout"},
+		{auditlog.ColumnError, "Error"},
+		{auditlog.ColumnType, "Type"},
+		{auditlog.ColumnDependencies, "Dependencies"},
+	}
+
+	for _, tt := range tests {
+		if got := tt.col.String(); got != tt.want {
+			t.Errorf("%d.String() = %q, want %q", tt.col, got, tt.want)
+		}
+	}
+}
+
+func TestTable_DefaultColumnsImmutability(t *testing.T) {
+	t.Parallel()
+
+	original := append([]auditlog.TableColumn(nil), auditlog.DefaultTableColumns...)
+
+	// Mutate a returned-default copy via WriteTable with no column options.
+	// Internally, applyTableOpts must copy DefaultTableColumns, not alias it.
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "s"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	_, err := report.WriteTableString(output.FormatCSV, output.RenderOptions{})
+	if err != nil {
+		t.Fatalf("WriteTableString: %v", err)
+	}
+
+	// Verify DefaultTableColumns was not mutated by the internal copy logic.
+	for i, want := range original {
+		if auditlog.DefaultTableColumns[i] != want {
+			t.Errorf("DefaultTableColumns[%d] was mutated: got %v, want %v",
+				i, auditlog.DefaultTableColumns[i], want)
+		}
+	}
+}

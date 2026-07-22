@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/larsartmann/go-workflow-auditlog.svg)](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)
 [![CI](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-~94%25-brightgreen)](#)
+[![Coverage](https://img.shields.io/badge/coverage-~96%25-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 
@@ -59,14 +59,14 @@ _ = audit.ExportHTML("report.html")  // Interactive dashboard
 - **Full DAG structure** — captures dependency graph (upstream + dependents), retry/timeout config, and step types
 - **Skipped & canceled detection** — reads post-execution state to catch steps that bypass callbacks entirely
 - **Cross-system correlation** — 128-bit `RunID` stamped on every event for trace/log correlation
-- **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT / D2 diagrams, step summary tables (16 formats), ASCII + HTML tree views, **interactive HTML dashboard** (5-tab self-contained report with DAG graph engine, timeline, waveform)
+- **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT / D2 diagrams (with configurable layout direction), step summary tables (16 formats, configurable column selection), ASCII + HTML tree views, **interactive HTML dashboard** (5-tab self-contained report with DAG graph engine, timeline, waveform)
 - **Report filtering** — slice reports by step name, status, event type, or time range
 - **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration delta)
 - **Event replay** — reconstruct a report from a flat NDJSON event stream
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
 - **Error classification** — auto-registered with [go-error-family](https://github.com/larsartmann/go-error-family) for `Classify()`, `IsRetryable()`, `ExitCode()`
-- **234 tests, ~94% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
+- **319 tests, ~96% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
 
 ## Installation
 
@@ -297,39 +297,39 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 ### `WorkflowReport` Methods
 
-| Method                                                  | Description                                                          |
-| ------------------------------------------------------- | -------------------------------------------------------------------- |
-| `report.StepByName(name)`                               | Find a step by name.                                                 |
-| `report.EventsByStep(name)`                             | Filter events by step.                                               |
-| `report.EventsByType(type)`                             | Filter events by type.                                               |
-| `report.FailedSteps()`                                  | All failed/canceled steps.                                           |
-| `report.SucceededSteps()`                               | All succeeded steps.                                                 |
-| `report.SkippedSteps()`                                 | All skipped steps.                                                   |
-| `report.RetriedSteps()`                                 | All steps with >1 attempt.                                           |
-| `report.Filtered(opts ...ReportOption) WorkflowReport`  | Returns a filtered copy of the report.                               |
-| `report.Diff(other WorkflowReport) DiffResult`          | Compares two reports (added/removed/changed steps + duration delta). |
-| `report.Duration() time.Duration`                       | Wall-clock duration spanned by all events (earliest → latest).       |
-| `report.Summary() string`                               | One-line human-readable summary.                                     |
-| `report.WriteJSON(w io.Writer) error`                   | Serialize report as JSON.                                            |
-| `report.WriteNDJSON(w io.Writer) error`                 | Serialize events as NDJSON.                                          |
-| `report.WriteMermaid(w io.Writer) error`                | Mermaid diagram.                                                     |
-| `report.WritePlantUML(w io.Writer) error`               | PlantUML diagram.                                                    |
-| `report.WriteGraphviz(w io.Writer) error`               | Graphviz DOT diagram.                                                |
-| `report.WriteD2(w io.Writer) error`                     | D2 diagram.                                                          |
-| `report.WriteMermaidString() (string, error)`           | Mermaid diagram as string.                                           |
-| `report.WritePlantUMLString() (string, error)`          | PlantUML diagram as string.                                          |
-| `report.WriteGraphvizString() (string, error)`          | Graphviz DOT diagram as string.                                      |
-| `report.WriteD2String() (string, error)`                | D2 diagram as string.                                                |
-| `report.WriteTable(w, format, opts) error`              | Step summary table (16 formats via go-output).                       |
-| `report.WriteTableString(format, opts) (string, error)` | Step summary table as string.                                        |
-| `report.WriteTree(w io.Writer) error`                   | ASCII tree of step DAG.                                              |
-| `report.WriteTreeString() (string, error)`              | ASCII tree as string.                                                |
-| `report.WriteHTMLTree(w io.Writer) error`               | HTML nested-list tree of step DAG.                                   |
-| `report.WriteHTMLTreeString() (string, error)`          | HTML tree as string.                                                 |
-| `report.WriteHTML(w io.Writer) error`                   | Interactive HTML dashboard (5-tab report with DAG graph).            |
-| `report.WriteHTMLString() (string, error)`              | HTML dashboard as string.                                            |
-| `report.ExportHTML(path string) error`                  | Writes HTML dashboard to file.                                       |
-| `report.Validate() error`                               | Checks internal consistency (counts, status drift).                  |
+| Method                                                                            | Description                                                          |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `report.StepByName(name)`                                                         | Find a step by name.                                                 |
+| `report.EventsByStep(name)`                                                       | Filter events by step.                                               |
+| `report.EventsByType(type)`                                                       | Filter events by type.                                               |
+| `report.FailedSteps()`                                                            | All failed/canceled steps.                                           |
+| `report.SucceededSteps()`                                                         | All succeeded steps.                                                 |
+| `report.SkippedSteps()`                                                           | All skipped steps.                                                   |
+| `report.RetriedSteps()`                                                           | All steps with >1 attempt.                                           |
+| `report.Filtered(opts ...ReportOption) WorkflowReport`                            | Returns a filtered copy of the report.                               |
+| `report.Diff(other WorkflowReport) DiffResult`                                    | Compares two reports (added/removed/changed steps + duration delta). |
+| `report.Duration() time.Duration`                                                 | Wall-clock duration spanned by all events (earliest → latest).       |
+| `report.Summary() string`                                                         | One-line human-readable summary.                                     |
+| `report.WriteJSON(w io.Writer) error`                                             | Serialize report as JSON.                                            |
+| `report.WriteNDJSON(w io.Writer) error`                                           | Serialize events as NDJSON.                                          |
+| `report.WriteMermaid(w io.Writer, opts ...DiagramOption) error`                   | Mermaid diagram (supports `WithDirection`).                          |
+| `report.WritePlantUML(w io.Writer, opts ...DiagramOption) error`                  | PlantUML diagram (supports `WithDirection`).                         |
+| `report.WriteGraphviz(w io.Writer, opts ...DiagramOption) error`                  | Graphviz DOT diagram (supports `WithDirection`).                     |
+| `report.WriteD2(w io.Writer, opts ...DiagramOption) error`                        | D2 diagram (supports `WithDirection`).                               |
+| `report.WriteMermaidString(opts ...DiagramOption) (string, error)`                | Mermaid diagram as string.                                           |
+| `report.WritePlantUMLString(opts ...DiagramOption) (string, error)`               | PlantUML diagram as string.                                          |
+| `report.WriteGraphvizString(opts ...DiagramOption) (string, error)`               | Graphviz DOT diagram as string.                                      |
+| `report.WriteD2String(opts ...DiagramOption) (string, error)`                     | D2 diagram as string.                                                |
+| `report.WriteTable(w, format, opts, tableOpts ...TableOption) error`              | Step summary table (16 formats, supports `WithColumns`).             |
+| `report.WriteTableString(format, opts, tableOpts ...TableOption) (string, error)` | Step summary table as string (supports `WithColumns`).               |
+| `report.WriteTree(w io.Writer) error`                                             | ASCII tree of step DAG.                                              |
+| `report.WriteTreeString() (string, error)`                                        | ASCII tree as string.                                                |
+| `report.WriteHTMLTree(w io.Writer) error`                                         | HTML nested-list tree of step DAG.                                   |
+| `report.WriteHTMLTreeString() (string, error)`                                    | HTML tree as string.                                                 |
+| `report.WriteHTML(w io.Writer) error`                                             | Interactive HTML dashboard (5-tab report with DAG graph).            |
+| `report.WriteHTMLString() (string, error)`                                        | HTML dashboard as string.                                            |
+| `report.ExportHTML(path string) error`                                            | Writes HTML dashboard to file.                                       |
+| `report.Validate() error`                                                         | Checks internal consistency (counts, status drift).                  |
 
 ### Package-Level Functions
 
@@ -411,7 +411,17 @@ For custom registries, call `auditlog.RegisterClassifications(reg)` explicitly.
 
 ## Diagrams
 
-Export the step DAG in three formats, with status-based coloring (succeeded = green, failed = red, skipped = gray, canceled = orange):
+Export the step DAG in four formats, with status-based coloring (succeeded = green, failed = red, skipped = gray, canceled = orange). All diagram writers accept `WithDirection` to control layout:
+
+```go
+_ = report.WriteMermaid(os.Stdout,
+    auditlog.WithDirection(output.DirectionLeftRight))  // left-to-right layout
+
+_ = report.WriteGraphviz(os.Stdout,
+    auditlog.WithDirection(output.DirectionBottomTop))  // bottom-to-top
+```
+
+Supported directions: `DirectionTopDown` (default), `DirectionLeftRight`, `DirectionBottomTop`, `DirectionRightLeft`. Available on all four formats (Mermaid, PlantUML, Graphviz DOT, D2).
 
 **Mermaid** (renders natively in GitHub):
 
@@ -457,10 +467,38 @@ _ = report.WriteMermaid(os.Stdout)      // or audit.ExportMermaid("dag.mmd")
 _ = report.WriteGraphviz(os.Stdout)     // or audit.ExportGraphviz("dag.dot")
 _ = report.WritePlantUML(os.Stdout)     // or audit.ExportPlantUML("dag.puml")
 _ = report.WriteD2(os.Stdout)           // or audit.ExportD2("dag.d2")
-_ = report.WriteTable(os.Stdout, output.FormatCSV, output.RenderOptions{})  // step summary table
+_ = report.WriteTable(os.Stdout, output.FormatCSV, output.RenderOptions{},
+    auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus, auditlog.ColumnDuration))
 _ = report.WriteTree(os.Stdout)         // ASCII tree of step DAG
 _ = report.WriteHTMLTree(os.Stdout)     // HTML nested-list tree
 _ = audit.ExportHTML("dashboard.html")  // interactive HTML dashboard
+```
+
+### Configurable Table Columns
+
+The `WriteTable` / `WriteTableString` / `ExportTable` methods accept `WithColumns` to control which columns appear. Ten columns are available:
+
+| Column       | Constant             | Default? |
+| ------------ | -------------------- | -------- |
+| Step name    | `ColumnStep`         | Yes      |
+| Status       | `ColumnStatus`       | Yes      |
+| Duration     | `ColumnDuration`     | Yes      |
+| Attempts     | `ColumnAttempts`     | Yes      |
+| Max Attempts | `ColumnMaxAttempts`  |          |
+| Has Retry    | `ColumnRetry`        | Yes      |
+| Has Timeout  | `ColumnTimeout`      | Yes      |
+| Error        | `ColumnError`        | Yes      |
+| Type         | `ColumnType`         |          |
+| Dependencies | `ColumnDependencies` |          |
+
+```go
+// Compact table: just step name, status, and duration
+out, _ := report.WriteTableString(output.FormatMarkdown, output.RenderOptions{},
+    auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus, auditlog.ColumnDuration))
+
+// Full table: all 10 columns
+out, _ := report.WriteTableString(output.FormatCSV, output.RenderOptions{},
+    auditlog.WithColumns(auditlog.AllTableColumns()...)
 ```
 
 ## HTML Dashboard

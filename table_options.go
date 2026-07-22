@@ -34,7 +34,10 @@ const (
 // DefaultTableColumns is the column set used when WithColumns is not called.
 // It matches the original hardcoded layout for backward compatibility.
 //
-//nolint:gochecknoglobals // Value must be a var so callers can read/modify defaults.
+// Treat as read-only: mutating this slice will corrupt the default for all
+// subsequent calls. Use WithColumns to customize column selection.
+//
+//nolint:gochecknoglobals // Read-only default; internal callers always copy before use.
 var DefaultTableColumns = []TableColumn{
 	ColumnStep,
 	ColumnStatus,
@@ -43,6 +46,21 @@ var DefaultTableColumns = []TableColumn{
 	ColumnRetry,
 	ColumnTimeout,
 	ColumnError,
+}
+
+// String returns the column name for debug/logging (e.g. "Step", "Status").
+func (c TableColumn) String() string {
+	if def, ok := columnDefs[c]; ok {
+		return def.header
+	}
+
+	return "Unknown"
+}
+
+// defaultColumnsCopy returns a fresh copy of DefaultTableColumns so callers
+// can freely mutate the returned slice without corrupting the package default.
+func defaultColumnsCopy() []TableColumn {
+	return append([]TableColumn(nil), DefaultTableColumns...)
 }
 
 // AllTableColumns returns every available table column in canonical order.
@@ -170,7 +188,7 @@ func applyTableOpts(opts []TableOption) tableConfig {
 	}
 
 	if len(cfg.columns) == 0 {
-		cfg.columns = DefaultTableColumns
+		cfg.columns = defaultColumnsCopy()
 	}
 
 	return cfg

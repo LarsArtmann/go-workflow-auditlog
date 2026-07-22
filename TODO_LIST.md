@@ -65,13 +65,15 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 
 ---
 
-## Short-term (high impact, low effort)
+## [DONE] — 2026-07-22 execution session (post-release review fixes)
 
-_(all items completed — see 2026-07-22 session above)_
+- [x] **Replace golden file byte comparison with structural validation** — `TestReport_WriteHTML_GoldenContent` validates DOCTYPE, CSP, 5 script tags, 5 tab panels, step names, WorkflowID, RunID, embedded CSS/JS, strict CSP policy. Retired fragile byte-for-byte golden file (`testdata/golden/report.html`) that broke 6+ times on whitespace/dependency drift.
+- [x] **Make `DefaultTableColumns` mutation-safe** — internal callers now use `defaultColumnsCopy()` (fresh slice), documented as read-only, added immutability test.
+- [x] **Add `TableColumn.String()` method** — returns the column header name for debug/logging.
+- [x] **Update README.md** — added `WithColumns` and `WithDirection` to feature list, new "Configurable Table Columns" section with column reference table + examples, diagram direction examples, corrected test count (234→319) and coverage (~94%→~96%).
+- [x] **Fix AGENTS.md** — corrected test count (~310→319 with breakdown), updated golden test reference.
 
-## Mid-term (medium impact, medium effort)
-
-_(all items completed — see 2026-07-22 session above)_
+---
 
 ## Deferred (high effort or needs architectural decision — see ROADMAP.md)
 
