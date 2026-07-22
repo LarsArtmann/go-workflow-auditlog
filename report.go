@@ -243,6 +243,45 @@ func (r WorkflowReport) Duration() time.Duration {
 	return time.Duration(computeWallClockDurationMs(r.Events) * float64(time.Millisecond))
 }
 
+// CriticalPath returns the ordered step chain (root-to-leaf) of the longest
+// dependency path — the bottleneck that determines the minimum possible
+// wall-clock time. The total duration of this chain equals
+// CriticalPathDurationMs. Returns nil for empty reports.
+func (r WorkflowReport) CriticalPath() []StepInfo {
+	_, names := computeCriticalPath(r.Steps)
+	if len(names) == 0 {
+		return nil
+	}
+
+	result := make([]StepInfo, 0, len(names))
+	for _, name := range names {
+		if step := r.StepByName(name); step != nil {
+			result = append(result, *step)
+		}
+	}
+
+	return result
+}
+
+// PeakConcurrencySteps returns the unique step names that were in-flight at
+// the moment of peak concurrency — when the most attempts were running
+// simultaneously. Returns nil for reports with no events.
+func (r WorkflowReport) PeakConcurrencySteps() []StepInfo {
+	names := computePeakConcurrencySteps(r.Events)
+	if len(names) == 0 {
+		return nil
+	}
+
+	result := make([]StepInfo, 0, len(names))
+	for _, name := range names {
+		if step := r.StepByName(name); step != nil {
+			result = append(result, *step)
+		}
+	}
+
+	return result
+}
+
 // computeWallClockDurationMs returns the elapsed wall-clock time in
 // milliseconds from the earliest to the latest event timestamp. Unlike
 // TotalDurationMs (which sums per-step durations and overcounts for parallel

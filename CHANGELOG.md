@@ -8,11 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **`WorkflowReport.CriticalPath()`** — returns the ordered step chain
+  (root-to-leaf) of the longest dependency path, not just the duration.
+- **`WorkflowReport.PeakConcurrencySteps()`** — returns the unique steps that
+  were in-flight at the moment of peak concurrency.
+- **`FuzzDiagramSanitization_MultiStep`** — multi-step diagram fuzz target
+  with 17 seed pairs (unicode, control chars, keyword collisions, length
+  extremes, edge sanitization) across Mermaid/PlantUML/DOT/D2.
 - **Public documentation website** at
   [go-workflow-auditlog.lars.software](https://go-workflow-auditlog.lars.software) —
   full Astro + Starlight site with 10 doc pages, landing page, and API reference.
 
 ### Changed
+
+- **`fromFlowStatus` refactored** from switch to data-driven map lookup
+  (`flowStatusMap`) for easier maintenance when go-workflow adds new statuses.
+- **`coverage_test.go` split** into focused files: `coverage_types_test.go`,
+  `coverage_report_test.go`, `coverage_plugin_test.go`.
 
 - **`encoding/json/v2` migration** — all JSON serialization now uses Go's
   `encoding/json/v2` + `encoding/json/jsontext` packages (`GOEXPERIMENT=jsonv2`).

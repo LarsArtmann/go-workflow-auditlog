@@ -2,9 +2,7 @@ package auditlog_test
 
 import (
 	"bytes"
-	"context"
-	"encoding/hex"
-	"encoding/json/v2"
+	json "encoding/json/v2"
 	"errors"
 	"fmt"
 	"os"
@@ -17,141 +15,6 @@ import (
 	output "github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
-
-// --- Event method tests ---
-
-func TestEvent_ConvenienceMethods(t *testing.T) {
-	t.Parallel()
-
-	dur := 5.5
-	errMsg := "boom"
-
-	startEvent := auditlog.Event{
-		EventType:  auditlog.EventTypeAttemptStart,
-		Phase:      auditlog.PhaseBefore,
-		StepRef:    auditlog.StepRef{Name: "step-a"},
-		DurationMs: &dur,
-	}
-
-	endEvent := auditlog.Event{
-		EventType: auditlog.EventTypeAttemptEnd,
-		Phase:     auditlog.PhaseAfter,
-		Error:     &errMsg,
-		Status:    auditlog.StepStatusFailed,
-	}
-
-	if !startEvent.IsAttemptStart() {
-		t.Error("expected IsAttemptStart=true")
-	}
-
-	if startEvent.IsAttemptEnd() {
-		t.Error("expected IsAttemptEnd=false")
-	}
-
-	if !endEvent.IsAttemptEnd() {
-		t.Error("expected IsAttemptEnd=true")
-	}
-
-	if !startEvent.IsBefore() {
-		t.Error("expected IsBefore=true")
-	}
-
-	if !endEvent.IsAfter() {
-		t.Error("expected IsAfter=true")
-	}
-
-	if !endEvent.HasError() {
-		t.Error("expected HasError=true")
-	}
-
-	if startEvent.HasError() {
-		t.Error("expected HasError=false")
-	}
-
-	if startEvent.Duration() != 5.5 {
-		t.Errorf("expected Duration=5.5, got %f", startEvent.Duration())
-	}
-
-	if endEvent.Duration() != 0 {
-		t.Errorf("expected Duration=0, got %f", endEvent.Duration())
-	}
-}
-
-func TestEvent_Label(t *testing.T) {
-	t.Parallel()
-
-	if auditlog.EventTypeAttemptStart.Label() != "Attempt Start" {
-		t.Errorf("unexpected label: %s", auditlog.EventTypeAttemptStart.Label())
-	}
-
-	if auditlog.EventTypeAttemptEnd.Label() != "Attempt End" {
-		t.Errorf("unexpected label: %s", auditlog.EventTypeAttemptEnd.Label())
-	}
-
-	unknown := auditlog.EventType("unknown")
-	if unknown.Label() != "" {
-		t.Errorf("expected empty label for unknown type")
-	}
-}
-
-func TestEvent_Color(t *testing.T) {
-	t.Parallel()
-
-	if auditlog.EventTypeAttemptStart.Color() == "" {
-		t.Error("expected non-empty color")
-	}
-
-	unknown := auditlog.EventType("unknown")
-	if unknown.Color() != "" {
-		t.Error("expected empty color for unknown type")
-	}
-}
-
-// --- StepStatus method tests ---
-
-func TestStepStatus_Methods(t *testing.T) {
-	t.Parallel()
-
-	if auditlog.StepStatusSucceeded.String() != "succeeded" {
-		t.Errorf("expected 'succeeded', got %s", auditlog.StepStatusSucceeded.String())
-	}
-
-	if auditlog.StepStatusSucceeded.Label() != "Succeeded" {
-		t.Errorf("expected 'Succeeded', got %s", auditlog.StepStatusSucceeded.Label())
-	}
-
-	if !auditlog.StepStatusFailed.IsTerminal() {
-		t.Error("expected Failed to be terminal")
-	}
-
-	if !auditlog.StepStatusSkipped.IsTerminal() {
-		t.Error("expected Skipped to be terminal")
-	}
-
-	if auditlog.StepStatusPending.IsTerminal() {
-		t.Error("expected Pending to NOT be terminal")
-	}
-
-	if auditlog.StepStatusRunning.IsTerminal() {
-		t.Error("expected Running to NOT be terminal")
-	}
-
-	if !auditlog.StepStatusFailed.IsError() {
-		t.Error("expected Failed to be error")
-	}
-
-	if !auditlog.StepStatusCanceled.IsError() {
-		t.Error("expected Canceled to be error")
-	}
-
-	if auditlog.StepStatusSucceeded.IsError() {
-		t.Error("expected Succeeded to NOT be error")
-	}
-
-	if auditlog.StepStatusSucceeded.Icon() == "" {
-		t.Error("expected non-empty icon")
-	}
-}
 
 // --- Report query method tests ---
 
@@ -243,54 +106,6 @@ func TestReport_SkippedSteps(t *testing.T) {
 	}
 }
 
-// --- StepInfo method tests ---
-
-func TestStepInfo_HasError(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	s := newFail("fail-step", "err")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-
-	step := report.StepByName("fail-step")
-	if !step.HasError() {
-		t.Error("expected HasError=true")
-	}
-
-	okStep := report.StepByName("fail-step")
-
-	okStep.Error = nil
-	if okStep.HasError() {
-		t.Error("expected HasError=false after clearing error")
-	}
-}
-
-func TestStepInfo_DeriveStatus_Terminal(t *testing.T) {
-	t.Parallel()
-
-	s := auditlog.StepInfo{Status: auditlog.StepStatusSucceeded}
-	if s.DeriveStatus() != auditlog.StepStatusSucceeded {
-		t.Error("expected terminal status preserved")
-	}
-}
-
-func TestStepInfo_DeriveStatus_FromError(t *testing.T) {
-	t.Parallel()
-
-	errMsg := "fail"
-
-	s := auditlog.StepInfo{
-		Status: auditlog.StepStatusRunning,
-		Error:  &errMsg,
-	}
-	if s.DeriveStatus() != auditlog.StepStatusFailed {
-		t.Error("expected failed from error")
-	}
-}
-
 // --- Validate error path tests ---
 
 func TestReport_Validate_EventCountMismatch(t *testing.T) {
@@ -360,372 +175,6 @@ func TestReport_Validate_StatusDrift(t *testing.T) {
 		"expected error mentioning status mismatch")
 }
 
-// --- Export tests ---
-
-func TestWriteJSON_ToBuffer(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("json-step")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	var buf bytes.Buffer
-
-	err := a.WriteJSON(&buf)
-	if err != nil {
-		t.Fatalf("WriteJSON error: %v", err)
-	}
-
-	var report auditlog.WorkflowReport
-
-	err = json.Unmarshal(buf.Bytes(), &report)
-	if err != nil {
-		t.Fatalf("invalid JSON output: %v", err)
-	}
-
-	assertStepCount(t, report, 1)
-}
-
-func TestWriteNDJSON_ToBuffer(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("ndjson-step")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	var buf bytes.Buffer
-
-	err := a.WriteNDJSON(&buf)
-	if err != nil {
-		t.Fatalf("WriteNDJSON error: %v", err)
-	}
-
-	lines := bytes.Split(bytes.TrimSpace(buf.Bytes()), []byte("\n"))
-	if len(lines) < 2 {
-		t.Fatalf("expected at least 2 NDJSON lines, got %d", len(lines))
-	}
-
-	var evt auditlog.Event
-
-	err = json.Unmarshal(lines[0], &evt)
-	if err != nil {
-		t.Fatalf("invalid NDJSON line: %v", err)
-	}
-}
-
-func TestExportJSON_Error(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{Enabled: true})
-
-	err := a.ExportJSON("/nonexistent/dir/file.json")
-	if err == nil {
-		t.Fatal("expected error writing to nonexistent directory")
-	}
-}
-
-func TestExportNDJSON_Error(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{Enabled: true})
-
-	err := a.ExportNDJSON("/nonexistent/dir/file.ndjson")
-	if err == nil {
-		t.Fatal("expected error writing to nonexistent directory")
-	}
-}
-
-// --- Config tests ---
-
-func TestNew_InitialEventCapacity(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{
-		Enabled:              true,
-		InitialEventCapacity: 512,
-	})
-	w := &flow.Workflow{}
-	s := newSucceed("cap-step")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	assertEventsRecorded(t, a, 2)
-}
-
-// --- Nil safety tests ---
-
-func TestAttach_NilWorkflow(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{Enabled: true})
-	// Should not panic.
-	a.Attach(nil)
-}
-
-func TestSnapshot_NilWorkflow(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{Enabled: true})
-	// Should not panic.
-	a.Snapshot(nil)
-}
-
-func TestAttach_Disabled(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{Enabled: false})
-	w := &flow.Workflow{}
-	s := newSucceed("step")
-	w.Add(flow.Step(s))
-	a.Attach(w) // no-op when disabled
-}
-
-// --- Complex scenario tests ---
-
-func TestFanOutFanIn(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	root := newSucceed("root")
-	branch1 := newSucceed("branch-1")
-	branch2 := newSucceed("branch-2")
-	join := newSucceed("join")
-	w.Add(
-		flow.Step(root),
-		flow.Step(branch1).DependsOn(root),
-		flow.Step(branch2).DependsOn(root),
-		flow.Step(join).DependsOn(branch1, branch2),
-	)
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-	assertReportValid(t, report)
-
-	assertStepCount(t, report, 4)
-
-	joinStep := findStep(t, report, "join")
-	if len(joinStep.Dependencies) != 2 {
-		t.Errorf("expected join to have 2 deps, got %d", len(joinStep.Dependencies))
-	}
-
-	rootStep := findStep(t, report, "root")
-	if len(rootStep.Dependents) != 2 {
-		t.Errorf("expected root to have 2 dependents, got %d", len(rootStep.Dependents))
-	}
-}
-
-func TestStepType_Inferred(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("typed")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-
-	step := report.StepByName("typed")
-	if step.StepType != "succeedStep" {
-		t.Errorf("expected step type 'succeedStep', got %q", step.StepType)
-	}
-}
-
-func TestDuration_Tracked(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	s := newSlow("slow-step", 20*time.Millisecond)
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-
-	step := report.StepByName("slow-step")
-	if step.DurationMs == nil {
-		t.Fatal("expected non-nil DurationMs")
-	}
-
-	if *step.DurationMs < 10 {
-		t.Errorf("expected duration >= 10ms, got %fms", *step.DurationMs)
-	}
-
-	if step.StartedAt == nil {
-		t.Error("expected non-nil StartedAt")
-	}
-
-	if step.FinishedAt == nil {
-		t.Error("expected non-nil FinishedAt")
-	}
-}
-
-func TestWorkflowID_Propagated(t *testing.T) {
-	t.Parallel()
-
-	a := mustNewWithID(t, "my-custom-wf")
-	w := &flow.Workflow{}
-	s := newSucceed("step")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-	assertWorkflowID(t, report, "my-custom-wf")
-}
-
-// TestRunID_DefaultGenerated confirms that when no RunID is supplied, the
-// auditor generates a non-empty, hex-formatted run ID and stamps it on every
-// captured event and the final report.
-func TestRunID_DefaultGenerated(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{Enabled: true})
-	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("step-a")))
-	w.Add(flow.Step(newSucceed("step-b")))
-	runWorkflow(t, a, w)
-
-	runID := a.RunID()
-	if runID == "" {
-		t.Fatal("expected non-empty generated RunID")
-	}
-
-	if len(runID) != 32 {
-		t.Errorf("expected 32-char hex RunID, got %d chars: %q", len(runID), runID)
-	}
-
-	_, err := hex.DecodeString(string(runID))
-	if err != nil {
-		t.Errorf("expected lowercase hex RunID, got %q: %v", runID, err)
-	}
-
-	report := a.Report()
-	if report.RunID != runID {
-		t.Errorf("report RunID %q != accessor RunID %q", report.RunID, runID)
-	}
-
-	if len(report.Events) == 0 {
-		t.Fatal("expected events in report")
-	}
-
-	assertEventRunIDsMatch(t, report.Events, runID)
-}
-
-// TestRunID_CustomHonored confirms a caller-supplied RunID is used verbatim
-// (no generation, no mutation) on the report and events.
-func TestRunID_CustomHonored(t *testing.T) {
-	t.Parallel()
-
-	const custom = "trace-abc-123"
-
-	a := mustNew(t, auditlog.Config{Enabled: true, RunID: custom})
-	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("step")))
-	runWorkflow(t, a, w)
-
-	if a.RunID() != custom {
-		t.Errorf("expected custom RunID %q, got %q", custom, a.RunID())
-	}
-
-	report := a.Report()
-	if report.RunID != custom {
-		t.Errorf("report RunID %q != custom %q", report.RunID, custom)
-	}
-}
-
-// TestRunID_ReplayRoundTrip confirms the RunID survives an NDJSON export →
-// ReplayEvents round trip, so offline analysis can still correlate the run.
-func TestRunID_ReplayRoundTrip(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{Enabled: true})
-	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("step")))
-	runWorkflow(t, a, w)
-
-	runID := a.RunID()
-	report := a.Report()
-
-	replayed, err := auditlog.ReplayEvents(report.Events)
-	if err != nil {
-		t.Fatalf("replay failed: %v", err)
-	}
-
-	if replayed.RunID != runID {
-		t.Errorf("replayed RunID %q != original %q", replayed.RunID, runID)
-	}
-}
-
-// TestRunID_UniquePerAuditor confirms two auditors get distinct run IDs, so
-// concurrent or sequential runs never share a correlation key.
-func TestRunID_UniquePerAuditor(t *testing.T) {
-	t.Parallel()
-
-	a1 := mustNew(t, auditlog.Config{Enabled: true})
-	a2 := mustNew(t, auditlog.Config{Enabled: true})
-
-	if a1.RunID() == a2.RunID() {
-		t.Errorf("expected distinct RunIDs, both were %q", a1.RunID())
-	}
-}
-
-// TestStepID_UniqueAndSequential confirms every step gets a distinct, non-zero
-// StepID and that all IDs form a contiguous 1..N set.
-func TestStepID_UniqueAndSequential(t *testing.T) {
-	t.Parallel()
-
-	a := mustNew(t, auditlog.Config{Enabled: true})
-	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("step-a")))
-	w.Add(flow.Step(newSucceed("step-b")))
-	w.Add(flow.Step(newSucceed("step-c")))
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-	if len(report.Steps) != 3 {
-		t.Fatalf("expected 3 steps, got %d", len(report.Steps))
-	}
-
-	seen := make(map[int]string, len(report.Steps))
-
-	for _, step := range report.Steps {
-		if step.StepID == 0 {
-			t.Errorf("step %q has zero StepID", step.Name)
-		}
-
-		if dup, ok := seen[step.StepID]; ok {
-			t.Errorf("StepID %d shared by %q and %q", step.StepID, dup, step.Name)
-		}
-
-		seen[step.StepID] = step.Name
-	}
-}
-
-func TestCanceledStatus(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	s := newSlow("cancel-me", 10*time.Second)
-	w.Add(
-		flow.Step(s).Timeout(10 * time.Millisecond),
-	)
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-	assertReportValid(t, report)
-
-	step := report.StepByName("cancel-me")
-	if step.Status != auditlog.StepStatusCanceled {
-		t.Errorf("expected canceled, got %s", step.Status)
-	}
-
-	assertCount(t, "CanceledCount", report.CanceledCount, 1)
-
-	if report.WorkflowSucceeded {
-		t.Error("expected WorkflowSucceeded=false")
-	}
-}
-
 func TestReport_JSONRoundTrip(t *testing.T) {
 	t.Parallel()
 
@@ -790,33 +239,6 @@ func TestReport_WithRetryTiming(t *testing.T) {
 	}
 }
 
-func TestEnvEnabledFalse(t *testing.T) {
-	t.Setenv(auditlog.EnvKeyEnabled, "false")
-
-	a := mustNew(t, auditlog.Config{})
-	w := &flow.Workflow{}
-	s := newSucceed("env-false-step")
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	if a.EventsCount() != 0 {
-		t.Errorf("expected 0 events when disabled via env, got %d", a.EventsCount())
-	}
-}
-
-func TestEventsCount_NoCopy(t *testing.T) {
-	t.Parallel()
-
-	a := runSingleSucceed(t, "count-step")
-
-	count := a.EventsCount()
-
-	events := a.Events()
-	if count != len(events) {
-		t.Errorf("EventsCount()=%d but len(Events())=%d", count, len(events))
-	}
-}
-
 func TestReport_EmptyWorkflow(t *testing.T) {
 	t.Parallel()
 
@@ -851,88 +273,6 @@ func TestWorkflowSucceeded_PendingStepsIsFalse(t *testing.T) {
 
 	if recomputed.WorkflowSucceeded {
 		t.Error("expected WorkflowSucceeded=false when steps are still running")
-	}
-}
-
-func TestStepTypeName_NilStep(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	// Use a Func step which has a clean type name.
-	w.Add(flow.Step(flow.Func("func-step", func(_ context.Context) error { return nil })))
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-
-	step := report.StepByName("func-step")
-	if step == nil {
-		t.Fatal("expected to find 'func-step'")
-	}
-
-	if step.StepType == "" {
-		t.Error("expected non-empty step type")
-	}
-}
-
-func TestSkip_Status(t *testing.T) {
-	t.Parallel()
-
-	a, w := newAuditAndWorkflow(t)
-	s := flow.Func("skip-me", func(_ context.Context) error {
-		return flow.Skip(errors.New("not needed"))
-	})
-	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
-
-	report := a.Report()
-	assertReportValid(t, report)
-
-	step := report.StepByName("skip-me")
-	if step.Status != auditlog.StepStatusSkipped {
-		t.Errorf("expected skipped, got %s", step.Status)
-	}
-}
-
-func TestMultipleWorkflows_Isolated(t *testing.T) {
-	t.Parallel()
-
-	a1 := mustNewWithID(t, "wf-1")
-	a2 := mustNewWithID(t, "wf-2")
-
-	w1 := &flow.Workflow{}
-	w1.Add(flow.Step(newSucceed("wf1-step")))
-
-	w2 := &flow.Workflow{}
-	w2.Add(flow.Step(newFail("wf2-step", "err")))
-
-	runWorkflow(t, a1, w1)
-	runWorkflow(t, a2, w2)
-
-	r1 := a1.Report()
-	r2 := a2.Report()
-
-	assertWorkflowID(t, r1, "wf-1")
-	assertWorkflowID(t, r2, "wf-2")
-
-	if r1.StepCount != 1 || r2.StepCount != 1 {
-		t.Errorf("expected each to have 1 step, got %d and %d", r1.StepCount, r2.StepCount)
-	}
-}
-
-func TestWriteToFile_CloseError(t *testing.T) {
-	t.Parallel()
-
-	// Writing to a read-only file should fail on close.
-	dir := t.TempDir()
-	path := dir + "/readonly.json"
-	_ = os.WriteFile(path, []byte{}, 0o444)
-
-	a := mustNew(t, auditlog.Config{Enabled: true})
-
-	err := a.ExportJSON(path)
-	if err == nil {
-		// Some filesystems allow writing to read-only files; skip if no error.
-		return
 	}
 }
 
@@ -1121,6 +461,139 @@ func TestReport_CriticalPathDuration_DiamondDAG(t *testing.T) {
 	if recomputed.CriticalPathDurationMs != want {
 		t.Errorf("diamond DAG: expected CriticalPathDurationMs=%f (root→left→bottom), got %f",
 			want, recomputed.CriticalPathDurationMs)
+	}
+}
+
+// TestReport_CriticalPath_DependentChain verifies the returned step chain
+// matches the longest dependency path.
+func TestReport_CriticalPath_DependentChain(t *testing.T) {
+	t.Parallel()
+
+	d10 := 10.0
+	d20 := 20.0
+	d30 := 30.0
+	d5 := 5.0
+
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "parent"}, Status: auditlog.StepStatusSucceeded, DurationMs: &d10},
+			{
+				StepRef:      auditlog.StepRef{Name: "child"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &d20,
+				Dependencies: []auditlog.StepRef{{Name: "parent"}},
+			},
+			{
+				StepRef:      auditlog.StepRef{Name: "grandchild"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &d30,
+				Dependencies: []auditlog.StepRef{{Name: "child"}},
+			},
+			{StepRef: auditlog.StepRef{Name: "leaf"}, Status: auditlog.StepStatusSucceeded, DurationMs: &d5},
+		},
+	}
+
+	path := raw.CriticalPath()
+
+	if len(path) != 3 {
+		t.Fatalf("expected 3 steps in critical path, got %d", len(path))
+	}
+
+	want := []string{"parent", "child", "grandchild"}
+
+	for i, step := range path {
+		if step.Name != want[i] {
+			t.Errorf("path[%d]: expected %q, got %q", i, want[i], step.Name)
+		}
+	}
+}
+
+// TestReport_CriticalPath_Empty verifies nil return for empty reports.
+func TestReport_CriticalPath_Empty(t *testing.T) {
+	t.Parallel()
+
+	report := auditlog.WorkflowReport{Steps: []auditlog.StepInfo{}}
+
+	if path := report.CriticalPath(); path != nil {
+		t.Errorf("expected nil critical path for empty report, got %v", path)
+	}
+}
+
+// TestReport_CriticalPath_DiamondDAG verifies the critical path selects the
+// longer branch in a diamond topology: root → left → bottom (not root → right → bottom).
+func TestReport_CriticalPath_DiamondDAG(t *testing.T) {
+	t.Parallel()
+
+	rootD := 10.0
+	leftD := 30.0
+	rightD := 5.0
+	bottomD := 5.0
+
+	raw := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "root"}, Status: auditlog.StepStatusSucceeded, DurationMs: &rootD},
+			{
+				StepRef:      auditlog.StepRef{Name: "left"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &leftD,
+				Dependencies: []auditlog.StepRef{{Name: "root"}},
+			},
+			{
+				StepRef:      auditlog.StepRef{Name: "right"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &rightD,
+				Dependencies: []auditlog.StepRef{{Name: "root"}},
+			},
+			{
+				StepRef:      auditlog.StepRef{Name: "bottom"},
+				Status:       auditlog.StepStatusSucceeded,
+				DurationMs:   &bottomD,
+				Dependencies: []auditlog.StepRef{{Name: "left"}, {Name: "right"}},
+			},
+		},
+	}
+
+	path := raw.CriticalPath()
+
+	want := []string{"root", "left", "bottom"}
+
+	if len(path) != len(want) {
+		t.Fatalf("expected %d steps, got %d: %v", len(want), len(path), path)
+	}
+
+	for i, step := range path {
+		if step.Name != want[i] {
+			t.Errorf("path[%d]: expected %q, got %q", i, want[i], step.Name)
+		}
+	}
+}
+
+// TestReport_PeakConcurrencySteps_ParallelSteps verifies that steps active at
+// the peak concurrency moment are returned.
+func TestReport_PeakConcurrencySteps_ParallelSteps(t *testing.T) {
+	t.Parallel()
+
+	a, w := newAuditAndWorkflow(t)
+	addSlowParallelSteps(w, 20*time.Millisecond)
+	runWorkflow(t, a, w)
+
+	report := a.Report()
+
+	steps := report.PeakConcurrencySteps()
+
+	if len(steps) != 2 {
+		t.Fatalf("expected 2 steps at peak, got %d", len(steps))
+	}
+}
+
+// TestReport_PeakConcurrencySteps_Empty verifies nil for reports with no events.
+func TestReport_PeakConcurrencySteps_Empty(t *testing.T) {
+	t.Parallel()
+
+	report := auditlog.WorkflowReport{}
+
+	if steps := report.PeakConcurrencySteps(); steps != nil {
+		t.Errorf("expected nil for empty report, got %v", steps)
 	}
 }
 
@@ -1320,14 +793,6 @@ func absDiff(a, b float64) float64 {
 	return b - a
 }
 
-// ---------------------------------------------------------------------------
-// Coverage gap closure tests
-//
-// These tests exercise previously-uncovered public API surface and reachable
-// internal branches. They do NOT chase unreachable defensive error paths
-// (e.g. strings.Builder.Write failures, json.Marshal on valid structs).
-// ---------------------------------------------------------------------------
-
 // TestCoverage_Report_ExportTable covers WorkflowReport.ExportTable (was 0%).
 // The Auditor.ExportTable path is tested in output_test.go, but the
 // WorkflowReport-level method — used by replayed/loaded reports — was never
@@ -1353,50 +818,47 @@ func TestCoverage_Report_ExportTable(t *testing.T) {
 	}
 }
 
-// TestCoverage_StepInfo_Type covers StepInfo.Type() (was 0%).
-func TestCoverage_StepInfo_Type(t *testing.T) {
+// TestExportTable_FromReplayedReport verifies the full round-trip pipeline:
+// run workflow → NDJSON export → ReadEvents → ReplayEvents → ExportTable.
+// This confirms the primary offline-analysis use case for WorkflowReport.Export*.
+func TestExportTable_FromReplayedReport(t *testing.T) {
 	t.Parallel()
 
-	step := auditlog.StepInfo{
-		StepRef: auditlog.StepRef{Name: "x", StepType: "FetchStep"},
+	a, w := newAuditAndWorkflow(t)
+	w.Add(flow.Step(newSucceed("replay-table-step")))
+	runWorkflow(t, a, w)
+
+	var ndjsonBuf bytes.Buffer
+
+	err := a.WriteNDJSON(&ndjsonBuf)
+	if err != nil {
+		t.Fatalf("WriteNDJSON error: %v", err)
 	}
 
-	if step.Type() != "FetchStep" {
-		t.Errorf("expected Type()='FetchStep', got %q", step.Type())
-	}
-}
-
-// TestCoverage_StepStatus_IsKnown covers StepStatus.IsKnown() (was 0%).
-func TestCoverage_StepStatus_IsKnown(t *testing.T) {
-	t.Parallel()
-
-	if !auditlog.StepStatusSucceeded.IsKnown() {
-		t.Error("expected Succeeded to be known")
+	events, err := auditlog.ReadEvents(&ndjsonBuf)
+	if err != nil {
+		t.Fatalf("ReadEvents error: %v", err)
 	}
 
-	unknown := auditlog.StepStatus("bogus")
-	if unknown.IsKnown() {
-		t.Error("expected bogus status to be unknown")
-	}
-}
-
-// TestCoverage_RunID_StringAndIsEmpty covers RunID.String() and
-// RunID.IsEmpty() (both were 0%).
-func TestCoverage_RunID_StringAndIsEmpty(t *testing.T) {
-	t.Parallel()
-
-	id := auditlog.RunID("abc123")
-	if id.String() != "abc123" {
-		t.Errorf("expected String()='abc123', got %q", id.String())
+	replayed, err := auditlog.ReplayEvents(events)
+	if err != nil {
+		t.Fatalf("ReplayEvents error: %v", err)
 	}
 
-	if id.IsEmpty() {
-		t.Error("expected non-empty RunID to not be empty")
+	path := filepath.Join(t.TempDir(), "replayed.csv")
+
+	err = replayed.ExportTable(path, output.FormatCSV, output.RenderOptions{})
+	if err != nil {
+		t.Fatalf("ExportTable from replayed report error: %v", err)
 	}
 
-	var empty auditlog.RunID
-	if !empty.IsEmpty() {
-		t.Error("expected zero-value RunID to be empty")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile error: %v", err)
+	}
+
+	if !strings.Contains(string(data), "replay-table-step") {
+		t.Errorf("expected table output to contain step name, got:\n%s", string(data))
 	}
 }
 
@@ -1431,74 +893,6 @@ func TestCoverage_Summary_AllBranches(t *testing.T) {
 
 	if !strings.Contains(s, "failed") && !strings.Contains(s, "pending") {
 		t.Errorf("failure-without-reason summary unexpected: %s", s)
-	}
-}
-
-// TestCoverage_StepStatus_Color_Unknown covers the unknown-status branch of
-// StepStatus.Color() (was 66.7%).
-func TestCoverage_StepStatus_Color_Unknown(t *testing.T) {
-	t.Parallel()
-
-	unknown := auditlog.StepStatus("bogus")
-	fill, font := unknown.Color()
-
-	if fill != "" || font != "" {
-		t.Errorf("expected empty colors for unknown status, got fill=%q font=%q", fill, font)
-	}
-}
-
-// TestCoverage_D2_EmptyWorkflowID covers the empty-WorkflowID fallback branch
-// of d2DiagramTitle (was 66.7%) and the pending-status branch of statusStyle
-// (was 75%). Both are triggered by exporting a D2 diagram from a report with
-// no WorkflowID and a pending step.
-func TestCoverage_D2_EmptyWorkflowID(t *testing.T) {
-	t.Parallel()
-
-	report := auditlog.WorkflowReport{
-		Steps: []auditlog.StepInfo{
-			stepFixture("pending-step", auditlog.StepStatusPending),
-		},
-	}
-
-	var buf bytes.Buffer
-
-	err := report.WriteD2(&buf)
-	if err != nil {
-		t.Fatalf("WriteD2 error: %v", err)
-	}
-
-	out := buf.String()
-	if !strings.Contains(out, "Workflow DAG") {
-		t.Error("expected fallback title 'Workflow DAG' in D2 output")
-	}
-
-	if !strings.Contains(out, "pending-step") {
-		t.Error("expected pending-step in D2 output")
-	}
-}
-
-// TestCoverage_CancelStatus_Diagram covers the canceled-status color branch
-// in statusStyle (was 75%) by exporting a diagram with a canceled step.
-func TestCoverage_CancelStatus_Diagram(t *testing.T) {
-	t.Parallel()
-
-	report := auditlog.WorkflowReport{
-		WorkflowID: "cancel-test",
-		Steps: []auditlog.StepInfo{
-			stepFixture("canceled-step", auditlog.StepStatusCanceled),
-		},
-	}
-
-	var buf bytes.Buffer
-
-	err := report.WriteD2(&buf)
-	if err != nil {
-		t.Fatalf("WriteD2 error: %v", err)
-	}
-
-	// Canceled steps get orange (#5a3d2d). Verify the color appears.
-	if !strings.Contains(buf.String(), "#5a3d2d") {
-		t.Error("expected canceled status color (#5a3d2d) in D2 output")
 	}
 }
 
@@ -1548,5 +942,73 @@ func TestCoverage_MatchEvent_TimeFilters(t *testing.T) {
 
 	if filtered.Events[0].EventType != auditlog.EventTypeAttemptEnd {
 		t.Errorf("expected attempt_end event, got %s", filtered.Events[0].EventType)
+	}
+}
+
+// TestFilter_CombinedEventTypeAndTimeRange verifies that WithEventsByType and
+// WithTimeRange interact correctly when applied together: only events matching
+// BOTH the type filter AND the time window should survive.
+func TestFilter_CombinedEventTypeAndTimeRange(t *testing.T) {
+	t.Parallel()
+
+	base := time.Date(2025, 1, 1, 12, 0, 0, 0, time.UTC)
+
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "s"}, Status: auditlog.StepStatusSucceeded},
+		},
+		EventCount: 4,
+		Events: []auditlog.Event{
+			{
+				StepRef:   auditlog.StepRef{Name: "s"},
+				Sequence:  1,
+				Timestamp: base,
+				EventType: auditlog.EventTypeAttemptStart,
+				Phase:     auditlog.PhaseBefore,
+			},
+			{
+				StepRef:   auditlog.StepRef{Name: "s"},
+				Sequence:  2,
+				Timestamp: base.Add(3 * time.Second),
+				EventType: auditlog.EventTypeAttemptEnd,
+				Phase:     auditlog.PhaseAfter,
+			},
+			{
+				StepRef:   auditlog.StepRef{Name: "s"},
+				Sequence:  3,
+				Timestamp: base.Add(6 * time.Second),
+				EventType: auditlog.EventTypeAttemptStart,
+				Phase:     auditlog.PhaseBefore,
+			},
+			{
+				StepRef:   auditlog.StepRef{Name: "s"},
+				Sequence:  4,
+				Timestamp: base.Add(9 * time.Second),
+				EventType: auditlog.EventTypeAttemptEnd,
+				Phase:     auditlog.PhaseAfter,
+			},
+		},
+	}
+
+	from := base.Add(2 * time.Second)
+	to := base.Add(7 * time.Second)
+
+	filtered := report.Filtered(
+		auditlog.WithEventsByType(auditlog.EventTypeAttemptStart),
+		auditlog.WithTimeRange(from, to),
+	)
+
+	// Only the start event at +6s is both an AttemptStart AND within [2s, 7s].
+	if len(filtered.Events) != 1 {
+		t.Fatalf("expected 1 event matching type+time, got %d", len(filtered.Events))
+	}
+
+	evt := filtered.Events[0]
+	if evt.EventType != auditlog.EventTypeAttemptStart {
+		t.Errorf("expected attempt_start, got %s", evt.EventType)
+	}
+
+	if evt.Sequence != 3 {
+		t.Errorf("expected sequence 3 (the +6s start), got %d", evt.Sequence)
 	}
 }

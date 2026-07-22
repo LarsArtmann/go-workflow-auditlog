@@ -237,22 +237,28 @@ func sortStepsByName(steps []StepInfo) {
 	})
 }
 
+// flowStatusMap maps go-workflow's capitalized status strings to our StepStatus
+// enum. Add new mappings here when go-workflow introduces new statuses.
+//
+//nolint:gochecknoglobals // Lookup table, treated as immutable after init.
+var flowStatusMap = map[string]StepStatus{
+	"Running":   StepStatusRunning,
+	"Failed":    StepStatusFailed,
+	"Succeeded": StepStatusSucceeded,
+	"Canceled":  StepStatusCanceled,
+	"Skipped":   StepStatusSkipped,
+}
+
 // fromFlowStatus converts a [flow.StepStatus] string to our StepStatus enum.
 // go-workflow uses capitalized strings ("Succeeded", "Failed", etc.) while we
 // use lowercase for JSON snake_case consistency.
+// Unknown or empty strings fall back to Pending: empty means the step hasn't
+// started; unknown values are a forward-compatibility fallback for statuses
+// not yet mapped in flowStatusMap.
 func fromFlowStatus(s string) StepStatus {
-	switch s {
-	case "Running":
-		return StepStatusRunning
-	case "Failed":
-		return StepStatusFailed
-	case "Succeeded":
-		return StepStatusSucceeded
-	case "Canceled":
-		return StepStatusCanceled
-	case "Skipped":
-		return StepStatusSkipped
-	default: // "" (Pending) or unknown
-		return StepStatusPending
+	if status, ok := flowStatusMap[s]; ok {
+		return status
 	}
+
+	return StepStatusPending
 }

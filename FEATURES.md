@@ -27,6 +27,8 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-13.
 - **`Diff(other)`** — compare two runs (added/removed/changed steps + wall-clock duration delta)
 - **`Summary()`** — one-line human-readable summary (uses wall-clock + failure reason)
 - **`Duration()`** — wall-clock duration as `time.Duration`
+- **`CriticalPath()`** — returns the ordered step chain (root-to-leaf) of the bottleneck dependency path
+- **`PeakConcurrencySteps()`** — returns the unique steps that were in-flight at peak concurrency
 - **`ReportIndex`** — O(1) lookup maps for repeated queries
 - **`ReplayEvents()`** — reconstruct report from flat NDJSON event stream
 - **`LoadReport()` / `LoadReportFromReader()` / `LoadReportFromBytes()`**
@@ -105,7 +107,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ### Testing & Quality
 
 - **`encoding/json/v2` migration** — migrated to Go 1.26 `encoding/json/v2` + `jsontext` (GOEXPERIMENT=jsonv2), full XSS hardening, deterministic output
-- **Fuzz tests**: `FuzzDiagramSpecialChars` (diagram injection), `FuzzHTMLSpecialChars` (HTML XSS, 12 seed payloads), `FuzzReadEvents` (NDJSON resilience), `FuzzClassify` (adversarial error chains)
+- **Fuzz tests**: `FuzzDiagramSpecialChars` (diagram injection), `FuzzDiagramSanitization_MultiStep` (multi-step edge sanitization, 17 seed pairs across 4 formats), `FuzzHTMLSpecialChars` (HTML XSS, 12 seed payloads), `FuzzReadEvents` (NDJSON resilience), `FuzzClassify` (adversarial error chains)
 - **Property-based tests**: Diff algebra (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output) — 200 iterations each, deterministic seeds; Classify wrapping-preserves-family + identity matches map
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values

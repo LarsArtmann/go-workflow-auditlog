@@ -199,59 +199,146 @@ func computePeakConcurrency(events []Event) int {
 	return peak
 }
 
+// computePeakConcurrencySteps returns the unique step names that were in-flight
+// at the moment of peak concurrency. Uses reference-counted tracking so that
+// overlapping retries of the same step are handled correctly.
+func computePeakConcurrencySteps(events []Event) []string {
+	if len(events) == 0 {
+		return nil
+	}
+
+	sorted := append([]Event(nil), events...)
+	slices.SortFunc(sorted, func(a, b Event) int {
+		if cmp := a.Timestamp.Compare(b.Timestamp); cmp != 0 {
+			return cmp
+		}
+
+		return a.Sequence - b.Sequence
+	})
+
+	peakAttempts := 0
+	attemptsInFlight := 0
+	stepRefCounts := make(map[string]int)
+
+	var peakSteps []string
+
+	for _, evt := range sorted {
+		switch evt.EventType {
+		case EventTypeAttemptStart:
+			attemptsInFlight++
+			stepRefCounts[evt.Name]++
+
+			if attemptsInFlight > peakAttempts {
+				peakAttempts = attemptsInFlight
+				peakSteps = peakSteps[:0]
+
+				for name, count := range stepRefCounts {
+					if count > 0 {
+						peakSteps = append(peakSteps, name)
+					}
+				}
+			}
+
+		case EventTypeAttemptEnd:
+			attemptsInFlight--
+			if attemptsInFlight < 0 {
+				attemptsInFlight = 0
+			}
+
+			stepRefCounts[evt.Name]--
+		}
+	}
+
+	slices.Sort(peakSteps)
+
+	return peakSteps
+}
+
 // computeCriticalPathDuration calculates the longest dependency-chain duration
 // in milliseconds. This represents the minimum possible wall-clock time given
 // perfect parallelization — the bottleneck path through the DAG.
 func computeCriticalPathDuration(steps []StepInfo) float64 {
+	d, _ := computeCriticalPath(steps)
+
+	return d
+}
+
+// criticalPathResult holds the longest path ending at a step: its total
+// duration and the ordered step names from root to that step.
+type criticalPathResult struct {
+	duration float64
+	path     []string
+}
+
+// computeCriticalPath returns both the duration and the ordered step names
+// (root-to-leaf) of the longest dependency chain.
+func computeCriticalPath(steps []StepInfo) (float64, []string) {
 	if len(steps) == 0 {
-		return 0
+		return 0, nil
 	}
 
-	// Build name -> step lookup.
 	byName := make(map[string]*StepInfo, len(steps))
 	for i := range steps {
 		byName[steps[i].Name] = &steps[i]
 	}
 
-	// memo stores the longest path duration ending at each step.
-	memo := make(map[string]float64)
+	memo := make(map[string]criticalPathResult)
+	dfs := buildCriticalPathDFS(byName, memo)
 
-	var dfs func(name string) float64
+	var best criticalPathResult
 
-	dfs = func(name string) float64 {
-		if d, ok := memo[name]; ok {
-			return d
+	for i := range steps {
+		r := dfs(steps[i].Name)
+		if r.duration > best.duration {
+			best = r
+		}
+	}
+
+	return best.duration, best.path
+}
+
+// buildCriticalPathDFS returns a memoized DFS that computes the longest
+// dependency-chain path ending at each step.
+func buildCriticalPathDFS(
+	byName map[string]*StepInfo,
+	memo map[string]criticalPathResult,
+) func(string) criticalPathResult {
+	var dfs func(string) criticalPathResult
+
+	dfs = func(name string) criticalPathResult {
+		if r, ok := memo[name]; ok {
+			return r
 		}
 
 		step, ok := byName[name]
 		if !ok {
-			return 0
+			return criticalPathResult{}
 		}
 
-		maxDepDuration := 0.0
+		bestDep := criticalPathResult{}
 
 		for _, dep := range step.Dependencies {
 			d := dfs(dep.Name)
-			if d > maxDepDuration {
-				maxDepDuration = d
+			if d.duration > bestDep.duration {
+				bestDep = d
 			}
 		}
 
-		memo[name] = maxDepDuration + step.Duration()
+		path := make([]string, 0, len(bestDep.path)+1)
+		path = append(path, bestDep.path...)
+		path = append(path, name)
 
-		return memo[name]
-	}
-
-	criticalPath := 0.0
-
-	for i := range steps {
-		d := dfs(steps[i].Name)
-		if d > criticalPath {
-			criticalPath = d
+		result := criticalPathResult{
+			duration: bestDep.duration + step.Duration(),
+			path:     path,
 		}
+
+		memo[name] = result
+
+		return result
 	}
 
-	return criticalPath
+	return dfs
 }
 
 // buildFailureReason returns a human-readable summary when the workflow failed.
