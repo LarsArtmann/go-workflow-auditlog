@@ -1012,3 +1012,47 @@ tr.row-canceled:hover td {
     grid-template-columns: 1fr;
   }
 }
+
+/* Critical path highlighting on graph */
+.graph-node.critical-path rect {
+  stroke: var(--accent);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 6px var(--accent));
+}
+.graph-edge.critical-path path {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+#graph-container .graph-edge.critical-path path {
+  marker-end: url(#arrow-hl);
+}
+
+/* Graph search highlight states */
+.graph-node.search-match rect {
+  stroke: var(--info);
+  stroke-width: 3;
+}
+.graph-node.search-dimmed {
+  opacity: 0.15;
+}
+
+/* Retry badge on graph nodes */
+.retry-badge text {
+  pointer-events: none;
+}
+
+/* Critical path Gantt bar overlay */
+.gantt-row.critical-path-bar .gantt-bar {
+  box-shadow: 0 0 0 2px var(--accent), 0 0 8px rgba(232, 168, 56, 0.3);
+}
+.gantt-row.critical-path-bar .gantt-label {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Graph filter bar chip active state */
+.chip#graph-critical-path.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: var(--accent);
+}
