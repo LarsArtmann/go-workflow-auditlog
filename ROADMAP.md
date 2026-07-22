@@ -58,7 +58,7 @@ for immediate visibility, `CreateNDJSONStreamer(path)` file convenience
 constructor. Output is `ReadEvents`-compatible for round-trip replay.
 
 **Remaining scale direction**: The in-memory `Report()` path still
-materializes all events. For workflows exceeding 10 000+ events, a
+materializes all events. For workflows exceeding 10000+ events, a
 streaming-only consumption model (skip `Report()` entirely) is the path
 forward. Potential enhancements: time-based flush (`WithFlushInterval`),
 async channel-based writer for backpressure decoupling, and a streaming
