@@ -2,8 +2,10 @@ package auditlog_test
 
 import (
 	"bytes"
+	"io"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
@@ -229,4 +231,103 @@ func extractJSONBlock(output, idAttr string) string {
 	}
 
 	return output[start : start+end]
+}
+
+// FuzzDiagramSanitization_MultiStep fuzzes diagram export with two steps
+// connected by a dependency edge, both with adversarial names. This goes deeper
+// than FuzzDiagramSpecialChars by testing edge (not just node) sanitization,
+// unicode and control-character handling, and diagram-keyword collisions.
+func FuzzDiagramSanitization_MultiStep(f *testing.F) {
+	seeds := [][2]string{
+		// Unicode: emoji, CJK, RTL, combining marks.
+		{"🎉", "\u6b65\u9aa4"},                                    // CJK "step"
+		{"\u062e\u0637\u0648\u0629", "\u30b9\u30c6\u30c3\u30d7"}, // Arabic/Japanese "step"
+		{"café\u0301", "naïve"},
+		// Control characters.
+		{"zero\x00byte", "normal"},
+		{"\x07bell\x1besc", "ctrl"},
+		// Diagram syntax keyword collisions.
+		{"digraph", "subgraph"},
+		{"flowchart", "style"},
+		{"@startuml", "@enduml"},
+		{"node", "edge"},
+		{"rankdir", "label"},
+		// Whitespace-only.
+		{" ", "\t"},
+		{"\n", "\r\n"},
+		// Mixed adversarial (brackets, quotes, pipes in both names).
+		{"a]b[c", `d"e"f`},
+		{"step-->other", "dep|pipe"},
+		// Length extremes.
+		{strings.Repeat("x", 1000), "short"},
+		{"short", strings.Repeat("y", 1000)},
+		// Unicode + special char combos.
+		{"🎉]step", "pipe|지"},
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed[0], seed[1])
+	}
+
+	f.Fuzz(func(t *testing.T, name1, name2 string) {
+		t.Parallel()
+
+		if name1 == "" || name2 == "" {
+			t.Skip()
+		}
+
+		// Skip invalid UTF-8 — rendering libraries may reject it, and that's
+		// acceptable (the test verifies valid-input robustness, not encoding
+		// repair).
+		if !utf8.ValidString(name1) || !utf8.ValidString(name2) {
+			t.Skip()
+		}
+
+		report := auditlog.WorkflowReport{
+			WorkflowID: "fuzz-multi",
+			Steps: []auditlog.StepInfo{
+				{
+					StepRef: auditlog.StepRef{Name: name1},
+					Status:  auditlog.StepStatusSucceeded,
+				},
+				{
+					StepRef: auditlog.StepRef{Name: name2},
+					Status:  auditlog.StepStatusFailed,
+					Dependencies: []auditlog.StepRef{
+						{Name: name1},
+					},
+				},
+			},
+		}
+
+		formats := []struct {
+			name     string
+			write    func(io.Writer) error
+			mustHave string
+		}{
+			{"mermaid", report.WriteMermaid, "flowchart TD"},
+			{"plantuml", report.WritePlantUML, ""},
+			{"dot", report.WriteGraphviz, "digraph"},
+			{"d2", report.WriteD2, "fuzz-multi"},
+		}
+
+		for _, fm := range formats {
+			var buf bytes.Buffer
+
+			err := fm.write(&buf)
+			if err != nil {
+				t.Fatalf("%s export error for names %q/%q: %v", fm.name, name1, name2, err)
+			}
+
+			out := buf.String()
+			if len(out) == 0 {
+				t.Errorf("%s produced empty output for names %q/%q", fm.name, name1, name2)
+			}
+
+			if fm.mustHave != "" && !strings.Contains(out, fm.mustHave) {
+				t.Errorf("%s missing structural marker %q for names %q/%q",
+					fm.name, fm.mustHave, name1, name2)
+			}
+		}
+	})
 }

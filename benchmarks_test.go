@@ -231,6 +231,51 @@ func ExampleWorkflowReport_Filtered() {
 	// Output: validate
 }
 
+// ExampleWorkflowReport_peakConcurrency demonstrates how to read the peak
+// concurrency metric — the maximum number of step attempts that were in-flight
+// simultaneously. This helps right-size worker pools and detect contention.
+func ExampleWorkflowReport_peakConcurrency() {
+	report := auditlog.WorkflowReport{
+		PeakConcurrency: 4,
+	}
+
+	fmt.Printf("At most %d steps ran at the same time\n", report.PeakConcurrency)
+
+	// Output: At most 4 steps ran at the same time
+}
+
+// ExampleWorkflowReport_criticalPathDurationMs demonstrates how to read the
+// critical-path duration — the longest dependency-chain duration. This is the
+// theoretical minimum wall-clock time with perfect parallelization, so it
+// identifies the bottleneck path through the DAG.
+func ExampleWorkflowReport_criticalPathDurationMs() {
+	report := auditlog.WorkflowReport{
+		TotalDurationMs:        3000, // sum of all step durations
+		CriticalPathDurationMs: 1200, // longest single chain
+	}
+
+	fmt.Printf("Bottleneck path: %.0fms (sum was %.0fms)\n",
+		report.CriticalPathDurationMs, report.TotalDurationMs)
+
+	// Output: Bottleneck path: 1200ms (sum was 3000ms)
+}
+
+// ExampleWorkflowReport_wallClockDurationMs demonstrates how to read the
+// wall-clock duration field directly. This is the actual elapsed time from
+// the earliest to the latest event — the "how long did I wait" number —
+// distinct from TotalDurationMs which sums individual step durations.
+func ExampleWorkflowReport_wallClockDurationMs() {
+	report := auditlog.WorkflowReport{
+		TotalDurationMs:     3000, // inflated: sums parallel steps
+		WallClockDurationMs: 1500, // real: earliest event → latest event
+	}
+
+	fmt.Printf("Real elapsed time: %.0fms (not %.0fms)\n",
+		report.WallClockDurationMs, report.TotalDurationMs)
+
+	// Output: Real elapsed time: 1500ms (not 3000ms)
+}
+
 // =============================================================================
 // Export/Render Benchmarks
 // =============================================================================

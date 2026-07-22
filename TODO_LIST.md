@@ -49,18 +49,23 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 
 ---
 
+## [DONE] — 2026-07-22 execution session
+
+- [x] **Add `WritePlantUMLString` coverage test** — happy-path test in `diagram_test.go` verifying non-empty output containing the step name.
+- [x] **Push coverage 93.9% → 95%+** — reached **95.6%** by adding tests for `ExportTable` (0%→100%), `StepInfo.Type` (0%→100%), `StepStatus.IsKnown` (0%→100%), `RunID.String`/`IsEmpty` (0%→100%), `Summary` all 3 branches (83%→100%), `StepStatus.Color` unknown branch (67%→100%), `d2DiagramTitle` empty-ID fallback (67%→100%), `statusStyle` pending/canceled branches (75%→100%), `matchEvent` time-filter branches (75%→100%). Remaining gaps are unreachable defensive paths (strings.Builder/marshal errors on valid types).
+- [x] **Add godoc `ExampleX` for `PeakConcurrency`, `CriticalPathDurationMs`, `WallClockDurationMs`** — 3 new examples in `benchmarks_test.go` (5 total now: Duration, Filtered, PeakConcurrency, CriticalPathDurationMs, WallClockDurationMs).
+- [x] **Add fuzz tests for diagram ID sanitization** — new `FuzzDiagramSanitization_MultiStep` in `fuzz_test.go` with 17 seed pairs covering unicode (emoji, CJK, RTL, combining marks), control chars, diagram-keyword collisions, whitespace-only, length extremes, and edge (not just node) sanitization. 710K+ executions, zero crashes.
+
+---
+
 ## Short-term (high impact, low effort)
 
-- [ ] **Add `WritePlantUMLString` coverage test** — currently at 80% coverage (unreachable error branch from `strings.Builder`). Low value — the 20% gap is a defensive error path that can't fire in practice.
-- [ ] **Push coverage 93.9% → 95%+** — target `writeToFile` close/rename branches and `renderHTML` marshal error paths.
-- [ ] **Add godoc `ExampleX` for `PeakConcurrency` and `CriticalPathDurationMs`** — 2 remaining examples (Duration and Filtered done).
-- [ ] **Add godoc `ExampleX` for `WallClockDurationMs`** — field-level example (Duration uses `Duration()` method, field example is separate).
+_(all items completed — see 2026-07-22 session above)_
 
 ## Mid-term (medium impact, medium effort)
 
 - [ ] **Make table columns configurable** — `WriteTable` currently hardcodes 7 columns. Add column-selection options. **Blocked**: needs upstream go-output `RenderOptions` support for column filtering. Design documented in ROADMAP.md.
 - [ ] **Add diagram layout direction option** — let caller choose TD vs LR for Mermaid/D2/Graphviz. **Blocked**: needs upstream go-output renderer direction config. Design documented in ROADMAP.md.
-- [ ] **Add fuzz tests for diagram ID sanitization** — arbitrary step names (special chars, unicode, empty) through go-output escape functions. `FuzzDiagramSpecialChars` exists but could go deeper into sanitization edge cases.
 
 ## Deferred (high effort or needs architectural decision — see ROADMAP.md)
 

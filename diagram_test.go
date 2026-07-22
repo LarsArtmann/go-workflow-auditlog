@@ -290,6 +290,19 @@ func TestWriteGraphvizString(t *testing.T) {
 	assertContains(t, output, "digraph workflow", "expected 'digraph workflow' in string output")
 }
 
+func TestWritePlantUMLString(t *testing.T) {
+	t.Parallel()
+
+	a := runSingleSucceed(t, "plantuml-step")
+
+	output, err := a.Report().WritePlantUMLString()
+	if err != nil {
+		t.Fatalf("WritePlantUMLString error: %v", err)
+	}
+
+	assertContains(t, output, "plantuml-step", "expected step name in PlantUML string output")
+}
+
 func TestMermaid_SkippedStepGrayColor(t *testing.T) {
 	t.Parallel()
 

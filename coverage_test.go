@@ -8,11 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	flow "github.com/Azure/go-workflow"
+	output "github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -1316,4 +1318,235 @@ func absDiff(a, b float64) float64 {
 	}
 
 	return b - a
+}
+
+// ---------------------------------------------------------------------------
+// Coverage gap closure tests
+//
+// These tests exercise previously-uncovered public API surface and reachable
+// internal branches. They do NOT chase unreachable defensive error paths
+// (e.g. strings.Builder.Write failures, json.Marshal on valid structs).
+// ---------------------------------------------------------------------------
+
+// TestCoverage_Report_ExportTable covers WorkflowReport.ExportTable (was 0%).
+// The Auditor.ExportTable path is tested in output_test.go, but the
+// WorkflowReport-level method — used by replayed/loaded reports — was never
+// called directly.
+func TestCoverage_Report_ExportTable(t *testing.T) {
+	t.Parallel()
+
+	report := minimalReport()
+	path := filepath.Join(t.TempDir(), "table.csv")
+
+	err := report.ExportTable(path, output.FormatCSV, output.RenderOptions{})
+	if err != nil {
+		t.Fatalf("ExportTable error: %v", err)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile error: %v", err)
+	}
+
+	if len(data) == 0 {
+		t.Error("expected non-empty table output file")
+	}
+}
+
+// TestCoverage_StepInfo_Type covers StepInfo.Type() (was 0%).
+func TestCoverage_StepInfo_Type(t *testing.T) {
+	t.Parallel()
+
+	step := auditlog.StepInfo{
+		StepRef: auditlog.StepRef{Name: "x", StepType: "FetchStep"},
+	}
+
+	if step.Type() != "FetchStep" {
+		t.Errorf("expected Type()='FetchStep', got %q", step.Type())
+	}
+}
+
+// TestCoverage_StepStatus_IsKnown covers StepStatus.IsKnown() (was 0%).
+func TestCoverage_StepStatus_IsKnown(t *testing.T) {
+	t.Parallel()
+
+	if !auditlog.StepStatusSucceeded.IsKnown() {
+		t.Error("expected Succeeded to be known")
+	}
+
+	unknown := auditlog.StepStatus("bogus")
+	if unknown.IsKnown() {
+		t.Error("expected bogus status to be unknown")
+	}
+}
+
+// TestCoverage_RunID_StringAndIsEmpty covers RunID.String() and
+// RunID.IsEmpty() (both were 0%).
+func TestCoverage_RunID_StringAndIsEmpty(t *testing.T) {
+	t.Parallel()
+
+	id := auditlog.RunID("abc123")
+	if id.String() != "abc123" {
+		t.Errorf("expected String()='abc123', got %q", id.String())
+	}
+
+	if id.IsEmpty() {
+		t.Error("expected non-empty RunID to not be empty")
+	}
+
+	var empty auditlog.RunID
+	if !empty.IsEmpty() {
+		t.Error("expected zero-value RunID to be empty")
+	}
+}
+
+// TestCoverage_Summary_AllBranches covers all three Summary() return paths:
+// success, failure-with-reason, and failure-without-reason.
+func TestCoverage_Summary_AllBranches(t *testing.T) {
+	t.Parallel()
+
+	// Success branch — WorkflowSucceeded=true.
+	successReport := auditlog.WorkflowReport{
+		WorkflowID: "wf", StepCount: 1, SucceededCount: 1,
+		WorkflowSucceeded: true,
+	}
+	if !strings.Contains(successReport.Summary(), "wf: 1 steps") {
+		t.Errorf("success summary unexpected: %s", successReport.Summary())
+	}
+
+	// Failure with explicit reason.
+	failedReport := auditlog.WorkflowReport{
+		WorkflowID: "wf", StepCount: 2, FailedCount: 1,
+		FailureReason: "1 step(s) failed: bad",
+	}
+	if !strings.Contains(failedReport.Summary(), "1 step(s) failed: bad") {
+		t.Errorf("failure-with-reason summary unexpected: %s", failedReport.Summary())
+	}
+
+	// Failure without explicit reason (pending steps, no failure reason set).
+	pendingReport := auditlog.WorkflowReport{
+		WorkflowID: "wf", StepCount: 1, PendingCount: 1,
+	}
+	s := pendingReport.Summary()
+
+	if !strings.Contains(s, "failed") && !strings.Contains(s, "pending") {
+		t.Errorf("failure-without-reason summary unexpected: %s", s)
+	}
+}
+
+// TestCoverage_StepStatus_Color_Unknown covers the unknown-status branch of
+// StepStatus.Color() (was 66.7%).
+func TestCoverage_StepStatus_Color_Unknown(t *testing.T) {
+	t.Parallel()
+
+	unknown := auditlog.StepStatus("bogus")
+	fill, font := unknown.Color()
+
+	if fill != "" || font != "" {
+		t.Errorf("expected empty colors for unknown status, got fill=%q font=%q", fill, font)
+	}
+}
+
+// TestCoverage_D2_EmptyWorkflowID covers the empty-WorkflowID fallback branch
+// of d2DiagramTitle (was 66.7%) and the pending-status branch of statusStyle
+// (was 75%). Both are triggered by exporting a D2 diagram from a report with
+// no WorkflowID and a pending step.
+func TestCoverage_D2_EmptyWorkflowID(t *testing.T) {
+	t.Parallel()
+
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			stepFixture("pending-step", auditlog.StepStatusPending),
+		},
+	}
+
+	var buf bytes.Buffer
+
+	err := report.WriteD2(&buf)
+	if err != nil {
+		t.Fatalf("WriteD2 error: %v", err)
+	}
+
+	out := buf.String()
+	if !strings.Contains(out, "Workflow DAG") {
+		t.Error("expected fallback title 'Workflow DAG' in D2 output")
+	}
+
+	if !strings.Contains(out, "pending-step") {
+		t.Error("expected pending-step in D2 output")
+	}
+}
+
+// TestCoverage_CancelStatus_Diagram covers the canceled-status color branch
+// in statusStyle (was 75%) by exporting a diagram with a canceled step.
+func TestCoverage_CancelStatus_Diagram(t *testing.T) {
+	t.Parallel()
+
+	report := auditlog.WorkflowReport{
+		WorkflowID: "cancel-test",
+		Steps: []auditlog.StepInfo{
+			stepFixture("canceled-step", auditlog.StepStatusCanceled),
+		},
+	}
+
+	var buf bytes.Buffer
+
+	err := report.WriteD2(&buf)
+	if err != nil {
+		t.Fatalf("WriteD2 error: %v", err)
+	}
+
+	// Canceled steps get orange (#5a3d2d). Verify the color appears.
+	if !strings.Contains(buf.String(), "#5a3d2d") {
+		t.Error("expected canceled status color (#5a3d2d) in D2 output")
+	}
+}
+
+// TestCoverage_MatchEvent_TimeFilters covers the timeFrom/timeTo branches of
+// matchEvent (was 75%) via the public Filtered API with time-based options.
+func TestCoverage_MatchEvent_TimeFilters(t *testing.T) {
+	t.Parallel()
+
+	base := time.Date(2025, 1, 1, 12, 0, 0, 0, time.UTC)
+	dur := 10.0
+
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "s"}, Status: auditlog.StepStatusSucceeded},
+		},
+		EventCount: 2,
+		Events: []auditlog.Event{
+			{
+				StepRef:   auditlog.StepRef{Name: "s"},
+				Sequence:  1,
+				Timestamp: base,
+				EventType: auditlog.EventTypeAttemptStart,
+				Phase:     auditlog.PhaseBefore,
+			},
+			{
+				StepRef:    auditlog.StepRef{Name: "s"},
+				Sequence:   2,
+				Timestamp:  base.Add(5 * time.Second),
+				EventType:  auditlog.EventTypeAttemptEnd,
+				Phase:      auditlog.PhaseAfter,
+				DurationMs: &dur,
+				Status:     auditlog.StepStatusSucceeded,
+			},
+		},
+	}
+
+	from := base.Add(2 * time.Second)
+	to := base.Add(10 * time.Second)
+
+	filtered := report.Filtered(
+		auditlog.WithTimeRange(from, to),
+	)
+
+	if len(filtered.Events) != 1 {
+		t.Errorf("expected 1 event in time window, got %d", len(filtered.Events))
+	}
+
+	if filtered.Events[0].EventType != auditlog.EventTypeAttemptEnd {
+		t.Errorf("expected attempt_end event, got %s", filtered.Events[0].EventType)
+	}
 }
