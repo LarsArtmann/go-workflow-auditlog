@@ -18,9 +18,9 @@ statuses — captured with timestamps and exportable to any format.
 The long-term arc moves from "capture and export" toward **analyze and act**:
 
 1. **Capture** (done) — per-attempt events, DAG structure, sub-workflow traversal
-2. **Export** (done) — JSON, NDJSON, Mermaid, PlantUML, DOT, D2, 16 table formats, ASCII/HTML trees, interactive HTML dashboard
-3. **Analyze** (in progress) — wall-clock vs total vs critical-path metrics, diff/regression detection, peak concurrency
-4. **Act** (future) — OpenTelemetry bridge, streaming export, replay UI, alerting
+2. **Export** (done) — JSON, NDJSON (batch + real-time streaming), Mermaid, PlantUML, DOT, D2, 16 table formats, ASCII/HTML trees, interactive HTML dashboard
+3. **Analyze** (done) — wall-clock vs total vs critical-path metrics, diff/regression detection, peak concurrency, critical-path step chain
+4. **Act** (future) — OpenTelemetry bridge, alerting, replay UI
 
 ---
 
@@ -31,7 +31,8 @@ The long-term arc moves from "capture and export" toward **analyze and act**:
 **Done (2026-07-22).** The library is split into two independent Go modules:
 
 - **Core** (`github.com/larsartmann/go-workflow-auditlog`) — event capture,
-  JSON/NDJSON export, replay, diff, filter. 3 direct deps, no go-output.
+  JSON/NDJSON export (batch + streaming), replay, diff, filter, index,
+  error classification. 3 direct deps, no go-output.
 - **Visualization** (`github.com/larsartmann/go-workflow-auditlog/viz`) —
   diagrams, tables, trees, HTML dashboard. Depends on core + go-output.
 
@@ -49,12 +50,19 @@ checks via it; nix makes them reproducible.
 
 ### Streaming & Scale
 
-Currently `Report()` materializes all events in memory. For very large
-workflows (1000+ steps, 10000+ events) this may be prohibitive.
+**Streaming NDJSON is shipped (2026-07-22).** `NDJSONStreamer` in `stream.go`
+writes events as NDJSON in real time via the `Config.OnEvent` callback — no
+full in-memory buffer required. Thread-safe (mutex-protected writes),
+64 KB default buffer (configurable via `WithBufferSize`), `WithAutoFlush()`
+for immediate visibility, `CreateNDJSONStreamer(path)` file convenience
+constructor. Output is `ReadEvents`-compatible for round-trip replay.
 
-**Direction**: Add a **streaming NDJSON writer** that writes events as they're
-captured (via the `OnEvent` callback) rather than buffering. Pair with a
-streaming reader for replay. This enables real-time audit log tailing.
+**Remaining scale direction**: The in-memory `Report()` path still
+materializes all events. For workflows exceeding 10 000+ events, a
+streaming-only consumption model (skip `Report()` entirely) is the path
+forward. Potential enhancements: time-based flush (`WithFlushInterval`),
+async channel-based writer for backpressure decoupling, and a streaming
+JSON report format (not just NDJSON events).
 
 ### Observability Integration
 
@@ -64,43 +72,53 @@ workflow step becomes a span with the audit log's rich metadata (retry count,
 durations, dependency chain). This is the "act" layer: the audit log feeds
 existing observability stacks rather than requiring a separate dashboard.
 
+**Defer** until a consumer has an OTel stack.
+
 ---
 
 ## Raw Ideas (not yet scoped)
 
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
-- `FailureReason` structured categories (typed categories, not just a string)
-- `Diff()` on PeakConcurrency / CriticalPath (currently only duration)
-- `ReplayEvents` round-trip property/fuzz test (export → read → replay = equivalent)
+- `FailureReason` structured categories (typed enum, not just a string)
+- `Diff()` on PeakConcurrency / CriticalPath (currently only duration delta)
 - Configurable node shapes/icons per step type in diagrams
 - Workflow-level retry/timeout surfacing in the report
+- Time-based streaming flush (`WithFlushInterval(d time.Duration)`)
+- Async channel-based streaming writer (decouple step execution from I/O latency)
+- `MultiWriter` that fans events to multiple `OnEvent` callbacks simultaneously
 
 ---
 
-## Strategic First-Chunk Audits
+## Strategic Decisions
 
-### Module Split (P6-38) — Done
+### Module Split — Done
 
 **Shipped (2026-07-22).** Core module (`auditlog` package, 3 deps) and
 visualization module (`viz` package, go-output deps) are separate Go modules
 linked via `go.work`. Core consumers pay zero go-output dependency cost.
 
-### Streaming NDJSON Export (P6-39) — API Design
+### Streaming NDJSON Export — Done
+
+**Shipped (2026-07-22).** `NDJSONStreamer` provides real-time event streaming
+via `Config.OnEvent`. Actual API:
 
 ```go
-func (a *Auditor) StreamEvents(w io.Writer) func() error
+streamer := auditlog.NewNDJSONStreamer(w, auditlog.WithAutoFlush())
+auditor := auditlog.New(auditlog.Config{OnEvent: streamer.OnEvent})
+// ... Attach, Do, Snapshot ...
+streamer.Close()
 ```
 
-Writes events as NDJSON as captured via `OnEvent`. **Defer** until real-time
-tailing need arises — current buffer handles 10k+ events fine.
+File convenience: `auditlog.CreateNDJSONStreamer(path, opts...)`.
 
-### OpenTelemetry Span Bridge (P6-40) — Mapping
+### init() Auto-Registration — Decision: KEEP
+
+**KEEP the `init()` auto-registration** of error classifications. Follows
+standard Go pattern (database/sql, image codecs). Zero setup for consumers.
+Escape hatch exists via `RegisterClassifications(reg)`. No consumer has
+reported issues.
+
+### OpenTelemetry Span Bridge — Deferred
 
 `attempt_start` → span start, `attempt_end` → span end with attributes.
 **Defer** until a consumer has an OTel stack.
-
-### init() Auto-Registration Decision (P6-36) — Recommendation
-
-**KEEP the `init()` auto-registration.** Follows standard Go pattern
-(database/sql, image codecs). Zero setup for consumers. Escape hatch exists
-via `RegisterClassifications(reg)`. No consumer has reported issues.
