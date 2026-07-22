@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Module split into core + visualization sub-modules** — the library is now
+  two independent Go modules:
+  - **Core** (`github.com/larsartmann/go-workflow-auditlog`) — event capture,
+    JSON/NDJSON export, replay, diff, filter, index. 3 direct deps, zero
+    go-output dependency.
+  - **Visualization** (`github.com/larsartmann/go-workflow-auditlog/viz`) —
+    diagrams (Mermaid, PlantUML, DOT, D2), tables (16 formats), trees
+    (ASCII/HTML), interactive HTML dashboard. Depends on core + go-output.
+    Both modules share a `go.work` workspace in development; CI verifies
+    `GOWORK=off` standalone builds for both. The `testhelpers` package lives in
+    core so both modules can import it without a circular dependency.
 - **`TableColumn.String()` method** — returns the column header name (e.g.
   `"Step"`, `"Max Attempts"`) for debug and logging ergonomics.
 

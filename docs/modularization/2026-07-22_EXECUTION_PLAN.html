@@ -15,30 +15,108 @@
         --problem: #ff6b6b;
         --solution: #6eb5ff;
         --warning: #f4d35e;
-        --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas, monospace;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
       }
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: var(--surface); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
-      .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
-      h1, h2, h3 { margin: 1.5rem 0 0.75rem; }
-      h1 { font-size: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-      h2 { font-size: 1.4rem; color: var(--accent); }
-      p, ul, ol, table { margin-bottom: 1rem; }
-      ul, ol { padding-left: 1.5rem; }
-      li { margin-bottom: 0.3rem; }
-      code, pre { font-family: var(--font-mono); font-size: 0.85rem; background: var(--surface-raised); padding: 0.15rem 0.35rem; border-radius: 3px; }
-      pre { padding: 1rem; overflow-x: auto; margin-bottom: 1rem; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { text-align: left; padding: 0.5rem; border: 1px solid var(--border); }
-      th { background: var(--surface-raised); color: var(--accent); }
-      .tier { background: var(--surface-raised); padding: 0.75rem 1rem; border-left: 4px solid var(--accent); margin-bottom: 1rem; }
-      .tier-1 { border-color: var(--solution); }
-      .tier-2 { border-color: var(--warning); }
-      .tier-3 { border-color: var(--accent); }
-      .tier-4 { border-color: var(--text-muted); }
-      .verify { color: var(--solution); }
-      .rollback { color: var(--problem); }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 1.5rem 0 0.75rem;
+      }
+      h1 {
+        font-size: 2rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        color: var(--accent);
+      }
+      p,
+      ul,
+      ol,
+      table {
+        margin-bottom: 1rem;
+      }
+      ul,
+      ol {
+        padding-left: 1.5rem;
+      }
+      li {
+        margin-bottom: 0.3rem;
+      }
+      code,
+      pre {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        background: var(--surface-raised);
+        padding: 0.15rem 0.35rem;
+        border-radius: 3px;
+      }
+      pre {
+        padding: 1rem;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem;
+        border: 1px solid var(--border);
+      }
+      th {
+        background: var(--surface-raised);
+        color: var(--accent);
+      }
+      .tier {
+        background: var(--surface-raised);
+        padding: 0.75rem 1rem;
+        border-left: 4px solid var(--accent);
+        margin-bottom: 1rem;
+      }
+      .tier-1 {
+        border-color: var(--solution);
+      }
+      .tier-2 {
+        border-color: var(--warning);
+      }
+      .tier-3 {
+        border-color: var(--accent);
+      }
+      .tier-4 {
+        border-color: var(--text-muted);
+      }
+      .verify {
+        color: var(--solution);
+      }
+      .rollback {
+        color: var(--problem);
+      }
     </style>
   </head>
   <body>
@@ -53,38 +131,82 @@
 
       <div class="tier tier-1">
         <h3>Step 1: Extract shared test helpers into a core package</h3>
-        <p>Create <code>testhelpers/testhelpers.go</code>, move step constructors, workflow builders, assertions, and runner helpers from <code>auditlog_test.go</code>. Keep the package name <code>testhelpers</code>. Update all core <code>_test.go</code> files to import it.</p>
-        <p class="verify">Verify: <code>GOEXPERIMENT=jsonv2 go test ./...</code> passes in the root module.</p>
-        <p class="rollback">Rollback: <code>git revert</code> the commit; alternatively restore <code>auditlog_test.go</code> from the previous branch.</p>
+        <p>
+          Create <code>testhelpers/testhelpers.go</code>, move step constructors, workflow builders,
+          assertions, and runner helpers from <code>auditlog_test.go</code>. Keep the package name
+          <code>testhelpers</code>. Update all core <code>_test.go</code> files to import it.
+        </p>
+        <p class="verify">
+          Verify: <code>GOEXPERIMENT=jsonv2 go test ./...</code> passes in the root module.
+        </p>
+        <p class="rollback">
+          Rollback: <code>git revert</code> the commit; alternatively restore
+          <code>auditlog_test.go</code> from the previous branch.
+        </p>
       </div>
 
       <div class="tier tier-1">
         <h3>Step 2: Create the visualization module skeleton</h3>
-        <p>Create <code>viz/</code> directory, <code>viz/go.mod</code> with a require/replace for the core module, and <code>viz/viz.go</code> defining the public package-level API (<code>WriteMermaid</code>, <code>ExportHTML</code>, etc.).</p>
-        <p class="verify">Verify: <code>GOWORK=off go build ./...</code> fails as expected (no rendering files yet), but <code>go work sync</code> succeeds.</p>
-        <p class="rollback">Rollback: remove the <code>viz/</code> directory and any <code>go.work</code> changes.</p>
+        <p>
+          Create <code>viz/</code> directory, <code>viz/go.mod</code> with a require/replace for the
+          core module, and <code>viz/viz.go</code> defining the public package-level API
+          (<code>WriteMermaid</code>, <code>ExportHTML</code>, etc.).
+        </p>
+        <p class="verify">
+          Verify: <code>GOWORK=off go build ./...</code> fails as expected (no rendering files yet),
+          but <code>go work sync</code> succeeds.
+        </p>
+        <p class="rollback">
+          Rollback: remove the <code>viz/</code> directory and any <code>go.work</code> changes.
+        </p>
       </div>
 
       <h2>Tier 2 — Untangle / Move Code</h2>
 
       <div class="tier tier-2">
         <h3>Step 3: Move rendering files into <code>viz/</code></h3>
-        <p>Move <code>render.go, diagram.go, diagram_options.go, mermaid.go, plantuml.go, graphviz.go, d2.go, daghtml_adapter.go, table.go, table_options.go, tree.go, html.go, html_render.go, metadata.go, dashboard.css, dashboard.js</code> into <code>viz/</code>. Update their package declaration to <code>package viz</code> and imports to reference <code>github.com/larsartmann/go-workflow-auditlog</code>.</p>
-        <p class="verify">Verify: <code>GOWORK=off go build ./...</code> inside <code>viz/</code> after the moves.</p>
+        <p>
+          Move
+          <code
+            >render.go, diagram.go, diagram_options.go, mermaid.go, plantuml.go, graphviz.go, d2.go,
+            daghtml_adapter.go, table.go, table_options.go, tree.go, html.go, html_render.go,
+            metadata.go, dashboard.css, dashboard.js</code
+          >
+          into <code>viz/</code>. Update their package declaration to <code>package viz</code> and
+          imports to reference <code>github.com/larsartmann/go-workflow-auditlog</code>.
+        </p>
+        <p class="verify">
+          Verify: <code>GOWORK=off go build ./...</code> inside <code>viz/</code> after the moves.
+        </p>
         <p class="rollback">Rollback: revert the commit; files are moved back automatically.</p>
       </div>
 
       <div class="tier tier-2">
         <h3>Step 4: Convert visualization methods to functions</h3>
-        <p>In <code>viz/</code>, convert all <code>func (r WorkflowReport) WriteX(...)</code> methods to <code>func WriteX(r auditlog.WorkflowReport, ...)</code>. Do the same for <code>Auditor</code> wrappers by having them accept a report. Remove all <code>go-output</code> imports from the core package.</p>
-        <p class="verify">Verify: <code>GOWORK=off go build ./...</code> in both root and <code>viz/</code>.</p>
+        <p>
+          In <code>viz/</code>, convert all <code>func (r WorkflowReport) WriteX(...)</code> methods
+          to <code>func WriteX(r auditlog.WorkflowReport, ...)</code>. Do the same for
+          <code>Auditor</code> wrappers by having them accept a report. Remove all
+          <code>go-output</code> imports from the core package.
+        </p>
+        <p class="verify">
+          Verify: <code>GOWORK=off go build ./...</code> in both root and <code>viz/</code>.
+        </p>
         <p class="rollback">Rollback: revert the commit.</p>
       </div>
 
       <div class="tier tier-2">
         <h3>Step 5: Remove visualization code from core</h3>
-        <p>Delete the old visualization files from the root. Remove visualization methods from <code>Auditor</code> in <code>plugin.go</code> and from <code>WorkflowReport</code> in <code>report.go</code>. Remove <code>go-output</code> from <code>go.mod</code> and run <code>go mod tidy</code>.</p>
-        <p class="verify">Verify: <code>GOEXPERIMENT=jsonv2 go test ./...</code> passes in the root module (core only).</p>
+        <p>
+          Delete the old visualization files from the root. Remove visualization methods from
+          <code>Auditor</code> in <code>plugin.go</code> and from <code>WorkflowReport</code> in
+          <code>report.go</code>. Remove <code>go-output</code> from <code>go.mod</code> and run
+          <code>go mod tidy</code>.
+        </p>
+        <p class="verify">
+          Verify: <code>GOEXPERIMENT=jsonv2 go test ./...</code> passes in the root module (core
+          only).
+        </p>
         <p class="rollback">Rollback: revert the commit; restore files from the previous state.</p>
       </div>
 
@@ -92,22 +214,52 @@
 
       <div class="tier tier-3">
         <h3>Step 6: Move visualization tests to <code>viz/</code></h3>
-        <p>Move <code>output_test.go, diagram_test.go, diagram_direction_test.go, table_columns_test.go, html_test.go, html_golden_test.go, html_bench_test.go, fuzz_test.go (visualization cases), error_path_test.go (visualization cases), benchmarks_test.go (visualization benchmarks), coverage_report_test.go (visualization cases)</code> into <code>viz/</code>. Update their package to <code>viz_test</code> and imports to use <code>testhelpers</code> plus the new API.</p>
-        <p class="verify">Verify: <code>GOEXPERIMENT=jsonv2 go test ./...</code> passes in <code>viz/</code>.</p>
+        <p>
+          Move
+          <code
+            >output_test.go, diagram_test.go, diagram_direction_test.go, table_columns_test.go,
+            html_test.go, html_golden_test.go, html_bench_test.go, fuzz_test.go (visualization
+            cases), error_path_test.go (visualization cases), benchmarks_test.go (visualization
+            benchmarks), coverage_report_test.go (visualization cases)</code
+          >
+          into <code>viz/</code>. Update their package to <code>viz_test</code> and imports to use
+          <code>testhelpers</code> plus the new API.
+        </p>
+        <p class="verify">
+          Verify: <code>GOEXPERIMENT=jsonv2 go test ./...</code> passes in <code>viz/</code>.
+        </p>
         <p class="rollback">Rollback: revert the commit; restore tests to the root module.</p>
       </div>
 
       <div class="tier tier-3">
         <h3>Step 7: Move the demo example to the visualization module</h3>
-        <p>Move <code>example/</code> to <code>viz/example/</code>. Update its imports to use <code>github.com/larsartmann/go-workflow-auditlog</code> and <code>github.com/larsartmann/go-workflow-auditlog/viz</code>. Replace <code>auditlog.WithDirection</code>, <code>auditlog.WithColumns</code>, and <code>auditlog.Export*</code> calls with their <code>viz</code> equivalents.</p>
-        <p class="verify">Verify: <code>GOEXPERIMENT=jsonv2 go build ./viz/example</code> and <code>go run ./viz/example --export</code> produce artifacts.</p>
+        <p>
+          Move <code>example/</code> to <code>viz/example/</code>. Update its imports to use
+          <code>github.com/larsartmann/go-workflow-auditlog</code> and
+          <code>github.com/larsartmann/go-workflow-auditlog/viz</code>. Replace
+          <code>auditlog.WithDirection</code>, <code>auditlog.WithColumns</code>, and
+          <code>auditlog.Export*</code> calls with their <code>viz</code> equivalents.
+        </p>
+        <p class="verify">
+          Verify: <code>GOEXPERIMENT=jsonv2 go build ./viz/example</code> and
+          <code>go run ./viz/example --export</code> produce artifacts.
+        </p>
         <p class="rollback">Rollback: revert the commit; move example back to root.</p>
       </div>
 
       <div class="tier tier-3">
         <h3>Step 8: Configure workspace and CI</h3>
-        <p>Create <code>go.work</code> listing <code>.</code> and <code>./viz</code>. Update <code>.github/workflows/ci.yml</code> to run per-module builds, tests, and <code>gowork=off</code> checks. Update <code>.goreleaser.yml</code> to build from <code>./viz/example</code> and run <code>go mod tidy</code> in both modules.</p>
-        <p class="verify">Verify: <code>go work sync</code> is idempotent; <code>GOWORK=off go test ./...</code> passes in each module; <code>GOWORK=off go build ./viz/example</code> passes.</p>
+        <p>
+          Create <code>go.work</code> listing <code>.</code> and <code>./viz</code>. Update
+          <code>.github/workflows/ci.yml</code> to run per-module builds, tests, and
+          <code>gowork=off</code> checks. Update <code>.goreleaser.yml</code> to build from
+          <code>./viz/example</code> and run <code>go mod tidy</code> in both modules.
+        </p>
+        <p class="verify">
+          Verify: <code>go work sync</code> is idempotent;
+          <code>GOWORK=off go test ./...</code> passes in each module;
+          <code>GOWORK=off go build ./viz/example</code> passes.
+        </p>
         <p class="rollback">Rollback: revert the commit; restore old CI and goreleaser files.</p>
       </div>
 
@@ -115,17 +267,31 @@
 
       <div class="tier tier-4">
         <h3>Step 9: Update README, AGENTS.md, and website docs</h3>
-        <p>Update README quick-start to import the <code>viz</code> module for diagram/table/HTML exports. Update AGENTS.md with the new module structure, build commands, and gotchas. Update website API docs that reference moved symbols.</p>
-        <p class="verify">Verify: grep for removed symbols (<code>auditlog.WriteMermaid</code>, etc.) in docs and source; ensure no stale references remain.</p>
+        <p>
+          Update README quick-start to import the <code>viz</code> module for diagram/table/HTML
+          exports. Update AGENTS.md with the new module structure, build commands, and gotchas.
+          Update website API docs that reference moved symbols.
+        </p>
+        <p class="verify">
+          Verify: grep for removed symbols (<code>auditlog.WriteMermaid</code>, etc.) in docs and
+          source; ensure no stale references remain.
+        </p>
         <p class="rollback">Rollback: revert the documentation commit.</p>
       </div>
 
       <div class="tier tier-4">
         <h3>Step 10: Final verification and reflection</h3>
-        <p>Run the full test suite with race and coverage across both modules. Verify <code>go mod tidy</code> produces no diff. Check for <code>go-output</code> imports in the core module. Verify the DAG has no cycles.</p>
+        <p>
+          Run the full test suite with race and coverage across both modules. Verify
+          <code>go mod tidy</code> produces no diff. Check for <code>go-output</code> imports in the
+          core module. Verify the DAG has no cycles.
+        </p>
         <p class="verify">Verify:</p>
         <ul>
-          <li><code>GOEXPERIMENT=jsonv2 go test -race ./...</code> at root and in <code>viz/</code> pass.</li>
+          <li>
+            <code>GOEXPERIMENT=jsonv2 go test -race ./...</code> at root and in
+            <code>viz/</code> pass.
+          </li>
           <li><code>GOWORK=off go test ./...</code> in each module passes.</li>
           <li><code>golangci-lint run ./...</code> passes in both modules.</li>
           <li>Coverage remains ≥92% when combined.</li>

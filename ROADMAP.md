@@ -28,15 +28,16 @@ The long-term arc moves from "capture and export" toward **analyze and act**:
 
 ### Dependency Architecture
 
-The go-output adoption added 12 direct + ~35 transitive dependencies (lipgloss,
-yaml, toml). This is fine for a full-featured observability tool but heavy for
-consumers who only want JSON/NDJSON event capture.
+**Done (2026-07-22).** The library is split into two independent Go modules:
 
-**Direction**: Consider splitting into a **core module** (JSON/NDJSON only,
-2 deps) and a **visualization module** (diagrams/tables/trees, go-output deps).
-Consumers opt into the visualization tax. This mirrors how go-output itself is
-structured. Decision needed on audience: lightweight audit trail vs full
-observability suite.
+- **Core** (`github.com/larsartmann/go-workflow-auditlog`) — event capture,
+  JSON/NDJSON export, replay, diff, filter. 3 direct deps, no go-output.
+- **Visualization** (`github.com/larsartmann/go-workflow-auditlog/viz`) —
+  diagrams, tables, trees, HTML dashboard. Depends on core + go-output.
+
+Consumers who only need JSON/NDJSON audit trails import the core module and pay
+zero go-output dependency cost. Both modules share a `go.work` workspace in
+development; CI also verifies `GOWORK=off` standalone builds.
 
 ### Build Automation
 
@@ -78,11 +79,11 @@ existing observability stacks rather than requiring a separate dashboard.
 
 ## Strategic First-Chunk Audits
 
-### Module Split (P6-38) — Scope Map
+### Module Split (P6-38) — Done
 
-**Current**: single-package library, 55 .go files in root.
-**Proposed**: `auditlog-core` (~20 files, 3 deps) + `auditlog-viz` (~11 files,
-go-output deps). **Defer** until a consumer requests the lighter footprint.
+**Shipped (2026-07-22).** Core module (`auditlog` package, 3 deps) and
+visualization module (`viz` package, go-output deps) are separate Go modules
+linked via `go.work`. Core consumers pay zero go-output dependency cost.
 
 ### Streaming NDJSON Export (P6-39) — API Design
 
