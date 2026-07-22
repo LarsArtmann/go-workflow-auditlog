@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modularization Proposal — go-workflow-auditlog</title>
+    <style>
+      :root {
+        --surface: #0e0e10;
+        --surface-raised: #18181d;
+        --text: #f4f4f0;
+        --text-muted: rgba(244, 244, 240, 0.72);
+        --border: rgba(244, 244, 240, 0.12);
+        --accent: #ffb347;
+        --problem: #ff6b6b;
+        --solution: #6eb5ff;
+        --warning: #f4d35e;
+        --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas, monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: var(--surface); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+      .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+      h1, h2, h3 { margin: 1.5rem 0 0.75rem; }
+      h1 { font-size: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+      h2 { font-size: 1.4rem; color: var(--accent); }
+      h3 { font-size: 1.1rem; color: var(--text); }
+      p, ul, ol, table { margin-bottom: 1rem; }
+      ul, ol { padding-left: 1.5rem; }
+      li { margin-bottom: 0.3rem; }
+      code, pre { font-family: var(--font-mono); font-size: 0.85rem; background: var(--surface-raised); padding: 0.15rem 0.35rem; border-radius: 3px; }
+      pre { padding: 1rem; overflow-x: auto; margin-bottom: 1rem; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 0.5rem; border: 1px solid var(--border); }
+      th { background: var(--surface-raised); color: var(--accent); }
+      .summary { background: var(--surface-raised); padding: 1rem; border-left: 4px solid var(--accent); margin-bottom: 1.5rem; }
+      .risk-high { color: var(--problem); }
+      .risk-medium { color: var(--warning); }
+      .risk-low { color: var(--solution); }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Modularization Proposal — go-workflow-auditlog</h1>
+      <p><em>Date: 2026-07-22 · Author: Crush</em></p>
+
+      <section class="summary">
+        <h2>Executive Summary</h2>
+        <p>
+          Split the single-package library into a <strong>core</strong> module (<code>auditlog</code>) that owns the workflow event capture, report model, JSON/NDJSON serialization, and replay; and a <strong>visualization</strong> sub-module (<code>viz</code>) that owns diagram, table, tree, and HTML dashboard rendering. This removes the heavy <code>go-output</code> dependency from the core module, gives consumers a smaller import surface, and makes the dependency graph acyclic.
+        </p>
+      </section>
+
+      <h2>Current State</h2>
+      <ul>
+        <li>Single module: <code>github.com/larsartmann/go-workflow-auditlog</code></li>
+        <li>Go 1.26.4, no <code>go.work</code></li>
+        <li>Package <code>auditlog</code> contains ~38 production Go files plus tests</li>
+        <li>Core domain and visualization code share one package and one <code>go.mod</code></li>
+        <li><code>go-output</code> and its sub-modules are required by the core module because rendering methods live on <code>Auditor</code> and <code>WorkflowReport</code></li>
+      </ul>
+
+      <h2>Proposed Module Structure</h2>
+      <table>
+        <tr><th>Module</th><th>Path</th><th>Purpose</th><th>Internal Deps</th><th>External Deps</th></tr>
+        <tr>
+          <td><strong>core</strong></td>
+          <td><code>github.com/larsartmann/go-workflow-auditlog</code></td>
+          <td>Event capture, report model, validation, JSON/NDJSON, replay, diff, filter, index</td>
+          <td>none</td>
+          <td>go-workflow, backoff/v4, go-error-family, json/v2</td>
+        </tr>
+        <tr>
+          <td><strong>viz</strong></td>
+          <td><code>github.com/larsartmann/go-workflow-auditlog/viz</code></td>
+          <td>Diagrams, tables, trees, HTML dashboard</td>
+          <td>core</td>
+          <td>go-output + sub-modules</td>
+        </tr>
+      </table>
+
+      <h3>Package Layout</h3>
+      <pre>github.com/larsartmann/go-workflow-auditlog/
+├── go.mod                  # core module (no go-output)
+├── go.sum
+├── doc.go, types.go, ...   # core auditlog package
+├── testhelpers/            # shared test fixtures (package in core module)
+├── viz/
+│   ├── go.mod              # viz module
+│   ├── viz.go              # public API: WriteMermaid, WriteTable, etc.
+│   ├── diagram.go, ...     # rendering internals
+│   ├── example/            # demo binary (depends on core + viz)
+│   └── *_test.go           # visualization tests
+└── go.work                 # workspace for development</pre>
+
+      <h2>DAG Verification</h2>
+      <p>The proposed dependency graph is acyclic:</p>
+      <pre>viz ──depends on──&gt; core
+example ──depends on──&gt; core, viz</pre>
+      <p>Core does not import viz. No circular dependencies.</p>
+
+      <h2>Replace / Workspace Strategy</h2>
+      <p>Use the dual strategy recommended for multi-module Go repositories:</p>
+      <ul>
+        <li><code>go.work</code> at the repo root lists <code>.</code> and <code>./viz</code> for development.</li>
+        <li><code>viz/go.mod</code> contains <code>replace github.com/larsartmann/go-workflow-auditlog =&gt; ..</code> so it builds standalone with <code>GOWORK=off</code>.</li>
+        <li>Internal module references are pinned to <code>v0.0.0</code> to avoid pseudo-version churn.</li>
+      </ul>
+
+      <h2>Test Dependency Isolation</h2>
+      <p>Shared workflow fixtures currently live in <code>auditlog_test.go</code> (external test package). After the split, both core and viz tests need them. They will be extracted into a <code>testhelpers</code> package inside the core module. The core module still does not depend on viz.</p>
+
+      <h2>API Changes</h2>
+      <p>Visualization methods currently on <code>Auditor</code> and <code>WorkflowReport</code> become package-level functions in <code>viz</code> that accept a <code>WorkflowReport</code>:</p>
+      <pre>// Before
+report.WriteMermaid(w)
+audit.ExportHTML("report.html")
+
+// After
+viz.WriteMermaid(report, w)
+viz.ExportHTML(report, "report.html")</pre>
+      <p>Core JSON/NDJSON exports remain on <code>WorkflowReport</code> and <code>Auditor</code> because they are serialization, not visualization.</p>
+
+      <h2>Error Type Placement</h2>
+      <ul>
+        <li><code>ErrRenderFailed</code> stays in core: it is used by both JSON marshaling and visualization, and core is the lower layer.</li>
+        <li><code>ErrExportWriteFailed</code> stays in core: used by all file exports including core JSON/NDJSON.</li>
+        <li>Visualization code wraps renderer errors with <code>ErrRenderFailed</code> from core.</li>
+      </ul>
+
+      <h2>Versioning Strategy</h2>
+      <p>Shared version tags. The project is pre-1.0 and alpha; both modules will ship together under a single <code>v0.x.x</code> git tag. The sub-module path is <code>.../viz</code>, not a <code>/v2</code> major-version suffix.</p>
+
+      <h2>Breaking Change Analysis</h2>
+      <p>This is a breaking change for consumers using diagram/table/tree/HTML exports:</p>
+      <ul>
+        <li>Remove <code>Auditor.WriteMermaid</code>, <code>WritePlantUML</code>, <code>WriteGraphviz</code>, <code>WriteD2</code>, <code>WriteTable</code>, <code>WriteTree</code>, <code>WriteHTML</code>, and their <code>Export*</code> and <code>Write*String</code> variants.</li>
+        <li>Remove <code>WorkflowReport</code> methods of the same names.</li>
+        <li>Move <code>WithDirection</code>, <code>WithColumns</code>, column constants, and <code>TableColumn</code> to the <code>viz</code> package.</li>
+      </ul>
+      <p>Consumers that only capture events and export JSON/NDJSON are unaffected.</p>
+
+      <h2>Migration Strategy</h2>
+      <ol>
+        <li>Create <code>testhelpers</code> package and move shared fixtures; update core tests.</li>
+        <li>Create <code>viz</code> directory, <code>viz/go.mod</code>, and public <code>viz</code> API.</li>
+        <li>Move rendering files and their tests into <code>viz</code>; convert methods to functions.</li>
+        <li>Remove visualization methods from core <code>Auditor</code> and <code>WorkflowReport</code>; remove go-output from core <code>go.mod</code>.</li>
+        <li>Move <code>example</code> to <code>viz/example</code> and update imports.</li>
+        <li>Create <code>go.work</code> and update <code>go.work.sum</code>.</li>
+        <li>Update CI, goreleaser, README, and AGENTS.md.</li>
+        <li>Run full test suite and <code>GOWORK=off</code> per-module verification.</li>
+      </ol>
+
+      <h2>Risk Assessment</h2>
+      <table>
+        <tr><th>Risk</th><th>Level</th><th>Mitigation</th></tr>
+        <tr><td>Breaking consumer code</td><td class="risk-high">High</td><td>Project is alpha; document migration in README; update example.</td></tr>
+        <tr><td>Test helpers across modules</td><td class="risk-medium">Medium</td><td>Extract <code>testhelpers</code> package in core module.</td></tr>
+        <tr><td>go.work / replace drift</td><td class="risk-medium">Medium</td><td>Use dual strategy; verify <code>GOWORK=off</code> builds.</td></tr>
+        <tr><td>CI coverage gate drops</td><td class="risk-medium">Medium</td><td>Run combined coverage across both modules; adjust gate if needed.</td></tr>
+        <tr><td>goreleaser example path</td><td class="risk-low">Low</td><td>Update <code>main: ./viz/example</code> in <code>.goreleaser.yml</code>.</td></tr>
+      </table>
+
+      <h2>Build System Impact</h2>
+      <ul>
+        <li><strong>CI</strong>: switch to workspace-based commands or run per-module builds and tests with <code>GOEXPERIMENT=jsonv2</code>.</li>
+        <li><strong>goreleaser</strong>: update example path and ensure <code>go mod tidy</code> runs in the correct module.</li>
+        <li><strong>flake.nix</strong>: no immediate change; dev shell already sets <code>GOEXPERIMENT=jsonv2</code>.</li>
+      </ul>
+    </div>
+  </body>
+</html>
