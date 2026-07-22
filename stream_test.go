@@ -3,6 +3,8 @@ package auditlog_test
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -725,4 +727,41 @@ func (w *writeTracker) writtenBytes() int {
 	defer w.mu.Unlock()
 
 	return w.buf.Len()
+}
+
+// --- Benchmarks ---
+
+func benchmarkNDJSONStreamer(b *testing.B, n int) {
+	b.Helper()
+
+	events := make([]auditlog.Event, 0, n)
+
+	for i := range n {
+		events = append(events, auditlog.Event{
+			Sequence:  i + 1,
+			EventType: auditlog.EventTypeAttemptStart,
+			Phase:     auditlog.PhaseBefore,
+			StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", i)},
+		})
+	}
+
+	b.ResetTimer()
+
+	for range b.N {
+		s := auditlog.NewNDJSONStreamer(io.Discard)
+
+		for _, evt := range events {
+			s.OnEvent(evt)
+		}
+
+		_ = s.Flush()
+	}
+}
+
+func BenchmarkNDJSONStreamer_100Events(b *testing.B) { benchmarkNDJSONStreamer(b, 100) }
+
+func BenchmarkNDJSONStreamer_1000Events(b *testing.B) { benchmarkNDJSONStreamer(b, 1000) }
+
+func BenchmarkNDJSONStreamer_10000Events(b *testing.B) {
+	benchmarkNDJSONStreamer(b, 10000)
 }

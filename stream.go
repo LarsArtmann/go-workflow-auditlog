@@ -42,13 +42,13 @@ import (
 type NDJSONStreamer struct {
 	mu sync.Mutex
 
-	writer      io.Writer
-	buf         *bufio.Writer
-	encoder     *jsontext.Encoder
-	err         error
-	bufferSize  int
-	autoFlush   bool
-	closed      bool
+	writer     io.Writer
+	buf        *bufio.Writer
+	encoder    *jsontext.Encoder
+	err        error
+	bufferSize int
+	autoFlush  bool
+	closed     bool
 }
 
 // NDJSONStreamerOption configures an [NDJSONStreamer].
