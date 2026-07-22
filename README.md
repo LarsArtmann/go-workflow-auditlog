@@ -501,20 +501,20 @@ _ = viz.ExportHTML(report, "dashboard.html")  // interactive HTML dashboard
 
 ### Configurable Table Columns
 
-The `WriteTable` / `WriteTableString` / `ExportTable` methods accept ``viz.WithColumns`` to control which columns appear. Ten columns are available:
+The `WriteTable` / `WriteTableString` / `ExportTable` methods accept `viz.WithColumns`` to control which columns appear. Ten columns are available:
 
 | Column       | Constant             | Default? |
 | ------------ | -------------------- | -------- |
-| Step name    | ``viz.ColumnStep``         | Yes      |
-| Status       | ``viz.ColumnStatus``       | Yes      |
-| Duration     | ``viz.ColumnDuration``     | Yes      |
-| Attempts     | ``viz.ColumnAttempts``     | Yes      |
-| Max Attempts | ``viz.ColumnMaxAttempts``  |          |
-| Has Retry    | ``viz.ColumnRetry``        | Yes      |
-| Has Timeout  | ``viz.ColumnTimeout``      | Yes      |
-| Error        | ``viz.ColumnError``        | Yes      |
-| Type         | ``viz.ColumnType``         |          |
-| Dependencies | ``viz.ColumnDependencies`` |          |
+| Step name    | `viz.ColumnStep``         | Yes      |
+| Status       | `viz.ColumnStatus``       | Yes      |
+| Duration     | `viz.ColumnDuration``     | Yes      |
+| Attempts     | `viz.ColumnAttempts``     | Yes      |
+| Max Attempts | `viz.ColumnMaxAttempts``  |          |
+| Has Retry    | `viz.ColumnRetry``        | Yes      |
+| Has Timeout  | `viz.ColumnTimeout``      | Yes      |
+| Error        | `viz.ColumnError``        | Yes      |
+| Type         | `viz.ColumnType``         |          |
+| Dependencies | `viz.ColumnDependencies`` |          |
 
 ```go
 // Compact table: just step name, status, and duration
