@@ -7,16 +7,17 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 func TestReadEvents_RoundTrip(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("rt-step-1")
-	s2 := newFail("rt-step-2", "boom")
-	addParallelSteps(w, s1, s2)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("rt-step-1")
+	s2 := testhelpers.NewFail("rt-step-2", "boom")
+	testhelpers.AddParallelSteps(w, s1, s2)
+	testhelpers.RunWorkflow(t, a, w)
 
 	// Export events as NDJSON.
 	var buf bytes.Buffer
@@ -91,7 +92,7 @@ func TestReadEvents_LineNumberInError(t *testing.T) {
 		t.Fatal("expected error for malformed input")
 	}
 
-	assertContains(t, err.Error(), "line 3", "expected error to mention 'line 3', got "+err.Error())
+	testhelpers.AssertContains(t, err.Error(), "line 3", "expected error to mention 'line 3', got "+err.Error())
 }
 
 func TestReadEvents_SkipsBlankLines(t *testing.T) {
@@ -113,10 +114,10 @@ func TestReadEvents_SkipsBlankLines(t *testing.T) {
 func TestReplayEvents_BasicReconstruction(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("replay-step")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("replay-step")
 	w.Add(flow.Step(s1))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	events := a.Events()
 
@@ -150,10 +151,10 @@ func TestReplayEvents_BasicReconstruction(t *testing.T) {
 func TestReplayEvents_WithFailure(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newFail("failed", "boom")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewFail("failed", "boom")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report, err := auditlog.ReplayEvents(a.Events())
 	if err != nil {
@@ -182,7 +183,7 @@ func TestReplayEvents_NoEvents(t *testing.T) {
 func TestReplayEvents_PreservesEventCount(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "count-step")
+	a := testhelpers.RunSingleSucceed(t, "count-step")
 
 	report, err := auditlog.ReplayEvents(a.Events())
 	if err != nil {
@@ -197,11 +198,11 @@ func TestReplayEvents_PreservesEventCount(t *testing.T) {
 func TestReplayEvents_FullRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("rt-1")
-	s2 := newFail("rt-2", "err")
-	addDependentStep(w, s1, s2)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("rt-1")
+	s2 := testhelpers.NewFail("rt-2", "err")
+	testhelpers.AddDependentStep(w, s1, s2)
+	testhelpers.RunWorkflow(t, a, w)
 
 	// Export NDJSON.
 	var buf bytes.Buffer
@@ -224,7 +225,7 @@ func TestReplayEvents_FullRoundTrip(t *testing.T) {
 		t.Errorf("expected 2 steps, got %d", report.StepCount)
 	}
 
-	assertFailedCount(t, report, 1)
+	testhelpers.AssertFailedCount(t, report, 1)
 
 	if !report.Reconstructed {
 		t.Error("expected Reconstructed=true")

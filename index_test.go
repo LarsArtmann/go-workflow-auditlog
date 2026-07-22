@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // TestReportIndex_AgreesWithLinearQueries confirms the O(1) ReportIndex
@@ -11,11 +12,11 @@ import (
 func TestReportIndex_AgreesWithLinearQueries(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	save := newSucceed("save")
-	addDependentStep(w, fetch, save)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	save := testhelpers.NewSucceed("save")
+	testhelpers.AddDependentStep(w, fetch, save)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 	index := auditlog.NewReportIndex(report)
@@ -26,7 +27,7 @@ func TestReportIndex_AgreesWithLinearQueries(t *testing.T) {
 		t.Errorf("StepByName(fetch) = %+v, want fetch step", got)
 	}
 
-	assertNilStep(t, index.StepByName("nonexistent"), "expected nil for unknown step name")
+	testhelpers.AssertNilStep(t, index.StepByName("nonexistent"), "expected nil for unknown step name")
 
 	// StepByID agrees with the StepID assigned in the report.
 	for _, step := range report.Steps {
@@ -35,7 +36,7 @@ func TestReportIndex_AgreesWithLinearQueries(t *testing.T) {
 		}
 	}
 
-	assertNilStep(t, index.StepByID(99999), "expected nil for unknown step ID")
+	testhelpers.AssertNilStep(t, index.StepByID(99999), "expected nil for unknown step ID")
 
 	// EventsByStep agrees with the linear method.
 	for _, name := range []string{"fetch", "save"} {
@@ -66,9 +67,9 @@ func TestReportIndex_EmptyReport(t *testing.T) {
 
 	index := auditlog.NewReportIndex(auditlog.WorkflowReport{})
 
-	assertNilStep(t, index.StepByName("anything"), "expected nil StepByName on empty report")
+	testhelpers.AssertNilStep(t, index.StepByName("anything"), "expected nil StepByName on empty report")
 
-	assertNilStep(t, index.StepByID(1), "expected nil StepByID on empty report")
+	testhelpers.AssertNilStep(t, index.StepByID(1), "expected nil StepByID on empty report")
 
 	if events := index.EventsByStep("anything"); events != nil {
 		t.Errorf("expected nil EventsByStep on empty report, got %d", len(events))

@@ -6,14 +6,15 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 func TestDiff_NoChanges(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	w.Add(flow.Step(newSucceed("step")))
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	w.Add(flow.Step(testhelpers.NewSucceed("step")))
+	testhelpers.RunWorkflow(t, a, w)
 
 	r1 := a.Report()
 	r2 := a.Report()
@@ -27,13 +28,13 @@ func TestDiff_NoChanges(t *testing.T) {
 func TestDiff_StatusChanged(t *testing.T) {
 	t.Parallel()
 
-	a1, w1 := newAuditAndWorkflow(t)
-	w1.Add(flow.Step(newSucceed("step")))
-	runWorkflow(t, a1, w1)
+	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
+	w1.Add(flow.Step(testhelpers.NewSucceed("step")))
+	testhelpers.RunWorkflow(t, a1, w1)
 
-	a2, w2 := newAuditAndWorkflow(t)
-	w2.Add(flow.Step(newFail("step", "err")))
-	runWorkflow(t, a2, w2)
+	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
+	w2.Add(flow.Step(testhelpers.NewFail("step", "err")))
+	testhelpers.RunWorkflow(t, a2, w2)
 
 	diff := a1.Report().Diff(a2.Report())
 	if len(diff.StatusChanged) != 1 {
@@ -61,13 +62,13 @@ func TestDiff_DeterministicOrdering(t *testing.T) {
 	t.Parallel()
 
 	makeReport := func() auditlog.WorkflowReport {
-		a, w := newAuditAndWorkflow(t)
+		a, w := testhelpers.NewAuditAndWorkflow(t)
 		w.Add(
-			flow.Step(newSucceed("alpha")),
-			flow.Step(newSucceed("bravo")),
-			flow.Step(newSucceed("charlie")),
+			flow.Step(testhelpers.NewSucceed("alpha")),
+			flow.Step(testhelpers.NewSucceed("bravo")),
+			flow.Step(testhelpers.NewSucceed("charlie")),
 		)
-		runWorkflow(t, a, w)
+		testhelpers.RunWorkflow(t, a, w)
 
 		return a.Report()
 	}
@@ -92,13 +93,13 @@ func TestDiff_DeterministicOrdering(t *testing.T) {
 func TestDiff_StepAdded(t *testing.T) {
 	t.Parallel()
 
-	a1, w1 := newAuditAndWorkflow(t)
-	w1.Add(flow.Step(newSucceed("a")))
-	runWorkflow(t, a1, w1)
+	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
+	w1.Add(flow.Step(testhelpers.NewSucceed("a")))
+	testhelpers.RunWorkflow(t, a1, w1)
 
-	a2, w2 := newAuditAndWorkflow(t)
-	w2.Add(flow.Step(newSucceed("a")), flow.Step(newSucceed("b")))
-	runWorkflow(t, a2, w2)
+	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
+	w2.Add(flow.Step(testhelpers.NewSucceed("a")), flow.Step(testhelpers.NewSucceed("b")))
+	testhelpers.RunWorkflow(t, a2, w2)
 
 	diff := a1.Report().Diff(a2.Report())
 	if len(diff.AddedSteps) != 1 {
@@ -113,13 +114,13 @@ func TestDiff_StepAdded(t *testing.T) {
 func TestDiff_StepRemoved(t *testing.T) {
 	t.Parallel()
 
-	a1, w1 := newAuditAndWorkflow(t)
-	w1.Add(flow.Step(newSucceed("a")), flow.Step(newSucceed("b")))
-	runWorkflow(t, a1, w1)
+	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
+	w1.Add(flow.Step(testhelpers.NewSucceed("a")), flow.Step(testhelpers.NewSucceed("b")))
+	testhelpers.RunWorkflow(t, a1, w1)
 
-	a2, w2 := newAuditAndWorkflow(t)
-	w2.Add(flow.Step(newSucceed("a")))
-	runWorkflow(t, a2, w2)
+	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
+	w2.Add(flow.Step(testhelpers.NewSucceed("a")))
+	testhelpers.RunWorkflow(t, a2, w2)
 
 	diff := a1.Report().Diff(a2.Report())
 	if len(diff.RemovedSteps) != 1 {
@@ -134,13 +135,13 @@ func TestDiff_StepRemoved(t *testing.T) {
 func TestDiff_DurationDelta(t *testing.T) {
 	t.Parallel()
 
-	a1, w1 := newAuditAndWorkflow(t)
-	w1.Add(flow.Step(newSucceed("step")))
-	runWorkflow(t, a1, w1)
+	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
+	w1.Add(flow.Step(testhelpers.NewSucceed("step")))
+	testhelpers.RunWorkflow(t, a1, w1)
 
-	a2, w2 := newAuditAndWorkflow(t)
-	w2.Add(flow.Step(newSlow("step", 20*time.Millisecond)))
-	runWorkflow(t, a2, w2)
+	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
+	w2.Add(flow.Step(testhelpers.NewSlow("step", 20*time.Millisecond)))
+	testhelpers.RunWorkflow(t, a2, w2)
 
 	diff := a1.Report().Diff(a2.Report())
 	if diff.DurationDelta <= 0 {
@@ -151,9 +152,9 @@ func TestDiff_DurationDelta(t *testing.T) {
 func TestDuration_WallClock(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	w.Add(flow.Step(newSlow("slow", 20*time.Millisecond)))
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	w.Add(flow.Step(testhelpers.NewSlow("slow", 20*time.Millisecond)))
+	testhelpers.RunWorkflow(t, a, w)
 
 	dur := a.Report().Duration()
 	if dur < 15*time.Millisecond {
@@ -164,7 +165,7 @@ func TestDuration_WallClock(t *testing.T) {
 func TestDuration_EmptyReport(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 	if a.Report().Duration() != 0 {
 		t.Error("expected 0 duration for empty report")
 	}
@@ -173,9 +174,9 @@ func TestDuration_EmptyReport(t *testing.T) {
 func TestSummary(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	w.Add(flow.Step(newSucceed("ok")), flow.Step(newFail("bad", "err")))
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	w.Add(flow.Step(testhelpers.NewSucceed("ok")), flow.Step(testhelpers.NewFail("bad", "err")))
+	testhelpers.RunWorkflow(t, a, w)
 
 	summary := a.Report().Summary()
 	if summary == "" {

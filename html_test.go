@@ -9,17 +9,18 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 func TestWriteHTML_BasicReport(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	transform := newSucceed("transform")
-	save := newSucceed("save")
-	addLinearChain(w, fetch, transform, save)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	transform := testhelpers.NewSucceed("transform")
+	save := testhelpers.NewSucceed("save")
+	testhelpers.AddLinearChain(w, fetch, transform, save)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -30,18 +31,18 @@ func TestWriteHTML_BasicReport(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE")
-	assertContains(t, output, "<html", "expected html element")
-	assertContains(t, output, "</html>", "expected closing html tag")
-	assertContains(t, output, "workflow-auditlog", "expected library name in header")
-	assertContains(t, output, `id="report-data"`, "expected report-data script tag")
-	assertContains(t, output, `id="type-metadata"`, "expected type-metadata script tag")
-	assertContains(t, output, `"step_name":"fetch"`, "expected fetch step in JSON data")
-	assertContains(t, output, `"step_name":"transform"`, "expected transform step in JSON data")
-	assertContains(t, output, `"step_name":"save"`, "expected save step in JSON data")
-	assertContains(t, output, "Content-Security-Policy", "expected CSP header")
-	assertContains(t, output, "attempt_start", "expected event type in data")
-	assertContains(t, output, "attempt_end", "expected event type in data")
+	testhelpers.AssertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE")
+	testhelpers.AssertContains(t, output, "<html", "expected html element")
+	testhelpers.AssertContains(t, output, "</html>", "expected closing html tag")
+	testhelpers.AssertContains(t, output, "workflow-auditlog", "expected library name in header")
+	testhelpers.AssertContains(t, output, `id="report-data"`, "expected report-data script tag")
+	testhelpers.AssertContains(t, output, `id="type-metadata"`, "expected type-metadata script tag")
+	testhelpers.AssertContains(t, output, `"step_name":"fetch"`, "expected fetch step in JSON data")
+	testhelpers.AssertContains(t, output, `"step_name":"transform"`, "expected transform step in JSON data")
+	testhelpers.AssertContains(t, output, `"step_name":"save"`, "expected save step in JSON data")
+	testhelpers.AssertContains(t, output, "Content-Security-Policy", "expected CSP header")
+	testhelpers.AssertContains(t, output, "attempt_start", "expected event type in data")
+	testhelpers.AssertContains(t, output, "attempt_end", "expected event type in data")
 }
 
 func TestWriteHTML_EmptyReport(t *testing.T) {
@@ -64,18 +65,18 @@ func TestWriteHTML_EmptyReport(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE even for empty report")
-	assertContains(t, output, `"workflow_id":"empty"`, "expected workflow_id in JSON")
+	testhelpers.AssertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE even for empty report")
+	testhelpers.AssertContains(t, output, `"workflow_id":"empty"`, "expected workflow_id in JSON")
 }
 
 func TestWriteHTML_FailedStepWithError(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	ok := newSucceed("ok-step")
-	bad := newFail("bad-step", "explosion")
-	addDependentStep(w, ok, bad)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	ok := testhelpers.NewSucceed("ok-step")
+	bad := testhelpers.NewFail("bad-step", "explosion")
+	testhelpers.AddDependentStep(w, ok, bad)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -85,15 +86,15 @@ func TestWriteHTML_FailedStepWithError(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "bad-step", "expected failed step name")
-	assertContains(t, output, "explosion", "expected error message in JSON data")
-	assertContains(t, output, `"failed"`, "expected failed status")
+	testhelpers.AssertContains(t, output, "bad-step", "expected failed step name")
+	testhelpers.AssertContains(t, output, "explosion", "expected error message in JSON data")
+	testhelpers.AssertContains(t, output, `"failed"`, "expected failed status")
 }
 
 func TestWriteHTMLString_ReturnsContent(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "only-step")
+	a := testhelpers.RunSingleSucceed(t, "only-step")
 
 	output, err := a.Report().WriteHTMLString()
 	if err != nil {
@@ -112,7 +113,7 @@ func TestWriteHTMLString_ReturnsContent(t *testing.T) {
 func TestExportHTML_WritesFile(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "exported-step", "report.html")
+	a, path := testhelpers.SingleSucceedExportPath(t, "exported-step", "report.html")
 
 	err := a.Report().ExportHTML(path)
 	if err != nil {
@@ -136,20 +137,20 @@ func TestExportHTML_WritesFile(t *testing.T) {
 func TestAuditor_WriteHTML_DelegatesToReport(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "delegate-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "delegate-step")
 
 	err := a.WriteHTML(buf)
 	if err != nil {
 		t.Fatalf("Auditor.WriteHTML error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "delegate-step", "expected step name in Auditor.WriteHTML output")
+	testhelpers.AssertContains(t, buf.String(), "delegate-step", "expected step name in Auditor.WriteHTML output")
 }
 
 func TestAuditor_ExportHTML_DelegatesToReport(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "auditor-export", "auditor-report.html")
+	a, path := testhelpers.SingleSucceedExportPath(t, "auditor-export", "auditor-report.html")
 
 	err := a.ExportHTML(path)
 	if err != nil {
@@ -169,23 +170,23 @@ func TestAuditor_ExportHTML_DelegatesToReport(t *testing.T) {
 func TestAuditor_WriteHTMLString_DelegatesToReport(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "string-delegate")
+	a := testhelpers.RunSingleSucceed(t, "string-delegate")
 
 	output, err := a.WriteHTMLString()
 	if err != nil {
 		t.Fatalf("Auditor.WriteHTMLString error: %v", err)
 	}
 
-	assertContains(t, output, "string-delegate", "expected step name in string output")
+	testhelpers.AssertContains(t, output, "string-delegate", "expected step name in string output")
 }
 
 func TestWriteHTML_RetryStepHasAttemptCount(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	flaky := newFlaky("flaky-retry", 2)
-	addRetryStep(w, flaky, 5)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	flaky := testhelpers.NewFlaky("flaky-retry", 2)
+	testhelpers.AddRetryStep(w, flaky, 5)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -195,9 +196,9 @@ func TestWriteHTML_RetryStepHasAttemptCount(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "flaky-retry", "expected retry step name")
-	assertContains(t, output, `"attempt_count":3`, "expected 3 attempts (2 fail + 1 success)")
-	assertContains(t, output, `"has_retry":true`, "expected has_retry flag")
+	testhelpers.AssertContains(t, output, "flaky-retry", "expected retry step name")
+	testhelpers.AssertContains(t, output, `"attempt_count":3`, "expected 3 attempts (2 fail + 1 success)")
+	testhelpers.AssertContains(t, output, `"has_retry":true`, "expected has_retry flag")
 }
 
 func TestWriteHTML_MetadataInjected(t *testing.T) {
@@ -218,10 +219,10 @@ func TestWriteHTML_MetadataInjected(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, `"statuses"`, "expected statuses in type metadata")
-	assertContains(t, output, `"events"`, "expected events in type metadata")
-	assertContains(t, output, `"succeeded"`, "expected succeeded status in metadata")
-	assertContains(t, output, `"attempt_start"`, "expected attempt_start event in metadata")
+	testhelpers.AssertContains(t, output, `"statuses"`, "expected statuses in type metadata")
+	testhelpers.AssertContains(t, output, `"events"`, "expected events in type metadata")
+	testhelpers.AssertContains(t, output, `"succeeded"`, "expected succeeded status in metadata")
+	testhelpers.AssertContains(t, output, `"attempt_start"`, "expected attempt_start event in metadata")
 }
 
 func TestWriteHTML_AllSixStatuses(t *testing.T) {
@@ -266,19 +267,19 @@ func TestWriteHTML_AllSixStatuses(t *testing.T) {
 
 	output := buf.String()
 	for _, status := range []string{"succeeded", "failed", "skipped", "canceled", "pending", "running"} {
-		assertContains(t, output, status, "expected status '"+status+"' in HTML output")
+		testhelpers.AssertContains(t, output, status, "expected status '"+status+"' in HTML output")
 	}
 }
 
 func TestWriteHTML_FromReplay(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("replay-html-a")
-	s2 := newSucceed("replay-html-b")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("replay-html-a")
+	s2 := testhelpers.NewSucceed("replay-html-b")
 
-	addDependentStep(w, s1, s2)
-	runWorkflow(t, a, w)
+	testhelpers.AddDependentStep(w, s1, s2)
+	testhelpers.RunWorkflow(t, a, w)
 
 	events := a.Events()
 
@@ -295,16 +296,16 @@ func TestWriteHTML_FromReplay(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE from replayed report")
-	assertContains(t, output, "replay-html-a", "expected step name from replayed report")
-	assertContains(t, output, "replay-html-b", "expected step name from replayed report")
-	assertContains(t, output, `"reconstructed":true`, "expected reconstructed flag in JSON data")
+	testhelpers.AssertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE from replayed report")
+	testhelpers.AssertContains(t, output, "replay-html-a", "expected step name from replayed report")
+	testhelpers.AssertContains(t, output, "replay-html-b", "expected step name from replayed report")
+	testhelpers.AssertContains(t, output, `"reconstructed":true`, "expected reconstructed flag in JSON data")
 }
 
 func TestWriteHTML_FromLoadedReport(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "loaded-html-step")
+	a := testhelpers.RunSingleSucceed(t, "loaded-html-step")
 
 	var jsonBuf bytes.Buffer
 
@@ -326,18 +327,18 @@ func TestWriteHTML_FromLoadedReport(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE from loaded report")
-	assertContains(t, output, "loaded-html-step", "expected step name from loaded report")
+	testhelpers.AssertContains(t, output, "<!DOCTYPE html>", "expected DOCTYPE from loaded report")
+	testhelpers.AssertContains(t, output, "loaded-html-step", "expected step name from loaded report")
 }
 
 func TestWriteHTML_DiamondDAG(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	root := newSucceed("diamond-root")
-	left := newSucceed("diamond-left")
-	right := newSucceed("diamond-right")
-	sink := newSucceed("diamond-sink")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	root := testhelpers.NewSucceed("diamond-root")
+	left := testhelpers.NewSucceed("diamond-left")
+	right := testhelpers.NewSucceed("diamond-right")
+	sink := testhelpers.NewSucceed("diamond-sink")
 
 	w.Add(
 		flow.Step(root),
@@ -345,7 +346,7 @@ func TestWriteHTML_DiamondDAG(t *testing.T) {
 		flow.Step(right).DependsOn(root),
 		flow.Step(sink).DependsOn(left, right),
 	)
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -355,10 +356,10 @@ func TestWriteHTML_DiamondDAG(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "diamond-root", "expected root step in HTML")
-	assertContains(t, output, "diamond-left", "expected left branch step in HTML")
-	assertContains(t, output, "diamond-right", "expected right branch step in HTML")
-	assertContains(t, output, "diamond-sink", "expected sink step in HTML")
+	testhelpers.AssertContains(t, output, "diamond-root", "expected root step in HTML")
+	testhelpers.AssertContains(t, output, "diamond-left", "expected left branch step in HTML")
+	testhelpers.AssertContains(t, output, "diamond-right", "expected right branch step in HTML")
+	testhelpers.AssertContains(t, output, "diamond-sink", "expected sink step in HTML")
 }
 
 func TestWriteHTML_HighFanOut(t *testing.T) {
@@ -397,9 +398,9 @@ func TestWriteHTML_HighFanOut(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "fan-root", "expected root step in HTML")
-	assertContains(t, output, "fan-0", "expected first fan-out step in HTML")
-	assertContains(t, output, "fan-9", "expected last fan-out step in HTML")
+	testhelpers.AssertContains(t, output, "fan-root", "expected root step in HTML")
+	testhelpers.AssertContains(t, output, "fan-0", "expected first fan-out step in HTML")
+	testhelpers.AssertContains(t, output, "fan-9", "expected last fan-out step in HTML")
 }
 
 func TestWriteHTML_Determinism(t *testing.T) {
@@ -429,7 +430,7 @@ func TestWriteHTML_Determinism(t *testing.T) {
 func TestWriteHTML_StructuralIntegrity(t *testing.T) {
 	t.Parallel()
 
-	output := writeSingleStepHTML(t, newSucceed("structure-test"))
+	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("structure-test"))
 	assertHTMLStructure(t, output)
 }
 
@@ -464,11 +465,11 @@ func assertHTMLStructure(t *testing.T, output string) {
 func TestWriteHTML_FailureBanner_WhenFailed(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	ok := newSucceed("ok-step")
-	bad := newFail("bad-step", "explosion")
-	addDependentStep(w, ok, bad)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	ok := testhelpers.NewSucceed("ok-step")
+	bad := testhelpers.NewFail("bad-step", "explosion")
+	testhelpers.AddDependentStep(w, ok, bad)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -479,65 +480,66 @@ func TestWriteHTML_FailureBanner_WhenFailed(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "failure-banner", "expected failure-banner container in template")
-	assertContains(t, output, `"workflow_succeeded":false`, "expected workflow_succeeded=false in JSON")
-	assertContains(t, output, `"failure_reason"`, "expected failure_reason field in JSON")
-	assertContains(t, output, `"bad-step"`, "expected failed step name in JSON")
-	assertContains(t, output, "explosion", "expected error message in JSON data")
+	testhelpers.AssertContains(t, output, "failure-banner", "expected failure-banner container in template")
+	testhelpers.AssertContains(t, output, `"workflow_succeeded":false`, "expected workflow_succeeded=false in JSON")
+	testhelpers.AssertContains(t, output, `"failure_reason"`, "expected failure_reason field in JSON")
+	testhelpers.AssertContains(t, output, `"bad-step"`, "expected failed step name in JSON")
+	testhelpers.AssertContains(t, output, "explosion", "expected error message in JSON data")
 }
 
 func TestWriteHTML_FailureBanner_HiddenWhenSucceeded(t *testing.T) {
 	t.Parallel()
 
-	output := writeSingleStepHTML(t, newSucceed("happy-step"))
+	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("happy-step"))
 
-	assertContains(t, output, `"workflow_succeeded":true`, "expected workflow_succeeded=true in JSON")
-	assertContains(t, output, "failure-banner", "failure-banner template element should still exist (hidden by JS)")
+	testhelpers.AssertContains(t, output, `"workflow_succeeded":true`, "expected workflow_succeeded=true in JSON")
+	testhelpers.AssertContains(t, output, "failure-banner",
+		"failure-banner template element should still exist (hidden by JS)")
 }
 
 func TestWriteHTML_ErrorColumn(t *testing.T) {
 	t.Parallel()
 
-	output := writeSingleStepHTML(t, newFail("crash-step", "disk full"))
+	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewFail("crash-step", "disk full"))
 
-	assertContains(t, output, ">Error</th>", "expected Error column header in template")
-	assertContains(t, output, `colspan="9"`, "expected colspan=9 for empty state row")
-	assertContains(t, output, `"error":"disk full"`, "expected error text in JSON data")
-	assertContains(t, output, "error-cell", "expected error-cell CSS class reference")
+	testhelpers.AssertContains(t, output, ">Error</th>", "expected Error column header in template")
+	testhelpers.AssertContains(t, output, `colspan="9"`, "expected colspan=9 for empty state row")
+	testhelpers.AssertContains(t, output, `"error":"disk full"`, "expected error text in JSON data")
+	testhelpers.AssertContains(t, output, "error-cell", "expected error-cell CSS class reference")
 }
 
 func TestWriteHTML_WorkflowStatusBadge(t *testing.T) {
 	t.Parallel()
 
-	output := writeSingleStepHTML(t, newSucceed("pass-step"))
+	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("pass-step"))
 
-	assertContains(t, output, "workflow-status", "expected workflow-status badge element in template")
-	assertContains(t, output, `"workflow_succeeded":true`, "expected success status in JSON")
-	assertContains(t, output, "workflow-status passed", "expected passed CSS class in JS")
-	assertContains(t, output, "workflow-status failed", "expected failed CSS class in JS")
+	testhelpers.AssertContains(t, output, "workflow-status", "expected workflow-status badge element in template")
+	testhelpers.AssertContains(t, output, `"workflow_succeeded":true`, "expected success status in JSON")
+	testhelpers.AssertContains(t, output, "workflow-status passed", "expected passed CSS class in JS")
+	testhelpers.AssertContains(t, output, "workflow-status failed", "expected failed CSS class in JS")
 }
 
 func TestWriteHTML_GanttChart(t *testing.T) {
 	t.Parallel()
 
-	output := writeSingleStepHTML(t, newSucceed("timed-step"))
+	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("timed-step"))
 
-	assertContains(t, output, "gantt-axis", "expected gantt-axis CSS in template")
-	assertContains(t, output, "gantt-grid", "expected gantt-grid CSS in template")
-	assertContains(t, output, "gantt-bar", "expected gantt-bar CSS in template")
-	assertContains(t, output, "renderGantt", "expected Gantt render function in JS")
-	assertContains(t, output, `"started_at"`, "expected started_at in JSON")
-	assertContains(t, output, `"finished_at"`, "expected finished_at in JSON")
+	testhelpers.AssertContains(t, output, "gantt-axis", "expected gantt-axis CSS in template")
+	testhelpers.AssertContains(t, output, "gantt-grid", "expected gantt-grid CSS in template")
+	testhelpers.AssertContains(t, output, "gantt-bar", "expected gantt-bar CSS in template")
+	testhelpers.AssertContains(t, output, "renderGantt", "expected Gantt render function in JS")
+	testhelpers.AssertContains(t, output, `"started_at"`, "expected started_at in JSON")
+	testhelpers.AssertContains(t, output, `"finished_at"`, "expected finished_at in JSON")
 }
 
 func TestWriteHTML_ImpactBadge(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	root := newFail("root-fail", "root broken")
-	child := newSucceed("child-step")
-	addDependentStep(w, root, child)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	root := testhelpers.NewFail("root-fail", "root broken")
+	child := testhelpers.NewSucceed("child-step")
+	testhelpers.AddDependentStep(w, root, child)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -548,42 +550,52 @@ func TestWriteHTML_ImpactBadge(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "impact-badge", "expected impact-badge CSS class")
-	assertContains(t, output, "impactedSteps", "expected impactedSteps computation in JS")
-	assertContains(t, output, "computeImpact", "expected computeImpact function in JS")
+	testhelpers.AssertContains(t, output, "impact-badge", "expected impact-badge CSS class")
+	testhelpers.AssertContains(t, output, "impactedSteps", "expected impactedSteps computation in JS")
+	testhelpers.AssertContains(t, output, "computeImpact", "expected computeImpact function in JS")
 }
 
 func TestWriteHTML_HumanizedDurations(t *testing.T) {
 	t.Parallel()
 
-	output := writeSingleStepHTML(t, newSucceed("duration-step"))
+	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("duration-step"))
 
-	assertContains(t, output, "function humanizeDuration", "expected humanizeDuration function definition")
-	assertContains(
+	testhelpers.AssertContains(t, output, "function humanizeDuration", "expected humanizeDuration function definition")
+	testhelpers.AssertContains(
 		t,
 		output,
 		"humanizeDuration(report.wall_clock_duration_ms)",
 		"expected humanized wall clock in stats",
 	)
-	assertContains(t, output, "humanizeDuration(s.duration_ms)", "expected humanized duration in steps table")
+	testhelpers.AssertContains(
+		t,
+		output,
+		"humanizeDuration(s.duration_ms)",
+		"expected humanized duration in steps table",
+	)
 }
 
 func TestWriteHTML_GraphFailedNodeDot(t *testing.T) {
 	t.Parallel()
 
-	output := writeSingleStepHTML(t, newFail("graph-fail", "node error"))
+	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewFail("graph-fail", "node error"))
 
 	// Error dot rendering is now in the daghtml SDK JS, triggered by the
 	// "error":true field in the DAG JSON data.
-	assertContains(t, output, `"error":true`, "expected error:true in DAG JSON for failed step")
+	testhelpers.AssertContains(t, output, `"error":true`, "expected error:true in DAG JSON for failed step")
 }
 
 func TestWriteHTML_TreeInlineError(t *testing.T) {
 	t.Parallel()
 
-	output := writeSingleStepHTML(t, newFail("tree-fail", "tree error here"))
+	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewFail("tree-fail", "tree error here"))
 
-	assertContains(t, output, "scope-node-error", "expected scope-node-error CSS class for tree inline errors")
-	assertContains(t, output, "has-failure", "expected has-failure class for failed tree nodes")
-	assertContains(t, output, `"tree error here"`, "expected error text in JSON data")
+	testhelpers.AssertContains(
+		t,
+		output,
+		"scope-node-error",
+		"expected scope-node-error CSS class for tree inline errors",
+	)
+	testhelpers.AssertContains(t, output, "has-failure", "expected has-failure class for failed tree nodes")
+	testhelpers.AssertContains(t, output, `"tree error here"`, "expected error text in JSON data")
 }

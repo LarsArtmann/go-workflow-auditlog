@@ -6,43 +6,44 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 func TestFiltered_ByStepName(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("keep-me")
-	s2 := newSucceed("filter-out")
-	addParallelSteps(w, s1, s2)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("keep-me")
+	s2 := testhelpers.NewSucceed("filter-out")
+	testhelpers.AddParallelSteps(w, s1, s2)
+	testhelpers.RunWorkflow(t, a, w)
 
 	filtered := a.ReportFiltered(auditlog.WithStepsByName("keep-me"))
-	assertStepCount(t, filtered, 1)
-	assertFirstStepName(t, filtered, "keep-me")
+	testhelpers.AssertStepCount(t, filtered, 1)
+	testhelpers.AssertFirstStepName(t, filtered, "keep-me")
 }
 
 func TestFiltered_ByStatus(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	ok := newSucceed("ok")
-	bad := newFail("bad", "err")
-	addParallelSteps(w, ok, bad)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	ok := testhelpers.NewSucceed("ok")
+	bad := testhelpers.NewFail("bad", "err")
+	testhelpers.AddParallelSteps(w, ok, bad)
+	testhelpers.RunWorkflow(t, a, w)
 
 	filtered := a.ReportFiltered(auditlog.WithStepsByStatus(auditlog.StepStatusFailed))
-	assertStepCount(t, filtered, 1)
-	assertFirstStepName(t, filtered, "bad")
+	testhelpers.AssertStepCount(t, filtered, 1)
+	testhelpers.AssertFirstStepName(t, filtered, "bad")
 }
 
 func TestFiltered_ByEventType(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("filter-event")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewSucceed("filter-event")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	fullReport := a.Report()
 	filtered := fullReport.Filtered(auditlog.WithEventsByType(auditlog.EventTypeAttemptStart))
@@ -62,7 +63,7 @@ func TestFiltered_ByEventType(t *testing.T) {
 func TestFiltered_ByTimeRange(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "time-step")
+	a := testhelpers.RunSingleSucceed(t, "time-step")
 
 	before := time.Now().Add(-1 * time.Hour)
 	after := time.Now().Add(1 * time.Hour)
@@ -76,11 +77,11 @@ func TestFiltered_ByTimeRange(t *testing.T) {
 func TestFiltered_NoOptions(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("s1")
-	s2 := newSucceed("s2")
-	addParallelSteps(w, s1, s2)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("s1")
+	s2 := testhelpers.NewSucceed("s2")
+	testhelpers.AddParallelSteps(w, s1, s2)
+	testhelpers.RunWorkflow(t, a, w)
 
 	original := a.Report()
 	filtered := original.Filtered()
@@ -93,26 +94,26 @@ func TestFiltered_NoOptions(t *testing.T) {
 func TestFiltered_MultipleStatuses(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	ok := newSucceed("ok")
-	bad := newFail("bad", "err")
-	addParallelSteps(w, ok, bad)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	ok := testhelpers.NewSucceed("ok")
+	bad := testhelpers.NewFail("bad", "err")
+	testhelpers.AddParallelSteps(w, ok, bad)
+	testhelpers.RunWorkflow(t, a, w)
 
 	filtered := a.ReportFiltered(
 		auditlog.WithStepsByStatus(auditlog.StepStatusSucceeded, auditlog.StepStatusFailed),
 	)
-	assertStepCount(t, filtered, 2)
+	testhelpers.AssertStepCount(t, filtered, 2)
 }
 
 func TestFiltered_EventsFilteredToSteps(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("keep")
-	s2 := newSucceed("drop")
-	addParallelSteps(w, s1, s2)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("keep")
+	s2 := testhelpers.NewSucceed("drop")
+	testhelpers.AddParallelSteps(w, s1, s2)
+	testhelpers.RunWorkflow(t, a, w)
 
 	filtered := a.ReportFiltered(auditlog.WithStepsByName("keep"))
 
@@ -126,25 +127,25 @@ func TestFiltered_EventsFilteredToSteps(t *testing.T) {
 func TestFiltered_RetriesFiltered(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newFlaky("flaky", 2)
-	addRetryStep(w, step, 5)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	step := testhelpers.NewFlaky("flaky", 2)
+	testhelpers.AddRetryStep(w, step, 5)
+	testhelpers.RunWorkflow(t, a, w)
 
 	// Filter to only succeeded steps — the flaky step should be included
 	// because it eventually succeeded.
 	filtered := a.ReportFiltered(auditlog.WithStepsByStatus(auditlog.StepStatusSucceeded))
-	assertStepCount(t, filtered, 1)
+	testhelpers.AssertStepCount(t, filtered, 1)
 }
 
 func TestFiltered_AggregatesRecomputed(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	ok := newSucceed("ok")
-	bad := newFail("bad", "err")
-	addParallelSteps(w, ok, bad)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	ok := testhelpers.NewSucceed("ok")
+	bad := testhelpers.NewFail("bad", "err")
+	testhelpers.AddParallelSteps(w, ok, bad)
+	testhelpers.RunWorkflow(t, a, w)
 
 	full := a.Report()
 	filtered := full.Filtered(auditlog.WithStepsByName("ok"))

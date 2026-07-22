@@ -5,6 +5,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // --- Event method tests ---
@@ -147,10 +148,10 @@ func TestStepStatus_Methods(t *testing.T) {
 func TestStepInfo_HasError(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newFail("fail-step", "err")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewFail("fail-step", "err")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 

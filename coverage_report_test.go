@@ -14,6 +14,7 @@ import (
 	flow "github.com/Azure/go-workflow"
 	output "github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // --- Report query method tests ---
@@ -21,10 +22,10 @@ import (
 func TestReport_StepByName(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("find-me")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewSucceed("find-me")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -45,10 +46,10 @@ func TestReport_StepByName(t *testing.T) {
 func TestReport_EventsByType(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("typed-step")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewSucceed("typed-step")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -66,16 +67,16 @@ func TestReport_EventsByType(t *testing.T) {
 func TestReport_SucceededSteps(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	ok := newSucceed("ok1")
-	ok2 := newSucceed("ok2")
-	bad := newFail("bad", "err")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	ok := testhelpers.NewSucceed("ok1")
+	ok2 := testhelpers.NewSucceed("ok2")
+	bad := testhelpers.NewFail("bad", "err")
 	w.Add(
 		flow.Step(ok),
 		flow.Step(ok2),
 		flow.Step(bad),
 	)
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -88,11 +89,11 @@ func TestReport_SucceededSteps(t *testing.T) {
 func TestReport_SkippedSteps(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	upstream := newFail("failing", "fail")
-	downstream := newSucceed("skipped")
-	addDependentStep(w, upstream, downstream)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	upstream := testhelpers.NewFail("failing", "fail")
+	downstream := testhelpers.NewSucceed("skipped")
+	testhelpers.AddDependentStep(w, upstream, downstream)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -171,18 +172,18 @@ func TestReport_Validate_StatusDrift(t *testing.T) {
 		t.Errorf("expected error to wrap auditlog.ErrStatusDrift, got: %v", err)
 	}
 
-	assertContains(t, err.Error(), "does not match derived status",
+	testhelpers.AssertContains(t, err.Error(), "does not match derived status",
 		"expected error mentioning status mismatch")
 }
 
 func TestReport_JSONRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("rt-1")
-	s2 := newFail("rt-2", "fail")
-	addDependentStep(w, s1, s2)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("rt-1")
+	s2 := testhelpers.NewFail("rt-2", "fail")
+	testhelpers.AddDependentStep(w, s1, s2)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf bytes.Buffer
 
@@ -203,18 +204,18 @@ func TestReport_JSONRoundTrip(t *testing.T) {
 		t.Errorf("version mismatch: %s", report.Version)
 	}
 
-	assertStepCount(t, report, 2)
+	testhelpers.AssertStepCount(t, report, 2)
 }
 
 func TestReport_WithRetryTiming(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newFlaky("retry-timing", 2)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewFlaky("retry-timing", 2)
 	w.Add(
-		flow.Step(s).Retry(retryOpts(5)),
+		flow.Step(s).Retry(testhelpers.RetryOpts(5)),
 	)
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 	step := report.StepByName("retry-timing")
@@ -242,12 +243,12 @@ func TestReport_WithRetryTiming(t *testing.T) {
 func TestReport_EmptyWorkflow(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 	report := a.Report()
 
-	assertStepCount(t, report, 0)
+	testhelpers.AssertStepCount(t, report, 0)
 
-	assertEventCount(t, report, 0)
+	testhelpers.AssertEventCount(t, report, 0)
 
 	if !report.WorkflowSucceeded {
 		t.Error("empty workflow should be considered succeeded")
@@ -265,7 +266,7 @@ func TestWorkflowSucceeded_PendingStepsIsFalse(t *testing.T) {
 	// zero value here, so we route it through Filtered() to recompute.
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			stepFixture("stuck", auditlog.StepStatusRunning),
+			testhelpers.StepFixture("stuck", auditlog.StepStatusRunning),
 		},
 	}
 
@@ -282,46 +283,46 @@ func TestReport_AggregateCounts_PendingRunning(t *testing.T) {
 	// Build a report with a non-terminal step directly.
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			stepFixture("pending-step", auditlog.StepStatusPending),
-			stepFixture("running-step", auditlog.StepStatusRunning),
-			stepFixture("done-step", auditlog.StepStatusSucceeded),
+			testhelpers.StepFixture("pending-step", auditlog.StepStatusPending),
+			testhelpers.StepFixture("running-step", auditlog.StepStatusRunning),
+			testhelpers.StepFixture("done-step", auditlog.StepStatusSucceeded),
 		},
 	}
 
 	recomputed := raw.Filtered()
 
-	assertCount(t, "PendingCount", recomputed.PendingCount, 1)
-	assertCount(t, "RunningCount", recomputed.RunningCount, 1)
-	assertCount(t, "SucceededCount", recomputed.SucceededCount, 1)
+	testhelpers.AssertCount(t, "PendingCount", recomputed.PendingCount, 1)
+	testhelpers.AssertCount(t, "RunningCount", recomputed.RunningCount, 1)
+	testhelpers.AssertCount(t, "SucceededCount", recomputed.SucceededCount, 1)
 }
 
 func TestReport_PeakConcurrency_ParallelSteps(t *testing.T) {
 	t.Parallel()
 
 	// Use slow steps to ensure true overlap in the event stream.
-	a, w := newAuditAndWorkflow(t)
-	addSlowParallelSteps(w, 20*time.Millisecond)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	testhelpers.AddSlowParallelSteps(w, 20*time.Millisecond)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertReportValid(t, report)
+	testhelpers.AssertReportValid(t, report)
 
 	// Two parallel slow steps should produce a peak concurrency of 2.
-	assertPeakConcurrency(t, report, 2)
+	testhelpers.AssertPeakConcurrency(t, report, 2)
 }
 
 func TestReport_PeakConcurrency_SequentialSteps(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	addDependentStep(w, newSucceed("parent"), newSucceed("child"))
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	testhelpers.AddDependentStep(w, testhelpers.NewSucceed("parent"), testhelpers.NewSucceed("child"))
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertReportValid(t, report)
+	testhelpers.AssertReportValid(t, report)
 
 	// Sequential steps should never overlap.
-	assertPeakConcurrency(t, report, 1)
+	testhelpers.AssertPeakConcurrency(t, report, 1)
 }
 
 func TestReport_CriticalPathDuration_DependentChain(t *testing.T) {
@@ -389,16 +390,16 @@ func TestReport_CriticalPathDuration_Empty(t *testing.T) {
 func TestReport_PeakConcurrency_HighFanOut(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
 	// Wire 8 independent slow steps so they all overlap in time.
 	for i := range 8 {
-		w.Add(flow.Step(newSlow(fmt.Sprintf("parallel-%d", i), 50*time.Millisecond)))
+		w.Add(flow.Step(testhelpers.NewSlow(fmt.Sprintf("parallel-%d", i), 50*time.Millisecond)))
 	}
 
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertReportValid(t, report)
+	testhelpers.AssertReportValid(t, report)
 
 	// With 8 independent 50ms steps, at least 4 must overlap on any machine
 	// fast enough to schedule goroutines within the step duration. Asserting
@@ -573,9 +574,9 @@ func TestReport_CriticalPath_DiamondDAG(t *testing.T) {
 func TestReport_PeakConcurrencySteps_ParallelSteps(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	addSlowParallelSteps(w, 20*time.Millisecond)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	testhelpers.AddSlowParallelSteps(w, 20*time.Millisecond)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -602,9 +603,9 @@ func TestReport_FailureReason_FailedSteps(t *testing.T) {
 
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			stepFixture("ok", auditlog.StepStatusSucceeded),
-			stepFixture("bad-a", auditlog.StepStatusFailed),
-			stepFixture("bad-b", auditlog.StepStatusFailed),
+			testhelpers.StepFixture("ok", auditlog.StepStatusSucceeded),
+			testhelpers.StepFixture("bad-a", auditlog.StepStatusFailed),
+			testhelpers.StepFixture("bad-b", auditlog.StepStatusFailed),
 		},
 	}
 
@@ -614,7 +615,7 @@ func TestReport_FailureReason_FailedSteps(t *testing.T) {
 		t.Error("expected workflow to be failed")
 	}
 
-	assertFailureReason(t, recomputed, "2 step(s) failed: bad-a, bad-b")
+	testhelpers.AssertFailureReason(t, recomputed, "2 step(s) failed: bad-a, bad-b")
 }
 
 func TestReport_FailureReason_CanceledSteps(t *testing.T) {
@@ -622,14 +623,14 @@ func TestReport_FailureReason_CanceledSteps(t *testing.T) {
 
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			stepFixture("ok", auditlog.StepStatusSucceeded),
-			stepFixture("cancel", auditlog.StepStatusCanceled),
+			testhelpers.StepFixture("ok", auditlog.StepStatusSucceeded),
+			testhelpers.StepFixture("cancel", auditlog.StepStatusCanceled),
 		},
 	}
 
 	recomputed := raw.Filtered()
 
-	assertFailureReason(t, recomputed, "1 step(s) canceled: cancel")
+	testhelpers.AssertFailureReason(t, recomputed, "1 step(s) canceled: cancel")
 }
 
 func TestReport_FailureReason_Success(t *testing.T) {
@@ -637,7 +638,7 @@ func TestReport_FailureReason_Success(t *testing.T) {
 
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			stepFixture("ok", auditlog.StepStatusSucceeded),
+			testhelpers.StepFixture("ok", auditlog.StepStatusSucceeded),
 		},
 	}
 
@@ -657,12 +658,12 @@ func TestReport_WallClockDuration_ParallelLessThanSum(t *testing.T) {
 
 	// Two parallel slow steps: wall-clock ≈ max(20ms, 20ms) = 20ms,
 	// but TotalDurationMs = 20 + 20 = 40ms. Wall-clock should be less.
-	a, w := newAuditAndWorkflow(t)
-	addSlowParallelSteps(w, 20*time.Millisecond)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	testhelpers.AddSlowParallelSteps(w, 20*time.Millisecond)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertReportValid(t, report)
+	testhelpers.AssertReportValid(t, report)
 
 	if report.WallClockDurationMs >= report.TotalDurationMs {
 		t.Errorf("wall-clock (%.1fms) should be less than sum (%.1fms) for parallel steps",
@@ -694,16 +695,16 @@ func TestReport_Summary_WithFailureReason(t *testing.T) {
 	raw := auditlog.WorkflowReport{
 		WorkflowID: "test-wf",
 		Steps: []auditlog.StepInfo{
-			stepFixture("ok", auditlog.StepStatusSucceeded),
-			stepFixture("bad", auditlog.StepStatusFailed),
+			testhelpers.StepFixture("ok", auditlog.StepStatusSucceeded),
+			testhelpers.StepFixture("bad", auditlog.StepStatusFailed),
 		},
 	}
 
 	recomputed := raw.Filtered()
 
 	summary := recomputed.Summary()
-	assertContains(t, summary, "bad", "summary should contain failed step name")
-	assertContains(t, summary, "failed", "summary should mention failure")
+	testhelpers.AssertContains(t, summary, "bad", "summary should contain failed step name")
+	testhelpers.AssertContains(t, summary, "failed", "summary should mention failure")
 }
 
 func TestReport_Summary_SuccessNoReason(t *testing.T) {
@@ -712,7 +713,7 @@ func TestReport_Summary_SuccessNoReason(t *testing.T) {
 	raw := auditlog.WorkflowReport{
 		WorkflowID: "test-wf",
 		Steps: []auditlog.StepInfo{
-			stepFixture("ok", auditlog.StepStatusSucceeded),
+			testhelpers.StepFixture("ok", auditlog.StepStatusSucceeded),
 		},
 	}
 
@@ -732,7 +733,7 @@ func TestReport_Validate_CountMismatch(t *testing.T) {
 		SucceededCount: 2, // lie — only 1 succeeded step
 		StepCount:      1,
 		Steps: []auditlog.StepInfo{
-			stepFixture("ok", auditlog.StepStatusSucceeded),
+			testhelpers.StepFixture("ok", auditlog.StepStatusSucceeded),
 		},
 	}
 
@@ -749,9 +750,9 @@ func TestReport_Validate_CountMismatch(t *testing.T) {
 func TestReport_Validate_CountsMatch(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	addParallelSteps(w, newSucceed("a"), newFail("b", "boom"))
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	testhelpers.AddParallelSteps(w, testhelpers.NewSucceed("a"), testhelpers.NewFail("b", "boom"))
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -824,9 +825,9 @@ func TestCoverage_Report_ExportTable(t *testing.T) {
 func TestExportTable_FromReplayedReport(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	w.Add(flow.Step(newSucceed("replay-table-step")))
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	w.Add(flow.Step(testhelpers.NewSucceed("replay-table-step")))
+	testhelpers.RunWorkflow(t, a, w)
 
 	var ndjsonBuf bytes.Buffer
 

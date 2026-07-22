@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // FuzzDiagramSpecialChars fuzzes diagram export (Mermaid, PlantUML, DOT, D2)
@@ -63,7 +64,7 @@ func FuzzDiagramSpecialChars(f *testing.F) {
 		}
 
 		mOut := mBuf.String()
-		assertContains(t, mOut, "flowchart TD", "expected 'flowchart TD' in mermaid output")
+		testhelpers.AssertContains(t, mOut, "flowchart TD", "expected 'flowchart TD' in mermaid output")
 
 		// PlantUML: must not contain @enduml in the middle (injection).
 		var pBuf bytes.Buffer
@@ -82,7 +83,7 @@ func FuzzDiagramSpecialChars(f *testing.F) {
 		}
 
 		dOut := dBuf.String()
-		assertContains(t, dOut, "digraph", "expected 'digraph' in DOT output")
+		testhelpers.AssertContains(t, dOut, "digraph", "expected 'digraph' in DOT output")
 
 		// D2: must not error.
 		var d2Buf bytes.Buffer
@@ -93,7 +94,7 @@ func FuzzDiagramSpecialChars(f *testing.F) {
 		}
 
 		d2Out := d2Buf.String()
-		assertContains(t, d2Out, "fuzz-run", "expected workflow ID as title in D2 output")
+		testhelpers.AssertContains(t, d2Out, "fuzz-run", "expected workflow ID as title in D2 output")
 	})
 }
 

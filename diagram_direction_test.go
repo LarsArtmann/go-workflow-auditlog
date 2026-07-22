@@ -7,6 +7,7 @@ import (
 	flow "github.com/Azure/go-workflow"
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // --- Mermaid Direction Tests ---
@@ -14,27 +15,27 @@ import (
 func TestMermaid_DefaultDirectionTD(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "td-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "td-step")
 
 	err := a.Report().WriteMermaid(buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "flowchart TD", "expected TD by default")
+	testhelpers.AssertContains(t, buf.String(), "flowchart TD", "expected TD by default")
 }
 
 func TestMermaid_DirectionLR(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "lr-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "lr-step")
 
 	err := a.Report().WriteMermaid(buf, auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "flowchart LR", "expected LR direction")
+	testhelpers.AssertContains(t, buf.String(), "flowchart LR", "expected LR direction")
 
 	if strings.Contains(buf.String(), "flowchart TD") {
 		t.Error("TD should not appear when LR is set")
@@ -44,27 +45,27 @@ func TestMermaid_DirectionLR(t *testing.T) {
 func TestMermaid_DirectionBT(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "bt-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "bt-step")
 
 	err := a.Report().WriteMermaid(buf, auditlog.WithDirection(output.DirectionUp))
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "flowchart BT", "expected BT direction")
+	testhelpers.AssertContains(t, buf.String(), "flowchart BT", "expected BT direction")
 }
 
 func TestMermaid_DirectionRL(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "rl-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "rl-step")
 
 	err := a.Report().WriteMermaid(buf, auditlog.WithDirection(output.DirectionLeft))
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "flowchart RL", "expected RL direction")
+	testhelpers.AssertContains(t, buf.String(), "flowchart RL", "expected RL direction")
 }
 
 // --- Graphviz Direction Tests ---
@@ -72,27 +73,27 @@ func TestMermaid_DirectionRL(t *testing.T) {
 func TestGraphviz_DefaultDirectionTB(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "gv-td-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "gv-td-step")
 
 	err := a.Report().WriteGraphviz(buf)
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "rankdir=TB", "expected TB by default")
+	testhelpers.AssertContains(t, buf.String(), "rankdir=TB", "expected TB by default")
 }
 
 func TestGraphviz_DirectionLR(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "gv-lr-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "gv-lr-step")
 
 	err := a.Report().WriteGraphviz(buf, auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "rankdir=LR", "expected LR direction")
+	testhelpers.AssertContains(t, buf.String(), "rankdir=LR", "expected LR direction")
 
 	if strings.Contains(buf.String(), "rankdir=TB") {
 		t.Error("TB should not appear when LR is set")
@@ -102,14 +103,14 @@ func TestGraphviz_DirectionLR(t *testing.T) {
 func TestGraphviz_DirectionBT(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "gv-bt-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "gv-bt-step")
 
 	err := a.Report().WriteGraphviz(buf, auditlog.WithDirection(output.DirectionUp))
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "rankdir=BT", "expected BT direction")
+	testhelpers.AssertContains(t, buf.String(), "rankdir=BT", "expected BT direction")
 }
 
 // --- D2 Direction Tests ---
@@ -117,7 +118,7 @@ func TestGraphviz_DirectionBT(t *testing.T) {
 func TestD2_DefaultDirectionNone(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "d2-default-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-default-step")
 
 	err := a.Report().WriteD2(buf)
 	if err != nil {
@@ -133,27 +134,27 @@ func TestD2_DefaultDirectionNone(t *testing.T) {
 func TestD2_DirectionRight(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "d2-right-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-right-step")
 
 	err := a.Report().WriteD2(buf, auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "direction: right", "expected right direction in D2")
+	testhelpers.AssertContains(t, buf.String(), "direction: right", "expected right direction in D2")
 }
 
 func TestD2_DirectionUp(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "d2-up-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-up-step")
 
 	err := a.Report().WriteD2(buf, auditlog.WithDirection(output.DirectionUp))
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "direction: up", "expected up direction in D2")
+	testhelpers.AssertContains(t, buf.String(), "direction: up", "expected up direction in D2")
 }
 
 // --- PlantUML Direction Tests ---
@@ -161,7 +162,7 @@ func TestD2_DirectionUp(t *testing.T) {
 func TestPlantUML_DefaultNoDirectionCommand(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "puml-default-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-default-step")
 
 	err := a.Report().WritePlantUML(buf)
 	if err != nil {
@@ -176,14 +177,14 @@ func TestPlantUML_DefaultNoDirectionCommand(t *testing.T) {
 func TestPlantUML_DirectionRight(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "puml-lr-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-lr-step")
 
 	err := a.Report().WritePlantUML(buf, auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "left to right direction", "expected LR direction in PlantUML")
+	testhelpers.AssertContains(t, buf.String(), "left to right direction", "expected LR direction in PlantUML")
 }
 
 // --- String Variant Tests ---
@@ -191,27 +192,27 @@ func TestPlantUML_DirectionRight(t *testing.T) {
 func TestMermaidString_DirectionLR(t *testing.T) {
 	t.Parallel()
 
-	a, _ := runSingleSucceedWithBuffer(t, "mmd-str-lr")
+	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "mmd-str-lr")
 
 	out, err := a.Report().WriteMermaidString(auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteMermaidString error: %v", err)
 	}
 
-	assertContains(t, out, "flowchart LR", "expected LR direction in string output")
+	testhelpers.AssertContains(t, out, "flowchart LR", "expected LR direction in string output")
 }
 
 func TestGraphvizString_DirectionLR(t *testing.T) {
 	t.Parallel()
 
-	a, _ := runSingleSucceedWithBuffer(t, "gv-str-lr")
+	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "gv-str-lr")
 
 	out, err := a.Report().WriteGraphvizString(auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteGraphvizString error: %v", err)
 	}
 
-	assertContains(t, out, "rankdir=LR", "expected LR direction in string output")
+	testhelpers.AssertContains(t, out, "rankdir=LR", "expected LR direction in string output")
 }
 
 // --- Auditor Delegate Tests ---
@@ -219,27 +220,27 @@ func TestGraphvizString_DirectionLR(t *testing.T) {
 func TestAuditor_WriteMermaidWithDirection(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "aud-mmd-lr")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "aud-mmd-lr")
 
 	err := a.WriteMermaid(buf, auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("Auditor.WriteMermaid error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "flowchart LR", "expected LR direction from Auditor")
+	testhelpers.AssertContains(t, buf.String(), "flowchart LR", "expected LR direction from Auditor")
 }
 
 func TestAuditor_WriteGraphvizWithDirection(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "aud-gv-lr")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "aud-gv-lr")
 
 	err := a.WriteGraphviz(buf, auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("Auditor.WriteGraphviz error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "rankdir=LR", "expected LR direction from Auditor")
+	testhelpers.AssertContains(t, buf.String(), "rankdir=LR", "expected LR direction from Auditor")
 }
 
 // --- Export Tests with Direction ---
@@ -247,7 +248,7 @@ func TestAuditor_WriteGraphvizWithDirection(t *testing.T) {
 func TestExportMermaidWithDirection(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "export-mmd-lr", "dag.mmd")
+	a, path := testhelpers.SingleSucceedExportPath(t, "export-mmd-lr", "dag.mmd")
 
 	err := a.ExportMermaid(path, auditlog.WithDirection(output.DirectionRight))
 	if err != nil {
@@ -260,20 +261,20 @@ func TestExportMermaidWithDirection(t *testing.T) {
 func TestMermaid_DirectionDownExplicit(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "td-explicit-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "td-explicit-step")
 
 	err := a.Report().WriteMermaid(buf, auditlog.WithDirection(output.DirectionDown))
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "flowchart TD", "expected TD for DirectionDown")
+	testhelpers.AssertContains(t, buf.String(), "flowchart TD", "expected TD for DirectionDown")
 }
 
 func TestPlantUML_DirectionDownExplicit(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "puml-td-explicit")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-td-explicit")
 
 	err := a.Report().WritePlantUML(buf, auditlog.WithDirection(output.DirectionDown))
 	if err != nil {
@@ -289,20 +290,20 @@ func TestPlantUML_DirectionDownExplicit(t *testing.T) {
 func TestPlantUML_DirectionLeft(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "puml-left-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-left-step")
 
 	err := a.Report().WritePlantUML(buf, auditlog.WithDirection(output.DirectionLeft))
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "left to right direction", "expected LR for DirectionLeft")
+	testhelpers.AssertContains(t, buf.String(), "left to right direction", "expected LR for DirectionLeft")
 }
 
 func TestPlantUML_DirectionUp(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "puml-up-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-up-step")
 
 	err := a.Report().WritePlantUML(buf, auditlog.WithDirection(output.DirectionUp))
 	if err != nil {
@@ -320,7 +321,7 @@ func TestPlantUML_DirectionUp(t *testing.T) {
 func TestWriteD2String_ErrorPath(t *testing.T) {
 	t.Parallel()
 
-	a, _ := runSingleSucceedWithBuffer(t, "d2-err-step")
+	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "d2-err-step")
 
 	_, err := a.Report().WriteD2String()
 	if err != nil {
@@ -331,7 +332,7 @@ func TestWriteD2String_ErrorPath(t *testing.T) {
 func TestWritePlantUMLString_ErrorPath(t *testing.T) {
 	t.Parallel()
 
-	a, _ := runSingleSucceedWithBuffer(t, "puml-err-step")
+	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "puml-err-step")
 
 	_, err := a.Report().WritePlantUMLString()
 	if err != nil {
@@ -344,11 +345,11 @@ func TestWritePlantUMLString_ErrorPath(t *testing.T) {
 func TestDiagram_DiamondDAGWithDirection(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	root := newSucceed("root")
-	b1 := newSucceed("branch-1")
-	b2 := newSucceed("branch-2")
-	join := newSucceed("join")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	root := testhelpers.NewSucceed("root")
+	b1 := testhelpers.NewSucceed("branch-1")
+	b2 := testhelpers.NewSucceed("branch-2")
+	join := testhelpers.NewSucceed("join")
 
 	w.Add(
 		flow.Step(root),
@@ -356,7 +357,7 @@ func TestDiagram_DiamondDAGWithDirection(t *testing.T) {
 		flow.Step(b2).DependsOn(root),
 		flow.Step(join).DependsOn(b1, b2),
 	)
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -369,11 +370,11 @@ func TestDiagram_DiamondDAGWithDirection(t *testing.T) {
 	}
 
 	out := buf.String()
-	assertContains(t, out, "flowchart LR", "expected LR direction")
-	assertContains(t, out, "root", "expected root node")
-	assertContains(t, out, "branch-1", "expected branch-1 node")
-	assertContains(t, out, "branch-2", "expected branch-2 node")
-	assertContains(t, out, "join", "expected join node")
+	testhelpers.AssertContains(t, out, "flowchart LR", "expected LR direction")
+	testhelpers.AssertContains(t, out, "root", "expected root node")
+	testhelpers.AssertContains(t, out, "branch-1", "expected branch-1 node")
+	testhelpers.AssertContains(t, out, "branch-2", "expected branch-2 node")
+	testhelpers.AssertContains(t, out, "join", "expected join node")
 
 	// At least 4 edges: root→b1, root→b2, b1→join, b2→join.
 	edgeCount := strings.Count(out, "-->")

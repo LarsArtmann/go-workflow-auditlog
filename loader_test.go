@@ -5,16 +5,17 @@ import (
 	"testing"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 func TestLoadReport_RoundTrip(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s1 := newSucceed("load-step-1")
-	s2 := newFail("load-step-2", "err")
-	addParallelSteps(w, s1, s2)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s1 := testhelpers.NewSucceed("load-step-1")
+	s2 := testhelpers.NewFail("load-step-2", "err")
+	testhelpers.AddParallelSteps(w, s1, s2)
+	testhelpers.RunWorkflow(t, a, w)
 
 	// Export to JSON.
 	var buf bytes.Buffer
@@ -34,7 +35,7 @@ func TestLoadReport_RoundTrip(t *testing.T) {
 		t.Errorf("expected WorkflowID 'test', got %q", loaded.WorkflowID)
 	}
 
-	assertStepCount(t, loaded, 2)
+	testhelpers.AssertStepCount(t, loaded, 2)
 
 	if loaded.FailedCount != 1 {
 		t.Errorf("expected 1 failed, got %d", loaded.FailedCount)
@@ -44,7 +45,7 @@ func TestLoadReport_RoundTrip(t *testing.T) {
 func TestLoadReport_FromFile(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "file-load-step", "report.json")
+	a, path := testhelpers.SingleSucceedExportPath(t, "file-load-step", "report.json")
 
 	err := a.ExportJSON(path)
 	if err != nil {
@@ -56,13 +57,13 @@ func TestLoadReport_FromFile(t *testing.T) {
 		t.Fatalf("LoadReport: %v", err)
 	}
 
-	assertStepCount(t, loaded, 1)
+	testhelpers.AssertStepCount(t, loaded, 1)
 }
 
 func TestLoadReport_FromReader(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "reader-step")
+	a := testhelpers.RunSingleSucceed(t, "reader-step")
 
 	var buf bytes.Buffer
 
@@ -73,7 +74,7 @@ func TestLoadReport_FromReader(t *testing.T) {
 		t.Fatalf("LoadReportFromReader: %v", err)
 	}
 
-	assertStepCount(t, loaded, 1)
+	testhelpers.AssertStepCount(t, loaded, 1)
 }
 
 func TestLoadReport_InvalidJSON(t *testing.T) {
@@ -97,7 +98,7 @@ func TestLoadReport_NonexistentFile(t *testing.T) {
 func TestReportWriteNDJSON(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "ndjson-report-step")
+	a := testhelpers.RunSingleSucceed(t, "ndjson-report-step")
 
 	report := a.Report()
 

@@ -10,13 +10,14 @@ import (
 	flow "github.com/Azure/go-workflow"
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // addSucceedSteps appends n identical succeeding steps named "step-<j>" to the
 // workflow.
 func addSucceedSteps(w *flow.Workflow, n int) {
 	for j := range n {
-		s := newSucceed(fmt.Sprintf("step-%d", j))
+		s := testhelpers.NewSucceed(fmt.Sprintf("step-%d", j))
 		w.Add(flow.Step(s))
 	}
 }
@@ -31,7 +32,7 @@ func BenchmarkInvocation(b *testing.B) {
 			b.StopTimer()
 
 			w := &flow.Workflow{}
-			w.Add(flow.Step(newSucceed("step")))
+			w.Add(flow.Step(testhelpers.NewSucceed("step")))
 			a.Attach(w)
 			b.StartTimer()
 
@@ -46,7 +47,7 @@ func BenchmarkInvocation(b *testing.B) {
 			b.StopTimer()
 
 			w := &flow.Workflow{}
-			w.Add(flow.Step(newSucceed("step")))
+			w.Add(flow.Step(testhelpers.NewSucceed("step")))
 			a.Attach(w)
 			b.StartTimer()
 
@@ -105,7 +106,7 @@ func BenchmarkEventsCopy(b *testing.B) {
 
 	w := &flow.Workflow{}
 	for j := range 100 {
-		w.Add(flow.Step(newSucceed(fmt.Sprintf("step-%d", j))))
+		w.Add(flow.Step(testhelpers.NewSucceed(fmt.Sprintf("step-%d", j))))
 	}
 
 	a.Attach(w)
@@ -130,7 +131,7 @@ func BenchmarkOnEventCallback(b *testing.B) {
 		b.StopTimer()
 
 		w := &flow.Workflow{}
-		w.Add(flow.Step(newSucceed("step")))
+		w.Add(flow.Step(testhelpers.NewSucceed("step")))
 		a.Attach(w)
 		b.StartTimer()
 
@@ -146,8 +147,8 @@ func BenchmarkRetryWithAudit(b *testing.B) {
 		b.StopTimer()
 
 		w := &flow.Workflow{}
-		step := &flakyStep{name: "bench-flaky", failUntil: 2}
-		addRetryStep(w, step, 5)
+		step := &testhelpers.FlakyStep{Name: "bench-flaky", FailUntil: 2}
+		testhelpers.AddRetryStep(w, step, 5)
 		a.Attach(w)
 		b.StartTimer()
 
@@ -166,7 +167,7 @@ func BenchmarkMermaidExport(b *testing.B) {
 			var prev flow.Steper
 
 			for j := range n {
-				s := newSucceed(fmt.Sprintf("step-%d", j))
+				s := testhelpers.NewSucceed(fmt.Sprintf("step-%d", j))
 				if prev != nil {
 					w.Add(flow.Step(s).DependsOn(prev))
 				} else {

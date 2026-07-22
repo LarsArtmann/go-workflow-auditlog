@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	flow "github.com/Azure/go-workflow"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // subFetchStep and subSaveStep are inner steps of a sub-workflow.
@@ -36,7 +37,7 @@ func (c *compositeStep) String() string { return "composite" }
 func TestSubWorkflow_InnerStepsCaptured(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
 	comp := &compositeStep{}
 	comp.BuildStep()
 	w.Add(flow.Step(comp))
@@ -73,7 +74,7 @@ func TestSubWorkflow_InnerStepsCaptured(t *testing.T) {
 func TestSubWorkflow_CompositeStepPresent(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
 	comp := &compositeStep{}
 	comp.BuildStep()
 	w.Add(flow.Step(comp))

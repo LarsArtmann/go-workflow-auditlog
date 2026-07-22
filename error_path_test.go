@@ -8,6 +8,7 @@ import (
 
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // errWriteFail is the sentinel error returned by failingWriter.
@@ -254,7 +255,7 @@ func TestErrorPath_ExportD2_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
 func TestErrorPath_Auditor_ExportJSON_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
-	a := mustNewWithID(t, "auditor-error-path")
+	a := testhelpers.MustNewWithID(t, "auditor-error-path")
 
 	err := a.ExportJSON("/nonexistent_dir_auditlog_test/audit.json")
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {

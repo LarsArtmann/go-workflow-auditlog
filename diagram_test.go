@@ -8,17 +8,18 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 func TestMermaid_BasicDAG(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	transform := newSucceed("transform")
-	save := newSucceed("save")
-	addLinearChain(w, fetch, transform, save)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	transform := testhelpers.NewSucceed("transform")
+	save := testhelpers.NewSucceed("save")
+	testhelpers.AddLinearChain(w, fetch, transform, save)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -29,22 +30,22 @@ func TestMermaid_BasicDAG(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "flowchart TD", "expected 'flowchart TD' in output")
-	assertContains(t, output, "fetch", "expected 'fetch' node in output")
-	assertContains(t, output, "transform", "expected 'transform' node in output")
-	assertContains(t, output, "save", "expected 'save' node in output")
-	assertContains(t, output, "-->", "expected '-->' edge in output")
-	assertContains(t, output, "#2d5a2d", "expected green fill color for succeeded step")
+	testhelpers.AssertContains(t, output, "flowchart TD", "expected 'flowchart TD' in output")
+	testhelpers.AssertContains(t, output, "fetch", "expected 'fetch' node in output")
+	testhelpers.AssertContains(t, output, "transform", "expected 'transform' node in output")
+	testhelpers.AssertContains(t, output, "save", "expected 'save' node in output")
+	testhelpers.AssertContains(t, output, "-->", "expected '-->' edge in output")
+	testhelpers.AssertContains(t, output, "#2d5a2d", "expected green fill color for succeeded step")
 }
 
 func TestMermaid_FailedStepRedColor(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	ok := newSucceed("ok")
-	bad := newFail("bad", "boom")
-	addDependentStep(w, ok, bad)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	ok := testhelpers.NewSucceed("ok")
+	bad := testhelpers.NewFail("bad", "boom")
+	testhelpers.AddDependentStep(w, ok, bad)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -55,16 +56,16 @@ func TestMermaid_FailedStepRedColor(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "#8b2d2d", "expected red fill color for failed step")
+	testhelpers.AssertContains(t, output, "#8b2d2d", "expected red fill color for failed step")
 }
 
 func TestMermaid_RetryIndicator(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newFlaky("flaky", 2)
-	addRetryStep(w, step, 5)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	step := testhelpers.NewFlaky("flaky", 2)
+	testhelpers.AddRetryStep(w, step, 5)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -76,16 +77,16 @@ func TestMermaid_RetryIndicator(t *testing.T) {
 	output := buf.String()
 
 	// The retry count should appear in the label.
-	assertContains(t, output, "×3", "expected '×3' retry indicator in mermaid output")
+	testhelpers.AssertContains(t, output, "×3", "expected '×3' retry indicator in mermaid output")
 }
 
 func TestMermaid_SpecialCharsSanitized(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := &succeedStep{name: "my.step-with-dashes"}
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	step := &testhelpers.SucceedStep{Name: "my.step-with-dashes"}
 	w.Add(flow.Step(step))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -100,13 +101,13 @@ func TestMermaid_SpecialCharsSanitized(t *testing.T) {
 	// go-output's MermaidID drops dots and hyphens from node identifiers.
 	// The sanitized ID must appear in the output; the raw name survives only
 	// in the display label.
-	assertContains(t, output, "mystepwithdashes", "expected sanitized node ID in output")
+	testhelpers.AssertContains(t, output, "mystepwithdashes", "expected sanitized node ID in output")
 }
 
 func TestMermaid_EmptyReport(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	var buf strings.Builder
 
@@ -116,17 +117,17 @@ func TestMermaid_EmptyReport(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "flowchart TD", "expected header even for empty report")
+	testhelpers.AssertContains(t, output, "flowchart TD", "expected header even for empty report")
 }
 
 func TestPlantUML_BasicDAG(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	save := newSucceed("save")
-	addDependentStep(w, fetch, save)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	save := testhelpers.NewSucceed("save")
+	testhelpers.AddDependentStep(w, fetch, save)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -137,17 +138,17 @@ func TestPlantUML_BasicDAG(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "@startuml", "expected '@startuml' in output")
-	assertContains(t, output, "@enduml", "expected '@enduml' in output")
-	assertContains(t, output, "component", "expected 'component' in output")
-	assertContains(t, output, "fetch", "expected 'fetch' in output")
-	assertContains(t, output, "save", "expected 'save' in output")
+	testhelpers.AssertContains(t, output, "@startuml", "expected '@startuml' in output")
+	testhelpers.AssertContains(t, output, "@enduml", "expected '@enduml' in output")
+	testhelpers.AssertContains(t, output, "component", "expected 'component' in output")
+	testhelpers.AssertContains(t, output, "fetch", "expected 'fetch' in output")
+	testhelpers.AssertContains(t, output, "save", "expected 'save' in output")
 }
 
 func TestExportMermaid(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "export-mmd", "dag.mmd")
+	a, path := testhelpers.SingleSucceedExportPath(t, "export-mmd", "dag.mmd")
 
 	err := a.ExportMermaid(path)
 	if err != nil {
@@ -158,7 +159,7 @@ func TestExportMermaid(t *testing.T) {
 func TestExportPlantUML(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "export-puml", "dag.puml")
+	a, path := testhelpers.SingleSucceedExportPath(t, "export-puml", "dag.puml")
 
 	err := a.ExportPlantUML(path)
 	if err != nil {
@@ -169,11 +170,11 @@ func TestExportPlantUML(t *testing.T) {
 func TestGraphviz_BasicDAG(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	save := newSucceed("save")
-	addDependentStep(w, fetch, save)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	save := testhelpers.NewSucceed("save")
+	testhelpers.AddDependentStep(w, fetch, save)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -184,20 +185,20 @@ func TestGraphviz_BasicDAG(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "digraph workflow", "expected 'digraph workflow' header")
-	assertContains(t, output, "fetch", "expected 'fetch' node")
-	assertContains(t, output, "save", "expected 'save' node")
-	assertContains(t, output, "->", "expected '->' edge")
-	assertContains(t, output, "label=\"fetch", "expected fetch label")
+	testhelpers.AssertContains(t, output, "digraph workflow", "expected 'digraph workflow' header")
+	testhelpers.AssertContains(t, output, "fetch", "expected 'fetch' node")
+	testhelpers.AssertContains(t, output, "save", "expected 'save' node")
+	testhelpers.AssertContains(t, output, "->", "expected '->' edge")
+	testhelpers.AssertContains(t, output, "label=\"fetch", "expected fetch label")
 }
 
 func TestGraphviz_FailedStepColor(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	bad := newFail("bad", "boom")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	bad := testhelpers.NewFail("bad", "boom")
 	w.Add(flow.Step(bad))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -207,13 +208,13 @@ func TestGraphviz_FailedStepColor(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "#8b2d2d", "expected red fillcolor for failed step")
+	testhelpers.AssertContains(t, output, "#8b2d2d", "expected red fillcolor for failed step")
 }
 
 func TestGraphviz_EmptyReport(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	var buf strings.Builder
 
@@ -222,13 +223,13 @@ func TestGraphviz_EmptyReport(t *testing.T) {
 		t.Fatalf("WriteGraphviz on empty report error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "digraph workflow", "expected header even for empty report")
+	testhelpers.AssertContains(t, buf.String(), "digraph workflow", "expected header even for empty report")
 }
 
 func TestExportGraphviz(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "export-dot", "dag.dot")
+	a, path := testhelpers.SingleSucceedExportPath(t, "export-dot", "dag.dot")
 
 	err := a.ExportGraphviz(path)
 	if err != nil {
@@ -239,18 +240,18 @@ func TestExportGraphviz(t *testing.T) {
 func TestMermaid_FanOutFanIn(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	root := newSucceed("root")
-	b1 := newSucceed("branch-1")
-	b2 := newSucceed("branch-2")
-	join := newSucceed("join")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	root := testhelpers.NewSucceed("root")
+	b1 := testhelpers.NewSucceed("branch-1")
+	b2 := testhelpers.NewSucceed("branch-2")
+	join := testhelpers.NewSucceed("join")
 	w.Add(
 		flow.Step(root),
 		flow.Step(b1).DependsOn(root),
 		flow.Step(b2).DependsOn(root),
 		flow.Step(join).DependsOn(b1, b2),
 	)
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -268,52 +269,52 @@ func TestMermaid_FanOutFanIn(t *testing.T) {
 func TestWriteMermaidString(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "string-step")
+	a := testhelpers.RunSingleSucceed(t, "string-step")
 
 	output, err := a.Report().WriteMermaidString()
 	// WriteMermaidString currently wraps nil errors; verify the output is usable.
 	_ = err
 
-	assertContains(t, output, "flowchart TD", "expected 'flowchart TD' in string output")
+	testhelpers.AssertContains(t, output, "flowchart TD", "expected 'flowchart TD' in string output")
 }
 
 func TestWriteGraphvizString(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "string-step")
+	a := testhelpers.RunSingleSucceed(t, "string-step")
 
 	output, err := a.Report().WriteGraphvizString()
 	if err != nil {
 		t.Fatalf("WriteGraphvizString error: %v", err)
 	}
 
-	assertContains(t, output, "digraph workflow", "expected 'digraph workflow' in string output")
+	testhelpers.AssertContains(t, output, "digraph workflow", "expected 'digraph workflow' in string output")
 }
 
 func TestWritePlantUMLString(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "plantuml-step")
+	a := testhelpers.RunSingleSucceed(t, "plantuml-step")
 
 	output, err := a.Report().WritePlantUMLString()
 	if err != nil {
 		t.Fatalf("WritePlantUMLString error: %v", err)
 	}
 
-	assertContains(t, output, "plantuml-step", "expected step name in PlantUML string output")
+	testhelpers.AssertContains(t, output, "plantuml-step", "expected step name in PlantUML string output")
 }
 
 func TestMermaid_SkippedStepGrayColor(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	bad := newFail("bad", "err")
-	skipped := newSucceed("skipped")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	bad := testhelpers.NewFail("bad", "err")
+	skipped := testhelpers.NewSucceed("skipped")
 	w.Add(
 		flow.Step(bad),
 		flow.Step(skipped).DependsOn(bad),
 	)
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -321,15 +322,15 @@ func TestMermaid_SkippedStepGrayColor(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "#4a4a4a", "expected gray fill color for skipped step")
+	testhelpers.AssertContains(t, output, "#4a4a4a", "expected gray fill color for skipped step")
 }
 
 func TestPlantUML_NoMermaidClasses(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	addSingleStep(w, "puml-step")
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	testhelpers.AddSingleStep(w, "puml-step")
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -351,11 +352,11 @@ func TestPlantUML_NoMermaidClasses(t *testing.T) {
 func TestMermaid_CanceledStep(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // cancel immediately so the step gets canceled
 
-	step := newSlow("cancel-step", 5*time.Second)
+	step := testhelpers.NewSlow("cancel-step", 5*time.Second)
 	w.Add(flow.Step(step))
 	a.Attach(w)
 	_ = w.Do(ctx)
@@ -367,7 +368,7 @@ func TestMermaid_CanceledStep(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "#5a3d2d", "expected orange fill color for canceled step")
+	testhelpers.AssertContains(t, output, "#5a3d2d", "expected orange fill color for canceled step")
 }
 
 // TestDiagram_EdgeDirectionFollowsExecutionFlow is the regression test for the
@@ -382,14 +383,14 @@ func TestMermaid_CanceledStep(t *testing.T) {
 func TestDiagram_EdgeDirectionFollowsExecutionFlow(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	transform := newSucceed("transform")
-	save := newSucceed("save")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	transform := testhelpers.NewSucceed("transform")
+	save := testhelpers.NewSucceed("save")
 
-	addDependentStep(w, fetch, transform)
-	addDependentStep(w, transform, save)
-	runWorkflow(t, a, w)
+	testhelpers.AddDependentStep(w, fetch, transform)
+	testhelpers.AddDependentStep(w, transform, save)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -459,7 +460,7 @@ func assertEdgeDirections(t *testing.T, format, out string, forward, backward []
 	t.Helper()
 
 	for _, e := range forward {
-		assertContains(t, out, e, format+" edge should follow execution flow")
+		testhelpers.AssertContains(t, out, e, format+" edge should follow execution flow")
 	}
 
 	for _, e := range backward {

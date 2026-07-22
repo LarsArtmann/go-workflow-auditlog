@@ -6,12 +6,13 @@ import (
 
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 func TestTable_DefaultColumns(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "default-col-step")
+	a := testhelpers.RunSingleSucceed(t, "default-col-step")
 
 	out, err := a.Report().WriteTableString(output.FormatCSV, output.RenderOptions{})
 	if err != nil {
@@ -19,19 +20,19 @@ func TestTable_DefaultColumns(t *testing.T) {
 	}
 
 	// Default columns: Step, Status, Duration, Attempts, Retry, Timeout, Error.
-	assertContains(t, out, "Step", "expected Step header")
-	assertContains(t, out, "Status", "expected Status header")
-	assertContains(t, out, "Duration", "expected Duration header")
-	assertContains(t, out, "Attempts", "expected Attempts header")
-	assertContains(t, out, "Retry", "expected Retry header")
-	assertContains(t, out, "Timeout", "expected Timeout header")
-	assertContains(t, out, "Error", "expected Error header")
+	testhelpers.AssertContains(t, out, "Step", "expected Step header")
+	testhelpers.AssertContains(t, out, "Status", "expected Status header")
+	testhelpers.AssertContains(t, out, "Duration", "expected Duration header")
+	testhelpers.AssertContains(t, out, "Attempts", "expected Attempts header")
+	testhelpers.AssertContains(t, out, "Retry", "expected Retry header")
+	testhelpers.AssertContains(t, out, "Timeout", "expected Timeout header")
+	testhelpers.AssertContains(t, out, "Error", "expected Error header")
 }
 
 func TestTable_CustomColumnSelection(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "custom-col-step")
+	a := testhelpers.RunSingleSucceed(t, "custom-col-step")
 
 	out, err := a.Report().WriteTableString(
 		output.FormatCSV, output.RenderOptions{},
@@ -42,8 +43,8 @@ func TestTable_CustomColumnSelection(t *testing.T) {
 	}
 
 	// Only selected columns should appear.
-	assertContains(t, out, "Step", "expected Step header")
-	assertContains(t, out, "Status", "expected Status header")
+	testhelpers.AssertContains(t, out, "Step", "expected Step header")
+	testhelpers.AssertContains(t, out, "Status", "expected Status header")
 
 	// Columns NOT selected should be absent.
 	if strings.Contains(out, "Duration") {
@@ -62,12 +63,12 @@ func TestTable_CustomColumnSelection(t *testing.T) {
 func TestTable_NewColumns(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	transform := newSucceed("transform")
-	save := newSucceed("save")
-	addLinearChain(w, fetch, transform, save)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	transform := testhelpers.NewSucceed("transform")
+	save := testhelpers.NewSucceed("save")
+	testhelpers.AddLinearChain(w, fetch, transform, save)
+	testhelpers.RunWorkflow(t, a, w)
 
 	out, err := a.Report().WriteTableString(
 		output.FormatCSV, output.RenderOptions{},
@@ -77,18 +78,18 @@ func TestTable_NewColumns(t *testing.T) {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
 
-	assertContains(t, out, "Step", "expected Step header")
-	assertContains(t, out, "Type", "expected Type header")
-	assertContains(t, out, "Dependencies", "expected Dependencies header")
+	testhelpers.AssertContains(t, out, "Step", "expected Step header")
+	testhelpers.AssertContains(t, out, "Type", "expected Type header")
+	testhelpers.AssertContains(t, out, "Dependencies", "expected Dependencies header")
 
 	// transform depends on fetch — the dependency name should appear in the table.
-	assertContains(t, out, "fetch", "expected dependency name in table")
+	testhelpers.AssertContains(t, out, "fetch", "expected dependency name in table")
 }
 
 func TestTable_ColumnOrderRespected(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "order-step")
+	a := testhelpers.RunSingleSucceed(t, "order-step")
 
 	// Reverse the natural order: Status, then Step.
 	out, err := a.Report().WriteTableString(
@@ -122,7 +123,7 @@ func TestTable_ColumnOrderRespected(t *testing.T) {
 func TestTable_AllColumns(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "all-cols-step")
+	a := testhelpers.RunSingleSucceed(t, "all-cols-step")
 
 	out, err := a.Report().WriteTableString(
 		output.FormatCSV, output.RenderOptions{},
@@ -142,10 +143,10 @@ func TestTable_AllColumns(t *testing.T) {
 func TestTable_MaxAttemptsColumn(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	step := newFlaky("flaky-max", 2)
-	addRetryStep(w, step, 5)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	step := testhelpers.NewFlaky("flaky-max", 2)
+	testhelpers.AddRetryStep(w, step, 5)
+	testhelpers.RunWorkflow(t, a, w)
 
 	out, err := a.Report().WriteTableString(
 		output.FormatCSV, output.RenderOptions{},
@@ -155,13 +156,13 @@ func TestTable_MaxAttemptsColumn(t *testing.T) {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
 
-	assertContains(t, out, "Max Attempts", "expected Max Attempts header")
+	testhelpers.AssertContains(t, out, "Max Attempts", "expected Max Attempts header")
 }
 
 func TestTable_ColumnsOnAuditor(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "auditor-col-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "auditor-col-step")
 
 	err := a.WriteTable(buf, output.FormatCSV, output.RenderOptions{},
 		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus),
@@ -171,14 +172,14 @@ func TestTable_ColumnsOnAuditor(t *testing.T) {
 	}
 
 	out := buf.String()
-	assertContains(t, out, "Step", "expected Step header from Auditor")
-	assertContains(t, out, "Status", "expected Status header from Auditor")
+	testhelpers.AssertContains(t, out, "Step", "expected Step header from Auditor")
+	testhelpers.AssertContains(t, out, "Status", "expected Status header from Auditor")
 }
 
 func TestTable_ExportWithColumns(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "table-cols-export", "table.csv")
+	a, path := testhelpers.SingleSucceedExportPath(t, "table-cols-export", "table.csv")
 
 	err := a.ExportTable(path, output.FormatCSV, output.RenderOptions{},
 		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus),
@@ -191,7 +192,7 @@ func TestTable_ExportWithColumns(t *testing.T) {
 func TestTable_EmptyColumnSelectionUsesDefaults(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "empty-cols-step")
+	a := testhelpers.RunSingleSucceed(t, "empty-cols-step")
 
 	// WriteTable with no tableOpts should produce default columns.
 	out, err := a.Report().WriteTableString(output.FormatCSV, output.RenderOptions{})
@@ -199,19 +200,19 @@ func TestTable_EmptyColumnSelectionUsesDefaults(t *testing.T) {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
 
-	assertContains(t, out, "Step", "expected Step header with default columns")
-	assertContains(t, out, "Error", "expected Error header with default columns")
+	testhelpers.AssertContains(t, out, "Step", "expected Step header with default columns")
+	testhelpers.AssertContains(t, out, "Error", "expected Error header with default columns")
 }
 
 // Ensures column selection also works from a replayed report (not just live capture).
 func TestTable_ColumnsFromReplayedReport(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch-replay")
-	transform := newSucceed("transform-replay")
-	addDependentStep(w, fetch, transform)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch-replay")
+	transform := testhelpers.NewSucceed("transform-replay")
+	testhelpers.AddDependentStep(w, fetch, transform)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -237,8 +238,8 @@ func TestTable_ColumnsFromReplayedReport(t *testing.T) {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
 
-	assertContains(t, out, "Step", "expected Step header from replayed report")
-	assertContains(t, out, "Dependencies", "expected Dependencies header from replayed report")
+	testhelpers.AssertContains(t, out, "Step", "expected Step header from replayed report")
+	testhelpers.AssertContains(t, out, "Dependencies", "expected Dependencies header from replayed report")
 }
 
 func TestTable_DefaultTableColumnsVar(t *testing.T) {
@@ -301,7 +302,7 @@ func TestTable_ZeroDurationCell(t *testing.T) {
 	}
 
 	// The data row should be "instant," (step name, empty duration).
-	assertContains(t, out, "instant,", "expected step name with empty duration cell")
+	testhelpers.AssertContains(t, out, "instant,", "expected step name with empty duration cell")
 }
 
 func TestTable_ColumnString(t *testing.T) {

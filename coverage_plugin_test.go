@@ -13,6 +13,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // --- Export tests ---
@@ -20,10 +21,10 @@ import (
 func TestWriteJSON_ToBuffer(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("json-step")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewSucceed("json-step")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf bytes.Buffer
 
@@ -39,16 +40,16 @@ func TestWriteJSON_ToBuffer(t *testing.T) {
 		t.Fatalf("invalid JSON output: %v", err)
 	}
 
-	assertStepCount(t, report, 1)
+	testhelpers.AssertStepCount(t, report, 1)
 }
 
 func TestWriteNDJSON_ToBuffer(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("ndjson-step")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewSucceed("ndjson-step")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf bytes.Buffer
 
@@ -73,7 +74,7 @@ func TestWriteNDJSON_ToBuffer(t *testing.T) {
 func TestExportJSON_Error(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	err := a.ExportJSON("/nonexistent/dir/file.json")
 	if err == nil {
@@ -84,7 +85,7 @@ func TestExportJSON_Error(t *testing.T) {
 func TestExportNDJSON_Error(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	err := a.ExportNDJSON("/nonexistent/dir/file.ndjson")
 	if err == nil {
@@ -97,14 +98,14 @@ func TestExportNDJSON_Error(t *testing.T) {
 func TestNew_InitialEventCapacity(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{
+	a := testhelpers.MustNew(t, auditlog.Config{
 		Enabled:              true,
 		InitialEventCapacity: 512,
 	})
 	w := &flow.Workflow{}
-	s := newSucceed("cap-step")
+	s := testhelpers.NewSucceed("cap-step")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	assertEventsRecorded(t, a, 2)
 }
@@ -114,7 +115,7 @@ func TestNew_InitialEventCapacity(t *testing.T) {
 func TestAttach_NilWorkflow(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 	// Should not panic.
 	a.Attach(nil)
 }
@@ -122,7 +123,7 @@ func TestAttach_NilWorkflow(t *testing.T) {
 func TestSnapshot_NilWorkflow(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 	// Should not panic.
 	a.Snapshot(nil)
 }
@@ -130,9 +131,9 @@ func TestSnapshot_NilWorkflow(t *testing.T) {
 func TestAttach_Disabled(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: false})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: false})
 	w := &flow.Workflow{}
-	s := newSucceed("step")
+	s := testhelpers.NewSucceed("step")
 	w.Add(flow.Step(s))
 	a.Attach(w) // no-op when disabled
 }
@@ -142,30 +143,30 @@ func TestAttach_Disabled(t *testing.T) {
 func TestFanOutFanIn(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	root := newSucceed("root")
-	branch1 := newSucceed("branch-1")
-	branch2 := newSucceed("branch-2")
-	join := newSucceed("join")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	root := testhelpers.NewSucceed("root")
+	branch1 := testhelpers.NewSucceed("branch-1")
+	branch2 := testhelpers.NewSucceed("branch-2")
+	join := testhelpers.NewSucceed("join")
 	w.Add(
 		flow.Step(root),
 		flow.Step(branch1).DependsOn(root),
 		flow.Step(branch2).DependsOn(root),
 		flow.Step(join).DependsOn(branch1, branch2),
 	)
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertReportValid(t, report)
+	testhelpers.AssertReportValid(t, report)
 
-	assertStepCount(t, report, 4)
+	testhelpers.AssertStepCount(t, report, 4)
 
-	joinStep := findStep(t, report, "join")
+	joinStep := testhelpers.FindStep(t, report, "join")
 	if len(joinStep.Dependencies) != 2 {
 		t.Errorf("expected join to have 2 deps, got %d", len(joinStep.Dependencies))
 	}
 
-	rootStep := findStep(t, report, "root")
+	rootStep := testhelpers.FindStep(t, report, "root")
 	if len(rootStep.Dependents) != 2 {
 		t.Errorf("expected root to have 2 dependents, got %d", len(rootStep.Dependents))
 	}
@@ -174,26 +175,26 @@ func TestFanOutFanIn(t *testing.T) {
 func TestStepType_Inferred(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSucceed("typed")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewSucceed("typed")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
 	step := report.StepByName("typed")
-	if step.StepType != "succeedStep" {
-		t.Errorf("expected step type 'succeedStep', got %q", step.StepType)
+	if step.StepType != "SucceedStep" {
+		t.Errorf("expected step type 'SucceedStep', got %q", step.StepType)
 	}
 }
 
 func TestDuration_Tracked(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSlow("slow-step", 20*time.Millisecond)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewSlow("slow-step", 20*time.Millisecond)
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -218,14 +219,14 @@ func TestDuration_Tracked(t *testing.T) {
 func TestWorkflowID_Propagated(t *testing.T) {
 	t.Parallel()
 
-	a := mustNewWithID(t, "my-custom-wf")
+	a := testhelpers.MustNewWithID(t, "my-custom-wf")
 	w := &flow.Workflow{}
-	s := newSucceed("step")
+	s := testhelpers.NewSucceed("step")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertWorkflowID(t, report, "my-custom-wf")
+	testhelpers.AssertWorkflowID(t, report, "my-custom-wf")
 }
 
 // TestRunID_DefaultGenerated confirms that when no RunID is supplied, the
@@ -234,11 +235,11 @@ func TestWorkflowID_Propagated(t *testing.T) {
 func TestRunID_DefaultGenerated(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("step-a")))
-	w.Add(flow.Step(newSucceed("step-b")))
-	runWorkflow(t, a, w)
+	w.Add(flow.Step(testhelpers.NewSucceed("step-a")))
+	w.Add(flow.Step(testhelpers.NewSucceed("step-b")))
+	testhelpers.RunWorkflow(t, a, w)
 
 	runID := a.RunID()
 	if runID == "" {
@@ -263,7 +264,7 @@ func TestRunID_DefaultGenerated(t *testing.T) {
 		t.Fatal("expected events in report")
 	}
 
-	assertEventRunIDsMatch(t, report.Events, runID)
+	testhelpers.AssertEventRunIDsMatch(t, report.Events, runID)
 }
 
 // TestRunID_CustomHonored confirms a caller-supplied RunID is used verbatim
@@ -273,10 +274,10 @@ func TestRunID_CustomHonored(t *testing.T) {
 
 	const custom = "trace-abc-123"
 
-	a := mustNew(t, auditlog.Config{Enabled: true, RunID: custom})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true, RunID: custom})
 	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("step")))
-	runWorkflow(t, a, w)
+	w.Add(flow.Step(testhelpers.NewSucceed("step")))
+	testhelpers.RunWorkflow(t, a, w)
 
 	if a.RunID() != custom {
 		t.Errorf("expected custom RunID %q, got %q", custom, a.RunID())
@@ -293,10 +294,10 @@ func TestRunID_CustomHonored(t *testing.T) {
 func TestRunID_ReplayRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("step")))
-	runWorkflow(t, a, w)
+	w.Add(flow.Step(testhelpers.NewSucceed("step")))
+	testhelpers.RunWorkflow(t, a, w)
 
 	runID := a.RunID()
 	report := a.Report()
@@ -316,8 +317,8 @@ func TestRunID_ReplayRoundTrip(t *testing.T) {
 func TestRunID_UniquePerAuditor(t *testing.T) {
 	t.Parallel()
 
-	a1 := mustNew(t, auditlog.Config{Enabled: true})
-	a2 := mustNew(t, auditlog.Config{Enabled: true})
+	a1 := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
+	a2 := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	if a1.RunID() == a2.RunID() {
 		t.Errorf("expected distinct RunIDs, both were %q", a1.RunID())
@@ -329,12 +330,12 @@ func TestRunID_UniquePerAuditor(t *testing.T) {
 func TestStepID_UniqueAndSequential(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("step-a")))
-	w.Add(flow.Step(newSucceed("step-b")))
-	w.Add(flow.Step(newSucceed("step-c")))
-	runWorkflow(t, a, w)
+	w.Add(flow.Step(testhelpers.NewSucceed("step-a")))
+	w.Add(flow.Step(testhelpers.NewSucceed("step-b")))
+	w.Add(flow.Step(testhelpers.NewSucceed("step-c")))
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 	if len(report.Steps) != 3 {
@@ -359,22 +360,22 @@ func TestStepID_UniqueAndSequential(t *testing.T) {
 func TestCanceledStatus(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	s := newSlow("cancel-me", 10*time.Second)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	s := testhelpers.NewSlow("cancel-me", 10*time.Second)
 	w.Add(
 		flow.Step(s).Timeout(10 * time.Millisecond),
 	)
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertReportValid(t, report)
+	testhelpers.AssertReportValid(t, report)
 
 	step := report.StepByName("cancel-me")
 	if step.Status != auditlog.StepStatusCanceled {
 		t.Errorf("expected canceled, got %s", step.Status)
 	}
 
-	assertCount(t, "CanceledCount", report.CanceledCount, 1)
+	testhelpers.AssertCount(t, "CanceledCount", report.CanceledCount, 1)
 
 	if report.WorkflowSucceeded {
 		t.Error("expected WorkflowSucceeded=false")
@@ -384,11 +385,11 @@ func TestCanceledStatus(t *testing.T) {
 func TestEnvEnabledFalse(t *testing.T) {
 	t.Setenv(auditlog.EnvKeyEnabled, "false")
 
-	a := mustNew(t, auditlog.Config{})
+	a := testhelpers.MustNew(t, auditlog.Config{})
 	w := &flow.Workflow{}
-	s := newSucceed("env-false-step")
+	s := testhelpers.NewSucceed("env-false-step")
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	if a.EventsCount() != 0 {
 		t.Errorf("expected 0 events when disabled via env, got %d", a.EventsCount())
@@ -398,7 +399,7 @@ func TestEnvEnabledFalse(t *testing.T) {
 func TestEventsCount_NoCopy(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "count-step")
+	a := testhelpers.RunSingleSucceed(t, "count-step")
 
 	count := a.EventsCount()
 
@@ -411,10 +412,10 @@ func TestEventsCount_NoCopy(t *testing.T) {
 func TestStepTypeName_NilStep(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
 	// Use a Func step which has a clean type name.
 	w.Add(flow.Step(flow.Func("func-step", func(_ context.Context) error { return nil })))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
 
@@ -431,15 +432,15 @@ func TestStepTypeName_NilStep(t *testing.T) {
 func TestSkip_Status(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
 	s := flow.Func("skip-me", func(_ context.Context) error {
 		return flow.Skip(errors.New("not needed"))
 	})
 	w.Add(flow.Step(s))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertReportValid(t, report)
+	testhelpers.AssertReportValid(t, report)
 
 	step := report.StepByName("skip-me")
 	if step.Status != auditlog.StepStatusSkipped {
@@ -450,23 +451,23 @@ func TestSkip_Status(t *testing.T) {
 func TestMultipleWorkflows_Isolated(t *testing.T) {
 	t.Parallel()
 
-	a1 := mustNewWithID(t, "wf-1")
-	a2 := mustNewWithID(t, "wf-2")
+	a1 := testhelpers.MustNewWithID(t, "wf-1")
+	a2 := testhelpers.MustNewWithID(t, "wf-2")
 
 	w1 := &flow.Workflow{}
-	w1.Add(flow.Step(newSucceed("wf1-step")))
+	w1.Add(flow.Step(testhelpers.NewSucceed("wf1-step")))
 
 	w2 := &flow.Workflow{}
-	w2.Add(flow.Step(newFail("wf2-step", "err")))
+	w2.Add(flow.Step(testhelpers.NewFail("wf2-step", "err")))
 
-	runWorkflow(t, a1, w1)
-	runWorkflow(t, a2, w2)
+	testhelpers.RunWorkflow(t, a1, w1)
+	testhelpers.RunWorkflow(t, a2, w2)
 
 	r1 := a1.Report()
 	r2 := a2.Report()
 
-	assertWorkflowID(t, r1, "wf-1")
-	assertWorkflowID(t, r2, "wf-2")
+	testhelpers.AssertWorkflowID(t, r1, "wf-1")
+	testhelpers.AssertWorkflowID(t, r2, "wf-2")
 
 	if r1.StepCount != 1 || r2.StepCount != 1 {
 		t.Errorf("expected each to have 1 step, got %d and %d", r1.StepCount, r2.StepCount)
@@ -481,7 +482,7 @@ func TestWriteToFile_CloseError(t *testing.T) {
 	path := dir + "/readonly.json"
 	_ = os.WriteFile(path, []byte{}, 0o444)
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	err := a.ExportJSON(path)
 	if err == nil {
@@ -499,7 +500,7 @@ func TestCoverage_D2_EmptyWorkflowID(t *testing.T) {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			stepFixture("pending-step", auditlog.StepStatusPending),
+			testhelpers.StepFixture("pending-step", auditlog.StepStatusPending),
 		},
 	}
 
@@ -528,7 +529,7 @@ func TestCoverage_CancelStatus_Diagram(t *testing.T) {
 	report := auditlog.WorkflowReport{
 		WorkflowID: "cancel-test",
 		Steps: []auditlog.StepInfo{
-			stepFixture("canceled-step", auditlog.StepStatusCanceled),
+			testhelpers.StepFixture("canceled-step", auditlog.StepStatusCanceled),
 		},
 	}
 

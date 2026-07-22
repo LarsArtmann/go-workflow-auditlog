@@ -8,6 +8,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // TestAcceptance_MixedOutcomePipeline verifies the public API tells a coherent
@@ -17,28 +18,28 @@ import (
 func TestAcceptance_MixedOutcomePipeline(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	root := newSucceed("root")
-	flaky := newFlaky("retry-step", 2) // succeeds on the 3rd attempt
-	bad := newFail("bad-step", "boom")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	root := testhelpers.NewSucceed("root")
+	flaky := testhelpers.NewFlaky("retry-step", 2) // succeeds on the 3rd attempt
+	bad := testhelpers.NewFail("bad-step", "boom")
 
 	w.Add(
 		flow.Step(root),
 	)
-	addRetryStep(w, flaky, 5)
+	testhelpers.AddRetryStep(w, flaky, 5)
 	w.Add(flow.Step(bad))
 
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	assertReportValid(t, report)
+	testhelpers.AssertReportValid(t, report)
 
 	// Aggregates reflect the three outcomes.
 	if report.SucceededCount != 2 {
 		t.Errorf("SucceededCount: got %d, want 2 (root + retry-step)", report.SucceededCount)
 	}
 
-	assertFailedCount(t, report, 1)
+	testhelpers.AssertFailedCount(t, report, 1)
 
 	// A failure means the overall workflow did not succeed.
 	if report.WorkflowSucceeded {
@@ -79,7 +80,7 @@ func TestAcceptance_OnEventStreamIsOrderedAndTagged(t *testing.T) {
 		mu        sync.Mutex
 	)
 
-	a := mustNew(t, auditlog.Config{
+	a := testhelpers.MustNew(t, auditlog.Config{
 		Enabled: true,
 		// OnEvent fires from each step's goroutine, so concurrent steps invoke
 		// it concurrently — the callback must be goroutine-safe.
@@ -93,9 +94,9 @@ func TestAcceptance_OnEventStreamIsOrderedAndTagged(t *testing.T) {
 	runID := a.RunID()
 
 	w := &flow.Workflow{}
-	w.Add(flow.Step(newSucceed("a")))
-	w.Add(flow.Step(newSucceed("b")))
-	runWorkflow(t, a, w)
+	w.Add(flow.Step(testhelpers.NewSucceed("a")))
+	w.Add(flow.Step(testhelpers.NewSucceed("b")))
+	testhelpers.RunWorkflow(t, a, w)
 
 	if len(collected) == 0 {
 		t.Fatal("expected OnEvent to collect events")
@@ -116,7 +117,7 @@ func TestAcceptance_OnEventStreamIsOrderedAndTagged(t *testing.T) {
 	}
 
 	// Every event is tagged with the run ID.
-	assertEventRunIDsMatch(t, collected, runID)
+	testhelpers.AssertEventRunIDsMatch(t, collected, runID)
 
 	// There is at least one start and one end event.
 	if !slices.ContainsFunc(collected, auditlog.Event.IsAttemptStart) {
@@ -134,18 +135,18 @@ func TestAcceptance_OnEventStreamIsOrderedAndTagged(t *testing.T) {
 func TestAcceptance_FilterExportLoadPreservesIdentity(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	ok := newSucceed("ok-step")
-	bad := newFail("bad-step", "boom")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	ok := testhelpers.NewSucceed("ok-step")
+	bad := testhelpers.NewFail("bad-step", "boom")
 	w.Add(flow.Step(ok), flow.Step(bad))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	original := a.Report()
 	runID := a.RunID()
 
 	// Keep only succeeded steps.
 	filtered := original.Filtered(auditlog.WithStepsByStatus(auditlog.StepStatusSucceeded))
-	assertReportValid(t, filtered)
+	testhelpers.AssertReportValid(t, filtered)
 
 	if filtered.RunID != runID {
 		t.Errorf("filtered RunID %q != %q", filtered.RunID, runID)

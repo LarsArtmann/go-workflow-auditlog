@@ -9,6 +9,7 @@ import (
 	flow "github.com/Azure/go-workflow"
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
 // --- D2 Diagram Tests ---
@@ -35,14 +36,14 @@ func renderMarkdownTable(t *testing.T, a *auditlog.Auditor) string {
 func TestD2_BasicDAG(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	transform := newSucceed("transform")
-	save := newSucceed("save")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	transform := testhelpers.NewSucceed("transform")
+	save := testhelpers.NewSucceed("save")
 
-	addDependentStep(w, fetch, transform)
-	addDependentStep(w, transform, save)
-	runWorkflow(t, a, w)
+	testhelpers.AddDependentStep(w, fetch, transform)
+	testhelpers.AddDependentStep(w, transform, save)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -53,22 +54,22 @@ func TestD2_BasicDAG(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "title:", "expected title block in D2 output")
-	assertContains(t, output, "test", "expected D2 title to derive from WorkflowID 'test'")
-	assertContains(t, output, "fetch", "expected 'fetch' node in output")
-	assertContains(t, output, "transform", "expected 'transform' node in output")
-	assertContains(t, output, "save", "expected 'save' node in output")
-	assertContains(t, output, "->", "expected '->' edge in output")
-	assertContains(t, output, "#2d5a2d", "expected green fill color for succeeded step")
+	testhelpers.AssertContains(t, output, "title:", "expected title block in D2 output")
+	testhelpers.AssertContains(t, output, "test", "expected D2 title to derive from WorkflowID 'test'")
+	testhelpers.AssertContains(t, output, "fetch", "expected 'fetch' node in output")
+	testhelpers.AssertContains(t, output, "transform", "expected 'transform' node in output")
+	testhelpers.AssertContains(t, output, "save", "expected 'save' node in output")
+	testhelpers.AssertContains(t, output, "->", "expected '->' edge in output")
+	testhelpers.AssertContains(t, output, "#2d5a2d", "expected green fill color for succeeded step")
 }
 
 func TestD2_FailedStepRedColor(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	bad := newFail("bad", "boom")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	bad := testhelpers.NewFail("bad", "boom")
 	w.Add(flow.Step(bad))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -78,13 +79,13 @@ func TestD2_FailedStepRedColor(t *testing.T) {
 	}
 
 	output := buf.String()
-	assertContains(t, output, "#8b2d2d", "expected red fill color for failed step")
+	testhelpers.AssertContains(t, output, "#8b2d2d", "expected red fill color for failed step")
 }
 
 func TestD2_EmptyReport(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	var buf strings.Builder
 
@@ -93,26 +94,26 @@ func TestD2_EmptyReport(t *testing.T) {
 		t.Fatalf("WriteD2 on empty report error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "title:", "expected title block even for empty report")
+	testhelpers.AssertContains(t, buf.String(), "title:", "expected title block even for empty report")
 }
 
 func TestWriteD2String(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "d2-string")
+	a := testhelpers.RunSingleSucceed(t, "d2-string")
 
 	output, err := a.Report().WriteD2String()
 	if err != nil {
 		t.Fatalf("WriteD2String error: %v", err)
 	}
 
-	assertContains(t, output, "title:", "expected 'title:' in string output")
+	testhelpers.AssertContains(t, output, "title:", "expected 'title:' in string output")
 }
 
 func TestExportD2(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "export-d2", "dag.d2")
+	a, path := testhelpers.SingleSucceedExportPath(t, "export-d2", "dag.d2")
 
 	err := a.ExportD2(path)
 	if err != nil {
@@ -125,25 +126,25 @@ func TestExportD2(t *testing.T) {
 func TestWriteTable_Markdown(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	bad := newFail("bad", "boom")
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	bad := testhelpers.NewFail("bad", "boom")
 	w.Add(flow.Step(fetch), flow.Step(bad))
-	runWorkflow(t, a, w)
+	testhelpers.RunWorkflow(t, a, w)
 
 	output := renderMarkdownTable(t, a)
 
-	assertContains(t, output, "Step", "expected markdown table header")
-	assertContains(t, output, "fetch", "expected fetch row")
-	assertContains(t, output, "bad", "expected bad row")
-	assertContains(t, output, "succeeded", "expected succeeded status")
-	assertContains(t, output, "failed", "expected failed status")
+	testhelpers.AssertContains(t, output, "Step", "expected markdown table header")
+	testhelpers.AssertContains(t, output, "fetch", "expected fetch row")
+	testhelpers.AssertContains(t, output, "bad", "expected bad row")
+	testhelpers.AssertContains(t, output, "succeeded", "expected succeeded status")
+	testhelpers.AssertContains(t, output, "failed", "expected failed status")
 }
 
 func TestWriteTable_CSV(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "csv-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "csv-step")
 
 	err := a.Report().WriteTable(buf, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
@@ -152,15 +153,15 @@ func TestWriteTable_CSV(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "Step,Status,Duration,Attempts,Retry,Timeout,Error", "expected CSV header")
-	assertContains(t, output, "csv-step", "expected step name in CSV")
-	assertContains(t, output, "succeeded", "expected status in CSV")
+	testhelpers.AssertContains(t, output, "Step,Status,Duration,Attempts,Retry,Timeout,Error", "expected CSV header")
+	testhelpers.AssertContains(t, output, "csv-step", "expected step name in CSV")
+	testhelpers.AssertContains(t, output, "succeeded", "expected status in CSV")
 }
 
 func TestWriteTable_JSON(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "json-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "json-step")
 
 	err := a.Report().WriteTable(buf, output.FormatJSON, output.RenderOptions{})
 	if err != nil {
@@ -169,14 +170,14 @@ func TestWriteTable_JSON(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "json-step", "expected step name in JSON")
-	assertContains(t, output, "succeeded", "expected status in JSON")
+	testhelpers.AssertContains(t, output, "json-step", "expected step name in JSON")
+	testhelpers.AssertContains(t, output, "succeeded", "expected status in JSON")
 }
 
 func TestWriteTable_JSONL(t *testing.T) {
 	t.Parallel()
 
-	a, buf := runSingleSucceedWithBuffer(t, "jsonl-step")
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "jsonl-step")
 
 	err := a.Report().WriteTable(buf, output.FormatJSONL, output.RenderOptions{})
 	if err != nil {
@@ -191,35 +192,35 @@ func TestWriteTable_JSONL(t *testing.T) {
 		t.Fatalf("expected 1 JSONL line, got %d", len(lines))
 	}
 
-	assertContains(t, output, "jsonl-step", "expected step name in JSONL")
+	testhelpers.AssertContains(t, output, "jsonl-step", "expected step name in JSONL")
 }
 
 func TestWriteTable_EmptyReport(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	output := renderMarkdownTable(t, a)
-	assertContains(t, output, "| Step |", "expected header even for empty report")
+	testhelpers.AssertContains(t, output, "| Step |", "expected header even for empty report")
 }
 
 func TestWriteTableString(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "table-string")
+	a := testhelpers.RunSingleSucceed(t, "table-string")
 
 	output, err := a.Report().WriteTableString(output.FormatMarkdown, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
 
-	assertContains(t, output, "table-string", "expected step name in table string")
+	testhelpers.AssertContains(t, output, "table-string", "expected step name in table string")
 }
 
 func TestExportTable(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "export-table", "report.csv")
+	a, path := testhelpers.SingleSucceedExportPath(t, "export-table", "report.csv")
 
 	err := a.ExportTable(path, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
@@ -232,11 +233,11 @@ func TestExportTable(t *testing.T) {
 func TestWriteTree_BasicDAG(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	transform := newSucceed("transform")
-	addDependentStep(w, fetch, transform)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	transform := testhelpers.NewSucceed("transform")
+	testhelpers.AddDependentStep(w, fetch, transform)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -247,15 +248,15 @@ func TestWriteTree_BasicDAG(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "Workflow", "expected root label")
-	assertContains(t, output, "fetch", "expected fetch in tree")
-	assertContains(t, output, "transform", "expected transform in tree")
+	testhelpers.AssertContains(t, output, "Workflow", "expected root label")
+	testhelpers.AssertContains(t, output, "fetch", "expected fetch in tree")
+	testhelpers.AssertContains(t, output, "transform", "expected transform in tree")
 }
 
 func TestWriteTree_EmptyReport(t *testing.T) {
 	t.Parallel()
 
-	a := mustNew(t, auditlog.Config{Enabled: true})
+	a := testhelpers.MustNew(t, auditlog.Config{Enabled: true})
 
 	var buf strings.Builder
 
@@ -264,30 +265,30 @@ func TestWriteTree_EmptyReport(t *testing.T) {
 		t.Fatalf("WriteTree on empty report error: %v", err)
 	}
 
-	assertContains(t, buf.String(), "Workflow", "expected root label even for empty report")
+	testhelpers.AssertContains(t, buf.String(), "Workflow", "expected root label even for empty report")
 }
 
 func TestWriteTreeString(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "tree-string")
+	a := testhelpers.RunSingleSucceed(t, "tree-string")
 
 	output, err := a.Report().WriteTreeString()
 	if err != nil {
 		t.Fatalf("WriteTreeString error: %v", err)
 	}
 
-	assertContains(t, output, "tree-string", "expected step name in tree string")
+	testhelpers.AssertContains(t, output, "tree-string", "expected step name in tree string")
 }
 
 func TestWriteHTMLTree_BasicDAG(t *testing.T) {
 	t.Parallel()
 
-	a, w := newAuditAndWorkflow(t)
-	fetch := newSucceed("fetch")
-	transform := newSucceed("transform")
-	addDependentStep(w, fetch, transform)
-	runWorkflow(t, a, w)
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fetch := testhelpers.NewSucceed("fetch")
+	transform := testhelpers.NewSucceed("transform")
+	testhelpers.AddDependentStep(w, fetch, transform)
+	testhelpers.RunWorkflow(t, a, w)
 
 	var buf strings.Builder
 
@@ -298,28 +299,28 @@ func TestWriteHTMLTree_BasicDAG(t *testing.T) {
 
 	output := buf.String()
 
-	assertContains(t, output, "<ul>", "expected <ul> in HTML tree")
-	assertContains(t, output, "fetch", "expected fetch in HTML tree")
-	assertContains(t, output, "transform", "expected transform in HTML tree")
+	testhelpers.AssertContains(t, output, "<ul>", "expected <ul> in HTML tree")
+	testhelpers.AssertContains(t, output, "fetch", "expected fetch in HTML tree")
+	testhelpers.AssertContains(t, output, "transform", "expected transform in HTML tree")
 }
 
 func TestWriteHTMLTreeString(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "html-tree-string")
+	a := testhelpers.RunSingleSucceed(t, "html-tree-string")
 
 	output, err := a.Report().WriteHTMLTreeString()
 	if err != nil {
 		t.Fatalf("WriteHTMLTreeString error: %v", err)
 	}
 
-	assertContains(t, output, "<ul>", "expected <ul> in HTML tree string")
+	testhelpers.AssertContains(t, output, "<ul>", "expected <ul> in HTML tree string")
 }
 
 func TestExportTree(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "export-tree", "tree.txt")
+	a, path := testhelpers.SingleSucceedExportPath(t, "export-tree", "tree.txt")
 
 	err := a.ExportTree(path)
 	if err != nil {
@@ -330,7 +331,7 @@ func TestExportTree(t *testing.T) {
 func TestExportHTMLTree(t *testing.T) {
 	t.Parallel()
 
-	a, path := singleSucceedExportPath(t, "export-html-tree", "tree.html")
+	a, path := testhelpers.SingleSucceedExportPath(t, "export-html-tree", "tree.html")
 
 	err := a.ExportHTMLTree(path)
 	if err != nil {
@@ -344,7 +345,7 @@ func TestExportHTMLTree(t *testing.T) {
 func TestWorkflowReport_ExportMethods(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "report-export")
+	a := testhelpers.RunSingleSucceed(t, "report-export")
 
 	report := a.Report()
 	dir := t.TempDir()
@@ -391,7 +392,7 @@ func TestWorkflowReport_ExportMethods(t *testing.T) {
 func TestAuditor_WriteStringMethods(t *testing.T) {
 	t.Parallel()
 
-	a := runSingleSucceed(t, "str-methods")
+	a := testhelpers.RunSingleSucceed(t, "str-methods")
 
 	for _, tc := range []struct {
 		name string
