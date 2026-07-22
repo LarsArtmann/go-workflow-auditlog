@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"strings"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -14,7 +15,7 @@ func TestTable_DefaultColumns(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "default-col-step")
 
-	out, err := a.Report().WriteTableString(output.FormatCSV, output.RenderOptions{})
+	out, err := viz.WriteTableString(viz, a.Report(), output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
@@ -34,9 +35,9 @@ func TestTable_CustomColumnSelection(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "custom-col-step")
 
-	out, err := a.Report().WriteTableString(
+	out, err := viz.WriteTableString(viz, a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus),
+		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
@@ -70,9 +71,9 @@ func TestTable_NewColumns(t *testing.T) {
 	testhelpers.AddLinearChain(w, fetch, transform, save)
 	testhelpers.RunWorkflow(t, a, w)
 
-	out, err := a.Report().WriteTableString(
+	out, err := viz.WriteTableString(viz, a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnType, auditlog.ColumnDependencies),
+		viz.WithColumns(viz.ColumnStep, viz.ColumnType, viz.ColumnDependencies),
 	)
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
@@ -92,9 +93,9 @@ func TestTable_ColumnOrderRespected(t *testing.T) {
 	a := testhelpers.RunSingleSucceed(t, "order-step")
 
 	// Reverse the natural order: Status, then Step.
-	out, err := a.Report().WriteTableString(
+	out, err := viz.WriteTableString(viz, a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStatus, auditlog.ColumnStep),
+		viz.WithColumns(viz.ColumnStatus, viz.ColumnStep),
 	)
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
@@ -125,9 +126,9 @@ func TestTable_AllColumns(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "all-cols-step")
 
-	out, err := a.Report().WriteTableString(
+	out, err := viz.WriteTableString(viz, a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.AllTableColumns()...),
+		viz.WithColumns(auditlog.AllTableColumns()...),
 	)
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
@@ -148,9 +149,9 @@ func TestTable_MaxAttemptsColumn(t *testing.T) {
 	testhelpers.AddRetryStep(w, step, 5)
 	testhelpers.RunWorkflow(t, a, w)
 
-	out, err := a.Report().WriteTableString(
+	out, err := viz.WriteTableString(viz, a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnMaxAttempts),
+		viz.WithColumns(viz.ColumnStep, viz.ColumnMaxAttempts),
 	)
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
@@ -164,8 +165,8 @@ func TestTable_ColumnsOnAuditor(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "auditor-col-step")
 
-	err := a.WriteTable(buf, output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus),
+	err := viz.WriteTable(a, buf, output.FormatCSV, output.RenderOptions{},
+		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
 	if err != nil {
 		t.Fatalf("Auditor.WriteTable error: %v", err)
@@ -181,8 +182,8 @@ func TestTable_ExportWithColumns(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "table-cols-export", "table.csv")
 
-	err := a.ExportTable(path, output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus),
+	err := viz.ExportTable(a, path, output.FormatCSV, output.RenderOptions{},
+		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
 	if err != nil {
 		t.Fatalf("ExportTable error: %v", err)
@@ -195,7 +196,7 @@ func TestTable_EmptyColumnSelectionUsesDefaults(t *testing.T) {
 	a := testhelpers.RunSingleSucceed(t, "empty-cols-step")
 
 	// WriteTable with no tableOpts should produce default columns.
-	out, err := a.Report().WriteTableString(output.FormatCSV, output.RenderOptions{})
+	out, err := viz.WriteTableString(viz, a.Report(), output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
@@ -230,9 +231,9 @@ func TestTable_ColumnsFromReplayedReport(t *testing.T) {
 		t.Fatalf("ReplayEvents error: %v", err)
 	}
 
-	out, err := replayed.WriteTableString(
+	out, err := viz.WriteTableString(replayed, 
 		output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnDependencies),
+		viz.WithColumns(viz.ColumnStep, viz.ColumnDependencies),
 	)
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
@@ -253,13 +254,13 @@ func TestTable_DefaultTableColumnsVar(t *testing.T) {
 
 	// Ensure it matches the original hardcoded layout.
 	expected := []auditlog.TableColumn{
-		auditlog.ColumnStep,
-		auditlog.ColumnStatus,
-		auditlog.ColumnDuration,
-		auditlog.ColumnAttempts,
-		auditlog.ColumnRetry,
-		auditlog.ColumnTimeout,
-		auditlog.ColumnError,
+		viz.ColumnStep,
+		viz.ColumnStatus,
+		viz.ColumnDuration,
+		viz.ColumnAttempts,
+		viz.ColumnRetry,
+		viz.ColumnTimeout,
+		viz.ColumnError,
 	}
 
 	for i, want := range expected {
@@ -293,9 +294,9 @@ func TestTable_ZeroDurationCell(t *testing.T) {
 		},
 	}
 
-	out, err := report.WriteTableString(
+	out, err := viz.WriteTableString(report, 
 		output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnDuration),
+		viz.WithColumns(viz.ColumnStep, viz.ColumnDuration),
 	)
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
@@ -312,16 +313,16 @@ func TestTable_ColumnString(t *testing.T) {
 		col  auditlog.TableColumn
 		want string
 	}{
-		{auditlog.ColumnStep, "Step"},
-		{auditlog.ColumnStatus, "Status"},
-		{auditlog.ColumnDuration, "Duration"},
-		{auditlog.ColumnAttempts, "Attempts"},
-		{auditlog.ColumnMaxAttempts, "Max Attempts"},
-		{auditlog.ColumnRetry, "Retry"},
-		{auditlog.ColumnTimeout, "Timeout"},
-		{auditlog.ColumnError, "Error"},
-		{auditlog.ColumnType, "Type"},
-		{auditlog.ColumnDependencies, "Dependencies"},
+		{viz.ColumnStep, "Step"},
+		{viz.ColumnStatus, "Status"},
+		{viz.ColumnDuration, "Duration"},
+		{viz.ColumnAttempts, "Attempts"},
+		{viz.ColumnMaxAttempts, "Max Attempts"},
+		{viz.ColumnRetry, "Retry"},
+		{viz.ColumnTimeout, "Timeout"},
+		{viz.ColumnError, "Error"},
+		{viz.ColumnType, "Type"},
+		{viz.ColumnDependencies, "Dependencies"},
 	}
 
 	for _, tt := range tests {
@@ -344,7 +345,7 @@ func TestTable_DefaultColumnsImmutability(t *testing.T) {
 		},
 	}
 
-	_, err := report.WriteTableString(output.FormatCSV, output.RenderOptions{})
+	_, err := viz.WriteTableString(report, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString: %v", err)
 	}

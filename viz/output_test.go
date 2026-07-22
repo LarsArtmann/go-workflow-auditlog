@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"os"
@@ -9,6 +9,7 @@ import (
 	flow "github.com/Azure/go-workflow"
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -16,14 +17,14 @@ import (
 
 // renderMarkdownTable renders the report's step summary as Markdown into a
 // buffer and returns it. Centralizes the
-// `var buf strings.Builder; err := a.Report().WriteTable(&buf, output.FormatMarkdown, output.RenderOptions{})`
+// `var buf strings.Builder; err := viz.WriteTable(viz, a.Report(), &buf, output.FormatMarkdown, output.RenderOptions{})`
 // boilerplate used by output tests that need a Markdown rendering of a report.
 func renderMarkdownTable(t *testing.T, a *auditlog.Auditor) string {
 	t.Helper()
 
 	var buf strings.Builder
 
-	err := a.Report().WriteTable(&buf, output.FormatMarkdown, output.RenderOptions{})
+	err := viz.WriteTable(viz, a.Report(), &buf, output.FormatMarkdown, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable markdown error: %v", err)
 	}
@@ -47,7 +48,7 @@ func TestD2_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteD2(&buf)
+	err := viz.WriteD2(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
@@ -73,7 +74,7 @@ func TestD2_FailedStepRedColor(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteD2(&buf)
+	err := viz.WriteD2(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
@@ -89,7 +90,7 @@ func TestD2_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteD2(&buf)
+	err := viz.WriteD2(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteD2 on empty report error: %v", err)
 	}
@@ -102,7 +103,7 @@ func TestWriteD2String(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "d2-string")
 
-	output, err := a.Report().WriteD2String()
+	output, err := viz.WriteD2String(viz, a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteD2String error: %v", err)
 	}
@@ -115,7 +116,7 @@ func TestExportD2(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-d2", "dag.d2")
 
-	err := a.ExportD2(path)
+	err := viz.ExportD2(a, path)
 	if err != nil {
 		t.Fatalf("ExportD2 error: %v", err)
 	}
@@ -146,7 +147,7 @@ func TestWriteTable_CSV(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "csv-step")
 
-	err := a.Report().WriteTable(buf, output.FormatCSV, output.RenderOptions{})
+	err := viz.WriteTable(viz, a.Report(), buf, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable csv error: %v", err)
 	}
@@ -163,7 +164,7 @@ func TestWriteTable_JSON(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "json-step")
 
-	err := a.Report().WriteTable(buf, output.FormatJSON, output.RenderOptions{})
+	err := viz.WriteTable(viz, a.Report(), buf, output.FormatJSON, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable json error: %v", err)
 	}
@@ -179,7 +180,7 @@ func TestWriteTable_JSONL(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "jsonl-step")
 
-	err := a.Report().WriteTable(buf, output.FormatJSONL, output.RenderOptions{})
+	err := viz.WriteTable(viz, a.Report(), buf, output.FormatJSONL, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable jsonl error: %v", err)
 	}
@@ -209,7 +210,7 @@ func TestWriteTableString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "table-string")
 
-	output, err := a.Report().WriteTableString(output.FormatMarkdown, output.RenderOptions{})
+	output, err := viz.WriteTableString(viz, a.Report(), output.FormatMarkdown, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
@@ -222,7 +223,7 @@ func TestExportTable(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-table", "report.csv")
 
-	err := a.ExportTable(path, output.FormatCSV, output.RenderOptions{})
+	err := viz.ExportTable(a, path, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("ExportTable error: %v", err)
 	}
@@ -241,7 +242,7 @@ func TestWriteTree_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteTree(&buf)
+	err := viz.WriteTree(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteTree error: %v", err)
 	}
@@ -260,7 +261,7 @@ func TestWriteTree_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteTree(&buf)
+	err := viz.WriteTree(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteTree on empty report error: %v", err)
 	}
@@ -273,7 +274,7 @@ func TestWriteTreeString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "tree-string")
 
-	output, err := a.Report().WriteTreeString()
+	output, err := viz.WriteTreeString(viz, a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteTreeString error: %v", err)
 	}
@@ -292,7 +293,7 @@ func TestWriteHTMLTree_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteHTMLTree(&buf)
+	err := viz.WriteHTMLTree(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTMLTree error: %v", err)
 	}
@@ -309,7 +310,7 @@ func TestWriteHTMLTreeString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "html-tree-string")
 
-	output, err := a.Report().WriteHTMLTreeString()
+	output, err := viz.WriteHTMLTreeString(viz, a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteHTMLTreeString error: %v", err)
 	}
@@ -322,7 +323,7 @@ func TestExportTree(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-tree", "tree.txt")
 
-	err := a.ExportTree(path)
+	err := viz.ExportTree(a, path)
 	if err != nil {
 		t.Fatalf("ExportTree error: %v", err)
 	}
@@ -333,7 +334,7 @@ func TestExportHTMLTree(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-html-tree", "tree.html")
 
-	err := a.ExportHTMLTree(path)
+	err := viz.ExportHTMLTree(a, path)
 	if err != nil {
 		t.Fatalf("ExportHTMLTree error: %v", err)
 	}
@@ -357,10 +358,10 @@ func TestWorkflowReport_ExportMethods(t *testing.T) {
 	}{
 		{"JSON", report.ExportJSON, ".json"},
 		{"NDJSON", report.ExportNDJSON, ".ndjson"},
-		{"Mermaid", func(path string) error { return report.ExportMermaid(path) }, ".mmd"},
-		{"PlantUML", func(path string) error { return report.ExportPlantUML(path) }, ".puml"},
-		{"Graphviz", func(path string) error { return report.ExportGraphviz(path) }, ".dot"},
-		{"D2", func(path string) error { return report.ExportD2(path) }, ".d2"},
+		{"Mermaid", func(path string) error { return viz.ExportMermaid(report, path) }, ".mmd"},
+		{"PlantUML", func(path string) error { return viz.ExportPlantUML(report, path) }, ".puml"},
+		{"Graphviz", func(path string) error { return viz.ExportGraphviz(report, path) }, ".dot"},
+		{"D2", func(path string) error { return viz.ExportD2(report, path) }, ".d2"},
 		{"Tree", report.ExportTree, ".txt"},
 		{"HTMLTree", report.ExportHTMLTree, ".html"},
 		{"HTML", report.ExportHTML, ".html"},
@@ -398,10 +399,10 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 		name string
 		fn   func() (string, error)
 	}{
-		{"Mermaid", func() (string, error) { return a.WriteMermaidString() }},
-		{"PlantUML", func() (string, error) { return a.WritePlantUMLString() }},
-		{"Graphviz", func() (string, error) { return a.WriteGraphvizString() }},
-		{"D2", func() (string, error) { return a.WriteD2String() }},
+		{"Mermaid", func() (string, error) { return viz.WriteMermaidString(a, ) }},
+		{"PlantUML", func() (string, error) { return viz.WritePlantUMLString(a, ) }},
+		{"Graphviz", func() (string, error) { return viz.WriteGraphvizString(a, ) }},
+		{"D2", func() (string, error) { return viz.WriteD2String(a, ) }},
 		{"Tree", a.WriteTreeString},
 		{"HTMLTree", a.WriteHTMLTreeString},
 		{"HTML", a.WriteHTMLString},
@@ -421,7 +422,7 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 	}
 
 	// Table string variant needs format + opts.
-	tableOut, err := a.WriteTableString(output.FormatMarkdown, output.RenderOptions{})
+	tableOut, err := viz.WriteTableString(a, output.FormatMarkdown, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}

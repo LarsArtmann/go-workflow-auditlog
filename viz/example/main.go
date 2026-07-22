@@ -268,23 +268,23 @@ func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.Workflo
 		{"audit-report.json", func() error { return audit.ExportJSON("audit-report.json") }},
 		{"audit-events.ndjson", func() error { return audit.ExportNDJSON("audit-events.ndjson") }},
 		{"dag.mmd", func() error {
-			return audit.ExportMermaid("dag.mmd",
-				auditlog.WithDirection(output.DirectionRight))
+			return viz.ExportMermaid(report, "dag.mmd",
+				viz.WithDirection(output.DirectionRight))
 		}},
-		{"dag.dot", func() error { return audit.ExportGraphviz("dag.dot") }},
-		{"dag.puml", func() error { return audit.ExportPlantUML("dag.puml") }},
-		{"dag.d2", func() error { return audit.ExportD2("dag.d2") }},
+		{"dag.dot", func() error { return viz.ExportGraphviz(report, "dag.dot") }},
+		{"dag.puml", func() error { return viz.ExportPlantUML(report, "dag.puml") }},
+		{"dag.d2", func() error { return viz.ExportD2(report, "dag.d2") }},
 		{"steps.csv", func() error {
-			return audit.ExportTable("steps.csv", output.FormatCSV, output.RenderOptions{})
+			return viz.ExportTable(report, "steps.csv", output.FormatCSV, output.RenderOptions{})
 		}},
 		{"steps-compact.md", func() error {
-			return audit.ExportTable("steps-compact.md", output.FormatMarkdown, output.RenderOptions{},
-				auditlog.WithColumns(
-					auditlog.ColumnStep, auditlog.ColumnStatus, auditlog.ColumnDuration,
+			return viz.ExportTable(report, "steps-compact.md", output.FormatMarkdown, output.RenderOptions{},
+				viz.WithColumns(
+					viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration,
 				))
 		}},
-		{"tree.txt", func() error { return audit.ExportTree("tree.txt") }},
-		{"dashboard.html", func() error { return audit.ExportHTML("dashboard.html") }},
+		{"tree.txt", func() error { return viz.ExportTree(report, "tree.txt") }},
+		{"dashboard.html", func() error { return viz.ExportHTML(report, "dashboard.html") }},
 	}
 
 	for _, task := range tasks {

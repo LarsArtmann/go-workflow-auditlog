@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"bytes"
@@ -13,6 +13,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -506,7 +507,7 @@ func TestCoverage_D2_EmptyWorkflowID(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	err := report.WriteD2(&buf)
+	err := viz.WriteD2(report, &buf)
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
@@ -535,7 +536,7 @@ func TestCoverage_CancelStatus_Diagram(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	err := report.WriteD2(&buf)
+	err := viz.WriteD2(report, &buf)
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}

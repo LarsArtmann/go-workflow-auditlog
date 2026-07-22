@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 // goldenExportedAt is a fixed timestamp so the rendered HTML is byte-for-byte
@@ -150,7 +151,7 @@ func TestReport_WriteHTML_GoldenContent(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	err := report.WriteHTML(&buf)
+	err := viz.WriteHTML(report, &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML: %v", err)
 	}

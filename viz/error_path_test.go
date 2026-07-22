@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -82,7 +83,7 @@ func TestErrorPath_WriteMermaid_FailingWriter_ErrExportWriteFailed(t *testing.T)
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteMermaid(failingWriter{})
+	err := viz.WriteMermaid(report, failingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteMermaid(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -93,7 +94,7 @@ func TestErrorPath_WriteGraphviz_FailingWriter_ErrExportWriteFailed(t *testing.T
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteGraphviz(failingWriter{})
+	err := viz.WriteGraphviz(report, failingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteGraphviz(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -108,7 +109,7 @@ func TestErrorPath_WritePlantUML_FailingWriter_ErrExportWriteFailed(t *testing.T
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WritePlantUML(failingWriter{})
+	err := viz.WritePlantUML(report, failingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WritePlantUML(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -119,7 +120,7 @@ func TestErrorPath_WriteD2_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteD2(failingWriter{})
+	err := viz.WriteD2(report, failingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteD2(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -134,7 +135,7 @@ func TestErrorPath_WriteTree_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteTree(failingWriter{})
+	err := viz.WriteTree(report, failingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteTree(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -145,7 +146,7 @@ func TestErrorPath_WriteHTMLTree_FailingWriter_ErrExportWriteFailed(t *testing.T
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteHTMLTree(failingWriter{})
+	err := viz.WriteHTMLTree(report, failingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteHTMLTree(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -161,7 +162,7 @@ func TestErrorPath_WriteTable_FailingWriter_ErrRenderFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteTable(failingWriter{}, output.FormatMarkdown, output.RenderOptions{})
+	err := viz.WriteTable(report, failingWriter{}, output.FormatMarkdown, output.RenderOptions{})
 
 	if !errors.Is(err, auditlog.ErrRenderFailed) {
 		t.Errorf("WriteTable(failingWriter) error = %v, want errors.Is(err, ErrRenderFailed)", err)
@@ -177,7 +178,7 @@ func TestErrorPath_WriteHTML_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteHTML(failingWriter{})
+	err := viz.WriteHTML(report, failingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteHTML(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -219,7 +220,7 @@ func TestErrorPath_ExportMermaid_UnwritableDir_ErrExportWriteFailed(t *testing.T
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.ExportMermaid("/nonexistent_dir_auditlog_test/output.mmd")
+	err := viz.ExportMermaid(report, "/nonexistent_dir_auditlog_test/output.mmd")
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("ExportMermaid(unwritable) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -230,7 +231,7 @@ func TestErrorPath_ExportHTML_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.ExportHTML("/nonexistent_dir_auditlog_test/output.html")
+	err := viz.ExportHTML(report, "/nonexistent_dir_auditlog_test/output.html")
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("ExportHTML(unwritable) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -241,7 +242,7 @@ func TestErrorPath_ExportD2_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.ExportD2("/nonexistent_dir_auditlog_test/output.d2")
+	err := viz.ExportD2(report, "/nonexistent_dir_auditlog_test/output.d2")
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("ExportD2(unwritable) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)

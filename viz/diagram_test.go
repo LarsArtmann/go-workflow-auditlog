@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -23,7 +24,7 @@ func TestMermaid_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteMermaid(&buf)
+	err := viz.WriteMermaid(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -49,7 +50,7 @@ func TestMermaid_FailedStepRedColor(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteMermaid(&buf)
+	err := viz.WriteMermaid(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -69,7 +70,7 @@ func TestMermaid_RetryIndicator(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteMermaid(&buf)
+	err := viz.WriteMermaid(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -90,7 +91,7 @@ func TestMermaid_SpecialCharsSanitized(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteMermaid(&buf)
+	err := viz.WriteMermaid(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -111,7 +112,7 @@ func TestMermaid_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteMermaid(&buf)
+	err := viz.WriteMermaid(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid on empty report error: %v", err)
 	}
@@ -131,7 +132,7 @@ func TestPlantUML_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WritePlantUML(&buf)
+	err := viz.WritePlantUML(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
@@ -150,7 +151,7 @@ func TestExportMermaid(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-mmd", "dag.mmd")
 
-	err := a.ExportMermaid(path)
+	err := viz.ExportMermaid(a, path)
 	if err != nil {
 		t.Fatalf("ExportMermaid error: %v", err)
 	}
@@ -161,7 +162,7 @@ func TestExportPlantUML(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-puml", "dag.puml")
 
-	err := a.ExportPlantUML(path)
+	err := viz.ExportPlantUML(a, path)
 	if err != nil {
 		t.Fatalf("ExportPlantUML error: %v", err)
 	}
@@ -178,7 +179,7 @@ func TestGraphviz_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteGraphviz(&buf)
+	err := viz.WriteGraphviz(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
@@ -202,7 +203,7 @@ func TestGraphviz_FailedStepColor(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteGraphviz(&buf)
+	err := viz.WriteGraphviz(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
@@ -218,7 +219,7 @@ func TestGraphviz_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteGraphviz(&buf)
+	err := viz.WriteGraphviz(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteGraphviz on empty report error: %v", err)
 	}
@@ -231,7 +232,7 @@ func TestExportGraphviz(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-dot", "dag.dot")
 
-	err := a.ExportGraphviz(path)
+	err := viz.ExportGraphviz(a, path)
 	if err != nil {
 		t.Fatalf("ExportGraphviz error: %v", err)
 	}
@@ -255,7 +256,7 @@ func TestMermaid_FanOutFanIn(t *testing.T) {
 
 	var buf strings.Builder
 
-	_ = a.Report().WriteMermaid(&buf)
+	_ = viz.WriteMermaid(viz, a.Report(), &buf)
 
 	output := buf.String()
 
@@ -271,7 +272,7 @@ func TestWriteMermaidString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "string-step")
 
-	output, err := a.Report().WriteMermaidString()
+	output, err := viz.WriteMermaidString(viz, a.Report(), )
 	// WriteMermaidString currently wraps nil errors; verify the output is usable.
 	_ = err
 
@@ -283,7 +284,7 @@ func TestWriteGraphvizString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "string-step")
 
-	output, err := a.Report().WriteGraphvizString()
+	output, err := viz.WriteGraphvizString(viz, a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteGraphvizString error: %v", err)
 	}
@@ -296,7 +297,7 @@ func TestWritePlantUMLString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "plantuml-step")
 
-	output, err := a.Report().WritePlantUMLString()
+	output, err := viz.WritePlantUMLString(viz, a.Report(), )
 	if err != nil {
 		t.Fatalf("WritePlantUMLString error: %v", err)
 	}
@@ -318,7 +319,7 @@ func TestMermaid_SkippedStepGrayColor(t *testing.T) {
 
 	var buf strings.Builder
 
-	_ = a.Report().WriteMermaid(&buf)
+	_ = viz.WriteMermaid(viz, a.Report(), &buf)
 
 	output := buf.String()
 
@@ -334,7 +335,7 @@ func TestPlantUML_NoMermaidClasses(t *testing.T) {
 
 	var buf strings.Builder
 
-	_ = a.Report().WritePlantUML(&buf)
+	_ = viz.WritePlantUML(viz, a.Report(), &buf)
 
 	output := buf.String()
 
@@ -364,7 +365,7 @@ func TestMermaid_CanceledStep(t *testing.T) {
 
 	var buf strings.Builder
 
-	_ = a.Report().WriteMermaid(&buf)
+	_ = viz.WriteMermaid(viz, a.Report(), &buf)
 
 	output := buf.String()
 
@@ -402,7 +403,7 @@ func TestDiagram_EdgeDirectionFollowsExecutionFlow(t *testing.T) {
 
 		var buf strings.Builder
 
-		err := report.WriteMermaid(&buf)
+		err := viz.WriteMermaid(report, &buf)
 		if err != nil {
 			t.Fatalf("WriteMermaid: %v", err)
 		}
@@ -415,7 +416,7 @@ func TestDiagram_EdgeDirectionFollowsExecutionFlow(t *testing.T) {
 
 		var buf strings.Builder
 
-		err := report.WriteD2(&buf)
+		err := viz.WriteD2(report, &buf)
 		if err != nil {
 			t.Fatalf("WriteD2: %v", err)
 		}
@@ -430,7 +431,7 @@ func TestDiagram_EdgeDirectionFollowsExecutionFlow(t *testing.T) {
 
 		var buf strings.Builder
 
-		err := report.WriteGraphviz(&buf)
+		err := viz.WriteGraphviz(report, &buf)
 		if err != nil {
 			t.Fatalf("WriteGraphviz: %v", err)
 		}
@@ -445,7 +446,7 @@ func TestDiagram_EdgeDirectionFollowsExecutionFlow(t *testing.T) {
 
 		var buf strings.Builder
 
-		err := report.WriteTree(&buf)
+		err := viz.WriteTree(report, &buf)
 		if err != nil {
 			t.Fatalf("WriteTree: %v", err)
 		}

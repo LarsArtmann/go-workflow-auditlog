@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -58,7 +59,7 @@ func FuzzDiagramSpecialChars(f *testing.F) {
 		// Mermaid: structural integrity check.
 		var mBuf bytes.Buffer
 
-		mErr := report.WriteMermaid(&mBuf)
+		mErr := viz.WriteMermaid(report, &mBuf)
 		if mErr != nil {
 			t.Fatalf("WriteMermaid error: %v", mErr)
 		}
@@ -69,7 +70,7 @@ func FuzzDiagramSpecialChars(f *testing.F) {
 		// PlantUML: must not contain @enduml in the middle (injection).
 		var pBuf bytes.Buffer
 
-		pErr := report.WritePlantUML(&pBuf)
+		pErr := viz.WritePlantUML(report, &pBuf)
 		if pErr != nil {
 			t.Fatalf("WritePlantUML error: %v", pErr)
 		}
@@ -77,7 +78,7 @@ func FuzzDiagramSpecialChars(f *testing.F) {
 		// DOT: must produce a valid digraph.
 		var dBuf bytes.Buffer
 
-		dErr := report.WriteGraphviz(&dBuf)
+		dErr := viz.WriteGraphviz(report, &dBuf)
 		if dErr != nil {
 			t.Fatalf("WriteGraphviz error: %v", dErr)
 		}
@@ -88,7 +89,7 @@ func FuzzDiagramSpecialChars(f *testing.F) {
 		// D2: must not error.
 		var d2Buf bytes.Buffer
 
-		d2Err := report.WriteD2(&d2Buf)
+		d2Err := viz.WriteD2(report, &d2Buf)
 		if d2Err != nil {
 			t.Fatalf("WriteD2 error: %v", d2Err)
 		}
@@ -168,7 +169,7 @@ func FuzzHTMLSpecialChars(f *testing.F) {
 
 		var buf bytes.Buffer
 
-		err := report.WriteHTML(&buf)
+		err := viz.WriteHTML(report, &buf)
 		if err != nil {
 			return // JSON marshal may fail on some inputs
 		}
@@ -306,10 +307,10 @@ func FuzzDiagramSanitization_MultiStep(f *testing.F) {
 			write    func(io.Writer) error
 			mustHave string
 		}{
-			{"mermaid", func(w io.Writer) error { return report.WriteMermaid(w) }, "flowchart TD"},
-			{"plantuml", func(w io.Writer) error { return report.WritePlantUML(w) }, ""},
-			{"dot", func(w io.Writer) error { return report.WriteGraphviz(w) }, "digraph"},
-			{"d2", func(w io.Writer) error { return report.WriteD2(w) }, "fuzz-multi"},
+			{"mermaid", func(w io.Writer) error { return viz.WriteMermaid(report, w) }, "flowchart TD"},
+			{"plantuml", func(w io.Writer) error { return viz.WritePlantUML(report, w) }, ""},
+			{"dot", func(w io.Writer) error { return viz.WriteGraphviz(report, w) }, "digraph"},
+			{"d2", func(w io.Writer) error { return viz.WriteD2(report, w) }, "fuzz-multi"},
 		}
 
 		for _, fm := range formats {

@@ -1,10 +1,11 @@
-package auditlog_test
+package viz_test
 
 import (
 	"strings"
 	"testing"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 // =============================================================================
@@ -53,7 +54,7 @@ func TestIntegration_RoundTrip_JSON_Load_Diagram(t *testing.T) {
 	}
 
 	// Step 4: Loaded report produces valid diagram output
-	mermaidOut, err := loaded.WriteMermaidString()
+	mermaidOut, err := viz.WriteMermaidString(loaded, )
 	if err != nil {
 		t.Fatalf("loaded.WriteMermaidString error: %v", err)
 	}
@@ -63,7 +64,7 @@ func TestIntegration_RoundTrip_JSON_Load_Diagram(t *testing.T) {
 	}
 
 	// Step 5: Loaded report produces valid D2 output
-	d2Out, err := loaded.WriteD2String()
+	d2Out, err := viz.WriteD2String(loaded, )
 	if err != nil {
 		t.Fatalf("loaded.WriteD2String error: %v", err)
 	}
@@ -121,7 +122,7 @@ func TestIntegration_RoundTrip_NDJSON_Replay_Diagram(t *testing.T) {
 	}
 
 	// Step 5: Replay report produces valid diagram output
-	treeOut, err := replayed.WriteTreeString()
+	treeOut, err := viz.WriteTreeString(replayed, )
 	if err != nil {
 		t.Fatalf("replayed.WriteTreeString error: %v", err)
 	}
@@ -158,17 +159,17 @@ func TestCrossFormat_DiagramNodeConsistency(t *testing.T) {
 	report.StepCount = 2
 
 	// Render all three formats
-	mermaidOut, err := report.WriteMermaidString()
+	mermaidOut, err := viz.WriteMermaidString(report, )
 	if err != nil {
 		t.Fatalf("WriteMermaidString error: %v", err)
 	}
 
-	dotOut, err := report.WriteGraphvizString()
+	dotOut, err := viz.WriteGraphvizString(report, )
 	if err != nil {
 		t.Fatalf("WriteGraphvizString error: %v", err)
 	}
 
-	d2Out, err := report.WriteD2String()
+	d2Out, err := viz.WriteD2String(report, )
 	if err != nil {
 		t.Fatalf("WriteD2String error: %v", err)
 	}

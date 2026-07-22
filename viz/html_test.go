@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -24,7 +25,7 @@ func TestWriteHTML_BasicReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteHTML(&buf)
+	err := viz.WriteHTML(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -59,7 +60,7 @@ func TestWriteHTML_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := report.WriteHTML(&buf)
+	err := viz.WriteHTML(report, &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -80,7 +81,7 @@ func TestWriteHTML_FailedStepWithError(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteHTML(&buf)
+	err := viz.WriteHTML(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -96,7 +97,7 @@ func TestWriteHTMLString_ReturnsContent(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "only-step")
 
-	output, err := a.Report().WriteHTMLString()
+	output, err := viz.WriteHTMLString(viz, a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteHTMLString error: %v", err)
 	}
@@ -115,7 +116,7 @@ func TestExportHTML_WritesFile(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "exported-step", "report.html")
 
-	err := a.Report().ExportHTML(path)
+	err := viz.ExportHTML(viz, a.Report(), path)
 	if err != nil {
 		t.Fatalf("ExportHTML error: %v", err)
 	}
@@ -139,7 +140,7 @@ func TestAuditor_WriteHTML_DelegatesToReport(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "delegate-step")
 
-	err := a.WriteHTML(buf)
+	err := viz.WriteHTML(a, buf)
 	if err != nil {
 		t.Fatalf("Auditor.WriteHTML error: %v", err)
 	}
@@ -152,7 +153,7 @@ func TestAuditor_ExportHTML_DelegatesToReport(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "auditor-export", "auditor-report.html")
 
-	err := a.ExportHTML(path)
+	err := viz.ExportHTML(a, path)
 	if err != nil {
 		t.Fatalf("Auditor.ExportHTML error: %v", err)
 	}
@@ -172,7 +173,7 @@ func TestAuditor_WriteHTMLString_DelegatesToReport(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "string-delegate")
 
-	output, err := a.WriteHTMLString()
+	output, err := viz.WriteHTMLString(a, )
 	if err != nil {
 		t.Fatalf("Auditor.WriteHTMLString error: %v", err)
 	}
@@ -190,7 +191,7 @@ func TestWriteHTML_RetryStepHasAttemptCount(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteHTML(&buf)
+	err := viz.WriteHTML(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -213,7 +214,7 @@ func TestWriteHTML_MetadataInjected(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := report.WriteHTML(&buf)
+	err := viz.WriteHTML(report, &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -260,7 +261,7 @@ func TestWriteHTML_AllSixStatuses(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := report.WriteHTML(&buf)
+	err := viz.WriteHTML(report, &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -290,7 +291,7 @@ func TestWriteHTML_FromReplay(t *testing.T) {
 
 	var buf strings.Builder
 
-	err = report.WriteHTML(&buf)
+	err = viz.WriteHTML(report, &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML from replay: %v", err)
 	}
@@ -321,7 +322,7 @@ func TestWriteHTML_FromLoadedReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err = loaded.WriteHTML(&buf)
+	err = viz.WriteHTML(loaded, &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML from loaded: %v", err)
 	}
@@ -350,7 +351,7 @@ func TestWriteHTML_DiamondDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteHTML(&buf)
+	err := viz.WriteHTML(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML: %v", err)
 	}
@@ -392,7 +393,7 @@ func TestWriteHTML_HighFanOut(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := report.WriteHTML(&buf)
+	err := viz.WriteHTML(report, &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML: %v", err)
 	}
@@ -410,14 +411,14 @@ func TestWriteHTML_Determinism(t *testing.T) {
 
 	var buf1 strings.Builder
 
-	err := report.WriteHTML(&buf1)
+	err := viz.WriteHTML(report, &buf1)
 	if err != nil {
 		t.Fatalf("first WriteHTML: %v", err)
 	}
 
 	var buf2 strings.Builder
 
-	err = report.WriteHTML(&buf2)
+	err = viz.WriteHTML(report, &buf2)
 	if err != nil {
 		t.Fatalf("second WriteHTML: %v", err)
 	}
@@ -473,7 +474,7 @@ func TestWriteHTML_FailureBanner_WhenFailed(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteHTML(&buf)
+	err := viz.WriteHTML(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML: %v", err)
 	}
@@ -543,7 +544,7 @@ func TestWriteHTML_ImpactBadge(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := a.Report().WriteHTML(&buf)
+	err := viz.WriteHTML(viz, a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML: %v", err)
 	}

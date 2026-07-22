@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	flow "github.com/Azure/go-workflow"
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -186,7 +187,7 @@ func BenchmarkMermaidExport(b *testing.B) {
 			b.ResetTimer()
 
 			for range b.N {
-				_ = report.WriteMermaid(&discardWriter{})
+				_ = viz.WriteMermaid(report, &discardWriter{})
 			}
 		})
 	}
@@ -291,9 +292,9 @@ func ExampleWorkflowReport_WriteTable() {
 		},
 	}
 
-	out, _ := report.WriteTableString(
+	out, _ := viz.WriteTableString(report, 
 		output.FormatCSV, output.RenderOptions{},
-		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus),
+		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
 
 	fmt.Println(out)
@@ -313,8 +314,8 @@ func ExampleWorkflowReport_WriteMermaid() {
 		},
 	}
 
-	out, _ := report.WriteMermaidString(
-		auditlog.WithDirection(output.DirectionRight),
+	out, _ := viz.WriteMermaidString(report, 
+		viz.WithDirection(output.DirectionRight),
 	)
 
 	fmt.Println(strings.Contains(out, "flowchart LR"))
@@ -396,7 +397,7 @@ func BenchmarkWriteD2_LargeReport(b *testing.B) {
 	b.ResetTimer()
 
 	for range b.N {
-		_ = report.WriteD2(io.Discard)
+		_ = viz.WriteD2(report, io.Discard)
 	}
 }
 
@@ -406,7 +407,7 @@ func BenchmarkWriteTable_LargeReport(b *testing.B) {
 	b.ResetTimer()
 
 	for range b.N {
-		_ = report.WriteTable(io.Discard, output.FormatMarkdown, output.RenderOptions{})
+		_ = viz.WriteTable(report, io.Discard, output.FormatMarkdown, output.RenderOptions{})
 	}
 }
 
@@ -416,7 +417,7 @@ func BenchmarkWriteTree_LargeReport(b *testing.B) {
 	b.ResetTimer()
 
 	for range b.N {
-		_ = report.WriteTree(io.Discard)
+		_ = viz.WriteTree(report, io.Discard)
 	}
 }
 
@@ -436,7 +437,7 @@ func BenchmarkWriteMermaid_LargeReport(b *testing.B) {
 	b.ResetTimer()
 
 	for range b.N {
-		_ = report.WriteMermaid(io.Discard)
+		_ = viz.WriteMermaid(report, io.Discard)
 	}
 }
 

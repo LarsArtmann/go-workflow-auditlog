@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"bytes"
@@ -14,6 +14,7 @@ import (
 	flow "github.com/Azure/go-workflow"
 	output "github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
@@ -804,7 +805,7 @@ func TestCoverage_Report_ExportTable(t *testing.T) {
 	report := minimalReport()
 	path := filepath.Join(t.TempDir(), "table.csv")
 
-	err := report.ExportTable(path, output.FormatCSV, output.RenderOptions{})
+	err := viz.ExportTable(report, path, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("ExportTable error: %v", err)
 	}
@@ -848,7 +849,7 @@ func TestExportTable_FromReplayedReport(t *testing.T) {
 
 	path := filepath.Join(t.TempDir(), "replayed.csv")
 
-	err = replayed.ExportTable(path, output.FormatCSV, output.RenderOptions{})
+	err = viz.ExportTable(replayed, path, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("ExportTable from replayed report error: %v", err)
 	}

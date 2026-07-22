@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 // exampleStep is used by the Example functions.
@@ -80,7 +81,7 @@ func Example_mermaidDiagram() {
 	audit.Snapshot(w)
 
 	report := audit.Report()
-	_ = report.WriteMermaid(io.Discard)
+	_ = viz.WriteMermaid(report, io.Discard)
 
 	// Output:
 }

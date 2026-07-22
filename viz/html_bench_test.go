@@ -1,4 +1,4 @@
-package auditlog_test
+package viz_test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 // BenchmarkRenderHTML_LargeReport measures renderHTML throughput with a
@@ -40,7 +41,7 @@ func BenchmarkRenderHTML_LargeReport(b *testing.B) {
 	b.ResetTimer()
 
 	for range b.N {
-		err := report.WriteHTML(io.Discard)
+		err := viz.WriteHTML(report, io.Discard)
 		if err != nil {
 			b.Fatalf("WriteHTML: %v", err)
 		}
@@ -66,7 +67,7 @@ func BenchmarkRenderHTML_SmallReport(b *testing.B) {
 	b.ResetTimer()
 
 	for range b.N {
-		err := report.WriteHTML(io.Discard)
+		err := viz.WriteHTML(report, io.Discard)
 		if err != nil {
 			b.Fatalf("WriteHTML: %v", err)
 		}
