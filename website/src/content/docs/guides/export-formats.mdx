@@ -25,6 +25,16 @@ _ = audit.ExportNDJSON("events.ndjson")
 _ = report.WriteNDJSON(os.Stdout)
 ```
 
+## Visualizations
+
+Diagrams, tables, trees, and the HTML dashboard are provided by the `viz` sub-module:
+
+```go
+import viz "github.com/larsartmann/go-workflow-auditlog/viz"
+
+report := audit.Report()
+```
+
 ## Diagrams
 
 Export the step DAG with status-based coloring (succeeded = green, failed = red, skipped = gray, canceled = orange). Edges point dependency to step, following execution flow.
@@ -32,7 +42,7 @@ Export the step DAG with status-based coloring (succeeded = green, failed = red,
 ### Mermaid (renders natively in GitHub)
 
 ```go
-_ = audit.ExportMermaid("dag.mmd")
+_ = viz.ExportMermaid(report, "dag.mmd")
 ```
 
 ```mermaid
@@ -51,26 +61,26 @@ flowchart TD
 ### Graphviz DOT
 
 ```go
-_ = audit.ExportGraphviz("dag.dot")
+_ = viz.ExportGraphviz(report, "dag.dot")
 ```
 
 ### D2
 
 ```go
-_ = audit.ExportD2("dag.d2")
+_ = viz.ExportD2(report, "dag.d2")
 ```
 
 ### PlantUML
 
 ```go
-_ = audit.ExportPlantUML("dag.puml")
+_ = viz.ExportPlantUML(report, "dag.puml")
 ```
 
-All four diagram methods are also available as `Write*` (to `io.Writer`) and `Write*String` (returns string):
+All four diagram functions are also available as `Write*` (to `io.Writer`) and `Write*String` (returns string):
 
 ```go
-mmd, _ := report.WriteMermaidString()
-dot, _ := report.WriteGraphvizString()
+mmd, _ := viz.WriteMermaidString(report)
+dot, _ := viz.WriteGraphvizString(report)
 ```
 
 ## Tables
@@ -80,9 +90,9 @@ Step summary table with columns: Step, Status, Duration, Attempts, Error. Suppor
 ```go
 import "github.com/larsartmann/go-output"
 
-_ = audit.ExportTable("summary.csv", output.FormatCSV, output.RenderOptions{})
-_ = audit.ExportTable("summary.md", output.FormatMarkdown, output.RenderOptions{})
-_ = audit.ExportTable("summary.html", output.FormatHTML, output.RenderOptions{})
+_ = viz.ExportTable(report, "summary.csv", output.FormatCSV, output.RenderOptions{})
+_ = viz.ExportTable(report, "summary.md", output.FormatMarkdown, output.RenderOptions{})
+_ = viz.ExportTable(report, "summary.html", output.FormatHTML, output.RenderOptions{})
 ```
 
 Available formats: `table`, `json`, `csv`, `tsv`, `markdown`, `xml`, `yaml`, `html`, `jsonl`, `asciidoc`, `toml`, `plantuml`.
@@ -92,7 +102,7 @@ Available formats: `table`, `json`, `csv`, `tsv`, `markdown`, `xml`, `yaml`, `ht
 ### ASCII Tree
 
 ```go
-_ = audit.ExportTree("tree.txt")
+_ = viz.ExportTree(report, "tree.txt")
 ```
 
 ```
@@ -105,7 +115,7 @@ fetch
 ### HTML Tree
 
 ```go
-_ = audit.ExportHTMLTree("tree.html")
+_ = viz.ExportHTMLTree(report, "tree.html")
 ```
 
 Nested `<ul>` list of the step DAG, suitable for embedding in web pages.

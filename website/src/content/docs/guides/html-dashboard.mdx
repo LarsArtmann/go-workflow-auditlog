@@ -5,17 +5,21 @@ description: Generate self-contained interactive HTML reports with DAG graph, ti
 
 ## Overview
 
-The `WriteHTML` / `ExportHTML` methods produce a **self-contained interactive HTML dashboard** — a single file with embedded CSS and JavaScript, no external dependencies. Open it in any browser, attach it to a CI artifact, or email it.
+The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained interactive HTML dashboard** — a single file with embedded CSS and JavaScript, no external dependencies. Open it in any browser, attach it to a CI artifact, or email it.
 
 ```go
+import viz "github.com/larsartmann/go-workflow-auditlog/viz"
+
+report := audit.Report()
+
 // From an Auditor (live workflow):
-audit.ExportHTML("dashboard.html")
+_ = viz.ExportHTML(report, "dashboard.html")
 
 // From a WorkflowReport (e.g. loaded from JSON):
-report.ExportHTML("dashboard.html")
+_ = viz.ExportHTML(report, "dashboard.html")
 
 // To a string:
-html, _ := report.WriteHTMLString()
+html, _ := viz.WriteHTMLString(report)
 ```
 
 ## Five Tabs
@@ -66,22 +70,23 @@ The dashboard works from any report, regardless of origin:
 
 ```go
 // From a live workflow
-audit.ExportHTML("live.html")
+report := audit.Report()
+_ = viz.ExportHTML(report, "live.html")
 
 // From a JSON report loaded from disk
 report, _ := auditlog.LoadReport("old-run.json")
-report.ExportHTML("historical.html")
+_ = viz.ExportHTML(report, "historical.html")
 
 // From replayed events
 events, _ := auditlog.ReadEvents(file)
 report, _ := auditlog.ReplayEvents(events)
-report.ExportHTML("replayed.html")
+_ = viz.ExportHTML(report, "replayed.html")
 ```
 
 ## Run the Demo
 
 ```bash
-go run ./example
+go run ./viz/example
 ```
 
-This runs a data pipeline (fetch, validate, transform, save + retry) and prints the audit report. Add an `ExportHTML` call to see the interactive dashboard.
+This runs a data pipeline (fetch, validate, transform, save + retry) and prints the audit report. Add a `viz.ExportHTML` call to see the interactive dashboard.
