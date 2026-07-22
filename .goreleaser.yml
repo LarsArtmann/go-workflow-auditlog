@@ -17,10 +17,13 @@ before:
     - go mod tidy
     - go vet ./...
     - go test -race ./...
+    - cd viz && go mod tidy
+    - cd viz && GOWORK=off go vet ./...
+    - cd viz && GOWORK=off go test -race ./...
 
 builds:
   - id: demo
-    main: ./example
+    main: ./viz/example
     binary: workflow-auditlog-demo
     env:
       - CGO_ENABLED=0
