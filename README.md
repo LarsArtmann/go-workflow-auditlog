@@ -77,10 +77,14 @@ _ = viz.ExportHTML(audit.Report(), "report.html")
 ## Installation
 
 ```bash
+# Core module (event recording, JSON/NDJSON, report, replay, diff, filter, index)
 go get github.com/larsartmann/go-workflow-auditlog
+
+# Visualization module (diagrams, tables, trees, HTML dashboard)
+go get github.com/larsartmann/go-workflow-auditlog/viz
 ```
 
-Requires Go 1.26+ and `github.com/Azure/go-workflow v0.1.13`.
+Requires Go 1.26+ and `github.com/Azure/go-workflow v0.1.13`. The `viz` module also requires `github.com/larsartmann/go-output` and its format-specific sub-modules.
 
 ## Quick Start
 
@@ -152,7 +156,7 @@ The three-step lifecycle is **always** `Attach` → `Do` → `Snapshot`:
 Run the bundled demo:
 
 ```bash
-go run ./example
+go run ./viz/example
 ```
 
 ```
@@ -284,22 +288,16 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `ExportNDJSON(path string) error`                     | Writes events as NDJSON.                                     |
 | `WriteJSON(w io.Writer) error`                        | Writes report JSON to writer.                                |
 | `WriteNDJSON(w io.Writer) error`                      | Writes NDJSON to writer.                                     |
-| `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                  |
-| `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                 |
-| `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                             |
-| `ExportD2(path string) error`                         | Writes D2 DAG to file.                                       |
-| `ExportTable(path string, format, opts) error`        | Writes step summary table (CSV/Markdown/JSON/HTML/...).      |
-| `ExportTree(path string) error`                       | Writes ASCII tree to file.                                   |
-| `ExportHTMLTree(path string) error`                   | Writes HTML tree to file.                                    |
-| `ExportHTML(path string) error`                       | Writes interactive HTML dashboard to file.                   |
-| `WriteMermaid(w io.Writer) error`                     | Writes Mermaid DAG to writer.                                |
-| `WritePlantUML(w io.Writer) error`                    | Writes PlantUML DAG to writer.                               |
-| `WriteGraphviz(w io.Writer) error`                    | Writes Graphviz DOT DAG to writer.                           |
-| `WriteD2(w io.Writer) error`                          | Writes D2 DAG to writer.                                     |
-| `WriteTable(w io.Writer, format, opts) error`         | Writes step summary table to writer.                         |
-| `WriteTree(w io.Writer) error`                        | Writes ASCII tree to writer.                                 |
-| `WriteHTMLTree(w io.Writer) error`                    | Writes HTML tree to writer.                                  |
-| `WriteHTML(w io.Writer) error`                        | Writes interactive HTML dashboard to writer.                 |
+
+Visualization functions live in `github.com/larsartmann/go-workflow-auditlog/viz` and operate on a `WorkflowReport` (e.g. from `audit.Report()`):
+
+```go
+import viz "github.com/larsartmann/go-workflow-auditlog/viz"
+
+report := audit.Report()
+_ = viz.ExportMermaid(report, "dag.mmd")
+_ = viz.ExportHTML(report, "dashboard.html")
+```
 
 ### `WorkflowReport` Methods
 
