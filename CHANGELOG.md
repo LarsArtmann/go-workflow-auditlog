@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **`TableColumn.String()` method** — returns the column header name (e.g.
+  `"Step"`, `"Max Attempts"`) for debug and logging ergonomics.
+
+### Changed
+
+- **Golden file test replaced with structural validation** — the fragile
+  byte-for-byte golden file test (`TestReport_WriteHTML_GoldenFile`) that broke
+  6+ times on whitespace/dependency drift is replaced by
+  `TestReport_WriteHTML_GoldenContent`, which validates structural and semantic
+  content (DOCTYPE, CSP, 5 balanced `<script>` tags, all 5 dashboard tab
+  panels, JSON data blocks, embedded CSS/JS, step names, WorkflowID, RunID,
+  schema version, strict CSP policy). No more `UPDATE_GOLDEN` maintenance.
+- **`DefaultTableColumns` is now mutation-safe** — internal callers use
+  `defaultColumnsCopy()` (fresh slice) so consumer code can never corrupt the
+  package-level default. Documented as read-only.
+- **README.md** — documented `WithColumns` and `WithDirection` features with a
+  10-column reference table, diagram direction examples, and corrected
+  WorkflowReport API signatures. Fixed stale badge values (234→319 tests,
+  ~94%→~96% coverage).
+- **AGENTS.md** — corrected test count (~310→319 with breakdown) and updated
+  golden test reference to describe the new structural validation approach.
+
+### Removed
+
+- **`testdata/golden/report.html`** — retired the stale golden file that
+  required constant regeneration. The test now validates structure and content
+  without a committed reference file.
+
 ## [0.7.0] - 2026-07-22
 
 ### Added
