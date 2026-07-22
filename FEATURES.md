@@ -124,6 +124,5 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 ## PLANNED (see TODO_LIST.md and ROADMAP.md)
 
-- Make heavy deps optional (split into core + visualization sub-modules, or build tags)
 - OpenTelemetry span bridge
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
