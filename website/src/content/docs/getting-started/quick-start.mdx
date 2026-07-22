@@ -101,25 +101,28 @@ fmt.Println(report.Duration())
 ## Export Formats
 
 ```go
-// Structured data
+// Structured data (core module)
 _ = audit.ExportJSON("report.json")
 _ = audit.ExportNDJSON("events.ndjson")
 
+// Visualizations (requires github.com/larsartmann/go-workflow-auditlog/viz)
+report := audit.Report()
+
 // Diagrams
-_ = audit.ExportMermaid("dag.mmd")
-_ = audit.ExportD2("dag.d2")
-_ = audit.ExportGraphviz("dag.dot")
-_ = audit.ExportPlantUML("dag.puml")
+_ = viz.ExportMermaid(report, "dag.mmd")
+_ = viz.ExportD2(report, "dag.d2")
+_ = viz.ExportGraphviz(report, "dag.dot")
+_ = viz.ExportPlantUML(report, "dag.puml")
 
 // Tables (16 formats: CSV, Markdown, JSON, HTML, ...)
-_ = audit.ExportTable("summary.csv", output.FormatCSV, output.RenderOptions{})
+_ = viz.ExportTable(report, "summary.csv", output.FormatCSV, output.RenderOptions{})
 
 // Trees
-_ = audit.ExportTree("tree.txt")
-_ = audit.ExportHTMLTree("tree.html")
+_ = viz.ExportTree(report, "tree.txt")
+_ = viz.ExportHTMLTree(report, "tree.html")
 
 // Interactive dashboard
-_ = audit.ExportHTML("dashboard.html")
+_ = viz.ExportHTML(report, "dashboard.html")
 ```
 
 ## Step Naming
