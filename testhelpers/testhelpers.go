@@ -6,6 +6,7 @@ package testhelpers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -376,6 +377,20 @@ func AssertNilStep(t *testing.T, got *auditlog.StepInfo, message string) {
 	if got != nil {
 		t.Error(message)
 	}
+}
+
+// --- I/O test helpers ---
+
+// ErrWriteFailed is the sentinel error returned by [FailingWriter].
+var ErrWriteFailed = errors.New("simulated I/O failure")
+
+// FailingWriter is an [io.Writer] that always returns [ErrWriteFailed].
+// Shared by core and viz tests for error-path coverage.
+type FailingWriter struct{}
+
+// Write implements [io.Writer].
+func (FailingWriter) Write([]byte) (int, error) {
+	return 0, ErrWriteFailed
 }
 
 // RunWorkflow attaches the auditor, runs the workflow, and snapshots state.

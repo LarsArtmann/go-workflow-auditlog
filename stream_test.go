@@ -189,7 +189,7 @@ func TestNDJSONStreamer_BufferedThenFlush(t *testing.T) {
 func TestNDJSONStreamer_ErrorHandling(t *testing.T) {
 	t.Parallel()
 
-	streamer := auditlog.NewNDJSONStreamer(&errorWriter{})
+	streamer := auditlog.NewNDJSONStreamer(&testhelpers.FailingWriter{})
 
 	streamer.OnEvent(auditlog.Event{
 		Sequence:  1,
@@ -213,7 +213,7 @@ func TestNDJSONStreamer_OnEventAfterError(t *testing.T) {
 
 	// WithAutoFlush forces immediate writes so the error surfaces on the
 	// first OnEvent call, not deferred to Flush.
-	streamer := auditlog.NewNDJSONStreamer(&errorWriter{}, auditlog.WithAutoFlush())
+	streamer := auditlog.NewNDJSONStreamer(&testhelpers.FailingWriter{}, auditlog.WithAutoFlush())
 
 	// First event triggers the write error.
 	streamer.OnEvent(auditlog.Event{
@@ -514,13 +514,6 @@ func TestNDJSONStreamer_AutoFlushWorkflowIntegration(t *testing.T) {
 }
 
 // --- Helpers ---
-
-// errorWriter is an io.Writer that always fails.
-type errorWriter struct{}
-
-func (errorWriter) Write([]byte) (int, error) {
-	return 0, errors.New("write failed")
-}
 
 // writeTracker is a thread-safe io.Writer that records all bytes written.
 type writeTracker struct {
