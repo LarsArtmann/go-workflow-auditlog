@@ -4,6 +4,8 @@
 package viz
 
 import (
+	"io"
+
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -58,15 +60,20 @@ var (
 	ErrExportWriteFailed = auditlog.ErrExportWriteFailed
 )
 
-// Re-export WriteToFile so viz exporters can use the same atomic write helper
-// as the core package.
-var WriteToFile = auditlog.WriteToFile
+// WriteToFile re-exports the core atomic file-write helper so viz exporters can
+// write files the same way the core package does.
+func WriteToFile(path string, fn func(io.Writer) error) error {
+	return auditlog.WriteToFile(path, fn)
+}
 
-// Re-export enum enumerators so viz code can enumerate statuses and event
-// types without importing the core package separately.
-var (
-	// AllStepStatuses returns every known StepStatus value.
-	AllStepStatuses = auditlog.AllStepStatuses
-	// AllEventTypes returns every known EventType value.
-	AllEventTypes = auditlog.AllEventTypes
-)
+// AllStepStatuses returns every known StepStatus value in canonical order.
+// Re-exported so viz code can enumerate statuses without importing core.
+func AllStepStatuses() []StepStatus {
+	return auditlog.AllStepStatuses()
+}
+
+// AllEventTypes returns every known EventType value in canonical order.
+// Re-exported so viz code can enumerate event types without importing core.
+func AllEventTypes() []EventType {
+	return auditlog.AllEventTypes()
+}
