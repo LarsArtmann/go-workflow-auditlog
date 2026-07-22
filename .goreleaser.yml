@@ -38,7 +38,7 @@ builds:
 
 archives:
   - id: default
-    builds: [demo]
+    ids: [demo]
     name_template: >-
       {{ .ProjectName }}_{{ .Version }}_
       {{- title .Os }}_{{ .Arch }}
