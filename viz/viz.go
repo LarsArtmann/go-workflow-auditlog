@@ -61,3 +61,12 @@ var (
 // Re-export WriteToFile so viz exporters can use the same atomic write helper
 // as the core package.
 var WriteToFile = auditlog.WriteToFile
+
+// Re-export enum enumerators so viz code can enumerate statuses and event
+// types without importing the core package separately.
+var (
+	// AllStepStatuses returns every known StepStatus value.
+	AllStepStatuses = auditlog.AllStepStatuses
+	// AllEventTypes returns every known EventType value.
+	AllEventTypes = auditlog.AllEventTypes
+)
