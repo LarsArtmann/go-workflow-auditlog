@@ -316,24 +316,40 @@ _ = viz.ExportHTML(report, "dashboard.html")
 | `report.Summary() string`                                                         | One-line human-readable summary.                                     |
 | `report.WriteJSON(w io.Writer) error`                                             | Serialize report as JSON.                                            |
 | `report.WriteNDJSON(w io.Writer) error`                                           | Serialize events as NDJSON.                                          |
-| `report.WriteMermaid(w io.Writer, opts ...DiagramOption) error`                   | Mermaid diagram (supports `WithDirection`).                          |
-| `report.WritePlantUML(w io.Writer, opts ...DiagramOption) error`                  | PlantUML diagram (supports `WithDirection`).                         |
-| `report.WriteGraphviz(w io.Writer, opts ...DiagramOption) error`                  | Graphviz DOT diagram (supports `WithDirection`).                     |
-| `report.WriteD2(w io.Writer, opts ...DiagramOption) error`                        | D2 diagram (supports `WithDirection`).                               |
-| `report.WriteMermaidString(opts ...DiagramOption) (string, error)`                | Mermaid diagram as string.                                           |
-| `report.WritePlantUMLString(opts ...DiagramOption) (string, error)`               | PlantUML diagram as string.                                          |
-| `report.WriteGraphvizString(opts ...DiagramOption) (string, error)`               | Graphviz DOT diagram as string.                                      |
-| `report.WriteD2String(opts ...DiagramOption) (string, error)`                     | D2 diagram as string.                                                |
-| `report.WriteTable(w, format, opts, tableOpts ...TableOption) error`              | Step summary table (16 formats, supports `WithColumns`).             |
-| `report.WriteTableString(format, opts, tableOpts ...TableOption) (string, error)` | Step summary table as string (supports `WithColumns`).               |
-| `report.WriteTree(w io.Writer) error`                                             | ASCII tree of step DAG.                                              |
-| `report.WriteTreeString() (string, error)`                                        | ASCII tree as string.                                                |
-| `report.WriteHTMLTree(w io.Writer) error`                                         | HTML nested-list tree of step DAG.                                   |
-| `report.WriteHTMLTreeString() (string, error)`                                    | HTML tree as string.                                                 |
-| `report.WriteHTML(w io.Writer) error`                                             | Interactive HTML dashboard (5-tab report with DAG graph).            |
-| `report.WriteHTMLString() (string, error)`                                        | HTML dashboard as string.                                            |
-| `report.ExportHTML(path string) error`                                            | Writes HTML dashboard to file.                                       |
-| `report.Validate() error`                                                         | Checks internal consistency (counts, status drift).                  |
+| `report.ExportJSON(path string) error`                                            | Writes JSON report to file.                                          |
+| `report.ExportNDJSON(path string) error`                                          | Writes NDJSON events to file.                                        |
+| `report.Validate() error`                                                           | Checks internal consistency (counts, status drift).                  |
+
+### `viz` Package Functions
+
+All visualization functions take the report as the first argument:
+
+| Function                                                                              | Description                                                        |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `viz.WriteMermaid(r, w io.Writer, opts ...DiagramOption) error`                       | Mermaid diagram (supports `viz.WithDirection`).                   |
+| `viz.WritePlantUML(r, w io.Writer, opts ...DiagramOption) error`                      | PlantUML diagram (supports `viz.WithDirection`).                  |
+| `viz.WriteGraphviz(r, w io.Writer, opts ...DiagramOption) error`                      | Graphviz DOT diagram (supports `viz.WithDirection`).              |
+| `viz.WriteD2(r, w io.Writer, opts ...DiagramOption) error`                            | D2 diagram (supports `viz.WithDirection`).                        |
+| `viz.WriteMermaidString(r, opts ...DiagramOption) (string, error)`                    | Mermaid diagram as string.                                        |
+| `viz.WritePlantUMLString(r, opts ...DiagramOption) (string, error)`                   | PlantUML diagram as string.                                       |
+| `viz.WriteGraphvizString(r, opts ...DiagramOption) (string, error)`                   | Graphviz DOT diagram as string.                                   |
+| `viz.WriteD2String(r, opts ...DiagramOption) (string, error)`                         | D2 diagram as string.                                              |
+| `viz.WriteTable(r, w, format, opts, tableOpts ...TableOption) error`                | Step summary table (16 formats, supports `viz.WithColumns`).       |
+| `viz.WriteTableString(r, format, opts, tableOpts ...TableOption) (string, error)`     | Step summary table as string (supports `viz.WithColumns`).        |
+| `viz.WriteTree(r, w io.Writer) error`                                               | ASCII tree of step DAG.                                            |
+| `viz.WriteTreeString(r) (string, error)`                                              | ASCII tree as string.                                              |
+| `viz.WriteHTMLTree(r, w io.Writer) error`                                             | HTML nested-list tree of step DAG.                                   |
+| `viz.WriteHTMLTreeString(r) (string, error)`                                          | HTML tree as string.                                               |
+| `viz.WriteHTML(r, w io.Writer) error`                                                 | Interactive HTML dashboard (5-tab report with DAG graph).          |
+| `viz.WriteHTMLString(r) (string, error)`                                              | HTML dashboard as string.                                          |
+| `viz.ExportMermaid(r, path string) error`                                               | Writes Mermaid DAG to file.                                        |
+| `viz.ExportPlantUML(r, path string) error`                                              | Writes PlantUML DAG to file.                                       |
+| `viz.ExportGraphviz(r, path string) error`                                              | Writes Graphviz DOT DAG to file.                                   |
+| `viz.ExportD2(r, path string) error`                                                    | Writes D2 DAG to file.                                             |
+| `viz.ExportTable(r, path string, format, opts, tableOpts ...TableOption) error`       | Writes step summary table to file.                                   |
+| `viz.ExportTree(r, path string) error`                                                  | Writes ASCII tree to file.                                         |
+| `viz.ExportHTMLTree(r, path string) error`                                              | Writes HTML tree to file.                                          |
+| `viz.ExportHTML(r, path string) error`                                                  | Writes interactive HTML dashboard to file.                         |
 
 ### Package-Level Functions
 
@@ -415,17 +431,22 @@ For custom registries, call `auditlog.RegisterClassifications(reg)` explicitly.
 
 ## Diagrams
 
-Export the step DAG in four formats, with status-based coloring (succeeded = green, failed = red, skipped = gray, canceled = orange). All diagram writers accept `WithDirection` to control layout:
+Export the step DAG in four formats, with status-based coloring (succeeded = green, failed = red, skipped = gray, canceled = orange). All diagram writers accept `viz.WithDirection` to control layout:
 
 ```go
-_ = report.WriteMermaid(os.Stdout,
-    auditlog.WithDirection(output.DirectionLeftRight))  // left-to-right layout
+import (
+    "github.com/larsartmann/go-output"
+    viz "github.com/larsartmann/go-workflow-auditlog/viz"
+)
 
-_ = report.WriteGraphviz(os.Stdout,
-    auditlog.WithDirection(output.DirectionBottomTop))  // bottom-to-top
+_ = viz.WriteMermaid(report, os.Stdout,
+    viz.WithDirection(output.DirectionRight))  // left-to-right layout
+
+_ = viz.WriteGraphviz(report, os.Stdout,
+    viz.WithDirection(output.DirectionUp))     // bottom-to-top
 ```
 
-Supported directions: `DirectionTopDown` (default), `DirectionLeftRight`, `DirectionBottomTop`, `DirectionRightLeft`. Available on all four formats (Mermaid, PlantUML, Graphviz DOT, D2).
+Supported directions: `DirectionDown` (default), `DirectionRight`, `DirectionUp`, `DirectionLeft`. Available on all four formats (Mermaid, PlantUML, Graphviz DOT, D2).
 
 **Mermaid** (renders natively in GitHub):
 
