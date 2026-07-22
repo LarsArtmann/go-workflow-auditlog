@@ -12,16 +12,6 @@ import (
 	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
-// errWriteFail is the sentinel error returned by failingWriter.
-var errWriteFail = errors.New("simulated I/O failure")
-
-// failingWriter is an io.Writer that always returns an error.
-type failingWriter struct{}
-
-func (failingWriter) Write(p []byte) (int, error) {
-	return 0, errWriteFail
-}
-
 // minimalReport returns a small WorkflowReport with one step and one event,
 // sufficient for all render/export methods to produce output.
 func minimalReport() auditlog.WorkflowReport {
@@ -67,7 +57,7 @@ func TestErrorPath_WriteJSON_FailingWriter_ErrRenderFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteJSON(failingWriter{})
+	err := report.WriteJSON(testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrRenderFailed) {
 		t.Errorf("WriteJSON(failingWriter) error = %v, want errors.Is(err, ErrRenderFailed)", err)
@@ -83,7 +73,7 @@ func TestErrorPath_WriteMermaid_FailingWriter_ErrExportWriteFailed(t *testing.T)
 	t.Parallel()
 
 	report := minimalReport()
-	err := viz.WriteMermaid(report, failingWriter{})
+	err := viz.WriteMermaid(report, testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteMermaid(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -94,7 +84,7 @@ func TestErrorPath_WriteGraphviz_FailingWriter_ErrExportWriteFailed(t *testing.T
 	t.Parallel()
 
 	report := minimalReport()
-	err := viz.WriteGraphviz(report, failingWriter{})
+	err := viz.WriteGraphviz(report, testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteGraphviz(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -109,7 +99,7 @@ func TestErrorPath_WritePlantUML_FailingWriter_ErrExportWriteFailed(t *testing.T
 	t.Parallel()
 
 	report := minimalReport()
-	err := viz.WritePlantUML(report, failingWriter{})
+	err := viz.WritePlantUML(report, testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WritePlantUML(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -120,7 +110,7 @@ func TestErrorPath_WriteD2_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := viz.WriteD2(report, failingWriter{})
+	err := viz.WriteD2(report, testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteD2(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -135,7 +125,7 @@ func TestErrorPath_WriteTree_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := viz.WriteTree(report, failingWriter{})
+	err := viz.WriteTree(report, testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteTree(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -146,7 +136,7 @@ func TestErrorPath_WriteHTMLTree_FailingWriter_ErrExportWriteFailed(t *testing.T
 	t.Parallel()
 
 	report := minimalReport()
-	err := viz.WriteHTMLTree(report, failingWriter{})
+	err := viz.WriteHTMLTree(report, testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteHTMLTree(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -162,7 +152,7 @@ func TestErrorPath_WriteTable_FailingWriter_ErrRenderFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := viz.WriteTable(report, failingWriter{}, output.FormatMarkdown, output.RenderOptions{})
+	err := viz.WriteTable(report, testhelpers.FailingWriter{}, output.FormatMarkdown, output.RenderOptions{})
 
 	if !errors.Is(err, auditlog.ErrRenderFailed) {
 		t.Errorf("WriteTable(failingWriter) error = %v, want errors.Is(err, ErrRenderFailed)", err)
@@ -178,7 +168,7 @@ func TestErrorPath_WriteHTML_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 	t.Parallel()
 
 	report := minimalReport()
-	err := viz.WriteHTML(report, failingWriter{})
+	err := viz.WriteHTML(report, testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteHTML(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)
@@ -194,7 +184,7 @@ func TestErrorPath_WriteNDJSON_FailingWriter_ErrExportWriteFailed(t *testing.T) 
 	t.Parallel()
 
 	report := minimalReport()
-	err := report.WriteNDJSON(failingWriter{})
+	err := report.WriteNDJSON(testhelpers.FailingWriter{})
 
 	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
 		t.Errorf("WriteNDJSON(failingWriter) error = %v, want errors.Is(err, ErrExportWriteFailed)", err)

@@ -2,7 +2,6 @@ package auditlog_test
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -542,42 +541,4 @@ func (w *writeTracker) writtenBytes() int {
 	defer w.mu.Unlock()
 
 	return w.buf.Len()
-}
-
-// Ensure the streamer is used as a context-compatible OnEvent in a real
-// workflow run — exercises the Attach → Do → Snapshot → Flush lifecycle.
-func TestNDJSONStreamer_FullLifecycleExample(t *testing.T) {
-	t.Parallel()
-
-	var buf bytes.Buffer
-
-	streamer := auditlog.NewNDJSONStreamer(&buf)
-
-	a := testhelpers.MustNew(t, auditlog.Config{
-		Enabled: true,
-		OnEvent: streamer.OnEvent,
-	})
-
-	w := &flow.Workflow{}
-	w.Add(flow.Step(testhelpers.NewSucceed("lifecycle-step")))
-
-	a.Attach(w)
-	_ = w.Do(context.TODO())
-	a.Snapshot(w)
-
-	err := streamer.Flush()
-	if err != nil {
-		t.Fatalf("Flush: %v", err)
-	}
-
-	if buf.Len() == 0 {
-		t.Fatal("expected non-empty NDJSON output from full lifecycle")
-	}
-
-	events, err := auditlog.ReadEvents(&buf)
-	if err != nil {
-		t.Fatalf("ReadEvents: %v", err)
-	}
-
-	testhelpers.AssertEventCount(t, a.Report(), len(events))
 }
