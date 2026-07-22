@@ -74,18 +74,41 @@ func TestCoverage_Report_SkippedSteps(t *testing.T) {
 }
 
 // TestCoverage_Report_CriticalPath covers WorkflowReport.CriticalPath and the
-// underlying computeCriticalPath/computeCriticalPathDuration logic.
+// underlying computeCriticalPathDuration logic.
 func TestCoverage_Report_CriticalPath(t *testing.T) {
 	t.Parallel()
 
-	a, w := testhelpers.NewAuditAndWorkflow(t)
-	a1 := testhelpers.NewSucceed("a")
-	b1 := testhelpers.NewSucceed("b")
-	c1 := testhelpers.NewSucceed("c")
-	testhelpers.AddLinearChain(w, a1, b1, c1)
-	testhelpers.RunWorkflow(t, a, w)
+	ms := 1.0
 
-	report := a.Report()
+	report := auditlog.WorkflowReport{
+		WorkflowID: "critical-path-test",
+		Steps: []auditlog.StepInfo{
+			{
+				StepRef:    auditlog.StepRef{Name: "a"},
+				Status:     auditlog.StepStatusSucceeded,
+				DurationMs: &ms,
+			},
+			{
+				StepRef:    auditlog.StepRef{Name: "b"},
+				Status:     auditlog.StepStatusSucceeded,
+				DurationMs: &ms,
+				Dependencies: []auditlog.StepRef{
+					{Name: "a"},
+				},
+			},
+			{
+				StepRef:    auditlog.StepRef{Name: "c"},
+				Status:     auditlog.StepStatusSucceeded,
+				DurationMs: &ms,
+				Dependencies: []auditlog.StepRef{
+					{Name: "b"},
+				},
+			},
+		},
+		EventCount: 0,
+		StepCount:  3,
+	}
+
 	path := report.CriticalPath()
 	if len(path) != 3 {
 		t.Fatalf("expected 3 steps on critical path, got %d", len(path))
@@ -95,8 +118,13 @@ func TestCoverage_Report_CriticalPath(t *testing.T) {
 		t.Errorf("unexpected critical path: %v", namesFromSteps(path))
 	}
 
-	if report.CriticalPathDurationMs <= 0 {
-		t.Error("expected positive CriticalPathDurationMs")
+	if report.CriticalPathDurationMs != 0 {
+		t.Errorf("expected zero duration before finalize, got %f", report.CriticalPathDurationMs)
+	}
+
+	empty := auditlog.WorkflowReport{WorkflowID: "empty"}
+	if empty.CriticalPath() != nil {
+		t.Error("expected nil CriticalPath for empty report")
 	}
 }
 
@@ -153,11 +181,6 @@ func TestCoverage_Report_PeakConcurrencySteps(t *testing.T) {
 	if empty.PeakConcurrencySteps() != nil {
 		t.Error("expected nil PeakConcurrencySteps for empty report")
 	}
-
-	emptyCriticalPath := empty.CriticalPath()
-	if emptyCriticalPath != nil {
-		t.Error("expected nil CriticalPath for empty report")
-	}
 }
 
 // TestCoverage_Report_ExportJSONAndNDJSON covers the core file-export methods
@@ -176,19 +199,23 @@ func TestCoverage_Report_ExportJSONAndNDJSON(t *testing.T) {
 
 	report := a.Report()
 
-	if err := report.ExportJSON(jsonPath); err != nil {
+	err := report.ExportJSON(jsonPath)
+	if err != nil {
 		t.Fatalf("ExportJSON error: %v", err)
 	}
 
-	if err := report.ExportNDJSON(ndjsonPath); err != nil {
+	err = report.ExportNDJSON(ndjsonPath)
+	if err != nil {
 		t.Fatalf("ExportNDJSON error: %v", err)
 	}
 
-	if _, err := os.Stat(jsonPath); err != nil {
+	_, err = os.Stat(jsonPath)
+	if err != nil {
 		t.Errorf("JSON file not written: %v", err)
 	}
 
-	if _, err := os.Stat(ndjsonPath); err != nil {
+	_, err = os.Stat(ndjsonPath)
+	if err != nil {
 		t.Errorf("NDJSON file not written: %v", err)
 	}
 }
@@ -198,12 +225,12 @@ func TestCoverage_Report_Summary(t *testing.T) {
 	t.Parallel()
 
 	failed := auditlog.WorkflowReport{
-		WorkflowID:      "wf",
-		StepCount:       1,
-		SucceededCount:  0,
-		FailedCount:     1,
-		SkippedCount:    0,
-		WorkflowSucceeded: false,
+		WorkflowID:          "wf",
+		StepCount:           1,
+		SucceededCount:      0,
+		FailedCount:         1,
+		SkippedCount:        0,
+		WorkflowSucceeded:   false,
 		WallClockDurationMs: 1.5,
 	}
 
@@ -218,14 +245,15 @@ func TestCoverage_Report_Summary(t *testing.T) {
 	}
 
 	pending := auditlog.WorkflowReport{
-		WorkflowID:      "wf",
-		StepCount:       1,
-		SucceededCount:  0,
-		FailedCount:     0,
-		SkippedCount:    0,
-		PendingCount:    1,
-		RunningCount:    0,
-		WorkflowSucceeded: false,
+		WorkflowID:          "wf",
+		StepCount:           1,
+		SucceededCount:      0,
+		FailedCount:         0,
+		SkippedCount:        0,
+		PendingCount:        1,
+		RunningCount:        0,
+		WorkflowSucceeded:   false,
+		WallClockDurationMs: 0,
 	}
 
 	if summary := pending.Summary(); summary == "" {
@@ -270,9 +298,10 @@ func TestCoverage_StepStatus_ColorUnknown(t *testing.T) {
 }
 
 func namesFromSteps(steps []auditlog.StepInfo) []string {
-	names := make([]string, len(steps))
-	for i, s := range steps {
-		names[i] = s.Name
+	names := make([]string, 0, len(steps))
+
+	for _, s := range steps {
+		names = append(names, s.Name)
 	}
 
 	return names
