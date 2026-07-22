@@ -239,6 +239,7 @@ func TestCoverage_Report_Summary(t *testing.T) {
 	}
 
 	failedWithReason := failed
+
 	failedWithReason.FailureReason = "explosion"
 	if summary := failedWithReason.Summary(); summary == "" {
 		t.Error("expected non-empty failure summary with reason")
