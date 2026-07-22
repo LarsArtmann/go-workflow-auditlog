@@ -87,9 +87,9 @@ example/            — Data pipeline demo (now in viz module)
 
 ### Data Flow
 
-1. User creates `Auditor` via `auditlog.New(Config)`
+1. User creates `Auditor` via `auditlog.New(Config)` — optionally passing `NDJSONStreamer.OnEvent` as `Config.OnEvent` for real-time streaming
 2. `Attach(w)` injects `BeforeStep`/`AfterStep` callbacks into all steps via `State.MergeConfig`
-3. During `w.Do(ctx)`, callbacks fire per-attempt → `Recorder` captures timestamped `Event`s
+3. During `w.Do(ctx)`, callbacks fire per-attempt → `Recorder` captures timestamped `Event`s → `OnEvent` (if set) fires outside the lock (e.g. streaming to NDJSON)
 4. `Snapshot(w)` reads `w.StateOf(step)` + `w.UpstreamOf(step)` to fill in DAG structure and skipped/canceled statuses
 5. `Report()` assembles `StepInfo` slice (with forward + reverse deps) and event stream
 6. Core consumers call `report.WriteJSON` / `report.WriteNDJSON` / `report.ExportJSON` / `report.ExportNDJSON`
