@@ -403,9 +403,9 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 		{"PlantUML", func() (string, error) { return viz.WritePlantUMLString(a.Report()) }},
 		{"Graphviz", func() (string, error) { return viz.WriteGraphvizString(a.Report()) }},
 		{"D2", func() (string, error) { return viz.WriteD2String(a.Report()) }},
-		{"Tree", viz.WriteTreeString(a.Report())},
-		{"HTMLTree", viz.WriteHTMLTreeString(a.Report())},
-		{"HTML", viz.WriteHTMLString(a.Report())},
+		{"Tree", func() (string, error) { return viz.WriteTreeString(a.Report()) }},
+		{"HTMLTree", func() (string, error) { return viz.WriteHTMLTreeString(a.Report()) }},
+		{"HTML", func() (string, error) { return viz.WriteHTMLString(a.Report()) }},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
