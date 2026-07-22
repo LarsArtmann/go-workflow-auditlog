@@ -116,7 +116,7 @@ func TestExportHTML_WritesFile(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "exported-step", "report.html")
 
-	err := viz.ExportHTML(viz, a.Report(), path)
+	err := viz.ExportHTML(a.Report(), path)
 	if err != nil {
 		t.Fatalf("ExportHTML error: %v", err)
 	}
