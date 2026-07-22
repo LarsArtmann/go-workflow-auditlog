@@ -781,6 +781,11 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
   );
   var range = maxT - minT || 1;
 
+  // Compute critical path for highlighting
+  var cpSteps = computeCriticalPathSteps();
+  var cpSet = {};
+  cpSteps.forEach(function (name) { cpSet[name] = true; });
+
   function pct(ts) {
     return ((ts - minT) / range) * 100;
   }
@@ -798,6 +803,7 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
       var ft = s.finished_at ? new Date(s.finished_at).getTime() : st;
       var left = pctStr(st);
       var width = Math.max(0.3, pct(ft) - pct(st)).toFixed(2);
+      var isCP = cpSet[s.step_name] ? " critical-path-bar" : "";
       var icon = statusIcons[s.status] || "";
       var tip =
         esc(s.step_name) +
@@ -807,14 +813,14 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
         (s.attempt_count > 1 ? " | " + s.attempt_count + " attempts" : "") +
         (s.error ? " | " + esc(s.error) : "");
       return (
-        '<div class="gantt-row">' +
+        '<div class="gantt-row' + isCP + '">' +
         '<div class="gantt-label">' +
         (icon ? icon + " " : "") +
         esc(s.step_name) +
         "</div>" +
         '<div class="gantt-track">' +
         '<div class="gantt-bar ' +
-        esc(s.status) +
+        esc(s.status) + isCP +
         '" style="left:' +
         left +
         "%;width:" +
@@ -844,6 +850,7 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
 // Dependency Graph - rendered by daghtml SDK
 function renderGraph() {
   initDAGGraph("graph-container", "dag-data");
+  enhanceGraph();
 }
 
 document.getElementById("footer-ts").textContent = new Date().toLocaleString();
@@ -855,3 +862,215 @@ document.getElementById("footer-stats").textContent =
   " events \u00b7 " +
   report.step_count +
   " steps";
+
+// === Graph enhancements: critical path, retry badges, search ===
+
+// Compute the critical path (longest duration chain) from report data.
+// Mirrors the Go computeCriticalPath algorithm: memoized DFS over step
+// dependencies, returning the ordered step names forming the bottleneck chain.
+function computeCriticalPathSteps() {
+  var byName = {};
+  report.steps.forEach(function (s) {
+    byName[s.step_name] = s;
+  });
+
+  var memo = {};
+  var bestChain = [];
+
+  function dfs(name) {
+    if (memo[name] !== undefined) return memo[name];
+    var step = byName[name];
+    if (!step) {
+      memo[name] = { duration: 0, chain: [] };
+      return memo[name];
+    }
+
+    var duration = (step.duration_ms || 0);
+    var deps = step.dependencies || [];
+    var bestChild = { duration: 0, chain: [] };
+
+    deps.forEach(function (d) {
+      var child = dfs(d.step_name);
+      if (child.duration > bestChild.duration) {
+        bestChild = child;
+      }
+    });
+
+    var result = {
+      duration: duration + bestChild.duration,
+      chain: bestChild.chain.concat([name]),
+    };
+    memo[name] = result;
+    return result;
+  }
+
+  report.steps.forEach(function (s) {
+    var r = dfs(s.step_name);
+    if (r.duration > 0 && r.chain.length > bestChain.length) {
+      bestChain = r.chain;
+    }
+  });
+
+  return bestChain;
+}
+
+// Build a map from dag-data node index to step name by reading the JSON.
+function buildNodeNameMap() {
+  var dataEl = document.getElementById("dag-data");
+  if (!dataEl) return {};
+  var data = JSON.parse(dataEl.textContent);
+  var map = {};
+  (data.nodes || []).forEach(function (n, i) {
+    map[i] = n.id;
+  });
+  return map;
+}
+
+// Enhance the daghtml graph after rendering: retry badges, critical path, search.
+function enhanceGraph() {
+  var container = document.getElementById("graph-container");
+  if (!container) return;
+  var svg = container.querySelector("svg");
+  if (!svg) return;
+
+  var nameMap = buildNodeNameMap();
+  var stepByName = {};
+  report.steps.forEach(function (s) {
+    stepByName[s.step_name] = s;
+  });
+
+  // Add retry badges to nodes with attempt_count > 1
+  var nodeEls = container.querySelectorAll(".graph-node");
+  nodeEls.forEach(function (g) {
+    var idx = parseInt(g.dataset.id);
+    var stepName = nameMap[idx];
+    if (!stepName) return;
+    var step = stepByName[stepName];
+    if (!step || !step.attempt_count || step.attempt_count <= 1) return;
+
+    var ns = "http://www.w3.org/2000/svg";
+    var nodeData = g.dataset;
+    var rect = g.querySelector("rect");
+    if (!rect) return;
+    var w = parseFloat(rect.getAttribute("width"));
+
+    var badge = document.createElementNS(ns, "g");
+    badge.classList.add("retry-badge");
+    badge.setAttribute("transform", "translate(" + (w - 24) + ", -6)");
+
+    var circle = document.createElementNS(ns, "circle");
+    circle.setAttribute("cx", 8);
+    circle.setAttribute("cy", 8);
+    circle.setAttribute("r", 8);
+    circle.setAttribute("fill", "var(--warning)");
+    circle.setAttribute("stroke", "var(--bg-elevated)");
+    circle.setAttribute("stroke-width", 1.5);
+    badge.appendChild(circle);
+
+    var text = document.createElementNS(ns, "text");
+    text.setAttribute("x", 8);
+    text.setAttribute("y", 8);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "central");
+    text.setAttribute("fill", "var(--bg)");
+    text.setAttribute("font-size", "10");
+    text.setAttribute("font-weight", "bold");
+    text.setAttribute("font-family", "var(--font-mono)");
+    text.textContent = "\u21bb" + step.attempt_count;
+    badge.appendChild(text);
+
+    g.appendChild(badge);
+  });
+
+  // Critical path computation
+  var criticalPathSteps = computeCriticalPathSteps();
+  var criticalPathSet = {};
+  criticalPathSteps.forEach(function (name) {
+    criticalPathSet[name] = true;
+  });
+
+  // Update info text
+  var infoEl = document.getElementById("graph-info-text");
+  if (infoEl && criticalPathSteps.length > 1) {
+    infoEl.textContent =
+      "Critical path: " +
+      criticalPathSteps.length +
+      " steps \u00b7 " +
+      humanizeDuration(report.critical_path_duration_ms);
+  }
+
+  // Critical path toggle
+  var cpBtn = document.getElementById("graph-critical-path");
+  if (cpBtn) {
+    if (criticalPathSteps.length <= 1) {
+      cpBtn.style.display = "none";
+    } else {
+      cpBtn.addEventListener("click", function () {
+        var active = cpBtn.getAttribute("aria-pressed") === "true";
+        cpBtn.setAttribute("aria-pressed", !active);
+        cpBtn.classList.toggle("active", !active);
+        toggleCriticalPathHighlight(container, nameMap, criticalPathSet, !active);
+      });
+    }
+  }
+
+  // Graph search
+  var searchInput = document.getElementById("graph-search");
+  if (searchInput) {
+    var searchTimer2;
+    searchInput.addEventListener("input", function () {
+      clearTimeout(searchTimer2);
+      searchTimer2 = setTimeout(function () {
+        applyGraphSearch(container, nameMap, searchInput.value.toLowerCase());
+      }, 120);
+    });
+  }
+}
+
+function toggleCriticalPathHighlight(container, nameMap, criticalPathSet, active) {
+  var nodeEls = container.querySelectorAll(".graph-node");
+  nodeEls.forEach(function (g) {
+    var idx = parseInt(g.dataset.id);
+    var stepName = nameMap[idx];
+    if (active && criticalPathSet[stepName]) {
+      g.classList.add("critical-path");
+    } else {
+      g.classList.remove("critical-path");
+    }
+  });
+
+  // Highlight edges between critical-path nodes
+  var edgeEls = container.querySelectorAll(".graph-edge");
+  edgeEls.forEach(function (eg) {
+    var sIdx = parseInt(eg.dataset.source);
+    var tIdx = parseInt(eg.dataset.target);
+    var sName = nameMap[sIdx];
+    var tName = nameMap[tIdx];
+    if (active && criticalPathSet[sName] && criticalPathSet[tName]) {
+      eg.classList.add("critical-path");
+    } else {
+      eg.classList.remove("critical-path");
+    }
+  });
+}
+
+function applyGraphSearch(container, nameMap, query) {
+  var nodeEls = container.querySelectorAll(".graph-node");
+  if (!query) {
+    nodeEls.forEach(function (g) {
+      g.classList.remove("search-match", "search-dimmed");
+    });
+    return;
+  }
+  nodeEls.forEach(function (g) {
+    var idx = parseInt(g.dataset.id);
+    var stepName = nameMap[idx] || "";
+    if (stepName.toLowerCase().indexOf(query) >= 0) {
+      g.classList.add("search-match");
+      g.classList.remove("search-dimmed");
+    } else {
+      g.classList.add("search-dimmed");
+      g.classList.remove("search-match");
+    }
+  });
+}
