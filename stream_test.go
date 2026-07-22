@@ -512,7 +512,131 @@ func TestNDJSONStreamer_AutoFlushWorkflowIntegration(t *testing.T) {
 	}
 }
 
+func TestNDJSONStreamer_WithBufferSize(t *testing.T) {
+	t.Parallel()
+
+	var buf bytes.Buffer
+
+	streamer := auditlog.NewNDJSONStreamer(&buf, auditlog.WithBufferSize(128))
+
+	streamer.OnEvent(auditlog.Event{
+		Sequence:  1,
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+		StepRef:   auditlog.StepRef{Name: "small-buf"},
+	})
+
+	err := streamer.Flush()
+	if err != nil {
+		t.Fatalf("Flush: %v", err)
+	}
+
+	events, err := auditlog.ReadEvents(&buf)
+	if err != nil {
+		t.Fatalf("ReadEvents: %v", err)
+	}
+
+	if len(events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(events))
+	}
+
+	if events[0].Name != "small-buf" {
+		t.Errorf("expected name %q, got %q", "small-buf", events[0].Name)
+	}
+}
+
+// WithBufferSize(1) forces bufio to bypass its buffer and write directly to
+// the underlying writer on every call. Combined with FailingWriter this
+// triggers the encode-error branch in OnEvent (which is unreachable with the
+// default 64 KB buffer because bufio swallows the write).
+func TestNDJSONStreamer_EncodeError(t *testing.T) {
+	t.Parallel()
+
+	streamer := auditlog.NewNDJSONStreamer(
+		&testhelpers.FailingWriter{},
+		auditlog.WithBufferSize(1),
+	)
+
+	streamer.OnEvent(auditlog.Event{
+		Sequence:  1,
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+		StepRef:   auditlog.StepRef{Name: "encode-fail"},
+	})
+
+	if !errors.Is(streamer.Err(), auditlog.ErrRenderFailed) {
+		t.Errorf("expected ErrRenderFailed from encode error, got %v", streamer.Err())
+	}
+}
+
+func TestNDJSONStreamer_FlushReturnsExistingError(t *testing.T) {
+	t.Parallel()
+
+	streamer := auditlog.NewNDJSONStreamer(
+		&testhelpers.FailingWriter{},
+		auditlog.WithBufferSize(1),
+	)
+
+	// Trigger an encode error (buffer size 1 bypasses bufio).
+	streamer.OnEvent(auditlog.Event{
+		Sequence:  1,
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+		StepRef:   auditlog.StepRef{Name: "trigger"},
+	})
+
+	firstErr := streamer.Err()
+	if firstErr == nil {
+		t.Fatal("expected error after OnEvent with failing writer")
+	}
+
+	// Flush must short-circuit and return the existing error.
+	flushErr := streamer.Flush()
+	if flushErr == nil {
+		t.Fatal("expected error from Flush after prior error")
+	}
+
+	if !errors.Is(flushErr, auditlog.ErrRenderFailed) {
+		t.Errorf("expected ErrRenderFailed from Flush, got %v", flushErr)
+	}
+}
+
+func TestNDJSONStreamer_CloseError(t *testing.T) {
+	t.Parallel()
+
+	w := &closeFailWriter{}
+
+	streamer := auditlog.NewNDJSONStreamer(w)
+
+	streamer.OnEvent(auditlog.Event{
+		Sequence:  1,
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+		StepRef:   auditlog.StepRef{Name: "close-fail"},
+	})
+
+	err := streamer.Close()
+	if err == nil {
+		t.Fatal("expected error from Close with failing closer")
+	}
+
+	if !errors.Is(err, auditlog.ErrExportWriteFailed) {
+		t.Errorf("expected ErrExportWriteFailed, got %v", err)
+	}
+}
+
 // --- Helpers ---
+
+// closeFailWriter is an io.ReadWriteCloser whose Write succeeds (delegating to
+// the embedded bytes.Buffer) but Close always fails. Used to exercise the
+// closer.Close() error path in NDJSONStreamer.Close.
+type closeFailWriter struct {
+	bytes.Buffer
+}
+
+func (*closeFailWriter) Close() error {
+	return errors.New("close failed")
+}
 
 // writeTracker is a thread-safe io.Writer that records all bytes written.
 type writeTracker struct {
