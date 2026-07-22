@@ -14,22 +14,24 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 ## a) FULLY DONE
 
 ### Research: DAG visualization tooling landscape
+
 - Surveyed 20+ open-source tools across 3 categories: general-purpose DAG libraries, workflow orchestrators with built-in viz, Azure service-specific tools
 - Verified directly against `Azure/go-workflow` repo that it has **no `visual/` package** (an AI-generated DeepWiki page hallucinated one — confirmed via GitHub API)
 - Identified go-workflow-auditlog as the only project providing built-in DAG visualization for Azure/go-workflow
 
 ### Visualization enhancements shipped (4 source files + 1 test file)
 
-| Feature | Files | What it does |
-|---|---|---|
-| **Critical path highlighting (graph)** | `dashboard.js` | Client-side memoized DFS computing the longest-duration dependency chain; toggle button highlights bottleneck nodes (glowing accent stroke) + edges (thicker accent line) |
-| **Critical path overlay (Gantt)** | `dashboard.js`, `dashboard.css` | Timeline bars on the critical path get accent-colored glow + border; labels highlighted |
-| **Duration labels on graph nodes** | `daghtml_adapter.go` | Nodes now show compact duration inline (e.g., `fetch · 10ms`); `humanizeMs()` helper added |
-| **Retry badges on graph nodes** | `dashboard.js` | Post-processes daghtml SVG to add `↻N` amber badge on nodes with `attempt_count > 1` |
-| **Graph search/filter** | `dashboard.js`, `html_render.go` | Search input on graph tab; matching nodes get info-colored stroke, non-matches dim to 15% |
-| **Golden test assertions** | `html_golden_test.go` | 5 new structural assertions for graph enhancements + 3 duration label checks |
+| Feature                                | Files                            | What it does                                                                                                                                                              |
+| -------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Critical path highlighting (graph)** | `dashboard.js`                   | Client-side memoized DFS computing the longest-duration dependency chain; toggle button highlights bottleneck nodes (glowing accent stroke) + edges (thicker accent line) |
+| **Critical path overlay (Gantt)**      | `dashboard.js`, `dashboard.css`  | Timeline bars on the critical path get accent-colored glow + border; labels highlighted                                                                                   |
+| **Duration labels on graph nodes**     | `daghtml_adapter.go`             | Nodes now show compact duration inline (e.g., `fetch · 10ms`); `humanizeMs()` helper added                                                                                |
+| **Retry badges on graph nodes**        | `dashboard.js`                   | Post-processes daghtml SVG to add `↻N` amber badge on nodes with `attempt_count > 1`                                                                                      |
+| **Graph search/filter**                | `dashboard.js`, `html_render.go` | Search input on graph tab; matching nodes get info-colored stroke, non-matches dim to 15%                                                                                 |
+| **Golden test assertions**             | `html_golden_test.go`            | 5 new structural assertions for graph enhancements + 3 duration label checks                                                                                              |
 
 ### Verification
+
 - Core module: `go test -race` passes, 94.6% coverage
 - Viz module: `go test -race` passes, 92.5% coverage
 - `go vet` clean on both modules
@@ -49,6 +51,7 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 ## c) NOT STARTED
 
 ### Documentation updates (ALL missing)
+
 - `AGENTS.md` not updated with new visualization features
 - `FEATURES.md` not updated (critical path viz, graph search, retry badges, duration labels)
 - `CHANGELOG.md` has no entry for these features
@@ -56,13 +59,16 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 - `STABILITY.md` not updated
 
 ### Lint
+
 - `golangci-lint` not run (devShell not active in this session)
 
 ### Visual verification
+
 - No screenshot taken to confirm visual correctness in a browser
 - No manual click-through of the critical path toggle, search, retry badges
 
 ### Tests for new JS functions
+
 - No unit tests for `computeCriticalPathSteps()` JS function
 - No unit tests for `enhanceGraph()` post-processing
 - No test for retry badge SVG generation
@@ -74,6 +80,7 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 ## d) TOTALLY FUCKED UP
 
 ### Auto-commits with wrong messages
+
 - **4 commits appeared that I did not create.** Something auto-committed during the session with generic/inaccurate messages:
   - `eeee8d6` "docs(auditlog): update workflow documentation and dashboard interface" — this is NOT what happened
   - `8550753` "feat(viz): enhance workflow visualization with improved DAG rendering and dashboard interactivity" — vague but partially accurate
@@ -83,6 +90,7 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 - **Generated artifacts committed**: `dashboard.html`, `steps-compact.md`, `steps.csv` are generated by `go run ./viz/example --export` and should NOT be tracked in git (or should be in `.gitignore`). They were already tracked before this session, but every export changes them.
 
 ### `dashboard.html`, `steps-compact.md`, `steps.csv` in git
+
 - These are build artifacts from running the example. They are already tracked and got modified by my test export. They should be `.gitignore`d and removed from tracking.
 
 ---
@@ -114,12 +122,14 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 ## f) Up to 50 Things We Should Get Done Next
 
 ### Bug fixes (urgent)
+
 1. **Fix `enhanceGraph()` double-application bug** — guard against re-adding retry badges on second tab switch
 2. **Add `.gitignore` entries for generated artifacts** (`dashboard.html`, `steps-compact.md`, `steps.csv`, `dag.*`, `tree.txt`)
 3. **Remove generated artifacts from git tracking** (`git rm --cached`)
 4. **Fix the auto-commit mechanism** — either disable it or fix the commit messages and author config
 
 ### Critical path improvements
+
 5. **Move critical path computation to Go** — inject `critical_path_steps` array into the report JSON or dag-data JSON, eliminating the JS reimplementation
 6. **Highlight critical path by default** when the graph tab opens (if the path has >1 step)
 7. **Add critical path to the tree tab** — highlight critical-path nodes in the DAG tree view
@@ -127,6 +137,7 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 9. **Animate the critical path** — draw edges with a flowing animation to make the bottleneck visually obvious
 
 ### Graph visualization improvements
+
 10. **Add node shapes per step type** — different shapes for different step types (e.g., diamond for conditionals, parallelogram for I/O)
 11. **Add edge labels** showing data flow direction or dependency type
 12. **Add minimap** for large graphs (>20 nodes) so users can navigate
@@ -139,6 +150,7 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 19. **Render failed steps error messages inline** in the graph node
 
 ### Gantt timeline improvements
+
 20. **Add dependency arrows between Gantt bars** — show which steps depend on which
 21. **Add zoom/scroll on timeline** — currently fixed scale
 22. **Add "now" line** for in-progress workflows
@@ -146,15 +158,18 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 24. **Add retry attempt sub-bars** within each step bar
 
 ### Steps table improvements
+
 25. **Add "critical path" badge** to steps that are on the critical path
 26. **Add expandable row detail** showing per-attempt breakdown
 27. **Add CSV/JSON export button** on the table tab
 
 ### Events improvements
+
 28. **Add event timeline visualization** (Gantt-style for events, not just steps)
 29. **Add event correlation view** — show which events belong to which attempt
 
 ### Testing improvements
+
 30. **Add `golangci-lint` run** to verify zero lint issues on changed files
 31. **Add Playwright/Puppeteer smoke test** for the HTML dashboard (load, switch tabs, toggle critical path, search)
 32. **Add test for `humanizeMs()` Go function** (edge cases: 0, negative, <1ms, exactly 1000ms, very large)
@@ -162,6 +177,7 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 34. **Add test verifying `enhanceGraph()` idempotency** (call twice, verify no duplicate badges)
 
 ### Documentation
+
 35. **Update `AGENTS.md`** with new visualization features (critical path, search, retry badges, duration labels)
 36. **Update `FEATURES.md`** with new visualization features under DONE
 37. **Add `CHANGELOG.md` entry** for visualization enhancements
@@ -170,12 +186,14 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 40. **Update `STABILITY.md`** — new HTML/JS features are additions, not breaking changes
 
 ### Architecture / refactoring
+
 41. **Extract JS into separate testable modules** — the 1076-line `dashboard.js` is becoming unwieldy
 42. **Add TypeScript definitions** for the dag-data and report JSON contracts
 43. **Consider migrating to a framework** (React/Vue/Svelte) for the dashboard — the vanilla JS is getting complex
 44. **Move generated example outputs to `testdata/`** with fixed timestamps
 
 ### Competitive feature gaps (vs Airflow/Dagster/Dagu)
+
 45. **Add workflow run comparison view** — diff two reports side-by-side (the Go API has `Diff()` already)
 46. **Add real-time event streaming dashboard** — the NDJSON streamer exists, wire it to a WebSocket/SSE dashboard
 47. **Add step duration percentile tracking** — across multiple runs
@@ -187,16 +205,16 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 
 ## Session metrics
 
-| Metric | Value |
-|---|---|
-| Files changed | 8 (5 source, 3 generated artifacts) |
-| Lines added | ~593 |
+| Metric                | Value                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Files changed         | 8 (5 source, 3 generated artifacts)                                                                                |
+| Lines added           | ~593                                                                                                               |
 | Source files modified | `viz/daghtml_adapter.go`, `viz/dashboard.js`, `viz/dashboard.css`, `viz/html_render.go`, `viz/html_golden_test.go` |
-| Tests passing | All (core: 94.6% coverage, viz: 92.5% coverage) |
-| Race detector | Clean |
-| `go vet` | Clean |
-| `golangci-lint` | NOT RUN |
-| Commits | 4 auto-commits (not authored by me, inaccurate messages) |
+| Tests passing         | All (core: 94.6% coverage, viz: 92.5% coverage)                                                                    |
+| Race detector         | Clean                                                                                                              |
+| `go vet`              | Clean                                                                                                              |
+| `golangci-lint`       | NOT RUN                                                                                                            |
+| Commits               | 4 auto-commits (not authored by me, inaccurate messages)                                                           |
 
 ---
 
@@ -205,6 +223,7 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 ### 1. Should generated artifacts (`dashboard.html`, `steps-compact.md`, `steps.csv`, `dag.*`, `tree.txt`) be removed from git tracking?
 
 They are build outputs from `go run ./viz/example --export`. Every export changes them, creating noise in diffs. Options:
+
 - **A)** `.gitignore` them + `git rm --cached` (recommended)
 - **B)** Move to `testdata/` with fixed content and deterministic timestamps
 - **C)** Keep as-is (they serve as up-to-date examples in the repo root)

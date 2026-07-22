@@ -1043,7 +1043,9 @@ tr.row-canceled:hover td {
 
 /* Critical path Gantt bar overlay */
 .gantt-row.critical-path-bar .gantt-bar {
-  box-shadow: 0 0 0 2px var(--accent), 0 0 8px rgba(232, 168, 56, 0.3);
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 0 8px rgba(232, 168, 56, 0.3);
 }
 .gantt-row.critical-path-bar .gantt-label {
   color: var(--accent);

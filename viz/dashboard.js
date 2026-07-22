@@ -784,7 +784,9 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
   // Compute critical path for highlighting
   var cpSteps = computeCriticalPathSteps();
   var cpSet = {};
-  cpSteps.forEach(function (name) { cpSet[name] = true; });
+  cpSteps.forEach(function (name) {
+    cpSet[name] = true;
+  });
 
   function pct(ts) {
     return ((ts - minT) / range) * 100;
@@ -813,14 +815,17 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
         (s.attempt_count > 1 ? " | " + s.attempt_count + " attempts" : "") +
         (s.error ? " | " + esc(s.error) : "");
       return (
-        '<div class="gantt-row' + isCP + '">' +
+        '<div class="gantt-row' +
+        isCP +
+        '">' +
         '<div class="gantt-label">' +
         (icon ? icon + " " : "") +
         esc(s.step_name) +
         "</div>" +
         '<div class="gantt-track">' +
         '<div class="gantt-bar ' +
-        esc(s.status) + isCP +
+        esc(s.status) +
+        isCP +
         '" style="left:' +
         left +
         "%;width:" +
@@ -885,7 +890,7 @@ function computeCriticalPathSteps() {
       return memo[name];
     }
 
-    var duration = (step.duration_ms || 0);
+    var duration = step.duration_ms || 0;
     var deps = step.dependencies || [];
     var bestChild = { duration: 0, chain: [] };
 

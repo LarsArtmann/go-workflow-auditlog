@@ -233,11 +233,11 @@ func TestReport_WriteHTML_GoldenContent(t *testing.T) {
 
 	// --- Graph visualization enhancements present ---
 	for _, marker := range []string{
-		`id="graph-search"`,          // search/filter input
-		`id="graph-critical-path"`,   // critical path toggle button
-		"computeCriticalPathSteps",   // critical path algorithm
-		"enhanceGraph",               // post-render enhancement function
-		"critical-path-bar",          // Gantt timeline critical path CSS class
+		`id="graph-search"`,        // search/filter input
+		`id="graph-critical-path"`, // critical path toggle button
+		"computeCriticalPathSteps", // critical path algorithm
+		"enhanceGraph",             // post-render enhancement function
+		"critical-path-bar",        // Gantt timeline critical path CSS class
 	} {
 		if !strings.Contains(html, marker) {
 			t.Errorf("expected graph enhancement marker %q in HTML output", marker)
