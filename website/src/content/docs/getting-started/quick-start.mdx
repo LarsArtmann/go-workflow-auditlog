@@ -16,7 +16,8 @@ import (
 
     flow "github.com/Azure/go-workflow"
 
-    "github.com/larsartmann/go-workflow-auditlog"
+    auditlog "github.com/larsartmann/go-workflow-auditlog"
+    viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 type FetchStep struct{ Data []byte }
@@ -56,9 +57,11 @@ func main() {
     fmt.Printf("Steps: %d, Events: %d\n", report.StepCount, report.EventCount)
     fmt.Println(report.Summary())
 
-    // Export
+    // Export core formats
     _ = audit.ExportJSON("audit.json")
-    _ = audit.ExportHTML("dashboard.html")
+
+    // Export visualizations (requires github.com/larsartmann/go-workflow-auditlog/viz)
+    _ = viz.ExportHTML(audit.Report(), "dashboard.html")
 }
 ```
 
