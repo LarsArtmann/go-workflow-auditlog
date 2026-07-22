@@ -17,14 +17,14 @@ import (
 
 // renderMarkdownTable renders the report's step summary as Markdown into a
 // buffer and returns it. Centralizes the
-// `var buf strings.Builder; err := viz.WriteTable(viz, a.Report(), &buf, output.FormatMarkdown, output.RenderOptions{})`
+// `var buf strings.Builder; err := viz.WriteTable(a.Report(), &buf, output.FormatMarkdown, output.RenderOptions{})`
 // boilerplate used by output tests that need a Markdown rendering of a report.
 func renderMarkdownTable(t *testing.T, a *auditlog.Auditor) string {
 	t.Helper()
 
 	var buf strings.Builder
 
-	err := viz.WriteTable(viz, a.Report(), &buf, output.FormatMarkdown, output.RenderOptions{})
+	err := viz.WriteTable(a.Report(), &buf, output.FormatMarkdown, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable markdown error: %v", err)
 	}
@@ -48,7 +48,7 @@ func TestD2_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteD2(viz, a.Report(), &buf)
+	err := viz.WriteD2(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
@@ -74,7 +74,7 @@ func TestD2_FailedStepRedColor(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteD2(viz, a.Report(), &buf)
+	err := viz.WriteD2(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
@@ -90,7 +90,7 @@ func TestD2_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteD2(viz, a.Report(), &buf)
+	err := viz.WriteD2(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteD2 on empty report error: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestWriteD2String(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "d2-string")
 
-	output, err := viz.WriteD2String(viz, a.Report(), )
+	output, err := viz.WriteD2String(a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteD2String error: %v", err)
 	}
@@ -147,7 +147,7 @@ func TestWriteTable_CSV(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "csv-step")
 
-	err := viz.WriteTable(viz, a.Report(), buf, output.FormatCSV, output.RenderOptions{})
+	err := viz.WriteTable(a.Report(), buf, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable csv error: %v", err)
 	}
@@ -164,7 +164,7 @@ func TestWriteTable_JSON(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "json-step")
 
-	err := viz.WriteTable(viz, a.Report(), buf, output.FormatJSON, output.RenderOptions{})
+	err := viz.WriteTable(a.Report(), buf, output.FormatJSON, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable json error: %v", err)
 	}
@@ -180,7 +180,7 @@ func TestWriteTable_JSONL(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "jsonl-step")
 
-	err := viz.WriteTable(viz, a.Report(), buf, output.FormatJSONL, output.RenderOptions{})
+	err := viz.WriteTable(a.Report(), buf, output.FormatJSONL, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTable jsonl error: %v", err)
 	}
@@ -210,7 +210,7 @@ func TestWriteTableString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "table-string")
 
-	output, err := viz.WriteTableString(viz, a.Report(), output.FormatMarkdown, output.RenderOptions{})
+	output, err := viz.WriteTableString(a.Report(), output.FormatMarkdown, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
@@ -242,7 +242,7 @@ func TestWriteTree_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteTree(viz, a.Report(), &buf)
+	err := viz.WriteTree(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteTree error: %v", err)
 	}
@@ -261,7 +261,7 @@ func TestWriteTree_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteTree(viz, a.Report(), &buf)
+	err := viz.WriteTree(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteTree on empty report error: %v", err)
 	}
@@ -274,7 +274,7 @@ func TestWriteTreeString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "tree-string")
 
-	output, err := viz.WriteTreeString(viz, a.Report(), )
+	output, err := viz.WriteTreeString(a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteTreeString error: %v", err)
 	}
@@ -293,7 +293,7 @@ func TestWriteHTMLTree_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteHTMLTree(viz, a.Report(), &buf)
+	err := viz.WriteHTMLTree(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTMLTree error: %v", err)
 	}
@@ -310,7 +310,7 @@ func TestWriteHTMLTreeString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "html-tree-string")
 
-	output, err := viz.WriteHTMLTreeString(viz, a.Report(), )
+	output, err := viz.WriteHTMLTreeString(a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteHTMLTreeString error: %v", err)
 	}

@@ -24,7 +24,7 @@ func TestMermaid_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteMermaid(viz, a.Report(), &buf)
+	err := viz.WriteMermaid(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -50,7 +50,7 @@ func TestMermaid_FailedStepRedColor(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteMermaid(viz, a.Report(), &buf)
+	err := viz.WriteMermaid(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -70,7 +70,7 @@ func TestMermaid_RetryIndicator(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteMermaid(viz, a.Report(), &buf)
+	err := viz.WriteMermaid(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -91,7 +91,7 @@ func TestMermaid_SpecialCharsSanitized(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteMermaid(viz, a.Report(), &buf)
+	err := viz.WriteMermaid(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -112,7 +112,7 @@ func TestMermaid_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteMermaid(viz, a.Report(), &buf)
+	err := viz.WriteMermaid(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid on empty report error: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestPlantUML_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WritePlantUML(viz, a.Report(), &buf)
+	err := viz.WritePlantUML(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
@@ -179,7 +179,7 @@ func TestGraphviz_BasicDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteGraphviz(viz, a.Report(), &buf)
+	err := viz.WriteGraphviz(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
@@ -203,7 +203,7 @@ func TestGraphviz_FailedStepColor(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteGraphviz(viz, a.Report(), &buf)
+	err := viz.WriteGraphviz(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
@@ -219,7 +219,7 @@ func TestGraphviz_EmptyReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteGraphviz(viz, a.Report(), &buf)
+	err := viz.WriteGraphviz(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteGraphviz on empty report error: %v", err)
 	}
@@ -256,7 +256,7 @@ func TestMermaid_FanOutFanIn(t *testing.T) {
 
 	var buf strings.Builder
 
-	_ = viz.WriteMermaid(viz, a.Report(), &buf)
+	_ = viz.WriteMermaid(a.Report(), &buf)
 
 	output := buf.String()
 
@@ -272,7 +272,7 @@ func TestWriteMermaidString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "string-step")
 
-	output, err := viz.WriteMermaidString(viz, a.Report(), )
+	output, err := viz.WriteMermaidString(a.Report(), )
 	// WriteMermaidString currently wraps nil errors; verify the output is usable.
 	_ = err
 
@@ -284,7 +284,7 @@ func TestWriteGraphvizString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "string-step")
 
-	output, err := viz.WriteGraphvizString(viz, a.Report(), )
+	output, err := viz.WriteGraphvizString(a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteGraphvizString error: %v", err)
 	}
@@ -297,7 +297,7 @@ func TestWritePlantUMLString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "plantuml-step")
 
-	output, err := viz.WritePlantUMLString(viz, a.Report(), )
+	output, err := viz.WritePlantUMLString(a.Report(), )
 	if err != nil {
 		t.Fatalf("WritePlantUMLString error: %v", err)
 	}
@@ -319,7 +319,7 @@ func TestMermaid_SkippedStepGrayColor(t *testing.T) {
 
 	var buf strings.Builder
 
-	_ = viz.WriteMermaid(viz, a.Report(), &buf)
+	_ = viz.WriteMermaid(a.Report(), &buf)
 
 	output := buf.String()
 
@@ -335,7 +335,7 @@ func TestPlantUML_NoMermaidClasses(t *testing.T) {
 
 	var buf strings.Builder
 
-	_ = viz.WritePlantUML(viz, a.Report(), &buf)
+	_ = viz.WritePlantUML(a.Report(), &buf)
 
 	output := buf.String()
 
@@ -365,7 +365,7 @@ func TestMermaid_CanceledStep(t *testing.T) {
 
 	var buf strings.Builder
 
-	_ = viz.WriteMermaid(viz, a.Report(), &buf)
+	_ = viz.WriteMermaid(a.Report(), &buf)
 
 	output := buf.String()
 

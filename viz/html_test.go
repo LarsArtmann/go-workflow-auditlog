@@ -25,7 +25,7 @@ func TestWriteHTML_BasicReport(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteHTML(viz, a.Report(), &buf)
+	err := viz.WriteHTML(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -81,7 +81,7 @@ func TestWriteHTML_FailedStepWithError(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteHTML(viz, a.Report(), &buf)
+	err := viz.WriteHTML(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -97,7 +97,7 @@ func TestWriteHTMLString_ReturnsContent(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "only-step")
 
-	output, err := viz.WriteHTMLString(viz, a.Report(), )
+	output, err := viz.WriteHTMLString(a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteHTMLString error: %v", err)
 	}
@@ -191,7 +191,7 @@ func TestWriteHTML_RetryStepHasAttemptCount(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteHTML(viz, a.Report(), &buf)
+	err := viz.WriteHTML(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML error: %v", err)
 	}
@@ -351,7 +351,7 @@ func TestWriteHTML_DiamondDAG(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteHTML(viz, a.Report(), &buf)
+	err := viz.WriteHTML(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML: %v", err)
 	}
@@ -474,7 +474,7 @@ func TestWriteHTML_FailureBanner_WhenFailed(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteHTML(viz, a.Report(), &buf)
+	err := viz.WriteHTML(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML: %v", err)
 	}
@@ -544,7 +544,7 @@ func TestWriteHTML_ImpactBadge(t *testing.T) {
 
 	var buf strings.Builder
 
-	err := viz.WriteHTML(viz, a.Report(), &buf)
+	err := viz.WriteHTML(a.Report(), &buf)
 	if err != nil {
 		t.Fatalf("WriteHTML: %v", err)
 	}

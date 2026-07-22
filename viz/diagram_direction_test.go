@@ -18,7 +18,7 @@ func TestMermaid_DefaultDirectionTD(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "td-step")
 
-	err := viz.WriteMermaid(viz, a.Report(), buf)
+	err := viz.WriteMermaid(a.Report(), buf)
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -31,7 +31,7 @@ func TestMermaid_DirectionLR(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "lr-step")
 
-	err := viz.WriteMermaid(viz, a.Report(), buf, viz.WithDirection(output.DirectionRight))
+	err := viz.WriteMermaid(a.Report(), buf, viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -48,7 +48,7 @@ func TestMermaid_DirectionBT(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "bt-step")
 
-	err := viz.WriteMermaid(viz, a.Report(), buf, viz.WithDirection(output.DirectionUp))
+	err := viz.WriteMermaid(a.Report(), buf, viz.WithDirection(output.DirectionUp))
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestMermaid_DirectionRL(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "rl-step")
 
-	err := viz.WriteMermaid(viz, a.Report(), buf, viz.WithDirection(output.DirectionLeft))
+	err := viz.WriteMermaid(a.Report(), buf, viz.WithDirection(output.DirectionLeft))
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -76,7 +76,7 @@ func TestGraphviz_DefaultDirectionTB(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "gv-td-step")
 
-	err := viz.WriteGraphviz(viz, a.Report(), buf)
+	err := viz.WriteGraphviz(a.Report(), buf)
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
@@ -89,7 +89,7 @@ func TestGraphviz_DirectionLR(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "gv-lr-step")
 
-	err := viz.WriteGraphviz(viz, a.Report(), buf, viz.WithDirection(output.DirectionRight))
+	err := viz.WriteGraphviz(a.Report(), buf, viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
@@ -106,7 +106,7 @@ func TestGraphviz_DirectionBT(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "gv-bt-step")
 
-	err := viz.WriteGraphviz(viz, a.Report(), buf, viz.WithDirection(output.DirectionUp))
+	err := viz.WriteGraphviz(a.Report(), buf, viz.WithDirection(output.DirectionUp))
 	if err != nil {
 		t.Fatalf("WriteGraphviz error: %v", err)
 	}
@@ -121,7 +121,7 @@ func TestD2_DefaultDirectionNone(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-default-step")
 
-	err := viz.WriteD2(viz, a.Report(), buf)
+	err := viz.WriteD2(a.Report(), buf)
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
@@ -137,7 +137,7 @@ func TestD2_DirectionRight(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-right-step")
 
-	err := viz.WriteD2(viz, a.Report(), buf, viz.WithDirection(output.DirectionRight))
+	err := viz.WriteD2(a.Report(), buf, viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
@@ -150,7 +150,7 @@ func TestD2_DirectionUp(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-up-step")
 
-	err := viz.WriteD2(viz, a.Report(), buf, viz.WithDirection(output.DirectionUp))
+	err := viz.WriteD2(a.Report(), buf, viz.WithDirection(output.DirectionUp))
 	if err != nil {
 		t.Fatalf("WriteD2 error: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestPlantUML_DefaultNoDirectionCommand(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-default-step")
 
-	err := viz.WritePlantUML(viz, a.Report(), buf)
+	err := viz.WritePlantUML(a.Report(), buf)
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
@@ -180,7 +180,7 @@ func TestPlantUML_DirectionRight(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-lr-step")
 
-	err := viz.WritePlantUML(viz, a.Report(), buf, viz.WithDirection(output.DirectionRight))
+	err := viz.WritePlantUML(a.Report(), buf, viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
@@ -195,7 +195,7 @@ func TestMermaidString_DirectionLR(t *testing.T) {
 
 	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "mmd-str-lr")
 
-	out, err := viz.WriteMermaidString(viz, a.Report(), viz.WithDirection(output.DirectionRight))
+	out, err := viz.WriteMermaidString(a.Report(), viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteMermaidString error: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestGraphvizString_DirectionLR(t *testing.T) {
 
 	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "gv-str-lr")
 
-	out, err := viz.WriteGraphvizString(viz, a.Report(), viz.WithDirection(output.DirectionRight))
+	out, err := viz.WriteGraphvizString(a.Report(), viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("WriteGraphvizString error: %v", err)
 	}
@@ -264,7 +264,7 @@ func TestMermaid_DirectionDownExplicit(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "td-explicit-step")
 
-	err := viz.WriteMermaid(viz, a.Report(), buf, viz.WithDirection(output.DirectionDown))
+	err := viz.WriteMermaid(a.Report(), buf, viz.WithDirection(output.DirectionDown))
 	if err != nil {
 		t.Fatalf("WriteMermaid error: %v", err)
 	}
@@ -277,7 +277,7 @@ func TestPlantUML_DirectionDownExplicit(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-td-explicit")
 
-	err := viz.WritePlantUML(viz, a.Report(), buf, viz.WithDirection(output.DirectionDown))
+	err := viz.WritePlantUML(a.Report(), buf, viz.WithDirection(output.DirectionDown))
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
@@ -293,7 +293,7 @@ func TestPlantUML_DirectionLeft(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-left-step")
 
-	err := viz.WritePlantUML(viz, a.Report(), buf, viz.WithDirection(output.DirectionLeft))
+	err := viz.WritePlantUML(a.Report(), buf, viz.WithDirection(output.DirectionLeft))
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
@@ -306,7 +306,7 @@ func TestPlantUML_DirectionUp(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-up-step")
 
-	err := viz.WritePlantUML(viz, a.Report(), buf, viz.WithDirection(output.DirectionUp))
+	err := viz.WritePlantUML(a.Report(), buf, viz.WithDirection(output.DirectionUp))
 	if err != nil {
 		t.Fatalf("WritePlantUML error: %v", err)
 	}
@@ -324,7 +324,7 @@ func TestWriteD2String_ErrorPath(t *testing.T) {
 
 	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "d2-err-step")
 
-	_, err := viz.WriteD2String(viz, a.Report(), )
+	_, err := viz.WriteD2String(a.Report(), )
 	if err != nil {
 		t.Fatalf("WriteD2String should succeed for valid report, got: %v", err)
 	}
@@ -335,7 +335,7 @@ func TestWritePlantUMLString_ErrorPath(t *testing.T) {
 
 	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "puml-err-step")
 
-	_, err := viz.WritePlantUMLString(viz, a.Report(), )
+	_, err := viz.WritePlantUMLString(a.Report(), )
 	if err != nil {
 		t.Fatalf("WritePlantUMLString should succeed for valid report, got: %v", err)
 	}

@@ -15,7 +15,7 @@ func TestTable_DefaultColumns(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "default-col-step")
 
-	out, err := viz.WriteTableString(viz, a.Report(), output.FormatCSV, output.RenderOptions{})
+	out, err := viz.WriteTableString(a.Report(), output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
@@ -35,7 +35,7 @@ func TestTable_CustomColumnSelection(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "custom-col-step")
 
-	out, err := viz.WriteTableString(viz, a.Report(), 
+	out, err := viz.WriteTableString(a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
@@ -71,7 +71,7 @@ func TestTable_NewColumns(t *testing.T) {
 	testhelpers.AddLinearChain(w, fetch, transform, save)
 	testhelpers.RunWorkflow(t, a, w)
 
-	out, err := viz.WriteTableString(viz, a.Report(), 
+	out, err := viz.WriteTableString(a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnType, viz.ColumnDependencies),
 	)
@@ -93,7 +93,7 @@ func TestTable_ColumnOrderRespected(t *testing.T) {
 	a := testhelpers.RunSingleSucceed(t, "order-step")
 
 	// Reverse the natural order: Status, then Step.
-	out, err := viz.WriteTableString(viz, a.Report(), 
+	out, err := viz.WriteTableString(a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStatus, viz.ColumnStep),
 	)
@@ -126,7 +126,7 @@ func TestTable_AllColumns(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "all-cols-step")
 
-	out, err := viz.WriteTableString(viz, a.Report(), 
+	out, err := viz.WriteTableString(a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(auditlog.AllTableColumns()...),
 	)
@@ -149,7 +149,7 @@ func TestTable_MaxAttemptsColumn(t *testing.T) {
 	testhelpers.AddRetryStep(w, step, 5)
 	testhelpers.RunWorkflow(t, a, w)
 
-	out, err := viz.WriteTableString(viz, a.Report(), 
+	out, err := viz.WriteTableString(a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnMaxAttempts),
 	)
@@ -196,7 +196,7 @@ func TestTable_EmptyColumnSelectionUsesDefaults(t *testing.T) {
 	a := testhelpers.RunSingleSucceed(t, "empty-cols-step")
 
 	// WriteTable with no tableOpts should produce default columns.
-	out, err := viz.WriteTableString(viz, a.Report(), output.FormatCSV, output.RenderOptions{})
+	out, err := viz.WriteTableString(a.Report(), output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}
