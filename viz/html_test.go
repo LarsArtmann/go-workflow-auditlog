@@ -13,6 +13,21 @@ import (
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
 
+func writeSingleStepHTML(t *testing.T, step flow.Steper) string {
+	t.Helper()
+
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	w.Add(flow.Step(step))
+	testhelpers.RunWorkflow(t, a, w)
+
+	out, err := viz.WriteHTMLString(a.Report())
+	if err != nil {
+		t.Fatalf("WriteHTMLString error: %v", err)
+	}
+
+	return out
+}
+
 func TestWriteHTML_BasicReport(t *testing.T) {
 	t.Parallel()
 
@@ -431,7 +446,7 @@ func TestWriteHTML_Determinism(t *testing.T) {
 func TestWriteHTML_StructuralIntegrity(t *testing.T) {
 	t.Parallel()
 
-	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("structure-test"))
+	output := writeSingleStepHTML(t, testhelpers.NewSucceed("structure-test"))
 	assertHTMLStructure(t, output)
 }
 
@@ -491,7 +506,7 @@ func TestWriteHTML_FailureBanner_WhenFailed(t *testing.T) {
 func TestWriteHTML_FailureBanner_HiddenWhenSucceeded(t *testing.T) {
 	t.Parallel()
 
-	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("happy-step"))
+	output := writeSingleStepHTML(t, testhelpers.NewSucceed("happy-step"))
 
 	testhelpers.AssertContains(t, output, `"workflow_succeeded":true`, "expected workflow_succeeded=true in JSON")
 	testhelpers.AssertContains(t, output, "failure-banner",
@@ -501,7 +516,7 @@ func TestWriteHTML_FailureBanner_HiddenWhenSucceeded(t *testing.T) {
 func TestWriteHTML_ErrorColumn(t *testing.T) {
 	t.Parallel()
 
-	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewFail("crash-step", "disk full"))
+	output := writeSingleStepHTML(t, testhelpers.NewFail("crash-step", "disk full"))
 
 	testhelpers.AssertContains(t, output, ">Error</th>", "expected Error column header in template")
 	testhelpers.AssertContains(t, output, `colspan="9"`, "expected colspan=9 for empty state row")
@@ -512,7 +527,7 @@ func TestWriteHTML_ErrorColumn(t *testing.T) {
 func TestWriteHTML_WorkflowStatusBadge(t *testing.T) {
 	t.Parallel()
 
-	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("pass-step"))
+	output := writeSingleStepHTML(t, testhelpers.NewSucceed("pass-step"))
 
 	testhelpers.AssertContains(t, output, "workflow-status", "expected workflow-status badge element in template")
 	testhelpers.AssertContains(t, output, `"workflow_succeeded":true`, "expected success status in JSON")
@@ -523,7 +538,7 @@ func TestWriteHTML_WorkflowStatusBadge(t *testing.T) {
 func TestWriteHTML_GanttChart(t *testing.T) {
 	t.Parallel()
 
-	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("timed-step"))
+	output := writeSingleStepHTML(t, testhelpers.NewSucceed("timed-step"))
 
 	testhelpers.AssertContains(t, output, "gantt-axis", "expected gantt-axis CSS in template")
 	testhelpers.AssertContains(t, output, "gantt-grid", "expected gantt-grid CSS in template")
@@ -559,7 +574,7 @@ func TestWriteHTML_ImpactBadge(t *testing.T) {
 func TestWriteHTML_HumanizedDurations(t *testing.T) {
 	t.Parallel()
 
-	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewSucceed("duration-step"))
+	output := writeSingleStepHTML(t, testhelpers.NewSucceed("duration-step"))
 
 	testhelpers.AssertContains(t, output, "function humanizeDuration", "expected humanizeDuration function definition")
 	testhelpers.AssertContains(
@@ -579,7 +594,7 @@ func TestWriteHTML_HumanizedDurations(t *testing.T) {
 func TestWriteHTML_GraphFailedNodeDot(t *testing.T) {
 	t.Parallel()
 
-	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewFail("graph-fail", "node error"))
+	output := writeSingleStepHTML(t, testhelpers.NewFail("graph-fail", "node error"))
 
 	// Error dot rendering is now in the daghtml SDK JS, triggered by the
 	// "error":true field in the DAG JSON data.
@@ -589,7 +604,7 @@ func TestWriteHTML_GraphFailedNodeDot(t *testing.T) {
 func TestWriteHTML_TreeInlineError(t *testing.T) {
 	t.Parallel()
 
-	output := testhelpers.WriteSingleStepHTML(t, testhelpers.NewFail("tree-fail", "tree error here"))
+	output := writeSingleStepHTML(t, testhelpers.NewFail("tree-fail", "tree error here"))
 
 	testhelpers.AssertContains(
 		t,
