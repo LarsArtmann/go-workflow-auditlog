@@ -362,9 +362,9 @@ func TestWorkflowReport_ExportMethods(t *testing.T) {
 		{"PlantUML", func(path string) error { return viz.ExportPlantUML(report, path) }, ".puml"},
 		{"Graphviz", func(path string) error { return viz.ExportGraphviz(report, path) }, ".dot"},
 		{"D2", func(path string) error { return viz.ExportD2(report, path) }, ".d2"},
-		{"Tree", report.ExportTree, ".txt"},
-		{"HTMLTree", report.ExportHTMLTree, ".html"},
-		{"HTML", report.ExportHTML, ".html"},
+		{"Tree", func(path string) error { return viz.ExportTree(report, path) }, ".txt"},
+		{"HTMLTree", func(path string) error { return viz.ExportHTMLTree(report, path) }, ".html"},
+		{"HTML", func(path string) error { return viz.ExportHTML(report, path) }, ".html"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
@@ -403,9 +403,9 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 		{"PlantUML", func() (string, error) { return viz.WritePlantUMLString(a.Report()) }},
 		{"Graphviz", func() (string, error) { return viz.WriteGraphvizString(a.Report()) }},
 		{"D2", func() (string, error) { return viz.WriteD2String(a.Report()) }},
-		{"Tree", a.WriteTreeString},
-		{"HTMLTree", a.WriteHTMLTreeString},
-		{"HTML", a.WriteHTMLString},
+		{"Tree", viz.WriteTreeString(a.Report())},
+		{"HTMLTree", viz.WriteHTMLTreeString(a.Report())},
+		{"HTML", viz.WriteHTMLString(a.Report())},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()

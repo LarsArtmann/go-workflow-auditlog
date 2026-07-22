@@ -128,7 +128,7 @@ func TestTable_AllColumns(t *testing.T) {
 
 	out, err := viz.WriteTableString(a.Report(), 
 		output.FormatCSV, output.RenderOptions{},
-		viz.WithColumns(auditlog.AllTableColumns()...),
+		viz.WithColumns(viz.AllTableColumns()...),
 	)
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
@@ -246,14 +246,14 @@ func TestTable_ColumnsFromReplayedReport(t *testing.T) {
 func TestTable_DefaultTableColumnsVar(t *testing.T) {
 	t.Parallel()
 
-	defaults := auditlog.DefaultTableColumns
+	defaults := viz.DefaultTableColumns
 
 	if len(defaults) != 7 {
 		t.Errorf("expected 7 default columns, got %d", len(defaults))
 	}
 
 	// Ensure it matches the original hardcoded layout.
-	expected := []auditlog.TableColumn{
+	expected := []viz.TableColumn{
 		viz.ColumnStep,
 		viz.ColumnStatus,
 		viz.ColumnDuration,
@@ -273,7 +273,7 @@ func TestTable_DefaultTableColumnsVar(t *testing.T) {
 func TestTable_AllTableColumnsCount(t *testing.T) {
 	t.Parallel()
 
-	all := auditlog.AllTableColumns()
+	all := viz.AllTableColumns()
 	if len(all) != 10 {
 		t.Errorf("expected 10 total columns, got %d", len(all))
 	}
@@ -310,7 +310,7 @@ func TestTable_ColumnString(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		col  auditlog.TableColumn
+		col  viz.TableColumn
 		want string
 	}{
 		{viz.ColumnStep, "Step"},
@@ -335,7 +335,7 @@ func TestTable_ColumnString(t *testing.T) {
 func TestTable_DefaultColumnsImmutability(t *testing.T) {
 	t.Parallel()
 
-	original := append([]auditlog.TableColumn(nil), auditlog.DefaultTableColumns...)
+	original := append([]viz.TableColumn(nil), viz.DefaultTableColumns...)
 
 	// Mutate a returned-default copy via WriteTable with no column options.
 	// Internally, applyTableOpts must copy DefaultTableColumns, not alias it.
@@ -352,9 +352,9 @@ func TestTable_DefaultColumnsImmutability(t *testing.T) {
 
 	// Verify DefaultTableColumns was not mutated by the internal copy logic.
 	for i, want := range original {
-		if auditlog.DefaultTableColumns[i] != want {
+		if viz.DefaultTableColumns[i] != want {
 			t.Errorf("DefaultTableColumns[%d] was mutated: got %v, want %v",
-				i, auditlog.DefaultTableColumns[i], want)
+				i, viz.DefaultTableColumns[i], want)
 		}
 	}
 }
