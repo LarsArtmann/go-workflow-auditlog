@@ -3,7 +3,7 @@
 **Date:** 2026-07-22 11:12 CEST  
 **Branch:** `modularize/core-viz-split`  
 **Snapshot:** Manual verification run after core-viz module split.  
-**Prepared by:** Crush (automated assistant)  
+**Prepared by:** Crush (automated assistant)
 
 ---
 
@@ -11,18 +11,18 @@
 
 The core-vs-visualization module split is **complete and verified**. The branch is 21 commits ahead of origin, the working tree is clean, and all manual verification gates pass. Two near-misses were caught during verification: a deprecated `archives.builds` field in `.goreleaser.yml` and a core coverage drop to 88.1% after moving viz tests out. Both are fixed. The remaining work is release logistics and follow-up polish.
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| Core tests | pass | pass | done |
-| Viz tests (workspace) | pass | pass | done |
-| Viz tests (`GOWORK=off`) | pass | pass | done |
-| Core lint | 0 issues | 0 | done |
-| Viz lint | 0 issues | 0 | done |
-| Core coverage | 94.1% | ≥92% | done |
-| Viz coverage | 92.7% | ≥92% | done |
-| `goreleaser check` | valid | valid | done |
-| `go work sync` | clean | clean | done |
-| `git status` | clean | clean | done |
+| Metric                   | Value    | Target | Status |
+| ------------------------ | -------- | ------ | ------ |
+| Core tests               | pass     | pass   | done   |
+| Viz tests (workspace)    | pass     | pass   | done   |
+| Viz tests (`GOWORK=off`) | pass     | pass   | done   |
+| Core lint                | 0 issues | 0      | done   |
+| Viz lint                 | 0 issues | 0      | done   |
+| Core coverage            | 94.1%    | ≥92%   | done   |
+| Viz coverage             | 92.7%    | ≥92%   | done   |
+| `goreleaser check`       | valid    | valid  | done   |
+| `go work sync`           | clean    | clean  | done   |
+| `git status`             | clean    | clean  | done   |
 
 ---
 
@@ -40,13 +40,14 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 10. **Docs updated.** `AGENTS.md`, `README.md`, and five website docs pages updated for the new modular API.
 11. **Core coverage restored.** Added `coverage_report_test.go` to cover report query methods, enumerators, export paths, and summary branches after viz tests moved out.
 12. **Final verification completed.**
-   - `go mod tidy` in both modules.
-   - `GOEXPERIMENT=jsonv2 go test ./...` passes in core and viz.
-   - `GOWORK=off GOEXPERIMENT=jsonv2 go test ./...` passes in viz.
-   - `golangci-lint run ./...` 0 issues in core and viz.
-   - Race + coverage: core 94.1%, viz 92.7%.
-   - `go work sync` clean.
-   - `goreleaser check` valid.
+
+- `go mod tidy` in both modules.
+- `GOEXPERIMENT=jsonv2 go test ./...` passes in core and viz.
+- `GOWORK=off GOEXPERIMENT=jsonv2 go test ./...` passes in viz.
+- `golangci-lint run ./...` 0 issues in core and viz.
+- Race + coverage: core 94.1%, viz 92.7%.
+- `go work sync` clean.
+- `goreleaser check` valid.
 
 ---
 
@@ -103,6 +104,7 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 ## f) Top 50 Things to Get Done Next
 
 ### Release & Logistics
+
 1. Push `modularize/core-viz-split` to origin.
 2. Open a PR against `master`/`main`.
 3. Let CI run the full matrix and confirm green.
@@ -115,6 +117,7 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 10. Verify release artifacts (demo binaries) on Linux and Darwin.
 
 ### Documentation & Consumer Experience
+
 11. Add a consumer migration guide (`docs/guides/migration.md` or README section).
 12. Add package-level examples for `viz` functions.
 13. Add package-level examples for core-only usage.
@@ -127,6 +130,7 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 20. Add a coverage badge and CI status badge to README.
 
 ### Testing & Coverage
+
 21. Add internal tests for `sortByName` and `fromFlowStatus` fallback.
 22. Add tests for `WriteToFile` atomicity failure paths.
 23. Add tests for `CheckNoClobber` and `ErrFileExists`.
@@ -145,6 +149,7 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 36. Add integration test importing the viz module with `GOWORK=off`.
 
 ### Tooling & CI
+
 37. Add a CI `goreleaser check` job.
 38. Add a local `nix run .#check` or equivalent all-checks command.
 39. Add `govulncheck` to local checks.
@@ -156,6 +161,7 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 45. Automate website deployment on release tag.
 
 ### Polish & Refactoring
+
 46. Modernize benchmarks to use `b.Loop()`.
 47. Resolve or suppress jsonv2 stdversion warnings.
 48. Review public API surface for unnecessary exports.
@@ -172,4 +178,4 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 
 ---
 
-*Report written at 2026-07-22 11:12 CEST. Waiting for further instructions.*
+_Report written at 2026-07-22 11:12 CEST. Waiting for further instructions._
