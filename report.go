@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"time"
-
-	"github.com/larsartmann/go-output"
 )
 
 // Sentinel errors returned by [WorkflowReport.Validate]. Consumers can match
@@ -333,62 +331,10 @@ func (r WorkflowReport) Summary() string {
 
 // ExportJSON writes the report as indented JSON to path.
 func (r WorkflowReport) ExportJSON(path string) error {
-	return writeToFile(path, r.WriteJSON)
+	return WriteToFile(path, r.WriteJSON)
 }
 
 // ExportNDJSON writes the report's events as NDJSON to path.
 func (r WorkflowReport) ExportNDJSON(path string) error {
-	return writeToFile(path, r.WriteNDJSON)
-}
-
-// ExportMermaid writes the step DAG as a Mermaid diagram to path.
-// See WriteMermaid for diagram options.
-func (r WorkflowReport) ExportMermaid(path string, opts ...DiagramOption) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return r.WriteMermaid(w, opts...)
-	})
-}
-
-// ExportPlantUML writes the step DAG as a PlantUML diagram to path.
-// See WritePlantUML for diagram options.
-func (r WorkflowReport) ExportPlantUML(path string, opts ...DiagramOption) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return r.WritePlantUML(w, opts...)
-	})
-}
-
-// ExportGraphviz writes the step DAG as a Graphviz DOT diagram to path.
-// See WriteGraphviz for diagram options.
-func (r WorkflowReport) ExportGraphviz(path string, opts ...DiagramOption) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return r.WriteGraphviz(w, opts...)
-	})
-}
-
-// ExportD2 writes the step DAG as a D2 diagram to path.
-// See WriteD2 for diagram options.
-func (r WorkflowReport) ExportD2(path string, opts ...DiagramOption) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return r.WriteD2(w, opts...)
-	})
-}
-
-// ExportTable writes the step summary table to path in the given format.
-// See WriteTable for column-selection options via tableOpts.
-func (r WorkflowReport) ExportTable(
-	path string, format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
-) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return r.WriteTable(w, format, opts, tableOpts...)
-	})
-}
-
-// ExportTree writes the step DAG as an ASCII tree to path.
-func (r WorkflowReport) ExportTree(path string) error {
-	return writeToFile(path, r.WriteTree)
-}
-
-// ExportHTMLTree writes the step DAG as an HTML nested-list tree to path.
-func (r WorkflowReport) ExportHTMLTree(path string) error {
-	return writeToFile(path, r.WriteHTMLTree)
+	return WriteToFile(path, r.WriteNDJSON)
 }

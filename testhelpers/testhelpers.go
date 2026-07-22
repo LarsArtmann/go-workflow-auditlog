@@ -386,23 +386,3 @@ func RunWorkflow(t *testing.T, a *auditlog.Auditor, w *flow.Workflow) {
 	_ = w.Do(context.Background())
 	a.Snapshot(w)
 }
-
-// WriteSingleStepHTML runs a workflow containing exactly the given step and
-// renders the resulting audit log to an HTML buffer, returning the rendered
-// string.
-func WriteSingleStepHTML(t *testing.T, step flow.Steper) string {
-	t.Helper()
-
-	a, w := NewAuditAndWorkflow(t)
-	w.Add(flow.Step(step))
-	RunWorkflow(t, a, w)
-
-	var buf strings.Builder
-
-	err := a.Report().WriteHTML(&buf)
-	if err != nil {
-		t.Fatalf("WriteHTML: %v", err)
-	}
-
-	return buf.String()
-}

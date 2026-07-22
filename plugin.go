@@ -1,16 +1,13 @@
 package auditlog
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
 
 	flow "github.com/Azure/go-workflow"
-	"github.com/larsartmann/go-output"
 )
 
 // EnvKeyEnabled is the environment variable that controls audit logging.
@@ -168,220 +165,10 @@ func (a *Auditor) WriteNDJSON(writer io.Writer) error {
 
 // ExportJSON writes the full WorkflowReport as indented JSON to path.
 func (a *Auditor) ExportJSON(path string) error {
-	return writeToFile(path, a.WriteJSON)
+	return WriteToFile(path, a.WriteJSON)
 }
 
 // ExportNDJSON writes every event as NDJSON to path.
 func (a *Auditor) ExportNDJSON(path string) error {
-	return writeToFile(path, a.WriteNDJSON)
-}
-
-// WriteMermaid writes the step DAG as a Mermaid diagram to the writer.
-// See WorkflowReport.WriteMermaid for diagram options.
-func (a *Auditor) WriteMermaid(writer io.Writer, opts ...DiagramOption) error {
-	return a.Report().WriteMermaid(writer, opts...)
-}
-
-// WritePlantUML writes the step DAG as a PlantUML diagram to the writer.
-// See WorkflowReport.WritePlantUML for diagram options.
-func (a *Auditor) WritePlantUML(writer io.Writer, opts ...DiagramOption) error {
-	return a.Report().WritePlantUML(writer, opts...)
-}
-
-// WriteGraphviz writes the step DAG as a Graphviz DOT diagram to the writer.
-// See WorkflowReport.WriteGraphviz for diagram options.
-func (a *Auditor) WriteGraphviz(writer io.Writer, opts ...DiagramOption) error {
-	return a.Report().WriteGraphviz(writer, opts...)
-}
-
-// ExportMermaid writes the step DAG as Mermaid to path.
-// See WorkflowReport.WriteMermaid for diagram options.
-func (a *Auditor) ExportMermaid(path string, opts ...DiagramOption) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return a.WriteMermaid(w, opts...)
-	})
-}
-
-// ExportPlantUML writes the step DAG as PlantUML to path.
-// See WorkflowReport.WritePlantUML for diagram options.
-func (a *Auditor) ExportPlantUML(path string, opts ...DiagramOption) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return a.WritePlantUML(w, opts...)
-	})
-}
-
-// ExportGraphviz writes the step DAG as Graphviz DOT to path.
-// See WorkflowReport.WriteGraphviz for diagram options.
-func (a *Auditor) ExportGraphviz(path string, opts ...DiagramOption) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return a.WriteGraphviz(w, opts...)
-	})
-}
-
-// WriteD2 writes the step DAG as a D2 diagram to the writer.
-// See WorkflowReport.WriteD2 for diagram options.
-func (a *Auditor) WriteD2(writer io.Writer, opts ...DiagramOption) error {
-	return a.Report().WriteD2(writer, opts...)
-}
-
-// ExportD2 writes the step DAG as D2 to path.
-// See WorkflowReport.WriteD2 for diagram options.
-func (a *Auditor) ExportD2(path string, opts ...DiagramOption) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return a.WriteD2(w, opts...)
-	})
-}
-
-// WriteTable writes the step summary as a table in the specified format.
-// See WorkflowReport.WriteTable for column-selection options.
-func (a *Auditor) WriteTable(
-	writer io.Writer, format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
-) error {
-	return a.Report().WriteTable(writer, format, opts, tableOpts...)
-}
-
-// ExportTable writes the step summary table to path in the specified format.
-// See WorkflowReport.WriteTable for column-selection options.
-func (a *Auditor) ExportTable(
-	path string, format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
-) error {
-	return writeToFile(path, func(w io.Writer) error {
-		return a.WriteTable(w, format, opts, tableOpts...)
-	})
-}
-
-// WriteTree writes the step DAG as an ASCII tree to the writer.
-func (a *Auditor) WriteTree(writer io.Writer) error {
-	return a.Report().WriteTree(writer)
-}
-
-// ExportTree writes the step DAG as an ASCII tree to path.
-func (a *Auditor) ExportTree(path string) error {
-	return writeToFile(path, a.WriteTree)
-}
-
-// WriteHTMLTree writes the step DAG as an HTML nested list tree to the writer.
-func (a *Auditor) WriteHTMLTree(writer io.Writer) error {
-	return a.Report().WriteHTMLTree(writer)
-}
-
-// ExportHTMLTree writes the step DAG as an HTML tree to path.
-func (a *Auditor) ExportHTMLTree(path string) error {
-	return writeToFile(path, a.WriteHTMLTree)
-}
-
-// --- String-variant methods (mirror WorkflowReport.Write*String) ---
-
-// WriteMermaidString returns the Mermaid diagram as a string.
-// See WorkflowReport.WriteMermaid for diagram options.
-func (a *Auditor) WriteMermaidString(opts ...DiagramOption) (string, error) {
-	return a.Report().WriteMermaidString(opts...)
-}
-
-// WritePlantUMLString returns the PlantUML diagram as a string.
-// See WorkflowReport.WritePlantUML for diagram options.
-func (a *Auditor) WritePlantUMLString(opts ...DiagramOption) (string, error) {
-	return a.Report().WritePlantUMLString(opts...)
-}
-
-// WriteGraphvizString returns the Graphviz DOT diagram as a string.
-// See WorkflowReport.WriteGraphviz for diagram options.
-func (a *Auditor) WriteGraphvizString(opts ...DiagramOption) (string, error) {
-	return a.Report().WriteGraphvizString(opts...)
-}
-
-// WriteD2String returns the D2 diagram as a string.
-// See WorkflowReport.WriteD2 for diagram options.
-func (a *Auditor) WriteD2String(opts ...DiagramOption) (string, error) {
-	return a.Report().WriteD2String(opts...)
-}
-
-// WriteTableString returns the step summary table as a string in the given format.
-// See WorkflowReport.WriteTable for column-selection options.
-func (a *Auditor) WriteTableString(
-	format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
-) (string, error) {
-	return a.Report().WriteTableString(format, opts, tableOpts...)
-}
-
-// WriteTreeString returns the ASCII tree as a string.
-func (a *Auditor) WriteTreeString() (string, error) {
-	return a.Report().WriteTreeString()
-}
-
-// WriteHTMLTreeString returns the HTML tree as a string.
-func (a *Auditor) WriteHTMLTreeString() (string, error) {
-	return a.Report().WriteHTMLTreeString()
-}
-
-// WriteHTML writes a self-contained interactive HTML dashboard to writer.
-func (a *Auditor) WriteHTML(writer io.Writer) error {
-	return a.Report().WriteHTML(writer)
-}
-
-// ExportHTML writes the HTML dashboard to path.
-func (a *Auditor) ExportHTML(path string) error {
-	return writeToFile(path, a.WriteHTML)
-}
-
-// WriteHTMLString returns the HTML dashboard as a string.
-func (a *Auditor) WriteHTMLString() (string, error) {
-	return a.Report().WriteHTMLString()
-}
-
-// fileWriteBufferSize is the bufio buffer size used for atomic file exports.
-const fileWriteBufferSize = 65536
-
-// writeToFile creates a file at path and calls fn with a buffered writer.
-// The bufio.Writer batches small writes into 64KB blocks, reducing syscall count
-// by 10-100x compared to writing directly to os.File.
-//
-// Writes are atomic: data is written to a temporary file in the same directory,
-// then atomically renamed to the final path. A crash during write leaves the
-// previous file (if any) intact rather than a partial file.
-func writeToFile(path string, fn func(io.Writer) error) error {
-	dir := filepath.Dir(path)
-
-	tmpFile, err := os.CreateTemp(dir, ".tmp-auditlog-*")
-	if err != nil {
-		return fmt.Errorf("%w: create temp file in %q: %w", ErrExportWriteFailed, dir, err)
-	}
-
-	tmpPath := tmpFile.Name()
-	cleanup := true
-
-	defer func() {
-		if cleanup {
-			_ = os.Remove(tmpPath)
-		}
-	}()
-
-	bw := bufio.NewWriterSize(tmpFile, fileWriteBufferSize)
-
-	writeErr := fn(bw)
-
-	flushErr := bw.Flush()
-
-	closeErr := tmpFile.Close()
-
-	if writeErr != nil {
-		return writeErr
-	}
-
-	if flushErr != nil {
-		return fmt.Errorf("%w: flush temp file %q: %w", ErrExportWriteFailed, tmpPath, flushErr)
-	}
-
-	if closeErr != nil {
-		return fmt.Errorf("%w: close temp file %q: %w", ErrExportWriteFailed, tmpPath, closeErr)
-	}
-
-	renameErr := os.Rename(tmpPath, path)
-	if renameErr != nil {
-		return fmt.Errorf("%w: rename %q → %q: %w", ErrExportWriteFailed, tmpPath, path, renameErr)
-	}
-
-	cleanup = false
-
-	return nil
+	return WriteToFile(path, a.WriteNDJSON)
 }
