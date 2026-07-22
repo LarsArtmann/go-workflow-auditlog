@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 // The output is a single HTML file with embedded CSS and JavaScript — no
 // external dependencies, no network requests. It can be opened directly in
 // any modern browser or attached to an email/report.
-func (r WorkflowReport) WriteHTML(writer io.Writer) error {
+func WriteHTML(r WorkflowReport, writer io.Writer) error {
 	html, err := renderHTML(r)
 	if err != nil {
 		return err
@@ -25,11 +25,13 @@ func (r WorkflowReport) WriteHTML(writer io.Writer) error {
 
 // WriteHTMLString returns the HTML dashboard as a string.
 // Convenience wrapper around WriteHTML for in-memory use.
-func (r WorkflowReport) WriteHTMLString() (string, error) {
+func WriteHTMLString(r WorkflowReport) (string, error) {
 	return renderHTML(r)
 }
 
 // ExportHTML writes the HTML dashboard to path (atomic write via temp+rename).
-func (r WorkflowReport) ExportHTML(path string) error {
-	return writeToFile(path, r.WriteHTML)
+func ExportHTML(r WorkflowReport, path string) error {
+	return WriteToFile(path, func(w io.Writer) error {
+		return WriteHTML(r, w)
+	})
 }

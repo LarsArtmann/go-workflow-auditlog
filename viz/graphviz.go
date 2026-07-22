@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"io"
@@ -14,8 +14,8 @@ import (
 //
 // Use WithDirection to change the layout direction (default: top-down):
 //
-//	r.WriteGraphviz(w, auditlog.WithDirection(output.DirectionRight))
-func (r WorkflowReport) WriteGraphviz(writer io.Writer, opts ...DiagramOption) error {
+//	viz.WriteGraphviz(w, report, viz.WithDirection(output.DirectionRight))
+func WriteGraphviz(r WorkflowReport, writer io.Writer, opts ...DiagramOption) error {
 	renderer := graph.NewDOTRenderer()
 	renderer.SetGraphID("workflow")
 
@@ -29,13 +29,20 @@ func (r WorkflowReport) WriteGraphviz(writer io.Writer, opts ...DiagramOption) e
 
 // WriteGraphvizString returns the Graphviz DOT diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
-func (r WorkflowReport) WriteGraphvizString(opts ...DiagramOption) (string, error) {
+func WriteGraphvizString(r WorkflowReport, opts ...DiagramOption) (string, error) {
 	var buf strings.Builder
 
-	err := r.WriteGraphviz(&buf, opts...)
+	err := WriteGraphviz(r, &buf, opts...)
 	if err != nil {
 		return "", err
 	}
 
 	return buf.String(), nil
+}
+
+// ExportGraphviz writes the Graphviz DOT diagram to path.
+func ExportGraphviz(r WorkflowReport, path string, opts ...DiagramOption) error {
+	return WriteToFile(path, func(w io.Writer) error {
+		return WriteGraphviz(r, w, opts...)
+	})
 }

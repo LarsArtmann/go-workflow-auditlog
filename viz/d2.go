@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"io"
@@ -59,8 +59,8 @@ func d2DiagramTitle(r WorkflowReport) string {
 //
 // Use WithDirection to change the layout direction (default: top-down):
 //
-//	r.WriteD2(w, auditlog.WithDirection(output.DirectionRight))
-func (r WorkflowReport) WriteD2(writer io.Writer, opts ...DiagramOption) error {
+//	viz.WriteD2(w, report, viz.WithDirection(output.DirectionRight))
+func WriteD2(r WorkflowReport, writer io.Writer, opts ...DiagramOption) error {
 	nodes, edges := buildGraph(r)
 
 	diagram := d2.NewDiagram()
@@ -84,13 +84,20 @@ func (r WorkflowReport) WriteD2(writer io.Writer, opts ...DiagramOption) error {
 
 // WriteD2String returns the D2 diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
-func (r WorkflowReport) WriteD2String(opts ...DiagramOption) (string, error) {
+func WriteD2String(r WorkflowReport, opts ...DiagramOption) (string, error) {
 	var buf strings.Builder
 
-	err := r.WriteD2(&buf, opts...)
+	err := WriteD2(r, &buf, opts...)
 	if err != nil {
 		return "", err
 	}
 
 	return buf.String(), nil
+}
+
+// ExportD2 writes the D2 diagram to path.
+func ExportD2(r WorkflowReport, path string, opts ...DiagramOption) error {
+	return WriteToFile(path, func(w io.Writer) error {
+		return WriteD2(r, w, opts...)
+	})
 }

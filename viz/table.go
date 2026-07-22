@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 
 // buildTableData converts a WorkflowReport into go-output Table.
 // When columns is empty, DefaultTableColumns is used.
-func (r WorkflowReport) buildTableData(columns []TableColumn) *output.Table {
+func buildTableData(r WorkflowReport, columns []TableColumn) *output.Table {
 	if len(columns) == 0 {
 		columns = defaultColumnsCopy()
 	}
@@ -60,14 +60,18 @@ func (r WorkflowReport) buildTableData(columns []TableColumn) *output.Table {
 // The tableOpts parameter controls which columns appear. By default all 7
 // standard columns are shown; use WithColumns to customize:
 //
-//	r.WriteTable(w, output.FormatCSV, output.RenderOptions{},
-//	    auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus))
-func (r WorkflowReport) WriteTable(
-	writer io.Writer, format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
+//	viz.WriteTable(report, w, output.FormatCSV, output.RenderOptions{},
+//	    viz.WithColumns(viz.ColumnStep, viz.ColumnStatus))
+func WriteTable(
+	r WorkflowReport,
+	writer io.Writer,
+	format output.Format,
+	opts output.RenderOptions,
+	tableOpts ...TableOption,
 ) error {
 	cfg := applyTableOpts(tableOpts)
 
-	data := r.buildTableData(cfg.columns)
+	data := buildTableData(r, cfg.columns)
 
 	opts.Writer = writer
 
@@ -81,15 +85,31 @@ func (r WorkflowReport) WriteTable(
 
 // WriteTableString returns the step summary table as a string in the
 // specified format. See WriteTable for supported formats and options.
-func (r WorkflowReport) WriteTableString(
-	format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
+func WriteTableString(
+	r WorkflowReport,
+	format output.Format,
+	opts output.RenderOptions,
+	tableOpts ...TableOption,
 ) (string, error) {
 	var buf strings.Builder
 
-	err := r.WriteTable(&buf, format, opts, tableOpts...)
+	err := WriteTable(r, &buf, format, opts, tableOpts...)
 	if err != nil {
 		return "", err
 	}
 
 	return buf.String(), nil
+}
+
+// ExportTable writes the step summary table to path.
+func ExportTable(
+	r WorkflowReport,
+	path string,
+	format output.Format,
+	opts output.RenderOptions,
+	tableOpts ...TableOption,
+) error {
+	return WriteToFile(path, func(w io.Writer) error {
+		return WriteTable(r, w, format, opts, tableOpts...)
+	})
 }

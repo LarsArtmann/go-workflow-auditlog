@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 // TypeMetadata provides display metadata (icons, labels, colors) for all enum
 // types used in the HTML visualization. It is injected into the template as JSON
@@ -25,16 +25,16 @@ type EventMeta struct {
 // This is the single source of truth — the HTML template's JavaScript reads
 // from the injected JSON rather than maintaining parallel constant definitions.
 func BuildTypeMetadata() TypeMetadata {
-	statuses := make(map[string]StatusMeta, len(stepStatusMeta))
-	for status := range stepStatusMeta {
+	statuses := make(map[string]StatusMeta, len(AllStepStatuses()))
+	for _, status := range AllStepStatuses() {
 		statuses[string(status)] = StatusMeta{
 			Icon:  status.Icon(),
 			Label: status.Label(),
 		}
 	}
 
-	events := make(map[string]EventMeta, len(eventTypeMeta))
-	for evt := range eventTypeMeta {
+	events := make(map[string]EventMeta, len(AllEventTypes()))
+	for _, evt := range AllEventTypes() {
 		events[string(evt)] = EventMeta{
 			Label: evt.Label(),
 			Color: evt.Color(),

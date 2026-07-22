@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"strings"
@@ -23,7 +23,7 @@ type diagramConfig struct {
 //
 // Example:
 //
-//	r.WriteMermaid(w, auditlog.WithDirection(output.DirectionRight))
+//	viz.WriteMermaid(w, report, viz.WithDirection(output.DirectionRight))
 func WithDirection(d output.Direction) DiagramOption {
 	return func(c *diagramConfig) { c.direction = d }
 }

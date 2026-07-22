@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	_ "embed"

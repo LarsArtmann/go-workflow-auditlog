@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"fmt"
@@ -38,7 +38,7 @@ func buildDAGHTML(report WorkflowReport) daghtml.DAG {
 	}
 
 	for _, step := range report.Steps {
-		icon := stepStatusMeta[step.Status].Icon
+		icon := step.Status.Icon()
 
 		label := step.Name
 		if icon != "" {

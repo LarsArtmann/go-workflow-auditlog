@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"strconv"
@@ -175,8 +175,8 @@ type tableConfig struct {
 //
 // Example: show only step name and status:
 //
-//	report.WriteTable(w, output.FormatMarkdown, output.RenderOptions{},
-//	    auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus))
+//	viz.WriteTable(report, w, output.FormatMarkdown, output.RenderOptions{},
+//	    viz.WithColumns(viz.ColumnStep, viz.ColumnStatus))
 func WithColumns(cols ...TableColumn) TableOption {
 	return func(c *tableConfig) { c.columns = cols }
 }

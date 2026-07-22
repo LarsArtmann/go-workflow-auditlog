@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"io"
@@ -16,8 +16,8 @@ import (
 //
 // Use WithDirection to change the layout direction (default: TD):
 //
-//	r.WriteMermaid(w, auditlog.WithDirection(output.DirectionRight))
-func (r WorkflowReport) WriteMermaid(writer io.Writer, opts ...DiagramOption) error {
+//	viz.WriteMermaid(w, report, viz.WithDirection(output.DirectionRight))
+func WriteMermaid(r WorkflowReport, writer io.Writer, opts ...DiagramOption) error {
 	renderer := graph.NewMermaidRenderer()
 	renderer.SetCodeFence(false)
 
@@ -36,13 +36,20 @@ func (r WorkflowReport) WriteMermaid(writer io.Writer, opts ...DiagramOption) er
 
 // WriteMermaidString returns the Mermaid diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
-func (r WorkflowReport) WriteMermaidString(opts ...DiagramOption) (string, error) {
+func WriteMermaidString(r WorkflowReport, opts ...DiagramOption) (string, error) {
 	var buf strings.Builder
 
-	err := r.WriteMermaid(&buf, opts...)
+	err := WriteMermaid(r, &buf, opts...)
 	if err != nil {
 		return "", err
 	}
 
 	return buf.String(), nil
+}
+
+// ExportMermaid writes the Mermaid diagram to path.
+func ExportMermaid(r WorkflowReport, path string, opts ...DiagramOption) error {
+	return WriteToFile(path, func(w io.Writer) error {
+		return WriteMermaid(r, w, opts...)
+	})
 }

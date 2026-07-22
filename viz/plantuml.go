@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"io"
@@ -13,8 +13,8 @@ import (
 // Use WithDirection to change the layout direction. PlantUML supports
 // top-to-bottom (default) and left-to-right (DirectionRight/DirectionLeft):
 //
-//	r.WritePlantUML(w, auditlog.WithDirection(output.DirectionRight))
-func (r WorkflowReport) WritePlantUML(writer io.Writer, opts ...DiagramOption) error {
+//	viz.WritePlantUML(w, report, viz.WithDirection(output.DirectionRight))
+func WritePlantUML(r WorkflowReport, writer io.Writer, opts ...DiagramOption) error {
 	renderer := plantuml.NewPlantUMLDiagram()
 
 	cfg := applyDiagramOpts(opts)
@@ -32,13 +32,20 @@ func (r WorkflowReport) WritePlantUML(writer io.Writer, opts ...DiagramOption) e
 
 // WritePlantUMLString returns the PlantUML diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
-func (r WorkflowReport) WritePlantUMLString(opts ...DiagramOption) (string, error) {
+func WritePlantUMLString(r WorkflowReport, opts ...DiagramOption) (string, error) {
 	var buf strings.Builder
 
-	err := r.WritePlantUML(&buf, opts...)
+	err := WritePlantUML(r, &buf, opts...)
 	if err != nil {
 		return "", err
 	}
 
 	return buf.String(), nil
+}
+
+// ExportPlantUML writes the PlantUML diagram to path.
+func ExportPlantUML(r WorkflowReport, path string, opts ...DiagramOption) error {
+	return WriteToFile(path, func(w io.Writer) error {
+		return WritePlantUML(r, w, opts...)
+	})
 }

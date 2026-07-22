@@ -1,4 +1,4 @@
-package auditlog
+package viz
 
 import (
 	"io"
@@ -12,7 +12,7 @@ import (
 // buildTreeNodes constructs a forest of TreeNodes from the step DAG.
 // Root nodes are steps with no dependencies; children are their dependents.
 // The result is wrapped in a single root node for the renderer.
-func (r WorkflowReport) buildTreeNodes() *output.TreeNode {
+func buildTreeNodes(r WorkflowReport) *output.TreeNode {
 	forestRoot := output.NewTreeNode("workflow", "Workflow")
 
 	if len(r.Steps) == 0 {
@@ -75,19 +75,19 @@ func (r WorkflowReport) buildTreeNodes() *output.TreeNode {
 
 // WriteTree writes the step dependency DAG as an ASCII tree.
 // Nodes are labeled with step name, status, and retry count.
-func (r WorkflowReport) WriteTree(writer io.Writer) error {
+func WriteTree(r WorkflowReport, writer io.Writer) error {
 	renderer := tree.NewASCIITreeRenderer()
-	renderer.SetRoot(r.buildTreeNodes())
+	renderer.SetRoot(buildTreeNodes(r))
 
 	return writeRendered(writer, "tree", renderer.Render)
 }
 
 // WriteTreeString returns the ASCII tree as a string.
 // Returns a non-nil error only if tree generation fails.
-func (r WorkflowReport) WriteTreeString() (string, error) {
+func WriteTreeString(r WorkflowReport) (string, error) {
 	var buf strings.Builder
 
-	err := r.WriteTree(&buf)
+	err := WriteTree(r, &buf)
 	if err != nil {
 		return "", err
 	}
@@ -95,24 +95,38 @@ func (r WorkflowReport) WriteTreeString() (string, error) {
 	return buf.String(), nil
 }
 
+// ExportTree writes the ASCII tree to path.
+func ExportTree(r WorkflowReport, path string) error {
+	return WriteToFile(path, func(w io.Writer) error {
+		return WriteTree(r, w)
+	})
+}
+
 // WriteHTMLTree writes the step dependency DAG as an HTML nested list tree.
 // Nodes are labeled with step name, status, and retry count.
-func (r WorkflowReport) WriteHTMLTree(writer io.Writer) error {
+func WriteHTMLTree(r WorkflowReport, writer io.Writer) error {
 	renderer := markup.NewHTMLTreeRenderer()
-	renderer.SetRoot(r.buildTreeNodes())
+	renderer.SetRoot(buildTreeNodes(r))
 
 	return writeRendered(writer, "html tree", renderer.Render)
 }
 
 // WriteHTMLTreeString returns the HTML tree as a string.
 // Returns a non-nil error only if tree generation fails.
-func (r WorkflowReport) WriteHTMLTreeString() (string, error) {
+func WriteHTMLTreeString(r WorkflowReport) (string, error) {
 	var buf strings.Builder
 
-	err := r.WriteHTMLTree(&buf)
+	err := WriteHTMLTree(r, &buf)
 	if err != nil {
 		return "", err
 	}
 
 	return buf.String(), nil
+}
+
+// ExportHTMLTree writes the HTML tree to path.
+func ExportHTMLTree(r WorkflowReport, path string) error {
+	return WriteToFile(path, func(w io.Writer) error {
+		return WriteHTMLTree(r, w)
+	})
 }

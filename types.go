@@ -63,6 +63,16 @@ func (e EventType) Color() string {
 	return ""
 }
 
+// AllEventTypes returns every known EventType value in canonical order.
+// This is the single source of truth for visualizations that need to enumerate
+// event types without accessing the unexported eventTypeMeta table.
+func AllEventTypes() []EventType {
+	return []EventType{
+		EventTypeAttemptStart,
+		EventTypeAttemptEnd,
+	}
+}
+
 // Phase indicates whether an event is the start or end of an operation.
 //
 // It is deliberately redundant with EventType: AttemptStart ↔ PhaseBefore and
@@ -197,6 +207,20 @@ func (s StepStatus) Color() (string, string) {
 	}
 
 	return "", ""
+}
+
+// AllStepStatuses returns every known StepStatus value in canonical order.
+// This is the single source of truth for visualizations that need to enumerate
+// statuses without accessing the unexported stepStatusMeta table.
+func AllStepStatuses() []StepStatus {
+	return []StepStatus{
+		StepStatusPending,
+		StepStatusRunning,
+		StepStatusSucceeded,
+		StepStatusFailed,
+		StepStatusCanceled,
+		StepStatusSkipped,
+	}
 }
 
 // RunID identifies a single execution ("run") of a workflow. It is stamped on
