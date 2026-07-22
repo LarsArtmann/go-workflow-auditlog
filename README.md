@@ -6,18 +6,24 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 
-**[Documentation](https://go-workflow-auditlog.lars.software)** · **[API Reference](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)** · **[Interactive Demo](./example)**
+**[Documentation](https://go-workflow-auditlog.lars.software)** · **[API Reference](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)** · **[Viz API Reference](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog/viz)** · **[Interactive Demo](./viz/example)**
 
 ---
 
-Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workflow) — records every step execution event (attempts, retries, durations, errors, dependencies, final statuses) with timestamped events and export to JSON / NDJSON / diagrams / interactive HTML dashboard.
+Audit logging library for [Azure/go-workflow](https://github.com/Azure/go-workflow) — records every step execution event (attempts, retries, durations, errors, dependencies, final statuses) with timestamped events and export to JSON / NDJSON. The optional `viz` sub-module adds diagrams / tables / trees / an interactive HTML dashboard.
 
 ```go
 audit.Attach(w)                      // 1. Inject callbacks
 _ = w.Do(context.Background())       // 2. Run workflow
 audit.Snapshot(w)                    // 3. Capture final state
 
-_ = audit.ExportHTML("report.html")  // Interactive dashboard
+// Core JSON/NDJSON export (no extra dependencies)
+_ = audit.ExportJSON("report.json")
+_ = audit.ExportNDJSON("events.ndjson")
+
+// Visualization requires the github.com/larsartmann/go-workflow-auditlog/viz module
+import viz "github.com/larsartmann/go-workflow-auditlog/viz"
+_ = viz.ExportHTML(audit.Report(), "report.html")
 ```
 
 ## Why?

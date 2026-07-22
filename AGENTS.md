@@ -213,21 +213,21 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 #### Acceptable clones (documented in source)
 
 At `-t 15` **zero** clone groups remain. The patterns previously listed here
-(`assert*` test helpers, `WriteTable`/`ExportTable` API-surface pairs, fixture
+(`Assert*` test helpers, `WriteTable`/`ExportTable` API-surface pairs, fixture
 field literals, edge-direction assertions, etc.) were either eliminated by
-the `writeGraph` + `singleSucceedExportPath` extractions or were classified by
+the `writeGraph` + `SingleSucceedExportPath` extractions or were classified by
 art-dupl as non-clones at the current threshold.
 
 #### Helper additions
 
-- **`addLinearChain(w, a, b, c)`** (auditlog_test.go): wires a 3-step
+- **`AddLinearChain(w, a, b, c)`** (`testhelpers`): wires a 3-step
   linear dependency chain (`a → b → c`) into a workflow. Centralizes
   the `w.Add(flow.Step(a), flow.Step(b).DependsOn(a),
 flow.Step(c).DependsOn(b))` idiom previously duplicated across
   `diagram_test.go` and `html_test.go`. Companion to the existing
-  `addDependentStep` (2-step chain) and `addParallelSteps` (no edges).
+  `AddDependentStep` (2-step chain) and `AddParallelSteps` (no edges).
 
-- **`singleSucceedExportPath(t, stepName, fileName)`** (auditlog_test.go):
+- **`SingleSucceedExportPath(t, stepName, fileName)`** (`testhelpers`):
   runs a single-succeed workflow with the given step name and returns
   the auditor plus a `t.TempDir()`-anchored output path. Centralizes the
   `runSingleSucceed + t.TempDir + path` boilerplate shared by every
@@ -235,10 +235,10 @@ flow.Step(c).DependsOn(b))` idiom previously duplicated across
   tree, HTML tree — 10 call sites). Callers still invoke `t.Parallel()`
   at the test level so the paralleltest linter stays satisfied.
 
-- **`runSingleSucceedWithBuffer(t, name)`** (auditlog_test.go): runs a
+- **`RunSingleSucceedWithBuffer(t, name)`** (`testhelpers`): runs a
   single-succeed workflow and returns the auditor plus a fresh
   `*strings.Builder` ready to receive `Write*` (non-String) output.
-  Centralizes the `t.Parallel + runSingleSucceed + var buf strings.Builder`
+  Centralizes the `t.Parallel + RunSingleSucceed + var buf strings.Builder`
   preamble previously duplicated across 23 sites in
   `diagram_direction_test.go` (18), `output_test.go` (3),
   `table_columns_test.go` (1), and `html_test.go` (1). Tests that only
