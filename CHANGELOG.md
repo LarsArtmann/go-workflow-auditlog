@@ -28,6 +28,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Public documentation website** at
   [go-workflow-auditlog.lars.software](https://go-workflow-auditlog.lars.software) —
   full Astro + Starlight site with 10 doc pages, landing page, and API reference.
+- **Godoc `ExampleX` funcs** for `PeakConcurrency`, `CriticalPathDurationMs`, and
+  `WallClockDurationMs` — 3 new runnable examples (5 total: Duration, Filtered,
+  PeakConcurrency, CriticalPathDurationMs, WallClockDurationMs).
 
 ### Changed
 
