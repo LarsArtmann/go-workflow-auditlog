@@ -9,6 +9,7 @@
 ## A) FULLY DONE
 
 ### Implementation (stream.go)
+
 - **`NDJSONStreamer`** struct — thread-safe real-time NDJSON writer with `sync.Mutex`, `bufio.Writer`, `jsontext.Encoder`
 - **`NewNDJSONStreamer(w, opts...)`** — constructor with 64KB default buffer
 - **`CreateNDJSONStreamer(path, opts...)`** — file convenience constructor (direct writes, NOT atomic, for tailing)
@@ -20,10 +21,12 @@
 - **`Err() error`** — exposes first error encountered
 
 ### Code Quality
+
 - **Extracted `encodeEvent`** shared helper in `export.go` — eliminated encoding duplication between `writeEventsNDJSON` and `NDJSONStreamer.OnEvent`. Both paths now produce identical NDJSON via one function.
 - **Extracted `FailingWriter`/`ErrWriteFailed`** to `testhelpers` package — replaced 3 duplicate copies: `errorWriter` (stream_test.go), `failingWriter` (coverage_report_test.go), `failingWriter` + `errWriteFail` (viz/error_path_test.go)
 
 ### Tests (20 test functions in stream_test.go + example_test.go)
+
 - `TestNDJSONStreamer_BasicRoundTrip` — write + read back + verify fields
 - `TestNDJSONStreamer_EmptyFlush` — flush on empty streamer
 - `TestNDJSONStreamer_ConcurrentSafety` — 16 goroutines × 50 events with `-race`
@@ -49,16 +52,19 @@
 - `BenchmarkNDJSONStreamer_{100,1000,10000}Events` — throughput benchmarks to `io.Discard`
 
 ### Coverage
+
 - **stream.go: 100%** on all 8 functions (WithAutoFlush, WithBufferSize, NewNDJSONStreamer, CreateNDJSONStreamer, OnEvent, Flush, Close, Err)
 - **export.go `encodeEvent`: 100%**
 
 ### Documentation
+
 - **doc.go** — added streaming mention to package doc
 - **TODO_LIST.md** — checked the streaming checkbox (marked done)
 - **FEATURES.md** — moved streaming from PLANNED to DONE section
 - **AGENTS.md** — updated source file list (encodeEvent, WithBufferSize), documented MaxEvents + OnEvent interaction (streamer sees dropped events), updated test count (355), added FailingWriter to helpers table, updated benchmarks description
 
 ### Verification
+
 - All 355 test functions pass with `-race` across both core and viz modules
 - `golangci-lint` clean (0 issues) on both core (91 rules) and viz modules
 - `go vet` clean on both modules
@@ -205,6 +211,7 @@
 ### 1. Should the noisy commit history be squashed before pushing?
 
 The branch is 9 commits ahead of origin with somewhat generic, auto-generated commit messages. Options:
+
 - **Squash to 1 clean commit** — simplest, cleanest history, but loses granular history
 - **Interactive rebase into 2-3 logical commits** — preserves structure (implementation, tests, docs)
 - **Push as-is** — fastest, but pollutes history

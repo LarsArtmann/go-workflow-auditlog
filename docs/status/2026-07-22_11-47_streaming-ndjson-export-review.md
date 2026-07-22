@@ -8,40 +8,40 @@
 
 ## a) FULLY DONE
 
-| Item | Details |
-|------|---------|
-| `stream.go` — `NDJSONStreamer` type | Thread-safe real-time NDJSON writer via `Config.OnEvent`. Mutex-serialized writes, 64KB buffer, `WithAutoFlush()` option, `CreateNDJSONStreamer(path)` file constructor, `Flush()`, `Close()` (idempotent, closes underlying writer), `Err()`, first-error-wins error handling. |
-| `stream_test.go` — 16 tests | Basic round-trip, empty flush, concurrent safety (16x50 events with `-race`), auto-flush immediacy, buffered-then-flush, error handling (`errors.Is(ErrExportWriteFailed)`), post-error event suppression, close (flush+close+read), double-close idempotency, post-close drops, file creation, workflow integration (parallel succeed+fail), nonexistent-path error, nil-err, auto-flush workflow integration, full lifecycle. |
-| Sentinel error reuse | Correctly reuses existing `ErrRenderFailed` (encode) and `ErrExportWriteFailed` (flush/close/write) — no new sentinels created. Already registered with go-error-family via `classify.go`. |
-| Lint clean | 0 issues from golangci-lint (91 linters) on both core and viz modules. |
-| All existing tests pass | `-race` clean across both modules. |
-| `AGENTS.md` updated | Source file list, data flow diagram, gotchas section, test count (346). |
+| Item                                | Details                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stream.go` — `NDJSONStreamer` type | Thread-safe real-time NDJSON writer via `Config.OnEvent`. Mutex-serialized writes, 64KB buffer, `WithAutoFlush()` option, `CreateNDJSONStreamer(path)` file constructor, `Flush()`, `Close()` (idempotent, closes underlying writer), `Err()`, first-error-wins error handling.                                                                                                                                                 |
+| `stream_test.go` — 16 tests         | Basic round-trip, empty flush, concurrent safety (16x50 events with `-race`), auto-flush immediacy, buffered-then-flush, error handling (`errors.Is(ErrExportWriteFailed)`), post-error event suppression, close (flush+close+read), double-close idempotency, post-close drops, file creation, workflow integration (parallel succeed+fail), nonexistent-path error, nil-err, auto-flush workflow integration, full lifecycle. |
+| Sentinel error reuse                | Correctly reuses existing `ErrRenderFailed` (encode) and `ErrExportWriteFailed` (flush/close/write) — no new sentinels created. Already registered with go-error-family via `classify.go`.                                                                                                                                                                                                                                      |
+| Lint clean                          | 0 issues from golangci-lint (91 linters) on both core and viz modules.                                                                                                                                                                                                                                                                                                                                                          |
+| All existing tests pass             | `-race` clean across both modules.                                                                                                                                                                                                                                                                                                                                                                                              |
+| `AGENTS.md` updated                 | Source file list, data flow diagram, gotchas section, test count (346).                                                                                                                                                                                                                                                                                                                                                         |
 
 ---
 
 ## b) PARTIALLY DONE
 
-| Item | What exists | What's missing |
-|------|-------------|----------------|
-| Test coverage on `stream.go` | 5 of 7 functions at 100% | `OnEvent` 83.3%, `Flush` 88.9%, `Close` 87.5% — uncovered branches: the `autoFlush` flush-error path in `OnEvent`, the `s.err != nil` early-return in `Flush`, the `closer.Close()` error path in `Close` |
-| AGENTS.md documentation | Source list, gotchas, data flow | Test count updated but no mention in architecture description of streaming as a first-class export path |
-| API surface | `NewNDJSONStreamer`, `CreateNDJSONStreamer`, `WithAutoFlush`, `OnEvent`, `Flush`, `Close`, `Err` | No `WriteJSON` streaming equivalent; no buffer-size option |
+| Item                         | What exists                                                                                      | What's missing                                                                                                                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Test coverage on `stream.go` | 5 of 7 functions at 100%                                                                         | `OnEvent` 83.3%, `Flush` 88.9%, `Close` 87.5% — uncovered branches: the `autoFlush` flush-error path in `OnEvent`, the `s.err != nil` early-return in `Flush`, the `closer.Close()` error path in `Close` |
+| AGENTS.md documentation      | Source list, gotchas, data flow                                                                  | Test count updated but no mention in architecture description of streaming as a first-class export path                                                                                                   |
+| API surface                  | `NewNDJSONStreamer`, `CreateNDJSONStreamer`, `WithAutoFlush`, `OnEvent`, `Flush`, `Close`, `Err` | No `WriteJSON` streaming equivalent; no buffer-size option                                                                                                                                                |
 
 ---
 
 ## c) NOT STARTED
 
-| Item | Why it matters |
-|------|----------------|
-| **`FEATURES.md` update** | Line 127 lists "Streaming NDJSON export" under "WORTH CONSIDERING" — should move to DONE/PARTIALLY DONE |
-| **`TODO_LIST.md` update** | Line 15 has `- [ ] Streaming NDJSON export option` — checkbox not checked |
-| **`doc.go` update** | Package doc says "export to JSON and NDJSON" but doesn't mention streaming |
-| **Benchmark** (`BenchmarkNDJSONStreamer`) | Project benchmarks everything (Invocation, Attach, BuildReport, OnEventCallback, MermaidExport, renderHTML). No streaming throughput benchmark exists. |
-| **Fuzz test** | Project has `FuzzReadEvents` for the NDJSON reader and fuzz tests for diagrams/HTML. No fuzz test for streaming encode/write paths. |
-| **Property test** (streamed == batch) | Project has property tests for Diff algebra. A property test verifying "streaming output for N events == batch `WriteNDJSON` output" would catch encoding divergence. |
-| **Godoc `Example` function** | I wrote `ExampleNDJSONStreamer` but **deleted it** during lint fixes instead of fixing it (needed `// Output:` comment). The project lists 11 examples as a test category. This was lazy. |
-| **`testhelpers` additions** | Created local `errorWriter` and `writeTracker` helpers instead of sharing. `errorWriter` is a near-duplicate of `failingWriter` in `coverage_report_test.go`. |
-| **README update** | If README lists features, streaming is not there. |
+| Item                                      | Why it matters                                                                                                                                                                            |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`FEATURES.md` update**                  | Line 127 lists "Streaming NDJSON export" under "WORTH CONSIDERING" — should move to DONE/PARTIALLY DONE                                                                                   |
+| **`TODO_LIST.md` update**                 | Line 15 has `- [ ] Streaming NDJSON export option` — checkbox not checked                                                                                                                 |
+| **`doc.go` update**                       | Package doc says "export to JSON and NDJSON" but doesn't mention streaming                                                                                                                |
+| **Benchmark** (`BenchmarkNDJSONStreamer`) | Project benchmarks everything (Invocation, Attach, BuildReport, OnEventCallback, MermaidExport, renderHTML). No streaming throughput benchmark exists.                                    |
+| **Fuzz test**                             | Project has `FuzzReadEvents` for the NDJSON reader and fuzz tests for diagrams/HTML. No fuzz test for streaming encode/write paths.                                                       |
+| **Property test** (streamed == batch)     | Project has property tests for Diff algebra. A property test verifying "streaming output for N events == batch `WriteNDJSON` output" would catch encoding divergence.                     |
+| **Godoc `Example` function**              | I wrote `ExampleNDJSONStreamer` but **deleted it** during lint fixes instead of fixing it (needed `// Output:` comment). The project lists 11 examples as a test category. This was lazy. |
+| **`testhelpers` additions**               | Created local `errorWriter` and `writeTracker` helpers instead of sharing. `errorWriter` is a near-duplicate of `failingWriter` in `coverage_report_test.go`.                             |
+| **README update**                         | If README lists features, streaming is not there.                                                                                                                                         |
 
 ---
 
@@ -180,10 +180,12 @@ Currently streaming is compose-it-yourself: user creates `NDJSONStreamer`, passe
 ### 2. Is the MaxEvents + OnEvent interaction correct?
 
 When `Config.MaxEvents` is reached, dropped events are removed from the recorder's internal slice but `OnEvent` still fires for them. This means:
+
 - `report.WriteNDJSON()` writes N events (cap reached)
 - `NDJSONStreamer` output has N + dropped events
 
 Is this the intended behavior? Two valid interpretations:
+
 - **Correct:** MaxEvents protects in-memory storage; streaming is a separate sink that should see everything
 - **Bug:** MaxEvents should cap the entire observation; streaming should also drop
 
