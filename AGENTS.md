@@ -2,38 +2,53 @@
 
 Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that records every step execution event (attempts, retries, durations, errors, dependencies, final statuses) with timestamps and export to JSON / NDJSON.
 
-**Module**: `github.com/larsartmann/go-workflow-auditlog` · **Package**: `auditlog` · **Go**: 1.26+ · **Status**: ALPHA
+**Modules**: `github.com/larsartmann/go-workflow-auditlog` (core) · `github.com/larsartmann/go-workflow-auditlog/viz` (visualization) · **Go**: 1.26+ · **Status**: ALPHA
 
 ---
 
 ## Commands
 
-| Command                                                                             | Purpose                                              |
-| ----------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `GOEXPERIMENT=jsonv2 go test ./...`                                                 | Run all tests (requires jsonv2)                      |
-| `GOEXPERIMENT=jsonv2 go test -race ./...`                                           | Run all tests with race detector                     |
-| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic ./...` | Tests with coverage (~95.6%)                         |
-| `GOEXPERIMENT=jsonv2 go vet ./...`                                                  | Static analysis                                      |
-| `golangci-lint run ./...`                                                           | Lint (golangci-lint v2, 0 issues)                    |
-| `go run ./example`                                                                  | Run the demo pipeline (json/v2 from flake.nix shell) |
+| Command                                                                                              | Purpose                                                           |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `GOEXPERIMENT=jsonv2 go test ./...`                                                                 | Run core tests (requires jsonv2)                                  |
+| `GOEXPERIMENT=jsonv2 go test -race ./...`                                                           | Run core tests with race detector                                 |
+| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic ./...`                 | Core tests with coverage (~95.6%)                                 |
+| `GOEXPERIMENT=jsonv2 go vet ./...`                                                                  | Core static analysis                                              |
+| `golangci-lint run ./...`                                                                            | Lint core (golangci-lint v2, 0 issues)                            |
+| `cd viz && GOEXPERIMENT=jsonv2 go test ./...`                                                        | Run viz tests (requires jsonv2)                                 |
+| `cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go test ./...`                                           | Run viz tests in standalone mode (no workspace)                   |
+| `cd viz && GOEXPERIMENT=jsonv2 go vet ./...`                                                         | Viz static analysis                                               |
+| `cd viz && golangci-lint run ./...`                                                                  | Lint viz                                                          |
+| `go run ./viz/example`                                                                               | Run the demo pipeline                                             |
+| `go run ./example`                                                                                   | Run the demo pipeline (legacy path; now `./viz/example`)          |
+| `go work sync`                                                                                       | Sync `go.work` and `go.work.sum` with module state                |
 
 ---
 
 ## Architecture
 
-Single-package library (`auditlog`) with these source files:
+The project is split into two Go modules:
+
+1. **Core module** (`github.com/larsartmann/go-workflow-auditlog`, package `auditlog`) —
+   event recording, report construction, JSON/NDJSON serialization, replay, diff, filter, and index.
+   It has no dependency on `go-output`.
+2. **Visualization module** (`github.com/larsartmann/go-workflow-auditlog/viz`, package `viz`) —
+   diagrams (Mermaid, PlantUML, Graphviz DOT, D2), tables (16 formats), trees (ASCII/HTML), and the
+   interactive HTML dashboard. It depends on the core module and on `github.com/larsartmann/go-output`.
+
+### Core module source files
 
 ```
 doc.go             — Package doc comment
-types.go           — Domain enums: EventType, Phase, StepStatus, StepRef, flowStatusMap, fromFlowStatus, SchemaVersion
+types.go           — Domain enums: EventType, Phase, StepStatus, StepRef, flowStatusMap, fromFlowStatus, SchemaVersion, AllStepStatuses, AllEventTypes
 event.go           — Event type (embeds StepRef, carries RunID) + convenience methods
 step.go            — StepInfo type + stepCore (shared accumulator for live/replay) + toStepInfo() conversion
-plugin.go          — Public API: New(), Attach(), Snapshot(), Report(), Export*(), Config, Auditor, RunID() + ErrExportWriteFailed sentinel + writeToFile()
+plugin.go          — Public API: New(), Attach(), Snapshot(), Report(), WriteJSON/WriteNDJSON/ExportJSON/ExportNDJSON, Config, Auditor, RunID() + ErrExportWriteFailed sentinel
 recorder.go        — Core state machine: event capture, step records, attempt tracking, RunID + StepID counters
 runid.go           — newRunID(): 128-bit crypto-random hex run identifier
 attach.go          — Attach/Snapshot logic: callback injection + post-run DAG capture (incl. sub-workflows)
-report.go          — WorkflowReport type (carries RunID) + Validate() + sentinel errors (incl. ErrRenderFailed) + query methods + Duration()/Summary()/CriticalPath()/PeakConcurrencySteps() + stepsByName (shared name→StepInfo resolver for CriticalPath + PeakConcurrencySteps) + WriteJSON + Export*() + computeWallClockDurationMs
-report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates (WorkflowSucceeded, finalizeDenormalized) + computeCriticalPath/computePeakConcurrency/computePeakConcurrencySteps + sortEventsByTime (shared timestamp+sequence sorter for the two peak-concurrency passes)
+report.go          — WorkflowReport type (carries RunID) + Validate() + sentinel errors (incl. ErrRenderFailed) + query methods + Duration()/Summary()/CriticalPath()/PeakConcurrencySteps() + stepsByName + WriteJSON/WriteNDJSON + ExportJSON/ExportNDJSON + computeWallClockDurationMs
+report_builder.go  — BuildReport assembly: step records → sorted StepInfo + aggregates (WorkflowSucceeded, finalizeDenormalized) + computeCriticalPath/computePeakConcurrency/computePeakConcurrencySteps + sortEventsByTime
 filter.go          — Report filtering (Filtered, ReportOption, WithStepsByStatus, etc.)
 diff.go            — Diff API: DiffResult/StepDiff, Diff() between reports
 index.go           — ReportIndex: opt-in O(1) lookup maps over a report
@@ -41,35 +56,43 @@ loader.go          — LoadReport / LoadReportFromReader / LoadReportFromBytes +
 export.go          — NDJSON writer (writeEventsNDJSON internal helper)
 ndjson.go          — ReadEvents NDJSON reader (sentinel errors, enum validation on ingest)
 replay.go          — ReplayEvents: reconstruct Report from event stream (uses stepCore from step.go, preserves RunID + assigns StepIDs)
-classify.go        — Error classification: RegisterClassifications() + ErrorClassifications() map sentinel errors → go-error-family Family (Corruption/Rejection) via init() auto-registration into DefaultRegistry
-helpers.go         — Utility helpers: CheckNoClobber (anti-overwrite guard), HasPointerAddress (detect unoverridden String()), NameCollisions (find duplicate step names) + ErrFileExists sentinel
-render.go          — Shared render helpers: writeRendered + writeRenderedTransformed (render + optional transform + write with sentinel wrapping) + writeGraph (buildGraph + SetNodes + SetEdges + writeRenderedTransformed — single helper for ALL graph-format Write* methods: Mermaid, PlantUML, DOT; nil transform skips post-processing)
-diagram.go         — Translation layer: buildGraph() converts WorkflowReport → go-output GraphNode/GraphEdge + statusStyle() maps StepStatus → GraphStyle colors
-diagram_options.go — DiagramOption type + WithDirection(output.Direction) option + per-format direction mapping helpers (mermaidDirection, plantumlDirectionCommand, applyPlantumlDirection)
-mermaid.go         — Mermaid flowchart export (delegates to go-output graph.MermaidRenderer, code fence off)
-plantuml.go        — PlantUML component diagram export (delegates to go-output plantuml.PlantUMLDiagram)
-graphviz.go        — Graphviz DOT digraph export (delegates to go-output graph.DOTRenderer, graphID "workflow")
-d2.go              — D2 diagram export (delegates to go-output d2.D2Diagram, title "Workflow DAG")
-table.go           — Step summary table export via go-output RenderTableData: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml
-table_options.go   — TableColumn enum (10 columns: Step/Status/Duration/Attempts/MaxAttempts/Retry/Timeout/Error/Type/Dependencies) + WithColumns option + columnDefs lookup table + DefaultTableColumns (backward-compat default: 7 cols)
-tree.go            — Step DAG tree export: ASCII tree (go-output/tree.ASCIITreeRenderer) + HTML nested list tree (go-output/markup.HTMLTreeRenderer)
-metadata.go        — TypeMetadata struct + BuildTypeMetadata(): single source of truth for enum display metadata (icons/labels/colors) consumed by HTML dashboard JS
-html.go            — Public API: WorkflowReport.WriteHTML / ExportHTML / WriteHTMLString (delegates to renderHTML)
-html_render.go     — renderHTML(): assembles self-contained HTML dashboard via fmt.Sprintf on htmlTemplate; CSS/JS embedded from dashboard.css/dashboard.js via go:embed
-dashboard.css      — Dashboard CSS theme (embedded at compile time via go:embed, ~550 lines)
-dashboard.js       — Dashboard JavaScript: Sugiyama DAG graph engine, waveform renderer, tab switching, sortable tables, timeline, tree view (~714 lines)
-example/           — Data pipeline demo (fetch → validate → transform → save + retry); version ldflags
-.goreleaser.yml    — Automated GitHub releases with grouped changelog + demo binary
+classify.go        — Error classification: RegisterClassifications() + ErrorClassifications() map sentinel errors → go-error-family Family
+helpers.go         — Utility helpers: CheckNoClobber, HasPointerAddress, NameCollisions + ErrFileExists sentinel + WriteToFile (atomic temp+rename export helper)
+testhelpers/     — Exported test fixtures, step constructors, and assertions shared by both modules
+```
+
+### Visualization module source files
+
+```
+viz.go              — Package doc + type aliases (WorkflowReport, StepInfo, StepStatus, etc.) and re-exports (ErrRenderFailed, ErrExportWriteFailed, WriteToFile, AllStepStatuses, AllEventTypes)
+diagram.go          — Translation layer: buildGraph() converts WorkflowReport → go-output GraphNode/GraphEdge + statusStyle() + stepLabel()
+diagram_options.go  — DiagramOption type + WithDirection(output.Direction) + per-format direction helpers
+render.go           — Shared render helpers: writeRendered, writeRenderedTransformed, writeGraph
+mermaid.go          — WriteMermaid, WriteMermaidString, ExportMermaid
+plantuml.go         — WritePlantUML, WritePlantUMLString, ExportPlantUML
+graphviz.go         — WriteGraphviz, WriteGraphvizString, ExportGraphviz
+d2.go               — WriteD2, WriteD2String, ExportD2
+daghtml_adapter.go  — buildDAGHTML() for the interactive HTML graph renderer
+metadata.go         — TypeMetadata struct + BuildTypeMetadata() for the HTML dashboard JS
+table.go            — WriteTable, WriteTableString, ExportTable
+table_options.go    — TableColumn enum + WithColumns + DefaultTableColumns + AllTableColumns
+tree.go             — WriteTree, WriteTreeString, ExportTree, WriteHTMLTree, WriteHTMLTreeString, ExportHTMLTree
+html.go             — WriteHTML, WriteHTMLString, ExportHTML
+html_render.go      — renderHTML(): assemble self-contained HTML dashboard
+dashboard.css       — Dashboard CSS theme (embedded via go:embed)
+dashboard.js        — Dashboard JavaScript: Sugiyama DAG, waveform, tabs, tables, timeline, tree
+example/            — Data pipeline demo (now in viz module)
 ```
 
 ### Data Flow
 
-1. User creates `Auditor` via `New(Config)`
+1. User creates `Auditor` via `auditlog.New(Config)`
 2. `Attach(w)` injects `BeforeStep`/`AfterStep` callbacks into all steps via `State.MergeConfig`
 3. During `w.Do(ctx)`, callbacks fire per-attempt → `Recorder` captures timestamped `Event`s
 4. `Snapshot(w)` reads `w.StateOf(step)` + `w.UpstreamOf(step)` to fill in DAG structure and skipped/canceled statuses
 5. `Report()` assembles `StepInfo` slice (with forward + reverse deps) and event stream
-6. Export methods serialize to JSON, NDJSON, diagrams (Mermaid/PlantUML/DOT/D2), tables (16 formats via go-output), trees (ASCII/HTML), and interactive HTML dashboard (5-tab report with embedded CSS/JS) via [go-output](https://github.com/larsartmann/go-output)
+6. Core consumers call `report.WriteJSON` / `report.WriteNDJSON` / `report.ExportJSON` / `report.ExportNDJSON`
+7. Consumers who want visualization import `viz` and call `viz.WriteX(report, ...)` or `viz.ExportX(report, ...)`
 
 ### Concurrency Model
 
