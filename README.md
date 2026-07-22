@@ -334,8 +334,8 @@ All visualization functions take the report as the first argument:
 | `viz.WritePlantUMLString(r, opts ...DiagramOption) (string, error)`                   | PlantUML diagram as string.                                       |
 | `viz.WriteGraphvizString(r, opts ...DiagramOption) (string, error)`                   | Graphviz DOT diagram as string.                                   |
 | `viz.WriteD2String(r, opts ...DiagramOption) (string, error)`                         | D2 diagram as string.                                              |
-| `viz.WriteTable(r, w, format, opts, tableOpts ...TableOption) error`                | Step summary table (16 formats, supports `viz.`viz.WithColumns``).       |
-| `viz.WriteTableString(r, format, opts, tableOpts ...TableOption) (string, error)`     | Step summary table as string (supports `viz.`viz.WithColumns``).        |
+| `viz.WriteTable(r, w, format, opts, tableOpts ...TableOption) error`                | Step summary table (16 formats, supports `viz.WithColumns`).       |
+| `viz.WriteTableString(r, format, opts, tableOpts ...TableOption) (string, error)`     | Step summary table as string (supports `viz.WithColumns`).        |
 | `viz.WriteTree(r, w io.Writer) error`                                               | ASCII tree of step DAG.                                            |
 | `viz.WriteTreeString(r) (string, error)`                                              | ASCII tree as string.                                              |
 | `viz.WriteHTMLTree(r, w io.Writer) error`                                             | HTML nested-list tree of step DAG.                                   |
@@ -488,42 +488,42 @@ digraph workflow {
 Generate diagrams from any report:
 
 ```go
-_ = report.WriteMermaid(os.Stdout)      // or viz.ExportMermaid("dag.mmd")
-_ = report.WriteGraphviz(os.Stdout)     // or viz.ExportGraphviz("dag.dot")
-_ = report.WritePlantUML(os.Stdout)     // or viz.ExportPlantUML("dag.puml")
-_ = report.WriteD2(os.Stdout)           // or viz.ExportD2("dag.d2")
-_ = report.WriteTable(os.Stdout, output.FormatCSV, output.RenderOptions{},
-    viz.`viz.WithColumns`(viz.`viz.ColumnStep`, viz.`viz.ColumnStatus`, viz.`viz.ColumnDuration`))
-_ = report.WriteTree(os.Stdout)         // ASCII tree of step DAG
-_ = report.WriteHTMLTree(os.Stdout)     // HTML nested-list tree
+_ = viz.WriteMermaid(report, os.Stdout)      // or viz.ExportMermaid(report, "dag.mmd")
+_ = viz.WriteGraphviz(report, os.Stdout)     // or viz.ExportGraphviz(report, "dag.dot")
+_ = viz.WritePlantUML(report, os.Stdout)     // or viz.ExportPlantUML(report, "dag.puml")
+_ = viz.WriteD2(report, os.Stdout)           // or viz.ExportD2(report, "dag.d2")
+_ = viz.WriteTable(report, os.Stdout, output.FormatCSV, output.RenderOptions{},
+    viz.WithColumns(viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration))
+_ = viz.WriteTree(report, os.Stdout)         // ASCII tree of step DAG
+_ = viz.WriteHTMLTree(report, os.Stdout)     // HTML nested-list tree
 _ = viz.ExportHTML(report, "dashboard.html")  // interactive HTML dashboard
 ```
 
 ### Configurable Table Columns
 
-The `WriteTable` / `WriteTableString` / `ExportTable` methods accept `viz.WithColumns`` to control which columns appear. Ten columns are available:
+The `viz.WriteTable` / `viz.WriteTableString` / `viz.ExportTable` functions accept `viz.WithColumns` to control which columns appear. Ten columns are available:
 
 | Column       | Constant             | Default? |
 | ------------ | -------------------- | -------- |
-| Step name    | `viz.ColumnStep``         | Yes      |
-| Status       | `viz.ColumnStatus``       | Yes      |
-| Duration     | `viz.ColumnDuration``     | Yes      |
-| Attempts     | `viz.ColumnAttempts``     | Yes      |
-| Max Attempts | `viz.ColumnMaxAttempts``  |          |
-| Has Retry    | `viz.ColumnRetry``        | Yes      |
-| Has Timeout  | `viz.ColumnTimeout``      | Yes      |
-| Error        | `viz.ColumnError``        | Yes      |
-| Type         | `viz.ColumnType``         |          |
-| Dependencies | `viz.ColumnDependencies`` |          |
+| Step name    | `viz.ColumnStep`         | Yes      |
+| Status       | `viz.ColumnStatus`       | Yes      |
+| Duration     | `viz.ColumnDuration`     | Yes      |
+| Attempts     | `viz.ColumnAttempts`     | Yes      |
+| Max Attempts | `viz.ColumnMaxAttempts`  |          |
+| Has Retry    | `viz.ColumnRetry`        | Yes      |
+| Has Timeout  | `viz.ColumnTimeout`      | Yes      |
+| Error        | `viz.ColumnError`        | Yes      |
+| Type         | `viz.ColumnType`         |          |
+| Dependencies | `viz.ColumnDependencies` |          |
 
 ```go
 // Compact table: just step name, status, and duration
 out, _ := viz.WriteTableString(report, output.FormatMarkdown, output.RenderOptions{},
-    viz.`viz.WithColumns`(viz.`viz.ColumnStep`, viz.`viz.ColumnStatus`, viz.`viz.ColumnDuration`))
+    viz.WithColumns(viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration))
 
 // Full table: all 10 columns
 out, _ := viz.WriteTableString(report, output.FormatCSV, output.RenderOptions{},
-    viz.`viz.WithColumns`(viz.`viz.AllTableColumns`()...)
+    viz.WithColumns(viz.AllTableColumns()...)
 ```
 
 ## HTML Dashboard
