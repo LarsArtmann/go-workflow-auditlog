@@ -55,11 +55,9 @@ func writeRenderedTransformed(
 
 // writeGraph writes the step DAG of r through the given pre-configured
 // go-output GraphRenderer. It centralizes the SetNodes/SetEdges + writeRendered
-// sequence shared by every graph-format Write method (Mermaid, PlantUML,
-// Graphviz). Each caller is responsible for constructing the renderer and
-// applying any format-specific configuration (e.g. SetCodeFence, SetGraphID)
-// before invoking this helper — keeping those one-line differences visible at
-// the call site rather than hiding them behind an interface-widening wrapper.
+// sequence for the Graphviz DOT writer. Mermaid and PlantUML use
+// writeRenderedTransformed instead because they post-process the rendered
+// output for direction overrides.
 func writeGraph(writer io.Writer, r WorkflowReport, format string, renderer output.GraphRenderer) error {
 	nodes, edges := buildGraph(r)
 

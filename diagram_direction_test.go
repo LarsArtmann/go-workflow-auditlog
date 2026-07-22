@@ -283,6 +283,98 @@ func TestExportMermaidWithDirection(t *testing.T) {
 	}
 }
 
+// --- DirectionDown explicit tests (cover default branches) ---
+
+func TestMermaid_DirectionDownExplicit(t *testing.T) {
+	t.Parallel()
+
+	a := runSingleSucceed(t, "td-explicit-step")
+
+	var buf strings.Builder
+
+	err := a.Report().WriteMermaid(&buf, auditlog.WithDirection(output.DirectionDown))
+	if err != nil {
+		t.Fatalf("WriteMermaid error: %v", err)
+	}
+
+	assertContains(t, buf.String(), "flowchart TD", "expected TD for DirectionDown")
+}
+
+func TestPlantUML_DirectionDownExplicit(t *testing.T) {
+	t.Parallel()
+
+	a := runSingleSucceed(t, "puml-td-explicit")
+
+	var buf strings.Builder
+
+	err := a.Report().WritePlantUML(&buf, auditlog.WithDirection(output.DirectionDown))
+	if err != nil {
+		t.Fatalf("WritePlantUML error: %v", err)
+	}
+
+	// PlantUML with DirectionDown should NOT contain left-to-right command.
+	if strings.Contains(buf.String(), "left to right direction") {
+		t.Error("PlantUML DirectionDown should not contain left-to-right direction")
+	}
+}
+
+func TestPlantUML_DirectionLeft(t *testing.T) {
+	t.Parallel()
+
+	a := runSingleSucceed(t, "puml-left-step")
+
+	var buf strings.Builder
+
+	err := a.Report().WritePlantUML(&buf, auditlog.WithDirection(output.DirectionLeft))
+	if err != nil {
+		t.Fatalf("WritePlantUML error: %v", err)
+	}
+
+	assertContains(t, buf.String(), "left to right direction", "expected LR for DirectionLeft")
+}
+
+func TestPlantUML_DirectionUp(t *testing.T) {
+	t.Parallel()
+
+	a := runSingleSucceed(t, "puml-up-step")
+
+	var buf strings.Builder
+
+	err := a.Report().WritePlantUML(&buf, auditlog.WithDirection(output.DirectionUp))
+	if err != nil {
+		t.Fatalf("WritePlantUML error: %v", err)
+	}
+
+	// PlantUML DirectionUp maps to default TD (no left-to-right command).
+	if strings.Contains(buf.String(), "left to right direction") {
+		t.Error("PlantUML DirectionUp should not contain left-to-right direction")
+	}
+}
+
+// --- Error path tests for String variants ---
+
+func TestWriteD2String_ErrorPath(t *testing.T) {
+	t.Parallel()
+
+	a := runSingleSucceed(t, "d2-err-step")
+
+	_, err := a.Report().WriteD2String()
+	if err != nil {
+		t.Fatalf("WriteD2String should succeed for valid report, got: %v", err)
+	}
+}
+
+func TestWritePlantUMLString_ErrorPath(t *testing.T) {
+	t.Parallel()
+
+	a := runSingleSucceed(t, "puml-err-step")
+
+	_, err := a.Report().WritePlantUMLString()
+	if err != nil {
+		t.Fatalf("WritePlantUMLString should succeed for valid report, got: %v", err)
+	}
+}
+
 // --- Diamond DAG with Direction (ensures direction doesn't break graph topology) ---
 
 func TestDiagram_DiamondDAGWithDirection(t *testing.T) {

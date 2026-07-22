@@ -30,6 +30,9 @@ These surfaces are functional but their exact shape may change:
 | `WorkflowReport.Filtered(opts ...ReportOption)`                                        | The filter option set may expand.                                                       |
 | `Event`, `StepInfo`, `StepRef` field set                                               | New fields may be added. Existing JSON tags are stable.                                 |
 | Diagram / Table / Tree export output                                                   | Output format may evolve as go-output updates.                                          |
+| `WithColumns(...TableColumn)` table option                                             | Column set may expand; existing column constants are stable.                            |
+| `WithDirection(output.Direction)` diagram option                                       | Direction mapping per format may evolve; option signature is stable.                    |
+| `TableColumn` enum / `DiagramOption` type                                              | New values may be added; existing ones keep their iota/string values.                   |
 | `ReportIndex` query methods                                                            | New lookup methods may be added.                                                        |
 | `ErrorClassifications()` / `RegisterClassifications(reg)`                              | Classification mapping may grow as new sentinels are added.                             |
 | I/O sentinel errors (`ErrReportLoadFailed`, `ErrRenderFailed`, `ErrExportWriteFailed`) | Sentinel set is stable; wrapping messages may evolve.                                   |

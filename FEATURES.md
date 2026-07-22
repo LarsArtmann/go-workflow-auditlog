@@ -106,7 +106,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns)
 - `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer
-- `CHANGELOG.md` — v0.6.0 tagged; `[Unreleased]` section covers json/v2 migration + website launch
+- `CHANGELOG.md` — v0.7.0 tagged (table columns + diagram direction + CriticalPath/PeakConcurrencySteps + json/v2 + website)
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
 - `example/main.go` — demos all export formats via `--export` flag
 

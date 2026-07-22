@@ -278,3 +278,30 @@ func TestTable_AllTableColumnsCount(t *testing.T) {
 		t.Errorf("expected 10 total columns, got %d", len(all))
 	}
 }
+
+func TestTable_ZeroDurationCell(t *testing.T) {
+	t.Parallel()
+
+	// A step with DurationMs=0 should produce an empty duration cell.
+	zeroDur := 0.0
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{
+				StepRef:    auditlog.StepRef{Name: "instant"},
+				Status:     auditlog.StepStatusSucceeded,
+				DurationMs: &zeroDur,
+			},
+		},
+	}
+
+	out, err := report.WriteTableString(
+		output.FormatCSV, output.RenderOptions{},
+		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnDuration),
+	)
+	if err != nil {
+		t.Fatalf("WriteTableString error: %v", err)
+	}
+
+	// The data row should be "instant," (step name, empty duration).
+	assertContains(t, out, "instant,", "expected step name with empty duration cell")
+}

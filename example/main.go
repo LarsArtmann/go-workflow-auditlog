@@ -266,15 +266,21 @@ func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.Workflo
 	tasks := []exportTask{
 		{"audit-report.json", func() error { return audit.ExportJSON("audit-report.json") }},
 		{"audit-events.ndjson", func() error { return audit.ExportNDJSON("audit-events.ndjson") }},
-		{"dag.mmd", func() error { return audit.ExportMermaid("dag.mmd") }},
+		{"dag.mmd", func() error {
+			return audit.ExportMermaid("dag.mmd",
+				auditlog.WithDirection(output.DirectionRight))
+		}},
 		{"dag.dot", func() error { return audit.ExportGraphviz("dag.dot") }},
 		{"dag.puml", func() error { return audit.ExportPlantUML("dag.puml") }},
 		{"dag.d2", func() error { return audit.ExportD2("dag.d2") }},
 		{"steps.csv", func() error {
 			return audit.ExportTable("steps.csv", output.FormatCSV, output.RenderOptions{})
 		}},
-		{"steps.md", func() error {
-			return audit.ExportTable("steps.md", output.FormatMarkdown, output.RenderOptions{})
+		{"steps-compact.md", func() error {
+			return audit.ExportTable("steps-compact.md", output.FormatMarkdown, output.RenderOptions{},
+				auditlog.WithColumns(
+					auditlog.ColumnStep, auditlog.ColumnStatus, auditlog.ColumnDuration,
+				))
 		}},
 		{"tree.txt", func() error { return audit.ExportTree("tree.txt") }},
 		{"dashboard.html", func() error { return audit.ExportHTML("dashboard.html") }},

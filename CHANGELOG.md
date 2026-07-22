@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-22
+
 ### Added
 
 - **Configurable table columns** — `WithColumns(TableColumn...)` option on
@@ -28,9 +30,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Public documentation website** at
   [go-workflow-auditlog.lars.software](https://go-workflow-auditlog.lars.software) —
   full Astro + Starlight site with 10 doc pages, landing page, and API reference.
-- **Godoc `ExampleX` funcs** for `PeakConcurrency`, `CriticalPathDurationMs`, and
-  `WallClockDurationMs` — 3 new runnable examples (5 total: Duration, Filtered,
-  PeakConcurrency, CriticalPathDurationMs, WallClockDurationMs).
+- **Godoc `ExampleX` funcs** for `PeakConcurrency`, `CriticalPathDurationMs`,
+  `WallClockDurationMs`, `WriteTable` (WithColumns), and `WriteMermaid`
+  (WithDirection) — 7 runnable examples total.
 
 ### Changed
 

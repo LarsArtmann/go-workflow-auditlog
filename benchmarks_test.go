@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"testing"
 
 	flow "github.com/Azure/go-workflow"
@@ -274,6 +275,50 @@ func ExampleWorkflowReport_wallClockDurationMs() {
 		report.WallClockDurationMs, report.TotalDurationMs)
 
 	// Output: Real elapsed time: 1500ms (not 3000ms)
+}
+
+// ExampleWorkflowReport_WriteTable demonstrates selecting a subset of columns
+// for table export using WithColumns.
+func ExampleWorkflowReport_WriteTable() {
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{
+				StepRef:  auditlog.StepRef{Name: "fetch"},
+				Status:   auditlog.StepStatusSucceeded,
+				HasRetry: true,
+			},
+		},
+	}
+
+	out, _ := report.WriteTableString(
+		output.FormatCSV, output.RenderOptions{},
+		auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus),
+	)
+
+	fmt.Println(out)
+
+	// Output:
+	// Step,Status
+	// fetch,succeeded
+}
+
+// ExampleWorkflowReport_WriteMermaid demonstrates setting a left-to-right
+// layout direction on a Mermaid diagram using WithDirection.
+func ExampleWorkflowReport_WriteMermaid() {
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "a"}},
+			{StepRef: auditlog.StepRef{Name: "b"}, Dependencies: []auditlog.StepRef{{Name: "a"}}},
+		},
+	}
+
+	out, _ := report.WriteMermaidString(
+		auditlog.WithDirection(output.DirectionRight),
+	)
+
+	fmt.Println(strings.Contains(out, "flowchart LR"))
+
+	// Output: true
 }
 
 // =============================================================================
