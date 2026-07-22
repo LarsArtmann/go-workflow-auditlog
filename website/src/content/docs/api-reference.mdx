@@ -1,13 +1,18 @@
 ---
 title: API Reference
-description: Public API for go-workflow-auditlog.
+description: Public API for go-workflow-auditlog and go-workflow-auditlog/viz.
 ---
+
+The project is split into two Go modules:
+
+- **Core** (`github.com/larsartmann/go-workflow-auditlog`, package `auditlog`) — event recording, reports, JSON/NDJSON, replay, diff, filter, and index.
+- **Visualization** (`github.com/larsartmann/go-workflow-auditlog/viz`, package `viz`) — diagrams, tables, trees, and the HTML dashboard.
 
 ## Core Types
 
 ### Auditor
 
-The main type. Created via `New(config)`. Orchestrates event capture, report assembly, and exports.
+The main type. Created via `New(config)`. Orchestrates event capture, report assembly, and core exports.
 
 ```go
 audit, err := auditlog.New(auditlog.Config{
@@ -51,15 +56,8 @@ type Event struct {
 | `ReportFiltered(opts ...ReportOption) WorkflowReport` | Returns a filtered report.                                   |
 | `ExportJSON(path string) error`                       | Writes report as JSON.                                       |
 | `ExportNDJSON(path string) error`                     | Writes events as NDJSON.                                     |
-| `ExportHTML(path string) error`                       | Writes interactive HTML dashboard.                           |
-| `ExportMermaid(path string) error`                    | Writes Mermaid DAG to file.                                  |
-| `ExportD2(path string) error`                         | Writes D2 DAG to file.                                       |
-| `ExportGraphviz(path string) error`                   | Writes Graphviz DOT DAG to file.                             |
-| `ExportPlantUML(path string) error`                   | Writes PlantUML DAG to file.                                 |
-| `ExportTable(path, format, opts) error`               | Writes step summary table (CSV/Markdown/...).                |
-| `ExportTree(path string) error`                       | Writes ASCII tree to file.                                   |
-
-See the [Full API on pkg.go.dev](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog) for all methods including `Write*` variants (to `io.Writer` instead of file).
+| `WriteJSON(w io.Writer) error`                        | Writes report JSON to writer.                                |
+| `WriteNDJSON(w io.Writer) error`                      | Writes NDJSON to writer.                                     |
 
 ## WorkflowReport Methods
 
@@ -75,7 +73,51 @@ See the [Full API on pkg.go.dev](https://pkg.go.dev/github.com/larsartmann/go-wo
 | `report.Diff(other WorkflowReport) DiffResult`         | Compares two reports (added/removed/changed steps + duration delta). |
 | `report.Duration() time.Duration`                      | Wall-clock duration spanned by all events.                           |
 | `report.Summary() string`                              | One-line human-readable summary.                                     |
+| `report.WriteJSON(w io.Writer) error`                  | Serialize report as JSON.                                            |
+| `report.WriteNDJSON(w io.Writer) error`                | Serialize events as NDJSON.                                          |
+| `report.ExportJSON(path string) error`                 | Writes JSON report to file.                                          |
+| `report.ExportNDJSON(path string) error`               | Writes NDJSON events to file.                                        |
 | `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
+
+## Visualization (`viz` package)
+
+All visualization functions take the report as the first argument:
+
+```go
+import viz "github.com/larsartmann/go-workflow-auditlog/viz"
+
+report := audit.Report()
+
+_ = viz.ExportMermaid(report, "dag.mmd")
+_ = viz.ExportHTML(report, "dashboard.html")
+```
+
+| Function                                                                                 | Description                                                        |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `viz.WriteMermaid(r, w io.Writer, opts ...DiagramOption) error`                            | Mermaid diagram (supports `viz.WithDirection`).                   |
+| `viz.WritePlantUML(r, w io.Writer, opts ...DiagramOption) error`                         | PlantUML diagram (supports `viz.WithDirection`).                  |
+| `viz.WriteGraphviz(r, w io.Writer, opts ...DiagramOption) error`                         | Graphviz DOT diagram (supports `viz.WithDirection`).              |
+| `viz.WriteD2(r, w io.Writer, opts ...DiagramOption) error`                               | D2 diagram (supports `viz.WithDirection`).                        |
+| `viz.WriteMermaidString(r, opts ...DiagramOption) (string, error)`                       | Mermaid diagram as string.                                        |
+| `viz.WritePlantUMLString(r, opts ...DiagramOption) (string, error)`                      | PlantUML diagram as string.                                       |
+| `viz.WriteGraphvizString(r, opts ...DiagramOption) (string, error)`                      | Graphviz DOT diagram as string.                                   |
+| `viz.WriteD2String(r, opts ...DiagramOption) (string, error)`                            | D2 diagram as string.                                                |
+| `viz.WriteTable(r, w, format, opts, tableOpts ...TableOption) error`                     | Step summary table (16 formats, supports `viz.WithColumns`).       |
+| `viz.WriteTableString(r, format, opts, tableOpts ...TableOption) (string, error)`        | Step summary table as string (supports `viz.WithColumns`).         |
+| `viz.WriteTree(r, w io.Writer) error`                                                    | ASCII tree of step DAG.                                            |
+| `viz.WriteTreeString(r) (string, error)`                                                 | ASCII tree as string.                                              |
+| `viz.WriteHTMLTree(r, w io.Writer) error`                                                | HTML nested-list tree of step DAG.                                 |
+| `viz.WriteHTMLTreeString(r) (string, error)`                                               | HTML tree as string.                                               |
+| `viz.WriteHTML(r, w io.Writer) error`                                                    | Interactive HTML dashboard.                                        |
+| `viz.WriteHTMLString(r) (string, error)`                                                 | HTML dashboard as string.                                          |
+| `viz.ExportMermaid(r, path string) error`                                                  | Writes Mermaid DAG to file.                                        |
+| `viz.ExportPlantUML(r, path string) error`                                                 | Writes PlantUML DAG to file.                                       |
+| `viz.ExportGraphviz(r, path string) error`                                                 | Writes Graphviz DOT DAG to file.                                   |
+| `viz.ExportD2(r, path string) error`                                                       | Writes D2 DAG to file.                                             |
+| `viz.ExportTable(r, path string, format, opts, tableOpts ...TableOption) error`            | Writes step summary table to file.                                   |
+| `viz.ExportTree(r, path string) error`                                                       | Writes ASCII tree to file.                                         |
+| `viz.ExportHTMLTree(r, path string) error`                                                 | Writes HTML tree to file.                                          |
+| `viz.ExportHTML(r, path string) error`                                                     | Writes interactive HTML dashboard to file.                         |
 
 ## Package-Level Functions
 
@@ -120,4 +162,7 @@ All errors are matchable via `errors.Is`:
 
 ## Full API on pkg.go.dev
 
-For the complete, always-up-to-date API documentation, see [pkg.go.dev](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog).
+For the complete, always-up-to-date API documentation, see:
+
+- [Core package](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)
+- [Visualization package](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog/viz)
