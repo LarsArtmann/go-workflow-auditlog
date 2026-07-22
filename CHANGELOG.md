@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Configurable table columns** — `WithColumns(TableColumn...)` option on
+  `WriteTable`, `WriteTableString`, and `ExportTable`. Select from 10 columns
+  (Step, Status, Duration, Attempts, MaxAttempts, Retry, Timeout, Error, Type,
+  Dependencies). Default preserves backward compatibility (original 7 columns).
+  Uses a pre-filter in `buildTableData` — no upstream go-output changes needed.
+- **Diagram layout direction** — `WithDirection(output.Direction)` option on
+  all diagram writers (`WriteMermaid`, `WriteGraphviz`, `WriteD2`,
+  `WritePlantUML`) and their String/Export variants. Supports TD/LR/BT/RL
+  directions. DOT and D2 use native go-output renderer support; Mermaid uses
+  post-processing; PlantUML injects `left to right direction`.
 - **`WorkflowReport.CriticalPath()`** — returns the ordered step chain
   (root-to-leaf) of the longest dependency path, not just the duration.
 - **`WorkflowReport.PeakConcurrencySteps()`** — returns the unique steps that

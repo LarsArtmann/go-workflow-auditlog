@@ -362,10 +362,10 @@ func TestWorkflowReport_ExportMethods(t *testing.T) {
 	}{
 		{"JSON", report.ExportJSON, ".json"},
 		{"NDJSON", report.ExportNDJSON, ".ndjson"},
-		{"Mermaid", report.ExportMermaid, ".mmd"},
-		{"PlantUML", report.ExportPlantUML, ".puml"},
-		{"Graphviz", report.ExportGraphviz, ".dot"},
-		{"D2", report.ExportD2, ".d2"},
+		{"Mermaid", func(path string) error { return report.ExportMermaid(path) }, ".mmd"},
+		{"PlantUML", func(path string) error { return report.ExportPlantUML(path) }, ".puml"},
+		{"Graphviz", func(path string) error { return report.ExportGraphviz(path) }, ".dot"},
+		{"D2", func(path string) error { return report.ExportD2(path) }, ".d2"},
 		{"Tree", report.ExportTree, ".txt"},
 		{"HTMLTree", report.ExportHTMLTree, ".html"},
 		{"HTML", report.ExportHTML, ".html"},
@@ -403,10 +403,10 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 		name string
 		fn   func() (string, error)
 	}{
-		{"Mermaid", a.WriteMermaidString},
-		{"PlantUML", a.WritePlantUMLString},
-		{"Graphviz", a.WriteGraphvizString},
-		{"D2", a.WriteD2String},
+		{"Mermaid", func() (string, error) { return a.WriteMermaidString() }},
+		{"PlantUML", func() (string, error) { return a.WritePlantUMLString() }},
+		{"Graphviz", func() (string, error) { return a.WriteGraphvizString() }},
+		{"D2", func() (string, error) { return a.WriteD2String() }},
 		{"Tree", a.WriteTreeString},
 		{"HTMLTree", a.WriteHTMLTreeString},
 		{"HTML", a.WriteHTMLString},

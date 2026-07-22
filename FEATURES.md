@@ -81,6 +81,12 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - **Full `Write*` / `Write*String` / `Export*` on both `Auditor` and `WorkflowReport`**
 - **Canonical JSON/NDJSON names** (`WriteJSON`, `WriteNDJSON`, `ExportJSON`, `ExportNDJSON`)
+- **Backward-compatible variadic options** — all diagram writers (`WriteMermaid`, `WriteGraphviz`, `WriteD2`, `WritePlantUML`) and table writers (`WriteTable`) accept optional `...DiagramOption` / `...TableOption` without breaking existing callers
+
+### Configurable Output Options
+
+- **Configurable table columns** — `WithColumns(TableColumn...)` selects which columns appear in table export. 10 columns available: Step, Status, Duration, Attempts, MaxAttempts, Retry, Timeout, Error, Type, Dependencies. Default preserves backward compatibility (original 7). Works across all 16 table sub-formats.
+- **Diagram layout direction** — `WithDirection(output.Direction)` sets TD/LR/BT/RL on Mermaid, Graphviz, D2, and PlantUML. Uses native go-output renderer support for DOT and D2; post-processing for Mermaid and PlantUML.
 
 ### Infrastructure
 
@@ -112,18 +118,6 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
 - **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + godoc examples
-
----
-
-## PARTIALLY DONE ⚠️
-
-### Table Column Configuration
-
-`buildTableData()` hardcodes 7 columns: Step, Status, Duration, Attempts, Retry, Timeout, Error. No way for users to customize which columns appear or add custom columns. The `StepType` field exists on `StepInfo` but is not available as a table column.
-
-### Diagram Layout Direction
-
-No way to set Mermaid/D2/Graphviz layout direction (TD vs LR). All diagrams default to top-down.
 
 ---
 

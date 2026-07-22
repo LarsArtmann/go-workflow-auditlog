@@ -88,39 +88,19 @@ CSP. Consumers get a shareable, offline artifact from any workflow run.
 
 ## Feature Designs (scoped, awaiting implementation)
 
-### Configurable Table Columns (P4-27)
+### Configurable Table Columns (P4-27) — DONE
 
-Currently `WriteTable` hardcodes 7 columns. Design:
+`WriteTable` now supports `WithColumns(TableColumn...)` for column selection.
+10 columns available: Step, Status, Duration, Attempts, MaxAttempts, Retry,
+Timeout, Error, Type, Dependencies. Uses a pre-filter in `buildTableData` —
+no upstream go-output changes needed. Backward-compatible variadic option.
 
-```go
-type TableColumn int
-const (
-    ColumnStep TableColumn = iota
-    ColumnStatus
-    ColumnDuration
-    ColumnAttempts
-    ColumnRetry
-    ColumnTimeout
-    ColumnError
-    ColumnType
-    ColumnDependencies
-)
-```
+### Diagram Layout Direction (P4-28) — DONE
 
-**Deferred**: `go-output`'s `RenderOptions` doesn't support column selection.
-Requires either upstream go-output support or a pre-filter in `buildTableData`.
-
-### Diagram Layout Direction (P4-28)
-
-Currently Mermaid/D2/Graphviz use default TD layout.
-
-```go
-type DiagramDirection string
-const ( DirectionTD = "TD"; DirectionLR = "LR" )
-```
-
-**Deferred**: go-output renderers don't expose direction config. Requires
-upstream support or post-processing the rendered string.
+`WithDirection(output.Direction)` sets TD/LR/BT/RL on all diagram formats.
+DOT and D2 use native go-output renderer `SetDirection()` support. Mermaid
+post-processes `flowchart TD` → `flowchart LR/BT/RL`. PlantUML injects
+`left to right direction`. Backward-compatible variadic option.
 
 ---
 

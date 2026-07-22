@@ -27,6 +27,32 @@ func writeRendered(writer io.Writer, format string, render func() (string, error
 	return nil
 }
 
+// writeRenderedTransformed is like writeRendered but applies an optional
+// transform to the rendered string before writing. Used by diagram writers
+// that need to post-process the output (e.g. Mermaid direction override).
+func writeRenderedTransformed(
+	writer io.Writer,
+	format string,
+	render func() (string, error),
+	transform func(string) string,
+) error {
+	out, err := render()
+	if err != nil {
+		return fmt.Errorf("%w: render %s: %w", ErrRenderFailed, format, err)
+	}
+
+	if transform != nil {
+		out = transform(out)
+	}
+
+	_, err = fmt.Fprintln(writer, out)
+	if err != nil {
+		return fmt.Errorf("%w: write %s output: %w", ErrExportWriteFailed, format, err)
+	}
+
+	return nil
+}
+
 // writeGraph writes the step DAG of r through the given pre-configured
 // go-output GraphRenderer. It centralizes the SetNodes/SetEdges + writeRendered
 // sequence shared by every graph-format Write method (Mermaid, PlantUML,

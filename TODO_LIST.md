@@ -58,14 +58,20 @@ Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 
 ---
 
+## [DONE] — 2026-07-22 execution session (mid-term features)
+
+- [x] **Configurable table columns** — `WithColumns(TableColumn...)` option on `WriteTable`/`WriteTableString`/`ExportTable`. 10 columns available (Step, Status, Duration, Attempts, MaxAttempts, Retry, Timeout, Error, Type, Dependencies). Default preserves backward compatibility (original 7 columns). Uses pre-filter in `buildTableData` — no upstream go-output changes needed. New files: `table_options.go`, `table_columns_test.go`.
+- [x] **Diagram layout direction** — `WithDirection(output.Direction)` option on all diagram writers (`WriteMermaid`/`WriteGraphviz`/`WriteD2`/`WritePlantUML` + String/Export variants). DOT and D2 use native go-output renderer support; Mermaid uses post-processing (`flowchart TD` → `flowchart LR/BT/RL`); PlantUML uses `left to right direction` injection. All methods accept backward-compatible variadic `opts ...DiagramOption`. New files: `diagram_options.go`, `diagram_direction_test.go`.
+
+---
+
 ## Short-term (high impact, low effort)
 
 _(all items completed — see 2026-07-22 session above)_
 
 ## Mid-term (medium impact, medium effort)
 
-- [ ] **Make table columns configurable** — `WriteTable` currently hardcodes 7 columns. Add column-selection options. **Blocked**: needs upstream go-output `RenderOptions` support for column filtering. Design documented in ROADMAP.md.
-- [ ] **Add diagram layout direction option** — let caller choose TD vs LR for Mermaid/D2/Graphviz. **Blocked**: needs upstream go-output renderer direction config. Design documented in ROADMAP.md.
+_(all items completed — see 2026-07-22 session above)_
 
 ## Deferred (high effort or needs architectural decision — see ROADMAP.md)
 

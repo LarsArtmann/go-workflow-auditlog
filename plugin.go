@@ -177,54 +177,76 @@ func (a *Auditor) ExportNDJSON(path string) error {
 }
 
 // WriteMermaid writes the step DAG as a Mermaid diagram to the writer.
-func (a *Auditor) WriteMermaid(writer io.Writer) error {
-	return a.Report().WriteMermaid(writer)
+// See WorkflowReport.WriteMermaid for diagram options.
+func (a *Auditor) WriteMermaid(writer io.Writer, opts ...DiagramOption) error {
+	return a.Report().WriteMermaid(writer, opts...)
 }
 
 // WritePlantUML writes the step DAG as a PlantUML diagram to the writer.
-func (a *Auditor) WritePlantUML(writer io.Writer) error {
-	return a.Report().WritePlantUML(writer)
+// See WorkflowReport.WritePlantUML for diagram options.
+func (a *Auditor) WritePlantUML(writer io.Writer, opts ...DiagramOption) error {
+	return a.Report().WritePlantUML(writer, opts...)
 }
 
 // WriteGraphviz writes the step DAG as a Graphviz DOT diagram to the writer.
-func (a *Auditor) WriteGraphviz(writer io.Writer) error {
-	return a.Report().WriteGraphviz(writer)
+// See WorkflowReport.WriteGraphviz for diagram options.
+func (a *Auditor) WriteGraphviz(writer io.Writer, opts ...DiagramOption) error {
+	return a.Report().WriteGraphviz(writer, opts...)
 }
 
 // ExportMermaid writes the step DAG as Mermaid to path.
-func (a *Auditor) ExportMermaid(path string) error {
-	return writeToFile(path, a.WriteMermaid)
+// See WorkflowReport.WriteMermaid for diagram options.
+func (a *Auditor) ExportMermaid(path string, opts ...DiagramOption) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return a.WriteMermaid(w, opts...)
+	})
 }
 
 // ExportPlantUML writes the step DAG as PlantUML to path.
-func (a *Auditor) ExportPlantUML(path string) error {
-	return writeToFile(path, a.WritePlantUML)
+// See WorkflowReport.WritePlantUML for diagram options.
+func (a *Auditor) ExportPlantUML(path string, opts ...DiagramOption) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return a.WritePlantUML(w, opts...)
+	})
 }
 
 // ExportGraphviz writes the step DAG as Graphviz DOT to path.
-func (a *Auditor) ExportGraphviz(path string) error {
-	return writeToFile(path, a.WriteGraphviz)
+// See WorkflowReport.WriteGraphviz for diagram options.
+func (a *Auditor) ExportGraphviz(path string, opts ...DiagramOption) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return a.WriteGraphviz(w, opts...)
+	})
 }
 
 // WriteD2 writes the step DAG as a D2 diagram to the writer.
-func (a *Auditor) WriteD2(writer io.Writer) error {
-	return a.Report().WriteD2(writer)
+// See WorkflowReport.WriteD2 for diagram options.
+func (a *Auditor) WriteD2(writer io.Writer, opts ...DiagramOption) error {
+	return a.Report().WriteD2(writer, opts...)
 }
 
 // ExportD2 writes the step DAG as D2 to path.
-func (a *Auditor) ExportD2(path string) error {
-	return writeToFile(path, a.WriteD2)
+// See WorkflowReport.WriteD2 for diagram options.
+func (a *Auditor) ExportD2(path string, opts ...DiagramOption) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return a.WriteD2(w, opts...)
+	})
 }
 
 // WriteTable writes the step summary as a table in the specified format.
-func (a *Auditor) WriteTable(writer io.Writer, format output.Format, opts output.RenderOptions) error {
-	return a.Report().WriteTable(writer, format, opts)
+// See WorkflowReport.WriteTable for column-selection options.
+func (a *Auditor) WriteTable(
+	writer io.Writer, format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
+) error {
+	return a.Report().WriteTable(writer, format, opts, tableOpts...)
 }
 
 // ExportTable writes the step summary table to path in the specified format.
-func (a *Auditor) ExportTable(path string, format output.Format, opts output.RenderOptions) error {
+// See WorkflowReport.WriteTable for column-selection options.
+func (a *Auditor) ExportTable(
+	path string, format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
+) error {
 	return writeToFile(path, func(w io.Writer) error {
-		return a.WriteTable(w, format, opts)
+		return a.WriteTable(w, format, opts, tableOpts...)
 	})
 }
 
@@ -251,28 +273,35 @@ func (a *Auditor) ExportHTMLTree(path string) error {
 // --- String-variant methods (mirror WorkflowReport.Write*String) ---
 
 // WriteMermaidString returns the Mermaid diagram as a string.
-func (a *Auditor) WriteMermaidString() (string, error) {
-	return a.Report().WriteMermaidString()
+// See WorkflowReport.WriteMermaid for diagram options.
+func (a *Auditor) WriteMermaidString(opts ...DiagramOption) (string, error) {
+	return a.Report().WriteMermaidString(opts...)
 }
 
 // WritePlantUMLString returns the PlantUML diagram as a string.
-func (a *Auditor) WritePlantUMLString() (string, error) {
-	return a.Report().WritePlantUMLString()
+// See WorkflowReport.WritePlantUML for diagram options.
+func (a *Auditor) WritePlantUMLString(opts ...DiagramOption) (string, error) {
+	return a.Report().WritePlantUMLString(opts...)
 }
 
 // WriteGraphvizString returns the Graphviz DOT diagram as a string.
-func (a *Auditor) WriteGraphvizString() (string, error) {
-	return a.Report().WriteGraphvizString()
+// See WorkflowReport.WriteGraphviz for diagram options.
+func (a *Auditor) WriteGraphvizString(opts ...DiagramOption) (string, error) {
+	return a.Report().WriteGraphvizString(opts...)
 }
 
 // WriteD2String returns the D2 diagram as a string.
-func (a *Auditor) WriteD2String() (string, error) {
-	return a.Report().WriteD2String()
+// See WorkflowReport.WriteD2 for diagram options.
+func (a *Auditor) WriteD2String(opts ...DiagramOption) (string, error) {
+	return a.Report().WriteD2String(opts...)
 }
 
 // WriteTableString returns the step summary table as a string in the given format.
-func (a *Auditor) WriteTableString(format output.Format, opts output.RenderOptions) (string, error) {
-	return a.Report().WriteTableString(format, opts)
+// See WorkflowReport.WriteTable for column-selection options.
+func (a *Auditor) WriteTableString(
+	format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
+) (string, error) {
+	return a.Report().WriteTableString(format, opts, tableOpts...)
 }
 
 // WriteTreeString returns the ASCII tree as a string.

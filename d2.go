@@ -56,11 +56,20 @@ func d2DiagramTitle(r WorkflowReport) string {
 // The diagram title is derived from the report's WorkflowID so each rendered
 // diagram is self-labeling. When WorkflowID is empty the title falls back to
 // "Workflow DAG".
-func (r WorkflowReport) WriteD2(writer io.Writer) error {
+//
+// Use WithDirection to change the layout direction (default: top-down):
+//
+//	r.WriteD2(w, auditlog.WithDirection(output.DirectionRight))
+func (r WorkflowReport) WriteD2(writer io.Writer, opts ...DiagramOption) error {
 	nodes, edges := buildGraph(r)
 
 	diagram := d2.NewDiagram()
 	diagram.SetTitle(d2DiagramTitle(r))
+
+	cfg := applyDiagramOpts(opts)
+	if cfg.hasDirection() {
+		diagram.SetDirection(d2.Direction(cfg.direction))
+	}
 
 	for _, node := range graphNodesToD2(nodes) {
 		diagram.AddNode(node)
@@ -75,10 +84,10 @@ func (r WorkflowReport) WriteD2(writer io.Writer) error {
 
 // WriteD2String returns the D2 diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
-func (r WorkflowReport) WriteD2String() (string, error) {
+func (r WorkflowReport) WriteD2String(opts ...DiagramOption) (string, error) {
 	var buf strings.Builder
 
-	err := r.WriteD2(&buf)
+	err := r.WriteD2(&buf, opts...)
 	if err != nil {
 		return "", err
 	}

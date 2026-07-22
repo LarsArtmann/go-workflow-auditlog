@@ -344,29 +344,44 @@ func (r WorkflowReport) ExportNDJSON(path string) error {
 }
 
 // ExportMermaid writes the step DAG as a Mermaid diagram to path.
-func (r WorkflowReport) ExportMermaid(path string) error {
-	return writeToFile(path, r.WriteMermaid)
+// See WriteMermaid for diagram options.
+func (r WorkflowReport) ExportMermaid(path string, opts ...DiagramOption) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return r.WriteMermaid(w, opts...)
+	})
 }
 
 // ExportPlantUML writes the step DAG as a PlantUML diagram to path.
-func (r WorkflowReport) ExportPlantUML(path string) error {
-	return writeToFile(path, r.WritePlantUML)
+// See WritePlantUML for diagram options.
+func (r WorkflowReport) ExportPlantUML(path string, opts ...DiagramOption) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return r.WritePlantUML(w, opts...)
+	})
 }
 
 // ExportGraphviz writes the step DAG as a Graphviz DOT diagram to path.
-func (r WorkflowReport) ExportGraphviz(path string) error {
-	return writeToFile(path, r.WriteGraphviz)
+// See WriteGraphviz for diagram options.
+func (r WorkflowReport) ExportGraphviz(path string, opts ...DiagramOption) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return r.WriteGraphviz(w, opts...)
+	})
 }
 
 // ExportD2 writes the step DAG as a D2 diagram to path.
-func (r WorkflowReport) ExportD2(path string) error {
-	return writeToFile(path, r.WriteD2)
+// See WriteD2 for diagram options.
+func (r WorkflowReport) ExportD2(path string, opts ...DiagramOption) error {
+	return writeToFile(path, func(w io.Writer) error {
+		return r.WriteD2(w, opts...)
+	})
 }
 
 // ExportTable writes the step summary table to path in the given format.
-func (r WorkflowReport) ExportTable(path string, format output.Format, opts output.RenderOptions) error {
+// See WriteTable for column-selection options via tableOpts.
+func (r WorkflowReport) ExportTable(
+	path string, format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
+) error {
 	return writeToFile(path, func(w io.Writer) error {
-		return r.WriteTable(w, format, opts)
+		return r.WriteTable(w, format, opts, tableOpts...)
 	})
 }
 

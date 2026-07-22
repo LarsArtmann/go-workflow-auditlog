@@ -305,10 +305,10 @@ func FuzzDiagramSanitization_MultiStep(f *testing.F) {
 			write    func(io.Writer) error
 			mustHave string
 		}{
-			{"mermaid", report.WriteMermaid, "flowchart TD"},
-			{"plantuml", report.WritePlantUML, ""},
-			{"dot", report.WriteGraphviz, "digraph"},
-			{"d2", report.WriteD2, "fuzz-multi"},
+			{"mermaid", func(w io.Writer) error { return report.WriteMermaid(w) }, "flowchart TD"},
+			{"plantuml", func(w io.Writer) error { return report.WritePlantUML(w) }, ""},
+			{"dot", func(w io.Writer) error { return report.WriteGraphviz(w) }, "digraph"},
+			{"d2", func(w io.Writer) error { return report.WriteD2(w) }, "fuzz-multi"},
 		}
 
 		for _, fm := range formats {

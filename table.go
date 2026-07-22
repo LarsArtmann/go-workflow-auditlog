@@ -3,7 +3,6 @@ package auditlog
 import (
 	"fmt"
 	"io"
-	"strconv"
 	"strings"
 
 	"github.com/larsartmann/go-output"
@@ -15,33 +14,36 @@ import (
 )
 
 // buildTableData converts a WorkflowReport into go-output Table.
-// Columns: Step, Status, Duration, Attempts, Retry, Timeout, Error.
-func (r WorkflowReport) buildTableData() *output.Table {
-	data := output.NewTable([]string{"Step", "Status", "Duration", "Attempts", "Retry", "Timeout", "Error"})
+// When columns is empty, DefaultTableColumns is used.
+func (r WorkflowReport) buildTableData(columns []TableColumn) *output.Table {
+	if len(columns) == 0 {
+		columns = DefaultTableColumns
+	}
+
+	headers := make([]string, 0, len(columns))
+	for _, col := range columns {
+		def, ok := columnDefs[col]
+		if !ok {
+			continue
+		}
+
+		headers = append(headers, def.header)
+	}
+
+	data := output.NewTable(headers)
 
 	for _, step := range r.Steps {
-		errStr := ""
-		if step.Error != nil {
-			errStr = *step.Error
+		row := make([]string, 0, len(columns))
+		for _, col := range columns {
+			def, ok := columnDefs[col]
+			if !ok {
+				continue
+			}
+
+			row = append(row, def.extract(step))
 		}
 
-		durStr := ""
-		if step.DurationMs != nil && *step.DurationMs > 0 {
-			durStr = fmt.Sprintf("%.2fms", *step.DurationMs)
-		}
-
-		retryStr := strconv.FormatBool(step.HasRetry)
-		timeoutStr := strconv.FormatBool(step.HasTimeout)
-
-		data.AddRow([]string{
-			step.Name,
-			string(step.Status),
-			durStr,
-			strconv.Itoa(step.AttemptCount),
-			retryStr,
-			timeoutStr,
-			errStr,
-		})
+		data.AddRow(row)
 	}
 
 	return data
@@ -54,8 +56,18 @@ func (r WorkflowReport) buildTableData() *output.Table {
 //
 // The opts parameter controls color mode, title, and output destination.
 // Pass output.RenderOptions{} for defaults.
-func (r WorkflowReport) WriteTable(writer io.Writer, format output.Format, opts output.RenderOptions) error {
-	data := r.buildTableData()
+//
+// The tableOpts parameter controls which columns appear. By default all 7
+// standard columns are shown; use WithColumns to customize:
+//
+//	r.WriteTable(w, output.FormatCSV, output.RenderOptions{},
+//	    auditlog.WithColumns(auditlog.ColumnStep, auditlog.ColumnStatus))
+func (r WorkflowReport) WriteTable(
+	writer io.Writer, format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
+) error {
+	cfg := applyTableOpts(tableOpts)
+
+	data := r.buildTableData(cfg.columns)
 
 	opts.Writer = writer
 
@@ -68,11 +80,13 @@ func (r WorkflowReport) WriteTable(writer io.Writer, format output.Format, opts 
 }
 
 // WriteTableString returns the step summary table as a string in the
-// specified format. See WriteTable for supported formats.
-func (r WorkflowReport) WriteTableString(format output.Format, opts output.RenderOptions) (string, error) {
+// specified format. See WriteTable for supported formats and options.
+func (r WorkflowReport) WriteTableString(
+	format output.Format, opts output.RenderOptions, tableOpts ...TableOption,
+) (string, error) {
 	var buf strings.Builder
 
-	err := r.WriteTable(&buf, format, opts)
+	err := r.WriteTable(&buf, format, opts, tableOpts...)
 	if err != nil {
 		return "", err
 	}
