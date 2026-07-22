@@ -6,8 +6,8 @@ import (
 
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
-	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 func TestTable_DefaultColumns(t *testing.T) {
@@ -35,7 +35,7 @@ func TestTable_CustomColumnSelection(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "custom-col-step")
 
-	out, err := viz.WriteTableString(a.Report(), 
+	out, err := viz.WriteTableString(a.Report(),
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
@@ -71,7 +71,7 @@ func TestTable_NewColumns(t *testing.T) {
 	testhelpers.AddLinearChain(w, fetch, transform, save)
 	testhelpers.RunWorkflow(t, a, w)
 
-	out, err := viz.WriteTableString(a.Report(), 
+	out, err := viz.WriteTableString(a.Report(),
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnType, viz.ColumnDependencies),
 	)
@@ -93,7 +93,7 @@ func TestTable_ColumnOrderRespected(t *testing.T) {
 	a := testhelpers.RunSingleSucceed(t, "order-step")
 
 	// Reverse the natural order: Status, then Step.
-	out, err := viz.WriteTableString(a.Report(), 
+	out, err := viz.WriteTableString(a.Report(),
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStatus, viz.ColumnStep),
 	)
@@ -126,7 +126,7 @@ func TestTable_AllColumns(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "all-cols-step")
 
-	out, err := viz.WriteTableString(a.Report(), 
+	out, err := viz.WriteTableString(a.Report(),
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.AllTableColumns()...),
 	)
@@ -149,7 +149,7 @@ func TestTable_MaxAttemptsColumn(t *testing.T) {
 	testhelpers.AddRetryStep(w, step, 5)
 	testhelpers.RunWorkflow(t, a, w)
 
-	out, err := viz.WriteTableString(a.Report(), 
+	out, err := viz.WriteTableString(a.Report(),
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnMaxAttempts),
 	)
@@ -231,7 +231,7 @@ func TestTable_ColumnsFromReplayedReport(t *testing.T) {
 		t.Fatalf("ReplayEvents error: %v", err)
 	}
 
-	out, err := viz.WriteTableString(replayed, 
+	out, err := viz.WriteTableString(replayed,
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnDependencies),
 	)
@@ -294,7 +294,7 @@ func TestTable_ZeroDurationCell(t *testing.T) {
 		},
 	}
 
-	out, err := viz.WriteTableString(report, 
+	out, err := viz.WriteTableString(report,
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnDuration),
 	)

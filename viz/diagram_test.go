@@ -8,8 +8,8 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
-	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 func TestMermaid_BasicDAG(t *testing.T) {

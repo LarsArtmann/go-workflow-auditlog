@@ -8,8 +8,8 @@ import (
 	"unicode/utf8"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
-	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 // FuzzDiagramSpecialChars fuzzes diagram export (Mermaid, PlantUML, DOT, D2)

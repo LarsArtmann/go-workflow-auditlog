@@ -8,8 +8,8 @@ import (
 
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
-	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 // errWriteFail is the sentinel error returned by failingWriter.

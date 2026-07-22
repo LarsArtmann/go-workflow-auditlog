@@ -6,8 +6,8 @@ import (
 
 	flow "github.com/Azure/go-workflow"
 	"github.com/larsartmann/go-output"
-	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 // --- Mermaid Direction Tests ---

@@ -10,8 +10,8 @@ import (
 	flow "github.com/Azure/go-workflow"
 	"github.com/larsartmann/go-output"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
-	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
+	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
 // addSucceedSteps appends n identical succeeding steps named "step-<j>" to the
@@ -292,7 +292,7 @@ func ExampleWriteTable() {
 		},
 	}
 
-	out, _ := viz.WriteTableString(report, 
+	out, _ := viz.WriteTableString(report,
 		output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
@@ -314,7 +314,7 @@ func ExampleWriteMermaid() {
 		},
 	}
 
-	out, _ := viz.WriteMermaidString(report, 
+	out, _ := viz.WriteMermaidString(report,
 		viz.WithDirection(output.DirectionRight),
 	)
 
