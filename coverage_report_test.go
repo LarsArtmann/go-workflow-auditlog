@@ -273,7 +273,7 @@ func TestCoverage_Report_WriteJSON_ErrorPath(t *testing.T) {
 	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
-	writer := &failingWriter{}
+	writer := &testhelpers.FailingWriter{}
 
 	err := report.WriteJSON(writer)
 	if err == nil {
@@ -306,10 +306,4 @@ func namesFromSteps(steps []auditlog.StepInfo) []string {
 	}
 
 	return names
-}
-
-type failingWriter struct{}
-
-func (f *failingWriter) Write(_ []byte) (int, error) {
-	return 0, errors.New("write failed")
 }
