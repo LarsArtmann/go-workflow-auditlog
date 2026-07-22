@@ -52,6 +52,14 @@ cover.html
 # Audit exports (from example/demo)
 audit-report.json
 audit-events.ndjson
+dashboard.html
+steps-compact.md
+steps.csv
+tree.txt
+dag.d2
+dag.dot
+dag.mmd
+dag.puml
 # Sensitive files
 *.db
 reports/
