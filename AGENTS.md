@@ -56,6 +56,7 @@ loader.go          — LoadReport / LoadReportFromReader / LoadReportFromBytes +
 export.go          — NDJSON writer (writeEventsNDJSON internal helper)
 ndjson.go          — ReadEvents NDJSON reader (sentinel errors, enum validation on ingest)
 replay.go          — ReplayEvents: reconstruct Report from event stream (uses stepCore from step.go, preserves RunID + assigns StepIDs)
+stream.go          — NDJSONStreamer: real-time streaming NDJSON writer (thread-safe OnEvent callback, WithAutoFlush, CreateNDJSONStreamer)
 classify.go        — Error classification: RegisterClassifications() + ErrorClassifications() map sentinel errors → go-error-family Family
 helpers.go         — Utility helpers: CheckNoClobber, HasPointerAddress, NameCollisions + ErrFileExists sentinel + WriteToFile (atomic temp+rename export helper)
 testhelpers/     — Exported test fixtures, step constructors, and assertions shared by both modules
