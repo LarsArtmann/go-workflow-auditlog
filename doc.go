@@ -2,7 +2,8 @@
 //
 // It records every step execution event — attempts, retries, durations, errors,
 // dependencies, and final statuses — with timestamped events and export to JSON
-// and NDJSON.
+// and NDJSON. For real-time monitoring, [NDJSONStreamer] writes events as NDJSON
+// the moment they are captured, without buffering the entire run in memory.
 //
 // # Quick start
 //

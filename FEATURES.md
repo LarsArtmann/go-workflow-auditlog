@@ -33,6 +33,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-13.
 - **`ReplayEvents()`** — reconstruct report from flat NDJSON event stream
 - **`LoadReport()` / `LoadReportFromReader()` / `LoadReportFromBytes()`**
 - **`ReadEvents()`** — NDJSON reader (inverse of WriteNDJSON)
+- **Streaming NDJSON** (`NDJSONStreamer` in `stream.go`) — real-time event streaming via `Config.OnEvent`; thread-safe mutex-protected writes, 64KB default buffer (configurable via `WithBufferSize`), `WithAutoFlush()` for tailing, `CreateNDJSONStreamer(path)` file convenience constructor, first-error-wins error handling. Output is `ReadEvents`-compatible.
 
 ### Error Classification
 
@@ -124,6 +125,5 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ## PLANNED (see TODO_LIST.md and ROADMAP.md)
 
 - Make heavy deps optional (split into core + visualization sub-modules, or build tags)
-- Streaming NDJSON export (write events as captured, not buffered)
 - OpenTelemetry span bridge
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
