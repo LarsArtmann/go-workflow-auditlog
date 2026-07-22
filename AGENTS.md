@@ -170,43 +170,42 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 
 | Helper                           | Purpose                                                                                 |
 | -------------------------------- | --------------------------------------------------------------------------------------- |
-| `mustNew`, `newAuditAndWorkflow` | Construct auditor + workflow fixtures                                                   |
-| `retryOpts`, `addRetryStep`      | Wrap a step with retry config (fresh backoff)                                           |
-| `addParallelSteps`               | Wire two independent steps (no dependency edge)                                         |
-| `addSlowParallelSteps`           | Wire two parallel slow steps of the same duration                                       |
-| `addDependentStep`               | Wire a parent→child dependency chain                                                    |
-| `addLinearChain`                 | Wire a 3-step linear chain (`a → b → c`)                                                |
-| `runSingleSucceed`               | Run minimal single-succeed-step workflow (auditor + wf + step + Attach + Do + Snapshot) |
-| `runSingleSucceedWithBuffer`     | `runSingleSucceed` + fresh `*strings.Builder` for `Write*`-into-buffer tests            |
-| `runWorkflow`                    | `Attach` + `Do` + `Snapshot` in one call                                                |
-| `singleSucceedExportPath`        | `runSingleSucceed` + `t.TempDir`-anchored path for `Export*` tests                      |
-| `findStep`, `assertReportValid`  | Step lookup + structural validation                                                     |
-| `assertStepCount`                | Required step count (uses `Fatalf` to stop on mismatch)                                 |
-| `assertEventCount`               | Required event count (`Errorf` — multiple counts may co-fail)                           |
-| `assertCount(name, got, want)`   | Generic named-count assertion                                                           |
-| `assertWorkflowID`               | Required WorkflowID                                                                     |
-| `assertAttemptCount`             | Required attempt count for a StepInfo                                                   |
-| `assertStatus`                   | Required status for a StepInfo                                                          |
-| `assertFirstStepName`            | Required name of `report.Steps[0]`                                                      |
-| `assertContains`                 | `strings.Contains` check with custom failure message                                    |
-| `assertEventsRecorded`           | `a.EventsCount() >= want` (loose event-count check)                                     |
+| `NewSucceed`, `NewFail`, `NewFlaky`, `NewSlow` | Construct test step instances                                                |
+| `SucceedStep`, `FailStep`, `FlakyStep`, `SlowStep` | Test step types exported for direct use in tests                        |
+| `StepFixture`                    | Build a minimal `auditlog.StepInfo` for visualization/table tests                       |
+| `RetryOpts`                      | Build retry config with a fresh backoff instance                                        |
+| `AddRetryStep`                   | Wrap a step with retry config (fresh backoff)                                           |
+| `AddSingleStep`                  | Wire a single succeed step into a workflow                                              |
+| `RunSingleSucceed`               | Run minimal single-succeed-step workflow (auditor + wf + step + Attach + Do + Snapshot) |
+| `RunSingleSucceedWithBuffer`     | `RunSingleSucceed` + fresh `*strings.Builder` for `Write*`-into-buffer tests            |
+| `RunWorkflow`                    | `Attach` + `Do` + `Snapshot` in one call                                                |
+| `SingleSucceedExportPath`        | `RunSingleSucceed` + `t.TempDir`-anchored path for `Export*` tests                      |
+| `FindStep`, `AssertReportValid`  | Step lookup + structural validation                                                     |
+| `AssertStepCount`                | Required step count (uses `Fatalf` to stop on mismatch)                                 |
+| `AssertEventCount`               | Required event count (`Errorf` — multiple counts may co-fail)                           |
+| `AssertCount(name, got, want)`   | Generic named-count assertion                                                           |
+| `AssertWorkflowID`               | Required WorkflowID                                                                     |
+| `AssertAttemptCount`             | Required attempt count for a StepInfo                                                   |
+| `AssertStatus`                   | Required status for a StepInfo                                                          |
+| `AssertFirstStepName`            | Required name of `report.Steps[0]`                                                      |
+| `AssertContains`                 | `strings.Contains` check with custom failure message                                    |
 
 ### Duplicate-code policy
 
 - Run `art-dupl --semantic --sort total-tokens -t 15` to find clones.
 - Goal is **zero harmful duplication**, not zero report lines. Some
-  signature-only matches (e.g. multiple `assert*(t, report, want)` helpers
+  signature-only matches (e.g. multiple `Assert*(t, report, want)` helpers
   sharing the same parameter shape) are intentional: each helper asserts a
   different field with different semantics and merging would harm clarity.
 - Production-code duplication is never acceptable: extract helpers (see
-  `sortByName`, `sortStepsByName`, `diffStep`, `writeGraph`).
+  `sortByName`, `sortStepsByName`, `diffStep`, `writeGraph` in `viz/render.go`).
 - **Current state**: zero clone groups at any threshold from `-t 3` through
-  `-t 30` (production code extracted via `writeGraph` in `render.go`; test
+  `-t 30` (production code extracted via `writeGraph` in `viz/render.go`; test
   `Write*`-into-buffer preamble extracted via
-  `runSingleSucceedWithBuffer` in `auditlog_test.go`, eliminating the
+  `RunSingleSucceedWithBuffer` in `testhelpers`, eliminating the
   23-occurrence `t.Parallel + runSingleSucceed + var buf strings.Builder`
   clone group that previously appeared at `-t 3`; test `Export*` preamble
-  extracted via `singleSucceedExportPath` in `auditlog_test.go`). The
+  extracted via `SingleSucceedExportPath` in `testhelpers`). The
   formerly-documented "ten acceptable clones" section below was retired
   when the refactor landed — those patterns no longer appear in the
   report.
