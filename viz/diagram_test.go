@@ -151,7 +151,7 @@ func TestExportMermaid(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-mmd", "dag.mmd")
 
-	err := viz.ExportMermaid(a, path)
+	err := viz.ExportMermaid(a.Report(), path)
 	if err != nil {
 		t.Fatalf("ExportMermaid error: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestExportPlantUML(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-puml", "dag.puml")
 
-	err := viz.ExportPlantUML(a, path)
+	err := viz.ExportPlantUML(a.Report(), path)
 	if err != nil {
 		t.Fatalf("ExportPlantUML error: %v", err)
 	}
@@ -232,7 +232,7 @@ func TestExportGraphviz(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-dot", "dag.dot")
 
-	err := viz.ExportGraphviz(a, path)
+	err := viz.ExportGraphviz(a.Report(), path)
 	if err != nil {
 		t.Fatalf("ExportGraphviz error: %v", err)
 	}
@@ -272,7 +272,7 @@ func TestWriteMermaidString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "string-step")
 
-	output, err := viz.WriteMermaidString(a.Report(), )
+	output, err := viz.WriteMermaidString(a.Report())
 	// WriteMermaidString currently wraps nil errors; verify the output is usable.
 	_ = err
 
@@ -284,7 +284,7 @@ func TestWriteGraphvizString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "string-step")
 
-	output, err := viz.WriteGraphvizString(a.Report(), )
+	output, err := viz.WriteGraphvizString(a.Report())
 	if err != nil {
 		t.Fatalf("WriteGraphvizString error: %v", err)
 	}
@@ -297,7 +297,7 @@ func TestWritePlantUMLString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "plantuml-step")
 
-	output, err := viz.WritePlantUMLString(a.Report(), )
+	output, err := viz.WritePlantUMLString(a.Report())
 	if err != nil {
 		t.Fatalf("WritePlantUMLString error: %v", err)
 	}

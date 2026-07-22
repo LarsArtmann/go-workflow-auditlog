@@ -165,7 +165,7 @@ func TestTable_ColumnsOnAuditor(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "auditor-col-step")
 
-	err := viz.WriteTable(a, buf, output.FormatCSV, output.RenderOptions{},
+	err := viz.WriteTable(a.Report(), buf, output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
 	if err != nil {
@@ -182,7 +182,7 @@ func TestTable_ExportWithColumns(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "table-cols-export", "table.csv")
 
-	err := viz.ExportTable(a, path, output.FormatCSV, output.RenderOptions{},
+	err := viz.ExportTable(a.Report(), path, output.FormatCSV, output.RenderOptions{},
 		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus),
 	)
 	if err != nil {

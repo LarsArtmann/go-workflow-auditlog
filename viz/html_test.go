@@ -97,7 +97,7 @@ func TestWriteHTMLString_ReturnsContent(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "only-step")
 
-	output, err := viz.WriteHTMLString(a.Report(), )
+	output, err := viz.WriteHTMLString(a.Report())
 	if err != nil {
 		t.Fatalf("WriteHTMLString error: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestAuditor_WriteHTML_DelegatesToReport(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "delegate-step")
 
-	err := viz.WriteHTML(a, buf)
+	err := viz.WriteHTML(a.Report(), buf)
 	if err != nil {
 		t.Fatalf("Auditor.WriteHTML error: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestAuditor_ExportHTML_DelegatesToReport(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "auditor-export", "auditor-report.html")
 
-	err := viz.ExportHTML(a, path)
+	err := viz.ExportHTML(a.Report(), path)
 	if err != nil {
 		t.Fatalf("Auditor.ExportHTML error: %v", err)
 	}
@@ -173,7 +173,7 @@ func TestAuditor_WriteHTMLString_DelegatesToReport(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "string-delegate")
 
-	output, err := viz.WriteHTMLString(a, )
+	output, err := viz.WriteHTMLString(a.Report())
 	if err != nil {
 		t.Fatalf("Auditor.WriteHTMLString error: %v", err)
 	}

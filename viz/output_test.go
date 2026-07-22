@@ -103,7 +103,7 @@ func TestWriteD2String(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "d2-string")
 
-	output, err := viz.WriteD2String(a.Report(), )
+	output, err := viz.WriteD2String(a.Report())
 	if err != nil {
 		t.Fatalf("WriteD2String error: %v", err)
 	}
@@ -116,7 +116,7 @@ func TestExportD2(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-d2", "dag.d2")
 
-	err := viz.ExportD2(a, path)
+	err := viz.ExportD2(a.Report(), path)
 	if err != nil {
 		t.Fatalf("ExportD2 error: %v", err)
 	}
@@ -223,7 +223,7 @@ func TestExportTable(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-table", "report.csv")
 
-	err := viz.ExportTable(a, path, output.FormatCSV, output.RenderOptions{})
+	err := viz.ExportTable(a.Report(), path, output.FormatCSV, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("ExportTable error: %v", err)
 	}
@@ -274,7 +274,7 @@ func TestWriteTreeString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "tree-string")
 
-	output, err := viz.WriteTreeString(a.Report(), )
+	output, err := viz.WriteTreeString(a.Report())
 	if err != nil {
 		t.Fatalf("WriteTreeString error: %v", err)
 	}
@@ -310,7 +310,7 @@ func TestWriteHTMLTreeString(t *testing.T) {
 
 	a := testhelpers.RunSingleSucceed(t, "html-tree-string")
 
-	output, err := viz.WriteHTMLTreeString(a.Report(), )
+	output, err := viz.WriteHTMLTreeString(a.Report())
 	if err != nil {
 		t.Fatalf("WriteHTMLTreeString error: %v", err)
 	}
@@ -323,7 +323,7 @@ func TestExportTree(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-tree", "tree.txt")
 
-	err := viz.ExportTree(a, path)
+	err := viz.ExportTree(a.Report(), path)
 	if err != nil {
 		t.Fatalf("ExportTree error: %v", err)
 	}
@@ -334,7 +334,7 @@ func TestExportHTMLTree(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-html-tree", "tree.html")
 
-	err := viz.ExportHTMLTree(a, path)
+	err := viz.ExportHTMLTree(a.Report(), path)
 	if err != nil {
 		t.Fatalf("ExportHTMLTree error: %v", err)
 	}
@@ -399,10 +399,10 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 		name string
 		fn   func() (string, error)
 	}{
-		{"Mermaid", func() (string, error) { return viz.WriteMermaidString(a, ) }},
-		{"PlantUML", func() (string, error) { return viz.WritePlantUMLString(a, ) }},
-		{"Graphviz", func() (string, error) { return viz.WriteGraphvizString(a, ) }},
-		{"D2", func() (string, error) { return viz.WriteD2String(a, ) }},
+		{"Mermaid", func() (string, error) { return viz.WriteMermaidString(a.Report()) }},
+		{"PlantUML", func() (string, error) { return viz.WritePlantUMLString(a.Report()) }},
+		{"Graphviz", func() (string, error) { return viz.WriteGraphvizString(a.Report()) }},
+		{"D2", func() (string, error) { return viz.WriteD2String(a.Report()) }},
 		{"Tree", a.WriteTreeString},
 		{"HTMLTree", a.WriteHTMLTreeString},
 		{"HTML", a.WriteHTMLString},
@@ -422,7 +422,7 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 	}
 
 	// Table string variant needs format + opts.
-	tableOut, err := viz.WriteTableString(a, output.FormatMarkdown, output.RenderOptions{})
+	tableOut, err := viz.WriteTableString(a.Report(), output.FormatMarkdown, output.RenderOptions{})
 	if err != nil {
 		t.Fatalf("WriteTableString error: %v", err)
 	}

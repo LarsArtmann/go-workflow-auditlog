@@ -223,7 +223,7 @@ func TestAuditor_WriteMermaidWithDirection(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "aud-mmd-lr")
 
-	err := viz.WriteMermaid(a, buf, viz.WithDirection(output.DirectionRight))
+	err := viz.WriteMermaid(a.Report(), buf, viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("Auditor.WriteMermaid error: %v", err)
 	}
@@ -236,7 +236,7 @@ func TestAuditor_WriteGraphvizWithDirection(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "aud-gv-lr")
 
-	err := viz.WriteGraphviz(a, buf, viz.WithDirection(output.DirectionRight))
+	err := viz.WriteGraphviz(a.Report(), buf, viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("Auditor.WriteGraphviz error: %v", err)
 	}
@@ -251,7 +251,7 @@ func TestExportMermaidWithDirection(t *testing.T) {
 
 	a, path := testhelpers.SingleSucceedExportPath(t, "export-mmd-lr", "dag.mmd")
 
-	err := viz.ExportMermaid(a, path, viz.WithDirection(output.DirectionRight))
+	err := viz.ExportMermaid(a.Report(), path, viz.WithDirection(output.DirectionRight))
 	if err != nil {
 		t.Fatalf("ExportMermaid error: %v", err)
 	}
@@ -324,7 +324,7 @@ func TestWriteD2String_ErrorPath(t *testing.T) {
 
 	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "d2-err-step")
 
-	_, err := viz.WriteD2String(a.Report(), )
+	_, err := viz.WriteD2String(a.Report())
 	if err != nil {
 		t.Fatalf("WriteD2String should succeed for valid report, got: %v", err)
 	}
@@ -335,7 +335,7 @@ func TestWritePlantUMLString_ErrorPath(t *testing.T) {
 
 	a, _ := testhelpers.RunSingleSucceedWithBuffer(t, "puml-err-step")
 
-	_, err := viz.WritePlantUMLString(a.Report(), )
+	_, err := viz.WritePlantUMLString(a.Report())
 	if err != nil {
 		t.Fatalf("WritePlantUMLString should succeed for valid report, got: %v", err)
 	}

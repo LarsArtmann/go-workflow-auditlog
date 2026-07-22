@@ -108,7 +108,9 @@ func TestNew_InitialEventCapacity(t *testing.T) {
 	w.Add(flow.Step(s))
 	testhelpers.RunWorkflow(t, a, w)
 
-	assertEventsRecorded(t, a, 2)
+	if a.EventsCount() < 2 {
+		t.Errorf("expected at least 2 events, got %d", a.EventsCount())
+	}
 }
 
 // --- Nil safety tests ---
