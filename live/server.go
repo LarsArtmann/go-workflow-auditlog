@@ -3,10 +3,12 @@ package live
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"net/http"
 	"time"
+
+	"encoding/json/jsontext"
 
 	corelive "github.com/larsartmann/auditlog-core/live"
 	"github.com/larsartmann/go-output/daghtml"
@@ -139,10 +141,10 @@ func makeReportProvider(auditor *auditlog.Auditor) corelive.ReportProvider {
 
 		var buf bytes.Buffer
 
-		encoder := json.NewEncoder(&buf)
+		encoder := jsontext.NewEncoder(&buf)
 		encoder.SetIndent("", "  ")
 
-		err := encoder.Encode(report)
+		err := json.MarshalEncode(encoder, report)
 		if err != nil {
 			return nil, fmt.Errorf("encode report: %w", err)
 		}
@@ -152,7 +154,7 @@ func makeReportProvider(auditor *auditlog.Auditor) corelive.ReportProvider {
 }
 
 func makeSnapshotProvider(auditor *auditlog.Auditor) corelive.SnapshotProvider {
-	return func(isComplete bool) (json.RawMessage, error) {
+	return func(isComplete bool) (jsontext.Value, error) {
 		report := auditor.Report()
 		events := auditor.Events()
 
@@ -169,7 +171,7 @@ func makeSnapshotProvider(auditor *auditlog.Auditor) corelive.SnapshotProvider {
 }
 
 func makeCompleteProvider(auditor *auditlog.Auditor) corelive.CompleteProvider {
-	return func() (json.RawMessage, error) {
+	return func() (jsontext.Value, error) {
 		report := auditor.Report()
 
 		data := completeData{

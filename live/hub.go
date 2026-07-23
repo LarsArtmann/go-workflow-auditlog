@@ -1,7 +1,7 @@
 package live
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"sync"
 
 	corelive "github.com/larsartmann/auditlog-core/live"
