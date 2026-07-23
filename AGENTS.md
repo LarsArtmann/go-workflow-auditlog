@@ -44,6 +44,17 @@ The project is split into three Go modules:
    real-time HTTP dashboard with Server-Sent Events (SSE) streaming. Steps light up as they execute,
    the DAG graph snaps into place on completion. Depends on both core and viz.
 
+### Shared infrastructure: `auditlog-core`
+
+The `live/` module depends on [`github.com/larsartmann/auditlog-core`](https://github.com/larsartmann/auditlog-core),
+a zero-dependency library that provides the domain-agnostic SSE hub, HTTP server skeleton, and
+atomic file-write helpers. The live module wraps `corelive.Hub` and `corelive.Server` with
+go-workflow-specific domain logic (event types, report structure, dashboard HTML).
+
+A `go.work` workspace at the parent directory links all three projects for local development.
+The `replace` directives in `go.mod` files will be removed once `auditlog-core` is published
+with a stable tag.
+
 ### Core module source files
 
 ```
