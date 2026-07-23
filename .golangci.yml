@@ -136,8 +136,6 @@ linters:
             - $gostd
             - github.com/Azure/go-workflow
             - github.com/cenkalti/backoff/v4
-            - github.com/larsartmann/auditlog-core
-            - github.com/larsartmann/auditlog-core/live
             - github.com/larsartmann/go-atomic-write
             - github.com/larsartmann/go-ndjson
             - github.com/larsartmann/go-ndjson
@@ -153,6 +151,7 @@ linters:
             - github.com/larsartmann/go-output/table
             - github.com/larsartmann/go-output/tree
             - github.com/larsartmann/go-error-family
+            - github.com/larsartmann/go-sse
             - github.com/larsartmann/go-workflow-auditlog
             - github.com/larsartmann/go-workflow-auditlog/viz
             - github.com/larsartmann/go-workflow-auditlog/live
@@ -234,9 +233,9 @@ linters:
     wrapcheck:
       ignore-package-globs:
         - github.com/larsartmann/go-workflow-auditlog
-        - github.com/larsartmann/auditlog-core/live
-            - github.com/larsartmann/go-atomic-write
-            - github.com/larsartmann/go-ndjson
+        - github.com/larsartmann/go-sse
+        - github.com/larsartmann/go-atomic-write
+        - github.com/larsartmann/go-ndjson
       ignore-sigs:
         - .Errorf(
         - errors.New(

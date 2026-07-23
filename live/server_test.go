@@ -23,6 +23,9 @@ func newTestServer(t *testing.T) *live.Server {
 		Enabled: true,
 		OnEvent: hub.OnEvent,
 	})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
 
 	server := live.NewServer(hub, auditor, live.Config{})
 
