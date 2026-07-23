@@ -5,19 +5,27 @@ import (
 	"context"
 	"encoding/json/jsontext"
 	"encoding/json/v2"
+	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
-	corelive "github.com/larsartmann/auditlog-core/live"
 	"github.com/larsartmann/go-output/daghtml"
+	"github.com/larsartmann/go-sse"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
+const (
+	defaultReadHeaderTimeout = 5 * time.Second
+	defaultHeartbeatInterval = 15 * time.Second
+	defaultAddr              = ":0"
+)
+
 // ErrServerAlreadyRunning is returned when ListenAndServe is called on a
 // server that is already serving.
-var ErrServerAlreadyRunning = corelive.ErrServerAlreadyRunning
+var ErrServerAlreadyRunning = errors.New("live server is already running")
 
 // Config controls the live dashboard server behaviour.
 type Config struct {
@@ -30,6 +38,28 @@ type Config struct {
 	// Default 15 seconds. Set to 0 to disable heartbeats.
 	HeartbeatInterval time.Duration
 }
+
+// ReportProvider returns the current report as JSON bytes.
+type ReportProvider func() ([]byte, error)
+
+// SnapshotProvider returns the initial SSE snapshot payload as raw JSON.
+type SnapshotProvider func(isComplete bool) (jsontext.Value, error)
+
+// CompleteProvider returns the final SSE complete payload as raw JSON.
+type CompleteProvider func() (jsontext.Value, error)
+
+// DashboardProvider returns the full HTML string for the dashboard page.
+type DashboardProvider func() string
+
+// HealthInfo provides dynamic health check data beyond the built-in
+// uptime, client count, and completion status.
+type HealthInfo struct {
+	Events  int   `json:"events"`
+	Dropped int64 `json:"dropped"`
+}
+
+// HealthProvider returns additional health check information.
+type HealthProvider func() HealthInfo
 
 // snapshotData is the payload sent as the initial SSE event.
 type snapshotData struct {
@@ -48,16 +78,28 @@ type completeData struct {
 
 // Server serves the real-time workflow dashboard over HTTP.
 type Server struct {
-	core    *corelive.Server
-	hub     *Hub
-	auditor *auditlog.Auditor
+	hub    *Hub
+	config Config
+
+	serverMu   sync.Mutex
+	httpServer *http.Server
+	mux        *http.ServeMux
+
+	reportProvider    ReportProvider
+	snapshotProvider  SnapshotProvider
+	completeProvider  CompleteProvider
+	dashboardProvider DashboardProvider
+	healthProvider    HealthProvider
+
+	dashboardHTML string
+	startTime     time.Time
 }
 
 // New is the convenience constructor. It creates a Hub, wires it as the
 // auditlog OnEvent callback, creates the Auditor, and returns a ready-to-use
 // Server.
 func New(auditCfg auditlog.Config, serverCfg Config) (*Server, *auditlog.Auditor, error) {
-	hub := NewHub(nil)
+	hub := NewHub()
 
 	auditCfg.OnEvent = hub.OnEvent
 	auditCfg.Enabled = true
@@ -67,8 +109,6 @@ func New(auditCfg auditlog.Config, serverCfg Config) (*Server, *auditlog.Auditor
 		return nil, nil, fmt.Errorf("create auditor: %w", err)
 	}
 
-	hub.SetAuditor(auditor)
-
 	server := NewServer(hub, auditor, serverCfg)
 
 	return server, auditor, nil
@@ -76,32 +116,94 @@ func New(auditCfg auditlog.Config, serverCfg Config) (*Server, *auditlog.Auditor
 
 // NewServer creates a Server from an existing Hub and Auditor.
 func NewServer(hub *Hub, auditor *auditlog.Auditor, cfg Config) *Server {
-	srv := &Server{
-		hub:     hub,
-		auditor: auditor,
+	if cfg.Addr == "" {
+		cfg.Addr = defaultAddr
 	}
 
-	coreCfg := corelive.Config{
-		Addr:              cfg.Addr,
-		Prefix:            "/",
-		ReadHeaderTimeout: cfg.ReadHeaderTimeout,
-		HeartbeatInterval: cfg.HeartbeatInterval,
+	if cfg.ReadHeaderTimeout == 0 {
+		cfg.ReadHeaderTimeout = defaultReadHeaderTimeout
 	}
 
-	srv.core = corelive.New(hub.core, coreCfg,
-		corelive.WithReportProvider(makeReportProvider(auditor)),
-		corelive.WithSnapshotProvider(makeSnapshotProvider(auditor)),
-		corelive.WithCompleteProvider(makeCompleteProvider(auditor)),
-		corelive.WithDashboardProvider(renderDashboardHTML),
-		corelive.WithHealthProvider(makeHealthProvider(auditor)),
-	)
+	if cfg.HeartbeatInterval == 0 {
+		cfg.HeartbeatInterval = defaultHeartbeatInterval
+	}
+
+	srv := &Server{ //nolint:exhaustruct
+		hub:    hub,
+		config: cfg,
+		mux:    http.NewServeMux(),
+	}
+
+	srv.reportProvider = makeReportProvider(auditor)
+	srv.snapshotProvider = makeSnapshotProvider(auditor)
+	srv.completeProvider = makeCompleteProvider(auditor)
+	srv.dashboardProvider = renderDashboardHTML
+	srv.healthProvider = makeHealthProvider(auditor)
+	srv.dashboardHTML = renderDashboardHTML()
+
+	srv.setupRoutes()
 
 	return srv
 }
 
+func (srv *Server) setupRoutes() {
+	srv.mux.HandleFunc("/", srv.handleDashboard)
+	srv.mux.HandleFunc("/api/report", srv.handleReport)
+	srv.mux.HandleFunc("/api/events", srv.handleSSE)
+	srv.mux.HandleFunc("/api/health", srv.handleHealth)
+}
+
+// ListenAndServe starts the HTTP server.
+func (srv *Server) ListenAndServe() error {
+	srv.serverMu.Lock()
+
+	if srv.httpServer != nil {
+		srv.serverMu.Unlock()
+
+		return ErrServerAlreadyRunning
+	}
+
+	srv.startTime = time.Now()
+
+	srv.httpServer = &http.Server{ //nolint:exhaustruct // minimal config
+		Addr:              srv.config.Addr,
+		Handler:           srv.mux,
+		ReadHeaderTimeout: srv.config.ReadHeaderTimeout,
+	}
+
+	srv.serverMu.Unlock()
+
+	return fmt.Errorf("listen and serve: %w", srv.httpServer.ListenAndServe())
+}
+
+// Addr returns the server's listen address.
+func (srv *Server) Addr() string {
+	srv.serverMu.Lock()
+	defer srv.serverMu.Unlock()
+
+	if srv.httpServer == nil {
+		return srv.config.Addr
+	}
+
+	return srv.httpServer.Addr
+}
+
+// Shutdown gracefully shuts down the server.
+func (srv *Server) Shutdown(ctx context.Context) error {
+	srv.serverMu.Lock()
+	server := srv.httpServer
+	srv.serverMu.Unlock()
+
+	if server == nil {
+		return nil
+	}
+
+	return fmt.Errorf("shutdown: %w", server.Shutdown(ctx))
+}
+
 // SignalComplete marks the workflow as finished.
 func (srv *Server) SignalComplete() {
-	srv.core.SignalComplete()
+	srv.hub.SignalComplete()
 }
 
 // OnEvent broadcasts an event to all connected SSE clients.
@@ -111,30 +213,172 @@ func (srv *Server) OnEvent(evt auditlog.Event) {
 
 // ClientCount returns the number of currently connected SSE clients.
 func (srv *Server) ClientCount() int {
-	return srv.core.ClientCount()
+	return srv.hub.ClientCount()
 }
 
-// ServeHTTP implements http.Handler, delegating to the core server.
+// ServeHTTP implements http.Handler.
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	srv.core.ServeHTTP(w, r)
+	srv.mux.ServeHTTP(w, r)
 }
 
-// ListenAndServe starts the HTTP server.
-func (srv *Server) ListenAndServe() error {
-	return srv.core.ListenAndServe()
+// --- HTTP Handlers ---
+
+func (srv *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache")
+	_, _ = w.Write([]byte(srv.dashboardHTML))
 }
 
-// Addr returns the server's listen address.
-func (srv *Server) Addr() string {
-	return srv.core.Addr()
+func (srv *Server) handleReport(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-cache")
+
+	if srv.reportProvider == nil {
+		http.Error(w, "report provider not configured", http.StatusInternalServerError)
+
+		return
+	}
+
+	data, err := srv.reportProvider()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("generate report: %v", err), http.StatusInternalServerError)
+
+		return
+	}
+
+	_, _ = w.Write(data)
 }
 
-// Shutdown gracefully shuts down the server.
-func (srv *Server) Shutdown(ctx context.Context) error {
-	return srv.core.Shutdown(ctx)
+type healthResponse struct {
+	Status   string  `json:"status"`
+	UptimeS  float64 `json:"uptime_s"`
+	Clients  int     `json:"clients"`
+	Events   int     `json:"events"`
+	Complete bool    `json:"complete"`
+	Dropped  int64   `json:"dropped"`
 }
 
-func makeReportProvider(auditor *auditlog.Auditor) corelive.ReportProvider {
+func (srv *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	resp := healthResponse{
+		Status:   "ok",
+		UptimeS:  time.Since(srv.startTime).Seconds(),
+		Clients:  srv.hub.ClientCount(),
+		Complete: srv.hub.IsComplete(),
+	}
+
+	if srv.healthProvider != nil {
+		info := srv.healthProvider()
+		resp.Events = info.Events
+		resp.Dropped = info.Dropped
+	}
+
+	payload, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, "marshal health response", http.StatusInternalServerError)
+
+		return
+	}
+
+	_, _ = w.Write([]byte(payload))
+}
+
+func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "streaming not supported", http.StatusInternalServerError)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", sse.ContentType)
+	w.Header().Set("Cache-Control", "no-cache, no-transform")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
+
+	sub := srv.hub.Subscribe()
+	defer srv.hub.Unsubscribe(sub.id)
+
+	if err := srv.sendSnapshot(w, flusher); err != nil {
+		return
+	}
+
+	heartbeat := time.NewTicker(srv.config.HeartbeatInterval)
+	defer heartbeat.Stop()
+
+	ctx := r.Context()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+
+		case <-sub.done:
+			srv.sendComplete(w, flusher)
+
+			return
+
+		case evt := <-sub.ch:
+			if err := sse.WriteEvent(w, sse.Event{Event: "event", Data: string(evt)}); err != nil {
+				return
+			}
+
+			flusher.Flush()
+
+		case <-heartbeat.C:
+			if _, err := w.Write([]byte(": heartbeat\n\n")); err != nil {
+				return
+			}
+
+			flusher.Flush()
+		}
+	}
+}
+
+func (srv *Server) sendSnapshot(w http.ResponseWriter, flusher http.Flusher) error {
+	if srv.snapshotProvider == nil {
+		return nil
+	}
+
+	data, err := srv.snapshotProvider(srv.hub.IsComplete())
+	if err != nil {
+		return fmt.Errorf("build snapshot: %w", err)
+	}
+
+	if err := sse.WriteEvent(w, sse.Event{Event: "snapshot", Data: string(data)}); err != nil {
+		return err
+	}
+
+	flusher.Flush()
+
+	return nil
+}
+
+func (srv *Server) sendComplete(w http.ResponseWriter, flusher http.Flusher) {
+	if srv.completeProvider == nil {
+		return
+	}
+
+	data, err := srv.completeProvider()
+	if err != nil {
+		return
+	}
+
+	_ = sse.WriteEvent(w, sse.Event{Event: "complete", Data: string(data)})
+
+	flusher.Flush()
+}
+
+// --- Provider Factories ---
+
+func makeReportProvider(auditor *auditlog.Auditor) ReportProvider {
 	return func() ([]byte, error) {
 		report := auditor.Report()
 
@@ -151,7 +395,7 @@ func makeReportProvider(auditor *auditlog.Auditor) corelive.ReportProvider {
 	}
 }
 
-func makeSnapshotProvider(auditor *auditlog.Auditor) corelive.SnapshotProvider {
+func makeSnapshotProvider(auditor *auditlog.Auditor) SnapshotProvider {
 	return func(isComplete bool) (jsontext.Value, error) {
 		report := auditor.Report()
 		events := auditor.Events()
@@ -168,7 +412,7 @@ func makeSnapshotProvider(auditor *auditlog.Auditor) corelive.SnapshotProvider {
 	}
 }
 
-func makeCompleteProvider(auditor *auditlog.Auditor) corelive.CompleteProvider {
+func makeCompleteProvider(auditor *auditlog.Auditor) CompleteProvider {
 	return func() (jsontext.Value, error) {
 		report := auditor.Report()
 
@@ -181,9 +425,9 @@ func makeCompleteProvider(auditor *auditlog.Auditor) corelive.CompleteProvider {
 	}
 }
 
-func makeHealthProvider(auditor *auditlog.Auditor) corelive.HealthProvider {
-	return func() corelive.HealthInfo {
-		return corelive.HealthInfo{
+func makeHealthProvider(auditor *auditlog.Auditor) HealthProvider {
+	return func() HealthInfo {
+		return HealthInfo{
 			Events:  auditor.EventsCount(),
 			Dropped: auditor.DroppedEventCount(),
 		}

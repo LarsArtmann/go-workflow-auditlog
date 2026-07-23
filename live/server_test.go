@@ -17,17 +17,12 @@ import (
 func newTestServer(t *testing.T) *live.Server {
 	t.Helper()
 
-	hub := live.NewHub(nil)
+	hub := live.NewHub()
 
 	auditor, err := auditlog.New(auditlog.Config{
 		Enabled: true,
 		OnEvent: hub.OnEvent,
 	})
-	if err != nil {
-		t.Fatalf("create auditor: %v", err)
-	}
-
-	hub.SetAuditor(auditor)
 
 	server := live.NewServer(hub, auditor, live.Config{})
 
@@ -361,7 +356,7 @@ func TestServer_ClientCount(t *testing.T) {
 func TestHub_SubscribeUnsubscribe(t *testing.T) {
 	t.Parallel()
 
-	hub := live.NewHub(nil)
+	hub := live.NewHub()
 
 	sub := hub.Subscribe()
 	if sub == nil {
@@ -382,7 +377,7 @@ func TestHub_SubscribeUnsubscribe(t *testing.T) {
 func TestHub_OnEventDelivery(t *testing.T) {
 	t.Parallel()
 
-	hub := live.NewHub(nil)
+	hub := live.NewHub()
 
 	sub := hub.Subscribe()
 	defer hub.Unsubscribe(sub.ID())
@@ -416,7 +411,7 @@ func TestHub_OnEventDelivery(t *testing.T) {
 func TestHub_SignalComplete(t *testing.T) {
 	t.Parallel()
 
-	hub := live.NewHub(nil)
+	hub := live.NewHub()
 
 	sub := hub.Subscribe()
 	defer hub.Unsubscribe(sub.ID())
@@ -441,7 +436,7 @@ func TestHub_SignalComplete(t *testing.T) {
 func TestHub_NonBlockingOnFullBuffer(t *testing.T) {
 	t.Parallel()
 
-	hub := live.NewHub(nil)
+	hub := live.NewHub()
 
 	sub := hub.Subscribe()
 	defer hub.Unsubscribe(sub.ID())

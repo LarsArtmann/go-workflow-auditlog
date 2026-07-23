@@ -17,8 +17,6 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 )
 
-replace github.com/larsartmann/auditlog-core => ../auditlog-core
-
 replace github.com/larsartmann/go-ndjson => ../go-ndjson
 
 replace github.com/larsartmann/go-atomic-write => ../go-atomic-write

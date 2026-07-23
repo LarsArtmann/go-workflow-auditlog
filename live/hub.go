@@ -1,6 +1,7 @@
 package live
 
 import (
+	"encoding/json/jsontext"
 	"encoding/json/v2"
 	"sync"
 
@@ -15,7 +16,7 @@ const subscriberBufferSize = 128
 // Subscriber represents a single SSE client connection.
 type Subscriber struct {
 	id        uint64
-	ch        chan json.RawMessage
+	ch        chan jsontext.Value
 	done      chan struct{}
 	closeOnce sync.Once
 }
@@ -24,7 +25,7 @@ type Subscriber struct {
 func (s *Subscriber) ID() uint64 { return s.id }
 
 // Events returns the channel that receives broadcast events.
-func (s *Subscriber) Events() <-chan json.RawMessage { return s.ch }
+func (s *Subscriber) Events() <-chan jsontext.Value { return s.ch }
 
 // Done returns a channel that is closed when the lifecycle completes
 // or the subscriber is removed.
@@ -65,7 +66,7 @@ func (h *Hub) OnEvent(evt auditlog.Event) {
 
 // broadcast sends raw JSON to all connected subscribers. Non-blocking:
 // if a subscriber's buffer is full, the event is dropped for that subscriber.
-func (h *Hub) broadcast(data json.RawMessage) {
+func (h *Hub) broadcast(data jsontext.Value) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
@@ -87,7 +88,7 @@ func (h *Hub) Subscribe() *Subscriber {
 
 	sub := &Subscriber{ //nolint:exhaustruct
 		id:   subID,
-		ch:   make(chan json.RawMessage, subscriberBufferSize),
+		ch:   make(chan jsontext.Value, subscriberBufferSize),
 		done: make(chan struct{}),
 	}
 	h.clients[subID] = sub
