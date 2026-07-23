@@ -5,6 +5,7 @@ go 1.26.4
 require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/larsartmann/auditlog-core v0.0.0-00010101000000-000000000000
 	github.com/larsartmann/go-error-family v0.7.0
 )
 
