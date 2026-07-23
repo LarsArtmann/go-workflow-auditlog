@@ -1,12 +1,12 @@
 package auditlog
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"regexp"
+
+	"github.com/larsartmann/go-atomic-write"
 )
 
 // ErrFileExists is returned when a file already exists at the target path
@@ -72,59 +72,9 @@ func (r WorkflowReport) NameCollisions() []string {
 	return collisions
 }
 
-// WriteToFile creates a file at path and calls fn with a buffered writer.
-// The bufio.Writer batches small writes into 64KB blocks, reducing syscall count
-// by 10-100x compared to writing directly to os.File.
-//
-// Writes are atomic: data is written to a temporary file in the same directory,
-// then atomically renamed to the final path. A crash during write leaves the
-// previous file (if any) intact rather than a partial file.
+// WriteToFile creates a file at path and writes to it atomically via a
+// streaming callback. Delegates to go-atomic-write for TOCTOU-safe writes
+// with fsync durability and cross-platform atomic rename.
 func WriteToFile(path string, fn func(io.Writer) error) error {
-	dir := filepath.Dir(path)
-
-	tmpFile, err := os.CreateTemp(dir, ".tmp-auditlog-*")
-	if err != nil {
-		return fmt.Errorf("%w: create temp file in %q: %w", ErrExportWriteFailed, dir, err)
-	}
-
-	tmpPath := tmpFile.Name()
-	cleanup := true
-
-	defer func() {
-		if cleanup {
-			_ = os.Remove(tmpPath)
-		}
-	}()
-
-	bw := bufio.NewWriterSize(tmpFile, fileWriteBufferSize)
-
-	writeErr := fn(bw)
-
-	flushErr := bw.Flush()
-
-	closeErr := tmpFile.Close()
-
-	if writeErr != nil {
-		return writeErr
-	}
-
-	if flushErr != nil {
-		return fmt.Errorf("%w: flush temp file %q: %w", ErrExportWriteFailed, tmpPath, flushErr)
-	}
-
-	if closeErr != nil {
-		return fmt.Errorf("%w: close temp file %q: %w", ErrExportWriteFailed, tmpPath, closeErr)
-	}
-
-	renameErr := os.Rename(tmpPath, path)
-	if renameErr != nil {
-		return fmt.Errorf("%w: rename %q → %q: %w", ErrExportWriteFailed, tmpPath, path, renameErr)
-	}
-
-	cleanup = false
-
-	return nil
+	return atomicwrite.WriteFunc(path, fn, atomicwrite.Fingerprint{})
 }
-
-// fileWriteBufferSize is the bufio buffer size used for atomic file exports.
-const fileWriteBufferSize = 65536

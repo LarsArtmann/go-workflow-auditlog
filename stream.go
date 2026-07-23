@@ -80,7 +80,7 @@ func WithBufferSize(size int) NDJSONStreamerOption {
 func NewNDJSONStreamer(w io.Writer, opts ...NDJSONStreamerOption) *NDJSONStreamer {
 	s := &NDJSONStreamer{
 		writer:     w,
-		bufferSize: fileWriteBufferSize,
+		bufferSize: 65536, // 64KB — matches go-atomic-write's buffer size
 	}
 
 	for _, opt := range opts {
