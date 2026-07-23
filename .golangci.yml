@@ -138,6 +138,8 @@ linters:
             - github.com/cenkalti/backoff/v4
             - github.com/larsartmann/auditlog-core
             - github.com/larsartmann/auditlog-core/live
+            - github.com/larsartmann/go-atomic-write
+            - github.com/larsartmann/go-ndjson
             - github.com/larsartmann/go-ndjson
             - github.com/larsartmann/go-output
             - github.com/larsartmann/go-output/d2
@@ -233,6 +235,8 @@ linters:
       ignore-package-globs:
         - github.com/larsartmann/go-workflow-auditlog
         - github.com/larsartmann/auditlog-core/live
+            - github.com/larsartmann/go-atomic-write
+            - github.com/larsartmann/go-ndjson
       ignore-sigs:
         - .Errorf(
         - errors.New(

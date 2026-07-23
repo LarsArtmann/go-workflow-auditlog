@@ -6,7 +6,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/larsartmann/go-atomic-write"
+	atomicwrite "github.com/larsartmann/go-atomic-write"
 )
 
 // ErrFileExists is returned when a file already exists at the target path
@@ -74,7 +74,13 @@ func (r WorkflowReport) NameCollisions() []string {
 
 // WriteToFile creates a file at path and writes to it atomically via a
 // streaming callback. Delegates to go-atomic-write for TOCTOU-safe writes
-// with fsync durability and cross-platform atomic rename.
+// with fsync durability and cross-platform atomic rename. Errors are wrapped
+// with ErrExportWriteFailed for errors.Is compatibility.
 func WriteToFile(path string, fn func(io.Writer) error) error {
-	return atomicwrite.WriteFunc(path, fn, atomicwrite.Fingerprint{})
+	err := atomicwrite.WriteFunc(path, fn, atomicwrite.Fingerprint{})
+	if err != nil {
+		return fmt.Errorf("%w: %w", ErrExportWriteFailed, err)
+	}
+
+	return nil
 }

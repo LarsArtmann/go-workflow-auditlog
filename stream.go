@@ -9,6 +9,9 @@ import (
 	"sync"
 )
 
+// ndjsonBufferSize is the default buffer size for NDJSON streaming writes.
+const ndjsonBufferSize = 65536
+
 // NDJSONStreamer writes events as newline-delimited JSON to an [io.Writer]
 // in real time, as each event is captured during workflow execution.
 //
@@ -80,7 +83,7 @@ func WithBufferSize(size int) NDJSONStreamerOption {
 func NewNDJSONStreamer(w io.Writer, opts ...NDJSONStreamerOption) *NDJSONStreamer {
 	s := &NDJSONStreamer{
 		writer:     w,
-		bufferSize: 65536, // 64KB — matches go-atomic-write's buffer size
+		bufferSize: ndjsonBufferSize,
 	}
 
 	for _, opt := range opts {
