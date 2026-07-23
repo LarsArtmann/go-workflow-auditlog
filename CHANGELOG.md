@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Dashboard DAG visualization enhancements** — five interactive features
+  for the HTML dashboard's graph and Gantt tabs:
+  - **Critical path highlighting** — toggle button on the graph tab
+    highlights the longest-duration dependency chain (nodes get glowing
+    accent strokes, edges get thicker accent lines). Computed client-side
+    via a memoized DFS that mirrors the Go `computeCriticalPath` algorithm.
+  - **Critical path overlay on Gantt timeline** — bars on the critical path
+    get accent-colored glow and bold labels.
+  - **Duration labels on graph nodes** — compact inline duration (e.g.
+    `fetch · 10ms`) via a new `humanizeMs()` helper in
+    `daghtml_adapter.go`.
+  - **Retry count badges** — `↻N` amber badge post-processed onto graph
+    nodes with `attempt_count > 1`.
+  - **Graph search/filter** — search input highlights matching nodes
+    (info-colored stroke) and dims non-matches to 15% opacity.
 - **Module split into core + visualization sub-modules** — the library is now
   two independent Go modules:
   - **Core** (`github.com/larsartmann/go-workflow-auditlog`) — event capture,
@@ -46,6 +61,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`testdata/golden/report.html`** — retired the stale golden file that
   required constant regeneration. The test now validates structure and content
   without a committed reference file.
+- **Generated artifacts removed from git tracking** — `dashboard.html`,
+  `steps-compact.md`, `steps.csv`, `tree.txt`, `dag.d2`, `dag.dot`,
+  `dag.mmd`, `dag.puml` are now `.gitignore`d. These are build outputs from
+  `viz/example --export` and should not be version-controlled.
+
+### Fixed
+
+- **`enhanceGraph()` double-application bug** — switching to the graph tab a
+  second time re-added retry badges and event listeners. Added an idempotency
+  guard (`container.dataset.enhanced`) so enhancement runs exactly once.
 
 ## [0.7.0] - 2026-07-22
 

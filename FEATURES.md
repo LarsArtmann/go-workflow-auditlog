@@ -89,6 +89,15 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Configurable table columns** — `WithColumns(TableColumn...)` selects which columns appear in table export. 10 columns available: Step, Status, Duration, Attempts, MaxAttempts, Retry, Timeout, Error, Type, Dependencies. Default preserves backward compatibility (original 7). Works across all 16 table sub-formats.
 - **Diagram layout direction** — `WithDirection(output.Direction)` sets TD/LR/BT/RL on Mermaid, Graphviz, D2, and PlantUML. Uses native go-output renderer support for DOT and D2; post-processing for Mermaid and PlantUML.
 
+### Dashboard Visualization Enhancements
+
+- **Critical path highlighting (graph)** — toggle button highlights the longest-duration dependency chain with glowing accent strokes on nodes and thicker accent edges; computed client-side via memoized DFS mirroring the Go algorithm
+- **Critical path overlay (Gantt)** — timeline bars on the critical path get accent-colored glow and bold labels
+- **Duration labels on graph nodes** — compact inline duration (e.g., `fetch · 10ms`) via `humanizeMs()` helper in `daghtml_adapter.go`
+- **Retry count badges** — `↻N` amber badge on graph nodes with `attempt_count > 1`
+- **Graph search/filter** — search input highlights matching nodes (info stroke) and dims non-matches to 15% opacity
+- **Idempotent graph enhancement** — `enhanceGraph()` guards against duplicate badge/listener application on repeated tab switches
+
 ### Infrastructure
 
 - **go-output** dependency at v0.30.4 (root + all sub-modules aligned)

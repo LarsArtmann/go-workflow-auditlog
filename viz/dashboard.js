@@ -935,6 +935,7 @@ function buildNodeNameMap() {
 function enhanceGraph() {
   var container = document.getElementById("graph-container");
   if (!container) return;
+  if (container.dataset.enhanced === "true") return;
   var svg = container.querySelector("svg");
   if (!svg) return;
 
@@ -1030,6 +1031,8 @@ function enhanceGraph() {
       }, 120);
     });
   }
+
+  container.dataset.enhanced = "true";
 }
 
 function toggleCriticalPathHighlight(container, nameMap, criticalPathSet, active) {

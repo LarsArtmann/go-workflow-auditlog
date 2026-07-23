@@ -28,7 +28,7 @@ _ = viz.ExportHTML(audit.Report(), "report.html")
 
 The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 
-<img src="docs/screenshots/example-steps.png" alt="HTML Dashboard — Steps tab showing the data-pipeline demo run" width="600">
+<img src="docs/screenshots/example-graph.png" alt="Interactive HTML dashboard with Sugiyama-layered DAG graph showing the data-pipeline demo run: fetch, validate, transform, save, notify, and flaky-api-call with retry" width="600" height="422">
 
 ---
 
@@ -552,16 +552,16 @@ The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained inte
     <td width="50%" align="center"><b>Timeline</b> — duration bar chart by status</td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/example-graph.png" alt="DAG Graph tab" width="400"></td>
-    <td><img src="docs/screenshots/example-timeline.png" alt="Timeline tab" width="400"></td>
+    <td><img src="docs/screenshots/example-graph.png" alt="DAG Graph tab — interactive SVG showing step dependencies with colored status nodes and bezier-curve edges" width="400" height="281" loading="lazy"></td>
+    <td><img src="docs/screenshots/example-timeline.png" alt="Timeline tab — horizontal bar chart showing relative step durations, color-coded by status" width="400" height="281" loading="lazy"></td>
   </tr>
   <tr>
     <td align="center"><b>Steps Table</b> — sortable, filterable</td>
     <td align="center"><b>DAG Tree</b> — collapsible dependency tree</td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/example-steps.png" alt="Steps tab" width="400"></td>
-    <td><img src="docs/screenshots/example-tree.png" alt="Tree tab" width="400"></td>
+    <td><img src="docs/screenshots/example-steps.png" alt="Steps tab — sortable table with step names, types, statuses, attempt counts, durations, and dependency lists" width="400" height="281" loading="lazy"></td>
+    <td><img src="docs/screenshots/example-tree.png" alt="DAG Tree tab — collapsible ASCII-style tree showing the dependency hierarchy from root steps to dependents" width="400" height="281" loading="lazy"></td>
   </tr>
 </table>
 

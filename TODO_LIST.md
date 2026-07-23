@@ -16,6 +16,7 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md).
 - [ ] Add package-level `ExampleX` funcs for core-only usage (no viz import)
 - [ ] Add package-level `ExampleX` funcs for `viz` functions
 - [ ] Create `docs/status/INDEX.md` linking all status reports
+- [ ] Document dashboard visualization features in `README.md` (critical path highlighting, graph search, retry badges, duration labels)
 
 ## Testing
 
@@ -27,6 +28,18 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md).
 - [ ] Add `ReplayEvents` round-trip property/fuzz test (export → read → replay = equivalent)
 - [ ] Add concurrent `Close()` + `OnEvent()` race test
 - [ ] Modernize benchmarks to `b.Loop()` (resolve ~46 gopls warnings)
+- [ ] Add JS runtime test coverage for dashboard functions (enhanceGraph, computeCriticalPathSteps, applyGraphSearch) — consider headless browser (Playwright) or JS unit test runner
+
+## Visualization
+
+- [ ] Inject `critical_path_steps` from Go into report JSON to eliminate JS reimplementation of the critical path algorithm (schema decision)
+- [ ] Highlight critical path by default when graph tab opens (if path has >1 step)
+- [ ] Add critical path highlighting to the DAG tree tab
+- [ ] Color-code edges by status (green for succeeded chain, red for failed)
+- [ ] Support node click → navigate to step details (cross-tab linking)
+- [ ] Add minimap for large graphs (>20 nodes)
+- [ ] Add graph layout direction toggle (TD/LR) matching diagram export options
+- [ ] Add "fit to view" on initial graph render
 
 ## Tooling & CI
 
