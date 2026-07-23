@@ -136,6 +136,8 @@ linters:
             - $gostd
             - github.com/Azure/go-workflow
             - github.com/cenkalti/backoff/v4
+            - github.com/larsartmann/auditlog-core
+            - github.com/larsartmann/auditlog-core/live
             - github.com/larsartmann/go-output
             - github.com/larsartmann/go-output/d2
             - github.com/larsartmann/go-output/daghtml
@@ -229,6 +231,7 @@ linters:
     wrapcheck:
       ignore-package-globs:
         - github.com/larsartmann/go-workflow-auditlog
+        - github.com/larsartmann/auditlog-core/live
       ignore-sigs:
         - .Errorf(
         - errors.New(

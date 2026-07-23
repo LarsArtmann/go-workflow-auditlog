@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"sync"
 
-	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	corelive "github.com/larsartmann/auditlog-core/live"
+	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 // Hub wraps corelive.Hub, adding domain-specific OnEvent method.
 type Hub struct {
-	core   *corelive.Hub
+	core    *corelive.Hub
 	auditor *auditlog.Auditor
-	mu     sync.RWMutex
+	mu      sync.RWMutex
 }
 
 // NewHub creates a Hub. Pass nil when using live.New() (set internally).

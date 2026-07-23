@@ -393,7 +393,9 @@ func TestHub_OnEventDelivery(t *testing.T) {
 		var parsed struct {
 			Sequence int `json:"sequence"`
 		}
-		if err := json.Unmarshal(received, &parsed); err != nil {
+
+		err := json.Unmarshal(received, &parsed)
+		if err != nil {
 			t.Fatalf("failed to unmarshal event: %v", err)
 		}
 
