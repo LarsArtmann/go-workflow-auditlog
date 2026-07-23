@@ -3,7 +3,28 @@ package viz
 import (
 	"fmt"
 	"io"
+
+	"github.com/larsartmann/go-output/daghtml"
 )
+
+// DashboardCSS returns the base dashboard CSS used by the static HTML export.
+// Exported so the live server package can reuse the same theme.
+func DashboardCSS() string {
+	return dashboardCSS
+}
+
+// DashboardJS returns the dashboard JavaScript used by the static HTML export.
+// Exported so downstream packages can inspect or reuse the rendering logic.
+func DashboardJS() string {
+	return dashboardJS
+}
+
+// BuildDAGHTML converts a WorkflowReport into a daghtml.DAG for interactive
+// graph rendering. Exported so the live server package can build the same DAG
+// model without duplicating the conversion logic.
+func BuildDAGHTML(report WorkflowReport) daghtml.DAG {
+	return buildDAGHTML(report)
+}
 
 // WriteHTML writes a self-contained interactive HTML dashboard to writer.
 // The output is a single HTML file with embedded CSS and JavaScript — no

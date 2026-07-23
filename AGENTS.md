@@ -2,7 +2,7 @@
 
 Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that records every step execution event (attempts, retries, durations, errors, dependencies, final statuses) with timestamps and export to JSON / NDJSON.
 
-**Modules**: `github.com/larsartmann/go-workflow-auditlog` (core) · `github.com/larsartmann/go-workflow-auditlog/viz` (visualization) · **Go**: 1.26+ · **Status**: ALPHA
+**Modules**: `github.com/larsartmann/go-workflow-auditlog` (core) · `github.com/larsartmann/go-workflow-auditlog/viz` (visualization) · `github.com/larsartmann/go-workflow-auditlog/live` (real-time dashboard) · **Go**: 1.26+ · **Status**: ALPHA
 
 ---
 
@@ -19,6 +19,10 @@ Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that re
 | `cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go test ./...`                            | Run viz tests in standalone mode (no workspace)                |
 | `cd viz && GOEXPERIMENT=jsonv2 go vet ./...`                                        | Viz static analysis                                            |
 | `cd viz && golangci-lint run ./...`                                                 | Lint viz                                                       |
+| `cd live && GOEXPERIMENT=jsonv2 go test ./...`                                      | Run live tests (requires jsonv2)                               |
+| `cd live && GOEXPERIMENT=jsonv2 go vet ./...`                                       | Live static analysis                                           |
+| `cd live && golangci-lint run ./...`                                                | Lint live                                                      |
+| `cd live && GOEXPERIMENT=jsonv2 go run ./demo`                                      | Run live dashboard demo (http://localhost:18080)               |
 | `go run ./viz/example`                                                              | Run the demo pipeline                                          |
 | `go run ./example`                                                                  | Run the demo pipeline (legacy path; now `./viz/example`)       |
 | `nix run .#check`                                                                   | Run all checks (vet + test + lint + govulncheck, both modules) |
@@ -28,7 +32,7 @@ Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that re
 
 ## Architecture
 
-The project is split into two Go modules:
+The project is split into three Go modules:
 
 1. **Core module** (`github.com/larsartmann/go-workflow-auditlog`, package `auditlog`) —
    event recording, report construction, JSON/NDJSON serialization, replay, diff, filter, and index.
@@ -36,6 +40,9 @@ The project is split into two Go modules:
 2. **Visualization module** (`github.com/larsartmann/go-workflow-auditlog/viz`, package `viz`) —
    diagrams (Mermaid, PlantUML, Graphviz DOT, D2), tables (16 formats), trees (ASCII/HTML), and the
    interactive HTML dashboard. It depends on the core module and on `github.com/larsartmann/go-output`.
+3. **Live dashboard module** (`github.com/larsartmann/go-workflow-auditlog/live`, package `live`) —
+   real-time HTTP dashboard with Server-Sent Events (SSE) streaming. Steps light up as they execute,
+   the DAG graph snaps into place on completion. Depends on both core and viz.
 
 ### Core module source files
 
@@ -95,6 +102,30 @@ example/            — Data pipeline demo (now in viz module)
 5. `Report()` assembles `StepInfo` slice (with forward + reverse deps) and event stream
 6. Core consumers call `report.WriteJSON` / `report.WriteNDJSON` / `report.ExportJSON` / `report.ExportNDJSON`
 7. Consumers who want visualization import `viz` and call `viz.WriteX(report, ...)` or `viz.ExportX(report, ...)`
+8. Consumers who want real-time monitoring import `live`, wire `hub.OnEvent` as `Config.OnEvent`, serve the dashboard, and call `server.SignalComplete()` after `Snapshot(w)`
+
+### Live module source files
+
+```
+doc.go             — Package doc comment
+hub.go             — Hub: SSE subscriber registry, fan-out OnEvent, SignalComplete, non-blocking broadcast
+server.go          — HTTP server: SSE handler, /api/report, /api/health, dashboard serving, New() convenience, ServeHTTP
+dashboard.go       — HTML template assembly: reuses viz CSS + embeds live CSS + JS + daghtml graph JS
+dashboard.css      — Live-specific CSS: pulsing live badge, connection status, step animations, graph placeholders
+dashboard.js       — SSE client + incremental rendering engine: state management, requestAnimationFrame batching, live tables/graph/timeline
+demo/              — Demo pipeline with retry: fetch → validate → transform/enrich → save (flaky, retries) → notify
+```
+
+### Live Data Flow (SSE)
+
+1. User creates server + auditor via `live.New(auditlog.Config{...}, live.Config{Addr: ":8080"})`
+2. `hub.OnEvent` is wired as the auditlog `Config.OnEvent` callback
+3. `auditor.Attach(w)` + `go server.ListenAndServe()` starts the dashboard
+4. Browser connects to `/api/events` → receives `snapshot` event (current report + events + metadata + DAG)
+5. As `w.Do(ctx)` executes, each captured event is fanned out via SSE `event` messages
+6. Browser incrementally renders: new steps appear, running steps animate, statuses change with flash effects
+7. After `auditor.Snapshot(w)` + `server.SignalComplete()`, all clients receive a `complete` event with the final report + full DAG
+8. The DAG graph tab activates with the Sugiyama layout from daghtml, showing the complete dependency structure
 
 ### Concurrency Model
 

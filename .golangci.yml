@@ -149,6 +149,9 @@ linters:
             - github.com/larsartmann/go-output/tree
             - github.com/larsartmann/go-error-family
             - github.com/larsartmann/go-workflow-auditlog
+            - github.com/larsartmann/go-workflow-auditlog/viz
+            - github.com/larsartmann/go-workflow-auditlog/live
+            - github.com/larsartmann/go-workflow-auditlog/testhelpers
           files:
             - $all
           list-mode: strict
@@ -168,6 +171,7 @@ linters:
         - github.com/larsartmann/go-output/d2.NodeStyle
         - github.com/larsartmann/go-output/d2.StrokeStyle
         - github.com/larsartmann/go-workflow-auditlog.*
+        - net/http.Server
     ginkgolinter:
       forbid-focus-container: true
       forbid-spec-pollution: true
@@ -247,6 +251,22 @@ linters:
           - gochecknoglobals
           - wrapcheck
           - gosec
+      - path: demo/
+        linters:
+          - forbidigo
+          - mnd
+          - cyclop
+          - err113
+          - exhaustruct
+          - varnamelen
+          - gochecknoglobals
+          - wrapcheck
+          - gosec
+          - funlen
+          - nlreturn
+          - noinlineerr
+          - unparam
+          - wsl_v5
       - path: _test\.go
         linters:
           - exhaustruct
