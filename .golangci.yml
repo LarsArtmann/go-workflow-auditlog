@@ -138,6 +138,7 @@ linters:
             - github.com/cenkalti/backoff/v4
             - github.com/larsartmann/auditlog-core
             - github.com/larsartmann/auditlog-core/live
+            - github.com/larsartmann/auditlog-core/ndjson
             - github.com/larsartmann/go-output
             - github.com/larsartmann/go-output/d2
             - github.com/larsartmann/go-output/daghtml
