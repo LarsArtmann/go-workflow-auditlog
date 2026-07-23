@@ -8,4 +8,9 @@ require (
 	github.com/larsartmann/go-error-family v0.7.0
 )
 
-require github.com/benbjohnson/clock v1.3.5 // indirect
+require (
+	github.com/benbjohnson/clock v1.3.5 // indirect
+	github.com/larsartmann/auditlog-core v0.0.0-00010101000000-000000000000 // indirect
+)
+
+replace github.com/larsartmann/auditlog-core => ../auditlog-core
