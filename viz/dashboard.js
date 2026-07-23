@@ -684,6 +684,12 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
   if (!roots.length && report.steps.length) roots.push(report.steps[0]);
   var visited = {};
 
+  // Compute critical path set for highlighting.
+  var criticalPathSet = {};
+  computeCriticalPathSteps().forEach(function (name) {
+    criticalPathSet[name] = true;
+  });
+
   function renderNode(step, parent) {
     if (visited[step.step_name]) return;
     visited[step.step_name] = true;
@@ -691,6 +697,9 @@ document.querySelectorAll("#event-filters .chip").forEach(function (btn) {
     div.className = "scope-node";
     if (step.status === "failed" || step.status === "canceled") {
       div.className += " has-failure";
+    }
+    if (criticalPathSet[step.step_name]) {
+      div.className += " critical-path-node";
     }
     var hdr = document.createElement("div");
     hdr.className = "scope-node-header";
@@ -871,9 +880,13 @@ document.getElementById("footer-stats").textContent =
 // === Graph enhancements: critical path, retry badges, search ===
 
 // Compute the critical path (longest duration chain) from report data.
-// Mirrors the Go computeCriticalPath algorithm: memoized DFS over step
-// dependencies, returning the ordered step names forming the bottleneck chain.
+// Uses the critical_path_steps field injected by Go when available.
+// Falls back to a client-side memoized DFS for older reports without the field.
 function computeCriticalPathSteps() {
+  if (report.critical_path_steps && report.critical_path_steps.length > 0) {
+    return report.critical_path_steps;
+  }
+
   var byName = {};
   report.steps.forEach(function (s) {
     byName[s.step_name] = s;
@@ -986,6 +999,48 @@ function enhanceGraph() {
     badge.appendChild(text);
 
     g.appendChild(badge);
+  });
+
+  // Node click → navigate to step details in the Steps tab
+  nodeEls.forEach(function (g) {
+    g.style.cursor = "pointer";
+    g.addEventListener("click", function () {
+      var idx = parseInt(g.dataset.id);
+      var stepName = nameMap[idx];
+      if (!stepName) return;
+
+      var stepsTab = document.querySelector('.tab[data-tab="steps"]');
+      if (stepsTab) switchTab(stepsTab);
+
+      // Briefly highlight the matching step row.
+      setTimeout(function () {
+        var rows = document.querySelectorAll("#steps-table tbody tr");
+        rows.forEach(function (row) {
+          if (row.textContent.indexOf(stepName) !== -1) {
+            row.classList.add("row-highlight");
+            row.scrollIntoView({ behavior: "smooth", block: "center" });
+            setTimeout(function () {
+              row.classList.remove("row-highlight");
+            }, 2000);
+          }
+        });
+      }, 50);
+    });
+  });
+
+  // Color-code edges by status of the target step (dependency → step)
+  var edgeEls = container.querySelectorAll(".graph-edge");
+  edgeEls.forEach(function (e) {
+    var targetIdx = parseInt(e.dataset.target);
+    var targetName = nameMap[targetIdx];
+    if (!targetName) return;
+    var targetStep = stepByName[targetName];
+    if (!targetStep) return;
+    if (targetStep.status === "failed" || targetStep.status === "canceled") {
+      e.classList.add("edge-failed");
+    } else if (targetStep.status === "succeeded") {
+      e.classList.add("edge-succeeded");
+    }
   });
 
   // Critical path computation

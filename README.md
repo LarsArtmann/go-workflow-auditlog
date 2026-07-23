@@ -55,6 +55,7 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - [Report Structure](#report-structure)
 - [API Reference](#api-reference)
 - [Config](#config)
+- [Streaming NDJSON](#streaming-ndjson)
 - [Diagrams](#diagrams)
 - [HTML Dashboard](#html-dashboard)
 - [Concurrency Model](#concurrency-model)
@@ -71,6 +72,7 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **Full DAG structure** — captures dependency graph (upstream + dependents), retry/timeout config, and step types
 - **Skipped & canceled detection** — reads post-execution state to catch steps that bypass callbacks entirely
 - **Cross-system correlation** — 128-bit `RunID` stamped on every event for trace/log correlation
+- **Real-time streaming NDJSON** — stream events as they happen via `Config.OnEvent`, no need to wait for the workflow to finish
 - **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT / D2 diagrams (with configurable layout direction), step summary tables (16 formats, configurable column selection), ASCII + HTML tree views, **interactive HTML dashboard** (5-tab self-contained report with DAG graph engine, timeline, waveform)
 - **Report filtering** — slice reports by step name, status, event type, or time range
 - **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration delta)
@@ -435,6 +437,50 @@ For custom registries, call `auditlog.RegisterClassifications(reg)` explicitly.
 | `MaxEvents`            | `0` (unlimited)              | Caps stored events to prevent OOM. Excess counted in `DroppedEventCount`.                                      |
 | `InitialEventCapacity` | `256`                        | Pre-allocates event slice.                                                                                     |
 
+## Streaming NDJSON
+
+For real-time monitoring pipelines that must see each event the moment it is captured — without waiting for the workflow to finish — use `NDJSONStreamer`. It writes events as NDJSON via the `Config.OnEvent` callback, with a mutex-protected internal buffer so writes from concurrent step goroutines never interleave.
+
+```go
+// Create a streamer writing to a file (tail-friendly, NOT atomic by design)
+streamer, _ := auditlog.CreateNDJSONStreamer("audit.ndjson")
+defer streamer.Close()
+
+auditor, _ := auditlog.New(auditlog.Config{
+    Enabled: true,
+    OnEvent: streamer.OnEvent, // hook the streamer into the event pipeline
+})
+
+audit.Attach(w)
+_ = w.Do(ctx)
+audit.Snapshot(w)
+streamer.Close() // flush + close the file
+```
+
+For low-latency tailing (each event flushed immediately), pass `WithAutoFlush`:
+
+```go
+streamer, _ := auditlog.CreateNDJSONStreamer("audit.ndjson", auditlog.WithAutoFlush())
+```
+
+**Options:**
+
+| Option              | Effect                                                                          |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `WithAutoFlush()`   | Flushes after every event (real-time tailing, lower throughput)                 |
+| `WithBufferSize(n)` | Sets internal buffer size in bytes (default 64 KB; values ≤ 0 keep the default) |
+
+**Error handling:** First-error-wins. If a write fails, `streamer.Err()` returns the error and subsequent events are silently dropped. Errors are wrapped with `ErrExportWriteFailed`.
+
+**Round-trip:** Streamer output is `ReadEvents`-compatible — you can replay a streamed file back into a report:
+
+```go
+events, _ := auditlog.ReadEvents(file)
+report, _ := auditlog.ReplayEvents(events)
+```
+
+**Note on ordering:** Events may arrive out of Sequence order when steps run concurrently. Consumers that need strict ordering should sort by `Event.Sequence` after reading.
+
 ## Diagrams
 
 Export the step DAG in four formats, with status-based coloring (succeeded = green, failed = red, skipped = gray, canceled = orange). All diagram writers accept `viz.WithDirection` to control layout:
@@ -545,6 +591,14 @@ The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained inte
 5. **Events** — sortable event stream with type filters and pagination
 
 **Security:** Report data is injected via `<script type="application/json">` tags (never parsed as HTML). Dynamic content is escaped via a JS `esc()` function. Strict CSP: `default-src 'none'`. XSS-tested via fuzz target `FuzzHTMLSpecialChars`.
+
+**Graph enhancements** (post-processed onto the daghtml SVG):
+
+- **Critical path highlighting** — toggle button highlights the longest-duration dependency chain (nodes get glowing accent strokes, edges get thicker accent lines)
+- **Retry count badges** — `↻N` amber badge on nodes with `attempt_count > 1`
+- **Duration labels** — compact inline duration on each node (e.g. `fetch · 10ms`)
+- **Graph search/filter** — search input highlights matching nodes and dims non-matches to 15% opacity
+- **Critical path overlay on Timeline** — bars on the critical path get accent-colored glow and bold labels
 
 <table>
   <tr>

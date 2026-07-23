@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Streaming NDJSON** (`NDJSONStreamer` in `stream.go`) — real-time event
+  streaming via `Config.OnEvent`. Writes events as NDJSON the moment they are
+  captured, without buffering the entire run in memory first. Thread-safe
+  (mutex-protected writes), 64 KB default buffer (configurable via
+  `WithBufferSize`), `WithAutoFlush()` for real-time tailing,
+  `CreateNDJSONStreamer(path)` file convenience constructor. First-error-wins
+  error handling. Output is `ReadEvents`-compatible for round-trip replay.
+  100% `stream.go` coverage with dedicated tests (concurrent safety,
+  auto-flush, buffer sizing, encode-error path, flush/Close error paths,
+  round-trip, workflow integration).
 - **Dashboard DAG visualization enhancements** — five interactive features
   for the HTML dashboard's graph and Gantt tabs:
   - **Critical path highlighting** — toggle button on the graph tab

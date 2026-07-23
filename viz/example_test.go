@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
@@ -105,4 +106,79 @@ func Example_filtering() {
 
 	// Output:
 	// Filtered steps: 1
+}
+
+// ExampleWriteD2 demonstrates generating a D2 diagram from a report.
+func ExampleWriteD2() {
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "a"}},
+			{StepRef: auditlog.StepRef{Name: "b"}, Dependencies: []auditlog.StepRef{{Name: "a"}}},
+		},
+	}
+
+	out, _ := viz.WriteD2String(report)
+	fmt.Println(strings.Contains(out, "a"))
+
+	// Output: true
+}
+
+// ExampleWriteGraphviz demonstrates generating a Graphviz DOT diagram.
+func ExampleWriteGraphviz() {
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "a"}},
+			{StepRef: auditlog.StepRef{Name: "b"}, Dependencies: []auditlog.StepRef{{Name: "a"}}},
+		},
+	}
+
+	out, _ := viz.WriteGraphvizString(report)
+	fmt.Println(strings.Contains(out, "digraph"))
+
+	// Output: true
+}
+
+// ExampleWritePlantUML demonstrates generating a PlantUML diagram.
+func ExampleWritePlantUML() {
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "a"}},
+		},
+	}
+
+	out, _ := viz.WritePlantUMLString(report)
+	fmt.Println(strings.Contains(out, "@startuml"))
+
+	// Output: true
+}
+
+// ExampleWriteTree demonstrates generating an ASCII tree view of the step DAG.
+func ExampleWriteTree() {
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "fetch"}},
+			{StepRef: auditlog.StepRef{Name: "save"}, Dependencies: []auditlog.StepRef{{Name: "fetch"}}},
+		},
+	}
+
+	out, _ := viz.WriteTreeString(report)
+	fmt.Println(strings.Contains(out, "fetch"))
+
+	// Output: true
+}
+
+// ExampleWriteHTML demonstrates generating the interactive HTML dashboard.
+// The output is a self-contained HTML file with embedded CSS and JavaScript.
+func ExampleWriteHTML() {
+	report := auditlog.WorkflowReport{
+		WorkflowID: "demo",
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	out, _ := viz.WriteHTMLString(report)
+	fmt.Println(strings.Contains(out, "<!DOCTYPE html>"))
+
+	// Output: true
 }

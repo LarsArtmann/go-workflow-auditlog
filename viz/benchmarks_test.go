@@ -29,7 +29,7 @@ func BenchmarkInvocation(b *testing.B) {
 	b.Run("disabled", func(b *testing.B) {
 		a, _ := auditlog.New(auditlog.Config{Enabled: false})
 
-		for range b.N {
+		for b.Loop() {
 			b.StopTimer()
 
 			w := &flow.Workflow{}
@@ -44,7 +44,7 @@ func BenchmarkInvocation(b *testing.B) {
 	b.Run("enabled", func(b *testing.B) {
 		a, _ := auditlog.New(auditlog.Config{Enabled: true})
 
-		for range b.N {
+		for b.Loop() {
 			b.StopTimer()
 
 			w := &flow.Workflow{}
@@ -63,7 +63,7 @@ func BenchmarkInvocation(b *testing.B) {
 func BenchmarkAttach(b *testing.B) {
 	for _, n := range []int{10, 50, 100} {
 		b.Run(fmt.Sprintf("%d-steps", n), func(b *testing.B) {
-			for range b.N {
+			for b.Loop() {
 				b.StopTimer()
 
 				a, _ := auditlog.New(auditlog.Config{Enabled: true})
@@ -94,7 +94,7 @@ func BenchmarkBuildReport(b *testing.B) {
 
 			b.ResetTimer()
 
-			for range b.N {
+			for b.Loop() {
 				_ = a.Report()
 			}
 		})
@@ -116,7 +116,7 @@ func BenchmarkEventsCopy(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		_ = a.Events()
 	}
 }
@@ -128,7 +128,7 @@ func BenchmarkOnEventCallback(b *testing.B) {
 		OnEvent: func(e auditlog.Event) {}, // no-op callback
 	})
 
-	for range b.N {
+	for b.Loop() {
 		b.StopTimer()
 
 		w := &flow.Workflow{}
@@ -144,7 +144,7 @@ func BenchmarkOnEventCallback(b *testing.B) {
 func BenchmarkRetryWithAudit(b *testing.B) {
 	a, _ := auditlog.New(auditlog.Config{Enabled: true})
 
-	for range b.N {
+	for b.Loop() {
 		b.StopTimer()
 
 		w := &flow.Workflow{}
@@ -186,7 +186,7 @@ func BenchmarkMermaidExport(b *testing.B) {
 
 			b.ResetTimer()
 
-			for range b.N {
+			for b.Loop() {
 				_ = viz.WriteMermaid(report, &discardWriter{})
 			}
 		})
@@ -396,7 +396,7 @@ func BenchmarkWriteD2_LargeReport(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		_ = viz.WriteD2(report, io.Discard)
 	}
 }
@@ -406,7 +406,7 @@ func BenchmarkWriteTable_LargeReport(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		_ = viz.WriteTable(report, io.Discard, output.FormatMarkdown, output.RenderOptions{})
 	}
 }
@@ -416,7 +416,7 @@ func BenchmarkWriteTree_LargeReport(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		_ = viz.WriteTree(report, io.Discard)
 	}
 }
@@ -426,7 +426,7 @@ func BenchmarkWriteJSON_LargeReport(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		_ = report.WriteJSON(io.Discard)
 	}
 }
@@ -436,7 +436,7 @@ func BenchmarkWriteMermaid_LargeReport(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		_ = viz.WriteMermaid(report, io.Discard)
 	}
 }
@@ -446,7 +446,7 @@ func BenchmarkWriteJSON_SmallReport(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		_ = report.WriteJSON(io.Discard)
 	}
 }

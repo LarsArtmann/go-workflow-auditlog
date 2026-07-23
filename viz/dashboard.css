@@ -563,6 +563,13 @@ tr:hover td {
   stroke: var(--border-active);
   stroke-width: 1.5;
 }
+.graph-edge.edge-failed path {
+  stroke: var(--error);
+  stroke-width: 2;
+}
+.graph-edge.edge-succeeded path {
+  stroke: var(--success);
+}
 .graph-edge.highlighted path {
   stroke: var(--accent);
   stroke-width: 2;
@@ -876,6 +883,16 @@ tr.row-canceled:hover td {
   word-break: break-word;
 }
 
+/* Critical path highlighting in tree tab */
+.scope-node.critical-path-node > .scope-node-header {
+  border-left: 3px solid var(--accent);
+  padding-left: calc(0.5rem - 3px);
+}
+.scope-node.critical-path-node > .scope-node-header .scope-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .impact-badge {
   display: inline-flex;
   align-items: center;
@@ -1057,4 +1074,17 @@ tr.row-canceled:hover td {
   background: var(--accent-dim);
   color: var(--accent);
   border-color: var(--accent);
+}
+
+/* Row highlight animation for graph node click → step details */
+@keyframes row-highlight-pulse {
+  0% {
+    background: var(--accent-dim);
+  }
+  100% {
+    background: transparent;
+  }
+}
+.row-highlight {
+  animation: row-highlight-pulse 2s ease-out;
 }

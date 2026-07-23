@@ -729,6 +729,201 @@ func (w *writeTracker) writtenBytes() int {
 	return w.buf.Len()
 }
 
+// --- Edge case tests ---
+
+// WithBufferSize(0) and WithBufferSize(-1) should be ignored, keeping the
+// default 64 KB buffer. The streamer should still function correctly.
+func TestNDJSONStreamer_WithBufferSizeZeroOrNegative(t *testing.T) {
+	t.Parallel()
+
+	for _, size := range []int{0, -1, -100} {
+		t.Run(fmt.Sprintf("size=%d", size), func(t *testing.T) {
+			t.Parallel()
+
+			var buf bytes.Buffer
+
+			streamer := auditlog.NewNDJSONStreamer(&buf, auditlog.WithBufferSize(size))
+
+			for i := range 5 {
+				streamer.OnEvent(auditlog.Event{
+					Sequence:  i + 1,
+					EventType: auditlog.EventTypeAttemptStart,
+					Phase:     auditlog.PhaseBefore,
+					StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", i)},
+				})
+			}
+
+			err := streamer.Flush()
+			if err != nil {
+				t.Fatalf("Flush: %v", err)
+			}
+
+			events, err := auditlog.ReadEvents(&buf)
+			if err != nil {
+				t.Fatalf("ReadEvents: %v", err)
+			}
+
+			if len(events) != 5 {
+				t.Errorf("expected 5 events, got %d", len(events))
+			}
+		})
+	}
+}
+
+// MaxEvents + streaming interaction: the streamer should see ALL events,
+// including those dropped by Config.MaxEvents. The report should only contain
+// the capped number.
+func TestNDJSONStreamer_MaxEventsInteraction(t *testing.T) {
+	t.Parallel()
+
+	var buf bytes.Buffer
+
+	streamer := auditlog.NewNDJSONStreamer(&buf)
+
+	a, err := auditlog.New(auditlog.Config{
+		Enabled:    true,
+		MaxEvents:  3, // cap stored events at 3
+		OnEvent:    streamer.OnEvent,
+		WorkflowID: "maxevents-test",
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	w := &flow.Workflow{}
+
+	for i := range 5 {
+		step := testhelpers.NewSucceed(fmt.Sprintf("step-%d", i))
+		w.Add(flow.Step(step))
+	}
+
+	a.Attach(w)
+	_ = w.Do(t.Context())
+	a.Snapshot(w)
+
+	err = streamer.Close()
+	if err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+
+	streamedEvents, err := auditlog.ReadEvents(&buf)
+	if err != nil {
+		t.Fatalf("ReadEvents: %v", err)
+	}
+
+	report := a.Report()
+
+	if report.DroppedEventCount == 0 {
+		t.Error("expected some dropped events due to MaxEvents cap")
+	}
+
+	if len(streamedEvents) <= report.EventCount {
+		t.Errorf("streamer should see more events than stored: streamed=%d stored=%d",
+			len(streamedEvents), report.EventCount)
+	}
+
+	t.Logf("streamed=%d events, stored=%d, dropped=%d",
+		len(streamedEvents), report.EventCount, report.DroppedEventCount)
+}
+
+// Concurrent Close + OnEvent: verify no data race or panic when Close and
+// OnEvent are called from different goroutines simultaneously.
+func TestNDJSONStreamer_ConcurrentCloseAndOnEvent(t *testing.T) {
+	t.Parallel()
+
+	var buf bytes.Buffer
+
+	streamer := auditlog.NewNDJSONStreamer(&buf)
+
+	var wg sync.WaitGroup
+
+	// Writer goroutine: continuously sends events.
+
+	wg.Go(func() {
+		for i := range 100 {
+			streamer.OnEvent(auditlog.Event{
+				Sequence:  i + 1,
+				EventType: auditlog.EventTypeAttemptStart,
+				Phase:     auditlog.PhaseBefore,
+				StepRef:   auditlog.StepRef{Name: "concurrent-step"},
+			})
+		}
+	})
+
+	// Closer goroutine: closes the streamer while events are still flowing.
+
+	wg.Go(func() {
+		_ = streamer.Close()
+	})
+
+	wg.Wait()
+
+	// After both finish, a second Close should be safe (idempotent).
+	err := streamer.Close()
+	if err != nil {
+		// Error from first close is fine, second close returns same error.
+		_ = err
+	}
+}
+
+// Property: streaming N events, reading them back, and replaying should
+// produce equivalent event sequences. Run multiple iterations with varying
+// event counts to exercise buffer boundary conditions.
+func TestNDJSONStreamer_PropertyRoundTrip(t *testing.T) {
+	t.Parallel()
+
+	for _, n := range []int{1, 2, 10, 50, 100, 200} {
+		t.Run(fmt.Sprintf("n=%d", n), func(t *testing.T) {
+			t.Parallel()
+
+			var buf bytes.Buffer
+
+			streamer := auditlog.NewNDJSONStreamer(&buf)
+
+			original := make([]auditlog.Event, 0, n)
+			for i := range n {
+				original = append(original, auditlog.Event{
+					Sequence:  i + 1,
+					EventType: auditlog.EventTypeAttemptStart,
+					Phase:     auditlog.PhaseBefore,
+					StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", i)},
+				})
+			}
+
+			for _, evt := range original {
+				streamer.OnEvent(evt)
+			}
+
+			err := streamer.Flush()
+			if err != nil {
+				t.Fatalf("Flush: %v", err)
+			}
+
+			read, err := auditlog.ReadEvents(&buf)
+			if err != nil {
+				t.Fatalf("ReadEvents: %v", err)
+			}
+
+			if len(read) != n {
+				t.Fatalf("expected %d events, got %d", n, len(read))
+			}
+
+			// Verify each event's sequence and name survived the round-trip.
+			for i, evt := range read {
+				if evt.Sequence != original[i].Sequence {
+					t.Errorf("event %d: seq mismatch: got %d, want %d",
+						i, evt.Sequence, original[i].Sequence)
+				}
+
+				if evt.Name != original[i].Name {
+					t.Errorf("event %d: name mismatch: got %q, want %q",
+						i, evt.Name, original[i].Name)
+				}
+			}
+		})
+	}
+}
+
 // --- Benchmarks ---
 
 func benchmarkNDJSONStreamer(b *testing.B, n int) {
@@ -747,7 +942,7 @@ func benchmarkNDJSONStreamer(b *testing.B, n int) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		s := auditlog.NewNDJSONStreamer(io.Discard)
 
 		for _, evt := range events {

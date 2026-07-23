@@ -55,20 +55,23 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-13.
 
 ### Export Formats
 
-| Format                 | Write (writer)  | WriteString           | Export (file)    | On Auditor | On Report |
-| ---------------------- | --------------- | --------------------- | ---------------- | ---------- | --------- |
-| JSON report            | `WriteJSON`     | —                     | `ExportJSON`     | ✅         | ✅        |
-| NDJSON events          | `WriteNDJSON`   | —                     | `ExportNDJSON`   | ✅         | ✅        |
-| Mermaid                | `WriteMermaid`  | `WriteMermaidString`  | `ExportMermaid`  | ✅         | ✅        |
-| PlantUML               | `WritePlantUML` | `WritePlantUMLString` | `ExportPlantUML` | ✅         | ✅        |
-| Graphviz DOT           | `WriteGraphviz` | `WriteGraphvizString` | `ExportGraphviz` | ✅         | ✅        |
-| D2                     | `WriteD2`       | `WriteD2String`       | `ExportD2`       | ✅         | ✅        |
-| Table (16 sub-formats) | `WriteTable`    | `WriteTableString`    | `ExportTable`    | ✅         | ✅        |
-| ASCII Tree             | `WriteTree`     | `WriteTreeString`     | `ExportTree`     | ✅         | ✅        |
-| HTML Tree              | `WriteHTMLTree` | `WriteHTMLTreeString` | `ExportHTMLTree` | ✅         | ✅        |
-| HTML Dashboard         | `WriteHTML`     | `WriteHTMLString`     | `ExportHTML`     | ✅         | ✅        |
+| Format                 | Write (writer)           | WriteString           | Export (file)          | On Auditor           | On Report |
+| ---------------------- | ------------------------ | --------------------- | ---------------------- | -------------------- | --------- |
+| JSON report            | `WriteJSON`              | —                     | `ExportJSON`           | ✅                   | ✅        |
+| NDJSON events          | `WriteNDJSON`            | —                     | `ExportNDJSON`         | ✅                   | ✅        |
+| Mermaid                | `WriteMermaid`           | `WriteMermaidString`  | `ExportMermaid`        | ✅                   | ✅        |
+| PlantUML               | `WritePlantUML`          | `WritePlantUMLString` | `ExportPlantUML`       | ✅                   | ✅        |
+| Graphviz DOT           | `WriteGraphviz`          | `WriteGraphvizString` | `ExportGraphviz`       | ✅                   | ✅        |
+| D2                     | `WriteD2`                | `WriteD2String`       | `ExportD2`             | ✅                   | ✅        |
+| Table (16 sub-formats) | `WriteTable`             | `WriteTableString`    | `ExportTable`          | ✅                   | ✅        |
+| ASCII Tree             | `WriteTree`              | `WriteTreeString`     | `ExportTree`           | ✅                   | ✅        |
+| HTML Tree              | `WriteHTMLTree`          | `WriteHTMLTreeString` | `ExportHTMLTree`       | ✅                   | ✅        |
+| HTML Dashboard         | `WriteHTML`              | `WriteHTMLString`     | `ExportHTML`           | ✅                   | ✅        |
+| **Streaming NDJSON**   | `NDJSONStreamer.OnEvent` | —                     | `CreateNDJSONStreamer` | via `Config.OnEvent` | —         |
 
 Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml
+
+**Streaming NDJSON** writes events in real time via `Config.OnEvent` — no need to wait for `Report()`. Thread-safe, 64 KB buffer (configurable), auto-flush option. Output is `ReadEvents`-compatible.
 
 ### Diagram Quality
 

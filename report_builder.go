@@ -156,7 +156,11 @@ func finalizeDenormalized(report *WorkflowReport) {
 		report.RunningCount == 0
 
 	report.PeakConcurrency = computePeakConcurrency(report.Events)
+
+	_, criticalPathNames := computeCriticalPath(report.Steps)
 	report.CriticalPathDurationMs = computeCriticalPathDuration(report.Steps)
+	report.CriticalPathSteps = criticalPathNames
+
 	report.WallClockDurationMs = computeWallClockDurationMs(report.Events)
 	report.FailureReason = buildFailureReason(*report)
 }

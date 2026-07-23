@@ -40,7 +40,7 @@ func BenchmarkRenderHTML_LargeReport(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		err := viz.WriteHTML(report, io.Discard)
 		if err != nil {
 			b.Fatalf("WriteHTML: %v", err)
@@ -66,7 +66,7 @@ func BenchmarkRenderHTML_SmallReport(b *testing.B) {
 
 	b.ResetTimer()
 
-	for range b.N {
+	for b.Loop() {
 		err := viz.WriteHTML(report, io.Discard)
 		if err != nil {
 			b.Fatalf("WriteHTML: %v", err)
