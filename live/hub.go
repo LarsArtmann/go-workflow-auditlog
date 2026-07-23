@@ -55,3 +55,13 @@ func (h *Hub) IsComplete() bool {
 func (h *Hub) ClientCount() int {
 	return h.core.ClientCount()
 }
+
+// Subscribe registers a new SSE client. For testing only.
+func (h *Hub) Subscribe() *corelive.Subscriber {
+	return h.core.Subscribe()
+}
+
+// Unsubscribe removes a subscriber by ID. For testing only.
+func (h *Hub) Unsubscribe(id uint64) {
+	h.core.Unsubscribe(id)
+}
