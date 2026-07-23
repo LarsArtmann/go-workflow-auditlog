@@ -342,15 +342,21 @@
     var placeholder = waveform.querySelector(".waveform-placeholder");
     if (placeholder) placeholder.remove();
 
-    var ts = events.map(function (e) { return new Date(e.timestamp).getTime(); });
+    var ts = events.map(function (e) {
+      return new Date(e.timestamp).getTime();
+    });
     var minT = Math.min.apply(null, ts);
     var maxT = Math.max.apply(null, ts);
     var range = maxT - minT || 1;
     var maxDur = Math.max.apply(
       null,
       events
-        .filter(function (e) { return e.duration_ms; })
-        .map(function (e) { return e.duration_ms; })
+        .filter(function (e) {
+          return e.duration_ms;
+        })
+        .map(function (e) {
+          return e.duration_ms;
+        })
         .concat([1]),
     );
 
@@ -431,8 +437,12 @@
     }
 
     var failedSteps = Object.keys(state.steps)
-      .map(function (n) { return state.steps[n]; })
-      .filter(function (s) { return s.status === "failed" || s.status === "canceled"; });
+      .map(function (n) {
+        return state.steps[n];
+      })
+      .filter(function (s) {
+        return s.status === "failed" || s.status === "canceled";
+      });
 
     els.failureList.innerHTML = failedSteps
       .map(function (s) {
@@ -454,7 +464,9 @@
   var numericSortKeys = ["attempts", "duration"];
 
   function buildStepRows() {
-    var steps = Object.keys(state.steps).map(function (n) { return state.steps[n]; });
+    var steps = Object.keys(state.steps).map(function (n) {
+      return state.steps[n];
+    });
 
     steps.sort(function (a, b) {
       var av, bv;
@@ -488,10 +500,14 @@
       if (s.status === "canceled") rowCls += " row-canceled";
 
       var deps = (s.dependencies || [])
-        .map(function (d) { return esc(d.step_name || d); })
+        .map(function (d) {
+          return esc(d.step_name || d);
+        })
         .join(", ");
       var depsR = (s.dependents || [])
-        .map(function (d) { return esc(d.step_name || d); })
+        .map(function (d) {
+          return esc(d.step_name || d);
+        })
         .join(", ");
 
       var errMsg = s.error ? esc(s.error) : "";
@@ -519,21 +535,52 @@
 
       return (
         '<tr data-search="' +
-        esc((s.step_name + " " + (s.step_type || "") + " " + s.status + " " + (s.error || "")).toLowerCase()) +
+        esc(
+          (
+            s.step_name +
+            " " +
+            (s.step_type || "") +
+            " " +
+            s.status +
+            " " +
+            (s.error || "")
+          ).toLowerCase(),
+        ) +
         '" class="' +
         rowCls.trim() +
         '"' +
-        ' data-has-error="' + hasError + '"' +
+        ' data-has-error="' +
+        hasError +
+        '"' +
         ">" +
-        '<td class="mono">' + esc(s.step_name) + "</td>" +
-        '<td class="mono" style="color:var(--text-dim)">' + esc(s.step_type || "\u2014") + "</td>" +
-        "<td>" + statusBadge + "</td>" +
-        "<td>" + s.attempt_count + (s.max_attempts > 1 ? "/" + s.max_attempts : "") + "</td>" +
-        "<td>" + (s.duration_ms ? humanizeDuration(s.duration_ms) : "\u2014") + "</td>" +
-        '<td class="deps-list">' + (deps || "\u2014") + "</td>" +
-        '<td class="deps-list">' + (depsR || "\u2014") + "</td>" +
-        "<td>" + cfgBadges + "</td>" +
-        '<td class="error-cell' + (errMsg ? "" : " empty") + '"' +
+        '<td class="mono">' +
+        esc(s.step_name) +
+        "</td>" +
+        '<td class="mono" style="color:var(--text-dim)">' +
+        esc(s.step_type || "\u2014") +
+        "</td>" +
+        "<td>" +
+        statusBadge +
+        "</td>" +
+        "<td>" +
+        s.attempt_count +
+        (s.max_attempts > 1 ? "/" + s.max_attempts : "") +
+        "</td>" +
+        "<td>" +
+        (s.duration_ms ? humanizeDuration(s.duration_ms) : "\u2014") +
+        "</td>" +
+        '<td class="deps-list">' +
+        (deps || "\u2014") +
+        "</td>" +
+        '<td class="deps-list">' +
+        (depsR || "\u2014") +
+        "</td>" +
+        "<td>" +
+        cfgBadges +
+        "</td>" +
+        '<td class="error-cell' +
+        (errMsg ? "" : " empty") +
+        '"' +
         (errMsg ? ' title="' + errMsg + '"' : "") +
         ">" +
         (errMsg || "\u2014") +
@@ -554,12 +601,24 @@
     var searching = q.length > 0;
 
     var filtered = rows.filter(function (html, i) {
-      var step = Object.keys(state.steps).map(function (n) { return state.steps[n]; }).sort(function (a, b) {
-        return (a.step_name || "").toLowerCase() < (b.step_name || "").toLowerCase() ? -1 : 1;
-      })[i];
+      var step = Object.keys(state.steps)
+        .map(function (n) {
+          return state.steps[n];
+        })
+        .sort(function (a, b) {
+          return (a.step_name || "").toLowerCase() < (b.step_name || "").toLowerCase() ? -1 : 1;
+        })[i];
       if (!step) return true;
       if (searching) {
-        var searchText = (step.step_name + " " + (step.step_type || "") + " " + step.status + " " + (step.error || "")).toLowerCase();
+        var searchText = (
+          step.step_name +
+          " " +
+          (step.step_type || "") +
+          " " +
+          step.status +
+          " " +
+          (step.error || "")
+        ).toLowerCase();
         if (searchText.indexOf(q) < 0) return false;
       }
       if (errorsOnly && step.status !== "failed" && step.status !== "canceled") return false;
@@ -574,9 +633,8 @@
     els.stepsTbody.innerHTML = visible.join("");
     els.stepsEmpty.style.display = visible.length ? "none" : "";
 
-    els.stepResultCount.textContent = searching || errorsOnly
-      ? filtered.length + " / " + rows.length + " steps"
-      : "";
+    els.stepResultCount.textContent =
+      searching || errorsOnly ? filtered.length + " / " + rows.length + " steps" : "";
 
     // Clear new-step markers after render
     state.newStepNames = {};
@@ -599,8 +657,11 @@
           return (
             '<button class="chip' +
             (t === "all" ? " active" : "") +
-            '" aria-pressed="' + (t === "all" ? "true" : "false") +
-            '" data-filter="' + t + '">' +
+            '" aria-pressed="' +
+            (t === "all" ? "true" : "false") +
+            '" data-filter="' +
+            t +
+            '">' +
             (t === "all" ? "all" : eventLabels[t] || t) +
             "</button>"
           );
@@ -632,21 +693,45 @@
       .map(function (e) {
         var phase = e.phase === "before" ? "\u25B4" : "\u25BE";
         var evtBadge =
-          '<span class="event-badge ' + esc(e.event_type) + '">' +
-          esc(eventLabels[e.event_type] || e.event_type) + "</span>";
+          '<span class="event-badge ' +
+          esc(e.event_type) +
+          '">' +
+          esc(eventLabels[e.event_type] || e.event_type) +
+          "</span>";
         var dur = e.duration_ms != null ? humanizeDuration(e.duration_ms) : "";
         var errTip = e.error ? ' data-error="' + esc(e.error) + '"' : "";
         return (
-          '<tr data-type="' + esc(e.event_type) + '" class="' + (e.error ? "has-error" : "") + '">' +
-          '<td class="mono">' + e.sequence + "</td>" +
-          '<td class="mono" title="' + esc(e.timestamp) + '">' +
-          new Date(e.timestamp).toLocaleTimeString() + "</td>" +
-          "<td>" + evtBadge + "</td>" +
-          '<td class="mono">' + phase + "</td>" +
-          '<td class="mono">' + esc(e.step_name) + "</td>" +
-          "<td>" + (e.attempt || "") + "</td>" +
-          '<td class="mono">' + dur + "</td>" +
-          "<td" + errTip + ">" +
+          '<tr data-type="' +
+          esc(e.event_type) +
+          '" class="' +
+          (e.error ? "has-error" : "") +
+          '">' +
+          '<td class="mono">' +
+          e.sequence +
+          "</td>" +
+          '<td class="mono" title="' +
+          esc(e.timestamp) +
+          '">' +
+          new Date(e.timestamp).toLocaleTimeString() +
+          "</td>" +
+          "<td>" +
+          evtBadge +
+          "</td>" +
+          '<td class="mono">' +
+          phase +
+          "</td>" +
+          '<td class="mono">' +
+          esc(e.step_name) +
+          "</td>" +
+          "<td>" +
+          (e.attempt || "") +
+          "</td>" +
+          '<td class="mono">' +
+          dur +
+          "</td>" +
+          "<td" +
+          errTip +
+          ">" +
           (e.error ? '<span class="inline-error">' + esc(e.error) + "</span>" : "") +
           "</td>" +
           "</tr>"
@@ -730,7 +815,9 @@
   function renderTimeline() {
     if (!state.report || !state.report.steps) return;
 
-    var steps = state.report.steps.filter(function (s) { return s.started_at; });
+    var steps = state.report.steps.filter(function (s) {
+      return s.started_at;
+    });
     if (!steps.length) {
       els.timelineContainer.innerHTML =
         '<div class="graph-placeholder">No timing data yet...</div>';
@@ -742,33 +829,53 @@
     });
 
     var minT = new Date(steps[0].started_at).getTime();
-    var maxT = Math.max.apply(null, steps.map(function (s) {
-      return new Date(s.finished_at || s.started_at).getTime();
-    }));
+    var maxT = Math.max.apply(
+      null,
+      steps.map(function (s) {
+        return new Date(s.finished_at || s.started_at).getTime();
+      }),
+    );
     var range = maxT - minT || 1;
 
-    function pct(ts) { return ((ts - minT) / range) * 100; }
+    function pct(ts) {
+      return ((ts - minT) / range) * 100;
+    }
 
-    var rowsHtml = steps.map(function (s) {
-      var st = new Date(s.started_at).getTime();
-      var ft = s.finished_at ? new Date(s.finished_at).getTime() : st;
-      var left = pct(st).toFixed(2);
-      var width = Math.max(0.3, pct(ft) - pct(st)).toFixed(2);
-      var icon = statusIcons[s.status] || "";
-      var tip = esc(s.step_name) + " | " + s.status +
-        (s.duration_ms ? " | " + humanizeDuration(s.duration_ms) : "") +
-        (s.attempt_count > 1 ? " | " + s.attempt_count + " attempts" : "");
-      return (
-        '<div class="gantt-row">' +
-        '<div class="gantt-label">' + (icon ? icon + " " : "") + esc(s.step_name) + "</div>" +
-        '<div class="gantt-track">' +
-        '<div class="gantt-bar ' + esc(s.status) + '" style="left:' + left + "%;width:" + width + '%" title="' + tip + '"></div>' +
-        "</div></div>"
-      );
-    }).join("");
+    var rowsHtml = steps
+      .map(function (s) {
+        var st = new Date(s.started_at).getTime();
+        var ft = s.finished_at ? new Date(s.finished_at).getTime() : st;
+        var left = pct(st).toFixed(2);
+        var width = Math.max(0.3, pct(ft) - pct(st)).toFixed(2);
+        var icon = statusIcons[s.status] || "";
+        var tip =
+          esc(s.step_name) +
+          " | " +
+          s.status +
+          (s.duration_ms ? " | " + humanizeDuration(s.duration_ms) : "") +
+          (s.attempt_count > 1 ? " | " + s.attempt_count + " attempts" : "");
+        return (
+          '<div class="gantt-row">' +
+          '<div class="gantt-label">' +
+          (icon ? icon + " " : "") +
+          esc(s.step_name) +
+          "</div>" +
+          '<div class="gantt-track">' +
+          '<div class="gantt-bar ' +
+          esc(s.status) +
+          '" style="left:' +
+          left +
+          "%;width:" +
+          width +
+          '%" title="' +
+          tip +
+          '"></div>' +
+          "</div></div>"
+        );
+      })
+      .join("");
 
-    els.timelineContainer.innerHTML =
-      '<div class="gantt-grid">' + rowsHtml + "</div>";
+    els.timelineContainer.innerHTML = '<div class="gantt-grid">' + rowsHtml + "</div>";
   }
 
   // === Footer ===
@@ -818,7 +925,10 @@
       if (focused) {
         e.preventDefault();
         var cur = tabList.indexOf(focused);
-        var next = e.key === "ArrowRight" ? (cur + 1) % tabList.length : (cur - 1 + tabList.length) % tabList.length;
+        var next =
+          e.key === "ArrowRight"
+            ? (cur + 1) % tabList.length
+            : (cur - 1 + tabList.length) % tabList.length;
         switchTab(tabList[next]);
       }
     }
@@ -871,7 +981,8 @@
       tooltip.textContent = msg;
       tooltip.style.left = "-9999px";
       tooltip.classList.add("visible");
-      var tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+      var tw = tooltip.offsetWidth,
+        th = tooltip.offsetHeight;
       var left = r.left;
       var top = r.bottom + 6;
       if (left + tw > window.innerWidth - 12) left = Math.max(12, window.innerWidth - tw - 12);

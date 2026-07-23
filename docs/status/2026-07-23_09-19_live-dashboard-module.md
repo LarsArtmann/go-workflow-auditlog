@@ -8,16 +8,16 @@
 
 ### New `live/` sub-module (2,406 lines across 8 files)
 
-| File | Lines | Purpose | Status |
-|------|-------|---------|--------|
-| `hub.go` | 155 | SSE subscriber registry, fan-out OnEvent, SignalComplete, non-blocking broadcast | DONE |
-| `server.go` | 387 | HTTP server: SSE handler, /api/report, /api/health, dashboard serving, New() convenience | DONE |
-| `dashboard.go` | 176 | HTML template assembly reusing viz CSS + live CSS + JS + daghtml graph JS | DONE |
-| `dashboard.css` | 198 | Live-specific CSS: pulsing badge, connection status, step animations, placeholders | DONE |
-| `dashboard.js` | 895 | SSE client + incremental rendering engine with requestAnimationFrame batching | DONE |
-| `server_test.go` | 449 | 14 tests covering dashboard HTML, health, report, SSE snapshot/live/complete/fanout, hub | DONE |
-| `demo/main.go` | 146 | Multi-step pipeline demo with retry (fetch → validate → transform/enrich → save → notify) | DONE |
-| `doc.go` | — | Package documentation | DONE |
+| File             | Lines | Purpose                                                                                   | Status |
+| ---------------- | ----- | ----------------------------------------------------------------------------------------- | ------ |
+| `hub.go`         | 155   | SSE subscriber registry, fan-out OnEvent, SignalComplete, non-blocking broadcast          | DONE   |
+| `server.go`      | 387   | HTTP server: SSE handler, /api/report, /api/health, dashboard serving, New() convenience  | DONE   |
+| `dashboard.go`   | 176   | HTML template assembly reusing viz CSS + live CSS + JS + daghtml graph JS                 | DONE   |
+| `dashboard.css`  | 198   | Live-specific CSS: pulsing badge, connection status, step animations, placeholders        | DONE   |
+| `dashboard.js`   | 895   | SSE client + incremental rendering engine with requestAnimationFrame batching             | DONE   |
+| `server_test.go` | 449   | 14 tests covering dashboard HTML, health, report, SSE snapshot/live/complete/fanout, hub  | DONE   |
+| `demo/main.go`   | 146   | Multi-step pipeline demo with retry (fetch → validate → transform/enrich → save → notify) | DONE   |
+| `doc.go`         | —     | Package documentation                                                                     | DONE   |
 
 ### Supporting changes
 
@@ -28,11 +28,11 @@
 
 ### Verification (ALL GREEN)
 
-| Module | Build | Vet | Test -race | Lint |
-|--------|-------|-----|------------|------|
-| Core (`auditlog`) | OK | OK | OK | 0 issues |
-| Viz | OK | OK | OK | 0 issues |
-| Live | OK | OK | OK | 0 issues |
+| Module            | Build | Vet | Test -race | Lint     |
+| ----------------- | ----- | --- | ---------- | -------- |
+| Core (`auditlog`) | OK    | OK  | OK         | 0 issues |
+| Viz               | OK    | OK  | OK         | 0 issues |
+| Live              | OK    | OK  | OK         | 0 issues |
 
 ### Smoke test results (via demo)
 
@@ -46,12 +46,14 @@
 ## b) PARTIALLY DONE
 
 ### Dashboard JS rendering engine
+
 - **Steps table**: Works but rebuilds entire table on every render tick. For large workflows (100+ steps), this causes flicker. Should diff-patch instead.
 - **DAG Graph during execution**: Shows placeholder until `complete` event arrives. Live graph updates (adding nodes as steps start) are NOT implemented — the graph only renders once on `snapshot` or `complete`.
 - **Timeline/Gantt**: Only renders from `report.steps` which requires `Snapshot(w)` to have been called. During live execution, timeline shows placeholder.
 - **Waveform**: Renders from the full events array on each tick. Works but inefficient for large event counts.
 
 ### Test coverage gaps
+
 - No test for concurrent Subscribe/Unsubscribe during OnEvent fan-out
 - No test for the demo binary itself
 - No fuzz test for SSE payload injection
