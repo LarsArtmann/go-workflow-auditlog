@@ -3,12 +3,11 @@ package live
 import (
 	"bytes"
 	"context"
+	"encoding/json/jsontext"
 	"encoding/json/v2"
 	"fmt"
 	"net/http"
 	"time"
-
-	"encoding/json/jsontext"
 
 	corelive "github.com/larsartmann/auditlog-core/live"
 	"github.com/larsartmann/go-output/daghtml"
@@ -141,8 +140,7 @@ func makeReportProvider(auditor *auditlog.Auditor) corelive.ReportProvider {
 
 		var buf bytes.Buffer
 
-		encoder := jsontext.NewEncoder(&buf)
-		encoder.SetIndent("", "  ")
+		encoder := jsontext.NewEncoder(&buf, jsontext.WithIndent("  "))
 
 		err := json.MarshalEncode(encoder, report)
 		if err != nil {
