@@ -8,7 +8,7 @@ require (
 	github.com/larsartmann/go-error-family v0.7.0
 	github.com/larsartmann/go-output v0.30.4
 	github.com/larsartmann/go-output/d2 v0.30.4
-	github.com/larsartmann/go-output/daghtml v0.30.4
+	github.com/larsartmann/go-output/daghtml v0.31.1
 	github.com/larsartmann/go-output/delimited v0.30.4
 	github.com/larsartmann/go-output/graph v0.30.4
 	github.com/larsartmann/go-output/markdown v0.30.4
