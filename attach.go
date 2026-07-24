@@ -35,6 +35,24 @@ func (a *Auditor) Attach(w *flow.Workflow) *flow.Workflow {
 	return w
 }
 
+// CaptureDAG traverses the workflow's step structure and pre-populates step
+// records with names, types, dependencies, retry/timeout config, and a
+// "pending" status. This makes the DAG available in Report() BEFORE w.Do(ctx)
+// is called, enabling real-time dashboards to render the full step graph
+// immediately on connect.
+//
+// Call this AFTER Attach(w) and BEFORE w.Do(ctx). Steps that already have
+// records (from a prior CaptureDAG or from event capture) are not overwritten.
+//
+// When the Auditor is disabled, CaptureDAG is a no-op.
+func (a *Auditor) CaptureDAG(w *flow.Workflow) {
+	if !a.config.Enabled || w == nil {
+		return
+	}
+
+	a.recorder.captureDAG(w)
+}
+
 // Snapshot reads the workflow's final state after Do() to capture the full DAG
 // structure, final statuses, and any steps that were skipped or canceled
 // (which bypass Before/After callbacks entirely).

@@ -166,7 +166,7 @@ func (srv *Server) ListenAndServe() error {
 
 	srv.startTime = time.Now()
 
-	ln, err := net.Listen("tcp", srv.config.Addr) //nolint:noctx // ListenAndServe doesn't accept a context
+	listener, err := net.Listen("tcp", srv.config.Addr) //nolint:noctx // ListenAndServe doesn't accept a context
 	if err != nil {
 		srv.serverMu.Unlock()
 
@@ -174,7 +174,7 @@ func (srv *Server) ListenAndServe() error {
 	}
 
 	// Store the actual address (resolves ":0" to the OS-assigned port).
-	srv.config.Addr = ln.Addr().String()
+	srv.config.Addr = listener.Addr().String()
 
 	srv.httpServer = &http.Server{ //nolint:exhaustruct // minimal config
 		Handler:           srv.mux,
@@ -183,7 +183,7 @@ func (srv *Server) ListenAndServe() error {
 
 	srv.serverMu.Unlock()
 
-	return fmt.Errorf("listen and serve: %w", srv.httpServer.Serve(ln))
+	return fmt.Errorf("listen and serve: %w", srv.httpServer.Serve(listener))
 }
 
 // Addr returns the server's listen address. After ListenAndServe succeeds,

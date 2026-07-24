@@ -467,7 +467,9 @@ func TestHub_ConcurrentSubscribeUnsubscribe(t *testing.T) {
 	t.Parallel()
 
 	hub := live.NewHub()
+
 	const goroutines = 20
+
 	const iterations = 50
 
 	var wg sync.WaitGroup
@@ -645,23 +647,35 @@ func TestServer_ListenAndServe_Addr_Shutdown(t *testing.T) {
 
 	// Wait for server to start by polling health endpoint
 	var lastErr error
+
 	for range 50 {
 		addr := server.Addr()
-		if addr != "" && addr != ":0" {
-			url := "http://" + addr + "/api/health"
-			ctx := t.Context()
-			req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-			resp, err := http.DefaultClient.Do(req)
-			if err == nil {
-				_ = resp.Body.Close()
 
-				if resp.StatusCode == http.StatusOK {
-					lastErr = nil
-					break
-				}
+		if addr == "" || addr == ":0" {
+			time.Sleep(20 * time.Millisecond)
+
+			continue
+		}
+
+		url := "http://" + addr + "/api/health"
+
+		ctx := t.Context()
+
+		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+
+		resp, err := http.DefaultClient.Do(req)
+		if err == nil {
+			_ = resp.Body.Close()
+
+			if resp.StatusCode == http.StatusOK {
+				lastErr = nil
+
+				break
 			}
 		}
+
 		lastErr = err
+
 		time.Sleep(20 * time.Millisecond)
 	}
 
