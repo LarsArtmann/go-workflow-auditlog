@@ -113,6 +113,7 @@ func main() {
 	)
 
 	auditor.Attach(w)
+	auditor.CaptureDAG(w)
 
 	go func() {
 		fmt.Println("============================================")

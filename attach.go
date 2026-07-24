@@ -152,3 +152,72 @@ func (r *Recorder) snapshotStepLocked(w *flow.Workflow, step flow.Steper) {
 	sortByName(deps)
 	rec.dependencies = deps
 }
+
+// captureDAG traverses the workflow to pre-populate step records with names,
+// types, dependencies, retry/timeout config, and a "pending" status. This
+// enables DAG visualization before execution begins.
+func (r *Recorder) captureDAG(w *flow.Workflow) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for _, root := range w.Steps() {
+		flow.Traverse(root, func(step flow.Steper, _ []flow.Steper) flow.TraverseDecision {
+			// Skip wrapper steps that don't have their own state (NamedStep, etc).
+			if w.StateOf(step) == nil {
+				return flow.TraverseEndBranch
+			}
+
+			r.captureDAGStepLocked(w, step)
+
+			return flow.TraverseContinue
+		})
+	}
+}
+
+// captureDAGStepLocked pre-populates a step record with structural information
+// (name, type, dependencies, retry/timeout config) and a "pending" status.
+// If a record already exists (from event capture or a prior call), it is not
+// overwritten — live execution data always wins.
+// Caller must hold r.mu.
+func (r *Recorder) captureDAGStepLocked(w *flow.Workflow, step flow.Steper) {
+	// Skip if already created — execution data should not be overwritten.
+	if _, exists := r.steps[step]; exists {
+		return
+	}
+
+	name := flow.String(step)
+	now := time.Now()
+
+	rec := r.getOrCreateStepLocked(step, name, now)
+
+	// Override the default "running" status to "pending" — execution hasn't started.
+	rec.status = StepStatusPending
+
+	// Capture dependencies from the workflow structure.
+	upstreams := w.UpstreamOf(step)
+	deps := make([]StepRef, 0, len(upstreams))
+
+	for up := range upstreams {
+		deps = append(deps, StepRef{Name: flow.String(up), StepType: stepTypeName(up)})
+	}
+
+	sortByName(deps)
+	rec.dependencies = deps
+
+	// Capture retry and timeout configuration.
+	state := w.StateOf(step)
+	if state != nil {
+		if opt := state.Option(); opt != nil {
+			if opt.RetryOption != nil {
+				rec.hasRetry = true
+
+				//nolint:gosec // Attempts is a small retry count, overflow is not realistic.
+				rec.maxAttempts = int(opt.RetryOption.Attempts)
+			}
+
+			if opt.Timeout != nil {
+				rec.hasTimeout = true
+			}
+		}
+	}
+}
