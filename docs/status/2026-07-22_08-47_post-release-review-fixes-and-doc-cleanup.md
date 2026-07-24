@@ -4,6 +4,11 @@
 **Session scope**: Executing the v0.7.0 release readiness review action items, then moving completed TODO/ROADMAP items to CHANGELOG
 **Git state**: 2 commits ahead of origin/master (`00984c5`, `8038d22`), working tree clean
 
+> **Update 2026-07-24:** the module split and streaming NDJSON listed "NOT
+> STARTED" below have both shipped since this report. A live real-time SSE
+> dashboard module was also added. The codebase now has 3 Go modules. Full
+> status in [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## a) FULLY DONE
@@ -194,3 +199,21 @@ AGENTS.md line 126 says the template has "six `%s` verbs" but the actual templat
 ### Q3: Is the coverage drop from 95.6% to 95.5% acceptable, or should I chase the last 0.1%?
 
 The drop is caused by adding new code paths (`TableColumn.String()`, `defaultColumnsCopy()`) — the numerator (covered lines) grew but the denominator (total lines) grew slightly more. All new code is fully tested. The remaining uncovered lines are all unreachable defensive paths (e.g., `strings.Builder.Write` that never fails on valid types). Should I spend time trying to hit 95.6%+ again, or is 95.5% fine?
+
+---
+
+## Resolution (2026-07-24)
+
+The "NOT STARTED" items from this report and their resolution:
+
+| Report item | Resolution |
+| --- | --- |
+| §c Module split | **Shipped** — core/viz/live are separate Go modules, merged to master |
+| §c Streaming NDJSON export | **Shipped** — `NDJSONStreamer`, 100% `stream.go` coverage |
+| §e AGENTS.md `htmlTemplate` says "six %s verbs" but actually eight | **Fixed** — AGENTS.md now says "eight `%s` verbs" |
+| §e STABILITY.md not updated for `TableColumn.String()` | **Updated** — STABILITY.md classifies streaming API as Evolving |
+| §e `writeGraph` single-caller smell | **Moved to viz** during module split |
+| §e b.Loop() migration (9 sites) | **Still open** — gopls `stdversion` warnings persist |
+| §f Live real-time dashboard module | **Shipped** — `live/` module with SSE, demo at `:18080` |
+
+**Still open**: b.Loop() migration, OTel bridge, CLI tool, CONTRIBUTING.md.

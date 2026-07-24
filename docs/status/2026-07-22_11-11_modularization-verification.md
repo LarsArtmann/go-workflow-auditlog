@@ -5,6 +5,12 @@
 **Snapshot:** Manual verification run after core-viz module split.  
 **Prepared by:** Crush (automated assistant)
 
+> **Update 2026-07-24:** the module split was merged to master. The release
+> logistics listed NOT STARTED below (push, PR, tag) were completed. Streaming
+> NDJSON and a live SSE dashboard module have since shipped as additional
+> modules. The branch `modularize/core-viz-split` no longer exists — work is on
+> master. Full status in [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## Executive Summary
@@ -179,3 +185,27 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 ---
 
 _Report written at 2026-07-22 11:12 CEST. Waiting for further instructions._
+
+---
+
+## Resolution (2026-07-24)
+
+The modularization was merged to master. Release logistics and follow-up:
+
+| Report item | Resolution |
+| --- | --- |
+| §c Branch `modularize/core-viz-split` — 21 commits ahead | **Merged to master** |
+| §c Push branch, create PR, merge | **Done** — work is on master |
+| §c Decide alpha version tag (proposed v0.3.0) | **Not tagged as v0.3.0** — the versioning question was mooted; the project continued at v0.7.0+ (pre-1.0 alpha) |
+| §c Publish GitHub release | **Not separately released** — modularization was an incremental alpha-phase change |
+| §c Write consumer migration guide | **Not written** — the AGENTS.md and README were updated instead |
+| §c Generate HTML dashboard version of this report | **Not done** |
+| §f Streaming NDJSON export | **Shipped** — `NDJSONStreamer`, 100% coverage |
+| §f Live real-time dashboard | **Shipped** — `live/` module with SSE |
+| §e ~46 gopls warnings (b.N, stdversion) | **Still open** — b.Loop() migration not done |
+
+**Note on versioning:** This report proposed `v0.3.0` as the next tag, which
+conflicted with the already-tagged `v0.7.0`. The project remained at v0.7.0+
+through the alpha phase. No separate modularization release was cut.
+
+**Still open**: b.Loop() migration, OTel bridge, CLI tool, CONTRIBUTING.md.

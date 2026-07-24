@@ -4,6 +4,12 @@
 **Session**: Continuation of streaming NDJSON export work (started in prior session, completed in this one)
 **Branch**: master (9 commits ahead of origin)
 
+> **Update 2026-07-24:** all "NOT STARTED" items below have since been
+> addressed. README has a streaming section, CHANGELOG and STABILITY.md have
+> streaming entries. The "9 commits ahead" is long stale — many more commits
+> landed since, including the live dashboard module. Full status in
+> [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## A) FULLY DONE
