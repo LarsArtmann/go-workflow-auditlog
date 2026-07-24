@@ -48,9 +48,10 @@ type Config struct {
 	// Default 15 seconds. Set to 0 to disable heartbeats.
 	HeartbeatInterval time.Duration
 	// CORSAllowedOrigins controls the Access-Control-Allow-Origin header
-	// on all API endpoints. Default "*" (allow all origins). Set to a
-	// specific origin (e.g. "https://dashboard.example.com") to restrict.
-	// Set to "" to disable CORS headers entirely.
+	// on all API endpoints. Default "*" (allow all origins, convenient for
+	// development). Set to a specific origin (e.g.
+	// "https://dashboard.example.com") to restrict. Set to "off" to disable
+	// CORS headers entirely.
 	CORSAllowedOrigins string
 }
 
@@ -192,6 +193,9 @@ func (srv *Server) setupRoutes() {
 		srv.mux.HandleFunc("/api/export/ndjson", srv.corsMiddleware(srv.handleExportNDJSON))
 		srv.mux.HandleFunc("/api/export/html", srv.corsMiddleware(srv.handleExportHTML))
 	} else {
+		// Register both /prefix and /prefix/ so the dashboard works with or
+		// without a trailing slash (avoids Go ServeMux 307 redirect).
+		srv.mux.HandleFunc(pfx, srv.handleDashboard)
 		srv.mux.HandleFunc(pfx+"/", srv.handleDashboard)
 		srv.mux.HandleFunc(pfx+"/api/report", srv.corsMiddleware(srv.handleReport))
 		srv.mux.HandleFunc(pfx+"/api/events", srv.corsMiddleware(srv.handleSSE))
@@ -202,11 +206,12 @@ func (srv *Server) setupRoutes() {
 }
 
 // corsMiddleware adds CORS headers and handles OPTIONS preflight for API endpoints.
+// When CORSAllowedOrigins is "off", no CORS headers are added.
 func (srv *Server) corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	origin := srv.config.CORSAllowedOrigins
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		if origin != "" {
+		if origin != "" && origin != "off" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Accept")

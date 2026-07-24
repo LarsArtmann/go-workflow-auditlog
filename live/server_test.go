@@ -803,7 +803,7 @@ func TestServer_CORSOptionsPreflight(t *testing.T) {
 	}
 }
 
-func TestServer_CORSDisabledWhenEmpty(t *testing.T) {
+func TestServer_CORSDisabledWithOff(t *testing.T) {
 	t.Parallel()
 
 	hub := live.NewHub()
@@ -814,7 +814,7 @@ func TestServer_CORSDisabledWhenEmpty(t *testing.T) {
 	}
 
 	server := live.NewServer(hub, auditor, live.Config{
-		CORSAllowedOrigins: "", // disable CORS
+		CORSAllowedOrigins: "off", // disable CORS
 	})
 
 	ctx := t.Context()
