@@ -604,6 +604,8 @@ The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained inte
 ### Screenshots
 
 <table>
+  <tr>
+    <td width="50%" align="center"><b>DAG Graph</b> — interactive SVG with pan/zoom</td>
     <td width="50%" align="center"><b>Timeline</b> — duration bar chart by status</td>
   </tr>
   <tr>
