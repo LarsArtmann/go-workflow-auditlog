@@ -5,6 +5,12 @@
 **Baseline**: 258 tests (1 failing), 95.6% coverage, stale AGENTS.md, monolithic test file
 **After**: 265 tests (all passing), 95.7% coverage, 0 lint issues, 2 new public API methods
 
+> **Update 2026-07-24:** the golden file "fix" in §a-1 was undone twice more
+> before the permanent structural-validation fix (report 08:47). The "NOT
+> STARTED" items — module split, streaming NDJSON, live dashboard — have all
+> shipped. Current codebase: 3 modules, ~389 test functions. Full status in
+> [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## a) FULLY DONE
@@ -288,3 +294,29 @@ On-demand is simpler (no struct changes, no JSON impact) but re-scans the event 
 ### 3. Should the `coverage_test.go` split be done differently — more files (4-5) with smaller scope, or is the current 3-way split acceptable?
 
 `coverage_report_test.go` ended up at 1014 lines — barely better than the original 1552-line monolith. I could split it further (e.g., `coverage_metrics_test.go` for peak/critical/wall-clock, `coverage_validation_test.go` for validate tests) but I'm not sure if the project has a preferred maximum file length or test file organization convention.
+
+---
+
+## Resolution (2026-07-24)
+
+The golden file fix in §a-1 was temporary — it was undone by commit `cedd5e3`
+and regenerated again before the **permanent** fix in the 08:47 report replaced
+byte comparison with structural validation (`TestReport_WriteHTML_GoldenContent`)
+and deleted the golden file entirely.
+
+Key "NOT STARTED" items and their resolution:
+
+| Report item | Resolution |
+| --- | --- |
+| §a-1 Golden file fix | **Permanently resolved** (08:47 report) — golden file deleted, structural validation replaces byte comparison |
+| §c Pre-filter table columns | **Shipped v0.7.0** — `WithColumns()` pre-filter in `buildTableData` |
+| §c Post-processing diagram direction | **Shipped v0.7.0** — `WithDirection()` on all 4 formats |
+| §c Module split | **Shipped** — merged to master, 3 modules (core/viz/live) |
+| §c Streaming NDJSON export | **Shipped** — `NDJSONStreamer`, 100% `stream.go` coverage |
+| §e-3 CriticalPath O(n*k) StepByName scans | **Optimized** — algorithm now memoized; steps injected from Go into report JSON |
+| §e-2 PeakConcurrencySteps re-scans events | **Shipped v0.7.0** — accepted on-demand cost |
+| §d-3 `coverage_test.go` deleted with `trash` not `git mv` | History severed; accepted as irreversible |
+| §f-11 b.Loop() migration (11 sites) | **Still open** — gopls `stdversion`/`b.N` warnings persist |
+
+**Still open**: CLI tool, OTel bridge, `FailureReason` categories, b.Loop()
+migration, CONTRIBUTING.md.
