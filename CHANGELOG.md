@@ -46,6 +46,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     core so both modules can import it without a circular dependency.
 - **`TableColumn.String()` method** — returns the column header name (e.g.
   `"Step"`, `"Max Attempts"`) for debug and logging ergonomics.
+- **Live real-time dashboard module** (`live/`) — a new third Go module
+  providing a real-time HTTP dashboard with Server-Sent Events (SSE) streaming.
+  Steps light up as they execute, with incremental rendering via
+  `requestAnimationFrame` batching. The DAG graph tab activates on completion
+  with the full Sugiyama-layout dependency structure. Includes:
+  - `Hub` — SSE subscriber registry with non-blocking fan-out `OnEvent` broadcast
+  - `Server` — HTTP server: SSE handler (`/api/events`), `/api/report`,
+    `/api/health`, dashboard serving, `ServeHTTP` for `http.Handler` integration
+  - `SignalComplete()` — notifies all connected clients when the workflow finishes
+  - `live.New(config, serverConfig)` — convenience constructor that wires
+    `hub.OnEvent` as `Config.OnEvent`, returns `(*Server, *Auditor, error)`
+  - Demo pipeline at `live/demo` (fetch → validate → transform → save → notify
+    with retry) serving at `http://localhost:18080`
+  - Depends on `github.com/larsartmann/go-sse` (private, `replace` directive in
+    `go.mod`; will be removed once go-sse is public)
+- **`d2 fmt` in treefmt** — D2 diagram files (`.d2`) are now formatted
+  automatically via `d2-fmt` in the `flake.nix` treefmt configuration. The `d2`
+  CLI is included in the devShell.
 
 ### Changed
 
@@ -81,6 +99,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`enhanceGraph()` double-application bug** — switching to the graph tab a
   second time re-added retry badges and event listeners. Added an idempotency
   guard (`container.dataset.enhanced`) so enhancement runs exactly once.
+- **D2/DOT diagram quoting** — hex colors (`#2d5a2d`) and labels with
+  spaces/brackets (`fetch [Succeeded]`) are now properly quoted in D2 and DOT
+  output. D2 treats `#` as a comment character; DOT edge `color` attributes
+  needed double-quote wrapping. Fix is in go-output v0.31.1 (commit `d91cc22`),
+  wired locally via `go.work`. **Pending:** the v0.31.1 tag must be pushed to
+  remote before `viz/go.mod` can bump from v0.30.4 — until then the fix is
+  local-only.
 
 ## [0.7.0] - 2026-07-22
 

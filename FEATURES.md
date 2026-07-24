@@ -1,8 +1,8 @@
 # Features — go-workflow-auditlog
 
-Honest feature inventory by status. Verified against the codebase on 2026-07-13.
+Honest feature inventory by status. Verified against the codebase on 2026-07-24.
 
-**Module**: `github.com/larsartmann/go-workflow-auditlog` · **Go**: 1.26+ · **Status**: ALPHA
+**Modules**: `github.com/larsartmann/go-workflow-auditlog` (core) · `…/viz` (visualization) · `…/live` (real-time dashboard) · **Go**: 1.26+ · **Status**: ALPHA
 
 ---
 
@@ -94,34 +94,47 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 ### Dashboard Visualization Enhancements
 
-- **Critical path highlighting (graph)** — toggle button highlights the longest-duration dependency chain with glowing accent strokes on nodes and thicker accent edges; computed client-side via memoized DFS mirroring the Go algorithm
+- **Critical path highlighting (graph)** — toggle button highlights the longest-duration dependency chain with glowing accent strokes on nodes and thicker accent edges; critical-path steps injected from Go (`CriticalPathSteps` field) with client-side JS fallback
 - **Critical path overlay (Gantt)** — timeline bars on the critical path get accent-colored glow and bold labels
 - **Duration labels on graph nodes** — compact inline duration (e.g., `fetch · 10ms`) via `humanizeMs()` helper in `daghtml_adapter.go`
 - **Retry count badges** — `↻N` amber badge on graph nodes with `attempt_count > 1`
 - **Graph search/filter** — search input highlights matching nodes (info stroke) and dims non-matches to 15% opacity
 - **Idempotent graph enhancement** — `enhanceGraph()` guards against duplicate badge/listener application on repeated tab switches
 
+### Live Real-Time Dashboard (`live/` module)
+
+- **SSE streaming dashboard** — real-time HTTP dashboard where steps light up as they execute, with incremental rendering via `requestAnimationFrame` batching
+- **Hub** — SSE subscriber registry with non-blocking fan-out `OnEvent` broadcast; `SignalComplete()` notifies all clients when the workflow finishes
+- **Server** — HTTP server with SSE handler (`/api/events`), `/api/report`, `/api/health`, dashboard serving, `ServeHTTP` for `http.Handler` integration
+- **`live.New(config, serverConfig)`** — convenience constructor that wires `hub.OnEvent` as `Config.OnEvent`, returns `(*Server, *Auditor, error)`
+- **Live data flow** — browser connects to `/api/events` → receives `snapshot` event (current report + events + metadata + DAG) → incremental `event` messages as steps execute → `complete` event with final report + full DAG on `SignalComplete()`
+- **Demo pipeline** at `live/demo` (fetch → validate → transform → save → notify with retry) serving at `http://localhost:18080`
+- **Depends on `go-sse`** (`github.com/larsartmann/go-sse`, private, `replace` directive; will be removed once go-sse is public)
+
 ### Infrastructure
 
-- **go-output** dependency at v0.30.4 (root + all sub-modules aligned)
+- **Three Go modules**: core (`auditlog`), visualization (`viz`), live dashboard (`live`) — linked via `go.work` workspace
+- **go-output** dependency at v0.30.4 in `viz/go.mod` (v0.31.1 available locally via `go.work` with D2/DOT quoting fix; pending push to remote)
 - **go-error-family** at v0.7.0
+- **go-sse** at v0.0.0 (private, `replace` directive in `live/go.mod`)
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
 - **govulncheck** in CI (golang/govulncheck-action)
 - **actionlint** in CI (workflow linting)
-- **Coverage gate** at 92%
-- **flake.nix** devShell (Go 1.26.4, golangci-lint, govulncheck, actionlint; GOEXPERIMENT=jsonv2)
-- **flake-parts** + **treefmt-nix** for build automation
+- **Coverage**: core 95.5%, viz 91.7%, live 76.9% (CI gate ≥92% for core + viz combined)
+- **flake.nix** devShell (Go 1.26.4, golangci-lint, govulncheck, actionlint, `d2` CLI; GOEXPERIMENT=jsonv2)
+- **flake-parts** + **treefmt-nix** for build automation (includes `d2-fmt`, `nixfmt`, `gofmt`)
 - **Pre-commit hook** (vet + lint + test)
 - **STABILITY.md** documenting API stability promises
 - **`.goreleaser.yml`** for automated GitHub releases
 
 ### Documentation
 
-- `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns)
-- `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer
-- `CHANGELOG.md` — v0.7.0 tagged (table columns + diagram direction + CriticalPath/PeakConcurrencySteps + json/v2 + website)
+- `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns, 3-module architecture)
+- `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer, streaming section, screenshots
+- `CHANGELOG.md` — v0.7.0 tagged (table columns + diagram direction + CriticalPath/PeakConcurrencySteps + json/v2 + website); `[Unreleased]` covers streaming NDJSON, DAG viz enhancements, module split, live dashboard module
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
-- `example/main.go` — demos all export formats via `--export` flag
+- `example/main.go` — demos all export formats via `--export` flag (in `viz/` module)
+- `live/demo/main.go` — demos real-time SSE dashboard with retry pipeline
 
 ### Testing & Quality
 
@@ -130,7 +143,8 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Property-based tests**: Diff algebra (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output) — 200 iterations each, deterministic seeds; Classify wrapping-preserves-family + identity matches map
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
-- **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + godoc examples
+- **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + NDJSONStreamer throughput (100/1000/10000 events) + godoc examples
+- **~389 test functions** across 3 modules (core: 135 tests + 5 examples + 3 benchmarks + 4 fuzz; viz: 193 tests + 16 examples + 15 benchmarks + 3 fuzz; live: 15 tests)
 
 ---
 
