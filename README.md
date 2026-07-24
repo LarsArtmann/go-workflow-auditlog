@@ -301,12 +301,12 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 **Report-level export** (on `WorkflowReport`):
 
-| Method                                  | Description                                             |
-| --------------------------------------- | ------------------------------------------------------- |
-| `report.WriteCSV(w io.Writer) error`    | Writes all steps as CSV (14 columns).                   |
-| `report.WriteTSV(w io.Writer) error`    | Writes all steps as TSV.                                |
-| `report.ExportCSV(path string) error`   | Writes all steps as CSV to file.                        |
-| `report.ExportTSV(path string) error`   | Writes all steps as TSV to file.                        |
+| Method                                | Description                           |
+| ------------------------------------- | ------------------------------------- |
+| `report.WriteCSV(w io.Writer) error`  | Writes all steps as CSV (14 columns). |
+| `report.WriteTSV(w io.Writer) error`  | Writes all steps as TSV.              |
+| `report.ExportCSV(path string) error` | Writes all steps as CSV to file.      |
+| `report.ExportTSV(path string) error` | Writes all steps as TSV to file.      |
 
 Visualization functions live in `github.com/larsartmann/go-workflow-auditlog/viz` and operate on a `WorkflowReport` (e.g. from `audit.Report()`):
 
@@ -335,12 +335,12 @@ _ = viz.ExportHTML(report, "dashboard.html")
 | `report.Summary() string`                              | One-line human-readable summary.                                     |
 | `report.WriteJSON(w io.Writer) error`                  | Serialize report as JSON.                                            |
 | `report.WriteNDJSON(w io.Writer) error`                | Serialize events as NDJSON.                                          |
-| `report.WriteCSV(w io.Writer) error`                   | Serialize steps as CSV (14 columns).                                |
-| `report.WriteTSV(w io.Writer) error`                   | Serialize steps as TSV.                                             |
+| `report.WriteCSV(w io.Writer) error`                   | Serialize steps as CSV (14 columns).                                 |
+| `report.WriteTSV(w io.Writer) error`                   | Serialize steps as TSV.                                              |
 | `report.ExportJSON(path string) error`                 | Writes JSON report to file.                                          |
 | `report.ExportNDJSON(path string) error`               | Writes NDJSON events to file.                                        |
-| `report.ExportCSV(path string) error`                  | Writes CSV steps to file.                                           |
-| `report.ExportTSV(path string) error`                  | Writes TSV steps to file.                                           |
+| `report.ExportCSV(path string) error`                  | Writes CSV steps to file.                                            |
+| `report.ExportTSV(path string) error`                  | Writes TSV steps to file.                                            |
 | `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
 
 ### `viz` Package Functions

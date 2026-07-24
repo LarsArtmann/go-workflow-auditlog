@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   injected into JS for client-side URL construction.
 - **Live server export endpoints** — `/api/export/ndjson` and
   `/api/export/html` serve downloadable artifacts with `Content-Disposition:
-  attachment`.
+attachment`.
 - **Live dashboard export buttons** — JSON, NDJSON, and HTML download buttons
   in the dashboard header. URLs wired via `ROUTE_PREFIX`.
 - **CSV benchmark** — `BenchmarkWriteCSV_LargeReport` (100-step report).

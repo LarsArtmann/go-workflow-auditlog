@@ -18,7 +18,10 @@
   border: 1px solid var(--border);
   text-decoration: none;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
 }
 .export-btn:hover {
   color: var(--accent);
