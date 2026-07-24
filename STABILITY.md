@@ -44,6 +44,17 @@ These surfaces are functional but their exact shape may change:
 | `live.Server.SignalComplete()` / `live.Hub.OnEvent` / SSE event protocol               | SSE event payloads (`snapshot`, `event`, `complete`) may gain fields; wire format stable. |
 | `Auditor.CaptureDAG(w)`                                                                | New method; pre-populates step DAG structure from workflow definition before execution.   |
 
+### Live Server Enhancements (Evolving)
+
+These surfaces are new and may change between 0.x releases:
+
+| Surface                                                                                     | Reason                                                                              |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `live.Config.Prefix`                                                                        | Configurable route prefix (default "/"); URL construction may evolve.               |
+| `live.Config.CORSAllowedOrigins`                                                           | CORS header control (default "*", "off" disables); sentinel values may expand.      |
+| `live.Server` export endpoints (`/api/export/ndjson`, `/api/export/html`)                  | New endpoints; Content-Disposition headers may evolve.                              |
+| `WorkflowReport.WriteCSV` / `WriteTSV` / `ExportCSV` / `ExportTSV`                         | New delimited-value export; column set may expand.                                  |
+
 ## Unstable / Internal (no stability guarantee)
 
 - All unexported types and functions.
