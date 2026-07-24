@@ -3,6 +3,7 @@ package auditlog_test
 import (
 	"encoding/csv"
 	"errors"
+	"os"
 	"strings"
 	"testing"
 
@@ -26,6 +27,7 @@ func TestReport_WriteCSV(t *testing.T) {
 	}
 
 	reader := csv.NewReader(strings.NewReader(output))
+
 	records, err := reader.ReadAll()
 	if err != nil {
 		t.Fatalf("parse CSV: %v", err)
@@ -134,8 +136,22 @@ func TestReport_ExportTSV(t *testing.T) {
 	}
 }
 
+// ExampleWorkflowReport_WriteCSV demonstrates exporting all steps as CSV
+// for spreadsheet analysis or data pipelines. Pointer fields (timestamps,
+// duration, error) render as empty strings when nil.
 func ExampleWorkflowReport_WriteCSV() {
-	// Write all steps as CSV for spreadsheet analysis or data pipelines.
-	// var report auditlog.WorkflowReport
-	// report.WriteCSV(os.Stdout)
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{
+				StepRef: auditlog.StepRef{Name: "fetch"},
+				StepID:  1,
+				Status:  auditlog.StepStatusSucceeded,
+			},
+		},
+	}
+
+	_ = report.WriteCSV(os.Stdout)
+
+	// Output: step_id,step_name,step_type,status,attempt_count,max_attempts,started_at,finished_at,duration_ms,has_retry,has_timeout,error,dependencies,dependents
+	// 1,fetch,,succeeded,0,0,,,false,false,,,
 }
