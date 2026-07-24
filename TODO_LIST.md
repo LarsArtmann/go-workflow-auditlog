@@ -8,7 +8,7 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md).
 
 ## Infrastructure (blocking)
 
-- [ ] Bump `viz/go.mod` from v0.30.4 → v0.31.1 (go-output v0.31.1 tag is published and proxy-available; D2/DOT quoting fix is not consumed until bumped)
+(none currently)
 
 ## Live Dashboard (`live/` module)
 
