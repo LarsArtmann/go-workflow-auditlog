@@ -26,6 +26,3 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md).
 - [ ] Add "fit to view" on initial graph render
 - [ ] Add `--output-dir` flag to `viz/example/main.go` (root cause of repeated file-clobbering incidents)
 
-## Polish
-
-- [ ] Migrate benchmarks from `b.N` to `b.Loop()` (gopls `stdversion` warnings)

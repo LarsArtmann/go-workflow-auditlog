@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	flow "github.com/Azure/go-workflow"
@@ -254,9 +255,29 @@ func printStepDetails(report auditlog.WorkflowReport) {
 }
 
 // maybeExport writes all export artifacts if --export is set.
+// When --output-dir <dir> is provided, files are written there instead of
+// the current working directory. The directory is created if it doesn't exist.
 func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.WorkflowReport) {
-	if len(args) <= 1 || args[1] != "--export" {
+	outputDir := "."
+
+	parsed := parseExportArgs(args)
+	if parsed == nil {
 		return
+	}
+
+	outputDir = parsed.outputDir
+	if outputDir != "." {
+		if err := os.MkdirAll(outputDir, 0o755); err != nil {
+			log.Fatalf("create output dir %s: %v", outputDir, err)
+		}
+	}
+
+	join := func(name string) string {
+		if outputDir == "." {
+			return name
+		}
+
+		return outputDir + "/" + name
 	}
 
 	type exportTask struct {
@@ -265,26 +286,26 @@ func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.Workflo
 	}
 
 	tasks := []exportTask{
-		{"audit-report.json", func() error { return audit.ExportJSON("audit-report.json") }},
-		{"audit-events.ndjson", func() error { return audit.ExportNDJSON("audit-events.ndjson") }},
+		{"audit-report.json", func() error { return audit.ExportJSON(join("audit-report.json")) }},
+		{"audit-events.ndjson", func() error { return audit.ExportNDJSON(join("audit-events.ndjson")) }},
 		{"dag.mmd", func() error {
-			return viz.ExportMermaid(report, "dag.mmd",
+			return viz.ExportMermaid(report, join("dag.mmd"),
 				viz.WithDirection(output.DirectionRight))
 		}},
-		{"dag.dot", func() error { return viz.ExportGraphviz(report, "dag.dot") }},
-		{"dag.puml", func() error { return viz.ExportPlantUML(report, "dag.puml") }},
-		{"dag.d2", func() error { return viz.ExportD2(report, "dag.d2") }},
+		{"dag.dot", func() error { return viz.ExportGraphviz(report, join("dag.dot")) }},
+		{"dag.puml", func() error { return viz.ExportPlantUML(report, join("dag.puml")) }},
+		{"dag.d2", func() error { return viz.ExportD2(report, join("dag.d2")) }},
 		{"steps.csv", func() error {
-			return viz.ExportTable(report, "steps.csv", output.FormatCSV, output.RenderOptions{})
+			return viz.ExportTable(report, join("steps.csv"), output.FormatCSV, output.RenderOptions{})
 		}},
 		{"steps-compact.md", func() error {
-			return viz.ExportTable(report, "steps-compact.md", output.FormatMarkdown, output.RenderOptions{},
+			return viz.ExportTable(report, join("steps-compact.md"), output.FormatMarkdown, output.RenderOptions{},
 				viz.WithColumns(
 					viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration,
 				))
 		}},
-		{"tree.txt", func() error { return viz.ExportTree(report, "tree.txt") }},
-		{"dashboard.html", func() error { return viz.ExportHTML(report, "dashboard.html") }},
+		{"tree.txt", func() error { return viz.ExportTree(report, join("tree.txt")) }},
+		{"dashboard.html", func() error { return viz.ExportHTML(report, join("dashboard.html")) }},
 	}
 
 	for _, task := range tasks {
@@ -297,6 +318,42 @@ func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.Workflo
 	}
 
 	printSampleEvent(report)
+}
+
+// exportArgs holds parsed command-line flags for the export mode.
+type exportArgs struct {
+	outputDir string
+}
+
+// parseExportArgs scans os.Args for --export and optional --output-dir <dir>.
+// Returns nil if --export is absent.
+func parseExportArgs(args []string) *exportArgs {
+	hasExport := false
+	outputDir := "."
+
+	for i := 1; i < len(args); i++ {
+		switch args[i] {
+		case "--export":
+			hasExport = true
+		case "--output-dir":
+			if i+1 < len(args) {
+				outputDir = args[i+1]
+				i++
+			}
+		case "--output-dir=*":
+			// handled below via strings.CutPrefix if needed
+		}
+
+		if strings.HasPrefix(args[i], "--output-dir=") {
+			outputDir = strings.TrimPrefix(args[i], "--output-dir=")
+		}
+	}
+
+	if !hasExport {
+		return nil
+	}
+
+	return &exportArgs{outputDir: outputDir}
 }
 
 // printSampleEvent pretty-prints the first captured event as JSON.
