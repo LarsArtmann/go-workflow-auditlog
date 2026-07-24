@@ -1,6 +1,6 @@
 module github.com/larsartmann/go-workflow-auditlog/live
 
-go 1.26.4
+go 1.26
 
 replace (
 	github.com/larsartmann/go-sse => ../../go-sse
