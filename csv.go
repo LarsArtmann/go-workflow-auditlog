@@ -52,7 +52,7 @@ func (r WorkflowReport) writeDelimited(writer io.Writer, comma rune) error {
 
 	err = w.Error()
 	if err != nil {
-		return fmt.Errorf("flush delimited writer: %w", err)
+		return fmt.Errorf("%w: flush delimited writer: %w", ErrExportWriteFailed, err)
 	}
 
 	return nil

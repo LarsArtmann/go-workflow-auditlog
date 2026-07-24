@@ -78,6 +78,7 @@ ndjson.go          — ReadEvents NDJSON reader (sentinel errors, enum validatio
 replay.go          — ReplayEvents: reconstruct Report from event stream (uses stepCore from step.go, preserves RunID + assigns StepIDs)
 stream.go          — NDJSONStreamer: real-time streaming NDJSON writer (thread-safe OnEvent callback, WithAutoFlush, WithBufferSize, CreateNDJSONStreamer)
 classify.go        — Error classification: RegisterClassifications() + ErrorClassifications() map sentinel errors → go-error-family Family
+csv.go             — WriteCSV/WriteTSV/ExportCSV/ExportTSV: delimited-value export of all steps (stdlib encoding/csv, pointer fields as empty strings)
 helpers.go         — Utility helpers: CheckNoClobber, HasPointerAddress, NameCollisions + ErrFileExists sentinel + WriteToFile (atomic temp+rename export helper)
 testhelpers/     — Exported test fixtures, step constructors, assertions, and FailingWriter/ErrWriteFailed shared by both modules
 ```
@@ -122,7 +123,7 @@ example/            — Data pipeline demo (now in viz module)
 ```
 doc.go             — Package doc comment
 hub.go             — Hub: SSE subscriber registry, fan-out OnEvent, SignalComplete, non-blocking broadcast
-server.go          — HTTP server: SSE handler, /api/report, /api/health, dashboard serving, New() convenience, ServeHTTP
+server.go          — HTTP server: SSE handler, /api/report, /api/health, /api/export/ndjson, /api/export/html, dashboard serving, configurable Prefix, CORS middleware, New() convenience, ServeHTTP
 dashboard.go       — HTML template assembly: reuses viz CSS + embeds live CSS + JS + daghtml graph JS
 dashboard.css      — Live-specific CSS: pulsing live badge, connection status, step animations, graph placeholders
 dashboard.js       — SSE client + incremental rendering engine: state management, requestAnimationFrame batching, live tables/graph/timeline; full graph enhancements (critical path auto-highlight, retry badges, search/filter, fit-to-view, zoom, minimap for >20 nodes, direction toggle, node click navigation)
