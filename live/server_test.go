@@ -593,40 +593,29 @@ func TestServer_SSE_Heartbeat(t *testing.T) {
 	if err != nil {
 		t.Fatalf("connect SSE: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	scanner := bufio.NewScanner(resp.Body)
 
 	// Skip the initial snapshot
 	skipSnapshot(scanner)
 
-	// Look for heartbeat comment lines
 	deadline := time.After(2 * time.Second)
-	foundHeartbeat := false
 
 	for {
 		select {
 		case <-deadline:
-			if !foundHeartbeat {
-				t.Fatal("did not receive heartbeat within timeout")
-			}
-
-			return
+			t.Fatal("did not receive heartbeat within timeout")
 		default:
 		}
 
 		if !scanner.Scan() {
-			if !foundHeartbeat {
-				t.Fatal("scanner ended before heartbeat")
-			}
-
-			return
+			t.Fatal("scanner ended before heartbeat")
 		}
 
 		line := scanner.Text()
-		if strings.HasPrefix(line, ": heartbeat") {
-			foundHeartbeat = true
 
+		if strings.HasPrefix(line, ": heartbeat") {
 			return
 		}
 	}
@@ -690,7 +679,8 @@ func TestServer_ListenAndServe_Addr_Shutdown(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil {
+	err = server.Shutdown(ctx)
+	if err != nil {
 		t.Errorf("shutdown error: %v", err)
 	}
 }
@@ -714,7 +704,7 @@ func TestServer_SSE_ClientDisconnect(t *testing.T) {
 	if err != nil {
 		t.Fatalf("connect SSE: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Give server time to register the subscriber
 	time.Sleep(50 * time.Millisecond)
@@ -752,7 +742,8 @@ func TestServer_ShutdownNotRunning(t *testing.T) {
 
 	ctx := t.Context()
 
-	if err := server.Shutdown(ctx); err != nil {
+	err := server.Shutdown(ctx)
+	if err != nil {
 		t.Errorf("shutdown on non-running server should return nil, got %v", err)
 	}
 }

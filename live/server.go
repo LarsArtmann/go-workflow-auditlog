@@ -166,7 +166,7 @@ func (srv *Server) ListenAndServe() error {
 
 	srv.startTime = time.Now()
 
-	ln, err := net.Listen("tcp", srv.config.Addr)
+	ln, err := net.Listen("tcp", srv.config.Addr) //nolint:noctx // ListenAndServe doesn't accept a context
 	if err != nil {
 		srv.serverMu.Unlock()
 

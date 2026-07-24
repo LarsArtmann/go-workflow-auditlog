@@ -13,12 +13,13 @@ import (
 func TestServer_NilReportProvider(t *testing.T) {
 	t.Parallel()
 
-	srv := &Server{ //nolint:exhaustruct
+	srv := &Server{
 		hub: NewHub(),
 		mux: http.NewServeMux(),
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/api/report", nil)
+	ctx := t.Context()
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/report", nil)
 	rec := httptest.NewRecorder()
 
 	srv.handleReport(rec, req)
@@ -31,7 +32,7 @@ func TestServer_NilReportProvider(t *testing.T) {
 func TestServer_SendSnapshotNilProvider(t *testing.T) {
 	t.Parallel()
 
-	srv := &Server{ //nolint:exhaustruct
+	srv := &Server{
 		hub: NewHub(),
 		mux: http.NewServeMux(),
 	}
@@ -47,7 +48,7 @@ func TestServer_SendSnapshotNilProvider(t *testing.T) {
 func TestServer_SendCompleteNilProvider(t *testing.T) {
 	t.Parallel()
 
-	srv := &Server{ //nolint:exhaustruct
+	srv := &Server{
 		hub: NewHub(),
 		mux: http.NewServeMux(),
 	}
@@ -83,14 +84,15 @@ func TestServer_ListenAndServeAlreadyRunning(t *testing.T) {
 		_ = srv.ListenAndServe()
 	}()
 
-	// Give it a moment to start
 	time.Sleep(50 * time.Millisecond)
 
-	if err := srv.ListenAndServe(); err == nil {
+	err = srv.ListenAndServe()
+	if err == nil {
 		t.Fatal("expected ErrServerAlreadyRunning on second ListenAndServe")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
 	_ = srv.Shutdown(ctx)
 }
