@@ -58,6 +58,7 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - [Streaming NDJSON](#streaming-ndjson)
 - [Diagrams](#diagrams)
 - [HTML Dashboard](#html-dashboard)
+- [Screenshots](#screenshots)
 - [Concurrency Model](#concurrency-model)
 - [Step Naming](#step-naming)
 - [Known Limitations](#known-limitations)
@@ -80,7 +81,7 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
 - **Error classification** — auto-registered with [go-error-family](https://github.com/larsartmann/go-error-family) for `Classify()`, `IsRetryable()`, `ExitCode()`
-- **319 tests, ~96% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
+- **389 tests across 3 modules, ~96% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
 
 ## Installation
 
@@ -600,9 +601,9 @@ The `viz.WriteHTML` / `viz.ExportHTML` functions produce a **self-contained inte
 - **Graph search/filter** — search input highlights matching nodes and dims non-matches to 15% opacity
 - **Critical path overlay on Timeline** — bars on the critical path get accent-colored glow and bold labels
 
+### Screenshots
+
 <table>
-  <tr>
-    <td width="50%" align="center"><b>DAG Graph</b> — interactive SVG with pan/zoom</td>
     <td width="50%" align="center"><b>Timeline</b> — duration bar chart by status</td>
   </tr>
   <tr>
