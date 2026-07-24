@@ -47,11 +47,10 @@ type Config struct {
 	// HeartbeatInterval is how often to send SSE keepalive comments.
 	// Default 15 seconds. Set to 0 to disable heartbeats.
 	HeartbeatInterval time.Duration
-	// CORSAllowedOrigins controls the Access-Control-Allow-Origin header
-	// on all API endpoints. Default "*" (allow all origins, convenient for
-	// development). Set to a specific origin (e.g.
-	// "https://dashboard.example.com") to restrict. Set to "off" to disable
-	// CORS headers entirely.
+	// CORSAllowedOrigins controls the Access-Control-Allow-Origin
+	// header on API endpoints. Empty (default) disables CORS
+	// (secure by default). Set to "*" to allow all origins, or a
+	// specific origin like "https://dashboard.example.com".
 	CORSAllowedOrigins string
 }
 
@@ -110,7 +109,6 @@ type Server struct {
 	reportProvider    ReportProvider
 	snapshotProvider  SnapshotProvider
 	completeProvider  CompleteProvider
-	dashboardProvider DashboardProvider
 	healthProvider    HealthProvider
 	ndjsonWriter      NDJSONWriter
 	htmlWriter        HTMLWriter
@@ -158,10 +156,6 @@ func NewServer(hub *Hub, auditor *auditlog.Auditor, cfg Config) *Server {
 		cfg.HeartbeatInterval = defaultHeartbeatInterval
 	}
 
-	if cfg.CORSAllowedOrigins == "" {
-		cfg.CORSAllowedOrigins = "*"
-	}
-
 	srv := &Server{
 		hub:    hub,
 		config: cfg,
@@ -171,7 +165,6 @@ func NewServer(hub *Hub, auditor *auditlog.Auditor, cfg Config) *Server {
 	srv.reportProvider = makeReportProvider(auditor)
 	srv.snapshotProvider = makeSnapshotProvider(auditor)
 	srv.completeProvider = makeCompleteProvider(auditor)
-	srv.dashboardProvider = func() string { return renderDashboardHTML(cfg.Prefix) }
 	srv.healthProvider = makeHealthProvider(auditor)
 	srv.ndjsonWriter = makeNDJSONWriter(auditor)
 	srv.htmlWriter = makeHTMLWriter(auditor)
@@ -205,13 +198,13 @@ func (srv *Server) setupRoutes() {
 	}
 }
 
-// corsMiddleware adds CORS headers and handles OPTIONS preflight for API endpoints.
-// When CORSAllowedOrigins is "off", no CORS headers are added.
+// corsMiddleware adds CORS headers and handles OPTIONS preflight for
+// API endpoints. When CORSAllowedOrigins is empty, CORS is disabled.
 func (srv *Server) corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	origin := srv.config.CORSAllowedOrigins
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		if origin != "" && origin != "off" {
+		if origin != "" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Accept")
@@ -234,7 +227,7 @@ func normalizePrefix(prefix string) string {
 		return "/"
 	}
 
-	prefix = strings.TrimSuffix(prefix, "/")
+	prefix = strings.TrimRight(prefix, "/")
 
 	if !strings.HasPrefix(prefix, "/") {
 		prefix = "/" + prefix
@@ -496,7 +489,8 @@ func (srv *Server) sendSnapshot(w http.ResponseWriter, flusher http.Flusher) err
 		return fmt.Errorf("build snapshot: %w", err)
 	}
 
-	if err := sse.WriteEvent(w, sse.Event{Event: "snapshot", Data: string(data)}); err != nil {
+	err = sse.WriteEvent(w, sse.Event{Event: "snapshot", Data: string(data)})
+	if err != nil {
 		return err
 	}
 

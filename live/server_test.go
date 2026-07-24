@@ -33,6 +33,24 @@ func newTestServer(t *testing.T) *live.Server {
 	return server
 }
 
+func newTestServerWithCORS(t *testing.T, corsOrigin string) *live.Server {
+	t.Helper()
+
+	hub := live.NewHub()
+
+	auditor, err := auditlog.New(auditlog.Config{
+		Enabled: true,
+		OnEvent: hub.OnEvent,
+	})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
+
+	return live.NewServer(hub, auditor, live.Config{
+		CORSAllowedOrigins: corsOrigin,
+	})
+}
+
 func TestServer_DashboardHTML(t *testing.T) {
 	t.Parallel()
 
@@ -767,7 +785,7 @@ func TestServer_ShutdownNotRunning(t *testing.T) {
 func TestServer_CORSHeaders(t *testing.T) {
 	t.Parallel()
 
-	server := newTestServer(t)
+	server := newTestServerWithCORS(t, "*")
 
 	ctx := t.Context()
 
@@ -789,7 +807,7 @@ func TestServer_CORSHeaders(t *testing.T) {
 func TestServer_CORSOptionsPreflight(t *testing.T) {
 	t.Parallel()
 
-	server := newTestServer(t)
+	server := newTestServerWithCORS(t, "*")
 
 	ctx := t.Context()
 
@@ -803,19 +821,10 @@ func TestServer_CORSOptionsPreflight(t *testing.T) {
 	}
 }
 
-func TestServer_CORSDisabledWithOff(t *testing.T) {
+func TestServer_CORSDisabledByDefault(t *testing.T) {
 	t.Parallel()
 
-	hub := live.NewHub()
-
-	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
-	if err != nil {
-		t.Fatalf("create auditor: %v", err)
-	}
-
-	server := live.NewServer(hub, auditor, live.Config{
-		CORSAllowedOrigins: "off", // disable CORS
-	})
+	server := newTestServer(t) // no CORS configured
 
 	ctx := t.Context()
 
@@ -829,7 +838,7 @@ func TestServer_CORSDisabledWithOff(t *testing.T) {
 	}
 
 	if origin := rec.Header().Get("Access-Control-Allow-Origin"); origin != "" {
-		t.Errorf("expected no CORS header when disabled, got %q", origin)
+		t.Errorf("expected no CORS header by default, got %q", origin)
 	}
 }
 
@@ -989,4 +998,3 @@ func TestServer_ExportHTML(t *testing.T) {
 		t.Error("export HTML should contain DOCTYPE")
 	}
 }
-
