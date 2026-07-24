@@ -23,6 +23,7 @@ require (
 require (
 	charm.land/lipgloss/v2 v2.0.5 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/ultraviolet v0.0.0-20260720091822-7cc6674724ac // indirect
 	github.com/charmbracelet/x/ansi v0.11.7 // indirect
@@ -34,7 +35,10 @@ require (
 	github.com/go-faster/errors v0.8.0 // indirect
 	github.com/go-faster/jx v1.2.0 // indirect
 	github.com/go-faster/yaml v0.4.6 // indirect
+	github.com/gofrs/flock v0.13.0 // indirect
+	github.com/larsartmann/go-atomic-write v0.3.0 // indirect
 	github.com/larsartmann/go-branded-id v0.3.2 // indirect
+	github.com/larsartmann/go-ndjson v0.0.1 // indirect
 	github.com/larsartmann/go-output/escape v0.31.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-runewidth v0.0.27 // indirect

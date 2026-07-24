@@ -47,14 +47,18 @@ The project is split into three Go modules:
 ### Shared infrastructure: `go-sse`
 
 The `live/` module depends on [`github.com/larsartmann/go-sse`](https://github.com/larsartmann/go-sse)
-(v0.1.0, currently private) for the SSE wire-format primitives — `sse.Event`, `sse.WriteEvent`,
+v0.2.0 (public, pinned) for the SSE wire-format primitives — `sse.Event`, `sse.WriteEvent`,
 and `sse.ContentType`. The domain-specific Hub and Server are implemented locally in `live/`
 (go-workflow event types, report structure, dashboard HTML) on top of those primitives; go-sse
 itself is transport-only and owns no domain types here.
 
-A `go.work` workspace at the parent directory links the projects for local development.
-The `replace` directive in `live/go.mod` (`go-sse => ../../go-sse`) remains because go-sse is
-private; it will be removed once the repo is made public (see the go-sse `ROADMAP.md`).
+A `go.work` workspace at the parent directory links the project's own modules (core, viz, live)
+and `go-output` for local development. **All external `larsartmann/*` modules are now pinned to
+published versions** (no local `replace` directives remain): `go-sse` v0.2.0 (`live`),
+`go-atomic-write` v0.3.0 and `go-ndjson` v0.0.1 (`core`). Pinning these surfaced their
+transitive deps (`cespare/xxhash/v2`, `gofrs/flock` from go-atomic-write) as `// indirect`
+entries in `viz` and `live`, which is correct. Standalone (`GOWORK=off`) builds now work for
+all three modules because every dependency has a real, checksum-verified version in `go.sum`.
 
 ### Core module source files
 
