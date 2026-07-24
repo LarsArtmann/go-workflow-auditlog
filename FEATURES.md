@@ -171,4 +171,3 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - Live DAG graph during execution (needs DAG structure available before `Do()`; currently only renders on `snapshot`/`complete` events)
 - Dashboard step-table diff-based DOM updates (eliminate flicker for 100+ steps)
 - Minimap for large graphs (>20 nodes)
-- CONTRIBUTING.md

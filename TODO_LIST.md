@@ -6,22 +6,17 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md).
 
 ---
 
-## Infrastructure (blocking)
-
-(none currently)
-
 ## Live Dashboard (`live/` module)
 
 - [ ] Live DAG graph during execution — needs DAG structure available before `Do()`; currently only renders on `snapshot` or `complete` events
 - [ ] Optimize steps table rendering — rebuilds entirely on each render tick (flicker for 100+ steps); consider diff-based DOM updates
-- [ ] Add concurrent Subscribe/Unsubscribe test for Hub
+- [ ] Add concurrent Subscribe/Unsubscribe test for Hub (current `TestHub_SubscribeUnsubscribe` is sequential; needs goroutines racing subscribe + unsubscribe)
 - [ ] Add SSE reconnect/heartbeat test
 
 ## Testing
 
 - [ ] Add JS runtime test coverage for dashboard functions (`enhanceGraph`, `computeCriticalPathSteps`, `applyGraphSearch`) — consider headless browser (Playwright) or JS unit test runner
-- [ ] Add fuzz test for `NDJSONStreamer` (streaming encode/flush error paths)
-- [ ] Add streaming round-trip property test (streamed events == batch events)
+- [ ] Improve live module test coverage (currently 76.9%, below the 92% core+viz gate)
 
 ## Visualization
 
@@ -34,4 +29,3 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md).
 ## Polish
 
 - [ ] Migrate benchmarks from `b.N` to `b.Loop()` (gopls `stdversion` warnings)
-- [ ] Add CONTRIBUTING.md
