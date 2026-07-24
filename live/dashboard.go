@@ -115,7 +115,7 @@ const liveTemplate = `<!DOCTYPE html>
       <button class="graph-fit" title="Fit to view" aria-label="Fit to view">&#8982;</button>
     </div>
     <div class="graph-info">Scroll/pinch to zoom &middot; Drag to pan &middot; Click node to highlight</div>
-    <div class="graph-placeholder" id="graph-placeholder">DAG will appear here as steps execute...</div>
+    <div class="graph-placeholder" id="graph-placeholder">DAG graph will appear here when steps are available...</div>
   </div>
 </div>
 <div class="tab-content" id="tab-timeline" role="tabpanel" aria-labelledby="tab-btn-timeline">

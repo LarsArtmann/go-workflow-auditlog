@@ -403,6 +403,7 @@ func main() {
 
 	// Attach audit callbacks BEFORE running.
 	audit.Attach(w)
+	audit.CaptureDAG(w)
 
 	// Run the workflow.
 	fmt.Println("━━━ Running data pipeline workflow ━━━")

@@ -258,6 +258,7 @@
     requestAnimationFrame(function () {
       renderQueued = false;
       renderAll();
+      updateGraphLive();
     });
   }
 
@@ -745,6 +746,51 @@
   // === Graph ===
 
   var graphRendered = false;
+
+  var statusColorMap = {
+    succeeded: "var(--success)",
+    failed: "var(--error)",
+    running: "var(--warning)",
+    pending: "var(--text-muted)",
+    canceled: "var(--transient)",
+    skipped: "var(--text-dim)",
+  };
+
+  // updateGraphLive incrementally updates node colors in the existing SVG
+  // without rebuilding the entire graph. Called on every incremental render.
+  function updateGraphLive() {
+    if (!graphRendered) return;
+
+    var svg = els.graphContainer.querySelector("svg");
+    if (!svg) return;
+
+    // daghtml nodes have data-id matching the step name
+    var nodes = svg.querySelectorAll("[data-id]");
+    nodes.forEach(function (node) {
+      var nodeId = node.getAttribute("data-id");
+      if (!nodeId) return;
+
+      var step = state.steps[nodeId];
+      if (!step) return;
+
+      var color = statusColorMap[step.status] || "var(--accent)";
+
+      // Update fill on the primary shape (rect, circle, or ellipse)
+      var shape = node.querySelector("rect, circle, ellipse");
+      if (shape) {
+        shape.style.fill = color;
+        shape.style.transition = "fill 0.3s ease";
+      }
+
+      // Flash recently changed nodes
+      if (state.changedSteps[nodeId]) {
+        node.classList.add("node-flash");
+        setTimeout(function () {
+          node.classList.remove("node-flash");
+        }, 600);
+      }
+    });
+  }
 
   function renderGraph() {
     if (!state.dag) {
