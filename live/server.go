@@ -7,6 +7,7 @@ import (
 	"encoding/json/v2"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -165,27 +166,34 @@ func (srv *Server) ListenAndServe() error {
 
 	srv.startTime = time.Now()
 
+	ln, err := net.Listen("tcp", srv.config.Addr)
+	if err != nil {
+		srv.serverMu.Unlock()
+
+		return fmt.Errorf("listen: %w", err)
+	}
+
+	// Store the actual address (resolves ":0" to the OS-assigned port).
+	srv.config.Addr = ln.Addr().String()
+
 	srv.httpServer = &http.Server{ //nolint:exhaustruct // minimal config
-		Addr:              srv.config.Addr,
 		Handler:           srv.mux,
 		ReadHeaderTimeout: srv.config.ReadHeaderTimeout,
 	}
 
 	srv.serverMu.Unlock()
 
-	return fmt.Errorf("listen and serve: %w", srv.httpServer.ListenAndServe())
+	return fmt.Errorf("listen and serve: %w", srv.httpServer.Serve(ln))
 }
 
-// Addr returns the server's listen address.
+// Addr returns the server's listen address. After ListenAndServe succeeds,
+// this reflects the actual address (including the OS-assigned port when ":0"
+// was requested).
 func (srv *Server) Addr() string {
 	srv.serverMu.Lock()
 	defer srv.serverMu.Unlock()
 
-	if srv.httpServer == nil {
-		return srv.config.Addr
-	}
-
-	return srv.httpServer.Addr
+	return srv.config.Addr
 }
 
 // Shutdown gracefully shuts down the server.
@@ -198,7 +206,11 @@ func (srv *Server) Shutdown(ctx context.Context) error {
 		return nil
 	}
 
-	return fmt.Errorf("shutdown: %w", server.Shutdown(ctx))
+	if err := server.Shutdown(ctx); err != nil {
+		return fmt.Errorf("shutdown: %w", err)
+	}
+
+	return nil
 }
 
 // SignalComplete marks the workflow as finished.

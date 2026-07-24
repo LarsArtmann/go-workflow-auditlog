@@ -558,3 +558,201 @@ func TestHub_OnEventMarshalError(t *testing.T) {
 		t.Fatal("did not receive event")
 	}
 }
+
+// --- SSE Heartbeat Test ---
+
+func TestServer_SSE_Heartbeat(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	auditor, err := auditlog.New(auditlog.Config{
+		Enabled: true,
+		OnEvent: hub.OnEvent,
+	})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
+
+	server := live.NewServer(hub, auditor, live.Config{
+		HeartbeatInterval: 50 * time.Millisecond,
+	})
+
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL+"/api/events", nil)
+	if err != nil {
+		t.Fatalf("create request: %v", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("connect SSE: %v", err)
+	}
+	defer resp.Body.Close()
+
+	scanner := bufio.NewScanner(resp.Body)
+
+	// Skip the initial snapshot
+	skipSnapshot(scanner)
+
+	// Look for heartbeat comment lines
+	deadline := time.After(2 * time.Second)
+	foundHeartbeat := false
+
+	for {
+		select {
+		case <-deadline:
+			if !foundHeartbeat {
+				t.Fatal("did not receive heartbeat within timeout")
+			}
+
+			return
+		default:
+		}
+
+		if !scanner.Scan() {
+			if !foundHeartbeat {
+				t.Fatal("scanner ended before heartbeat")
+			}
+
+			return
+		}
+
+		line := scanner.Text()
+		if strings.HasPrefix(line, ": heartbeat") {
+			foundHeartbeat = true
+
+			return
+		}
+	}
+}
+
+// --- Server Lifecycle Tests ---
+
+func TestServer_ListenAndServe_Addr_Shutdown(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	auditor, err := auditlog.New(auditlog.Config{
+		Enabled: true,
+		OnEvent: hub.OnEvent,
+	})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
+
+	server := live.NewServer(hub, auditor, live.Config{Addr: ":0"})
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- server.ListenAndServe()
+	}()
+
+	// Wait for server to start by polling health endpoint
+	var lastErr error
+	for range 50 {
+		addr := server.Addr()
+		if addr != "" && addr != ":0" {
+			url := "http://" + addr + "/api/health"
+			ctx := t.Context()
+			req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+			resp, err := http.DefaultClient.Do(req)
+			if err == nil {
+				_ = resp.Body.Close()
+
+				if resp.StatusCode == http.StatusOK {
+					lastErr = nil
+					break
+				}
+			}
+		}
+		lastErr = err
+		time.Sleep(20 * time.Millisecond)
+	}
+
+	if lastErr != nil {
+		t.Fatalf("server did not become ready: %v", lastErr)
+	}
+
+	// Verify Addr returns the real listen address
+	addr := server.Addr()
+	if addr == "" || addr == ":0" {
+		t.Errorf("expected real listen address, got %q", addr)
+	}
+
+	// Graceful shutdown
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		t.Errorf("shutdown error: %v", err)
+	}
+}
+
+func TestServer_SSE_ClientDisconnect(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	ctx, cancel := context.WithCancel(t.Context())
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL+"/api/events", nil)
+	if err != nil {
+		t.Fatalf("create request: %v", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("connect SSE: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Give server time to register the subscriber
+	time.Sleep(50 * time.Millisecond)
+
+	if server.ClientCount() != 1 {
+		t.Errorf("expected 1 client during active SSE connection, got %d", server.ClientCount())
+	}
+
+	// Disconnect client
+	cancel()
+
+	// Give server time to clean up
+	time.Sleep(100 * time.Millisecond)
+
+	if server.ClientCount() != 0 {
+		t.Errorf("expected 0 clients after disconnect, got %d", server.ClientCount())
+	}
+}
+
+func TestServer_NewInvalidConfig(t *testing.T) {
+	t.Parallel()
+
+	_, _, err := live.New(auditlog.Config{
+		WorkflowID: "bad/name",
+	}, live.Config{})
+	if err == nil {
+		t.Fatal("expected error for invalid WorkflowID")
+	}
+}
+
+func TestServer_ShutdownNotRunning(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	ctx := t.Context()
+
+	if err := server.Shutdown(ctx); err != nil {
+		t.Errorf("shutdown on non-running server should return nil, got %v", err)
+	}
+}

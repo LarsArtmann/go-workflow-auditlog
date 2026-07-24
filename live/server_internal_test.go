@@ -1,9 +1,11 @@
 package live
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
@@ -58,7 +60,7 @@ func TestServer_SendCompleteNilProvider(t *testing.T) {
 func TestServer_NewErrorInvalidConfig(t *testing.T) {
 	t.Parallel()
 
-	_, _, err := auditlog.New(auditlog.Config{
+	_, err := auditlog.New(auditlog.Config{
 		Enabled:    true,
 		WorkflowID: "bad/name",
 	})
@@ -75,13 +77,20 @@ func TestServer_ListenAndServeAlreadyRunning(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	srv := NewServer(NewHub(), &auditor, Config{Addr: ":0"})
+	srv := NewServer(NewHub(), auditor, Config{Addr: ":0"})
 
-	if err := srv.ListenAndServe(); err == nil {
-		t.Fatal("expected ListenAndServe to block/fail, got nil")
-	}
+	go func() {
+		_ = srv.ListenAndServe()
+	}()
+
+	// Give it a moment to start
+	time.Sleep(50 * time.Millisecond)
 
 	if err := srv.ListenAndServe(); err == nil {
 		t.Fatal("expected ErrServerAlreadyRunning on second ListenAndServe")
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	_ = srv.Shutdown(ctx)
 }
