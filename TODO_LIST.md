@@ -8,8 +8,7 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md).
 
 ## Infrastructure (blocking)
 
-- [ ] Push go-output v0.31.1 tag to remote and bump `viz/go.mod` from v0.30.4 → v0.31.1 (D2/DOT quoting fix is local-only via `go.work` until pushed)
-- [ ] Add STABILITY.md entries for viz visualization features (critical path, retry badges, graph search, duration labels) and live module API
+- [ ] Bump `viz/go.mod` from v0.30.4 → v0.31.1 (go-output v0.31.1 tag is published and proxy-available; D2/DOT quoting fix is not consumed until bumped)
 
 ## Live Dashboard (`live/` module)
 

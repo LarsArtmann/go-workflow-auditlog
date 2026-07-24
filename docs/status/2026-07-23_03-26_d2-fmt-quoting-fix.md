@@ -4,11 +4,12 @@
 **Session Scope:** Fix `d2-fmt` failures caused by invalid D2 output from go-output's D2 renderer  
 **Overall Status:** FIX COMPLETE, locally verified — **BLOCKED on go-output publish + version bump**
 
-> **Update 2026-07-24:** the go-output fix was committed locally (`d91cc22`)
-> and tagged v0.31.1 (04:11 report), but **the tag was never pushed to remote**.
-> `viz/go.mod` remains at v0.30.4. The `d2-fmt` treefmt integration and `d2`
-> devShell package were added to `flake.nix`. The fix works via `go.work`
-> workspace resolution locally but is not available to external consumers.
+> **Update 2026-07-24:** the go-output fix was committed (`d91cc22`)
+> and tagged v0.31.1 (04:11 report). The v0.31.1 tags **were pushed to
+> remote** and are available on the Go proxy (`go list -m -versions` confirms
+> all sub-module tags at `d91cc22`). However, `viz/go.mod` was never bumped
+> from v0.30.4 — the quoting fix works locally via `go.work` workspace
+> resolution but is not consumed by external consumers.
 > Full status in [Resolution](#resolution-2026-07-24) below.
 
 ---
@@ -166,8 +167,9 @@ Nothing. No data loss, no broken tests, no reverted work. The fix is correct and
 | Report item | Resolution |
 | --- | --- |
 | D2 quoting fix (`d2NeedsQuoting()` + `d2Quote()`) | **Committed locally** in go-output (`d91cc22`) |
-| go-output v0.31.1 tag | **Created locally** (04:11 report) — **NOT pushed to remote** |
-| `viz/go.mod` version bump | **NOT done** — still v0.30.4; bump requires published tag |
+| go-output v0.31.1 tag | **Pushed to remote** — all 16 sub-module tags at `d91cc22`, confirmed via `git ls-remote --tags origin` |
+| go-output v0.31.1 on Go proxy | **Available** — `go list -m -versions` confirms v0.31.1 for all sub-modules |
+| `viz/go.mod` version bump | **NOT done** — still v0.30.4; tag is published and proxy-available, just needs `go get` + `go mod tidy` |
 | DOT edge color quoting | **Fixed** in same commit (`d91cc22`) — `graph/dot.go` edge `color` attribute |
 | PlantUML/Mermaid audit | **Done** (04:11 report) — both safe (Mermaid sanitizes IDs; PlantUML uses `#` as color prefix) |
 | `d2-fmt` in treefmt | **Done** — `settings.formatter.d2` in `flake.nix`, `d2` in devShell |
@@ -175,5 +177,5 @@ Nothing. No data loss, no broken tests, no reverted work. The fix is correct and
 | Q2: `d2-fmt` in flake.nix treefmt | **Done** |
 | Q3: Audit all renderers | **Done** — D2 fixed, DOT fixed (edge color), Mermaid safe, PlantUML safe |
 
-**Blocking:** the go-output v0.31.1 tag must be pushed before `viz/go.mod` can
-be bumped. Until then, the fix is local-only via `go.work` workspace resolution.
+**Blocking:** none — the v0.31.1 tag is pushed and proxy-available. The
+remaining task is a routine `viz/go.mod` bump (`go get` + `go mod tidy`).

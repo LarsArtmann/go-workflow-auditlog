@@ -130,7 +130,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ### Infrastructure
 
 - **Three Go modules**: core (`auditlog`), visualization (`viz`), live dashboard (`live`) — linked via `go.work` workspace
-- **go-output** dependency at v0.30.4 in `viz/go.mod` (v0.31.1 available locally via `go.work` with D2/DOT quoting fix; pending push to remote)
+- **go-output** dependency at v0.30.4 in `viz/go.mod` (v0.31.1 published with D2/DOT quoting fix; `viz/go.mod` bump pending)
 - **go-error-family** at v0.7.0
 - **go-sse** at v0.0.0 (private, `replace` directive in `live/go.mod`)
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI

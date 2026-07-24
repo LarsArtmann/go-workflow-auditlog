@@ -103,9 +103,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   spaces/brackets (`fetch [Succeeded]`) are now properly quoted in D2 and DOT
   output. D2 treats `#` as a comment character; DOT edge `color` attributes
   needed double-quote wrapping. Fix is in go-output v0.31.1 (commit `d91cc22`),
-  wired locally via `go.work`. **Pending:** the v0.31.1 tag must be pushed to
-  remote before `viz/go.mod` can bump from v0.30.4 — until then the fix is
-  local-only.
+  published and available on the Go proxy. **Pending:** `viz/go.mod` must be
+  bumped from v0.30.4 → v0.31.1 to consume the fix.
 
 ## [0.7.0] - 2026-07-22
 
