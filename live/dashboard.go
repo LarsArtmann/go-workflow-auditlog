@@ -152,7 +152,9 @@ const liveTemplate = `<!DOCTYPE html>
 
 // renderDashboardHTML builds the static HTML dashboard string. This is called
 // once at server startup (not per-request) since all dynamic data flows via SSE.
-func renderDashboardHTML() string {
+// The prefix parameter is injected as window.ROUTE_PREFIX so the JS can build
+// API URLs relative to the configured route prefix.
+func renderDashboardHTML(prefix string) string {
 	metadata := viz.BuildTypeMetadata()
 
 	metadataJSON, err := json.Marshal(
@@ -165,13 +167,17 @@ func renderDashboardHTML() string {
 		return "<html><body>failed to render dashboard</body></html>"
 	}
 
+	routePrefixJS := fmt.Sprintf("window.ROUTE_PREFIX=%q;", prefix)
+
+	js := routePrefixJS + "\n" + liveJS
+
 	return fmt.Sprintf(
 		liveTemplate,
 		viz.DashboardCSS(),
 		liveCSS,
 		SchemaVersion,
 		metadataJSON,
-		liveJS,
+		js,
 		daghtml.Script(),
 		SchemaVersion,
 	)

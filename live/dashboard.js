@@ -110,7 +110,7 @@
   function connect() {
     setConnStatus("connecting", "connecting...");
 
-    eventSource = new EventSource("/api/events");
+    eventSource = new EventSource((window.ROUTE_PREFIX || "") + "/api/events");
 
     eventSource.addEventListener("snapshot", function (e) {
       setConnStatus("connected", "connected");

@@ -7,8 +7,10 @@ import (
 	"encoding/json/v2"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,6 +24,7 @@ const (
 	defaultReadHeaderTimeout = 5 * time.Second
 	defaultHeartbeatInterval = 15 * time.Second
 	defaultAddr              = ":0"
+	defaultPrefix            = "/"
 )
 
 // ErrServerAlreadyRunning is returned when ListenAndServe is called on a
@@ -32,12 +35,23 @@ var ErrServerAlreadyRunning = errors.New("live server is already running")
 type Config struct {
 	// Addr is the TCP address to listen on. Default ":0" (random port).
 	Addr string
+	// Prefix is the URL path prefix for all dashboard routes.
+	// Default "/" (root). Routes: {prefix}/, {prefix}/api/report,
+	// {prefix}/api/events, {prefix}/api/health,
+	// {prefix}/api/export/ndjson, {prefix}/api/export/html.
+	// Set to "/workflow" to mount at /workflow/. Trailing slash is stripped.
+	Prefix string
 	// ReadHeaderTimeout is the maximum duration for reading the request
 	// headers. Default 5 seconds. Set to 0 to disable.
 	ReadHeaderTimeout time.Duration
 	// HeartbeatInterval is how often to send SSE keepalive comments.
 	// Default 15 seconds. Set to 0 to disable heartbeats.
 	HeartbeatInterval time.Duration
+	// CORSAllowedOrigins controls the Access-Control-Allow-Origin header
+	// on all API endpoints. Default "*" (allow all origins). Set to a
+	// specific origin (e.g. "https://dashboard.example.com") to restrict.
+	// Set to "" to disable CORS headers entirely.
+	CORSAllowedOrigins string
 }
 
 // ReportProvider returns the current report as JSON bytes.
@@ -61,6 +75,12 @@ type HealthInfo struct {
 
 // HealthProvider returns additional health check information.
 type HealthProvider func() HealthInfo
+
+// NDJSONWriter writes the full NDJSON event stream to the given writer.
+type NDJSONWriter func(w io.Writer) error
+
+// HTMLWriter writes the self-contained HTML report to the given writer.
+type HTMLWriter func(w io.Writer) error
 
 // snapshotData is the payload sent as the initial SSE event.
 type snapshotData struct {
@@ -91,6 +111,8 @@ type Server struct {
 	completeProvider  CompleteProvider
 	dashboardProvider DashboardProvider
 	healthProvider    HealthProvider
+	ndjsonWriter      NDJSONWriter
+	htmlWriter        HTMLWriter
 
 	dashboardHTML string
 	startTime     time.Time
@@ -121,12 +143,22 @@ func NewServer(hub *Hub, auditor *auditlog.Auditor, cfg Config) *Server {
 		cfg.Addr = defaultAddr
 	}
 
+	if cfg.Prefix == "" {
+		cfg.Prefix = defaultPrefix
+	}
+
+	cfg.Prefix = normalizePrefix(cfg.Prefix)
+
 	if cfg.ReadHeaderTimeout == 0 {
 		cfg.ReadHeaderTimeout = defaultReadHeaderTimeout
 	}
 
 	if cfg.HeartbeatInterval == 0 {
 		cfg.HeartbeatInterval = defaultHeartbeatInterval
+	}
+
+	if cfg.CORSAllowedOrigins == "" {
+		cfg.CORSAllowedOrigins = "*"
 	}
 
 	srv := &Server{
@@ -138,9 +170,11 @@ func NewServer(hub *Hub, auditor *auditlog.Auditor, cfg Config) *Server {
 	srv.reportProvider = makeReportProvider(auditor)
 	srv.snapshotProvider = makeSnapshotProvider(auditor)
 	srv.completeProvider = makeCompleteProvider(auditor)
-	srv.dashboardProvider = renderDashboardHTML
+	srv.dashboardProvider = func() string { return renderDashboardHTML(cfg.Prefix) }
 	srv.healthProvider = makeHealthProvider(auditor)
-	srv.dashboardHTML = renderDashboardHTML()
+	srv.ndjsonWriter = makeNDJSONWriter(auditor)
+	srv.htmlWriter = makeHTMLWriter(auditor)
+	srv.dashboardHTML = renderDashboardHTML(cfg.Prefix)
 
 	srv.setupRoutes()
 
@@ -148,10 +182,60 @@ func NewServer(hub *Hub, auditor *auditlog.Auditor, cfg Config) *Server {
 }
 
 func (srv *Server) setupRoutes() {
-	srv.mux.HandleFunc("/", srv.handleDashboard)
-	srv.mux.HandleFunc("/api/report", srv.handleReport)
-	srv.mux.HandleFunc("/api/events", srv.handleSSE)
-	srv.mux.HandleFunc("/api/health", srv.handleHealth)
+	pfx := srv.config.Prefix
+
+	if pfx == "/" {
+		srv.mux.HandleFunc("/", srv.handleDashboard)
+		srv.mux.HandleFunc("/api/report", srv.corsMiddleware(srv.handleReport))
+		srv.mux.HandleFunc("/api/events", srv.corsMiddleware(srv.handleSSE))
+		srv.mux.HandleFunc("/api/health", srv.corsMiddleware(srv.handleHealth))
+		srv.mux.HandleFunc("/api/export/ndjson", srv.corsMiddleware(srv.handleExportNDJSON))
+		srv.mux.HandleFunc("/api/export/html", srv.corsMiddleware(srv.handleExportHTML))
+	} else {
+		srv.mux.HandleFunc(pfx+"/", srv.handleDashboard)
+		srv.mux.HandleFunc(pfx+"/api/report", srv.corsMiddleware(srv.handleReport))
+		srv.mux.HandleFunc(pfx+"/api/events", srv.corsMiddleware(srv.handleSSE))
+		srv.mux.HandleFunc(pfx+"/api/health", srv.corsMiddleware(srv.handleHealth))
+		srv.mux.HandleFunc(pfx+"/api/export/ndjson", srv.corsMiddleware(srv.handleExportNDJSON))
+		srv.mux.HandleFunc(pfx+"/api/export/html", srv.corsMiddleware(srv.handleExportHTML))
+	}
+}
+
+// corsMiddleware adds CORS headers and handles OPTIONS preflight for API endpoints.
+func (srv *Server) corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	origin := srv.config.CORSAllowedOrigins
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Accept")
+		}
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+
+			return
+		}
+
+		next(w, r)
+	}
+}
+
+// normalizePrefix strips trailing slashes and ensures the prefix starts with /.
+// "/" is returned as-is (root mount). Empty input returns "/".
+func normalizePrefix(p string) string {
+	if p == "" || p == "/" {
+		return "/"
+	}
+
+	p = strings.TrimSuffix(p, "/")
+
+	if !strings.HasPrefix(p, "/") {
+		p = "/" + p
+	}
+
+	return p
 }
 
 // ListenAndServe starts the HTTP server.
@@ -237,7 +321,8 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // --- HTTP Handlers ---
 
 func (srv *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
+	pfx := srv.config.Prefix
+	if r.URL.Path != pfx && r.URL.Path != pfx+"/" {
 		http.NotFound(w, r)
 
 		return
@@ -266,6 +351,42 @@ func (srv *Server) handleReport(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	_, _ = w.Write(data)
+}
+
+func (srv *Server) handleExportNDJSON(w http.ResponseWriter, _ *http.Request) {
+	if srv.ndjsonWriter == nil {
+		http.Error(w, "ndjson writer not configured", http.StatusServiceUnavailable)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/x-ndjson")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Content-Disposition", `attachment; filename="workflow-events.ndjson"`)
+
+	if err := srv.ndjsonWriter(w); err != nil {
+		http.Error(w, fmt.Sprintf("export ndjson: %v", err), http.StatusInternalServerError)
+
+		return
+	}
+}
+
+func (srv *Server) handleExportHTML(w http.ResponseWriter, _ *http.Request) {
+	if srv.htmlWriter == nil {
+		http.Error(w, "html writer not configured", http.StatusServiceUnavailable)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Content-Disposition", `attachment; filename="workflow-report.html"`)
+
+	if err := srv.htmlWriter(w); err != nil { //nolint:contextcheck // WriteHTML takes io.Writer, not context
+		http.Error(w, fmt.Sprintf("export html: %v", err), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 type healthResponse struct {
@@ -446,5 +567,21 @@ func makeHealthProvider(auditor *auditlog.Auditor) HealthProvider {
 			Events:  auditor.EventsCount(),
 			Dropped: auditor.DroppedEventCount(),
 		}
+	}
+}
+
+func makeNDJSONWriter(auditor *auditlog.Auditor) NDJSONWriter {
+	return func(w io.Writer) error {
+		report := auditor.Report()
+
+		return report.WriteNDJSON(w)
+	}
+}
+
+func makeHTMLWriter(auditor *auditlog.Auditor) HTMLWriter {
+	return func(w io.Writer) error {
+		report := auditor.Report()
+
+		return viz.WriteHTML(report, w) //nolint:wrapcheck // viz already wraps with ErrRenderFailed
 	}
 }

@@ -761,3 +761,232 @@ func TestServer_ShutdownNotRunning(t *testing.T) {
 		t.Errorf("shutdown on non-running server should return nil, got %v", err)
 	}
 }
+
+// --- CORS Tests ---
+
+func TestServer_CORSHeaders(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	ctx := t.Context()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/health", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+
+	origin := rec.Header().Get("Access-Control-Allow-Origin")
+	if origin != "*" {
+		t.Errorf("expected Access-Control-Allow-Origin '*', got %q", origin)
+	}
+}
+
+func TestServer_CORSOptionsPreflight(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	ctx := t.Context()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodOptions, "/api/report", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Errorf("expected 204 for OPTIONS preflight, got %d", rec.Code)
+	}
+}
+
+func TestServer_CORSDisabledWhenEmpty(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
+
+	server := live.NewServer(hub, auditor, live.Config{
+		CORSAllowedOrigins: "", // disable CORS
+	})
+
+	ctx := t.Context()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/health", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+
+	if origin := rec.Header().Get("Access-Control-Allow-Origin"); origin != "" {
+		t.Errorf("expected no CORS header when disabled, got %q", origin)
+	}
+}
+
+func TestServer_CORSSpecificOrigin(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
+
+	server := live.NewServer(hub, auditor, live.Config{
+		CORSAllowedOrigins: "https://dashboard.example.com",
+	})
+
+	ctx := t.Context()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/health", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	origin := rec.Header().Get("Access-Control-Allow-Origin")
+	if origin != "https://dashboard.example.com" {
+		t.Errorf("expected specific origin, got %q", origin)
+	}
+}
+
+// --- Prefix Tests ---
+
+func TestServer_PrefixRoutes(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
+
+	server := live.NewServer(hub, auditor, live.Config{
+		Prefix: "/workflow",
+	})
+
+	ctx := t.Context()
+
+	// Dashboard under prefix
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/workflow", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200 at /workflow, got %d", rec.Code)
+	}
+
+	if !strings.Contains(rec.Body.String(), "workflow-auditlog") {
+		t.Error("dashboard HTML should contain workflow-auditlog")
+	}
+
+	// API under prefix
+	req2 := httptest.NewRequestWithContext(ctx, http.MethodGet, "/workflow/api/health", nil)
+	rec2 := httptest.NewRecorder()
+
+	server.ServeHTTP(rec2, req2)
+
+	if rec2.Code != http.StatusOK {
+		t.Errorf("expected 200 at /workflow/api/health, got %d", rec2.Code)
+	}
+}
+
+func TestServer_PrefixTrailingSlashStripped(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
+
+	server := live.NewServer(hub, auditor, live.Config{
+		Prefix: "/dashboard/",
+	})
+
+	ctx := t.Context()
+
+	// Should work at /dashboard/ (trailing slash stripped during normalization)
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/dashboard", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200 at /dashboard, got %d", rec.Code)
+	}
+}
+
+// --- Export Endpoint Tests ---
+
+func TestServer_ExportNDJSON(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	ctx := t.Context()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/export/ndjson", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+
+	ct := rec.Header().Get("Content-Type")
+	if !strings.Contains(ct, "ndjson") {
+		t.Errorf("expected ndjson content-type, got %s", ct)
+	}
+
+	cd := rec.Header().Get("Content-Disposition")
+	if !strings.Contains(cd, "attachment") || !strings.Contains(cd, ".ndjson") {
+		t.Errorf("expected attachment disposition with .ndjson, got %s", cd)
+	}
+}
+
+func TestServer_ExportHTML(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	ctx := t.Context()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/export/html", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+
+	ct := rec.Header().Get("Content-Type")
+	if !strings.Contains(ct, "text/html") {
+		t.Errorf("expected text/html content-type, got %s", ct)
+	}
+
+	cd := rec.Header().Get("Content-Disposition")
+	if !strings.Contains(cd, "attachment") || !strings.Contains(cd, ".html") {
+		t.Errorf("expected attachment disposition with .html, got %s", cd)
+	}
+
+	if !strings.Contains(rec.Body.String(), "<!DOCTYPE html>") {
+		t.Error("export HTML should contain DOCTYPE")
+	}
+}
+
