@@ -4,6 +4,13 @@
 **Session Scope:** Fix `d2-fmt` failures caused by invalid D2 output from go-output's D2 renderer  
 **Overall Status:** FIX COMPLETE, locally verified — **BLOCKED on go-output publish + version bump**
 
+> **Update 2026-07-24:** the go-output fix was committed locally (`d91cc22`)
+> and tagged v0.31.1 (04:11 report), but **the tag was never pushed to remote**.
+> `viz/go.mod` remains at v0.30.4. The `d2-fmt` treefmt integration and `d2`
+> devShell package were added to `flake.nix`. The fix works via `go.work`
+> workspace resolution locally but is not available to external consumers.
+> Full status in [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## What Was The Problem?
@@ -151,3 +158,22 @@ Nothing. No data loss, no broken tests, no reverted work. The fix is correct and
 2. **Should `d2-fmt` be added to the `flake.nix` treefmt configuration for this project?** Currently treefmt only runs `nixfmt` + `gofmt`. Adding `d2-fmt` would catch future D2 syntax issues automatically, but I don't know if you want D2 formatting enforced as a build gate.
 
 3. **Should the DOT/PlantUML/Mermaid renderers be audited and fixed in the same go-output release, or shipped separately?** They likely have the same class of quoting bug (`escape.DOT` is literally `escape.D2`), but fixing all renderers at once is a bigger change with more test updates.
+
+---
+
+## Resolution (2026-07-24)
+
+| Report item | Resolution |
+| --- | --- |
+| D2 quoting fix (`d2NeedsQuoting()` + `d2Quote()`) | **Committed locally** in go-output (`d91cc22`) |
+| go-output v0.31.1 tag | **Created locally** (04:11 report) — **NOT pushed to remote** |
+| `viz/go.mod` version bump | **NOT done** — still v0.30.4; bump requires published tag |
+| DOT edge color quoting | **Fixed** in same commit (`d91cc22`) — `graph/dot.go` edge `color` attribute |
+| PlantUML/Mermaid audit | **Done** (04:11 report) — both safe (Mermaid sanitizes IDs; PlantUML uses `#` as color prefix) |
+| `d2-fmt` in treefmt | **Done** — `settings.formatter.d2` in `flake.nix`, `d2` in devShell |
+| go-output CHANGELOG | **Still open** — go-output `[Unreleased]` section is empty |
+| Q2: `d2-fmt` in flake.nix treefmt | **Done** |
+| Q3: Audit all renderers | **Done** — D2 fixed, DOT fixed (edge color), Mermaid safe, PlantUML safe |
+
+**Blocking:** the go-output v0.31.1 tag must be pushed before `viz/go.mod` can
+be bumped. Until then, the fix is local-only via `go.work` workspace resolution.

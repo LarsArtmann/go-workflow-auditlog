@@ -3,6 +3,13 @@
 **Date**: 2026-07-22 19:34
 **Session scope**: Research DAG visualization tooling landscape + implement visualization improvements for go-workflow-auditlog dashboard
 
+> **Update 2026-07-24:** the `enhanceGraph()` double-application bug (§d) was
+> fixed in the next session (03:25 report) with an idempotency guard. The
+> critical-path Go/JS duplication (§e, Q2) was resolved by injecting
+> `critical_path_steps` from Go into the report JSON. Generated artifacts
+> committed to git (§d-2) are now `.gitignore`d. Full status in
+> [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## Context
@@ -235,3 +242,22 @@ Currently the JS recomputes the critical path client-side (duplicating the Go al
 ### 3. Something auto-committed my changes with wrong messages and "Unknown Author". Should I investigate/fix this, or is it an expected hook?
 
 The 4 commits (`eeee8d6`, `8550753`, `6b99b24`, `b3b77b9`) appeared during the session with generic messages and `Unknown Author <unknown@example.com>`. I did not run `git commit`. This suggests a hook or automation is committing changes, but with broken config and poor message quality.
+
+---
+
+## Resolution (2026-07-24)
+
+| Report item | Resolution |
+| --- | --- |
+| §d-1 `enhanceGraph()` double-application bug | **Fixed** (03:25 report) — `container.dataset.enhanced` idempotency guard |
+| §d-2 Generated artifacts committed to git | **Fixed** — `dashboard.html`, `steps-compact.md`, etc. now in `.gitignore` |
+| §e Critical path Go/JS duplication | **Resolved** — Go now injects `critical_path_steps` into report JSON; JS reads it directly with client-side fallback |
+| §e `humanizeMs()` (Go) vs `humanizeDuration()` (JS) duplication | **Intentional** — different formats (compact vs verbose) by design |
+| §e `enhanceGraph()` coupling to daghtml DOM internals | **Still coupled** — documented in AGENTS.md gotchas as known risk |
+| §c Documentation updates (AGENTS, FEATURES, CHANGELOG, TODO, STABILITY) | **Done** (03:25 report) — except STABILITY.md (still missing viz feature entries) |
+| Q1: No visual/browser verification | Not addressed — no JS unit test runner added |
+| Q2: Critical path `critical_path_steps` schema field | **Added** — injected from Go, serialized as `critical_path_steps` |
+| Q3: "Unknown Author" auto-commits | **In history** — accepted as irreversible; pre-commit hook behavior |
+
+**Still open**: JS runtime test coverage (no Playwright/headless tests),
+STABILITY.md entries for viz visualization features.

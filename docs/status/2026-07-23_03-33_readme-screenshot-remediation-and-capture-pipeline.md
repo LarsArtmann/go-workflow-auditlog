@@ -5,6 +5,12 @@
 **Branch**: master (commit `36136ef`)
 **Previous review**: `docs/status/2026-07-22_19-03_readme-screenshot-enhancement-review.md`
 
+> **Update 2026-07-24:** the remediation held — generated artifacts remain
+> `.gitignore`d and the capture pipeline works. The `--output-dir` flag (Q3
+> below) was never added to the example binary, which remains the root cause of
+> potential future clobbering. Full status in
+> [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## a) FULLY DONE
@@ -169,3 +175,23 @@
 2. **Should the capture script use `magick` instead of `convert`?** ImageMagick 7 deprecated `convert` in favor of `magick`. The current script uses `convert` (via `nix shell nixpkgs#imagemagick`) which produces a deprecation warning. Should I switch to `magick`, or is `convert` fine for broader compatibility?
 
 3. **Should I add `--output-dir` to the example binary?** This is the root cause of the clobbering mistake (repeated twice across two sessions). The fix is ~5 lines in `viz/example/main.go`. Should I do it now, or is it out of scope for this screenshot work?
+
+---
+
+## Resolution (2026-07-24)
+
+| Report item | Resolution |
+| --- | --- |
+| §a-1 Clobbered reference files remediated | **Held** — generated artifacts remain `.gitignore`d |
+| §a-3 Reproducible capture script (`scripts/capture-screenshots.sh`) | **Shipped** — builds to temp dir, `sed` tab injection, `--virtual-time-budget=10000` |
+| §a-4 4 screenshots re-captured at 2x retina | **Done** — graph, steps, timeline, tree |
+| Q1: Screenshots visually correct? | Accepted by user |
+| Q3: `--output-dir` flag for example binary | **Still open** — root cause of clobbering never fixed at source |
+| README TOC "Screenshots" entry | **Still open** — no dedicated heading in README |
+| CI screenshot regeneration | **Still open** |
+| CONTRIBUTING.md for capture script | **Still open** |
+| Events tab screenshot (5th tab) | **Still open** |
+| Failed-step scenario screenshot | **Still open** — only all-green captured |
+
+**Still open**: `--output-dir` flag, README screenshots TOC, CI integration,
+CONTRIBUTING.md, events/failed-step screenshots.

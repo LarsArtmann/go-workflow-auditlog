@@ -4,6 +4,12 @@
 **Session scope**: Fix bugs from prior session's self-review, clean up lint issues, update all documentation for the DAG visualization enhancement features shipped in the prior session
 **Prior session work**: Implemented 5 dashboard visualization features (critical path highlighting, Gantt CP overlay, duration labels, retry badges, graph search), cleaned generated artifacts from git tracking, wrote self-review at `2026-07-22_19-34_dag-visualization-enhancements-self-review.md`
 
+> **Update 2026-07-24:** all items in this report shipped. The critical-path
+> Go/JS duplication question (Q3 below) was resolved — Go now injects
+> `critical_path_steps` into the report JSON, JS reads it directly. STABILITY.md
+> still lacks viz feature entries. Full status in
+> [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## Context
@@ -212,3 +218,18 @@ Four commits in history have `Unknown Author <unknown@example.com>` as the autho
 ### 3. Should the critical path step names be injected from Go into the report JSON?
 
 Currently the critical path is computed twice: in Go (`report_builder.go:272`) for `CriticalPathDurationMs` and `CriticalPath()`, and in JS (`dashboard.js:876`) for the graph toggle. Injecting `critical_path_steps: ["fetch", "transform", "load"]` into the report JSON would eliminate the duplication but changes the report schema. Should I do this, or keep the client-side computation?
+
+---
+
+## Resolution (2026-07-24)
+
+| Report item | Resolution |
+| --- | --- |
+| §a `enhanceGraph()` double-application fix | **Shipped** — idempotency guard in `dashboard.js` |
+| §a Lint findings (`mnd`, `varnamelen`) | **Fixed** — `const msPerSecond`, `durationMs` rename |
+| §a Documentation (FEATURES, CHANGELOG, TODO, AGENTS) | **Updated** |
+| §c STABILITY.md for viz features | **Still open** — viz visualization features not in STABILITY.md |
+| §c README visualization section | **Partial** — one mention at line 601, no dedicated section |
+| Q3: Inject `critical_path_steps` from Go | **Done** — `report_builder.go` injects `CriticalPathSteps`; JS reads it with client-side fallback |
+
+**Still open**: STABILITY.md entries for viz features, JS runtime test coverage.
