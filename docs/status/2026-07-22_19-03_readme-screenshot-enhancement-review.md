@@ -165,16 +165,16 @@
 
 ## Resolution (2026-07-24)
 
-| Report item | Resolution |
-| --- | --- |
-| §d-1 Clobbered reference files (`dashboard.html`, `steps-compact.md`, `steps.csv`) | **Remediated** (03:33 report) — all generated artifacts added to `.gitignore`; tracked files verified intact |
-| §d-2 Unused `example-hero.png` committed | **Removed** via `git rm` |
-| §d-3 Auto-commits with bad messages (`5ad6aac`, `7944da4`, `fd0bf66`) | **In history** — accepted as irreversible; pre-commit hook behavior |
-| Q1: Should `fd0bf66` be reverted? | **No** — the clobbered files were example output, not golden references. Root cause (generated files tracked in git) fixed by `.gitignore` |
-| Q2: Should BuildFlow dashboard be featured? | **No** — it's from `do-auditlog`, a different library |
-| §c README TOC "Screenshots" entry | **Still open** — no dedicated Screenshots heading in README TOC |
-| §c CI screenshot regeneration | **Still open** — no automation |
-| §c `--output-dir` flag for example binary | **Still open** — root cause of file clobbering never fixed at source |
+| Report item                                                                        | Resolution                                                                                                                                 |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| §d-1 Clobbered reference files (`dashboard.html`, `steps-compact.md`, `steps.csv`) | **Remediated** (03:33 report) — all generated artifacts added to `.gitignore`; tracked files verified intact                               |
+| §d-2 Unused `example-hero.png` committed                                           | **Removed** via `git rm`                                                                                                                   |
+| §d-3 Auto-commits with bad messages (`5ad6aac`, `7944da4`, `fd0bf66`)              | **In history** — accepted as irreversible; pre-commit hook behavior                                                                        |
+| Q1: Should `fd0bf66` be reverted?                                                  | **No** — the clobbered files were example output, not golden references. Root cause (generated files tracked in git) fixed by `.gitignore` |
+| Q2: Should BuildFlow dashboard be featured?                                        | **No** — it's from `do-auditlog`, a different library                                                                                      |
+| §c README TOC "Screenshots" entry                                                  | **Still open** — no dedicated Screenshots heading in README TOC                                                                            |
+| §c CI screenshot regeneration                                                      | **Still open** — no automation                                                                                                             |
+| §c `--output-dir` flag for example binary                                          | **Still open** — root cause of file clobbering never fixed at source                                                                       |
 
 **Reproducible capture pipeline** (`scripts/capture-screenshots.sh`) was built
 in the 03:33 report to address screenshot regeneration.

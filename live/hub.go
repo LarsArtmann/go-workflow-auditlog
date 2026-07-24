@@ -48,7 +48,7 @@ type Hub struct {
 
 // NewHub creates a Hub ready for use.
 func NewHub() *Hub {
-	return &Hub{ //nolint:exhaustruct
+	return &Hub{
 		clients: make(map[uint64]*Subscriber),
 	}
 }
@@ -86,7 +86,7 @@ func (h *Hub) Subscribe() *Subscriber {
 	subID := h.nextID
 	h.nextID++
 
-	sub := &Subscriber{ //nolint:exhaustruct
+	sub := &Subscriber{
 		id:   subID,
 		ch:   make(chan jsontext.Value, subscriberBufferSize),
 		done: make(chan struct{}),

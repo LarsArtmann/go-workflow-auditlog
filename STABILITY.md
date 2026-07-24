@@ -24,25 +24,25 @@ the 0.x series:
 
 These surfaces are functional but their exact shape may change:
 
-| Surface                                                                                | Reason                                                                                  |
-| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `WorkflowReport.Diff(other) DiffResult`                                                | `DiffResult` and `StepDiff` field sets may grow.                                        |
-| `WorkflowReport.Filtered(opts ...ReportOption)`                                        | The filter option set may expand.                                                       |
-| `Event`, `StepInfo`, `StepRef` field set                                               | New fields may be added. Existing JSON tags are stable.                                 |
-| Diagram / Table / Tree export output                                                   | Output format may evolve as go-output updates.                                          |
-| `WithColumns(...TableColumn)` table option                                             | Column set may expand; existing column constants are stable.                            |
-| `WithDirection(output.Direction)` diagram option                                       | Direction mapping per format may evolve; option signature is stable.                    |
-| `TableColumn` enum / `DiagramOption` type                                              | New values may be added; existing ones keep their iota/string values.                   |
-| `ReportIndex` query methods                                                            | New lookup methods may be added.                                                        |
-| `ErrorClassifications()` / `RegisterClassifications(reg)`                              | Classification mapping may grow as new sentinels are added.                             |
-| I/O sentinel errors (`ErrReportLoadFailed`, `ErrRenderFailed`, `ErrExportWriteFailed`) | Sentinel set is stable; wrapping messages may evolve.                                   |
-| `go-error-family` dependency (v0.7.0)                                                  | Transitive: classification metadata depends on this external library. Pinned in go.mod. |
-| `NDJSONStreamer` / `NewNDJSONStreamer` / `CreateNDJSONStreamer`                        | New streaming API; type and method set may grow. Output format (NDJSON) is stable.      |
-| `WithAutoFlush()` / `WithBufferSize(n)` / `NDJSONStreamerOption`                       | Option set may expand; existing options keep their semantics.                           |
-| Dashboard graph enhancements (critical path, retry badges, search, duration labels)   | JS post-processing layer on daghtml SVG; behavior may evolve with go-output daghtml SDK. |
-| `live.New(config, serverConfig)` / `live.Config` / `live.Server` / `live.Hub`          | New module; type and method set may change between 0.x releases.                        |
+| Surface                                                                                | Reason                                                                                    |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `WorkflowReport.Diff(other) DiffResult`                                                | `DiffResult` and `StepDiff` field sets may grow.                                          |
+| `WorkflowReport.Filtered(opts ...ReportOption)`                                        | The filter option set may expand.                                                         |
+| `Event`, `StepInfo`, `StepRef` field set                                               | New fields may be added. Existing JSON tags are stable.                                   |
+| Diagram / Table / Tree export output                                                   | Output format may evolve as go-output updates.                                            |
+| `WithColumns(...TableColumn)` table option                                             | Column set may expand; existing column constants are stable.                              |
+| `WithDirection(output.Direction)` diagram option                                       | Direction mapping per format may evolve; option signature is stable.                      |
+| `TableColumn` enum / `DiagramOption` type                                              | New values may be added; existing ones keep their iota/string values.                     |
+| `ReportIndex` query methods                                                            | New lookup methods may be added.                                                          |
+| `ErrorClassifications()` / `RegisterClassifications(reg)`                              | Classification mapping may grow as new sentinels are added.                               |
+| I/O sentinel errors (`ErrReportLoadFailed`, `ErrRenderFailed`, `ErrExportWriteFailed`) | Sentinel set is stable; wrapping messages may evolve.                                     |
+| `go-error-family` dependency (v0.7.0)                                                  | Transitive: classification metadata depends on this external library. Pinned in go.mod.   |
+| `NDJSONStreamer` / `NewNDJSONStreamer` / `CreateNDJSONStreamer`                        | New streaming API; type and method set may grow. Output format (NDJSON) is stable.        |
+| `WithAutoFlush()` / `WithBufferSize(n)` / `NDJSONStreamerOption`                       | Option set may expand; existing options keep their semantics.                             |
+| Dashboard graph enhancements (critical path, retry badges, search, duration labels)    | JS post-processing layer on daghtml SVG; behavior may evolve with go-output daghtml SDK.  |
+| `live.New(config, serverConfig)` / `live.Config` / `live.Server` / `live.Hub`          | New module; type and method set may change between 0.x releases.                          |
 | `live.Server.SignalComplete()` / `live.Hub.OnEvent` / SSE event protocol               | SSE event payloads (`snapshot`, `event`, `complete`) may gain fields; wire format stable. |
-| `Auditor.CaptureDAG(w)`                                                                 | New method; pre-populates step DAG structure from workflow definition before execution. |
+| `Auditor.CaptureDAG(w)`                                                                | New method; pre-populates step DAG structure from workflow definition before execution.   |
 
 ## Unstable / Internal (no stability guarantee)
 

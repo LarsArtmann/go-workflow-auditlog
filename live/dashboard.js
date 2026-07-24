@@ -797,10 +797,7 @@
   function computeCriticalPathSteps() {
     if (!state.report) return [];
 
-    if (
-      state.report.critical_path_steps &&
-      state.report.critical_path_steps.length > 0
-    ) {
+    if (state.report.critical_path_steps && state.report.critical_path_steps.length > 0) {
       return state.report.critical_path_steps;
     }
 

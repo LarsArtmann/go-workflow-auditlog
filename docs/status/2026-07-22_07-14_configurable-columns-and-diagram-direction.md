@@ -255,16 +255,16 @@ The golden file test (`TestReport_WriteHTML_GoldenFile`) has been failing since 
 
 Both features shipped in v0.7.0. Key items from this report and their resolution:
 
-| Report item | Resolution |
-| --- | --- |
-| Session Summary "Committed: No" | **Committed** as `f259b32` (features) + `c1a3d9b` (release prep), tagged v0.7.0 |
-| §c Module split | **Shipped** — core/viz/live are separate Go modules |
-| §c Streaming NDJSON export | **Shipped** — `NDJSONStreamer`, 100% coverage |
-| §d Golden file test failure (pre-existing) | **Permanently resolved** (08:47 report) — replaced with structural validation |
-| §e `writeGraph` orphaned (Graphviz-only caller) | **Moved to viz module** during module split |
-| §e `DefaultTableColumns` mutable `var` | **Fixed** (08:47 report) — `defaultColumnsCopy()` returns fresh slice |
-| §e PlantUML direction limited (2/4 directions) | **Still open** — `DirectionUp`/`DirectionLeft` fall back to default |
-| §f-15 `TableColumn.String()` | **Shipped** (08:47 report) |
+| Report item                                     | Resolution                                                                      |
+| ----------------------------------------------- | ------------------------------------------------------------------------------- |
+| Session Summary "Committed: No"                 | **Committed** as `f259b32` (features) + `c1a3d9b` (release prep), tagged v0.7.0 |
+| §c Module split                                 | **Shipped** — core/viz/live are separate Go modules                             |
+| §c Streaming NDJSON export                      | **Shipped** — `NDJSONStreamer`, 100% coverage                                   |
+| §d Golden file test failure (pre-existing)      | **Permanently resolved** (08:47 report) — replaced with structural validation   |
+| §e `writeGraph` orphaned (Graphviz-only caller) | **Moved to viz module** during module split                                     |
+| §e `DefaultTableColumns` mutable `var`          | **Fixed** (08:47 report) — `defaultColumnsCopy()` returns fresh slice           |
+| §e PlantUML direction limited (2/4 directions)  | **Still open** — `DirectionUp`/`DirectionLeft` fall back to default             |
+| §f-15 `TableColumn.String()`                    | **Shipped** (08:47 report)                                                      |
 
 **Still open**: PlantUML direction asymmetry, CONTRIBUTING.md, OTel bridge,
 CLI tool.

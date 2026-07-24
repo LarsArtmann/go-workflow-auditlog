@@ -306,17 +306,17 @@ and deleted the golden file entirely.
 
 Key "NOT STARTED" items and their resolution:
 
-| Report item | Resolution |
-| --- | --- |
-| §a-1 Golden file fix | **Permanently resolved** (08:47 report) — golden file deleted, structural validation replaces byte comparison |
-| §c Pre-filter table columns | **Shipped v0.7.0** — `WithColumns()` pre-filter in `buildTableData` |
-| §c Post-processing diagram direction | **Shipped v0.7.0** — `WithDirection()` on all 4 formats |
-| §c Module split | **Shipped** — merged to master, 3 modules (core/viz/live) |
-| §c Streaming NDJSON export | **Shipped** — `NDJSONStreamer`, 100% `stream.go` coverage |
-| §e-3 CriticalPath O(n*k) StepByName scans | **Optimized** — algorithm now memoized; steps injected from Go into report JSON |
-| §e-2 PeakConcurrencySteps re-scans events | **Shipped v0.7.0** — accepted on-demand cost |
-| §d-3 `coverage_test.go` deleted with `trash` not `git mv` | History severed; accepted as irreversible |
-| §f-11 b.Loop() migration (11 sites) | **Still open** — gopls `stdversion`/`b.N` warnings persist |
+| Report item                                               | Resolution                                                                                                    |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| §a-1 Golden file fix                                      | **Permanently resolved** (08:47 report) — golden file deleted, structural validation replaces byte comparison |
+| §c Pre-filter table columns                               | **Shipped v0.7.0** — `WithColumns()` pre-filter in `buildTableData`                                           |
+| §c Post-processing diagram direction                      | **Shipped v0.7.0** — `WithDirection()` on all 4 formats                                                       |
+| §c Module split                                           | **Shipped** — merged to master, 3 modules (core/viz/live)                                                     |
+| §c Streaming NDJSON export                                | **Shipped** — `NDJSONStreamer`, 100% `stream.go` coverage                                                     |
+| §e-3 CriticalPath O(n*k) StepByName scans                 | **Optimized** — algorithm now memoized; steps injected from Go into report JSON                               |
+| §e-2 PeakConcurrencySteps re-scans events                 | **Shipped v0.7.0** — accepted on-demand cost                                                                  |
+| §d-3 `coverage_test.go` deleted with `trash` not `git mv` | History severed; accepted as irreversible                                                                     |
+| §f-11 b.Loop() migration (11 sites)                       | **Still open** — gopls `stdversion`/`b.N` warnings persist                                                    |
 
 **Still open**: CLI tool, OTel bridge, `FailureReason` categories, b.Loop()
 migration, CONTRIBUTING.md.

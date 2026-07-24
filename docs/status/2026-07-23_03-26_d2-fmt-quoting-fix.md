@@ -164,18 +164,18 @@ Nothing. No data loss, no broken tests, no reverted work. The fix is correct and
 
 ## Resolution (2026-07-24)
 
-| Report item | Resolution |
-| --- | --- |
-| D2 quoting fix (`d2NeedsQuoting()` + `d2Quote()`) | **Committed locally** in go-output (`d91cc22`) |
-| go-output v0.31.1 tag | **Pushed to remote** — all 16 sub-module tags at `d91cc22`, confirmed via `git ls-remote --tags origin` |
-| go-output v0.31.1 on Go proxy | **Available** — `go list -m -versions` confirms v0.31.1 for all sub-modules |
-| `viz/go.mod` version bump | **NOT done** — still v0.30.4; tag is published and proxy-available, just needs `go get` + `go mod tidy` |
-| DOT edge color quoting | **Fixed** in same commit (`d91cc22`) — `graph/dot.go` edge `color` attribute |
-| PlantUML/Mermaid audit | **Done** (04:11 report) — both safe (Mermaid sanitizes IDs; PlantUML uses `#` as color prefix) |
-| `d2-fmt` in treefmt | **Done** — `settings.formatter.d2` in `flake.nix`, `d2` in devShell |
-| go-output CHANGELOG | **Still open** — go-output `[Unreleased]` section is empty |
-| Q2: `d2-fmt` in flake.nix treefmt | **Done** |
-| Q3: Audit all renderers | **Done** — D2 fixed, DOT fixed (edge color), Mermaid safe, PlantUML safe |
+| Report item                                       | Resolution                                                                                              |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| D2 quoting fix (`d2NeedsQuoting()` + `d2Quote()`) | **Committed locally** in go-output (`d91cc22`)                                                          |
+| go-output v0.31.1 tag                             | **Pushed to remote** — all 16 sub-module tags at `d91cc22`, confirmed via `git ls-remote --tags origin` |
+| go-output v0.31.1 on Go proxy                     | **Available** — `go list -m -versions` confirms v0.31.1 for all sub-modules                             |
+| `viz/go.mod` version bump                         | **NOT done** — still v0.30.4; tag is published and proxy-available, just needs `go get` + `go mod tidy` |
+| DOT edge color quoting                            | **Fixed** in same commit (`d91cc22`) — `graph/dot.go` edge `color` attribute                            |
+| PlantUML/Mermaid audit                            | **Done** (04:11 report) — both safe (Mermaid sanitizes IDs; PlantUML uses `#` as color prefix)          |
+| `d2-fmt` in treefmt                               | **Done** — `settings.formatter.d2` in `flake.nix`, `d2` in devShell                                     |
+| go-output CHANGELOG                               | **Still open** — go-output `[Unreleased]` section is empty                                              |
+| Q2: `d2-fmt` in flake.nix treefmt                 | **Done**                                                                                                |
+| Q3: Audit all renderers                           | **Done** — D2 fixed, DOT fixed (edge color), Mermaid safe, PlantUML safe                                |
 
 **Blocking:** none — the v0.31.1 tag is pushed and proxy-available. The
 remaining task is a routine `viz/go.mod` bump (`go get` + `go mod tidy`).

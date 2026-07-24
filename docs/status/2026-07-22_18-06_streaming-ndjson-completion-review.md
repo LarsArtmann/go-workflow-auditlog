@@ -247,17 +247,17 @@ Should we change this (gate OnEvent behind the MaxEvents check) or keep it and j
 
 All open items from this report's section C:
 
-| Report item | Resolution |
-| --- | --- |
-| §C README.md — no streaming section | **Added** — `## Streaming NDJSON` with usage examples |
-| §C CHANGELOG.md — no streaming entry | **Added** to `[Unreleased]` |
-| §C STABILITY.md — no streaming entry | **Added** — `NDJSONStreamer` / options classified as Evolving |
-| §C `writeEventsNDJSON` flush error path uncovered from core | Covered indirectly via `encodeEvent` shared helper |
-| §C No fuzz test for streaming | **Still open** — seed corpus runs in CI but no dedicated streaming fuzz target |
-| §C No property/round-trip test for streaming | **Still open** |
-| §C `WithFlushInterval` time-based flush | **Still open** — see TODO_LIST "Deferred" |
-| §C MaxEvents + streaming integration test | **Still open** |
-| "9 commits ahead of origin" | **Stale** — many more commits since, including live dashboard module |
+| Report item                                                 | Resolution                                                                     |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| §C README.md — no streaming section                         | **Added** — `## Streaming NDJSON` with usage examples                          |
+| §C CHANGELOG.md — no streaming entry                        | **Added** to `[Unreleased]`                                                    |
+| §C STABILITY.md — no streaming entry                        | **Added** — `NDJSONStreamer` / options classified as Evolving                  |
+| §C `writeEventsNDJSON` flush error path uncovered from core | Covered indirectly via `encodeEvent` shared helper                             |
+| §C No fuzz test for streaming                               | **Still open** — seed corpus runs in CI but no dedicated streaming fuzz target |
+| §C No property/round-trip test for streaming                | **Still open**                                                                 |
+| §C `WithFlushInterval` time-based flush                     | **Still open** — see TODO_LIST "Deferred"                                      |
+| §C MaxEvents + streaming integration test                   | **Still open**                                                                 |
+| "9 commits ahead of origin"                                 | **Stale** — many more commits since, including live dashboard module           |
 
 **Product decision (MaxEvents + OnEvent):** kept current behavior (OnEvent fires
 for ALL events including those dropped by MaxEvents) and documented in AGENTS.md.

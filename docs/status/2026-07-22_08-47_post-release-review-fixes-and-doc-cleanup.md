@@ -206,14 +206,14 @@ The drop is caused by adding new code paths (`TableColumn.String()`, `defaultCol
 
 The "NOT STARTED" items from this report and their resolution:
 
-| Report item | Resolution |
-| --- | --- |
-| §c Module split | **Shipped** — core/viz/live are separate Go modules, merged to master |
-| §c Streaming NDJSON export | **Shipped** — `NDJSONStreamer`, 100% `stream.go` coverage |
-| §e AGENTS.md `htmlTemplate` says "six %s verbs" but actually eight | **Fixed** — AGENTS.md now says "eight `%s` verbs" |
-| §e STABILITY.md not updated for `TableColumn.String()` | **Updated** — STABILITY.md classifies streaming API as Evolving |
-| §e `writeGraph` single-caller smell | **Moved to viz** during module split |
-| §e b.Loop() migration (9 sites) | **Still open** — gopls `stdversion` warnings persist |
-| §f Live real-time dashboard module | **Shipped** — `live/` module with SSE, demo at `:18080` |
+| Report item                                                        | Resolution                                                            |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| §c Module split                                                    | **Shipped** — core/viz/live are separate Go modules, merged to master |
+| §c Streaming NDJSON export                                         | **Shipped** — `NDJSONStreamer`, 100% `stream.go` coverage             |
+| §e AGENTS.md `htmlTemplate` says "six %s verbs" but actually eight | **Fixed** — AGENTS.md now says "eight `%s` verbs"                     |
+| §e STABILITY.md not updated for `TableColumn.String()`             | **Updated** — STABILITY.md classifies streaming API as Evolving       |
+| §e `writeGraph` single-caller smell                                | **Moved to viz** during module split                                  |
+| §e b.Loop() migration (9 sites)                                    | **Still open** — gopls `stdversion` warnings persist                  |
+| §f Live real-time dashboard module                                 | **Shipped** — `live/` module with SSE, demo at `:18080`               |
 
 **Still open**: b.Loop() migration, OTel bridge, CLI tool, CONTRIBUTING.md.

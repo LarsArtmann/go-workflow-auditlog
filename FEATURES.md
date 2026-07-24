@@ -57,30 +57,30 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-24.
 
 **Core module** (JSON/NDJSON — methods on `Auditor` and `WorkflowReport`):
 
-| Format        | Write (writer)  | Export (file)  | On Auditor | On Report |
-| ------------- | --------------- | -------------- | ---------- | --------- |
-| JSON report   | `WriteJSON`     | `ExportJSON`   | ✅         | ✅        |
-| NDJSON events | `WriteNDJSON`   | `ExportNDJSON` | ✅         | ✅        |
+| Format        | Write (writer) | Export (file)  | On Auditor | On Report |
+| ------------- | -------------- | -------------- | ---------- | --------- |
+| JSON report   | `WriteJSON`    | `ExportJSON`   | ✅         | ✅        |
+| NDJSON events | `WriteNDJSON`  | `ExportNDJSON` | ✅         | ✅        |
 
 **Visualization module** (diagrams/tables/trees/HTML — package-level functions in `viz`):
 
-| Format                 | Write (writer)           | WriteString           | Export (file)          |
-| ---------------------- | ------------------------ | --------------------- | ---------------------- |
-| Mermaid                | `viz.WriteMermaid`       | `viz.WriteMermaidString`  | `viz.ExportMermaid`       |
-| PlantUML               | `viz.WritePlantUML`      | `viz.WritePlantUMLString` | `viz.ExportPlantUML`      |
-| Graphviz DOT           | `viz.WriteGraphviz`      | `viz.WriteGraphvizString` | `viz.ExportGraphviz`      |
-| D2                     | `viz.WriteD2`            | `viz.WriteD2String`       | `viz.ExportD2`            |
-| Table (16 sub-formats) | `viz.WriteTable`         | `viz.WriteTableString`    | `viz.ExportTable`         |
-| ASCII Tree             | `viz.WriteTree`          | `viz.WriteTreeString`     | `viz.ExportTree`          |
-| HTML Tree              | `viz.WriteHTMLTree`      | `viz.WriteHTMLTreeString` | `viz.ExportHTMLTree`      |
-| HTML Dashboard         | `viz.WriteHTML`          | `viz.WriteHTMLString`     | `viz.ExportHTML`          |
+| Format                 | Write (writer)      | WriteString               | Export (file)        |
+| ---------------------- | ------------------- | ------------------------- | -------------------- |
+| Mermaid                | `viz.WriteMermaid`  | `viz.WriteMermaidString`  | `viz.ExportMermaid`  |
+| PlantUML               | `viz.WritePlantUML` | `viz.WritePlantUMLString` | `viz.ExportPlantUML` |
+| Graphviz DOT           | `viz.WriteGraphviz` | `viz.WriteGraphvizString` | `viz.ExportGraphviz` |
+| D2                     | `viz.WriteD2`       | `viz.WriteD2String`       | `viz.ExportD2`       |
+| Table (16 sub-formats) | `viz.WriteTable`    | `viz.WriteTableString`    | `viz.ExportTable`    |
+| ASCII Tree             | `viz.WriteTree`     | `viz.WriteTreeString`     | `viz.ExportTree`     |
+| HTML Tree              | `viz.WriteHTMLTree` | `viz.WriteHTMLTreeString` | `viz.ExportHTMLTree` |
+| HTML Dashboard         | `viz.WriteHTML`     | `viz.WriteHTMLString`     | `viz.ExportHTML`     |
 
 **Live module** (real-time streaming):
 
-| Format          | Mechanism                          | Constructor                    |
-| --------------- | ---------------------------------- | ------------------------------ |
-| Streaming NDJSON | `NDJSONStreamer.OnEvent`          | `NewNDJSONStreamer` / `CreateNDJSONStreamer` |
-| Live SSE events  | `hub.OnEvent` → SSE fan-out       | `live.New(config, serverConfig)` |
+| Format           | Mechanism                   | Constructor                                  |
+| ---------------- | --------------------------- | -------------------------------------------- |
+| Streaming NDJSON | `NDJSONStreamer.OnEvent`    | `NewNDJSONStreamer` / `CreateNDJSONStreamer` |
+| Live SSE events  | `hub.OnEvent` → SSE fan-out | `live.New(config, serverConfig)`             |
 
 Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml
 

@@ -223,13 +223,13 @@ Currently the critical path is computed twice: in Go (`report_builder.go:272`) f
 
 ## Resolution (2026-07-24)
 
-| Report item | Resolution |
-| --- | --- |
-| §a `enhanceGraph()` double-application fix | **Shipped** — idempotency guard in `dashboard.js` |
-| §a Lint findings (`mnd`, `varnamelen`) | **Fixed** — `const msPerSecond`, `durationMs` rename |
-| §a Documentation (FEATURES, CHANGELOG, TODO, AGENTS) | **Updated** |
-| §c STABILITY.md for viz features | **Still open** — viz visualization features not in STABILITY.md |
-| §c README visualization section | **Partial** — one mention at line 601, no dedicated section |
-| Q3: Inject `critical_path_steps` from Go | **Done** — `report_builder.go` injects `CriticalPathSteps`; JS reads it with client-side fallback |
+| Report item                                          | Resolution                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| §a `enhanceGraph()` double-application fix           | **Shipped** — idempotency guard in `dashboard.js`                                                 |
+| §a Lint findings (`mnd`, `varnamelen`)               | **Fixed** — `const msPerSecond`, `durationMs` rename                                              |
+| §a Documentation (FEATURES, CHANGELOG, TODO, AGENTS) | **Updated**                                                                                       |
+| §c STABILITY.md for viz features                     | **Still open** — viz visualization features not in STABILITY.md                                   |
+| §c README visualization section                      | **Partial** — one mention at line 601, no dedicated section                                       |
+| Q3: Inject `critical_path_steps` from Go             | **Done** — `report_builder.go` injects `CriticalPathSteps`; JS reads it with client-side fallback |
 
 **Still open**: STABILITY.md entries for viz features, JS runtime test coverage.

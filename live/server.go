@@ -129,7 +129,7 @@ func NewServer(hub *Hub, auditor *auditlog.Auditor, cfg Config) *Server {
 		cfg.HeartbeatInterval = defaultHeartbeatInterval
 	}
 
-	srv := &Server{ //nolint:exhaustruct
+	srv := &Server{
 		hub:    hub,
 		config: cfg,
 		mux:    http.NewServeMux(),
@@ -176,7 +176,7 @@ func (srv *Server) ListenAndServe() error {
 	// Store the actual address (resolves ":0" to the OS-assigned port).
 	srv.config.Addr = listener.Addr().String()
 
-	srv.httpServer = &http.Server{ //nolint:exhaustruct // minimal config
+	srv.httpServer = &http.Server{
 		Handler:           srv.mux,
 		ReadHeaderTimeout: srv.config.ReadHeaderTimeout,
 	}
@@ -206,7 +206,8 @@ func (srv *Server) Shutdown(ctx context.Context) error {
 		return nil
 	}
 
-	if err := server.Shutdown(ctx); err != nil {
+	err := server.Shutdown(ctx)
+	if err != nil {
 		return fmt.Errorf("shutdown: %w", err)
 	}
 
@@ -318,7 +319,8 @@ func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
 	sub := srv.hub.Subscribe()
 	defer srv.hub.Unsubscribe(sub.id)
 
-	if err := srv.sendSnapshot(w, flusher); err != nil {
+	err := srv.sendSnapshot(w, flusher)
+	if err != nil {
 		return
 	}
 
@@ -338,7 +340,8 @@ func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
 			return
 
 		case evt := <-sub.ch:
-			if err := sse.WriteEvent(w, sse.Event{Event: "event", Data: string(evt)}); err != nil {
+			err := sse.WriteEvent(w, sse.Event{Event: "event", Data: string(evt)})
+			if err != nil {
 				return
 			}
 

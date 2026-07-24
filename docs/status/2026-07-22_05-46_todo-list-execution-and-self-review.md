@@ -259,20 +259,20 @@ The ROADMAP says "Blocked: needs upstream go-output `RenderOptions` support." Bu
 This report's "NOT STARTED" (§c) and "Deferred" (§f items 25–38) sections listed
 work that has since shipped. Item-by-item status:
 
-| Report item | Resolution |
-| --- | --- |
-| §c Configurable table columns (blocked on go-output) | **Shipped v0.7.0** — pre-filter in `buildTableData`, no upstream change needed (commits `f259b32`, `c1a3d9b`) |
-| §c Diagram layout direction (blocked on go-output) | **Shipped v0.7.0** — `WithDirection()` on all 4 diagram formats |
-| §f-22 `StepStatusFromFlow` exported helper | Not shipped; `fromFlowStatus` refactored to `flowStatusMap` lookup instead |
-| §f-23 `PeakConcurrencySteps()` | **Shipped v0.7.0** |
-| §f-24 `CriticalPath()` | **Shipped v0.7.0** |
-| §f-29 CLI tool (`auditlog`) | **Still open** — see TODO_LIST "Deferred" |
-| §f-36 Module split (core + visualization) | **Shipped** — merged to master; core has zero go-output deps |
-| §f-37 Streaming NDJSON export | **Shipped** — `NDJSONStreamer` in `stream.go`, 100% coverage |
-| §f-38 OpenTelemetry span bridge | **Still deferred** — see ROADMAP |
-| §f-40 `govulncheck` in CI | **Shipped** — golang/govulncheck-action in CI workflow |
-| §f-39 Fuzz tests in CI | Seed corpus runs in CI; long-running fuzz not automated |
-| AGENTS.md metrics (§d-1: coverage 94→95.6%, tests 234→258, fuzz 2→3) | **Updated multiple times since** — AGENTS.md now reflects 3 modules, ~355 test functions, live module |
+| Report item                                                          | Resolution                                                                                                    |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| §c Configurable table columns (blocked on go-output)                 | **Shipped v0.7.0** — pre-filter in `buildTableData`, no upstream change needed (commits `f259b32`, `c1a3d9b`) |
+| §c Diagram layout direction (blocked on go-output)                   | **Shipped v0.7.0** — `WithDirection()` on all 4 diagram formats                                               |
+| §f-22 `StepStatusFromFlow` exported helper                           | Not shipped; `fromFlowStatus` refactored to `flowStatusMap` lookup instead                                    |
+| §f-23 `PeakConcurrencySteps()`                                       | **Shipped v0.7.0**                                                                                            |
+| §f-24 `CriticalPath()`                                               | **Shipped v0.7.0**                                                                                            |
+| §f-29 CLI tool (`auditlog`)                                          | **Still open** — see TODO_LIST "Deferred"                                                                     |
+| §f-36 Module split (core + visualization)                            | **Shipped** — merged to master; core has zero go-output deps                                                  |
+| §f-37 Streaming NDJSON export                                        | **Shipped** — `NDJSONStreamer` in `stream.go`, 100% coverage                                                  |
+| §f-38 OpenTelemetry span bridge                                      | **Still deferred** — see ROADMAP                                                                              |
+| §f-40 `govulncheck` in CI                                            | **Shipped** — golang/govulncheck-action in CI workflow                                                        |
+| §f-39 Fuzz tests in CI                                               | Seed corpus runs in CI; long-running fuzz not automated                                                       |
+| AGENTS.md metrics (§d-1: coverage 94→95.6%, tests 234→258, fuzz 2→3) | **Updated multiple times since** — AGENTS.md now reflects 3 modules, ~355 test functions, live module         |
 
 **Still open** from this report's 50-item list: CLI tool, OTel span bridge,
 `FailureReason` structured categories, `Diff()` on PeakConcurrency/CriticalPath,

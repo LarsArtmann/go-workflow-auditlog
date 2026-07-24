@@ -267,7 +267,8 @@ func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.Workflo
 
 	outputDir = parsed.outputDir
 	if outputDir != "." {
-		if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		err := os.MkdirAll(outputDir, 0o755)
+		if err != nil {
 			log.Fatalf("create output dir %s: %v", outputDir, err)
 		}
 	}

@@ -212,21 +212,21 @@ NDJSON streams individual events in real time. A JSON report is a single documen
 The "INCOMPLETE" items from section c were resolved in the 18:06 completion
 report:
 
-| Report item | Resolution |
-| --- | --- |
-| §c FEATURES.md — streaming listed under "WORTH CONSIDERING" | **Moved to DONE** |
-| §c TODO_LIST.md — checkbox unchecked | **Checked and removed** (streaming shipped) |
-| §c doc.go — no mention of streaming | **Updated** |
-| §c `FailingWriter` not shared (duplicate `errorWriter`) | **Extracted to `testhelpers`** |
-| §c `TestNDJSONStreamer_FullLifecycleExample` duplicates workflow integration test | **Consolidated** |
-| §c MaxEvents + OnEvent interaction undocumented | **Documented** in AGENTS.md gotchas |
-| §e-2 Encoding logic duplicated between `writeEventsNDJSON` and `OnEvent` | **Extracted** `encodeEvent` shared helper in `export.go` |
-| §e-1 No configurable buffer size (hardcoded 64KB) | **Shipped** `WithBufferSize(n)` |
-| §c No README streaming section | **Added** — README has `## Streaming NDJSON` section |
-| §c No CHANGELOG entry | **Added** to `[Unreleased]` |
-| §c No STABILITY.md entry | **Added** — classified as Evolving |
-| §c No benchmark | **Added** `BenchmarkNDJSONStreamer_{100,1000,10000}Events` |
-| §c No godoc Example function | **Not re-added** (was deleted during lint fixes; not critical) |
+| Report item                                                                       | Resolution                                                     |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| §c FEATURES.md — streaming listed under "WORTH CONSIDERING"                       | **Moved to DONE**                                              |
+| §c TODO_LIST.md — checkbox unchecked                                              | **Checked and removed** (streaming shipped)                    |
+| §c doc.go — no mention of streaming                                               | **Updated**                                                    |
+| §c `FailingWriter` not shared (duplicate `errorWriter`)                           | **Extracted to `testhelpers`**                                 |
+| §c `TestNDJSONStreamer_FullLifecycleExample` duplicates workflow integration test | **Consolidated**                                               |
+| §c MaxEvents + OnEvent interaction undocumented                                   | **Documented** in AGENTS.md gotchas                            |
+| §e-2 Encoding logic duplicated between `writeEventsNDJSON` and `OnEvent`          | **Extracted** `encodeEvent` shared helper in `export.go`       |
+| §e-1 No configurable buffer size (hardcoded 64KB)                                 | **Shipped** `WithBufferSize(n)`                                |
+| §c No README streaming section                                                    | **Added** — README has `## Streaming NDJSON` section           |
+| §c No CHANGELOG entry                                                             | **Added** to `[Unreleased]`                                    |
+| §c No STABILITY.md entry                                                          | **Added** — classified as Evolving                             |
+| §c No benchmark                                                                   | **Added** `BenchmarkNDJSONStreamer_{100,1000,10000}Events`     |
+| §c No godoc Example function                                                      | **Not re-added** (was deleted during lint fixes; not critical) |
 
 **Q1 (auto-wire via `Config.NDJSONWriter`):** Not implemented — compose-it-yourself
 pattern kept, as recommended.

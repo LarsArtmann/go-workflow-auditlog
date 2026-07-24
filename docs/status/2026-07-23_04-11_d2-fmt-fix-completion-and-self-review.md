@@ -186,20 +186,20 @@
 
 ## Resolution (2026-07-24)
 
-| Report item | Resolution |
-| --- | --- |
-| §a-1 D2 quoting fix committed (`d91cc22`) | **Committed** in go-output local repo |
-| §a-2 DOT edge color quoting fix | **Committed** in same `d91cc22` |
-| §a-3 Renderer audit (D2/DOT/Mermaid/PlantUML) | **Done** — D2 fixed, DOT fixed, Mermaid safe, PlantUML safe |
-| §a-5 go-output tagged v0.31.1 (root + 16 sub-modules) | **Pushed to remote** — confirmed via `git ls-remote --tags origin`; available on Go proxy |
-| §a-7 `d2-fmt` in treefmt config | **Done** — `flake.nix` `settings.formatter.d2` |
-| §a-8 AGENTS.md updated | **Done** |
-| §a-9 Standalone build verified at v0.30.4 | **Done** |
-| §c Push go-output tags to remote | **Done** — tags pushed and available on Go proxy |
-| §c `viz/go.mod` bump to v0.31.1 | **Still open** — tag is published; just needs `go get` + `go mod tidy` |
-| §c DOT edge color regression test | **Still open** — no `TestDOT_EdgeColorQuoted` |
-| Q1: Re-point v0.31.1 tags to include `7c0671b`? | **Moot** — tags are pushed at `d91cc22`; re-pointing requires force-push (not recommended) |
-| Q2: Commit auditlog changes now or after push? | **Partially done** — flake.nix/AGENTS.md committed; some test files may still be uncommitted |
+| Report item                                           | Resolution                                                                                   |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| §a-1 D2 quoting fix committed (`d91cc22`)             | **Committed** in go-output local repo                                                        |
+| §a-2 DOT edge color quoting fix                       | **Committed** in same `d91cc22`                                                              |
+| §a-3 Renderer audit (D2/DOT/Mermaid/PlantUML)         | **Done** — D2 fixed, DOT fixed, Mermaid safe, PlantUML safe                                  |
+| §a-5 go-output tagged v0.31.1 (root + 16 sub-modules) | **Pushed to remote** — confirmed via `git ls-remote --tags origin`; available on Go proxy    |
+| §a-7 `d2-fmt` in treefmt config                       | **Done** — `flake.nix` `settings.formatter.d2`                                               |
+| §a-8 AGENTS.md updated                                | **Done**                                                                                     |
+| §a-9 Standalone build verified at v0.30.4             | **Done**                                                                                     |
+| §c Push go-output tags to remote                      | **Done** — tags pushed and available on Go proxy                                             |
+| §c `viz/go.mod` bump to v0.31.1                       | **Still open** — tag is published; just needs `go get` + `go mod tidy`                       |
+| §c DOT edge color regression test                     | **Still open** — no `TestDOT_EdgeColorQuoted`                                                |
+| Q1: Re-point v0.31.1 tags to include `7c0671b`?       | **Moot** — tags are pushed at `d91cc22`; re-pointing requires force-push (not recommended)   |
+| Q2: Commit auditlog changes now or after push?        | **Partially done** — flake.nix/AGENTS.md committed; some test files may still be uncommitted |
 
 **Blocking:** none — the v0.31.1 tag is pushed and proxy-available. The only
 remaining task is bumping `viz/go.mod` from v0.30.4 → v0.31.1.

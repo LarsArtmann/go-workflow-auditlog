@@ -23,15 +23,15 @@ If a word means something different to a developer than to a customer, define it
 
 Objects with identity and lifecycle.
 
-| Term           | Definition                                                                | Context                             |
-| -------------- | ------------------------------------------------------------------------- | ----------------------------------- |
-| StepInfo       | Aggregated observation for a single step (status, attempts, deps, errors) | Public; serialized in report.Steps  |
-| Event          | A single observation (attempt_start / attempt_end)                        | Public; serialized in report.Events |
-| WorkflowReport | Denormalized report with aggregates (counts, durations)                   | Public; serialized as JSON          |
-| DiffResult     | Difference between two reports (added/removed/changed steps)              | Computed by `WorkflowReport.Diff()` |
-| StepDiff       | A single step's state in a diff context                                   | Embedded in DiffResult slices       |
-| NDJSONStreamer | Real-time NDJSON writer that streams events via `Config.OnEvent`          | Thread-safe, mutex-protected writes |
-| Hub            | SSE subscriber registry with non-blocking fan-out broadcast               | Live module; manages browser connections |
+| Term           | Definition                                                                | Context                                          |
+| -------------- | ------------------------------------------------------------------------- | ------------------------------------------------ |
+| StepInfo       | Aggregated observation for a single step (status, attempts, deps, errors) | Public; serialized in report.Steps               |
+| Event          | A single observation (attempt_start / attempt_end)                        | Public; serialized in report.Events              |
+| WorkflowReport | Denormalized report with aggregates (counts, durations)                   | Public; serialized as JSON                       |
+| DiffResult     | Difference between two reports (added/removed/changed steps)              | Computed by `WorkflowReport.Diff()`              |
+| StepDiff       | A single step's state in a diff context                                   | Embedded in DiffResult slices                    |
+| NDJSONStreamer | Real-time NDJSON writer that streams events via `Config.OnEvent`          | Thread-safe, mutex-protected writes              |
+| Hub            | SSE subscriber registry with non-blocking fan-out broadcast               | Live module; manages browser connections         |
 | Server         | HTTP server serving the live dashboard + SSE endpoint                     | Live module; `ServeHTTP` for handler integration |
 
 ## Value Objects
@@ -52,43 +52,43 @@ Immutable objects defined by attributes.
 
 Things that happen in the domain.
 
-| Term          | Definition                                              | Context                               |
-| ------------- | ------------------------------------------------------- | ------------------------------------- |
-| attempt_start | Fired by `BeforeStep` callback when an attempt begins.  | Recorded with sequence + timestamp    |
-| attempt_end   | Fired by `AfterStep` callback when an attempt finishes. | Records duration, error, final status |
-| snapshot (SSE)| Sent to browser on connect with current report + events + DAG. | Live module SSE event type |
-| event (SSE)   | Incremental event fanned out to browser as steps execute. | Live module SSE event type |
-| complete (SSE)| Final report + full DAG sent when `SignalComplete()` is called. | Live module SSE event type |
+| Term           | Definition                                                      | Context                               |
+| -------------- | --------------------------------------------------------------- | ------------------------------------- |
+| attempt_start  | Fired by `BeforeStep` callback when an attempt begins.          | Recorded with sequence + timestamp    |
+| attempt_end    | Fired by `AfterStep` callback when an attempt finishes.         | Records duration, error, final status |
+| snapshot (SSE) | Sent to browser on connect with current report + events + DAG.  | Live module SSE event type            |
+| event (SSE)    | Incremental event fanned out to browser as steps execute.       | Live module SSE event type            |
+| complete (SSE) | Final report + full DAG sent when `SignalComplete()` is called. | Live module SSE event type            |
 
 ## Commands
 
 Actions the system can perform.
 
-| Term                                              | Definition                                           | Context                             |
-| ------------------------------------------------- | ---------------------------------------------------- | ----------------------------------- |
-| `Attach(w)`                                       | Inject audit callbacks into all workflow steps.      | Before `w.Do(ctx)`.                 |
-| `Snapshot(w)`                                     | Read post-execution DAG state into the recorder.     | After `w.Do(ctx)` returns.          |
-| `Report()`                                        | Assemble and return the consolidated WorkflowReport. | Read-only; uses RLock.              |
-| `Filtered(opts)`                                  | Return a filtered copy of a report.                  | Aggregates recomputed.              |
-| `Diff(other)`                                     | Compare two reports.                                 | Returns added/removed/changed.      |
-| `ReplayEvents(events)`                            | Reconstruct a report from a flat event stream.       | `Reconstructed=true` on the result. |
-| `LoadReport(path)`                                | Read a JSON report from disk.                        | Inverse of `ExportJSON`.            |
-| `WriteMermaid(w)` / `PlantUML(w)` / `Graphviz(w)` | Serialize the step DAG as a diagram.                 | For visualization tools.            |
-| `live.New(config, serverConfig)`                  | Create a live SSE server + auditor in one call.      | Wires `hub.OnEvent` as `Config.OnEvent`. |
+| Term                                              | Definition                                              | Context                                            |
+| ------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------- |
+| `Attach(w)`                                       | Inject audit callbacks into all workflow steps.         | Before `w.Do(ctx)`.                                |
+| `Snapshot(w)`                                     | Read post-execution DAG state into the recorder.        | After `w.Do(ctx)` returns.                         |
+| `Report()`                                        | Assemble and return the consolidated WorkflowReport.    | Read-only; uses RLock.                             |
+| `Filtered(opts)`                                  | Return a filtered copy of a report.                     | Aggregates recomputed.                             |
+| `Diff(other)`                                     | Compare two reports.                                    | Returns added/removed/changed.                     |
+| `ReplayEvents(events)`                            | Reconstruct a report from a flat event stream.          | `Reconstructed=true` on the result.                |
+| `LoadReport(path)`                                | Read a JSON report from disk.                           | Inverse of `ExportJSON`.                           |
+| `WriteMermaid(w)` / `PlantUML(w)` / `Graphviz(w)` | Serialize the step DAG as a diagram.                    | For visualization tools.                           |
+| `live.New(config, serverConfig)`                  | Create a live SSE server + auditor in one call.         | Wires `hub.OnEvent` as `Config.OnEvent`.           |
 | `hub.SignalComplete()`                            | Notify all connected SSE clients the workflow finished. | Triggers `complete` event with final report + DAG. |
-| `CreateNDJSONStreamer(path)`                      | Create a real-time NDJSON file streamer.             | Non-atomic by design for live tailing. |
+| `CreateNDJSONStreamer(path)`                      | Create a real-time NDJSON file streamer.                | Non-atomic by design for live tailing.             |
 
 ## Bounded Contexts
 
-| Context   | Description                                                               |
-| --------- | ------------------------------------------------------------------------- |
-| Capture   | Live event recording via callbacks (Recorder, Attach, Snapshot).          |
-| Reporting | Building and querying WorkflowReport (BuildReport, query methods).        |
-| Export    | Serializing reports/events to JSON, NDJSON, or diagram formats.           |
-| Replay    | Reconstructing reports from event streams (ReplayEvents, ReadEvents).     |
-| Diff      | Comparing two reports for regression detection (Diff, Duration, Summary). |
-| Streaming | Real-time event delivery to external consumers (NDJSONStreamer, SSE Hub). |
-| Monitoring| Real-time browser dashboard with live updates (live.Server, Hub, SSE).    |
+| Context    | Description                                                               |
+| ---------- | ------------------------------------------------------------------------- |
+| Capture    | Live event recording via callbacks (Recorder, Attach, Snapshot).          |
+| Reporting  | Building and querying WorkflowReport (BuildReport, query methods).        |
+| Export     | Serializing reports/events to JSON, NDJSON, or diagram formats.           |
+| Replay     | Reconstructing reports from event streams (ReplayEvents, ReadEvents).     |
+| Diff       | Comparing two reports for regression detection (Diff, Duration, Summary). |
+| Streaming  | Real-time event delivery to external consumers (NDJSONStreamer, SSE Hub). |
+| Monitoring | Real-time browser dashboard with live updates (live.Server, Hub, SSE).    |
 
 ---
 

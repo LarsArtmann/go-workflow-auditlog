@@ -192,17 +192,17 @@ _Report written at 2026-07-22 11:12 CEST. Waiting for further instructions._
 
 The modularization was merged to master. Release logistics and follow-up:
 
-| Report item | Resolution |
-| --- | --- |
-| §c Branch `modularize/core-viz-split` — 21 commits ahead | **Merged to master** |
-| §c Push branch, create PR, merge | **Done** — work is on master |
-| §c Decide alpha version tag (proposed v0.3.0) | **Not tagged as v0.3.0** — the versioning question was mooted; the project continued at v0.7.0+ (pre-1.0 alpha) |
-| §c Publish GitHub release | **Not separately released** — modularization was an incremental alpha-phase change |
-| §c Write consumer migration guide | **Not written** — the AGENTS.md and README were updated instead |
-| §c Generate HTML dashboard version of this report | **Not done** |
-| §f Streaming NDJSON export | **Shipped** — `NDJSONStreamer`, 100% coverage |
-| §f Live real-time dashboard | **Shipped** — `live/` module with SSE |
-| §e ~46 gopls warnings (b.N, stdversion) | **Still open** — b.Loop() migration not done |
+| Report item                                              | Resolution                                                                                                      |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| §c Branch `modularize/core-viz-split` — 21 commits ahead | **Merged to master**                                                                                            |
+| §c Push branch, create PR, merge                         | **Done** — work is on master                                                                                    |
+| §c Decide alpha version tag (proposed v0.3.0)            | **Not tagged as v0.3.0** — the versioning question was mooted; the project continued at v0.7.0+ (pre-1.0 alpha) |
+| §c Publish GitHub release                                | **Not separately released** — modularization was an incremental alpha-phase change                              |
+| §c Write consumer migration guide                        | **Not written** — the AGENTS.md and README were updated instead                                                 |
+| §c Generate HTML dashboard version of this report        | **Not done**                                                                                                    |
+| §f Streaming NDJSON export                               | **Shipped** — `NDJSONStreamer`, 100% coverage                                                                   |
+| §f Live real-time dashboard                              | **Shipped** — `live/` module with SSE                                                                           |
+| §e ~46 gopls warnings (b.N, stdversion)                  | **Still open** — b.Loop() migration not done                                                                    |
 
 **Note on versioning:** This report proposed `v0.3.0` as the next tag, which
 conflicted with the already-tagged `v0.7.0`. The project remained at v0.7.0+

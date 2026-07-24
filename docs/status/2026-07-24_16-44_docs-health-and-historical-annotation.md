@@ -18,34 +18,34 @@ Every `2026-07-2*` file was read in full before any annotation. Each received:
 
 Files annotated (15 .md + 2 .html):
 
-| File | Key correction |
-| --- | --- |
-| `2026-07-22_05-46_todo-list-execution-and-self-review.md` | All NOT STARTED items shipped (table columns, diagram direction, module split, streaming, live dashboard) |
-| `2026-07-22_06-35_self-review-execution-and-improvements.md` | Golden file fix was temporary (undone twice); permanent fix in 08:47 report |
-| `2026-07-22_07-14_configurable-columns-and-diagram-direction.md` | "Committed: No" was superseded by `f259b32`/`c1a3d9b` |
-| `2026-07-22_07-34_v0.7.0-release-readiness-review.md` | Golden file saga permanently resolved; v0.7.0 tagged |
-| `2026-07-22_08-47_post-release-review-fixes-and-doc-cleanup.md` | Module split + streaming shipped; AGENTS.md verb count fixed |
-| `2026-07-22_11-11_modularization-verification.md` | Branch merged to master; versioning question mooted (stayed at v0.7.0+) |
-| `2026-07-22_11-47_streaming-ndjson-export-review.md` | "INCOMPLETE" resolved same day (18:06); internal ✅/NOT STARTED contradiction explained |
-| `2026-07-22_18-06_streaming-ndjson-completion-review.md` | README/CHANGELOG/STABILITY streaming entries added |
-| `2026-07-22_19-03_readme-screenshot-enhancement-review.md` | Clobbered files remediated; unused asset removed |
-| `2026-07-22_19-34_dag-visualization-enhancements-self-review.md` | enhanceGraph bug fixed; critical path Go/JS duplication resolved |
-| `2026-07-23_03-25_visualization-polish-bugfix-lint-and-docs.md` | Critical path injection from Go shipped |
-| `2026-07-23_03-26_d2-fmt-quoting-fix.md` | D2/DOT quoting fix committed; d2-fmt in treefmt |
-| `2026-07-23_03-33_readme-screenshot-remediation-and-capture-pipeline.md` | Remediation held; --output-dir still open |
-| `2026-07-23_04-11_d2-fmt-fix-completion-and-self-review.md` | **CONTAINS ERROR — see §d below** |
-| `2026-07-23_09-19_live-dashboard-module.md` | Merged to master; CHANGELOG/FEATURES/STABILITY gaps noted |
-| `modularization/2026-07-22_PROPOSAL.html` | Inline update after stale "Current State"; resolution appendix |
-| `modularization/2026-07-22_EXECUTION_PLAN.html` | Brief resolution confirming all 10 steps completed |
+| File                                                                     | Key correction                                                                                            |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `2026-07-22_05-46_todo-list-execution-and-self-review.md`                | All NOT STARTED items shipped (table columns, diagram direction, module split, streaming, live dashboard) |
+| `2026-07-22_06-35_self-review-execution-and-improvements.md`             | Golden file fix was temporary (undone twice); permanent fix in 08:47 report                               |
+| `2026-07-22_07-14_configurable-columns-and-diagram-direction.md`         | "Committed: No" was superseded by `f259b32`/`c1a3d9b`                                                     |
+| `2026-07-22_07-34_v0.7.0-release-readiness-review.md`                    | Golden file saga permanently resolved; v0.7.0 tagged                                                      |
+| `2026-07-22_08-47_post-release-review-fixes-and-doc-cleanup.md`          | Module split + streaming shipped; AGENTS.md verb count fixed                                              |
+| `2026-07-22_11-11_modularization-verification.md`                        | Branch merged to master; versioning question mooted (stayed at v0.7.0+)                                   |
+| `2026-07-22_11-47_streaming-ndjson-export-review.md`                     | "INCOMPLETE" resolved same day (18:06); internal ✅/NOT STARTED contradiction explained                   |
+| `2026-07-22_18-06_streaming-ndjson-completion-review.md`                 | README/CHANGELOG/STABILITY streaming entries added                                                        |
+| `2026-07-22_19-03_readme-screenshot-enhancement-review.md`               | Clobbered files remediated; unused asset removed                                                          |
+| `2026-07-22_19-34_dag-visualization-enhancements-self-review.md`         | enhanceGraph bug fixed; critical path Go/JS duplication resolved                                          |
+| `2026-07-23_03-25_visualization-polish-bugfix-lint-and-docs.md`          | Critical path injection from Go shipped                                                                   |
+| `2026-07-23_03-26_d2-fmt-quoting-fix.md`                                 | D2/DOT quoting fix committed; d2-fmt in treefmt                                                           |
+| `2026-07-23_03-33_readme-screenshot-remediation-and-capture-pipeline.md` | Remediation held; --output-dir still open                                                                 |
+| `2026-07-23_04-11_d2-fmt-fix-completion-and-self-review.md`              | **CONTAINS ERROR — see §d below**                                                                         |
+| `2026-07-23_09-19_live-dashboard-module.md`                              | Merged to master; CHANGELOG/FEATURES/STABILITY gaps noted                                                 |
+| `modularization/2026-07-22_PROPOSAL.html`                                | Inline update after stale "Current State"; resolution appendix                                            |
+| `modularization/2026-07-22_EXECUTION_PLAN.html`                          | Brief resolution confirming all 10 steps completed                                                        |
 
 ### 2. Living docs rebuilt (docs-health)
 
-| Doc | What changed |
-| --- | --- |
-| **CHANGELOG.md** | Added live module entry, `d2 fmt` treefmt integration, D2/DOT quoting fix |
-| **FEATURES.md** | Fixed stale date (Jul 13 → Jul 24), added Live Dashboard section, fixed Export Formats table (viz functions are package-level), updated coverage/deps/test counts, fixed API Symmetry section |
-| **TODO_LIST.md** | Removed Deferred section (duplicated ROADMAP — split brain), added 9 actionable items from status reports, organized by category |
-| **ROADMAP.md** | Added "Monitor" phase, "Real-Time Monitoring" theme, updated Dependency Architecture to 3 modules, updated Strategic Decisions |
+| Doc              | What changed                                                                                                                                                                                  |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CHANGELOG.md** | Added live module entry, `d2 fmt` treefmt integration, D2/DOT quoting fix                                                                                                                     |
+| **FEATURES.md**  | Fixed stale date (Jul 13 → Jul 24), added Live Dashboard section, fixed Export Formats table (viz functions are package-level), updated coverage/deps/test counts, fixed API Symmetry section |
+| **TODO_LIST.md** | Removed Deferred section (duplicated ROADMAP — split brain), added 9 actionable items from status reports, organized by category                                                              |
+| **ROADMAP.md**   | Added "Monitor" phase, "Real-Time Monitoring" theme, updated Dependency Architecture to 3 modules, updated Strategic Decisions                                                                |
 
 ### 3. Quality gate verified
 
@@ -72,6 +72,7 @@ I checked TODO_LIST vs ROADMAP duplication (the most common rot) but did NOT run
 ### 2. FEATURES.md PLANNED section incomplete
 
 The PLANNED section still only lists:
+
 - OpenTelemetry span bridge
 - CLI tool
 
@@ -80,6 +81,7 @@ It does NOT list the **live DAG graph during execution** — the #1 gap for the 
 ### 3. Test counts imprecise
 
 I wrote "~389 test functions" in FEATURES.md based on a grep count. The actual per-module breakdown:
+
 - Core: 147 (135 tests + 5 examples + 3 benchmarks + 4 fuzz)
 - Viz: 227 (193 tests + 16 examples + 15 benchmarks + 3 fuzz)
 - Live: 15 tests
@@ -92,6 +94,7 @@ I wrote "~389 test functions" in FEATURES.md based on a grep count. The actual p
 ### 1. STABILITY.md — NOT updated (biggest miss)
 
 Multiple status reports flagged that STABILITY.md is missing entries for:
+
 - Viz visualization features (critical path highlighting, retry badges, graph search, duration labels)
 - Live module API (`live.Server`, `live.Hub`, `live.New`, `live.Config`, `SignalComplete`)
 

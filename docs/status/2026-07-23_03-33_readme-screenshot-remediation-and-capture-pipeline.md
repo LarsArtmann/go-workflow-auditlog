@@ -180,18 +180,18 @@
 
 ## Resolution (2026-07-24)
 
-| Report item | Resolution |
-| --- | --- |
-| §a-1 Clobbered reference files remediated | **Held** — generated artifacts remain `.gitignore`d |
+| Report item                                                         | Resolution                                                                           |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| §a-1 Clobbered reference files remediated                           | **Held** — generated artifacts remain `.gitignore`d                                  |
 | §a-3 Reproducible capture script (`scripts/capture-screenshots.sh`) | **Shipped** — builds to temp dir, `sed` tab injection, `--virtual-time-budget=10000` |
-| §a-4 4 screenshots re-captured at 2x retina | **Done** — graph, steps, timeline, tree |
-| Q1: Screenshots visually correct? | Accepted by user |
-| Q3: `--output-dir` flag for example binary | **Still open** — root cause of clobbering never fixed at source |
-| README TOC "Screenshots" entry | **Still open** — no dedicated heading in README |
-| CI screenshot regeneration | **Still open** |
-| CONTRIBUTING.md for capture script | **Still open** |
-| Events tab screenshot (5th tab) | **Still open** |
-| Failed-step scenario screenshot | **Still open** — only all-green captured |
+| §a-4 4 screenshots re-captured at 2x retina                         | **Done** — graph, steps, timeline, tree                                              |
+| Q1: Screenshots visually correct?                                   | Accepted by user                                                                     |
+| Q3: `--output-dir` flag for example binary                          | **Still open** — root cause of clobbering never fixed at source                      |
+| README TOC "Screenshots" entry                                      | **Still open** — no dedicated heading in README                                      |
+| CI screenshot regeneration                                          | **Still open**                                                                       |
+| CONTRIBUTING.md for capture script                                  | **Still open**                                                                       |
+| Events tab screenshot (5th tab)                                     | **Still open**                                                                       |
+| Failed-step scenario screenshot                                     | **Still open** — only all-green captured                                             |
 
 **Still open**: `--output-dir` flag, README screenshots TOC, CI integration,
 CONTRIBUTING.md, events/failed-step screenshots.
