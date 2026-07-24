@@ -61,6 +61,8 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-24.
 | ------------- | -------------- | -------------- | ---------- | --------- |
 | JSON report   | `WriteJSON`    | `ExportJSON`   | ✅         | ✅        |
 | NDJSON events | `WriteNDJSON`  | `ExportNDJSON` | ✅         | ✅        |
+| CSV steps     | `WriteCSV`     | `ExportCSV`    |            | ✅        |
+| TSV steps     | `WriteTSV`     | `ExportTSV`    |            | ✅        |
 
 **Visualization module** (diagrams/tables/trees/HTML — package-level functions in `viz`):
 
@@ -121,8 +123,12 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - **SSE streaming dashboard** — real-time HTTP dashboard where steps light up as they execute, with incremental rendering via `requestAnimationFrame` batching
 - **Hub** — SSE subscriber registry with non-blocking fan-out `OnEvent` broadcast; `SignalComplete()` notifies all clients when the workflow finishes
-- **Server** — HTTP server with SSE handler (`/api/events`), `/api/report`, `/api/health`, dashboard serving, `ServeHTTP` for `http.Handler` integration
+- **Server** — HTTP server with SSE handler (`/api/events`), `/api/report`, `/api/health`, `/api/export/ndjson`, `/api/export/html` (Content-Disposition attachment downloads), dashboard serving, `ServeHTTP` for `http.Handler` integration
 - **`live.New(config, serverConfig)`** — convenience constructor that wires `hub.OnEvent` as `Config.OnEvent`, returns `(*Server, *Auditor, error)`
+- **Configurable route prefix** — `Prefix` config field (default `/`) mounts all routes at a sub-path (e.g., `/workflow/`). Dual-route registration avoids ServeMux 307 redirects.
+- **CORS support** — `CORSAllowedOrigins` config field controls `Access-Control-Allow-Origin` on API endpoints. Empty (default) disables CORS (secure by default); set to `"*"` or a specific origin to enable. OPTIONS preflight handled automatically.
+- **Export endpoints** — `/api/export/ndjson` and `/api/export/html` serve downloadable artifacts with `Content-Disposition: attachment`
+- **Export buttons in dashboard UI** — JSON, NDJSON, and HTML download buttons in the header, URLs wired via `ROUTE_PREFIX`
 - **Live data flow** — browser connects to `/api/events` → receives `snapshot` event (current report + events + metadata + DAG) → incremental `event` messages as steps execute → `complete` event with final report + full DAG on `SignalComplete()`. DAG is available immediately via `CaptureDAG(w)` — no need to wait for execution.
 - **Live graph enhancements** — critical path auto-highlight on graph open (if path >1 step), retry count badges, node search/filter, fit-to-view, zoom controls, minimap for >20 nodes, direction toggle (TB/LR), incremental node color updates via `updateGraphLive()`
 - **Live timeline** — Gantt-style timeline updates in real-time as step timing data arrives

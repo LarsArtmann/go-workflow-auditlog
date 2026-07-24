@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **CSV/TSV export** (`csv.go`) — `WriteCSV`, `WriteTSV`, `ExportCSV`, `ExportTSV`
+  on `WorkflowReport`. 14 columns including step ID/name/type/status, attempt
+  counts, timestamps, duration, retry/timeout flags, error, and dependency
+  lists. Nil-safe pointer formatting (empty strings). Semicolon-separated
+  dependency/dependent lists. Flush errors wrapped with `ErrExportWriteFailed`.
+- **Live server CORS support** — `CORSAllowedOrigins` config field controls
+  `Access-Control-Allow-Origin` on API endpoints. Empty (default) disables CORS
+  (secure by default); set to `"*"` or a specific origin to enable. OPTIONS
+  preflight handled automatically.
+- **Live server configurable route prefix** — `Prefix` config field (default
+  `/`) mounts all dashboard routes at a sub-path (e.g., `/workflow/`). Dual-
+  route registration avoids ServeMux 307 redirects. `window.ROUTE_PREFIX`
+  injected into JS for client-side URL construction.
+- **Live server export endpoints** — `/api/export/ndjson` and
+  `/api/export/html` serve downloadable artifacts with `Content-Disposition:
+  attachment`.
+- **Live dashboard export buttons** — JSON, NDJSON, and HTML download buttons
+  in the dashboard header. URLs wired via `ROUTE_PREFIX`.
+- **CSV benchmark** — `BenchmarkWriteCSV_LargeReport` (100-step report).
 - **Streaming NDJSON** (`NDJSONStreamer` in `stream.go`) — real-time event
   streaming via `Config.OnEvent`. Writes events as NDJSON the moment they are
   captured, without buffering the entire run in memory first. Thread-safe
@@ -100,6 +119,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **CORS default is now secure-by-default** — empty `CORSAllowedOrigins`
+  disables CORS (previously defaulted to `"*"`). The `"off"` sentinel is
+  removed. Set `"*"` explicitly for development convenience.
+- **Removed dead `DashboardProvider` type and `dashboardProvider` field** from
+  `Server` struct — the field was assigned but never read after construction.
+- **`normalizePrefix` uses `TrimRight`** instead of `TrimSuffix` to handle
+  multiple trailing slashes (e.g., `/foo//` → `/foo`).
 - **Golden file test replaced with structural validation** — the fragile
   byte-for-byte golden file test (`TestReport_WriteHTML_GoldenFile`) that broke
   6+ times on whitespace/dependency drift is replaced by
