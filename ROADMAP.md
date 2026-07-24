@@ -20,7 +20,8 @@ The long-term arc moves from "capture and export" toward **analyze and act**:
 1. **Capture** (done) — per-attempt events, DAG structure, sub-workflow traversal
 2. **Export** (done) — JSON, NDJSON (batch + real-time streaming), Mermaid, PlantUML, DOT, D2, 16 table formats, ASCII/HTML trees, interactive HTML dashboard
 3. **Analyze** (done) — wall-clock vs total vs critical-path metrics, diff/regression detection, peak concurrency, critical-path step chain
-4. **Act** (future) — OpenTelemetry bridge, alerting, replay UI
+4. **Monitor** (done) — real-time SSE dashboard (`live/` module): steps light up as they execute, DAG graph snaps into place on completion
+5. **Act** (future) — OpenTelemetry bridge, alerting, replay UI
 
 ---
 
@@ -28,16 +29,18 @@ The long-term arc moves from "capture and export" toward **analyze and act**:
 
 ### Dependency Architecture
 
-**Done (2026-07-22).** The library is split into two independent Go modules:
+**Done (2026-07-22).** The library is split into three independent Go modules:
 
 - **Core** (`github.com/larsartmann/go-workflow-auditlog`) — event capture,
   JSON/NDJSON export (batch + streaming), replay, diff, filter, index,
   error classification. 3 direct deps, no go-output.
 - **Visualization** (`github.com/larsartmann/go-workflow-auditlog/viz`) —
   diagrams, tables, trees, HTML dashboard. Depends on core + go-output.
+- **Live** (`github.com/larsartmann/go-workflow-auditlog/live`) — real-time
+  SSE dashboard. Depends on core + viz + go-sse (private).
 
 Consumers who only need JSON/NDJSON audit trails import the core module and pay
-zero go-output dependency cost. Both modules share a `go.work` workspace in
+zero go-output dependency cost. All modules share a `go.work` workspace in
 development; CI also verifies `GOWORK=off` standalone builds.
 
 ### Build Automation
@@ -74,6 +77,24 @@ existing observability stacks rather than requiring a separate dashboard.
 
 **Defer** until a consumer has an OTel stack.
 
+### Real-Time Monitoring
+
+**Live dashboard shipped (2026-07-23).** The `live/` module provides a
+real-time HTTP dashboard with SSE streaming. Browser connects to `/api/events`
+→ receives snapshot → incremental event updates → complete notification. Steps
+light up as they execute. The DAG graph activates on `SignalComplete()` with
+the full Sugiyama-layout dependency structure.
+
+**Remaining direction**: The DAG graph only renders after execution completes
+(needs DAG structure from `Snapshot(w)`). Showing the graph DURING execution —
+nodes appearing as steps start, edges snapping into place — requires making the
+DAG structure available before `Do()`. This is the #1 gap for the live module.
+
+Other potential enhancements: WebSocket transport (alternative to SSE),
+multi-run support (multiple concurrent workflow dashboards), authentication,
+TLS/HTTPS, compression (gzip/brotli), client-side replay/playback, graceful
+drain on shutdown.
+
 ---
 
 ## Raw Ideas (not yet scoped)
@@ -93,9 +114,11 @@ existing observability stacks rather than requiring a separate dashboard.
 
 ### Module Split — Done
 
-**Shipped (2026-07-22).** Core module (`auditlog` package, 3 deps) and
-visualization module (`viz` package, go-output deps) are separate Go modules
-linked via `go.work`. Core consumers pay zero go-output dependency cost.
+**Shipped (2026-07-22).** Core module (`auditlog` package, 3 deps),
+visualization module (`viz` package, go-output deps), and live module
+(`live` package, go-sse + net/http deps) are separate Go modules linked via
+`go.work`. Core consumers pay zero go-output dependency cost. Live consumers
+get real-time monitoring without pulling `net/http` into core or viz.
 
 ### Streaming NDJSON Export — Done
 

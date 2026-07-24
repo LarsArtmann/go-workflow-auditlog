@@ -55,23 +55,38 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-24.
 
 ### Export Formats
 
-| Format                 | Write (writer)           | WriteString           | Export (file)          | On Auditor           | On Report |
-| ---------------------- | ------------------------ | --------------------- | ---------------------- | -------------------- | --------- |
-| JSON report            | `WriteJSON`              | —                     | `ExportJSON`           | ✅                   | ✅        |
-| NDJSON events          | `WriteNDJSON`            | —                     | `ExportNDJSON`         | ✅                   | ✅        |
-| Mermaid                | `WriteMermaid`           | `WriteMermaidString`  | `ExportMermaid`        | ✅                   | ✅        |
-| PlantUML               | `WritePlantUML`          | `WritePlantUMLString` | `ExportPlantUML`       | ✅                   | ✅        |
-| Graphviz DOT           | `WriteGraphviz`          | `WriteGraphvizString` | `ExportGraphviz`       | ✅                   | ✅        |
-| D2                     | `WriteD2`                | `WriteD2String`       | `ExportD2`             | ✅                   | ✅        |
-| Table (16 sub-formats) | `WriteTable`             | `WriteTableString`    | `ExportTable`          | ✅                   | ✅        |
-| ASCII Tree             | `WriteTree`              | `WriteTreeString`     | `ExportTree`           | ✅                   | ✅        |
-| HTML Tree              | `WriteHTMLTree`          | `WriteHTMLTreeString` | `ExportHTMLTree`       | ✅                   | ✅        |
-| HTML Dashboard         | `WriteHTML`              | `WriteHTMLString`     | `ExportHTML`           | ✅                   | ✅        |
-| **Streaming NDJSON**   | `NDJSONStreamer.OnEvent` | —                     | `CreateNDJSONStreamer` | via `Config.OnEvent` | —         |
+**Core module** (JSON/NDJSON — methods on `Auditor` and `WorkflowReport`):
+
+| Format        | Write (writer)  | Export (file)  | On Auditor | On Report |
+| ------------- | --------------- | -------------- | ---------- | --------- |
+| JSON report   | `WriteJSON`     | `ExportJSON`   | ✅         | ✅        |
+| NDJSON events | `WriteNDJSON`   | `ExportNDJSON` | ✅         | ✅        |
+
+**Visualization module** (diagrams/tables/trees/HTML — package-level functions in `viz`):
+
+| Format                 | Write (writer)           | WriteString           | Export (file)          |
+| ---------------------- | ------------------------ | --------------------- | ---------------------- |
+| Mermaid                | `viz.WriteMermaid`       | `viz.WriteMermaidString`  | `viz.ExportMermaid`       |
+| PlantUML               | `viz.WritePlantUML`      | `viz.WritePlantUMLString` | `viz.ExportPlantUML`      |
+| Graphviz DOT           | `viz.WriteGraphviz`      | `viz.WriteGraphvizString` | `viz.ExportGraphviz`      |
+| D2                     | `viz.WriteD2`            | `viz.WriteD2String`       | `viz.ExportD2`            |
+| Table (16 sub-formats) | `viz.WriteTable`         | `viz.WriteTableString`    | `viz.ExportTable`         |
+| ASCII Tree             | `viz.WriteTree`          | `viz.WriteTreeString`     | `viz.ExportTree`          |
+| HTML Tree              | `viz.WriteHTMLTree`      | `viz.WriteHTMLTreeString` | `viz.ExportHTMLTree`      |
+| HTML Dashboard         | `viz.WriteHTML`          | `viz.WriteHTMLString`     | `viz.ExportHTML`          |
+
+**Live module** (real-time streaming):
+
+| Format          | Mechanism                          | Constructor                    |
+| --------------- | ---------------------------------- | ------------------------------ |
+| Streaming NDJSON | `NDJSONStreamer.OnEvent`          | `NewNDJSONStreamer` / `CreateNDJSONStreamer` |
+| Live SSE events  | `hub.OnEvent` → SSE fan-out       | `live.New(config, serverConfig)` |
 
 Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, mermaid, dot, jsonl, asciidoc, toml, plantuml
 
-**Streaming NDJSON** writes events in real time via `Config.OnEvent` — no need to wait for `Report()`. Thread-safe, 64 KB buffer (configurable), auto-flush option. Output is `ReadEvents`-compatible.
+**Streaming NDJSON** (core module) writes events in real time via `Config.OnEvent` — no need to wait for `Report()`. Thread-safe, 64 KB buffer (configurable), auto-flush option. Output is `ReadEvents`-compatible.
+
+**Live SSE** (live module) streams events to browser dashboards in real time. Steps light up as they execute; the DAG graph activates on `SignalComplete()`.
 
 ### Diagram Quality
 
@@ -83,9 +98,10 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 ### API Symmetry
 
-- **Full `Write*` / `Write*String` / `Export*` on both `Auditor` and `WorkflowReport`**
+- **Core JSON/NDJSON** on both `Auditor` and `WorkflowReport` (`WriteJSON`, `WriteNDJSON`, `ExportJSON`, `ExportNDJSON`)
+- **Viz diagrams/tables/trees/HTML** as package-level functions taking `WorkflowReport` as first arg (`viz.WriteMermaid(report, w)`, `viz.ExportHTML(report, path)`, etc.)
 - **Canonical JSON/NDJSON names** (`WriteJSON`, `WriteNDJSON`, `ExportJSON`, `ExportNDJSON`)
-- **Backward-compatible variadic options** — all diagram writers (`WriteMermaid`, `WriteGraphviz`, `WriteD2`, `WritePlantUML`) and table writers (`WriteTable`) accept optional `...DiagramOption` / `...TableOption` without breaking existing callers
+- **Backward-compatible variadic options** — all diagram writers (`viz.WriteMermaid`, `viz.WriteGraphviz`, `viz.WriteD2`, `viz.WritePlantUML`) and table writers (`viz.WriteTable`) accept optional `...DiagramOption` / `...TableOption` without breaking existing callers
 
 ### Configurable Output Options
 
