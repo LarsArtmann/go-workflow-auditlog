@@ -45,6 +45,11 @@ const liveTemplate = `<!DOCTYPE html>
     <p class="subtitle">Workflow <span class="mono" id="workflow-id">&mdash;</span> &middot; Run <span class="mono" id="run-id">&mdash;</span> &mdash; <span id="connection-status" class="conn-status connecting">connecting...</span></p>
   </div>
   <div class="legend" id="legend"></div>
+  <div class="export-bar">
+    <a class="export-btn" id="export-json" download="workflow-report.json" title="Download JSON report">JSON</a>
+    <a class="export-btn" id="export-ndjson" download="workflow-events.ndjson" title="Download NDJSON event stream">NDJSON</a>
+    <a class="export-btn" id="export-html" download="workflow-report.html" title="Download HTML report">HTML</a>
+  </div>
 </header>
 <div class="failure-banner" id="failure-banner" style="display:none">
   <div class="failure-banner-header">

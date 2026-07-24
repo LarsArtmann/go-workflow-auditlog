@@ -1463,5 +1463,13 @@
 
   // === Start ===
 
+  var pfx = window.ROUTE_PREFIX || "";
+  var exportJson = document.getElementById("export-json");
+  var exportNdjson = document.getElementById("export-ndjson");
+  var exportHtml = document.getElementById("export-html");
+  if (exportJson) exportJson.href = pfx + "/api/report";
+  if (exportNdjson) exportNdjson.href = pfx + "/api/export/ndjson";
+  if (exportHtml) exportHtml.href = pfx + "/api/export/html";
+
   connect();
 })();

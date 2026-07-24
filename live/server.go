@@ -106,12 +106,12 @@ type Server struct {
 	httpServer *http.Server
 	mux        *http.ServeMux
 
-	reportProvider    ReportProvider
-	snapshotProvider  SnapshotProvider
-	completeProvider  CompleteProvider
-	healthProvider    HealthProvider
-	ndjsonWriter      NDJSONWriter
-	htmlWriter        HTMLWriter
+	reportProvider   ReportProvider
+	snapshotProvider SnapshotProvider
+	completeProvider CompleteProvider
+	healthProvider   HealthProvider
+	ndjsonWriter     NDJSONWriter
+	htmlWriter       HTMLWriter
 
 	dashboardHTML string
 	startTime     time.Time

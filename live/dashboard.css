@@ -1,5 +1,31 @@
 /* live/dashboard.css — Live-specific styles layered on top of viz base CSS */
 
+/* === Export Buttons === */
+.export-bar {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.export-btn {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.export-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
 /* === Live Badge === */
 .live-badge {
   display: inline-flex;
