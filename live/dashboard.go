@@ -169,7 +169,7 @@ func renderDashboardHTML(prefix string) string {
 
 	routePrefixJS := fmt.Sprintf("window.ROUTE_PREFIX=%q;", prefix)
 
-	js := routePrefixJS + "\n" + liveJS
+	dashboardJS := routePrefixJS + "\n" + liveJS
 
 	return fmt.Sprintf(
 		liveTemplate,
@@ -177,7 +177,7 @@ func renderDashboardHTML(prefix string) string {
 		liveCSS,
 		SchemaVersion,
 		metadataJSON,
-		js,
+		dashboardJS,
 		daghtml.Script(),
 		SchemaVersion,
 	)

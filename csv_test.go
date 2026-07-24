@@ -153,5 +153,5 @@ func ExampleWorkflowReport_WriteCSV() {
 	_ = report.WriteCSV(os.Stdout)
 
 	// Output: step_id,step_name,step_type,status,attempt_count,max_attempts,started_at,finished_at,duration_ms,has_retry,has_timeout,error,dependencies,dependents
-	// 1,fetch,,succeeded,0,0,,,false,false,,,
+	// 1,fetch,,succeeded,0,0,,,,false,false,,,
 }

@@ -229,18 +229,18 @@ func (srv *Server) corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 // normalizePrefix strips trailing slashes and ensures the prefix starts with /.
 // "/" is returned as-is (root mount). Empty input returns "/".
-func normalizePrefix(p string) string {
-	if p == "" || p == "/" {
+func normalizePrefix(prefix string) string {
+	if prefix == "" || prefix == "/" {
 		return "/"
 	}
 
-	p = strings.TrimSuffix(p, "/")
+	prefix = strings.TrimSuffix(prefix, "/")
 
-	if !strings.HasPrefix(p, "/") {
-		p = "/" + p
+	if !strings.HasPrefix(prefix, "/") {
+		prefix = "/" + prefix
 	}
 
-	return p
+	return prefix
 }
 
 // ListenAndServe starts the HTTP server.
@@ -369,7 +369,8 @@ func (srv *Server) handleExportNDJSON(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Content-Disposition", `attachment; filename="workflow-events.ndjson"`)
 
-	if err := srv.ndjsonWriter(w); err != nil {
+	err := srv.ndjsonWriter(w)
+	if err != nil {
 		http.Error(w, fmt.Sprintf("export ndjson: %v", err), http.StatusInternalServerError)
 
 		return
@@ -387,7 +388,8 @@ func (srv *Server) handleExportHTML(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Content-Disposition", `attachment; filename="workflow-report.html"`)
 
-	if err := srv.htmlWriter(w); err != nil { //nolint:contextcheck // WriteHTML takes io.Writer, not context
+	err := srv.htmlWriter(w)
+	if err != nil {
 		http.Error(w, fmt.Sprintf("export html: %v", err), http.StatusInternalServerError)
 
 		return
@@ -426,7 +428,7 @@ func (srv *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	_, _ = w.Write([]byte(payload))
+	_, _ = w.Write(payload)
 }
 
 func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
@@ -474,7 +476,8 @@ func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
 			flusher.Flush()
 
 		case <-heartbeat.C:
-			if _, err := w.Write([]byte(": heartbeat\n\n")); err != nil {
+			_, writeErr := w.Write([]byte(": heartbeat\n\n"))
+			if writeErr != nil {
 				return
 			}
 
@@ -587,6 +590,6 @@ func makeHTMLWriter(auditor *auditlog.Auditor) HTMLWriter {
 	return func(w io.Writer) error {
 		report := auditor.Report()
 
-		return viz.WriteHTML(report, w) //nolint:wrapcheck // viz already wraps with ErrRenderFailed
+		return viz.WriteHTML(report, w)
 	}
 }

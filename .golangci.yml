@@ -175,6 +175,7 @@ linters:
         - github.com/larsartmann/go-output/d2.NodeStyle
         - github.com/larsartmann/go-output/d2.StrokeStyle
         - github.com/larsartmann/go-workflow-auditlog.*
+        - github.com/larsartmann/go-sse.Event
         - net/http.Server
     ginkgolinter:
       forbid-focus-container: true

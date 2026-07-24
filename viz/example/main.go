@@ -254,6 +254,38 @@ func printStepDetails(report auditlog.WorkflowReport) {
 	}
 }
 
+// exportTask represents a single file export operation.
+type exportTask struct {
+	name string
+	fn   func() error
+}
+
+// buildExportTasks constructs the list of all export artifacts.
+func buildExportTasks(audit *auditlog.Auditor, report auditlog.WorkflowReport, join func(string) string) []exportTask {
+	return []exportTask{
+		{"audit-report.json", func() error { return audit.ExportJSON(join("audit-report.json")) }},
+		{"audit-events.ndjson", func() error { return audit.ExportNDJSON(join("audit-events.ndjson")) }},
+		{"dag.mmd", func() error {
+			return viz.ExportMermaid(report, join("dag.mmd"),
+				viz.WithDirection(output.DirectionRight))
+		}},
+		{"dag.dot", func() error { return viz.ExportGraphviz(report, join("dag.dot")) }},
+		{"dag.puml", func() error { return viz.ExportPlantUML(report, join("dag.puml")) }},
+		{"dag.d2", func() error { return viz.ExportD2(report, join("dag.d2")) }},
+		{"steps.csv", func() error {
+			return viz.ExportTable(report, join("steps.csv"), output.FormatCSV, output.RenderOptions{})
+		}},
+		{"steps-compact.md", func() error {
+			return viz.ExportTable(report, join("steps-compact.md"), output.FormatMarkdown, output.RenderOptions{},
+				viz.WithColumns(
+					viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration,
+				))
+		}},
+		{"tree.txt", func() error { return viz.ExportTree(report, join("tree.txt")) }},
+		{"dashboard.html", func() error { return viz.ExportHTML(report, join("dashboard.html")) }},
+	}
+}
+
 // maybeExport writes all export artifacts if --export is set.
 // When --output-dir <dir> is provided, files are written there instead of
 // the current working directory. The directory is created if it doesn't exist.
@@ -281,35 +313,7 @@ func maybeExport(audit *auditlog.Auditor, args []string, report auditlog.Workflo
 		return outputDir + "/" + name
 	}
 
-	type exportTask struct {
-		name string
-		fn   func() error
-	}
-
-	tasks := []exportTask{
-		{"audit-report.json", func() error { return audit.ExportJSON(join("audit-report.json")) }},
-		{"audit-events.ndjson", func() error { return audit.ExportNDJSON(join("audit-events.ndjson")) }},
-		{"dag.mmd", func() error {
-			return viz.ExportMermaid(report, join("dag.mmd"),
-				viz.WithDirection(output.DirectionRight))
-		}},
-		{"dag.dot", func() error { return viz.ExportGraphviz(report, join("dag.dot")) }},
-		{"dag.puml", func() error { return viz.ExportPlantUML(report, join("dag.puml")) }},
-		{"dag.d2", func() error { return viz.ExportD2(report, join("dag.d2")) }},
-		{"steps.csv", func() error {
-			return viz.ExportTable(report, join("steps.csv"), output.FormatCSV, output.RenderOptions{})
-		}},
-		{"steps-compact.md", func() error {
-			return viz.ExportTable(report, join("steps-compact.md"), output.FormatMarkdown, output.RenderOptions{},
-				viz.WithColumns(
-					viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration,
-				))
-		}},
-		{"tree.txt", func() error { return viz.ExportTree(report, join("tree.txt")) }},
-		{"dashboard.html", func() error { return viz.ExportHTML(report, join("dashboard.html")) }},
-	}
-
-	for _, task := range tasks {
+	for _, task := range buildExportTasks(audit, report, join) {
 		err := task.fn()
 		if err != nil {
 			log.Fatalf("export %s: %v", task.name, err)
