@@ -81,7 +81,7 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
 - **Error classification** — auto-registered with [go-error-family](https://github.com/larsartmann/go-error-family) for `Classify()`, `IsRetryable()`, `ExitCode()`
-- **389 tests across 3 modules, ~96% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
+- **415 tests across 3 modules, ~96% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
 
 ## Installation
 

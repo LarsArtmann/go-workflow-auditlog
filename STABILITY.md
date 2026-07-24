@@ -42,6 +42,7 @@ These surfaces are functional but their exact shape may change:
 | Dashboard graph enhancements (critical path, retry badges, search, duration labels)   | JS post-processing layer on daghtml SVG; behavior may evolve with go-output daghtml SDK. |
 | `live.New(config, serverConfig)` / `live.Config` / `live.Server` / `live.Hub`          | New module; type and method set may change between 0.x releases.                        |
 | `live.Server.SignalComplete()` / `live.Hub.OnEvent` / SSE event protocol               | SSE event payloads (`snapshot`, `event`, `complete`) may gain fields; wire format stable. |
+| `Auditor.CaptureDAG(w)`                                                                 | New method; pre-populates step DAG structure from workflow definition before execution. |
 
 ## Unstable / Internal (no stability guarantee)
 

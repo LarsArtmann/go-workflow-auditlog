@@ -263,3 +263,54 @@ body.workflow-complete .live-dot {
 .node-flash {
   animation: node-flash 0.6s ease-out;
 }
+
+/* === Graph Enhancements === */
+.graph-node.critical-path rect,
+.graph-node.critical-path circle {
+  stroke: var(--accent);
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 6px var(--accent));
+}
+.graph-edge.critical-path {
+  stroke: var(--accent);
+  stroke-width: 2.5px;
+}
+.graph-node.search-match rect {
+  stroke: var(--warning);
+  stroke-width: 2px;
+}
+.graph-node.search-dimmed {
+  opacity: 0.3;
+}
+.graph-node {
+  transition: opacity 0.2s ease;
+}
+.retry-badge {
+  pointer-events: none;
+}
+.row-highlight {
+  animation: row-flash 2s ease-out;
+}
+@keyframes row-flash {
+  0% { background: var(--accent-dim); }
+  100% { background: transparent; }
+}
+
+/* === Minimap === */
+.graph-minimap {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 160px;
+  height: 120px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+.graph-minimap svg {
+  display: block;
+}

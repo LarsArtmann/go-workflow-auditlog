@@ -106,6 +106,7 @@ const liveTemplate = `<!DOCTYPE html>
     <label for="graph-search" class="sr-only">Filter graph nodes</label>
     <input type="text" id="graph-search" placeholder="Highlight nodes..." aria-label="Filter graph nodes by name">
     <button class="chip" id="graph-critical-path" aria-pressed="false" title="Highlight the longest dependency chain (bottleneck)">Critical Path</button>
+    <button class="chip" id="graph-direction-toggle" aria-pressed="false" title="Toggle layout direction">LR</button>
     <span id="graph-info-text" style="font-size:0.75rem;color:var(--text-dim);font-family:var(--font-mono)"></span>
   </div>
   <div id="graph-container">
@@ -116,6 +117,7 @@ const liveTemplate = `<!DOCTYPE html>
     </div>
     <div class="graph-info">Scroll/pinch to zoom &middot; Drag to pan &middot; Click node to highlight</div>
     <div class="graph-placeholder" id="graph-placeholder">DAG graph will appear here when steps are available...</div>
+    <div id="graph-minimap" class="graph-minimap" style="display:none"></div>
   </div>
 </div>
 <div class="tab-content" id="tab-timeline" role="tabpanel" aria-labelledby="tab-btn-timeline">

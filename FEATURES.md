@@ -10,13 +10,13 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-24.
 
 ### Core Audit Pipeline
 
-- **Auditor lifecycle**: `New(Config)` → `Attach(w)` → `w.Do(ctx)` → `Snapshot(w)` → `Report()`
+- **Auditor lifecycle**: `New(Config)` → `Attach(w)` → `CaptureDAG(w)` (optional) → `w.Do(ctx)` → `Snapshot(w)` → `Report()`
 - **Per-attempt event capture**: `attempt_start` / `attempt_end` with timestamps, errors, durations
 - **Full step DAG capture**: dependencies, dependents, retry/timeout config, step types
 - **Sub-workflow traversal** via `flow.Traverse` (captures inner steps that bypass callbacks)
 - **Skipped & canceled detection** (reads post-execution state for steps that bypass Before/After)
 - **`StepInfo.Error` reflects FINAL outcome only** — a succeeded step has `Error == nil` even after transient failures (regression-tested)
-- **MaxEvents cap** with `DroppedEventCount` tracking
+- **Pre-execution DAG capture** — `CaptureDAG(w)` traverses the workflow to pre-populate step records with names, types, dependencies, retry/timeout config, and "pending" status. Makes the full DAG available in `Report()` BEFORE `w.Do(ctx)`, enabling live dashboards to render the step graph immediately. Idempotent, disabled-safe, nil-safe. No events generated.
 
 ### Report & Query API
 
@@ -123,7 +123,11 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Hub** — SSE subscriber registry with non-blocking fan-out `OnEvent` broadcast; `SignalComplete()` notifies all clients when the workflow finishes
 - **Server** — HTTP server with SSE handler (`/api/events`), `/api/report`, `/api/health`, dashboard serving, `ServeHTTP` for `http.Handler` integration
 - **`live.New(config, serverConfig)`** — convenience constructor that wires `hub.OnEvent` as `Config.OnEvent`, returns `(*Server, *Auditor, error)`
-- **Live data flow** — browser connects to `/api/events` → receives `snapshot` event (current report + events + metadata + DAG) → incremental `event` messages as steps execute → `complete` event with final report + full DAG on `SignalComplete()`
+- **Live data flow** — browser connects to `/api/events` → receives `snapshot` event (current report + events + metadata + DAG) → incremental `event` messages as steps execute → `complete` event with final report + full DAG on `SignalComplete()`. DAG is available immediately via `CaptureDAG(w)` — no need to wait for execution.
+- **Live graph enhancements** — critical path auto-highlight on graph open (if path >1 step), retry count badges, node search/filter, fit-to-view, zoom controls, minimap for >20 nodes, direction toggle (TB/LR), incremental node color updates via `updateGraphLive()`
+- **Live timeline** — Gantt-style timeline updates in real-time as step timing data arrives
+- **SSE heartbeat** — configurable keepalive interval (default 15s) prevents proxy timeouts
+- **Reconnection** — automatic reconnection with exponential backoff on SSE errors
 - **Demo pipeline** at `live/demo` (fetch → validate → transform → save → notify with retry) serving at `http://localhost:18080`
 - **Depends on `go-sse`** (`github.com/larsartmann/go-sse`, private, `replace` directive; will be removed once go-sse is public)
 
@@ -136,7 +140,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
 - **govulncheck** in CI (golang/govulncheck-action)
 - **actionlint** in CI (workflow linting)
-- **Coverage**: core 95.5%, viz 91.7%, live 76.9% (CI gate ≥92% for core + viz combined)
+- **Coverage**: core 95.6%, viz 91.7%, live 90.4%
 - **flake.nix** devShell (Go 1.26.4, golangci-lint, govulncheck, actionlint, `d2` CLI; GOEXPERIMENT=jsonv2)
 - **flake-parts** + **treefmt-nix** for build automation (includes `d2-fmt`, `nixfmt`, `gofmt`)
 - **Pre-commit hook** (vet + lint + test)
@@ -160,7 +164,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
 - **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + NDJSONStreamer throughput (100/1000/10000 events) + godoc examples
-- **~389 test functions** across 3 modules (core: 135 tests + 5 examples + 3 benchmarks + 4 fuzz; viz: 193 tests + 16 examples + 15 benchmarks + 3 fuzz; live: 15 tests)
+- **~415 test functions** across 3 modules (core: 155; viz: 227; live: 33)
 
 ---
 
@@ -168,6 +172,4 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - OpenTelemetry span bridge
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
-- Live DAG graph during execution (needs DAG structure available before `Do()`; currently only renders on `snapshot`/`complete` events)
-- Dashboard step-table diff-based DOM updates (eliminate flicker for 100+ steps)
-- Minimap for large graphs (>20 nodes)
+- Live SSE reconnection with heartbeat test

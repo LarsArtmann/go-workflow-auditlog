@@ -746,6 +746,7 @@
   // === Graph ===
 
   var graphRendered = false;
+  var graphDirection = "TB"; // TB (top-bottom) or LR (left-right)
 
   var statusColorMap = {
     succeeded: "var(--success)",
@@ -792,6 +793,77 @@
     });
   }
 
+  // Compute the critical path (longest duration chain) from report data.
+  function computeCriticalPathSteps() {
+    if (!state.report) return [];
+
+    if (
+      state.report.critical_path_steps &&
+      state.report.critical_path_steps.length > 0
+    ) {
+      return state.report.critical_path_steps;
+    }
+
+    var steps = state.report.steps || [];
+    var byName = {};
+    steps.forEach(function (s) {
+      byName[s.step_name] = s;
+    });
+
+    var memo = {};
+    var bestChain = [];
+
+    function dfs(name) {
+      if (memo[name] !== undefined) return memo[name];
+
+      var step = byName[name];
+      if (!step) {
+        memo[name] = { duration: 0, chain: [] };
+        return memo[name];
+      }
+
+      var duration = step.duration_ms || 0;
+      var deps = step.dependencies || [];
+      var bestChild = { duration: 0, chain: [] };
+
+      deps.forEach(function (d) {
+        var child = dfs(d.step_name);
+        if (child.duration > bestChild.duration) {
+          bestChild = child;
+        }
+      });
+
+      var result = {
+        duration: duration + bestChild.duration,
+        chain: bestChild.chain.concat([name]),
+      };
+      memo[name] = result;
+      return result;
+    }
+
+    steps.forEach(function (s) {
+      var r = dfs(s.step_name);
+      if (r.duration > 0 && r.chain.length > bestChain.length) {
+        bestChain = r.chain;
+      }
+    });
+
+    return bestChain;
+  }
+
+  // Build a map from dag-data node index to step name.
+  function buildNodeNameMap() {
+    var dataEl = document.getElementById("dag-data");
+    if (!dataEl) return {};
+
+    var data = JSON.parse(dataEl.textContent);
+    var map = {};
+    (data.nodes || []).forEach(function (n, i) {
+      map[i] = n.id;
+    });
+    return map;
+  }
+
   function renderGraph() {
     if (!state.dag) {
       if (els.graphPlaceholder) els.graphPlaceholder.style.display = "";
@@ -820,6 +892,7 @@
     if (typeof initDAGGraph === "function") {
       initDAGGraph("graph-container", "dag-data");
       enhanceGraph();
+      renderMinimap();
     }
 
     graphRendered = true;
@@ -830,28 +903,325 @@
     var svg = container.querySelector("svg");
     if (!svg) return;
 
-    if (!state.report || !state.report.steps) return;
+    if (!state.report || !state.report.steps) {
+      // Fall back to state.steps for pre-execution DAG
+      var fallbackSteps = Object.keys(state.steps).map(function (n) {
+        return state.steps[n];
+      });
+      if (!fallbackSteps.length) return;
+      state.report = state.report || {};
+      state.report.steps = fallbackSteps;
+    }
 
+    var nameMap = buildNodeNameMap();
     var stepByName = {};
-    state.report.steps.forEach(function (s) {
+    (state.report.steps || []).forEach(function (s) {
       stepByName[s.step_name] = s;
+    });
+
+    // Retry badges on nodes with attempt_count > 1
+    var nodeEls = container.querySelectorAll(".graph-node");
+    var ns = "http://www.w3.org/2000/svg";
+    nodeEls.forEach(function (g) {
+      var idx = parseInt(g.getAttribute("data-id"));
+      var stepName = nameMap[idx];
+      if (!stepName) return;
+
+      var step = stepByName[stepName] || state.steps[stepName];
+      if (!step || !step.attempt_count || step.attempt_count <= 1) return;
+
+      var rect = g.querySelector("rect");
+      if (!rect) return;
+      var w = parseFloat(rect.getAttribute("width"));
+
+      var badge = document.createElementNS(ns, "g");
+      badge.classList.add("retry-badge");
+      badge.setAttribute("transform", "translate(" + (w - 24) + ", -6)");
+
+      var circle = document.createElementNS(ns, "circle");
+      circle.setAttribute("cx", 8);
+      circle.setAttribute("cy", 8);
+      circle.setAttribute("r", 8);
+      circle.setAttribute("fill", "var(--warning)");
+      circle.setAttribute("stroke", "var(--bg-elevated)");
+      circle.setAttribute("stroke-width", 1.5);
+      badge.appendChild(circle);
+
+      var text = document.createElementNS(ns, "text");
+      text.setAttribute("x", 8);
+      text.setAttribute("y", 8);
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("dominant-baseline", "central");
+      text.setAttribute("fill", "var(--bg)");
+      text.setAttribute("font-size", "10");
+      text.setAttribute("font-weight", "bold");
+      text.setAttribute("font-family", "var(--font-mono)");
+      text.textContent = "\u21bb" + step.attempt_count;
+      badge.appendChild(text);
+
+      g.appendChild(badge);
+    });
+
+    // Node click → navigate to step in Steps tab
+    nodeEls.forEach(function (g) {
+      g.style.cursor = "pointer";
+      g.addEventListener("click", function () {
+        var idx = parseInt(g.getAttribute("data-id"));
+        var stepName = nameMap[idx];
+        if (!stepName) return;
+
+        var stepsTab = document.querySelector('.tab[data-tab="steps"]');
+        if (stepsTab) switchTab(stepsTab);
+
+        setTimeout(function () {
+          var rows = document.querySelectorAll("#steps-tbody tr");
+          rows.forEach(function (row) {
+            if (row.textContent.indexOf(stepName) !== -1) {
+              row.classList.add("row-highlight");
+              row.scrollIntoView({ behavior: "smooth", block: "center" });
+              setTimeout(function () {
+                row.classList.remove("row-highlight");
+              }, 2000);
+            }
+          });
+        }, 50);
+      });
     });
 
     // Edge color coding by target status
     var edgeEls = container.querySelectorAll(".graph-edge");
     edgeEls.forEach(function (e) {
-      var targetIdx = parseInt(e.dataset.target);
-      var dataEl = document.getElementById("dag-data");
-      if (!dataEl) return;
-      var data = JSON.parse(dataEl.textContent);
-      var targetNode = data.nodes[targetIdx];
-      if (!targetNode) return;
-      var step = stepByName[targetNode.id];
+      var targetIdx = parseInt(e.getAttribute("data-target"));
+      var targetName = nameMap[targetIdx];
+      if (!targetName) return;
+      var step = stepByName[targetName] || state.steps[targetName];
       if (!step) return;
       if (step.status === "failed" || step.status === "canceled") {
         e.classList.add("edge-failed");
       } else if (step.status === "succeeded") {
         e.classList.add("edge-succeeded");
+      }
+    });
+
+    // Critical path
+    var criticalPathSteps = computeCriticalPathSteps();
+    var criticalPathSet = {};
+    criticalPathSteps.forEach(function (name) {
+      criticalPathSet[name] = true;
+    });
+
+    // Update info text
+    var infoEl = document.getElementById("graph-info-text");
+    if (infoEl && criticalPathSteps.length > 1) {
+      infoEl.textContent =
+        "Critical path: " +
+        criticalPathSteps.length +
+        " steps" +
+        (state.report.critical_path_duration_ms
+          ? " \u00b7 " + humanizeDuration(state.report.critical_path_duration_ms)
+          : "");
+    }
+
+    // Critical path button
+    var cpBtn = document.getElementById("graph-critical-path");
+    if (cpBtn) {
+      if (criticalPathSteps.length <= 1) {
+        cpBtn.style.display = "none";
+      } else {
+        cpBtn.style.display = "";
+
+        // Auto-highlight critical path by default
+        if (cpBtn.getAttribute("aria-pressed") !== "true") {
+          cpBtn.setAttribute("aria-pressed", "true");
+          cpBtn.classList.add("active");
+          toggleCriticalPathHighlight(container, nameMap, criticalPathSet, true);
+        }
+
+        // Remove old listeners by cloning
+        var newCpBtn = cpBtn.cloneNode(true);
+        cpBtn.parentNode.replaceChild(newCpBtn, cpBtn);
+        newCpBtn.addEventListener("click", function () {
+          var active = newCpBtn.getAttribute("aria-pressed") === "true";
+          newCpBtn.setAttribute("aria-pressed", !active);
+          newCpBtn.classList.toggle("active", !active);
+          toggleCriticalPathHighlight(container, nameMap, criticalPathSet, !active);
+        });
+      }
+    }
+
+    // Graph search
+    var searchInput = document.getElementById("graph-search");
+    if (searchInput) {
+      var newSearch = searchInput.cloneNode(true);
+      searchInput.parentNode.replaceChild(newSearch, searchInput);
+      var searchTimer2;
+      newSearch.addEventListener("input", function () {
+        clearTimeout(searchTimer2);
+        searchTimer2 = setTimeout(function () {
+          applyGraphSearch(container, nameMap, newSearch.value.toLowerCase());
+        }, 120);
+      });
+    }
+
+    // Fit-to-view button
+    var fitBtn = document.querySelector(".graph-fit");
+    if (fitBtn) {
+      var newFit = fitBtn.cloneNode(true);
+      fitBtn.parentNode.replaceChild(newFit, fitBtn);
+      newFit.addEventListener("click", function () {
+        fitGraphToView(container);
+      });
+    }
+
+    container.dataset.enhanced = "true";
+  }
+
+  function toggleCriticalPathHighlight(container, nameMap, criticalPathSet, active) {
+    var nodeEls = container.querySelectorAll(".graph-node");
+    nodeEls.forEach(function (g) {
+      var idx = parseInt(g.getAttribute("data-id"));
+      var stepName = nameMap[idx];
+      if (active && criticalPathSet[stepName]) {
+        g.classList.add("critical-path");
+      } else {
+        g.classList.remove("critical-path");
+      }
+    });
+
+    var edgeEls = container.querySelectorAll(".graph-edge");
+    edgeEls.forEach(function (eg) {
+      var sIdx = parseInt(eg.getAttribute("data-source"));
+      var tIdx = parseInt(eg.getAttribute("data-target"));
+      var sName = nameMap[sIdx];
+      var tName = nameMap[tIdx];
+      if (active && criticalPathSet[sName] && criticalPathSet[tName]) {
+        eg.classList.add("critical-path");
+      } else {
+        eg.classList.remove("critical-path");
+      }
+    });
+  }
+
+  function applyGraphSearch(container, nameMap, query) {
+    var nodeEls = container.querySelectorAll(".graph-node");
+    if (!query) {
+      nodeEls.forEach(function (g) {
+        g.classList.remove("search-match", "search-dimmed");
+      });
+      return;
+    }
+    nodeEls.forEach(function (g) {
+      var idx = parseInt(g.getAttribute("data-id"));
+      var stepName = nameMap[idx] || "";
+      if (stepName.toLowerCase().indexOf(query) >= 0) {
+        g.classList.add("search-match");
+        g.classList.remove("search-dimmed");
+      } else {
+        g.classList.add("search-dimmed");
+        g.classList.remove("search-match");
+      }
+    });
+  }
+
+  function fitGraphToView(container) {
+    var svg = container.querySelector("svg");
+    if (!svg) return;
+
+    // Reset transform to identity, then let daghtml's zoom recalibrate
+    var content = svg.querySelector("g");
+    if (content) {
+      content.setAttribute("transform", "translate(0,0) scale(1)");
+    }
+
+    // Compute bounding box of all nodes and set viewBox
+    var nodes = svg.querySelectorAll(".graph-node rect");
+    if (!nodes.length) return;
+
+    var minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    nodes.forEach(function (rect) {
+      var x = parseFloat(rect.getAttribute("x")) || 0;
+      var y = parseFloat(rect.getAttribute("y")) || 0;
+      var w = parseFloat(rect.getAttribute("width")) || 0;
+      var h = parseFloat(rect.getAttribute("height")) || 0;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x + w > maxX) maxX = x + w;
+      if (y + h > maxY) maxY = y + h;
+    });
+
+    var padding = 40;
+    var vbX = minX - padding;
+    var vbY = minY - padding;
+    var vbW = maxX - minX + padding * 2;
+    var vbH = maxY - minY + padding * 2;
+    svg.setAttribute("viewBox", vbX + " " + vbY + " " + vbW + " " + vbH);
+  }
+
+  function renderMinimap() {
+    var minimapEl = document.getElementById("graph-minimap");
+    if (!minimapEl) return;
+
+    var dataEl = document.getElementById("dag-data");
+    if (!dataEl) return;
+
+    var data = JSON.parse(dataEl.textContent);
+    var nodeCount = (data.nodes || []).length;
+
+    // Only show minimap for large graphs
+    if (nodeCount <= 20) {
+      minimapEl.style.display = "none";
+      return;
+    }
+
+    minimapEl.style.display = "";
+    minimapEl.innerHTML = "";
+
+    // Create a scaled-down clone of the SVG
+    var originalSvg = els.graphContainer.querySelector("svg");
+    if (!originalSvg) return;
+
+    var clone = originalSvg.cloneNode(true);
+    clone.removeAttribute("width");
+    clone.removeAttribute("height");
+    clone.style.width = "100%";
+    clone.style.height = "100%";
+    clone.style.pointerEvents = "none";
+
+    minimapEl.appendChild(clone);
+
+    // Add viewport indicator rectangle
+    var ns = "http://www.w3.org/2000/svg";
+    var viewport = document.createElementNS(ns, "rect");
+    viewport.classList.add("minimap-viewport");
+    viewport.setAttribute("fill", "rgba(100,160,255,0.15)");
+    viewport.setAttribute("stroke", "var(--accent)");
+    viewport.setAttribute("stroke-width", "2");
+    viewport.setAttribute("pointer-events", "none");
+
+    // Append viewport rect to clone's SVG
+    var cloneSvg = minimapEl.querySelector("svg");
+    if (cloneSvg) {
+      cloneSvg.appendChild(viewport);
+    }
+
+    // Click-to-navigate on minimap
+    minimapEl.style.pointerEvents = "auto";
+    minimapEl.addEventListener("click", function (e) {
+      var rect = minimapEl.getBoundingClientRect();
+      var pctX = (e.clientX - rect.left) / rect.width;
+      var pctY = (e.clientY - rect.top) / rect.height;
+
+      // Pan the main graph to center on clicked point
+      var mainSvg = els.graphContainer.querySelector("svg");
+      if (mainSvg) {
+        var vb = mainSvg.viewBox.baseVal;
+        if (vb && vb.width) {
+          vb.x = pctX * vb.width - vb.width / 2;
+          vb.y = pctY * vb.height - vb.height / 2;
+        }
       }
     });
   }
@@ -1045,6 +1415,54 @@
       tooltip.classList.remove("visible");
     }
   });
+
+  // === Graph control buttons ===
+
+  // Direction toggle (TB ↔ LR)
+  var dirBtn = document.getElementById("graph-direction-toggle");
+  if (dirBtn) {
+    dirBtn.addEventListener("click", function () {
+      graphDirection = graphDirection === "TB" ? "LR" : "TB";
+      dirBtn.textContent = graphDirection;
+      dirBtn.setAttribute("aria-pressed", graphDirection === "LR" ? "true" : "false");
+
+      // Re-render graph with new direction
+      if (state.dag) {
+        renderGraph();
+      }
+    });
+  }
+
+  // Zoom buttons
+  var zoomInBtn = document.querySelector(".graph-zoom-in");
+  var zoomOutBtn = document.querySelector(".graph-zoom-out");
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener("click", function () {
+      zoomGraph(1.2);
+    });
+  }
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener("click", function () {
+      zoomGraph(1 / 1.2);
+    });
+  }
+
+  function zoomGraph(factor) {
+    var svg = els.graphContainer.querySelector("svg");
+    if (!svg) return;
+    var content = svg.querySelector("g");
+    if (!content) return;
+
+    var transform = content.getAttribute("transform") || "translate(0,0) scale(1)";
+    var scaleMatch = transform.match(/scale\(([\d.]+)\)/);
+    var translateMatch = transform.match(/translate\(([\d.-]+),([\d.-]+)\)/);
+    var scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+    var tx = translateMatch ? parseFloat(translateMatch[1]) : 0;
+    var ty = translateMatch ? parseFloat(translateMatch[2]) : 0;
+
+    scale *= factor;
+    content.setAttribute("transform", "translate(" + tx + "," + ty + ") scale(" + scale + ")");
+  }
 
   // === Start ===
 

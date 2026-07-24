@@ -64,6 +64,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`d2 fmt` in treefmt** — D2 diagram files (`.d2`) are now formatted
   automatically via `d2-fmt` in the `flake.nix` treefmt configuration. The `d2`
   CLI is included in the devShell.
+- **`CaptureDAG(w)` method** — pre-populates step records with names, types,
+  dependencies, retry/timeout config, and "pending" status by traversing the
+  workflow BEFORE `Do(ctx)`. Makes the full DAG structure available in
+  `Report()` immediately, enabling live dashboards to render the step graph on
+  connect (no need to wait for execution). Idempotent, disabled-safe,
+  nil-safe. 7 dedicated tests covering pre-population, status update on run,
+  retry config, idempotency, disabled mode, nil workflow, and no-event
+  generation.
+- **Live dashboard graph enhancements** — full graph feature set ported from
+  the static viz dashboard to the live dashboard:
+  - **Critical path auto-highlight** — graph nodes on the critical path are
+    highlighted by default when the graph tab opens (if path has >1 step)
+  - **Retry count badges** — `↻N` amber badge on nodes with `attempt_count > 1`
+  - **Node search/filter** — highlights matching nodes, dims non-matches
+  - **Fit-to-view** — button recalculates SVG viewBox to fit all nodes
+  - **Zoom controls** — zoom in/out buttons with transform manipulation
+  - **Minimap** — scaled-down graph overview for large graphs (>20 nodes)
+    with click-to-navigate
+  - **Direction toggle** — TB/LR toggle button for layout direction
+  - **Incremental node color updates** — `updateGraphLive()` updates node
+    fill colors on every render tick without rebuilding the graph
+  - **Node click navigation** — click a graph node to jump to the Steps tab
+- **`--output-dir` flag** for `viz/example/main.go` — export files to a
+  specified directory instead of clobbering the current working directory.
+  Supports both `--output-dir <dir>` and `--output-dir=<dir>` syntax.
+- **SSE heartbeat** — configurable keepalive interval (default 15s) prevents
+  proxy timeouts on idle SSE connections
+- **Live dashboard JS structural tests** — 5 test functions validating
+  function presence, brace balance, SSE wiring, CSS class integrity, and
+  viz dashboard.js consistency
+- **Live module coverage improvement** — from 76.9% to 90.4% via new tests
+  (concurrent Hub Subscribe/Unsubscribe, SSE heartbeat, client disconnect,
+  server lifecycle, error paths, invalid config)
 
 ### Changed
 

@@ -206,18 +206,23 @@ func (r *Recorder) captureDAGStepLocked(w *flow.Workflow, step flow.Steper) {
 
 	// Capture retry and timeout configuration.
 	state := w.StateOf(step)
-	if state != nil {
-		if opt := state.Option(); opt != nil {
-			if opt.RetryOption != nil {
-				rec.hasRetry = true
+	if state == nil {
+		return
+	}
 
-				//nolint:gosec // Attempts is a small retry count, overflow is not realistic.
-				rec.maxAttempts = int(opt.RetryOption.Attempts)
-			}
+	opt := state.Option()
+	if opt == nil {
+		return
+	}
 
-			if opt.Timeout != nil {
-				rec.hasTimeout = true
-			}
-		}
+	if opt.RetryOption != nil {
+		rec.hasRetry = true
+
+		//nolint:gosec // Attempts is a small retry count, overflow is not realistic.
+		rec.maxAttempts = int(opt.RetryOption.Attempts)
+	}
+
+	if opt.Timeout != nil {
+		rec.hasTimeout = true
 	}
 }
