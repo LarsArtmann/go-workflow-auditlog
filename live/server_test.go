@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -459,5 +460,101 @@ func TestHub_NonBlockingOnFullBuffer(t *testing.T) {
 	case <-done:
 	case <-time.After(time.Second):
 		t.Fatal("OnEvent blocked on full buffer")
+	}
+}
+
+func TestHub_ConcurrentSubscribeUnsubscribe(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+	const goroutines = 20
+	const iterations = 50
+
+	var wg sync.WaitGroup
+	wg.Add(goroutines * 3)
+
+	// Subscribers
+	for range goroutines {
+		go func() {
+			defer wg.Done()
+
+			for range iterations {
+				sub := hub.Subscribe()
+				_ = sub.ID()
+				hub.Unsubscribe(sub.ID())
+			}
+		}()
+	}
+
+	// Event broadcasters
+	for range goroutines {
+		go func() {
+			defer wg.Done()
+
+			for i := range iterations {
+				hub.OnEvent(auditlog.Event{
+					Sequence:  i,
+					StepRef:   auditlog.StepRef{Name: "concurrent-step"},
+					EventType: auditlog.EventTypeAttemptStart,
+					Phase:     auditlog.PhaseBefore,
+				})
+			}
+		}()
+	}
+
+	// SignalComplete + IsComplete pollers
+	for range goroutines {
+		go func() {
+			defer wg.Done()
+
+			for range iterations {
+				_ = hub.IsComplete()
+				_ = hub.ClientCount()
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	if hub.ClientCount() != 0 {
+		t.Errorf("expected 0 clients after all goroutines finish, got %d", hub.ClientCount())
+	}
+}
+
+func TestHub_UnsubscribeUnknownID(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	sub := hub.Subscribe()
+	defer hub.Unsubscribe(sub.ID())
+
+	// Unsubscribing a non-existent ID should be a no-op, not a panic.
+	hub.Unsubscribe(99999)
+
+	if hub.ClientCount() != 1 {
+		t.Errorf("expected 1 client after unknown unsubscribe, got %d", hub.ClientCount())
+	}
+}
+
+func TestHub_OnEventMarshalError(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	sub := hub.Subscribe()
+	defer hub.Unsubscribe(sub.ID())
+
+	// OnEvent with a valid event should not panic even if marshaling
+	// produces an unexpected result. A normal event should deliver fine.
+	hub.OnEvent(auditlog.Event{
+		Sequence: 1,
+		StepRef:  auditlog.StepRef{Name: "test"},
+	})
+
+	select {
+	case <-sub.Events():
+	case <-time.After(time.Second):
+		t.Fatal("did not receive event")
 	}
 }

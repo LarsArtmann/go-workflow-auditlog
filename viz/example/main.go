@@ -332,19 +332,13 @@ func parseExportArgs(args []string) *exportArgs {
 	outputDir := "."
 
 	for i := 1; i < len(args); i++ {
-		switch args[i] {
-		case "--export":
+		switch {
+		case args[i] == "--export":
 			hasExport = true
-		case "--output-dir":
-			if i+1 < len(args) {
-				outputDir = args[i+1]
-				i++
-			}
-		case "--output-dir=*":
-			// handled below via strings.CutPrefix if needed
-		}
-
-		if strings.HasPrefix(args[i], "--output-dir=") {
+		case args[i] == "--output-dir" && i+1 < len(args):
+			outputDir = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--output-dir="):
 			outputDir = strings.TrimPrefix(args[i], "--output-dir=")
 		}
 	}
