@@ -143,6 +143,17 @@
         </li>
       </ul>
 
+      <div class="summary" style="border-left-color: var(--solution);">
+        <strong>Update 2026-07-24:</strong> This proposal was fully implemented
+        and merged to master. The codebase now has <strong>three</strong> Go
+        modules (core, viz, live), not two — a <code>live/</code> real-time SSE
+        dashboard module was added later. The "Current State" above describes the
+        pre-split reality and is kept as historical record. Core
+        <code>go.mod</code> has zero <code>go-output</code> dependencies.
+        <code>go.work</code> exists. See the full resolution at the bottom of
+        this document.
+      </div>
+
       <h2>Proposed Module Structure</h2>
       <table>
         <tr>
@@ -345,6 +356,26 @@ viz.ExportHTML(report, "report.html")</pre>
           <code>GOEXPERIMENT=jsonv2</code>.
         </li>
       </ul>
+
+      <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;" />
+
+      <h2>Resolution (2026-07-24)</h2>
+      <p>
+        This proposal was fully implemented and merged to master. Every design
+        decision above was realized:
+      </p>
+      <ul>
+        <li><strong>Module split:</strong> core (<code>auditlog</code> package, zero go-output deps) and viz (<code>viz</code> package, go-output deps) are separate Go modules.</li>
+        <li><strong>API conversion:</strong> viz methods converted to standalone functions (<code>viz.WriteMermaid(report, w)</code> pattern).</li>
+        <li><strong>testhelpers:</strong> extracted to core, shared by both modules.</li>
+        <li><strong>go.work:</strong> workspace links all modules for local development.</li>
+        <li><strong>Third module:</strong> <code>live/</code> (real-time SSE dashboard) was added later as a third module, depending on both core and viz.</li>
+        <li><strong>CI:</strong> per-module vet/build/test/lint + <code>GOWORK=off</code> standalone verification.</li>
+      </ul>
+      <p>
+        The "Current State" section above describes the pre-split reality and is
+        retained as a historical record of what motivated the change.
+      </p>
     </div>
   </body>
 </html>

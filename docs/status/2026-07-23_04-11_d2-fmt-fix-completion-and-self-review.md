@@ -3,6 +3,13 @@
 **Date:** 2026-07-23 04:11  
 **Session goal:** Fix `d2-fmt` buildflow failures on `dag.d2`, audit all renderers, tag go-output, wire into auditlog.
 
+> **Update 2026-07-24:** the v0.31.1 tags mentioned in §a-5 below were created
+> **locally only** — they were never pushed to remote. `viz/go.mod` remains at
+> v0.30.4 because the tag couldn't be resolved by the Go proxy. The D2/DOT
+> quoting fix is real and committed (`d91cc22`), and works locally via `go.work`.
+> External consumers cannot use it until go-output is published. Full status in
+> [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## a) FULLY DONE
@@ -174,3 +181,25 @@
 2. **Should I commit the auditlog changes (flake.nix, AGENTS.md, test file fixes) now, or wait until the go-output tag is pushed and viz/go.mod is bumped?** There are 16+ uncommitted files in the auditlog repo from multiple sessions. I don't know your preferred commit strategy (one big commit vs. separate per-concern commits) or whether the pre-existing changes (dashboard.js, report.go, etc.) are ready to commit.
 
 3. **Are the uncommitted changes in `viz/dashboard.js`, `viz/dashboard.css`, `report.go`, `report_builder.go` from a previous session work-in-progress that I should leave alone, or are they stable and ready to commit?** I didn't investigate them and they may be related to ongoing work I'm not aware of.
+
+---
+
+## Resolution (2026-07-24)
+
+| Report item | Resolution |
+| --- | --- |
+| §a-1 D2 quoting fix committed (`d91cc22`) | **Committed** in go-output local repo |
+| §a-2 DOT edge color quoting fix | **Committed** in same `d91cc22` |
+| §a-3 Renderer audit (D2/DOT/Mermaid/PlantUML) | **Done** — D2 fixed, DOT fixed, Mermaid safe, PlantUML safe |
+| §a-5 go-output tagged v0.31.1 (root + 16 sub-modules) | **Tags created locally — NOT pushed** |
+| §a-7 `d2-fmt` in treefmt config | **Done** — `flake.nix` `settings.formatter.d2` |
+| §a-8 AGENTS.md updated | **Done** |
+| §a-9 Standalone build verified at v0.30.4 | **Done** |
+| §c Push go-output tags to remote | **Still open** — blocking |
+| §c `viz/go.mod` bump to v0.31.1 | **Still open** — requires published tag |
+| §c DOT edge color regression test | **Still open** — no `TestDOT_EdgeColorQuoted` |
+| Q1: Re-point v0.31.1 tags to include `7c0671b`? | **Still open** — tags are local-only and may be on wrong commit |
+| Q2: Commit auditlog changes now or after push? | **Partially done** — flake.nix/AGENTS.md committed; some test files may still be uncommitted |
+
+**Blocking:** go-output v0.31.1 must be pushed and `viz/go.mod` bumped before
+external consumers benefit from the D2/DOT quoting fix.

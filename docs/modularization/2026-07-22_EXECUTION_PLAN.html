@@ -299,6 +299,17 @@
         </ul>
         <p class="rollback">Rollback: create a recovery branch from the last known-good commit.</p>
       </div>
+
+      <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;" />
+
+      <div class="summary" style="border-left-color: var(--solution);">
+        <strong>Resolution (2026-07-24):</strong> All 10 steps were executed
+        successfully. The branch <code>modularize/core-viz-split</code> was merged
+        to master. Core coverage stayed at 94.1% (≥92% target), viz at 92.7%.
+        <code>GOWORK=off</code> standalone builds verified. A third module
+        (<code>live/</code>) was added later following the same patterns
+        established here.
+      </div>
     </div>
   </body>
 </html>

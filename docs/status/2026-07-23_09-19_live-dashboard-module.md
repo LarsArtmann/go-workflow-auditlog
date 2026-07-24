@@ -2,6 +2,13 @@
 
 > **Session focus**: Built a new `live/` sub-module providing a real-time HTTP dashboard with SSE streaming, live DAG updates, and incremental rendering.
 
+> **Update 2026-07-24:** the `live/` module is merged to master and builds/tests
+> clean. However, CHANGELOG.md and FEATURES.md do not yet document the live
+> module, and STABILITY.md has no entries for it. The live DAG graph during
+> execution (listed NOT STARTED §c-8) remains the biggest open gap. The module
+> depends on `go-sse` (private, `replace` directive in `go.mod`). Full status in
+> [Resolution](#resolution-2026-07-24) below.
+
 ---
 
 ## a) FULLY DONE
@@ -197,3 +204,28 @@ SSE is simpler and covers the one-way data flow (server → browser). WebSocket 
 ### 3. Should this be a separate versioned module or merged into viz?
 
 Currently `live/` is a separate Go module (like `viz/`), depending on both `auditlog` and `viz`. An alternative is to merge it into `viz` as a `viz/live` sub-package, reducing module count. The tradeoff: `net/http` as a dependency in viz vs. keeping it isolated. **Do you prefer the current 3-module split, or should live move into viz?**
+
+---
+
+## Resolution (2026-07-24)
+
+| Report item | Resolution |
+| --- | --- |
+| `live/` module (hub.go, server.go, dashboard.go, CSS, JS, tests, demo) | **Merged to master** — builds and tests clean |
+| SSE snapshot/event/complete flow | **Working** — `sendSnapshot`, `handleSSE`, `SignalComplete` |
+| Demo pipeline at `:18080` | **Working** |
+| CHANGELOG.md entry for live module | **Still open** — no entry in `[Unreleased]` |
+| FEATURES.md entry for live module | **Still open** — no live section |
+| STABILITY.md entries for live API | **Still open** — no `live.*` entries |
+| §c-8 Live DAG graph during execution | **Still open** — needs DAG structure before `Do()`; remains the biggest gap |
+| §c-1 WebSocket transport | **Still open** — SSE kept |
+| §b Steps table rebuilds entirely on each tick | **Still open** — flicker for 100+ steps |
+| §c-5 Compression (gzip/brotli) | **Still open** |
+| Q3: Separate module or merge into viz? | **Kept as separate module** — 3-module split maintained |
+
+**Dependency note:** `live/` depends on `github.com/larsartmann/go-sse`
+(private, `replace` directive pointing to `../../go-sse`). The `replace` will
+be removed once go-sse is made public.
+
+**Still open**: live DAG during execution, CHANGELOG/FEATURES/STABILITY entries,
+WebSocket, compression, multi-run, auth, graceful drain, mobile testing.
