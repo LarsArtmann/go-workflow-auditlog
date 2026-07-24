@@ -3,6 +3,8 @@ package auditlog_test
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -154,4 +156,39 @@ func ExampleWorkflowReport_WriteCSV() {
 
 	// Output: step_id,step_name,step_type,status,attempt_count,max_attempts,started_at,finished_at,duration_ms,has_retry,has_timeout,error,dependencies,dependents
 	// 1,fetch,,succeeded,0,0,,,,false,false,,,
+}
+
+func BenchmarkWriteCSV_LargeReport(b *testing.B) {
+	steps := make([]auditlog.StepInfo, 0, 100)
+
+	for i := range 100 {
+		dur := float64(i * 100)
+
+		steps = append(steps, auditlog.StepInfo{
+			StepRef:      auditlog.StepRef{Name: fmt.Sprintf("step-%04d", i), StepType: "BenchStep"},
+			StepID:       i + 1,
+			Status:       auditlog.StepStatusSucceeded,
+			AttemptCount: 1,
+			HasRetry:     i%3 == 0,
+			HasTimeout:   i%5 == 0,
+			DurationMs:   &dur,
+		})
+	}
+
+	report := auditlog.WorkflowReport{
+		Version:        auditlog.SchemaVersion,
+		WorkflowID:     "bench-csv",
+		StepCount:      100,
+		SucceededCount: 100,
+		Steps:          steps,
+	}
+
+	b.ResetTimer()
+
+	for b.Loop() {
+		err := report.WriteCSV(io.Discard)
+		if err != nil {
+			b.Fatalf("WriteCSV: %v", err)
+		}
+	}
 }

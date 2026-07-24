@@ -431,3 +431,39 @@ func TestAuditor_WriteStringMethods(t *testing.T) {
 		t.Error("WriteTableString returned empty output")
 	}
 }
+
+// --- CSV/TSV Export via type alias ---
+
+func TestViz_WriteCSVViaTypeAlias(t *testing.T) {
+	t.Parallel()
+
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "csv-via-viz")
+
+	var report viz.WorkflowReport = a.Report()
+
+	err := report.WriteCSV(buf)
+	if err != nil {
+		t.Fatalf("WriteCSV via viz.WorkflowReport: %v", err)
+	}
+
+	if !strings.Contains(buf.String(), "csv-via-viz") {
+		t.Error("expected step name in CSV output")
+	}
+}
+
+func TestViz_WriteTSVViaTypeAlias(t *testing.T) {
+	t.Parallel()
+
+	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "tsv-via-viz")
+
+	var report viz.WorkflowReport = a.Report()
+
+	err := report.WriteTSV(buf)
+	if err != nil {
+		t.Fatalf("WriteTSV via viz.WorkflowReport: %v", err)
+	}
+
+	if !strings.Contains(buf.String(), "tsv-via-viz") {
+		t.Error("expected step name in TSV output")
+	}
+}
