@@ -439,7 +439,7 @@ func TestViz_WriteCSVViaTypeAlias(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "csv-via-viz")
 
-	var report viz.WorkflowReport = a.Report()
+	report := a.Report()
 
 	err := report.WriteCSV(buf)
 	if err != nil {
@@ -456,7 +456,7 @@ func TestViz_WriteTSVViaTypeAlias(t *testing.T) {
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "tsv-via-viz")
 
-	var report viz.WorkflowReport = a.Report()
+	report := a.Report()
 
 	err := report.WriteTSV(buf)
 	if err != nil {

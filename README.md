@@ -74,7 +74,8 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **Skipped & canceled detection** — reads post-execution state to catch steps that bypass callbacks entirely
 - **Cross-system correlation** — 128-bit `RunID` stamped on every event for trace/log correlation
 - **Real-time streaming NDJSON** — stream events as they happen via `Config.OnEvent`, no need to wait for the workflow to finish
-- **Export formats** — JSON report, NDJSON event stream, Mermaid / PlantUML / Graphviz DOT / D2 diagrams (with configurable layout direction), step summary tables (16 formats, configurable column selection), ASCII + HTML tree views, **interactive HTML dashboard** (5-tab self-contained report with DAG graph engine, timeline, waveform)
+- **Live real-time dashboard** (`live/` module) — SSE-powered HTTP dashboard that streams step updates as they execute, with configurable CORS, route prefix, export endpoints (NDJSON/HTML), and download buttons in the UI
+- **Export formats** — JSON report, NDJSON event stream, CSV/TSV step export, Mermaid / PlantUML / Graphviz DOT / D2 diagrams (with configurable layout direction), step summary tables (16 formats, configurable column selection), ASCII + HTML tree views, **interactive HTML dashboard** (5-tab self-contained report with DAG graph engine, timeline, waveform)
 - **Report filtering** — slice reports by step name, status, event type, or time range
 - **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration delta)
 - **Event replay** — reconstruct a report from a flat NDJSON event stream
@@ -298,6 +299,15 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 | `WriteJSON(w io.Writer) error`                        | Writes report JSON to writer.                                |
 | `WriteNDJSON(w io.Writer) error`                      | Writes NDJSON to writer.                                     |
 
+**Report-level export** (on `WorkflowReport`):
+
+| Method                                  | Description                                             |
+| --------------------------------------- | ------------------------------------------------------- |
+| `report.WriteCSV(w io.Writer) error`    | Writes all steps as CSV (14 columns).                   |
+| `report.WriteTSV(w io.Writer) error`    | Writes all steps as TSV.                                |
+| `report.ExportCSV(path string) error`   | Writes all steps as CSV to file.                        |
+| `report.ExportTSV(path string) error`   | Writes all steps as TSV to file.                        |
+
 Visualization functions live in `github.com/larsartmann/go-workflow-auditlog/viz` and operate on a `WorkflowReport` (e.g. from `audit.Report()`):
 
 ```go
@@ -325,8 +335,12 @@ _ = viz.ExportHTML(report, "dashboard.html")
 | `report.Summary() string`                              | One-line human-readable summary.                                     |
 | `report.WriteJSON(w io.Writer) error`                  | Serialize report as JSON.                                            |
 | `report.WriteNDJSON(w io.Writer) error`                | Serialize events as NDJSON.                                          |
+| `report.WriteCSV(w io.Writer) error`                   | Serialize steps as CSV (14 columns).                                |
+| `report.WriteTSV(w io.Writer) error`                   | Serialize steps as TSV.                                             |
 | `report.ExportJSON(path string) error`                 | Writes JSON report to file.                                          |
 | `report.ExportNDJSON(path string) error`               | Writes NDJSON events to file.                                        |
+| `report.ExportCSV(path string) error`                  | Writes CSV steps to file.                                           |
+| `report.ExportTSV(path string) error`                  | Writes TSV steps to file.                                           |
 | `report.Validate() error`                              | Checks internal consistency (counts, status drift).                  |
 
 ### `viz` Package Functions
