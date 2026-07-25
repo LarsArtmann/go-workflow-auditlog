@@ -132,6 +132,23 @@ func TestServer_ReportEndpoint(t *testing.T) {
 func TestServer_NotFound(t *testing.T) {
 	t.Parallel()
 
+	server := newTestServer(t)
+
+	ctx := t.Context()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/nonexistent", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected 404, got %d", rec.Code)
+	}
+}
+
+func TestServer_NewConvenience(t *testing.T) {
+	t.Parallel()
+
 	server, auditor, err := live.New(auditlog.Config{
 		WorkflowID: "test-workflow",
 	}, live.Config{Addr: ":0"})

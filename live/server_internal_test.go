@@ -112,8 +112,8 @@ func TestServer_NilNDJSONWriter(t *testing.T) {
 
 	srv.handleExportNDJSON(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("expected 500 for nil ndjsonWriter, got %d", rec.Code)
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Errorf("expected 503 for nil ndjsonWriter, got %d", rec.Code)
 	}
 }
 
@@ -131,8 +131,8 @@ func TestServer_NilHTMLWriter(t *testing.T) {
 
 	srv.handleExportHTML(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("expected 500 for nil htmlWriter, got %d", rec.Code)
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Errorf("expected 503 for nil htmlWriter, got %d", rec.Code)
 	}
 }
 
