@@ -27,7 +27,6 @@ func (s *e2eStep) Do(ctx context.Context) error {
 		select {
 		case <-time.After(s.delay):
 		case <-ctx.Done():
-
 			return ctx.Err()
 		}
 	}
@@ -169,6 +168,7 @@ func TestServer_SSE_EndToEnd(t *testing.T) {
 
 	for _, data := range sseEvents {
 		var sseEvt auditlog.Event
+
 		jsonErr := json.Unmarshal([]byte(data), &sseEvt)
 		if jsonErr != nil {
 			t.Errorf("unmarshal SSE event: %v (data: %s)", jsonErr, data[:min(100, len(data))])
@@ -323,6 +323,7 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 	}
 
 	var snapshot wsTestMessage
+
 	jsonErr := json.Unmarshal(msg, &snapshot)
 	if jsonErr != nil {
 		t.Fatalf("unmarshal snapshot: %v", jsonErr)
@@ -358,6 +359,7 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 		}
 
 		var wsMsg wsTestMessage
+
 		jsonErr := json.Unmarshal(msg, &wsMsg)
 		if jsonErr != nil {
 			continue

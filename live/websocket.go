@@ -13,7 +13,7 @@ import (
 const wsWriteTimeout = 10 * time.Second
 
 // wsMessage is the JSON envelope for WebSocket messages. It mirrors the
-// SSE event structure (snapshot → event → complete) using a type field.
+// SSE event structure (snapshot, event, complete) using a type field.
 type wsMessage struct {
 	Type string         `json:"type"`
 	Data jsontext.Value `json:"data"`
@@ -21,20 +21,23 @@ type wsMessage struct {
 
 // handleWebSocket upgrades to WebSocket and streams events, mirroring
 // the SSE handler. Used as a fallback for environments that block SSE.
+//
+//nolint:nlreturn,exhaustruct // codebase style + optional upgrader fields
 func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{ //nolint:exhaustruct // optional fields default to sane values
+	upgrader := websocket.Upgrader{
 		CheckOrigin: func(_ *http.Request) bool { return true },
 	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		// Upgrade already wrote an HTTP error response
-		return //nolint:nlreturn // matching codebase style { _ = conn.Close() }()
+		return
+	}
+
+	defer func() { _ = conn.Close() }()
 
 	sub := srv.hub.Subscribe()
 	defer srv.hub.Unsubscribe(sub.id)
 
-	// Send snapshot
 	if srv.snapshotProvider != nil {
 		data, snapErr := srv.snapshotProvider(srv.hub.IsComplete())
 		if snapErr == nil {
@@ -42,7 +45,6 @@ func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// If already complete, send complete and return
 	if srv.hub.IsComplete() {
 		srv.sendWSComplete(conn)
 		return
@@ -70,7 +72,7 @@ func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 func (srv *Server) writeWS(conn *websocket.Conn, msg wsMessage) bool {
 	data, err := json.Marshal(msg)
 	if err != nil {
-		return true // skip malformed message but keep connection alive
+		return true
 	}
 
 	_ = conn.SetWriteDeadline(time.Now().Add(wsWriteTimeout))
