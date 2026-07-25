@@ -47,11 +47,7 @@ func TestReport_StepByName(t *testing.T) {
 func TestReport_EventsByType(t *testing.T) {
 	t.Parallel()
 
-	a, w := testhelpers.NewAuditAndWorkflow(t)
-	s := testhelpers.NewSucceed("typed-step")
-	w.Add(flow.Step(s))
-	testhelpers.RunWorkflow(t, a, w)
-
+	a := testhelpers.RunSingleSucceed(t, "typed-step")
 	report := a.Report()
 
 	starts := report.EventsByType(auditlog.EventTypeAttemptStart)

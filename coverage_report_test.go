@@ -267,11 +267,7 @@ func TestCoverage_Report_Summary(t *testing.T) {
 func TestCoverage_Report_WriteJSON_ErrorPath(t *testing.T) {
 	t.Parallel()
 
-	a, w := testhelpers.NewAuditAndWorkflow(t)
-	s := testhelpers.NewSucceed("json-error")
-	w.Add(flow.Step(s))
-	testhelpers.RunWorkflow(t, a, w)
-
+	a := testhelpers.RunSingleSucceed(t, "json-error")
 	report := a.Report()
 	writer := &testhelpers.FailingWriter{}
 

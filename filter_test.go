@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
@@ -40,11 +39,7 @@ func TestFiltered_ByStatus(t *testing.T) {
 func TestFiltered_ByEventType(t *testing.T) {
 	t.Parallel()
 
-	a, w := testhelpers.NewAuditAndWorkflow(t)
-	s := testhelpers.NewSucceed("filter-event")
-	w.Add(flow.Step(s))
-	testhelpers.RunWorkflow(t, a, w)
-
+	a := testhelpers.RunSingleSucceed(t, "filter-event")
 	fullReport := a.Report()
 	filtered := fullReport.Filtered(auditlog.WithEventsByType(auditlog.EventTypeAttemptStart))
 
