@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/larsartmann/go-workflow-auditlog.svg)](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)
 [![CI](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-~96%25-brightgreen)](#)
+[![Coverage](https://img.shields.io/badge/coverage-~95%25-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 
@@ -82,7 +82,7 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
 - **Error classification** — auto-registered with [go-error-family](https://github.com/larsartmann/go-error-family) for `Classify()`, `IsRetryable()`, `ExitCode()`
-- **423 tests across 3 modules, ~95% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
+- **445 tests across 3 modules, ~95% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
 
 ## Installation
 

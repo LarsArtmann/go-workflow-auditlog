@@ -57,6 +57,12 @@ attachment`.
 - **Live dashboard export buttons** — JSON, NDJSON, and HTML download buttons
   in the dashboard header. URLs wired via `ROUTE_PREFIX`.
 - **CSV benchmark** — `BenchmarkWriteCSV_LargeReport` (100-step report).
+- **Dependency pinning** — `go-sse` v0.2.0, `go-atomic-write` v0.3.0, and
+  `go-ndjson` v0.0.1 are now resolved from published tags (local `replace`
+  directives removed). All three modules build/test standalone (`GOWORK=off`)
+  against checksum-verified published versions. `go-output` is likewise
+  resolved from published v0.31.1 (workspace `use` directives for go-output
+  removed), so `go.work` references only this project's own modules.
 - **Streaming NDJSON** (`NDJSONStreamer` in `stream.go`) — real-time event
   streaming via `Config.OnEvent`. Writes events as NDJSON the moment they are
   captured, without buffering the entire run in memory first. Thread-safe
@@ -127,11 +133,11 @@ attachment`.
     highlighted by default when the graph tab opens (if path has >1 step)
   - **Retry count badges** — `↻N` amber badge on nodes with `attempt_count > 1`
   - **Node search/filter** — highlights matching nodes, dims non-matches
-  - **Fit-to-view** — button recalculates SVG viewBox to fit all nodes
-  - **Zoom controls** — zoom in/out buttons with transform manipulation
-  - **Minimap** — scaled-down graph overview for large graphs (>20 nodes)
-    with click-to-navigate
-  - **Direction toggle** — TB/LR toggle button for layout direction
+  - **daghtml-native zoom/fit** — zoom in/out and fit-to-view use the daghtml
+    SDK's built-in `.graph-zoom-in` / `.graph-zoom-out` / `.graph-fit` handlers
+  - **Minimap with viewport tracking** — scaled-down graph overview for large
+    graphs (>20 nodes) with a viewport indicator synced to pan/zoom in
+    real-time via `MutationObserver`, plus click-to-navigate
   - **Incremental node color updates** — `updateGraphLive()` updates node
     fill colors on every render tick without rebuilding the graph
   - **Node click navigation** — click a graph node to jump to the Steps tab
@@ -187,14 +193,6 @@ attachment`.
 
 ### Removed
 
-- **Non-functional direction toggle button** — daghtml v0.31.1's `initDAGGraph`
-  has no layout direction parameter. SVG coordinate transposition was evaluated
-  and rejected as fragile (breaks text orientation, node aspect ratios, edge
-  bezier curves). Direction support belongs in the daghtml SDK's layout algorithm.
-- **Broken `zoomGraph()` and `fitGraphToView()` functions** — these manipulated
-  a `<g>` transform, but daghtml uses viewBox-based pan/zoom internally. The
-  custom handlers conflicted with daghtml's native handlers (double-zoom bug)
-  and the fit handler's clone-and-replace destroyed daghtml's listener.
 - **Tracked `example` binary** — 14MB compiled binary removed from git tracking.
   Now `.gitignore`d. Every build was modifying it, bloating the repo.
 - **`testdata/golden/report.html`** — retired the stale golden file that
