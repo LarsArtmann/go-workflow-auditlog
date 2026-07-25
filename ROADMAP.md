@@ -20,7 +20,7 @@ The long-term arc moves from "capture and export" toward **analyze and act**:
 1. **Capture** (done) — per-attempt events, DAG structure, sub-workflow traversal
 2. **Export** (done) — JSON, NDJSON (batch + real-time streaming), Mermaid, PlantUML, DOT, D2, 16 table formats, ASCII/HTML trees, interactive HTML dashboard
 3. **Analyze** (done) — wall-clock vs total vs critical-path metrics, diff/regression detection, peak concurrency, critical-path step chain
-4. **Monitor** (done) — real-time SSE dashboard (`live/` module): steps light up as they execute, DAG graph snaps into place on completion
+4. **Monitor** (done) — real-time SSE + WebSocket dashboard (`live/` module): steps light up as they execute, DAG graph available immediately via `CaptureDAG`
 5. **Act** (future) — OpenTelemetry bridge, alerting, replay UI
 
 ---
@@ -37,7 +37,8 @@ The long-term arc moves from "capture and export" toward **analyze and act**:
 - **Visualization** (`github.com/larsartmann/go-workflow-auditlog/viz`) —
   diagrams, tables, trees, HTML dashboard. Depends on core + go-output.
 - **Live** (`github.com/larsartmann/go-workflow-auditlog/live`) — real-time
-  SSE dashboard. Depends on core + viz + go-sse (private).
+  SSE + WebSocket dashboard. Depends on core + viz + go-sse v0.2.0 (public,
+  pinned).
 
 Consumers who only need JSON/NDJSON audit trails import the core module and pay
 zero go-output dependency cost. All modules share a `go.work` workspace in
@@ -80,20 +81,23 @@ existing observability stacks rather than requiring a separate dashboard.
 ### Real-Time Monitoring
 
 **Live dashboard shipped (2026-07-23).** The `live/` module provides a
-real-time HTTP dashboard with SSE streaming. Browser connects to `/api/events`
-→ receives snapshot → incremental event updates → complete notification. Steps
-light up as they execute. The DAG graph activates on `SignalComplete()` with
-the full Sugiyama-layout dependency structure.
+real-time HTTP dashboard with SSE streaming (plus a WebSocket transport at
+`/api/ws` with automatic SSE→WebSocket fallback). Browser connects to
+`/api/events` → receives snapshot → incremental event updates → complete
+notification. Steps light up as they execute.
 
-**Remaining direction**: The DAG graph only renders after execution completes
-(needs DAG structure from `Snapshot(w)`). Showing the graph DURING execution —
-nodes appearing as steps start, edges snapping into place — requires making the
-DAG structure available before `Do()`. This is the #1 gap for the live module.
+**DAG during execution — resolved.** `CaptureDAG(w)` (shipped 2026-07-24)
+pre-populates the full step DAG from the workflow definition BEFORE `Do(ctx)`,
+so the graph renders immediately on connect and nodes color in as steps run —
+no need to wait for `SignalComplete()`. Diff-based steps-table rendering
+(shipped 2026-07-25) updates only changed cells instead of rebuilding the
+table, eliminating flicker for 100+ step workflows.
 
-Other potential enhancements: WebSocket transport (alternative to SSE),
-multi-run support (multiple concurrent workflow dashboards), authentication,
-TLS/HTTPS, compression (gzip/brotli), client-side replay/playback, graceful
-drain on shutdown.
+**Remaining direction**: genuinely-open enhancements — multi-run support
+(multiple concurrent workflow dashboards), authentication, TLS/HTTPS,
+compression (gzip/brotli), client-side replay/playback, graceful drain on
+shutdown, and a `Transport` interface to deduplicate the parallel
+SSE/WebSocket implementations.
 
 ---
 

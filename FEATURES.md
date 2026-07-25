@@ -122,31 +122,36 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ### Live Real-Time Dashboard (`live/` module)
 
 - **SSE streaming dashboard** — real-time HTTP dashboard where steps light up as they execute, with incremental rendering via `requestAnimationFrame` batching
+- **WebSocket transport** — `/api/ws` endpoint as an alternative to SSE, with automatic SSE→WebSocket fallback after 2 connection failures (uses `gorilla/websocket` v1.5.3). Same snapshot→events→complete flow as SSE, encoded as JSON `{type, data}` envelopes.
 - **Hub** — SSE subscriber registry with non-blocking fan-out `OnEvent` broadcast; `SignalComplete()` notifies all clients when the workflow finishes
-- **Server** — HTTP server with SSE handler (`/api/events`), `/api/report`, `/api/health`, `/api/export/ndjson`, `/api/export/html` (Content-Disposition attachment downloads), dashboard serving, `ServeHTTP` for `http.Handler` integration
+- **Server** — HTTP server with SSE handler (`/api/events`), WebSocket endpoint (`/api/ws`), `/api/report`, `/api/health`, `/api/export/ndjson`, `/api/export/html` (Content-Disposition attachment downloads), dashboard serving, `ServeHTTP` for `http.Handler` integration
 - **`live.New(config, serverConfig)`** — convenience constructor that wires `hub.OnEvent` as `Config.OnEvent`, returns `(*Server, *Auditor, error)`
 - **Configurable route prefix** — `Prefix` config field (default `/`) mounts all routes at a sub-path (e.g., `/workflow/`). Dual-route registration avoids ServeMux 307 redirects.
 - **CORS support** — `CORSAllowedOrigins` config field controls `Access-Control-Allow-Origin` on API endpoints. Empty (default) disables CORS (secure by default); set to `"*"` or a specific origin to enable. OPTIONS preflight handled automatically.
 - **Export endpoints** — `/api/export/ndjson` and `/api/export/html` serve downloadable artifacts with `Content-Disposition: attachment`
 - **Export buttons in dashboard UI** — JSON, NDJSON, and HTML download buttons in the header, URLs wired via `ROUTE_PREFIX`
 - **Live data flow** — browser connects to `/api/events` → receives `snapshot` event (current report + events + metadata + DAG) → incremental `event` messages as steps execute → `complete` event with final report + full DAG on `SignalComplete()`. DAG is available immediately via `CaptureDAG(w)` — no need to wait for execution.
-- **Live graph enhancements** — critical path auto-highlight on graph open (if path >1 step), retry count badges, node search/filter, fit-to-view, zoom controls, minimap for >20 nodes, direction toggle (TB/LR), incremental node color updates via `updateGraphLive()`
+- **Live graph enhancements** — critical path auto-highlight on graph open (if path >1 step), retry count badges, node search/filter, minimap for >20 nodes with real-time viewport tracking via `MutationObserver`, daghtml-native zoom/fit handlers, live duration labels on nodes, incremental node color updates via `updateGraphLive()`
 - **Live timeline** — Gantt-style timeline updates in real-time as step timing data arrives
 - **SSE heartbeat** — configurable keepalive interval (default 15s) prevents proxy timeouts
 - **Reconnection** — automatic reconnection with exponential backoff on SSE errors
 - **Demo pipeline** at `live/demo` (fetch → validate → transform → save → notify with retry) serving at `http://localhost:18080`
-- **Depends on `go-sse`** (`github.com/larsartmann/go-sse`, private, `replace` directive; will be removed once go-sse is public)
+- **Diff-based steps table rendering** — rows tracked by step name in a `stepRows` map; only changed cells (status, attempts, duration, error) are updated in-place via `updateStepRow()` instead of rebuilding `innerHTML` on every tick, eliminating flicker for 100+ step workflows
+- **Depends on `go-sse`** (`github.com/larsartmann/go-sse` v0.2.0, public, pinned in `live/go.mod`) for SSE wire-format primitives (`sse.Event`, `sse.WriteEvent`, `sse.ContentType`)
 
 ### Infrastructure
 
 - **Three Go modules**: core (`auditlog`), visualization (`viz`), live dashboard (`live`) — linked via `go.work` workspace
-- **go-output** dependency at v0.31.1 in `viz/go.mod` (includes D2/DOT quoting fix)
-- **go-error-family** at v0.7.0
-- **go-sse** at v0.0.0 (private, `replace` directive in `live/go.mod`)
+- **go-output** at v0.31.1 (root + graph/plantuml/d2/daghtml/tree/table/markup/delimited/serialization sub-modules) — includes D2/DOT quoting fix; resolved from published tags (no local `replace`)
+- **go-error-family** at v0.9.0
+- **go-sse** at v0.2.0 (public, pinned in `live/go.mod`)
+- **go-atomic-write** at v0.3.0 and **go-ndjson** at v0.0.1 (pinned in core `go.mod`)
+- **gorilla/websocket** v1.5.3 (live module, for `/api/ws`)
+- **go-branded-id** v0.3.2 (indirect, via go-output)
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
 - **govulncheck** in CI (golang/govulncheck-action)
 - **actionlint** in CI (workflow linting)
-- **Coverage**: core 95.6%, viz 91.7%, live 90.4%
+- **Coverage**: core 94.9%, viz 91.7%, live 90.3%
 - **flake.nix** devShell (Go 1.26.4, golangci-lint, govulncheck, actionlint, `d2` CLI; GOEXPERIMENT=jsonv2)
 - **flake-parts** + **treefmt-nix** for build automation (includes `d2-fmt`, `nixfmt`, `gofmt`)
 - **Pre-commit hook** (vet + lint + test)
@@ -157,7 +162,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns, 3-module architecture)
 - `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer, streaming section, screenshots
-- `CHANGELOG.md` — v0.7.0 tagged (table columns + diagram direction + CriticalPath/PeakConcurrencySteps + json/v2 + website); `[Unreleased]` covers streaming NDJSON, DAG viz enhancements, module split, live dashboard module
+- `CHANGELOG.md` — v0.7.0 tagged (table columns + diagram direction + CriticalPath/PeakConcurrencySteps + json/v2 + website); `[Unreleased]` covers streaming NDJSON, DAG viz enhancements, module split, live dashboard module, WebSocket transport, CSV/TSV export, CORS/prefix/export endpoints, diff-based rendering, dependency pinning
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
 - `example/main.go` — demos all export formats via `--export` flag (in `viz/` module)
 - `live/demo/main.go` — demos real-time SSE dashboard with retry pipeline
@@ -170,12 +175,13 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
 - **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + NDJSONStreamer throughput (100/1000/10000 events) + godoc examples
-- **~415 test functions** across 3 modules (core: 155; viz: 227; live: 33)
+- **445 test functions** across 3 modules (core: 162; viz: 229; live: 54), all passing with `-race`
 
 ---
 
 ## PLANNED (see TODO_LIST.md and ROADMAP.md)
 
-- OpenTelemetry span bridge
+- OpenTelemetry span bridge (defer until a consumer has an OTel stack)
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
-- Live SSE reconnection with heartbeat test
+- JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor)
+- `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md` exists)
