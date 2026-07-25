@@ -28,6 +28,13 @@ func (d DiffResult) HasChanges() bool {
 		len(d.StatusChanged) > 0 || d.DurationDelta != 0
 }
 
+// IsEmpty returns true when no differences were found.
+// This is the logical inverse of HasChanges, provided for parity with the
+// samber-do-auditlog twin API.
+func (d DiffResult) IsEmpty() bool {
+	return !d.HasChanges()
+}
+
 // Diff compares this report against another and returns the differences.
 // Useful for detecting regressions between workflow runs.
 //
