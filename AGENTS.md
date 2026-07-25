@@ -60,7 +60,7 @@ versions** (no local `use`/`replace` for them): `go-output` v0.31.1 + its sub-mo
 (`GOWORK=off`) builds work for all three modules because every dependency has a real,
 checksum-verified version in `go.sum`. **Note:** `go work sync` prints harmless
 `downloading ... go-output/testhelpers v0.0.0-00010101000000-000000000000` lines because the
-*published* `go-output@v0.31.1/go.mod` contains local `replace` directives (`=> ./testhelpers`)
+_published_ `go-output@v0.31.1/go.mod` contains local `replace` directives (`=> ./testhelpers`)
 that Go ignores when consuming it as a dependency — builds/tests are unaffected; this is a
 defect in go-output's release, not this repo.
 
