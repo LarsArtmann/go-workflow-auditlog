@@ -70,8 +70,7 @@ func TestDisabled_IsNoOp(t *testing.T) {
 func TestSingleStep_Success(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "my-step")
-	report := a.Report()
+	report := testhelpers.RunSingleSucceedWithReport(t, "my-step")
 	testhelpers.AssertReportValid(t, report)
 
 	testhelpers.AssertStepCount(t, report, 1)
@@ -362,8 +361,7 @@ func assertEventsRecorded(t *testing.T, a *auditlog.Auditor, want int) {
 func TestEventsByStep(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "query-step")
-	report := a.Report()
+	report := testhelpers.RunSingleSucceedWithReport(t, "query-step")
 
 	evts := report.EventsByStep("query-step")
 	if len(evts) < 2 {

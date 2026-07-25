@@ -110,9 +110,7 @@ func BenchmarkEventsCopy(b *testing.B) {
 		w.Add(flow.Step(testhelpers.NewSucceed(fmt.Sprintf("step-%d", j))))
 	}
 
-	a.Attach(w)
-	_ = w.Do(context.Background())
-	a.Snapshot(w)
+	testhelpers.RunWorkflow(b, a, w)
 
 	b.ResetTimer()
 

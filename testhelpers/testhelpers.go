@@ -191,6 +191,16 @@ func RunSingleSucceedWithBuffer(t *testing.T, name string) (*auditlog.Auditor, *
 	return a, buf
 }
 
+// RunSingleSucceedWithReport is the audit+report variant of RunSingleSucceed:
+// runs a single-succeed workflow and returns the assembled WorkflowReport.
+// Use this when the test only needs the report (no further auditor queries);
+// otherwise prefer RunSingleSucceed to keep the auditor handle.
+func RunSingleSucceedWithReport(t *testing.T, name string) auditlog.WorkflowReport {
+	t.Helper()
+
+	return RunSingleSucceed(t, name).Report()
+}
+
 // SingleSucceedExportPath is the shared fixture for every Export* test:
 // runs a single-succeed workflow with the given step name and returns the
 // auditor plus a t.TempDir-anchored output file path.
@@ -394,8 +404,9 @@ func (FailingWriter) Write([]byte) (int, error) {
 }
 
 // RunWorkflow attaches the auditor, runs the workflow, and snapshots state.
-func RunWorkflow(t *testing.T, a *auditlog.Auditor, w *flow.Workflow) {
-	t.Helper()
+// Accepts testing.TB so benchmarks can reuse the same setup.
+func RunWorkflow(tb testing.TB, a *auditlog.Auditor, w *flow.Workflow) {
+	tb.Helper()
 
 	a.Attach(w)
 	_ = w.Do(context.Background())
