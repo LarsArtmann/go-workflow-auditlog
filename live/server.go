@@ -63,9 +63,6 @@ type SnapshotProvider func(isComplete bool) (jsontext.Value, error)
 // CompleteProvider returns the final SSE complete payload as raw JSON.
 type CompleteProvider func() (jsontext.Value, error)
 
-// DashboardProvider returns the full HTML string for the dashboard page.
-type DashboardProvider func() string
-
 // HealthInfo provides dynamic health check data beyond the built-in
 // uptime, client count, and completion status.
 type HealthInfo struct {
