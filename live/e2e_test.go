@@ -10,6 +10,7 @@ import (
 	"time"
 
 	flow "github.com/Azure/go-workflow"
+	"github.com/gorilla/websocket"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	"github.com/larsartmann/go-workflow-auditlog/live"
 )
@@ -264,4 +265,113 @@ func TestServer_SSE_EndToEnd_FailingWorkflow(t *testing.T) {
 	if !foundError {
 		t.Error("no error field found in SSE events for failing step")
 	}
+}
+
+// TestServer_WebSocket_EndToEnd verifies WebSocket transport delivers the
+// same snapshot → events → complete flow as SSE.
+func TestServer_WebSocket_EndToEnd(t *testing.T) {
+	t.Parallel()
+
+	hub := live.NewHub()
+
+	auditor, err := auditlog.New(auditlog.Config{
+		WorkflowID: "ws-e2e-test",
+		Enabled:    true,
+		OnEvent:    hub.OnEvent,
+	})
+	if err != nil {
+		t.Fatalf("create auditor: %v", err)
+	}
+
+	server := live.NewServer(hub, auditor, live.Config{})
+
+	w := &flow.Workflow{}
+
+	fetch := &e2eStep{name: "ws-fetch", delay: 5 * time.Millisecond}
+
+	w.Add(flow.Step(fetch))
+
+	auditor.Attach(w)
+	auditor.CaptureDAG(w)
+
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	// Connect WebSocket client
+	wsURL := "ws" + strings.TrimPrefix(ts.URL, "http") + "/api/ws"
+
+	conn, _, err := websocket.DefaultDialer.DialContext(t.Context(), wsURL, nil)
+	if err != nil {
+		t.Fatalf("dial websocket: %v", err)
+	}
+
+	defer conn.Close()
+
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+
+	// Read snapshot
+	_, msg, err := conn.ReadMessage()
+	if err != nil {
+		t.Fatalf("read snapshot: %v", err)
+	}
+
+	var snapshot wsTestMessage
+	if err := json.Unmarshal(msg, &snapshot); err != nil {
+		t.Fatalf("unmarshal snapshot: %v", err)
+	}
+
+	if snapshot.Type != "snapshot" {
+		t.Errorf("expected snapshot type, got %q", snapshot.Type)
+	}
+
+	// Run the workflow
+	ctx := t.Context()
+
+	if runErr := w.Do(ctx); runErr != nil {
+		t.Fatalf("workflow Do failed: %v", runErr)
+	}
+
+	auditor.Snapshot(w)
+	time.Sleep(50 * time.Millisecond)
+	server.SignalComplete()
+
+	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+
+	// Read events until complete
+	var eventCount int
+
+	gotComplete := false
+
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+
+		var wsMsg wsTestMessage
+		if err := json.Unmarshal(msg, &wsMsg); err != nil {
+			continue
+		}
+
+		switch wsMsg.Type {
+		case "event":
+			eventCount++
+		case "complete":
+			gotComplete = true
+			goto done
+		}
+	}
+
+done:
+	if !gotComplete {
+		t.Error("did not receive complete via WebSocket")
+	}
+
+	if eventCount == 0 {
+		t.Error("no events received via WebSocket")
+	}
+}
+
+type wsTestMessage struct {
+	Type string `json:"type"`
 }
