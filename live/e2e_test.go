@@ -169,7 +169,8 @@ func TestServer_SSE_EndToEnd(t *testing.T) {
 
 	for _, data := range sseEvents {
 		var sseEvt auditlog.Event
-		if jsonErr := json.Unmarshal([]byte(data), &sseEvt); jsonErr != nil {
+		jsonErr := json.Unmarshal([]byte(data), &sseEvt)
+		if jsonErr != nil {
 			t.Errorf("unmarshal SSE event: %v (data: %s)", jsonErr, data[:min(100, len(data))])
 
 			continue
@@ -322,7 +323,8 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 	}
 
 	var snapshot wsTestMessage
-	if jsonErr := json.Unmarshal(msg, &snapshot); jsonErr != nil {
+	jsonErr := json.Unmarshal(msg, &snapshot)
+	if jsonErr != nil {
 		t.Fatalf("unmarshal snapshot: %v", jsonErr)
 	}
 
@@ -356,7 +358,8 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 		}
 
 		var wsMsg wsTestMessage
-		if jsonErr := json.Unmarshal(msg, &wsMsg); jsonErr != nil {
+		jsonErr := json.Unmarshal(msg, &wsMsg)
+		if jsonErr != nil {
 			continue
 		}
 
