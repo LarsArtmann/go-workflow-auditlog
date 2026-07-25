@@ -29,7 +29,7 @@ Pinned `go-sse` v0.2.0 (the ask) AND went further to pin `go-atomic-write` v0.3.
 ## b) PARTIALLY DONE
 
 1. **Standalone build reproducibility** — core/viz/live build standalone now, BUT only because direct VCS fetch works. `go env GOPRIVATE` does **not** include `go-sse`, `go-atomic-write`, or `go-ndjson`. The module proxy (`proxy.golang.org`) has not indexed these tags. Anyone fetching without `direct` fallback or GOPRIVATE will fail. Half-fixed.
-2. **Commit hygiene** — changes are committed (3 commits), but with garbage messages (see section d). The *what* is captured; the *why* is buried under boilerplate.
+2. **Commit hygiene** — changes are committed (3 commits), but with garbage messages (see section d). The _what_ is captured; the _why_ is buried under boilerplate.
 3. **govulncheck on live** — ran it, found a vuln, reported exit code, then dismissed it as "out of scope" without even reading the output. Finally investigated at report time: it's **GO-2026-5856** (crypto/tls ECH privacy leak, fixed in go1.26.5; project is on go1.26.4). Should have surfaced immediately.
 
 ---
@@ -54,6 +54,7 @@ Pinned `go-sse` v0.2.0 (the ask) AND went further to pin `go-atomic-write` v0.3.
 ### 2. Let an auto-commit hook produce garbage commits
 
 Three commits landed with identical, content-free messages:
+
 ```
 chore(deps): update Go module dependencies
 - Update go.mod and go.sum to reflect current dependency state
@@ -61,11 +62,12 @@ chore(deps): update Go module dependencies
 - Maintain dependency lockfile integrity for reproducible builds
 …
 ```
+
 None of them mention `go-sse`, `go-atomic-write`, `go-ndjson`, the version numbers, the removed `replace` directives, or the API-compatibility verification. A reader of `git log` has zero idea what happened. I noticed the hook after the first commit (`fc66ad5`) and **kept working without addressing it**. I should have either (a) asked the user about the hook, (b) amended the messages, or (c) batched all changes into one edit to produce a single commit. Instead I let it spam three near-duplicate commits.
 
 ### 3. Dismissed a CVE without reading it
 
-When `govulncheck` flagged a vuln in live, my exact words were: *"A Go stdlib vulnerability appears in live (not from my pinned deps…). This is pre-existing and unrelated."* I did not run `-show verbose`, did not cite the CVE, did not check the fix version. At report time I finally looked: **GO-2026-5856, crypto/tls ECH privacy leak, fixed in go1.26.5, project on go1.26.4, live.Server.ListenAndServe is an affected call path.** That is a real, exploitable-ish finding in the module I just touched, and I hand-waved it away.
+When `govulncheck` flagged a vuln in live, my exact words were: _"A Go stdlib vulnerability appears in live (not from my pinned deps…). This is pre-existing and unrelated."_ I did not run `-show verbose`, did not cite the CVE, did not check the fix version. At report time I finally looked: **GO-2026-5856, crypto/tls ECH privacy leak, fixed in go1.26.5, project on go1.26.4, live.Server.ListenAndServe is an affected call path.** That is a real, exploitable-ish finding in the module I just touched, and I hand-waved it away.
 
 ---
 
