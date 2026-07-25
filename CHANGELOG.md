@@ -187,6 +187,16 @@ attachment`.
 
 ### Removed
 
+- **Non-functional direction toggle button** — daghtml v0.31.1's `initDAGGraph`
+  has no layout direction parameter. SVG coordinate transposition was evaluated
+  and rejected as fragile (breaks text orientation, node aspect ratios, edge
+  bezier curves). Direction support belongs in the daghtml SDK's layout algorithm.
+- **Broken `zoomGraph()` and `fitGraphToView()` functions** — these manipulated
+  a `<g>` transform, but daghtml uses viewBox-based pan/zoom internally. The
+  custom handlers conflicted with daghtml's native handlers (double-zoom bug)
+  and the fit handler's clone-and-replace destroyed daghtml's listener.
+- **Tracked `example` binary** — 14MB compiled binary removed from git tracking.
+  Now `.gitignore`d. Every build was modifying it, bloating the repo.
 - **`testdata/golden/report.html`** — retired the stale golden file that
   required constant regeneration. The test now validates structure and content
   without a committed reference file.
