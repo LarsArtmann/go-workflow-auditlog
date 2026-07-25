@@ -20,6 +20,7 @@ This session was a **repair and completion** round. The previous session had cla
 **Previous state**: `renderStepsTable()` rebuilt the entire `<tbody>` via `innerHTML = visible.join("")` on every render tick, causing flicker for 100+ step workflows. This was claimed done but never implemented.
 
 **This session**: Complete rewrite of the steps table rendering pipeline:
+
 - **`stepRows` map** tracks rendered rows by step name (`Map<string, {tr, key}>`)
 - **`stepStateKey()`** computes a compact volatile-state key (`status|attempts|duration|error|retry|maxAttempts`) for O(1) change detection
 - **`buildStepCellsHTML()`** generates only the `<td>` cells (not the `<tr>` wrapper) — one-time cost per new step
@@ -33,12 +34,14 @@ This session was a **repair and completion** round. The previous session had cla
 ### 2. `enhanceGraph()` State Mutation (FIXED)
 
 **Previous state**: `enhanceGraph()` mutated `state.report` as a fallback hack:
+
 ```js
 state.report = state.report || {};
-state.report.steps = fallbackSteps;  // MUTATION!
+state.report.steps = fallbackSteps; // MUTATION!
 ```
 
 **This session**: Replaced with a local variable:
+
 ```js
 var stepsForGraph;
 if (state.report && state.report.steps && state.report.steps.length) {
@@ -53,16 +56,19 @@ if (state.report && state.report.steps && state.report.steps.length) {
 ### 3. Broken Graph Handlers Removed (FIXED)
 
 **Previous state**: Three broken/conflicting handlers:
+
 - `zoomGraph(factor)` — manipulated a `<g>` transform attribute, but daghtml uses viewBox-based zoom internally. The custom handler conflicted with daghtml's native zoom, causing a **double-zoom bug**.
 - `fitGraphToView(container)` — reset viewBox AND `<g>` transform, but daghtml's internal zoom state was never reset. The fit handler also clone-replaced the `.graph-fit` button, **destroying daghtml's native click listener**.
 - Direction toggle (`graphDirection` variable + button) — toggled a variable and re-rendered, but `initDAGGraph()` was called WITHOUT passing direction (daghtml has no direction parameter at all).
 
 **Research performed**: Read the daghtml SDK source (`go-output/daghtml@v0.31.1/graph.js`). Key findings:
+
 - `initDAGGraph(containerId, dataScriptId)` takes exactly **2 parameters** — no direction/config support.
 - daghtml **already wires** `.graph-zoom-in`, `.graph-zoom-out`, `.graph-fit` buttons internally via `container.querySelector()` + `addEventListener("click", ...)`.
 - daghtml manages all pan/zoom via a private `vb = {x, y, w, h}` object and `svg.setAttribute("viewBox", ...)`.
 
 **This session**:
+
 - Removed `zoomGraph()`, `fitGraphToView()`, `graphDirection` variable, direction toggle event handler, and the clone-replace fit button logic.
 - Removed the direction toggle `<button>` from the HTML template (`dashboard.go`).
 - Let daghtml's native handlers work unimpeded.
@@ -74,6 +80,7 @@ if (state.report && state.report.steps && state.report.steps.length) {
 **Previous state**: Minimap cloned the SVG but the viewport indicator rectangle was never positioned or updated. No synchronization between main graph pan/zoom and minimap.
 
 **This session**:
+
 - Capture full graph bounds from the main SVG's initial `viewBox.baseVal` (before any pan/zoom mutations).
 - Lock the clone's viewBox to the full graph bounds so it always shows everything.
 - `syncViewport()` reads `originalSvg.viewBox.baseVal` and positions the viewport `<rect>` accordingly.
@@ -87,6 +94,7 @@ if (state.report && state.report.steps && state.report.steps.length) {
 **Previous state**: Duration labels existed in the DAG data from `viz.buildDAGHTML()` (line 48-50 of `daghtml_adapter.go`), but only appeared at completion because `updateGraphLive()` only updated colors, not text.
 
 **This session**:
+
 - Added `humanizeMs(ms)` JS helper mirroring the Go `humanizeMs()` in `viz/daghtml_adapter.go` (compact format: `<1ms`, `48ms`, `2.3s`).
 - Extended `updateGraphLive()` to update node `<text>` elements with status icon + step name + duration (matching the Go `buildDAGHTML` label format).
 
@@ -97,6 +105,7 @@ if (state.report && state.report.steps && state.report.steps.length) {
 **File**: `live/e2e_test.go` — `TestServer_SSE_EndToEnd`
 
 Runs a real 3-step linear workflow (`fetch → validate → save`, each with 5ms delay) through the live server, connects an SSE client before `w.Do(ctx)`, and verifies:
+
 - All expected step names appear in SSE events
 - SSE event sequences match the auditor's internal event stream
 - Event types match (`attempt_start` / `attempt_end`)
@@ -123,6 +132,7 @@ Also includes `TestServer_SSE_EndToEnd_FailingWorkflow` — verifies error field
 **File**: `live/dashboardjs_test.go` — expanded from 5 to 8 tests
 
 New tests:
+
 - `TestDashboardJS_WebSocketFallback` — validates WebSocket fallback logic exists (`new WebSocket`, `sseFailCount`, all 3 message type handlers, ws/wss URL construction)
 - `TestDashboardJS_DiffBasedRendering` — validates diff infrastructure (`stepRows`, `stepStateKey`, `prevTr.after`, and explicitly checks `stepsTbody.innerHTML = visible.join` does NOT appear)
 - `TestDashboardJS_GraphEnhancements` — validates broken code is gone (no `graphDirection`, `zoomGraph`, `fitGraphToView`), confirms `MutationObserver` and `humanizeMs` exist
@@ -134,6 +144,7 @@ Updated `TestDashboardJS_StructuralIntegrity` — function list updated to match
 **File**: `live/server_internal_test.go` — expanded from 5 to 11 tests
 
 New tests:
+
 - `TestServer_NilNDJSONWriter` — verifies 503 for nil provider
 - `TestServer_NilHTMLWriter` — verifies 503 for nil provider
 - `TestServer_SendWSCompleteNilProvider` — no panic on nil provider
@@ -212,6 +223,7 @@ e881b87 docs(readme): update comprehensive project documentation across all docu
 ```
 
 **Problems**:
+
 1. Messages are generic garbage that don't match the project's conventional commit style.
 2. Each commit contains an intermediate/incomplete state (e.g., commit `2db834a` added WebSocket but before tests were written).
 3. Commit `388ec6d` says "add project foundation files" but actually contains the `.gitignore` change + binary removal.
@@ -224,6 +236,7 @@ e881b87 docs(readme): update comprehensive project documentation across all docu
 ### Linter Conflicts Cost Significant Time
 
 The `.golangci.yml` has `nlreturn` enabled (requires blank line before `return`) AND `wsl_v5` enabled (which sometimes flags the same blank lines as "unnecessary whitespace"). These two linters **directly conflict** on certain code patterns. I spent 4 extra lint iterations resolving:
+
 - `nlreturn` wants blank line before return → add it → `wsl_v5` flags it as unnecessary → remove it → `nlreturn` flags it again.
 
 **Resolution**: Used `//nolint:nlreturn` with justification comment, then eventually moved to a package-level `//nolint:nlreturn,exhaustruct` directive on the function. This is ugly but necessary given the conflicting linter configuration.
@@ -345,6 +358,7 @@ The `.golangci.yml` has `nlreturn` enabled (requires blank line before `return`)
 The hook committed **15 times** during this session (and 5+ times in the previous session) with garbage AI-generated messages. Each commit contains an intermediate/incomplete state. The 15 commits need squashing before pushing.
 
 **Options**:
+
 - **(a)** Remove the hook entirely — commit manually at logical checkpoints.
 - **(b)** Keep the hook but configure it to only format (run `gofmt`/`golines`), not commit.
 - **(c)** Keep the hook but configure it to `--amend` instead of creating new commits.
@@ -354,11 +368,13 @@ The hook committed **15 times** during this session (and 5+ times in the previou
 ### Q2: Should the 15 auto-commits be squashed before pushing?
 
 Currently 15 commits ahead of origin, all from this session, all with garbage messages. They should logically be 2-3 commits:
+
 1. `fix(live): repair broken dashboard features (diff rendering, graph handlers, minimap, state mutation)`
 2. `feat(live): add WebSocket transport with SSE fallback`
 3. `test(live): add E2E integration tests and expand coverage`
 
 **Options**:
+
 - **(a)** Squash into 2-3 well-formed commits (requires `git rebase -i`, which AGENTS.md bans — but this is a special case).
 - **(b)** Leave as-is (15 garbage commits permanently in history).
 - **(c)** Create a single new commit with everything, then reset to it (requires `git reset`).
@@ -370,6 +386,7 @@ Currently 15 commits ahead of origin, all from this session, all with garbage me
 `gorilla/websocket` is in maintenance mode (officially since 2022, though still widely used and stable). `nhooyr.io/websocket` (now `coder.com/websocket`) is the modern alternative with context support, a simpler API, and active maintenance.
 
 **Options**:
+
 - **(a)** Keep `gorilla/websocket` (stable, not banned, 25k+ stars, works fine).
 - **(b)** Switch to `nhooyr.io/websocket` (modern, context-native, smaller API surface).
 
@@ -379,34 +396,34 @@ Currently 15 commits ahead of origin, all from this session, all with garbage me
 
 ## Test & Quality Summary
 
-| Module    | Tests   | Coverage | Lint Issues | Status              |
-| --------- | ------- | -------- | ----------- | ------------------- |
-| Core      | 156     | ~95%     | 0           | Clean               |
-| Viz       | 213     | ~92%     | 0           | Clean               |
-| Live      | 54      | 90.3%    | 0           | Clean               |
-| **Total** | **423** | ~93%     | **0**       | **All pass -race**  |
+| Module    | Tests   | Coverage | Lint Issues | Status             |
+| --------- | ------- | -------- | ----------- | ------------------ |
+| Core      | 156     | ~95%     | 0           | Clean              |
+| Viz       | 213     | ~92%     | 0           | Clean              |
+| Live      | 54      | 90.3%    | 0           | Clean              |
+| **Total** | **423** | ~93%     | **0**       | **All pass -race** |
 
 All tests pass with `-race`. `go vet` clean on all 3 modules. `golangci-lint` 0 issues on all 3 modules.
 
 ### Files Changed This Session (16 files, +1148 / -264 lines)
 
-| File                          | Change                                                     |
-| ----------------------------- | ---------------------------------------------------------- |
-| `.gitignore`                  | Added `/example`                                           |
-| `.golangci.yml`               | Added `gorilla/websocket` to depguard allow list           |
-| `AGENTS.md`                   | Updated source files, test counts, dashboard.js description|
-| `CHANGELOG.md`                | Added/Changed/Removed sections for all session work        |
-| `README.md`                   | Test count updated (423, ~95%)                             |
-| `TODO_LIST.md`                | Rewritten (2 remaining items)                              |
-| `example`                     | Removed from git tracking (14MB binary)                    |
-| `live/dashboard.go`           | Removed direction toggle button from HTML template         |
-| `live/dashboard.js`           | Major rewrite (diff-based rendering, WS fallback, graph fixes) |
-| `live/dashboardjs_test.go`    | Expanded to 8 tests (WS fallback, diff rendering, graph)   |
-| `live/e2e_test.go`            | NEW: 3 E2E tests (SSE, failing, WebSocket)                 |
-| `live/go.mod` / `live/go.sum` | Added `gorilla/websocket` v1.5.3                           |
-| `live/server.go`              | Added `/api/ws` route registration                         |
-| `live/server_internal_test.go`| Expanded to 11 tests (nil providers, prefix, health)       |
-| `live/websocket.go`           | NEW: WebSocket handler (96 lines)                          |
+| File                           | Change                                                         |
+| ------------------------------ | -------------------------------------------------------------- |
+| `.gitignore`                   | Added `/example`                                               |
+| `.golangci.yml`                | Added `gorilla/websocket` to depguard allow list               |
+| `AGENTS.md`                    | Updated source files, test counts, dashboard.js description    |
+| `CHANGELOG.md`                 | Added/Changed/Removed sections for all session work            |
+| `README.md`                    | Test count updated (423, ~95%)                                 |
+| `TODO_LIST.md`                 | Rewritten (2 remaining items)                                  |
+| `example`                      | Removed from git tracking (14MB binary)                        |
+| `live/dashboard.go`            | Removed direction toggle button from HTML template             |
+| `live/dashboard.js`            | Major rewrite (diff-based rendering, WS fallback, graph fixes) |
+| `live/dashboardjs_test.go`     | Expanded to 8 tests (WS fallback, diff rendering, graph)       |
+| `live/e2e_test.go`             | NEW: 3 E2E tests (SSE, failing, WebSocket)                     |
+| `live/go.mod` / `live/go.sum`  | Added `gorilla/websocket` v1.5.3                               |
+| `live/server.go`               | Added `/api/ws` route registration                             |
+| `live/server_internal_test.go` | Expanded to 11 tests (nil providers, prefix, health)           |
+| `live/websocket.go`            | NEW: WebSocket handler (96 lines)                              |
 
 ### Commands That Worked
 
