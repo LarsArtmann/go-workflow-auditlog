@@ -5,6 +5,17 @@
 **Branch**: master (21 commits ahead of origin)
 **Pre-commit hook**: Auto-committed several batches during the session (commits `44d8dc8` through `b5560fb`)
 
+> **Update 2026-07-25 (round-2 session, commits `388ec6d`–`7d2edf3`):** the four
+> §b "PARTIALLY DONE / CLAIMED DONE, NOT IMPLEMENTED" items were all resolved —
+> diff-based steps-table rendering shipped (`stepRows`/`stepStateKey`/
+> `updateStepRow`), the broken direction-toggle / custom zoom / fit-to-view
+> handlers were *removed* in favour of daghtml-native handlers, and the minimap
+> gained real viewport tracking via `MutationObserver`. The §c "NOT STARTED"
+> items also shipped: SSE end-to-end test, WebSocket transport (`/api/ws` with
+> SSE→WS fallback), dashboard export buttons, and live graph duration labels.
+> The §e Critical items are annotated inline below; the 14 MB tracked `example`
+> binary is gone. Remaining open items live in `TODO_LIST.md`.
+
 ---
 
 ## a) FULLY DONE
@@ -139,9 +150,13 @@
 ### Critical
 
 1. **Remove the tracked `example` binary** — 14MB binary tracked in git since the initial commit. Should be `.gitignore`d and `git rm`'d. Every build modifies it, bloating the repo.
+   **DONE:** removed in round-2 (commit `388ec6d`, now `.gitignore`d);
 2. **Implement actual steps table diff rendering** — The #1 user-visible issue (flicker on 100+ steps) remains unfixed. Approach: track rendered rows by step name in a Map, only update changed cells, append/remove rows incrementally instead of `innerHTML` rebuild.
+   **DONE:** shipped in round-2 (`stepRows` map + `stepStateKey()` + `updateStepRow()`, commits `388ec6d`–`7d2edf3`);
 3. **Fix the direction toggle** — Check if `initDAGGraph` accepts a direction/rankdir parameter. If not, pass direction to the Go side and have `viz.BuildDAGHTML` produce a direction-aware DAG, or post-process the SVG to swap x/y coordinates.
+   **REJECTED:** daghtml's `initDAGGraph` has no direction param; the toggle was removed in round-2 (SVG transposition rejected as fragile);
 4. **Fix the `enhanceGraph` state mutation** — Don't mutate `state.report`. Build a local `stepsForGraph` variable that merges report steps with live step data.
+   **DONE:** fixed in round-2 (local `stepsForGraph` variable, no `state.report` mutation);
 
 ### Important
 

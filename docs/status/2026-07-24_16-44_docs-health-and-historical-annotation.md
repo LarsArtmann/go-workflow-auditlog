@@ -5,6 +5,16 @@
 **Baseline**: 17 historical files (15 .md + 2 .html), 4 living docs, build green
 **After**: 17 historical files annotated, 4 living docs rebuilt, build green, 6 auto-commits by pre-commit hook
 
+> **Update 2026-07-25:** the §d "FACTUALLY WRONG" finding is resolved — the
+> go-output v0.31.1 tags ARE published (`git ls-remote` confirms all sub-module
+> tags) and `viz/go.mod` now resolves go-output at v0.31.1 from published tags,
+> so the "viz/go.mod bump" gap called out here is closed. The §c "NOT STARTED"
+> doc gaps were the longest-running debt: `STABILITY.md` still contradicted the
+> code (go-error-family listed as v0.7.0 vs actual v0.9.0; CORS described the
+> old `"*"`/`"off"` default) until corrected on 2026-07-25; the test-count
+> drift in `AGENTS.md` (said 423, actual 445) was also fixed then. The go-output
+> workspace decoupling landed separately (report `2026-07-25_05-38`).
+
 ---
 
 ## a) FULLY DONE

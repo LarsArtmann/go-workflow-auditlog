@@ -4,6 +4,16 @@
 **Session goal**: Execute the action items from `2026-07-24_23-09_cross-project-learning-from-samber-do-auditlog.md`  
 **Outcome**: 10 of 13 planned tasks completed, all tests green, all lint clean — but several bugs and gaps remain that the self-review caught
 
+> **Update 2026-07-25 (this session):** the two highest-impact §D fuckups are
+> now closed. The dead `DashboardProvider` type (§D.1/§B, "the type is still
+> there") was removed from `live/server.go` — verified dead (only the
+> definition existed), so the `CHANGELOG.md` "Removed dead DashboardProvider
+> type" claim is finally true. `STABILITY.md` (§D.4) was corrected:
+> go-error-family bumped v0.7.0 → v0.9.0 and the CORS line rewritten to
+> secure-by-default (empty = disabled). Still open from §C: the live module is
+> not yet in `flake.nix #check` and the Go toolchain is still 1.26.4 (CVE
+> GO-2026-5856) — both now tracked in `TODO_LIST.md`.
+
 ---
 
 ## A) FULLY DONE

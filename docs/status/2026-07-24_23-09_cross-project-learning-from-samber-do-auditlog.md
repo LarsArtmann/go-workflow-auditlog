@@ -4,6 +4,14 @@
 **Session goal**: Learn from `samber-do-auditlog` and apply improvements to `go-workflow-auditlog`  
 **Outcome**: 5 features ported, all tests green, but significant gaps remain
 
+> **Update 2026-07-25:** the §E "Immediate" action items shipped in the
+> follow-up session (report `2026-07-25_00-08`): export buttons added to the
+> dashboard UI, CORS redesigned to secure-by-default (empty = disabled),
+> `golangci-lint` clean across all 3 modules, and FEATURES/README/CHANGELOG
+> updated. The §C "NOT STARTED" strategic items (JSON Schema generation,
+> `MigrateReport()`, CLI tool, shared design tokens) remain unreleased — they
+> are tracked as PLANNED in `FEATURES.md` and raw ideas in `ROADMAP.md`.
+
 ---
 
 ## A) FULLY DONE
