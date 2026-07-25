@@ -2,6 +2,9 @@ package live
 
 import (
 	"context"
+	"encoding/json/jsontext"
+	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,6 +13,8 @@ import (
 
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
+
+var errProviderFailure = errors.New("provider failure")
 
 func TestServer_NilReportProvider(t *testing.T) {
 	t.Parallel()
@@ -228,5 +233,295 @@ func TestServer_HandleHealthWithProvider(t *testing.T) {
 	body := rec.Body.String()
 	if !strings.Contains(body, "42") {
 		t.Errorf("health response should contain events count 42: %s", body)
+	}
+}
+
+// --- Provider / write-failure coverage ---
+
+// failingFlusher is an http.ResponseWriter + http.Flusher whose Write always
+// fails. Used to exercise SSE write-error branches.
+type failingFlusher struct {
+	header http.Header
+}
+
+func (f *failingFlusher) Write([]byte) (int, error) { return 0, errProviderFailure }
+func (f *failingFlusher) Header() http.Header {
+	if f.header == nil {
+		f.header = http.Header{}
+	}
+
+	return f.header
+}
+
+func (f *failingFlusher) WriteHeader(int) {}
+func (f *failingFlusher) Flush()          {}
+
+// failAfterNFlusher succeeds for the first n writes then fails every
+// subsequent Write. Lets a snapshot fully flush before a heartbeat write fails.
+type failAfterNFlusher struct {
+	n      int
+	header http.Header
+}
+
+func (f *failAfterNFlusher) Write(p []byte) (int, error) {
+	if f.n <= 0 {
+		return 0, errProviderFailure
+	}
+
+	f.n--
+
+	return len(p), nil
+}
+
+func (f *failAfterNFlusher) Header() http.Header {
+	if f.header == nil {
+		f.header = http.Header{}
+	}
+
+	return f.header
+}
+
+func (f *failAfterNFlusher) WriteHeader(int) {}
+func (f *failAfterNFlusher) Flush()          {}
+
+// nonFlusherWriter wraps a ResponseRecorder but hides its Flush method so the
+// SSE handler sees a writer that does not support streaming.
+type nonFlusherWriter struct {
+	http.ResponseWriter
+}
+
+func TestServer_HandleSSE_StreamingNotSupported(t *testing.T) {
+	t.Parallel()
+
+	srv := &Server{hub: NewHub()}
+
+	ctx := t.Context()
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/events", nil)
+	rec := httptest.NewRecorder()
+
+	srv.handleSSE(nonFlusherWriter{rec}, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("expected 500 when writer is not a Flusher, got %d", rec.Code)
+	}
+
+	if !strings.Contains(rec.Body.String(), "streaming not supported") {
+		t.Errorf("expected streaming-not-supported message, got: %s", rec.Body.String())
+	}
+}
+
+func TestServer_HandleReportProviderError(t *testing.T) {
+	t.Parallel()
+
+	srv := &Server{
+		hub:            NewHub(),
+		mux:            http.NewServeMux(),
+		reportProvider: func() ([]byte, error) { return nil, errProviderFailure },
+	}
+
+	ctx := t.Context()
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/report", nil)
+	rec := httptest.NewRecorder()
+
+	srv.handleReport(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("expected 500 for failing reportProvider, got %d", rec.Code)
+	}
+
+	if !strings.Contains(rec.Body.String(), "generate report") {
+		t.Errorf("expected generate-report error message, got: %s", rec.Body.String())
+	}
+}
+
+func TestServer_HandleExportNDJSONWriterError(t *testing.T) {
+	t.Parallel()
+
+	srv := &Server{
+		hub:           NewHub(),
+		mux:           http.NewServeMux(),
+		ndjsonWriter:  func(io.Writer) error { return errProviderFailure },
+	}
+
+	ctx := t.Context()
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/export/ndjson", nil)
+	rec := httptest.NewRecorder()
+
+	srv.handleExportNDJSON(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("expected 500 for failing ndjsonWriter, got %d", rec.Code)
+	}
+}
+
+func TestServer_HandleExportHTMLWriterError(t *testing.T) {
+	t.Parallel()
+
+	srv := &Server{
+		hub:        NewHub(),
+		mux:        http.NewServeMux(),
+		htmlWriter: func(io.Writer) error { return errProviderFailure },
+	}
+
+	ctx := t.Context()
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/export/html", nil)
+	rec := httptest.NewRecorder()
+
+	srv.handleExportHTML(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Errorf("expected 500 for failing htmlWriter, got %d", rec.Code)
+	}
+}
+
+func TestServer_SendSnapshotProviderError(t *testing.T) {
+	t.Parallel()
+
+	srv := &Server{
+		hub: NewHub(),
+		snapshotProvider: func(bool) (jsontext.Value, error) {
+			return nil, errProviderFailure
+		},
+	}
+
+	rec := httptest.NewRecorder()
+
+	err := srv.sendSnapshot(rec, rec)
+	if err == nil {
+		t.Fatal("expected error from failing snapshotProvider")
+	}
+
+	if !strings.Contains(err.Error(), "build snapshot") {
+		t.Errorf("expected build-snapshot error wrap, got: %v", err)
+	}
+}
+
+func TestServer_SendCompleteProviderError(t *testing.T) {
+	t.Parallel()
+
+	srv := &Server{
+		hub: NewHub(),
+		completeProvider: func() (jsontext.Value, error) {
+			return nil, errProviderFailure
+		},
+	}
+
+	rec := httptest.NewRecorder()
+
+	// Must not panic and must return without writing a complete event.
+	srv.sendComplete(rec, rec)
+
+	if rec.Body.Len() != 0 {
+		t.Errorf("expected empty body when completeProvider errors, got: %s", rec.Body.String())
+	}
+}
+
+// TestServer_HandleSSE_SnapshotWriteFailure drives handleSSE with a writer
+// whose Write always fails, so sendSnapshot's WriteEvent errors and the
+// handler returns immediately.
+func TestServer_HandleSSE_SnapshotWriteFailure(t *testing.T) {
+	t.Parallel()
+
+	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	srv := NewServer(NewHub(), auditor, Config{})
+
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/events", nil)
+
+	done := make(chan struct{})
+
+	go func() {
+		srv.handleSSE(&failingFlusher{}, req)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		cancel()
+		t.Fatal("handleSSE did not return after snapshot write failure")
+	}
+}
+
+// TestServer_HandleSSE_HeartbeatWriteFailure lets the snapshot flush, then the
+// next heartbeat write fails and the handler returns.
+func TestServer_HandleSSE_HeartbeatWriteFailure(t *testing.T) {
+	t.Parallel()
+
+	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	srv := NewServer(NewHub(), auditor, Config{HeartbeatInterval: time.Millisecond})
+
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/events", nil)
+
+	done := make(chan struct{})
+
+	go func() {
+		// Allow the snapshot to flush, then fail on a subsequent heartbeat.
+		srv.handleSSE(&failAfterNFlusher{n: 8}, req)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		cancel()
+		t.Fatal("handleSSE did not return after heartbeat write failure")
+	}
+}
+
+// TestServer_HandleSSE_EventWriteFailure disables the snapshot (nil provider)
+// and heartbeat, injects an event, and verifies the handler returns when the
+// event WriteEvent fails.
+func TestServer_HandleSSE_EventWriteFailure(t *testing.T) {
+	t.Parallel()
+
+	srv := &Server{
+		hub:    NewHub(),
+		mux:    http.NewServeMux(),
+		config: Config{HeartbeatInterval: time.Hour}, // disable heartbeat
+		// snapshotProvider nil -> sendSnapshot returns nil immediately
+	}
+
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/events", nil)
+
+	done := make(chan struct{})
+
+	go func() {
+		srv.handleSSE(&failingFlusher{}, req)
+		close(done)
+	}()
+
+	// Give the handler time to subscribe before broadcasting, so the event
+	// lands in the subscriber's buffer.
+	time.Sleep(20 * time.Millisecond)
+
+	srv.hub.OnEvent(auditlog.Event{
+		Sequence:  1,
+		StepRef:   auditlog.StepRef{Name: "ev-write-fail"},
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+	})
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		cancel()
+		t.Fatal("handleSSE did not return after event write failure")
 	}
 }
