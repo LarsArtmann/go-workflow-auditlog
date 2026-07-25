@@ -87,7 +87,6 @@ linters:
     - nilerr
     - nilnesserr
     - nilnil
-    - nlreturn
     - noctx
     - noinlineerr
     - nolintlint
@@ -272,7 +271,6 @@ linters:
           - wrapcheck
           - gosec
           - funlen
-          - nlreturn
           - noinlineerr
           - unparam
           - wsl_v5

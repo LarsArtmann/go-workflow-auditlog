@@ -22,7 +22,7 @@ type wsMessage struct {
 // handleWebSocket upgrades to WebSocket and streams events, mirroring
 // the SSE handler. Used as a fallback for environments that block SSE.
 //
-//nolint:nlreturn,exhaustruct // codebase style + optional upgrader fields
+//nolint:exhaustruct // optional upgrader fields
 func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(_ *http.Request) bool { return true },
