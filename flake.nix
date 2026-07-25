@@ -98,6 +98,18 @@
               echo "==> govulncheck (viz)"
               (cd viz && GOWORK=off govulncheck ./...)
 
+              echo "==> go vet (live standalone)"
+              (cd live && go vet ./...)
+
+              echo "==> go test -race (live standalone)"
+              (cd live && GOWORK=off go test -race -count=1 ./...)
+
+              echo "==> golangci-lint (live)"
+              (cd live && golangci-lint run --timeout=10m ./...)
+
+              echo "==> govulncheck (live)"
+              (cd live && GOWORK=off govulncheck ./...)
+
               echo "All checks passed."
             '';
           };
