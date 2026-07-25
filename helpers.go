@@ -77,7 +77,7 @@ func (r WorkflowReport) NameCollisions() []string {
 // with fsync durability and cross-platform atomic rename. Errors are wrapped
 // with ErrExportWriteFailed for errors.Is compatibility.
 func WriteToFile(path string, fn func(io.Writer) error) error {
-	err := atomicwrite.WriteFunc(path, fn, atomicwrite.Fingerprint{})
+	err := atomicwrite.WriteFunc(path, fn)
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrExportWriteFailed, err)
 	}
