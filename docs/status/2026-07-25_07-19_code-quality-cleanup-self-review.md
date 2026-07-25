@@ -13,6 +13,7 @@
 **Before**: Only the flush-error path (line 57) was wrapped with `ErrExportWriteFailed`. Header and step-row write errors returned bare `fmt.Errorf("write header: %w", err)`.
 
 **After**: All three branches now satisfy `errors.Is(err, ErrExportWriteFailed)`:
+
 ```go
 return fmt.Errorf("%w: write header: %w", ErrExportWriteFailed, err)    // line 43
 return fmt.Errorf("%w: write step %q: %w", ErrExportWriteFailed, ...)   // line 49
@@ -29,7 +30,8 @@ return fmt.Errorf("%w: flush delimited writer: %w", ErrExportWriteFailed, err) /
 
 **Before**: `WriteCSV` doc comment said "Dependencies and dependents are semicolon-separated step names." — no warning about the collision.
 
-**After**: 
+**After**:
+
 ```go
 // Dependencies and dependents are rendered as semicolon-separated step names.
 // Names containing ';' cannot be distinguished from the separator on re-parse;

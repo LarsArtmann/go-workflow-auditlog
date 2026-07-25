@@ -229,29 +229,29 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 
 ### Shared test helpers (in `testhelpers` package)
 
-| Helper                                             | Purpose                                                                                 |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `NewSucceed`, `NewFail`, `NewFlaky`, `NewSlow`     | Construct test step instances                                                           |
-| `SucceedStep`, `FailStep`, `FlakyStep`, `SlowStep` | Test step types exported for direct use in tests                                        |
-| `StepFixture`                                      | Build a minimal `auditlog.StepInfo` for visualization/table tests                       |
-| `RetryOpts`                                        | Build retry config with a fresh backoff instance                                        |
-| `AddRetryStep`                                     | Wrap a step with retry config (fresh backoff)                                           |
-| `AddSingleStep`                                    | Wire a single succeed step into a workflow                                              |
-| `RunSingleSucceed`                                 | Run minimal single-succeed-step workflow (auditor + wf + step + Attach + Do + Snapshot) |
-| `RunSingleSucceedWithBuffer`                       | `RunSingleSucceed` + fresh `*strings.Builder` for `Write*`-into-buffer tests            |
+| Helper                                             | Purpose                                                                                                    |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `NewSucceed`, `NewFail`, `NewFlaky`, `NewSlow`     | Construct test step instances                                                                              |
+| `SucceedStep`, `FailStep`, `FlakyStep`, `SlowStep` | Test step types exported for direct use in tests                                                           |
+| `StepFixture`                                      | Build a minimal `auditlog.StepInfo` for visualization/table tests                                          |
+| `RetryOpts`                                        | Build retry config with a fresh backoff instance                                                           |
+| `AddRetryStep`                                     | Wrap a step with retry config (fresh backoff)                                                              |
+| `AddSingleStep`                                    | Wire a single succeed step into a workflow                                                                 |
+| `RunSingleSucceed`                                 | Run minimal single-succeed-step workflow (auditor + wf + step + Attach + Do + Snapshot)                    |
+| `RunSingleSucceedWithBuffer`                       | `RunSingleSucceed` + fresh `*strings.Builder` for `Write*`-into-buffer tests                               |
 | `RunSingleSucceedWithReport`                       | `RunSingleSucceed().Report()` — returns the assembled `WorkflowReport` for tests that only need the report |
-| `RunWorkflow`                                      | `Attach` + `Do` + `Snapshot` in one call; accepts `testing.TB` so benchmarks can reuse the same setup |
-| `SingleSucceedExportPath`                          | `RunSingleSucceed` + `t.TempDir`-anchored path for `Export*` tests                      |
-| `FindStep`, `AssertReportValid`                    | Step lookup + structural validation                                                     |
-| `AssertStepCount`                                  | Required step count (uses `Fatalf` to stop on mismatch)                                 |
-| `AssertEventCount`                                 | Required event count (`Errorf` — multiple counts may co-fail)                           |
-| `AssertCount(name, got, want)`                     | Generic named-count assertion                                                           |
-| `AssertWorkflowID`                                 | Required WorkflowID                                                                     |
-| `AssertAttemptCount`                               | Required attempt count for a StepInfo                                                   |
-| `AssertStatus`                                     | Required status for a StepInfo                                                          |
-| `AssertFirstStepName`                              | Required name of `report.Steps[0]`                                                      |
-| `AssertContains`                                   | `strings.Contains` check with custom failure message                                    |
-| `FailingWriter`, `ErrWriteFailed`                  | Shared `io.Writer` that always fails — used by error-path tests in both core and viz    |
+| `RunWorkflow`                                      | `Attach` + `Do` + `Snapshot` in one call; accepts `testing.TB` so benchmarks can reuse the same setup      |
+| `SingleSucceedExportPath`                          | `RunSingleSucceed` + `t.TempDir`-anchored path for `Export*` tests                                         |
+| `FindStep`, `AssertReportValid`                    | Step lookup + structural validation                                                                        |
+| `AssertStepCount`                                  | Required step count (uses `Fatalf` to stop on mismatch)                                                    |
+| `AssertEventCount`                                 | Required event count (`Errorf` — multiple counts may co-fail)                                              |
+| `AssertCount(name, got, want)`                     | Generic named-count assertion                                                                              |
+| `AssertWorkflowID`                                 | Required WorkflowID                                                                                        |
+| `AssertAttemptCount`                               | Required attempt count for a StepInfo                                                                      |
+| `AssertStatus`                                     | Required status for a StepInfo                                                                             |
+| `AssertFirstStepName`                              | Required name of `report.Steps[0]`                                                                         |
+| `AssertContains`                                   | `strings.Contains` check with custom failure message                                                       |
+| `FailingWriter`, `ErrWriteFailed`                  | Shared `io.Writer` that always fails — used by error-path tests in both core and viz                       |
 
 ### Duplicate-code policy
 
@@ -275,11 +275,13 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 
 #### Acceptable clones (documented in source)
 
-At `-t 15` **zero** clone groups remain. The patterns previously listed here
-(`Assert*` test helpers, `WriteTable`/`ExportTable` API-surface pairs, fixture
-field literals, edge-direction assertions, etc.) were either eliminated by
-the `writeGraph` + `SingleSucceedExportPath` extractions or were classified by
-art-dupl as non-clones at the current threshold.
+**Zero clone groups at every threshold from `-t 3` through `-t 30`.** The
+final 10 occurrences of the `t.Parallel() + RunSingleSucceed(t, name) +
+report := a.Report()` preamble were eliminated by adding
+`RunSingleSucceedWithReport(t, name) *auditlog.WorkflowReport` to
+`testhelpers`. The 2-occurrence benchmark `a.Attach(w) / w.Do / a.Snapshot(w)`
+group was eliminated by generalizing `RunWorkflow` to accept
+`testing.TB` (so benchmarks reuse the same setup).
 
 #### Helper additions
 
@@ -307,3 +309,17 @@ flow.Step(c).DependsOn(b))` idiom previously duplicated across
   `table_columns_test.go` (1), and `html_test.go` (1). Tests that only
   call `Write*String` variants may discard the buffer with `_`.
   Callers still invoke `t.Parallel()` at the test level.
+
+- **`RunSingleSucceedWithReport(t, name) auditlog.WorkflowReport`**
+  (`testhelpers`): runs a single-succeed workflow and returns the
+  assembled `WorkflowReport` directly. Centralizes the
+  `t.Parallel + a := RunSingleSucceed + report := a.Report()` preamble
+  across 10 sites that only need the report (no auditor queries).
+  Reduces the callsite to `t.Parallel()` + 1 helper call. Use
+  `RunSingleSucceed` instead when the test needs the auditor handle.
+
+- **`RunWorkflow(tb testing.TB, ...)`** (`testhelpers`): generalized
+  from `*testing.T` to `testing.TB` so benchmarks (`*testing.B`) can
+  reuse the same `Attach + Do + Snapshot` setup. Replaces the
+  duplicate `a.Attach(w) / w.Do / a.Snapshot(w)` sequence in
+  `viz/benchmarks_test.go`.
