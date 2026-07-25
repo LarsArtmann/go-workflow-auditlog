@@ -156,6 +156,110 @@ func TestDashboardCSS_StructuralIntegrity(t *testing.T) {
 	}
 }
 
+// TestDashboardJS_WebSocketFallback validates the SSE→WebSocket fallback
+// logic exists and the WebSocket message handling is wired correctly.
+func TestDashboardJS_WebSocketFallback(t *testing.T) {
+	t.Parallel()
+
+	jsBytes, err := os.ReadFile("dashboard.js")
+	if err != nil {
+		t.Fatalf("read dashboard.js: %v", err)
+	}
+
+	js := string(jsBytes)
+
+	// Must create WebSocket connection in fallback
+	if !strings.Contains(js, "new WebSocket") {
+		t.Error("dashboard.js should create WebSocket for fallback transport")
+	}
+
+	// Must have SSE fail counter for fallback trigger
+	if !strings.Contains(js, "sseFailCount") {
+		t.Error("dashboard.js missing sseFailCount for fallback detection")
+	}
+
+	// Must handle all three WebSocket message types
+	for _, msgType := range []string{`case "snapshot"`, `case "event"`, `case "complete"`} {
+		if !strings.Contains(js, msgType) {
+			t.Errorf("dashboard.js missing WebSocket message handler for %s", msgType)
+		}
+	}
+
+	// Must build ws:// or wss:// URL
+	if !strings.Contains(js, "ws:") || !strings.Contains(js, "wss:") {
+		t.Error("dashboard.js missing WebSocket URL scheme construction")
+	}
+}
+
+// TestDashboardJS_DiffBasedRendering validates the incremental DOM update
+// infrastructure for the steps table (no full innerHTML rebuild).
+func TestDashboardJS_DiffBasedRendering(t *testing.T) {
+	t.Parallel()
+
+	jsBytes, err := os.ReadFile("dashboard.js")
+	if err != nil {
+		t.Fatalf("read dashboard.js: %v", err)
+	}
+
+	js := string(jsBytes)
+
+	// Must track rendered rows by step name
+	if !strings.Contains(js, "stepRows") {
+		t.Error("dashboard.js missing stepRows tracking for diff-based rendering")
+	}
+
+	// Must have state key for change detection
+	if !strings.Contains(js, "stepStateKey") {
+		t.Error("dashboard.js missing stepStateKey for change detection")
+	}
+
+	// Must use DOM positioning (insertBefore/after/prepend) not innerHTML rebuild
+	if !strings.Contains(js, "prevTr.after") {
+		t.Error("dashboard.js should use DOM positioning for incremental updates")
+	}
+
+	// Must NOT use full innerHTML rebuild on steps table
+	if strings.Contains(js, "stepsTbody.innerHTML = visible.join") {
+		t.Error("dashboard.js should not rebuild steps table via innerHTML (use diff-based updates)")
+	}
+}
+
+// TestDashboardJS_GraphEnhancements validates graph interaction features.
+func TestDashboardJS_GraphEnhancements(t *testing.T) {
+	t.Parallel()
+
+	jsBytes, err := os.ReadFile("dashboard.js")
+	if err != nil {
+		t.Fatalf("read dashboard.js: %v", err)
+	}
+
+	js := string(jsBytes)
+
+	// Must NOT have broken direction toggle (daghtml has no direction API)
+	if strings.Contains(js, "graphDirection") {
+		t.Error("dashboard.js should not have graphDirection (daghtml has no direction support)")
+	}
+
+	// Must NOT have broken zoomGraph/fitGraphToView (daghtml handles natively)
+	if strings.Contains(js, "function zoomGraph") {
+		t.Error("dashboard.js should not have zoomGraph (daghtml handles zoom natively)")
+	}
+
+	if strings.Contains(js, "function fitGraphToView") {
+		t.Error("dashboard.js should not have fitGraphToView (daghtml handles fit natively)")
+	}
+
+	// Must have MutationObserver for minimap viewport tracking
+	if !strings.Contains(js, "MutationObserver") {
+		t.Error("dashboard.js missing MutationObserver for minimap viewport tracking")
+	}
+
+	// Must have duration label updates in live graph
+	if !strings.Contains(js, "humanizeMs") {
+		t.Error("dashboard.js missing humanizeMs for live duration labels")
+	}
+}
+
 // TestVizDashboardJS_StructuralIntegrity validates the viz dashboard.js.
 func TestVizDashboardJS_StructuralIntegrity(t *testing.T) {
 	t.Parallel()

@@ -560,15 +560,15 @@
       if (stepSortKey === "name") {
         av = (a.step_name || "").toLowerCase();
         bv = (b.step_name || "").toLowerCase();
-        return ((av < bv ? -1 : av > bv ? 1 : 0)) * stepSortDir;
+        return (av < bv ? -1 : av > bv ? 1 : 0) * stepSortDir;
       } else if (stepSortKey === "type") {
         av = a.step_type || "";
         bv = b.step_type || "";
-        return ((av < bv ? -1 : av > bv ? 1 : 0)) * stepSortDir;
+        return (av < bv ? -1 : av > bv ? 1 : 0) * stepSortDir;
       } else if (stepSortKey === "status") {
         av = a.status || "";
         bv = b.status || "";
-        return ((av < bv ? -1 : av > bv ? 1 : 0)) * stepSortDir;
+        return (av < bv ? -1 : av > bv ? 1 : 0) * stepSortDir;
       } else if (stepSortKey === "attempts") {
         return ((a.attempt_count || 0) - (b.attempt_count || 0)) * stepSortDir;
       } else if (stepSortKey === "duration") {
@@ -684,8 +684,7 @@
       "</span>";
 
     // Cell 3: attempts
-    tr.children[3].textContent =
-      s.attempt_count + (s.max_attempts > 1 ? "/" + s.max_attempts : "");
+    tr.children[3].textContent = s.attempt_count + (s.max_attempts > 1 ? "/" + s.max_attempts : "");
 
     // Cell 4: duration
     tr.children[4].textContent = s.duration_ms ? humanizeDuration(s.duration_ms) : "\u2014";
@@ -762,7 +761,10 @@
         if (step.status === "running") tr.classList.add("step-row-running");
         if (step.status === "failed") tr.classList.add("row-failed");
         if (step.status === "canceled") tr.classList.add("row-canceled");
-        tr.setAttribute("data-has-error", step.status === "failed" || step.status === "canceled" ? "1" : "0");
+        tr.setAttribute(
+          "data-has-error",
+          step.status === "failed" || step.status === "canceled" ? "1" : "0",
+        );
 
         stepRows[step.step_name] = { tr: tr, key: stepStateKey(step) };
       } else {
@@ -1368,10 +1370,7 @@
       // Map click percentage to graph coordinates, then center
       var targetX = fullX + pctX * fullW - vb.width / 2;
       var targetY = fullY + pctY * fullH - vb.height / 2;
-      mainSvg.setAttribute(
-        "viewBox",
-        targetX + " " + targetY + " " + vb.width + " " + vb.height,
-      );
+      mainSvg.setAttribute("viewBox", targetX + " " + targetY + " " + vb.width + " " + vb.height);
       // MutationObserver will sync the minimap indicator
     });
   }
