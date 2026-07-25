@@ -746,8 +746,6 @@
   // === Graph ===
 
   var graphRendered = false;
-  var graphDirection = "TB"; // TB (top-bottom) or LR (left-right)
-
   var statusColorMap = {
     succeeded: "var(--success)",
     failed: "var(--error)",
@@ -900,19 +898,20 @@
     var svg = container.querySelector("svg");
     if (!svg) return;
 
-    if (!state.report || !state.report.steps) {
-      // Fall back to state.steps for pre-execution DAG
-      var fallbackSteps = Object.keys(state.steps).map(function (n) {
+    // Build a local steps array for graph enhancements — never mutate state.report
+    var stepsForGraph;
+    if (state.report && state.report.steps && state.report.steps.length) {
+      stepsForGraph = state.report.steps;
+    } else {
+      stepsForGraph = Object.keys(state.steps).map(function (n) {
         return state.steps[n];
       });
-      if (!fallbackSteps.length) return;
-      state.report = state.report || {};
-      state.report.steps = fallbackSteps;
+      if (!stepsForGraph.length) return;
     }
 
     var nameMap = buildNodeNameMap();
     var stepByName = {};
-    (state.report.steps || []).forEach(function (s) {
+    stepsForGraph.forEach(function (s) {
       stepByName[s.step_name] = s;
     });
 
@@ -1060,16 +1059,6 @@
       });
     }
 
-    // Fit-to-view button
-    var fitBtn = document.querySelector(".graph-fit");
-    if (fitBtn) {
-      var newFit = fitBtn.cloneNode(true);
-      fitBtn.parentNode.replaceChild(newFit, fitBtn);
-      newFit.addEventListener("click", function () {
-        fitGraphToView(container);
-      });
-    }
-
     container.dataset.enhanced = "true";
   }
 
@@ -1118,43 +1107,6 @@
         g.classList.remove("search-match");
       }
     });
-  }
-
-  function fitGraphToView(container) {
-    var svg = container.querySelector("svg");
-    if (!svg) return;
-
-    // Reset transform to identity, then let daghtml's zoom recalibrate
-    var content = svg.querySelector("g");
-    if (content) {
-      content.setAttribute("transform", "translate(0,0) scale(1)");
-    }
-
-    // Compute bounding box of all nodes and set viewBox
-    var nodes = svg.querySelectorAll(".graph-node rect");
-    if (!nodes.length) return;
-
-    var minX = Infinity,
-      minY = Infinity,
-      maxX = -Infinity,
-      maxY = -Infinity;
-    nodes.forEach(function (rect) {
-      var x = parseFloat(rect.getAttribute("x")) || 0;
-      var y = parseFloat(rect.getAttribute("y")) || 0;
-      var w = parseFloat(rect.getAttribute("width")) || 0;
-      var h = parseFloat(rect.getAttribute("height")) || 0;
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x + w > maxX) maxX = x + w;
-      if (y + h > maxY) maxY = y + h;
-    });
-
-    var padding = 40;
-    var vbX = minX - padding;
-    var vbY = minY - padding;
-    var vbW = maxX - minX + padding * 2;
-    var vbH = maxY - minY + padding * 2;
-    svg.setAttribute("viewBox", vbX + " " + vbY + " " + vbW + " " + vbH);
   }
 
   function renderMinimap() {
@@ -1412,54 +1364,6 @@
       tooltip.classList.remove("visible");
     }
   });
-
-  // === Graph control buttons ===
-
-  // Direction toggle (TB ↔ LR)
-  var dirBtn = document.getElementById("graph-direction-toggle");
-  if (dirBtn) {
-    dirBtn.addEventListener("click", function () {
-      graphDirection = graphDirection === "TB" ? "LR" : "TB";
-      dirBtn.textContent = graphDirection;
-      dirBtn.setAttribute("aria-pressed", graphDirection === "LR" ? "true" : "false");
-
-      // Re-render graph with new direction
-      if (state.dag) {
-        renderGraph();
-      }
-    });
-  }
-
-  // Zoom buttons
-  var zoomInBtn = document.querySelector(".graph-zoom-in");
-  var zoomOutBtn = document.querySelector(".graph-zoom-out");
-  if (zoomInBtn) {
-    zoomInBtn.addEventListener("click", function () {
-      zoomGraph(1.2);
-    });
-  }
-  if (zoomOutBtn) {
-    zoomOutBtn.addEventListener("click", function () {
-      zoomGraph(1 / 1.2);
-    });
-  }
-
-  function zoomGraph(factor) {
-    var svg = els.graphContainer.querySelector("svg");
-    if (!svg) return;
-    var content = svg.querySelector("g");
-    if (!content) return;
-
-    var transform = content.getAttribute("transform") || "translate(0,0) scale(1)";
-    var scaleMatch = transform.match(/scale\(([\d.]+)\)/);
-    var translateMatch = transform.match(/translate\(([\d.-]+),([\d.-]+)\)/);
-    var scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-    var tx = translateMatch ? parseFloat(translateMatch[1]) : 0;
-    var ty = translateMatch ? parseFloat(translateMatch[2]) : 0;
-
-    scale *= factor;
-    content.setAttribute("transform", "translate(" + tx + "," + ty + ") scale(" + scale + ")");
-  }
 
   // === Start ===
 
