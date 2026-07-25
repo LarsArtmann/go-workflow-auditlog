@@ -2,24 +2,34 @@
 #
 # This is a library, not a service, so the primary release artifact is the
 # GitHub Release with auto-generated, grouped changelog notes. We also build
-# the demo binary (go run ./example) cross-platform so users can try the
+# the demo binary (go run ./viz/example) cross-platform so users can try the
 # library's output without writing code first.
 #
 # Usage:
-#   goreleaser release --clean          # full release (run by CI on tag push)
-#   goreleaser release --snapshot --clean # local dry-run, no publish
-#   goreleaser check                     # validate this config
+#   GOEXPERIMENT=jsonv2 goreleaser release --clean          # full release
+#   GOEXPERIMENT=jsonv2 goreleaser release --snapshot --clean # local dry-run
+#   goreleaser check                                         # validate config
+#
+# NOTE: GOEXPERIMENT=jsonv2 is set explicitly on every hook and build below so
+# the release is reproducible without the caller remembering to export it. The
+# library imports the stdlib encoding/json/v2 (gated behind that experiment).
 
 version: 2
 
 before:
   hooks:
-    - go mod tidy
-    - go vet ./...
-    - go test -race ./...
-    - cd viz && go mod tidy
-    - cd viz && GOWORK=off go vet ./...
-    - cd viz && GOWORK=off go test -race ./...
+    # Core module (workspace mode — resolves viz/live via go.work).
+    - GOEXPERIMENT=jsonv2 go mod tidy
+    - GOEXPERIMENT=jsonv2 go vet ./...
+    - GOEXPERIMENT=jsonv2 go test -race ./...
+    # Viz module (standalone — proves consumers can build it without go.work).
+    - cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy
+    - cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go vet ./...
+    - cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./...
+    # Live module (standalone — proves consumers can build it without go.work).
+    - cd live && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy
+    - cd live && GOWORK=off GOEXPERIMENT=jsonv2 go vet ./...
+    - cd live && GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./...
 
 builds:
   - id: demo
@@ -27,6 +37,7 @@ builds:
     binary: workflow-auditlog-demo
     env:
       - CGO_ENABLED=0
+      - GOEXPERIMENT=jsonv2
     goos:
       - linux
       - darwin

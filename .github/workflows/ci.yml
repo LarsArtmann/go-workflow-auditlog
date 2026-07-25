@@ -39,6 +39,19 @@ jobs:
           GOWORK: off
         working-directory: ./viz
         run: go test -race -count=1 ./...
+      - name: go vet live (standalone)
+        working-directory: ./live
+        run: go vet ./...
+      - name: go build live (standalone)
+        env:
+          GOWORK: off
+        working-directory: ./live
+        run: go build ./...
+      - name: go test -race live (standalone)
+        env:
+          GOWORK: off
+        working-directory: ./live
+        run: go test -race -count=1 ./...
 
   coverage:
     name: Coverage gate (≥92%)
@@ -79,6 +92,9 @@ jobs:
       - name: golangci-lint (viz)
         working-directory: ./viz
         run: golangci-lint run --timeout=10m ./...
+      - name: golangci-lint (live)
+        working-directory: ./live
+        run: golangci-lint run --timeout=10m ./...
 
   vulncheck:
     name: Vulnerability scan
@@ -110,6 +126,9 @@ jobs:
         run: go mod tidy
       - name: go mod tidy (viz)
         working-directory: ./viz
+        run: go mod tidy
+      - name: go mod tidy (live)
+        working-directory: ./live
         run: go mod tidy
       - name: Check for drift
         run: |

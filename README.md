@@ -92,9 +92,12 @@ go get github.com/larsartmann/go-workflow-auditlog
 
 # Visualization module (diagrams, tables, trees, HTML dashboard)
 go get github.com/larsartmann/go-workflow-auditlog/viz
+
+# Live dashboard module (real-time SSE + WebSocket HTTP dashboard)
+go get github.com/larsartmann/go-workflow-auditlog/live
 ```
 
-Requires Go 1.26+ and `github.com/Azure/go-workflow v0.1.13`. The `viz` module also requires `github.com/larsartmann/go-output` and its format-specific sub-modules.
+Requires Go 1.26+ and `github.com/Azure/go-workflow v0.1.13`. The `viz` module also requires `github.com/larsartmann/go-output` and its format-specific sub-modules. The `live` module additionally requires `github.com/larsartmann/go-output/daghtml` and `github.com/larsartmann/go-sse`.
 
 ## Quick Start
 
