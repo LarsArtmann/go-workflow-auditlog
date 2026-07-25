@@ -12,7 +12,7 @@ import (
 // wsUpgrader upgrades HTTP connections to WebSocket. CheckOrigin accepts
 // all origins so the dashboard works from any host (the CSP on the HTML
 // page is the real security boundary).
-var wsUpgrader = websocket.Upgrader{
+var wsUpgrader = websocket.Upgrader{ //nolint:exhaustruct // optional fields are fine with defaults
 	CheckOrigin: func(_ *http.Request) bool { return true },
 }
 
@@ -32,18 +32,19 @@ func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := wsUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		// Upgrade already wrote an HTTP error response
+
 		return
 	}
 
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	sub := srv.hub.Subscribe()
 	defer srv.hub.Unsubscribe(sub.id)
 
 	// Send snapshot
 	if srv.snapshotProvider != nil {
-		data, err := srv.snapshotProvider(srv.hub.IsComplete())
-		if err == nil {
+		data, snapErr := srv.snapshotProvider(srv.hub.IsComplete())
+		if snapErr == nil {
 			srv.writeWS(conn, wsMessage{Type: "snapshot", Data: data})
 		}
 	}
@@ -51,6 +52,7 @@ func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	// If already complete, send complete and return
 	if srv.hub.IsComplete() {
 		srv.sendWSComplete(conn)
+
 		return
 	}
 
@@ -59,14 +61,17 @@ func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case <-ctx.Done():
+
 			return
 
 		case <-sub.done:
 			srv.sendWSComplete(conn)
+
 			return
 
 		case evt := <-sub.ch:
 			if !srv.writeWS(conn, wsMessage{Type: "event", Data: evt}) {
+
 				return
 			}
 		}
@@ -83,11 +88,9 @@ func (srv *Server) writeWS(conn *websocket.Conn, msg wsMessage) bool {
 
 	_ = conn.SetWriteDeadline(time.Now().Add(wsWriteTimeout))
 
-	if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
-		return false
-	}
+	err = conn.WriteMessage(websocket.TextMessage, data)
 
-	return true
+	return err == nil
 }
 
 // sendWSComplete sends the final complete message over WebSocket.
@@ -98,6 +101,7 @@ func (srv *Server) sendWSComplete(conn *websocket.Conn) {
 
 	data, err := srv.completeProvider()
 	if err != nil {
+
 		return
 	}
 

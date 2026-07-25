@@ -197,6 +197,7 @@ func TestServer_ShutdownNotStarted(t *testing.T) {
 	}
 
 	ctx := t.Context()
+
 	err := srv.Shutdown(ctx)
 	if err != nil {
 		t.Errorf("Shutdown on unstarted server should return nil, got %v", err)

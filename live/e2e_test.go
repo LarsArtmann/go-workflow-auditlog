@@ -27,6 +27,7 @@ func (s *e2eStep) Do(ctx context.Context) error {
 		select {
 		case <-time.After(s.delay):
 		case <-ctx.Done():
+
 			return ctx.Err()
 		}
 	}
@@ -40,11 +41,11 @@ func (s *e2eStep) Do(ctx context.Context) error {
 
 func (s *e2eStep) String() string { return s.name }
 
-var errE2EStepFailed = errE2E("e2e step failed")
+var errE2EStepFailed = e2eStepError("e2e step failed")
 
-type errE2E string
+type e2eStepError string
 
-func (e errE2E) Error() string { return string(e) }
+func (e e2eStepError) Error() string { return string(e) }
 
 // readAllSSEEvents reads all "event" messages until "complete" arrives.
 // Returns the event data payloads and whether complete was received.
@@ -118,7 +119,8 @@ func TestServer_SSE_EndToEnd(t *testing.T) {
 	// Run the workflow synchronously
 	ctx := t.Context()
 
-	if runErr := w.Do(ctx); runErr != nil {
+	runErr := w.Do(ctx)
+	if runErr != nil {
 		t.Fatalf("workflow Do failed: %v", runErr)
 	}
 
@@ -167,8 +169,8 @@ func TestServer_SSE_EndToEnd(t *testing.T) {
 
 	for _, data := range sseEvents {
 		var sseEvt auditlog.Event
-		if err := json.Unmarshal([]byte(data), &sseEvt); err != nil {
-			t.Errorf("unmarshal SSE event: %v (data: %s)", err, data[:min(100, len(data))])
+		if jsonErr := json.Unmarshal([]byte(data), &sseEvt); jsonErr != nil {
+			t.Errorf("unmarshal SSE event: %v (data: %s)", jsonErr, data[:min(100, len(data))])
 
 			continue
 		}
@@ -180,9 +182,9 @@ func TestServer_SSE_EndToEnd(t *testing.T) {
 			continue
 		}
 
-		if ae.StepRef.Name != sseEvt.StepRef.Name {
+		if ae.Name != sseEvt.Name {
 			t.Errorf("event seq %d: step name mismatch: SSE %q vs auditor %q",
-				sseEvt.Sequence, sseEvt.StepRef.Name, ae.StepRef.Name)
+				sseEvt.Sequence, sseEvt.Name, ae.Name)
 		}
 
 		if ae.EventType != sseEvt.EventType {
@@ -300,24 +302,28 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 	// Connect WebSocket client
 	wsURL := "ws" + strings.TrimPrefix(ts.URL, "http") + "/api/ws"
 
-	conn, _, err := websocket.DefaultDialer.DialContext(t.Context(), wsURL, nil)
-	if err != nil {
-		t.Fatalf("dial websocket: %v", err)
+	conn, resp, dialErr := websocket.DefaultDialer.DialContext(t.Context(), wsURL, nil)
+	if resp != nil {
+		_ = resp.Body.Close()
 	}
 
-	defer conn.Close()
+	if dialErr != nil {
+		t.Fatalf("dial websocket: %v", dialErr)
+	}
 
-	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	defer func() { _ = conn.Close() }()
+
+	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 
 	// Read snapshot
-	_, msg, err := conn.ReadMessage()
-	if err != nil {
-		t.Fatalf("read snapshot: %v", err)
+	_, msg, readErr := conn.ReadMessage()
+	if readErr != nil {
+		t.Fatalf("read snapshot: %v", readErr)
 	}
 
 	var snapshot wsTestMessage
-	if err := json.Unmarshal(msg, &snapshot); err != nil {
-		t.Fatalf("unmarshal snapshot: %v", err)
+	if jsonErr := json.Unmarshal(msg, &snapshot); jsonErr != nil {
+		t.Fatalf("unmarshal snapshot: %v", jsonErr)
 	}
 
 	if snapshot.Type != "snapshot" {
@@ -327,7 +333,8 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 	// Run the workflow
 	ctx := t.Context()
 
-	if runErr := w.Do(ctx); runErr != nil {
+	runErr := w.Do(ctx)
+	if runErr != nil {
 		t.Fatalf("workflow Do failed: %v", runErr)
 	}
 
@@ -335,7 +342,7 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	server.SignalComplete()
 
-	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 
 	// Read events until complete
 	var eventCount int
@@ -343,13 +350,13 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 	gotComplete := false
 
 	for {
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
+		_, msg, readErr := conn.ReadMessage()
+		if readErr != nil {
 			break
 		}
 
 		var wsMsg wsTestMessage
-		if err := json.Unmarshal(msg, &wsMsg); err != nil {
+		if jsonErr := json.Unmarshal(msg, &wsMsg); jsonErr != nil {
 			continue
 		}
 
@@ -358,6 +365,7 @@ func TestServer_WebSocket_EndToEnd(t *testing.T) {
 			eventCount++
 		case "complete":
 			gotComplete = true
+
 			goto done
 		}
 	}

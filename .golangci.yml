@@ -136,6 +136,7 @@ linters:
             - $gostd
             - github.com/Azure/go-workflow
             - github.com/cenkalti/backoff/v4
+            - github.com/gorilla/websocket
             - github.com/larsartmann/go-atomic-write
             - github.com/larsartmann/go-ndjson
             - github.com/larsartmann/go-ndjson
