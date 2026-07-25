@@ -8,15 +8,8 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md).
 
 ## Live Dashboard (`live/` module)
 
-- [ ] Add SSE end-to-end integration test (real workflow → live server → SSE client → verify events match)
-- [ ] Add WebSocket transport alternative to SSE (for environments that block SSE)
+- [ ] Improve live module test coverage to 95%+ (currently 90%, gap is SSE error paths: heartbeat timing, WriteEvent failures, context cancellation edge cases)
 
 ## Testing
 
-- [ ] Add Playwright-based browser tests for live dashboard interactions (graph click navigation, search filtering, tab switching)
-- [ ] Improve live module test coverage to 95%+ (currently 90.4%, gap is mostly in error paths within handleSSE/sendSnapshot)
-
-## Visualization
-
-- [ ] Add "export dashboard" button to live view (snapshot current state to standalone HTML)
-- [ ] Add step duration labels to graph nodes in live mode (matching static dashboard)
+- [ ] Add full browser automation tests (Playwright or chromedp) for live dashboard pixel-level interactions — current Go-based structural tests validate function presence, event wiring, diff-based rendering infrastructure, WebSocket fallback, and CSS integrity, but cannot test click→render→DOM-update flows at the pixel level

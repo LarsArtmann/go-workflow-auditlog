@@ -8,6 +8,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **WebSocket transport** (`websocket.go`) — `/api/ws` endpoint with automatic
+  SSE→WebSocket fallback after 2 connection failures. Uses `gorilla/websocket`.
+  Same snapshot→events→complete message flow as SSE, encoded as JSON
+  `{type, data}` envelopes. Handles write deadlines, non-blocking delivery.
+- **Diff-based steps table rendering** — `renderStepsTable()` now tracks rows
+  by step name in a `stepRows` map, updates only changed cells (status, attempts,
+  duration, error) via `updateStepRow()`, and repositions existing DOM nodes
+  via `insertBefore` instead of rebuilding `innerHTML` on every tick. Eliminates
+  flicker for 100+ step workflows. `stepStateKey()` provides O(1) change
+  detection.
+- **Live graph duration labels** — `updateGraphLive()` now updates node text
+  labels with status icon + compact duration (`humanizeMs()`) during live
+  execution, matching the static dashboard's `buildDAGHTML` format.
+- **Minimap viewport tracking** — `renderMinimap()` uses `MutationObserver` on
+  the main SVG's `viewBox` attribute to sync the viewport indicator rectangle
+  in real-time as the user pans/zooms. Click-to-navigate centers the main graph.
+- **SSE end-to-end integration test** (`TestServer_SSE_EndToEnd`) — runs a real
+  3-step workflow through the live server, connects an SSE client, verifies
+  event count, step names, and sequence/event-type match against the auditor's
+  internal event stream.
+- **WebSocket E2E test** (`TestServer_WebSocket_EndToEnd`) — verifies WS
+  transport delivers snapshot→events→complete correctly.
+- **Failing workflow E2E test** (`TestServer_SSE_EndToEnd_FailingWorkflow`) —
+  verifies error fields appear in SSE events for failing steps.
+- **JS structural tests** expanded — validates WebSocket fallback logic,
+  diff-based rendering infrastructure (no innerHTML rebuild), graph enhancement
+  correctness (no broken zoomGraph/fitGraphToView/direction toggle), MutationObserver
+  for minimap, and humanizeMs for live duration labels.
+- **Internal coverage tests** — nil provider error paths for export handlers,
+  normalizePrefix table-driven test, WebSocket nil provider, shutdown-not-started.
 - **CSV/TSV export** (`csv.go`) — `WriteCSV`, `WriteTSV`, `ExportCSV`, `ExportTSV`
   on `WorkflowReport`. 14 columns including step ID/name/type/status, attempt
   counts, timestamps, duration, retry/timeout flags, error, and dependency
@@ -119,6 +149,18 @@ attachment`.
 
 ### Changed
 
+- **Steps table rendering is now diff-based** — replaced the O(n) `innerHTML`
+  rebuild on every render tick with incremental DOM updates: tracks rows by
+  step name, only touches changed cells (status, attempts, duration, error),
+  repositions existing DOM nodes via `insertBefore`. Eliminates flicker for
+  100+ step workflows.
+- **`enhanceGraph()` no longer mutates `state.report`** — uses a local
+  `stepsForGraph` variable instead of the hacky `state.report.steps = fallback`
+  mutation that could cause subtle bugs in critical path computation.
+- **daghtml native zoom/fit handlers** — removed conflicting custom
+  `zoomGraph()` and `fitGraphToView()` that manipulated a `<g>` transform while
+  daghtml uses viewBox. The daghtml SDK already wires `.graph-zoom-in`,
+  `.graph-zoom-out`, `.graph-fit` buttons natively.
 - **CORS default is now secure-by-default** — empty `CORSAllowedOrigins`
   disables CORS (previously defaulted to `"*"`). The `"off"` sentinel is
   removed. Set `"*"` explicitly for development convenience.
