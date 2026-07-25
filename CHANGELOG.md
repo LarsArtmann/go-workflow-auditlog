@@ -8,6 +8,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **`live` module in `nix run .#check`** — the canonical check script now runs
+  `go vet`, `go test -race`, and `golangci-lint` for the live module
+  (standalone, `GOWORK=off`). `govulncheck` for live is intentionally deferred
+  until the Go toolchain bumps past 1.26.4 (it currently reports
+  GO-2026-5856 in `live.Server.ListenAndServe`; enabling it now would keep CI
+  red). See `flake.nix` for the documented re-enable steps.
+- **CSV escaping / formula-injection regression tests** (`csv_test.go`) —
+  `TestReport_WriteCSV_SpecialChars_RoundTrip` proves RFC 4180 quoting preserves
+  commas, double quotes, embedded newlines, tabs, and unicode through a
+  WriteCSV → csv.Read round-trip (step names AND dependency cells).
+  `TestReport_WriteCSV_FormulaVectors_PreservedVerbatim` documents that
+  formula vectors (`=cmd`, `+cmd`, `-cmd`, `@cmd`) are exported verbatim —
+  intentional for a truthful audit log (CSV-injection hardening belongs at
+  spreadsheet open-time, not in the export layer). Plus a documented
+  `;`-in-dependency-name collision limitation test.
+- **Live module coverage to 95.5%** (from 90.3%) — new internal tests exercise
+  the provider-error and write-failure paths: failing report/ndjson/html
+  providers, snapshot/complete provider errors, SSE streaming-not-supported,
+  SSE snapshot/heartbeat/event write failures, and WebSocket graceful
+  degradation when the snapshot provider errors (snapshot skipped, complete
+  still delivered).
+- **`docs/DOMAIN_LANGUAGE.md`** updated with missing live-module terms:
+  `CaptureDAG(w)`, WebSocket transport (`/api/ws`, SSE→WS fallback), export
+  endpoints (`/api/export/ndjson`, `/api/export/html`), `Prefix`, and
+  `CORSAllowedOrigins` (secure-by-default).
 - **WebSocket transport** (`websocket.go`) — `/api/ws` endpoint with automatic
   SSE→WebSocket fallback after 2 connection failures. Uses `gorilla/websocket`.
   Same snapshot→events→complete message flow as SSE, encoded as JSON
@@ -156,6 +181,11 @@ attachment`.
 
 ### Changed
 
+- **Removed the `nlreturn` linter** from `.golangci.yml`. It directly
+  contradicted `wsl_v5` on blank-line-before-return, forcing a `//nolint:nlreturn`
+  workaround in `live/websocket.go`. `wsl_v5` provides comprehensive whitespace
+  control that fully subsumes `nlreturn`'s single rule; the workaround directive
+  was removed. All three modules still lint clean.
 - **Steps table rendering is now diff-based** — replaced the O(n) `innerHTML`
   rebuild on every render tick with incremental DOM updates: tracks rows by
   step name, only touches changed cells (status, attempts, duration, error),
