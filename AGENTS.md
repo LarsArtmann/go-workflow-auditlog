@@ -52,13 +52,17 @@ and `sse.ContentType`. The domain-specific Hub and Server are implemented locall
 (go-workflow event types, report structure, dashboard HTML) on top of those primitives; go-sse
 itself is transport-only and owns no domain types here.
 
-A `go.work` workspace at the parent directory links the project's own modules (core, viz, live)
-and `go-output` for local development. **All external `larsartmann/*` modules are now pinned to
-published versions** (no local `replace` directives remain): `go-sse` v0.2.0 (`live`),
-`go-atomic-write` v0.3.0 and `go-ndjson` v0.0.1 (`core`). Pinning these surfaced their
-transitive deps (`cespare/xxhash/v2`, `gofrs/flock` from go-atomic-write) as `// indirect`
-entries in `viz` and `live`, which is correct. Standalone (`GOWORK=off`) builds now work for
-all three modules because every dependency has a real, checksum-verified version in `go.sum`.
+A `go.work` workspace links only the project's own modules (core `.`, `./viz`, `./live`)
+for local development; **all external `larsartmann/*` modules are resolved from published
+versions** (no local `use`/`replace` for them): `go-output` v0.31.1 + its sub-modules
+(`viz`, `live`), `go-sse` v0.2.0 (`live`), `go-atomic-write` v0.3.0 and `go-ndjson` v0.0.1
+(`core`). `go.work` and `go.work.sum` are gitignored (local dev artifacts). Standalone
+(`GOWORK=off`) builds work for all three modules because every dependency has a real,
+checksum-verified version in `go.sum`. **Note:** `go work sync` prints harmless
+`downloading ... go-output/testhelpers v0.0.0-00010101000000-000000000000` lines because the
+*published* `go-output@v0.31.1/go.mod` contains local `replace` directives (`=> ./testhelpers`)
+that Go ignores when consuming it as a dependency — builds/tests are unaffected; this is a
+defect in go-output's release, not this repo.
 
 ### Core module source files
 
