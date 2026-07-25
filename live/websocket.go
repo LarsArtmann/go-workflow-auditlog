@@ -47,6 +47,7 @@ func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	if srv.hub.IsComplete() {
 		srv.sendWSComplete(conn)
+
 		return
 	}
 
@@ -58,6 +59,7 @@ func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			return
 		case <-sub.done:
 			srv.sendWSComplete(conn)
+
 			return
 		case evt := <-sub.ch:
 			if !srv.writeWS(conn, wsMessage{Type: "event", Data: evt}) {

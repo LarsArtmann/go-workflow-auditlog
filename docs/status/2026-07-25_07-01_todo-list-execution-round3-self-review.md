@@ -9,6 +9,7 @@
 ## a) FULLY DONE (shipped + verified)
 
 ### 1. `live` module added to `nix run .#check`
+
 - **Files:** `flake.nix`
 - **What:** The canonical check script now runs `go vet`, `go test -race`, and
   `golangci-lint` for the `live` module (standalone, `GOWORK=off`), mirroring
@@ -17,6 +18,7 @@
 - **Caveat (intentional):** `govulncheck` for live is **omitted** — see (b).
 
 ### 2. `nlreturn` vs `wsl_v5` linter conflict resolved
+
 - **Files:** `.golangci.yml`, `live/websocket.go`
 - **What:** Removed `nlreturn` from the global enable list AND from the `demo/`
   exclusion list (it was listed in both). `wsl_v5` retained (comprehensive
@@ -28,6 +30,7 @@
   it immediately via View — restored before any test run. No damage.
 
 ### 3. CSV escaping / formula-injection regression tests
+
 - **Files:** `csv_test.go` (3 new tests)
 - **What:**
   - `TestReport_WriteCSV_SpecialChars_RoundTrip` — RFC 4180 quoting round-trip
@@ -43,6 +46,7 @@
   (after fixing noinlineerr + gosmopolitan + gci findings).
 
 ### 4. `docs/DOMAIN_LANGUAGE.md` updated
+
 - **Files:** `docs/DOMAIN_LANGUAGE.md`
 - **What:** Added `CaptureDAG(w)` command, WebSocket transport (`/api/ws`,
   SSE→WS fallback), export endpoints (`/api/export/ndjson`, `/api/export/html`),
@@ -51,6 +55,7 @@
 - **Verification:** Eyeball review against `live/server.go` Config fields.
 
 ### 5. Live module coverage: 90.3% → 95.5%
+
 - **Files:** `live/server_internal_test.go` (11 new tests + 2 helper types)
 - **What:** New tests exercising provider-error and write-failure paths:
   - `failingFlusher` / `failAfterNFlusher` helper writers.
@@ -69,6 +74,7 @@
   needed — the TODO's "interface extraction" suggestion was unnecessary.
 
 ### Plus: Documentation sync
+
 - **CHANGELOG.md** — Added entries under [Unreleased] Added + Changed.
 - **TODO_LIST.md** — Rewritten: completed items removed (per project convention),
   2 blocked items remain with full remediation steps.
@@ -82,18 +88,20 @@
 ## b) PARTIALLY DONE
 
 ### Go toolchain bump (1.26.4 → 1.26.5) — BLOCKED
+
 - **Status:** Cannot execute. Verified the vulnerability is real
   (`govulncheck` confirms GO-2026-5856, `live.Server.ListenAndServe` is an
   affected call path, "Fixed in: crypto/tls@go1.26.5"). But the pinned
   `nixos-unstable` (`2cc9de6`) ships `go_1_26` at **1.26.4**. The `go` directive
-  is a *minimum*, so bumping `go.mod` while the toolchain is 1.26.4 breaks the
+  is a _minimum_, so bumping `go.mod` while the toolchain is 1.26.4 breaks the
   build. Fully documented the remediation in TODO_LIST.md + AGENTS.md.
 - **Collateral:** This is WHY live `govulncheck` is omitted from `nix run .#check`
   (it exits code 3 on the finding → would keep CI permanently red).
 
 ### Browser automation tests — DEFERRED (design decision)
+
 - **Status:** Documented as deferred by design. Adding a Chromium (~300 MB)
-  runtime dependency to a Go *library's* default CI is a net negative. The
+  runtime dependency to a Go _library's_ default CI is a net negative. The
   existing Go-based JS structural tests cover the wiring. If pixel-level tests
   are ever needed, they belong behind `//go:build browser_e2e`. Documented in
   TODO_LIST.md + ROADMAP.md.
@@ -149,6 +157,7 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
 ## e) WHAT WE SHOULD IMPROVE
 
 ### Code quality
+
 1. **Fix `writeDelimited` error wrapping** — wrap header/step write errors with
    `ErrExportWriteFailed` for consistency with the flush path. Defends against
    `csv.Writer` buffering changes.
@@ -158,6 +167,7 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
    robust than the magic-number approach.
 
 ### Test coverage (remaining live gaps — all unreachable defensive branches)
+
 4. `hub.OnEvent` marshal-error branch (75%) — `json.Marshal(evt)` failing.
 5. `renderDashboardHTML` (85.7%) — template error branch.
 6. `makeReportProvider` (87.5%) — encode-error branch.
@@ -168,12 +178,14 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
 11. `handleWebSocket` upgrade-failure path (returns on err, no assertion).
 
 ### CI / infrastructure
+
 12. **Pin a newer nixpkgs revision** that provides `go_1_26` ≥ 1.26.5 — unblocks
     the Go bump AND live govulncheck.
 13. **Add `nix flake check` to the documented commands** — I ran it manually and
     it passes (treefmt clean), but it's not in the AGENTS.md command table.
 
 ### Documentation
+
 14. **Add a "Documentation" subsection convention to CHANGELOG** — or use
     "Changed" for doc updates instead of "Added".
 
@@ -182,6 +194,7 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
 ## f) Up to 50 things to get done next
 
 ### High impact
+
 1. Bump Go 1.26.4 → 1.26.5 (once nixpkgs provides it) — unblocks govulncheck.
 2. Re-enable live `govulncheck` in `flake.nix` (command documented inline).
 3. Pin a newer `nixos-unstable` revision in `flake.lock` (provides go 1.26.5).
@@ -194,6 +207,7 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
 10. Cover `Shutdown` error path.
 
 ### Medium impact
+
 11. Add `nix flake check` to the AGENTS.md command table.
 12. Improve `failAfterNFlusher` test helper (fail-after-Flush semantics).
 13. Escape `;` in CSV dependency names OR add a JSON-only note in csv.go doc.
@@ -216,6 +230,7 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
 30. Re-measure core + viz coverage to confirm AGENTS.md stats are accurate.
 
 ### Lower impact / polish
+
 31. Shorten the `flake.nix` govulncheck-omission comment (move detail to TODO).
 32. Add a fuzz test for `writeDelimited` (random special-char step names).
 33. Add a property test for CSV round-trip (random StepInfo → WriteCSV → Read).
@@ -266,12 +281,12 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
 
 ## Verification Summary
 
-| Check | Core | Viz | Live |
-|-------|------|-----|------|
-| `go vet` | ✅ | ✅ | ✅ |
-| `go test -race` | ✅ | ✅ | ✅ |
-| `golangci-lint` | ✅ 0 issues | ✅ 0 issues | ✅ 0 issues |
-| `govulncheck` | ✅ clean | ✅ clean | ⏸ deferred (GO-2026-5856) |
-| Coverage | ~94.9% (unverified this session) | 91.7% (unverified) | **95.5%** ✅ |
-| `nix run .#check` | ✅ "All checks passed." |||
-| `nix flake check` | ✅ (treefmt clean) |||
+| Check             | Core                             | Viz                | Live                      |
+| ----------------- | -------------------------------- | ------------------ | ------------------------- |
+| `go vet`          | ✅                               | ✅                 | ✅                        |
+| `go test -race`   | ✅                               | ✅                 | ✅                        |
+| `golangci-lint`   | ✅ 0 issues                      | ✅ 0 issues        | ✅ 0 issues               |
+| `govulncheck`     | ✅ clean                         | ✅ clean           | ⏸ deferred (GO-2026-5856) |
+| Coverage          | ~94.9% (unverified this session) | 91.7% (unverified) | **95.5%** ✅              |
+| `nix run .#check` | ✅ "All checks passed."          |                    |                           |
+| `nix flake check` | ✅ (treefmt clean)               |                    |                           |

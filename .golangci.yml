@@ -87,8 +87,8 @@ linters:
     - nilerr
     - nilnesserr
     - nilnil
+    - nlreturn
     - noctx
-    - noinlineerr
     - nolintlint
     - nonamedreturns
     - nosprintfhostport
@@ -125,6 +125,8 @@ linters:
     - wrapcheck
     - wsl_v5
     - zerologlint
+  disable:
+    - noinlineerr
   settings:
     cyclop:
       max-complexity: 12

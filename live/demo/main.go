@@ -31,6 +31,7 @@ type fetchStep struct{ url string }
 func (s *fetchStep) String() string { return "fetch" }
 func (s *fetchStep) Do(_ context.Context) error {
 	time.Sleep(800 * time.Millisecond)
+
 	return nil
 }
 
@@ -39,6 +40,7 @@ type validateStep struct{}
 func (s *validateStep) String() string { return "validate" }
 func (s *validateStep) Do(_ context.Context) error {
 	time.Sleep(300 * time.Millisecond)
+
 	return nil
 }
 
@@ -47,6 +49,7 @@ type transformStep struct{}
 func (s *transformStep) String() string { return "transform" }
 func (s *transformStep) Do(_ context.Context) error {
 	time.Sleep(600 * time.Millisecond)
+
 	return nil
 }
 
@@ -55,6 +58,7 @@ type enrichStep struct{}
 func (s *enrichStep) String() string { return "enrich" }
 func (s *enrichStep) Do(_ context.Context) error {
 	time.Sleep(700 * time.Millisecond)
+
 	return nil
 }
 
@@ -77,6 +81,7 @@ type notifyStep struct{}
 func (s *notifyStep) String() string { return "notify" }
 func (s *notifyStep) Do(_ context.Context) error {
 	time.Sleep(300 * time.Millisecond)
+
 	return nil
 }
 

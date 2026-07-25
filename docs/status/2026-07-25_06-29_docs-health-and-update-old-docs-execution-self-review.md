@@ -17,16 +17,16 @@ Both skills executed end-to-end. All 6 historical snapshots got specific, non-de
 
 ### 1. update-old-docs: all 6 historical snapshots annotated
 
-Every `2026-07-2[45]*` file was read in full *before* any annotation (Step 1 of the skill). Each received a per-file classification (all ANNOTATE — each had load-bearing stale claims). Annotations are specific, not generic banners:
+Every `2026-07-2[45]*` file was read in full _before_ any annotation (Step 1 of the skill). Each received a per-file classification (all ANNOTATE — each had load-bearing stale claims). Annotations are specific, not generic banners:
 
-| File | Annotation type | Key correction |
-| ---- | --------------- | -------------- |
-| `2026-07-24_19-06_todo-list-execution-and-self-review.md` | Blockquote after metadata + inline `DONE:`/`REJECTED:` markers on the §e Critical list (4 items) | The 4 "CLAIMED DONE, NOT IMPLEMENTED" items all shipped in round-2; direction toggle REJECTED (daghtml has no direction param); `example` binary removed |
-| `2026-07-24_16-44_docs-health-and-historical-annotation.md` | Blockquote after metadata | The §d "go-output tag never pushed" finding resolved (tags ARE published); the §c doc gaps closed 2026-07-25 |
-| `2026-07-24_23-09_cross-project-learning-from-samber-do-auditlog.md` | Blockquote after metadata | §E "Immediate" items shipped in follow-up (`2026-07-25_00-08`); §C strategic items still unreleased (tracked PLANNED) |
-| `2026-07-25_00-08_post-cross-project-learning-execution-self-review.md` | Blockquote after metadata | Dead `DashboardProvider` type + STABILITY.md CORS contradiction — both fixed this session |
-| `2026-07-25_02-42_go-sse-pinning-brutal-self-review.md` | Blockquote after TL;DR | Pins confirmed current published state; CHANGELOG gap closed; open items tracked in TODO_LIST |
-| `2026-07-25_05-38_go-output-workspace-decoupling-self-review.md` | Blockquote after TL;DR | Decoupling verified current state; FEATURES.md gap closed; residual `go work sync` churn confirmed harmless |
+| File                                                                    | Annotation type                                                                                  | Key correction                                                                                                                                           |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `2026-07-24_19-06_todo-list-execution-and-self-review.md`               | Blockquote after metadata + inline `DONE:`/`REJECTED:` markers on the §e Critical list (4 items) | The 4 "CLAIMED DONE, NOT IMPLEMENTED" items all shipped in round-2; direction toggle REJECTED (daghtml has no direction param); `example` binary removed |
+| `2026-07-24_16-44_docs-health-and-historical-annotation.md`             | Blockquote after metadata                                                                        | The §d "go-output tag never pushed" finding resolved (tags ARE published); the §c doc gaps closed 2026-07-25                                             |
+| `2026-07-24_23-09_cross-project-learning-from-samber-do-auditlog.md`    | Blockquote after metadata                                                                        | §E "Immediate" items shipped in follow-up (`2026-07-25_00-08`); §C strategic items still unreleased (tracked PLANNED)                                    |
+| `2026-07-25_00-08_post-cross-project-learning-execution-self-review.md` | Blockquote after metadata                                                                        | Dead `DashboardProvider` type + STABILITY.md CORS contradiction — both fixed this session                                                                |
+| `2026-07-25_02-42_go-sse-pinning-brutal-self-review.md`                 | Blockquote after TL;DR                                                                           | Pins confirmed current published state; CHANGELOG gap closed; open items tracked in TODO_LIST                                                            |
+| `2026-07-25_05-38_go-output-workspace-decoupling-self-review.md`        | Blockquote after TL;DR                                                                           | Decoupling verified current state; FEATURES.md gap closed; residual `go work sync` churn confirmed harmless                                              |
 
 Every annotation: (1) passes the "so what?" test — cites what resolved + what's open with pointers; (2) placed after the metadata/TL;DR, never between title and opening; (3) no top-of-file banner; (4) no generic "see TODO_LIST" filler. Idempotent (heading-dated, re-runnable). The 50-item brainstorm lists in the old reports were **left untouched** — restraint over noise (per the skill: "files left untouched is a metric of good judgment").
 
@@ -34,19 +34,19 @@ Every annotation: (1) passes the "so what?" test — cites what resolved + what'
 
 All counts and versions verified against the actual code (`go.mod`, `git ls-remote`, fresh test/coverage runs) before editing — never trusted doc claims. Findings:
 
-| # | File | Finding | Severity | Fix |
-| - | ---- | ------- | -------- | --- |
-| 1 | `live/server.go` | Dead `DashboardProvider` type still present — CHANGELOG claimed "Removed" | Critical (code/doc lie) | **Removed the type** — makes CHANGELOG true; verified dead (only definition, no usage) |
-| 2 | `STABILITY.md:39` | go-error-family listed as v0.7.0 (actual v0.9.0) | Medium | Corrected to v0.9.0 |
-| 3 | `STABILITY.md:54` | CORS described old `"*"`/`"off"` default (code is secure-by-default) | Medium (contradicts code) | Rewritten to "empty = disabled, secure-by-default" |
-| 4 | `FEATURES.md` | go-sse "private, replace directive" (actually v0.2.0 public, pinned) | Medium | Corrected to "v0.2.0, public, pinned" |
-| 5 | `FEATURES.md` | go-output "v0.31.1 in viz/go.mod" (now resolved from published tags, no local replace) | Medium | Corrected + added full sub-module list |
-| 6 | `FEATURES.md` | go-error-family v0.7.0 (actual v0.9.0) | Medium | Corrected |
-| 7 | `FEATURES.md` | Listed non-existent direction toggle + broken zoom/fit | Medium (ghost features) | Rewritten to daghtml-native + minimap viewport tracking |
-| 8 | `FEATURES.md`/`README`/`AGENTS` | Test count 415/423 (actual 445: 162/229/54) | Low | Corrected everywhere consistently |
-| 9 | `FEATURES.md`/`STABILITY`/`AGENTS` | Coverage 95.6%/90.4% (actual 94.9%/90.3%) | Low | Corrected |
-| 10 | `ROADMAP.md` | "DAG during execution" called the "#1 gap" — resolved by `CaptureDAG` (shipped 2026-07-24) | Medium (stale status) | Rewritten: resolved; WebSocket also shipped |
-| 11 | `CHANGELOG.md [Unreleased]` | Direction toggle in Added AND Removed (contradiction); stale "go-sse private"; missing dep-pinning entry | Medium | Reconciled; added dep-pinning entry incl. go-error-family v0.9.0 |
+| #   | File                               | Finding                                                                                                  | Severity                  | Fix                                                                                    |
+| --- | ---------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
+| 1   | `live/server.go`                   | Dead `DashboardProvider` type still present — CHANGELOG claimed "Removed"                                | Critical (code/doc lie)   | **Removed the type** — makes CHANGELOG true; verified dead (only definition, no usage) |
+| 2   | `STABILITY.md:39`                  | go-error-family listed as v0.7.0 (actual v0.9.0)                                                         | Medium                    | Corrected to v0.9.0                                                                    |
+| 3   | `STABILITY.md:54`                  | CORS described old `"*"`/`"off"` default (code is secure-by-default)                                     | Medium (contradicts code) | Rewritten to "empty = disabled, secure-by-default"                                     |
+| 4   | `FEATURES.md`                      | go-sse "private, replace directive" (actually v0.2.0 public, pinned)                                     | Medium                    | Corrected to "v0.2.0, public, pinned"                                                  |
+| 5   | `FEATURES.md`                      | go-output "v0.31.1 in viz/go.mod" (now resolved from published tags, no local replace)                   | Medium                    | Corrected + added full sub-module list                                                 |
+| 6   | `FEATURES.md`                      | go-error-family v0.7.0 (actual v0.9.0)                                                                   | Medium                    | Corrected                                                                              |
+| 7   | `FEATURES.md`                      | Listed non-existent direction toggle + broken zoom/fit                                                   | Medium (ghost features)   | Rewritten to daghtml-native + minimap viewport tracking                                |
+| 8   | `FEATURES.md`/`README`/`AGENTS`    | Test count 415/423 (actual 445: 162/229/54)                                                              | Low                       | Corrected everywhere consistently                                                      |
+| 9   | `FEATURES.md`/`STABILITY`/`AGENTS` | Coverage 95.6%/90.4% (actual 94.9%/90.3%)                                                                | Low                       | Corrected                                                                              |
+| 10  | `ROADMAP.md`                       | "DAG during execution" called the "#1 gap" — resolved by `CaptureDAG` (shipped 2026-07-24)               | Medium (stale status)     | Rewritten: resolved; WebSocket also shipped                                            |
+| 11  | `CHANGELOG.md [Unreleased]`        | Direction toggle in Added AND Removed (contradiction); stale "go-sse private"; missing dep-pinning entry | Medium                    | Reconciled; added dep-pinning entry incl. go-error-family v0.9.0                       |
 
 ### 3. TODO_LIST.md rebuilt (structural decay fixed)
 
@@ -96,11 +96,11 @@ I ran coverage once per module and recorded 94.9% / 91.7% / 90.3%. These are acc
 
 ### 1. I duplicated the dependency-pinning CHANGELOG entry
 
-When fixing the stale "go-sse private" line in `[Unreleased]`, I added a "Dependency pinning" entry. But an earlier edit in the same session had *already* added a near-identical "Dependency pinning" entry (to record go-sse/go-atomic-write/go-ndjson + go-output decoupling). I then edited the *second* one to add go-error-family/go-branded-id, not realizing the first existed. Net result: **two "Dependency pinning" entries in `[Unreleased]`**, partially overlapping. This is a copy-paste/duplicate-information failure that the docs-health skill explicitly warns against ("each fact lives in exactly ONE place"). I caught it during the final consistency sweep and consolidated them into one — but I produced the duplication first, which should not have happened.
+When fixing the stale "go-sse private" line in `[Unreleased]`, I added a "Dependency pinning" entry. But an earlier edit in the same session had _already_ added a near-identical "Dependency pinning" entry (to record go-sse/go-atomic-write/go-ndjson + go-output decoupling). I then edited the _second_ one to add go-error-family/go-branded-id, not realizing the first existed. Net result: **two "Dependency pinning" entries in `[Unreleased]`**, partially overlapping. This is a copy-paste/duplicate-information failure that the docs-health skill explicitly warns against ("each fact lives in exactly ONE place"). I caught it during the final consistency sweep and consolidated them into one — but I produced the duplication first, which should not have happened.
 
 ### 2. I edited a file the auto-commit daemon had just modified without re-reading
 
-Several `edit`/`multiedit` calls failed with "file modified since last read" because the auto-commit daemon touched the mtime. I recovered by re-viewing and re-applying — but the *root cause* is that I did not account for the daemon racing me. The 00-08 and 02-42 reports both document this daemon producing garbage commits and intermediate states. I should have either (a) disabled the daemon for the session, (b) batched all edits into fewer operations, or (c) asked the user about it. Instead I treated each mtime-conflict as a one-off retry. The right fix is to stop fighting the daemon.
+Several `edit`/`multiedit` calls failed with "file modified since last read" because the auto-commit daemon touched the mtime. I recovered by re-viewing and re-applying — but the _root cause_ is that I did not account for the daemon racing me. The 00-08 and 02-42 reports both document this daemon producing garbage commits and intermediate states. I should have either (a) disabled the daemon for the session, (b) batched all edits into fewer operations, or (c) asked the user about it. Instead I treated each mtime-conflict as a one-off retry. The right fix is to stop fighting the daemon.
 
 ### 3. I wrote `grep -c` chains with `&&`, which aborted on the first 0-match
 
@@ -123,7 +123,7 @@ During the final verification sweep, I chained grep counts with `&&`. When a gre
 6. **DOMAIN_LANGUAGE.md is structurally behind.** Core + viz terms are covered; live-module terms (WebSocket, CaptureDAG, CORS, Prefix, export endpoints) are missing. This is now the most stale living doc.
 7. **`docs/status/INDEX.md` has no entries for any 2026-07-2[45] report** (7 reports). It's an index that doesn't index the recent work.
 8. **Coverage numbers in docs are hardcoded and will rot.** FEATURES/AGENTS now say "94.9%/91.7%/90.3%." Better: point at the command, or add a coverage-gate CI badge that stays current.
-9. **The `example` binary removal + `.gitignore` change** (from the round-2 session) is in git history but the *history bloat* (14 MB binary across many commits) is permanent without a `git filter-repo`. Noted, not actionable without user decision.
+9. **The `example` binary removal + `.gitignore` change** (from the round-2 session) is in git history but the _history bloat_ (14 MB binary across many commits) is permanent without a `git filter-repo`. Noted, not actionable without user decision.
 10. **Go 1.26.4 has a known CVE (GO-2026-5856)** affecting `live.Server.ListenAndServe`. This is a real security finding, not just doc drift. It's in TODO_LIST but it deserves prominence — a library advertising `live.Server` shouldn't ship on a vulnerable toolchain.
 
 ---
