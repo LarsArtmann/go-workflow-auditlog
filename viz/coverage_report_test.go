@@ -47,8 +47,7 @@ func TestReport_StepByName(t *testing.T) {
 func TestReport_EventsByType(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "typed-step")
-	report := a.Report()
+	report := testhelpers.RunSingleSucceedWithReport(t, "typed-step")
 
 	starts := report.EventsByType(auditlog.EventTypeAttemptStart)
 	if len(starts) < 1 {

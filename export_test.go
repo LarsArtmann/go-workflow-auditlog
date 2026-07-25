@@ -15,8 +15,7 @@ import (
 func TestReportWriteNDJSON_FlushError(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "flush-error-step")
-	report := a.Report()
+	report := testhelpers.RunSingleSucceedWithReport(t, "flush-error-step")
 
 	err := report.WriteNDJSON(testhelpers.FailingWriter{})
 	if err == nil {
@@ -33,8 +32,7 @@ func TestReportWriteNDJSON_FlushError(t *testing.T) {
 func TestReportWriteJSON_RenderError(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "render-error-step")
-	report := a.Report()
+	report := testhelpers.RunSingleSucceedWithReport(t, "render-error-step")
 
 	err := report.WriteJSON(testhelpers.FailingWriter{})
 	if err == nil {

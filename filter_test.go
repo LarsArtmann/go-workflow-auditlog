@@ -39,8 +39,7 @@ func TestFiltered_ByStatus(t *testing.T) {
 func TestFiltered_ByEventType(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "filter-event")
-	fullReport := a.Report()
+	fullReport := testhelpers.RunSingleSucceedWithReport(t, "filter-event")
 	filtered := fullReport.Filtered(auditlog.WithEventsByType(auditlog.EventTypeAttemptStart))
 
 	// Only start events should survive.

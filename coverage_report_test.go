@@ -267,8 +267,7 @@ func TestCoverage_Report_Summary(t *testing.T) {
 func TestCoverage_Report_WriteJSON_ErrorPath(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "json-error")
-	report := a.Report()
+	report := testhelpers.RunSingleSucceedWithReport(t, "json-error")
 	writer := &testhelpers.FailingWriter{}
 
 	err := report.WriteJSON(writer)

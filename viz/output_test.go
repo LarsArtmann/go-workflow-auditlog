@@ -346,9 +346,7 @@ func TestExportHTMLTree(t *testing.T) {
 func TestWorkflowReport_ExportMethods(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "report-export")
-
-	report := a.Report()
+	report := testhelpers.RunSingleSucceedWithReport(t, "report-export")
 	dir := t.TempDir()
 
 	for _, tc := range []struct {

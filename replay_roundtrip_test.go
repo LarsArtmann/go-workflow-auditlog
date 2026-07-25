@@ -17,8 +17,7 @@ func TestReplayEvents_RoundTripFromWorkflow(t *testing.T) {
 	t.Parallel()
 
 	// Run a real workflow to get a report with events.
-	a := testhelpers.RunSingleSucceed(t, "roundtrip-step")
-	original := a.Report()
+	original := testhelpers.RunSingleSucceedWithReport(t, "roundtrip-step")
 
 	if original.EventCount == 0 {
 		t.Fatal("expected events in original report")

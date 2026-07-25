@@ -98,9 +98,7 @@ func TestLoadReport_NonexistentFile(t *testing.T) {
 func TestReportWriteNDJSON(t *testing.T) {
 	t.Parallel()
 
-	a := testhelpers.RunSingleSucceed(t, "ndjson-report-step")
-
-	report := a.Report()
+	report := testhelpers.RunSingleSucceedWithReport(t, "ndjson-report-step")
 
 	var buf bytes.Buffer
 

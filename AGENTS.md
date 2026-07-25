@@ -239,7 +239,8 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 | `AddSingleStep`                                    | Wire a single succeed step into a workflow                                              |
 | `RunSingleSucceed`                                 | Run minimal single-succeed-step workflow (auditor + wf + step + Attach + Do + Snapshot) |
 | `RunSingleSucceedWithBuffer`                       | `RunSingleSucceed` + fresh `*strings.Builder` for `Write*`-into-buffer tests            |
-| `RunWorkflow`                                      | `Attach` + `Do` + `Snapshot` in one call                                                |
+| `RunSingleSucceedWithReport`                       | `RunSingleSucceed().Report()` — returns the assembled `WorkflowReport` for tests that only need the report |
+| `RunWorkflow`                                      | `Attach` + `Do` + `Snapshot` in one call; accepts `testing.TB` so benchmarks can reuse the same setup |
 | `SingleSucceedExportPath`                          | `RunSingleSucceed` + `t.TempDir`-anchored path for `Export*` tests                      |
 | `FindStep`, `AssertReportValid`                    | Step lookup + structural validation                                                     |
 | `AssertStepCount`                                  | Required step count (uses `Fatalf` to stop on mismatch)                                 |
