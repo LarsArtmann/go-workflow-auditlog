@@ -96,8 +96,11 @@ table, eliminating flicker for 100+ step workflows.
 **Remaining direction**: genuinely-open enhancements — multi-run support
 (multiple concurrent workflow dashboards), authentication, TLS/HTTPS,
 compression (gzip/brotli), client-side replay/playback, graceful drain on
-shutdown, and a `Transport` interface to deduplicate the parallel
-SSE/WebSocket implementations.
+shutdown, a `Transport` interface to deduplicate the parallel
+SSE/WebSocket implementations, and (only if pixel-level verification is ever
+required) opt-in browser-automation tests behind a `//go:build browser_e2e`
+tag — kept out of default CI because a Chromium dependency is a net negative
+for a library; the Go-based JS structural tests already cover the wiring.
 
 ---
 
