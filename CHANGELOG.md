@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-25
+
+> **⚠️ Breaking (permitted in 0.x minor releases — see
+> [STABILITY.md](STABILITY.md)).** The single-module layout was split into
+> three independent Go modules: **core**, **viz**, and **live**. Visualization
+> functions moved from the root `auditlog` package to the `viz` package
+> (e.g. `auditlog.WriteMermaid` → `viz.WriteMermaid`). Core import paths and
+> all stable API surfaces are unchanged. See
+> [`docs/MIGRATION.md`](docs/MIGRATION.md) for the full migration guide.
+
 ### Added
 
 - **`live` module in `nix run .#check`** — the canonical check script now runs
