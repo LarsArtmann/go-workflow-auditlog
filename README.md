@@ -222,48 +222,48 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 
 ```json
 {
-  "version": "0.1.0",
-  "workflow_id": "my-pipeline",
-  "run_id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
-  "exported_at": "2026-06-18T15:21:09Z",
-  "event_count": 4,
-  "step_count": 2,
-  "succeeded_count": 2,
-  "failed_count": 0,
-  "skipped_count": 0,
-  "canceled_count": 0,
-  "pending_count": 0,
-  "running_count": 0,
-  "total_duration_ms": 15.23,
-  "wall_clock_duration_ms": 15.23,
-  "workflow_succeeded": true,
-  "dropped_event_count": 0,
-  "peak_concurrency": 1,
-  "critical_path_duration_ms": 15.23,
-  "steps": [
-    {
-      "step_name": "fetch",
-      "step_type": "FetchStep",
-      "step_id": 1,
-      "status": "succeeded",
-      "attempt_count": 1,
-      "duration_ms": 10.5,
-      "has_retry": false,
-      "has_timeout": false,
-      "dependents": [{ "step_name": "save" }]
-    }
-  ],
-  "events": [
-    {
-      "run_id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
-      "sequence": 1,
-      "timestamp": "2026-06-18T15:21:09Z",
-      "event_type": "attempt_start",
-      "phase": "before",
-      "step_name": "fetch",
-      "attempt": 1
-    }
-  ]
+	"version": "0.1.0",
+	"workflow_id": "my-pipeline",
+	"run_id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+	"exported_at": "2026-06-18T15:21:09Z",
+	"event_count": 4,
+	"step_count": 2,
+	"succeeded_count": 2,
+	"failed_count": 0,
+	"skipped_count": 0,
+	"canceled_count": 0,
+	"pending_count": 0,
+	"running_count": 0,
+	"total_duration_ms": 15.23,
+	"wall_clock_duration_ms": 15.23,
+	"workflow_succeeded": true,
+	"dropped_event_count": 0,
+	"peak_concurrency": 1,
+	"critical_path_duration_ms": 15.23,
+	"steps": [
+		{
+			"step_name": "fetch",
+			"step_type": "FetchStep",
+			"step_id": 1,
+			"status": "succeeded",
+			"attempt_count": 1,
+			"duration_ms": 10.5,
+			"has_retry": false,
+			"has_timeout": false,
+			"dependents": [{ "step_name": "save" }]
+		}
+	],
+	"events": [
+		{
+			"run_id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+			"sequence": 1,
+			"timestamp": "2026-06-18T15:21:09Z",
+			"event_type": "attempt_start",
+			"phase": "before",
+			"step_name": "fetch",
+			"attempt": 1
+		}
+	]
 }
 ```
 
