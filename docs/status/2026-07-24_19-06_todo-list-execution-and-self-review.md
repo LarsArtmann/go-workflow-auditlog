@@ -9,7 +9,7 @@
 > §b "PARTIALLY DONE / CLAIMED DONE, NOT IMPLEMENTED" items were all resolved —
 > diff-based steps-table rendering shipped (`stepRows`/`stepStateKey`/
 > `updateStepRow`), the broken direction-toggle / custom zoom / fit-to-view
-> handlers were *removed* in favour of daghtml-native handlers, and the minimap
+> handlers were _removed_ in favour of daghtml-native handlers, and the minimap
 > gained real viewport tracking via `MutationObserver`. The §c "NOT STARTED"
 > items also shipped: SSE end-to-end test, WebSocket transport (`/api/ws` with
 > SSE→WS fallback), dashboard export buttons, and live graph duration labels.
