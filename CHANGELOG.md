@@ -63,6 +63,7 @@ attachment`.
   against checksum-verified published versions. `go-output` is likewise
   resolved from published v0.31.1 (workspace `use` directives for go-output
   removed), so `go.work` references only this project's own modules.
+  `go-error-family` bumped to v0.9.0 and `go-branded-id` to v0.3.2.
 - **Streaming NDJSON** (`NDJSONStreamer` in `stream.go`) — real-time event
   streaming via `Config.OnEvent`. Writes events as NDJSON the moment they are
   captured, without buffering the entire run in memory first. Thread-safe
@@ -114,8 +115,8 @@ attachment`.
     `hub.OnEvent` as `Config.OnEvent`, returns `(*Server, *Auditor, error)`
   - Demo pipeline at `live/demo` (fetch → validate → transform → save → notify
     with retry) serving at `http://localhost:18080`
-  - Depends on `github.com/larsartmann/go-sse` (private, `replace` directive in
-    `go.mod`; will be removed once go-sse is public)
+  - Depends on `github.com/larsartmann/go-sse` v0.2.0 (public, pinned in
+    `live/go.mod`) for SSE wire-format primitives
 - **`d2 fmt` in treefmt** — D2 diagram files (`.d2`) are now formatted
   automatically via `d2-fmt` in the `flake.nix` treefmt configuration. The `d2`
   CLI is included in the devShell.

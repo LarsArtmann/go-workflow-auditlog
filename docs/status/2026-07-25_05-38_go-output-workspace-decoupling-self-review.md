@@ -17,6 +17,16 @@ path (including `govulncheck`), did not run `go mod tidy`, did not investigate w
 go-output release fixes the residual `go work sync` churn, and left `FEATURES.md` stale. Details
 and the full improvement plan below.
 
+> **Update 2026-07-25:** the decoupling is the verified current state — `go.work`
+> references only this project's own modules (`.`, `./viz`, `./live`), and all
+> three modules build/test in both workspace and standalone (`GOWORK=off`) mode.
+> The §c "FEATURES.md lines 142–143 stale" gap is closed: FEATURES.md now states
+> go-output is resolved from published v0.31.1 with no local `replace`. The
+> residual `go work sync` testhelpers churn (§a.12) is confirmed to be a defect
+> in go-output's published `go.mod` (`=> ./testhelpers` + pseudo-version) and is
+> harmless to builds. Still open from §c: a full `nix run .#check` (incl.
+> govulncheck) and `go mod tidy` were not re-run after this work.
+
 ---
 
 ## a) FULLY DONE ✅
