@@ -26,6 +26,15 @@
     return h + "h " + remM + "m";
   }
 
+  // humanizeMs formats durations for compact graph node labels.
+  // Mirrors the Go humanizeMs() in viz/daghtml_adapter.go.
+  function humanizeMs(ms) {
+    if (ms == null || ms < 0) return "";
+    if (ms < 1) return "<1ms";
+    if (ms < 1000) return Math.round(ms) + "ms";
+    return (ms / 1000).toFixed(1) + "s";
+  }
+
   // === Type metadata ===
 
   var meta = {};
@@ -846,6 +855,18 @@
       if (shape) {
         shape.style.fill = color;
         shape.style.transition = "fill 0.3s ease";
+      }
+
+      // Update label with status icon + duration (matches Go buildDAGHTML format)
+      var textEl = node.querySelector("text");
+      if (textEl) {
+        var label = step.step_name;
+        var icon = statusIcons[step.status];
+        if (icon) label = icon + " " + label;
+        if (step.duration_ms && step.duration_ms > 0) {
+          label += " \u00b7 " + humanizeMs(step.duration_ms);
+        }
+        textEl.textContent = label;
       }
 
       // Flash recently changed nodes
