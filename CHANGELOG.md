@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **`DiffResult.IsEmpty()`** — polarity reconciliation with the `samber-do-auditlog` twin (which exposes `HasChanges()`). Both twins now offer both methods so consumers can ask either question regardless of which library they use.
+
+### Changed
+
+- **Adopted the new `go-atomic-write` API** (`helpers.go`) — `WriteFunc(path, fn, Fingerprint{})` migrated to the plain `WriteFunc(path, fn)` variant (no TOCTOU verification needed here). Tracks the `go-atomic-write` breaking API split.
+
 ## [0.8.0] - 2026-07-25
 
 > **⚠️ Breaking (permitted in 0.x minor releases — see
