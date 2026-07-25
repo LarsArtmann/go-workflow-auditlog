@@ -36,7 +36,7 @@ These surfaces are functional but their exact shape may change:
 | `ReportIndex` query methods                                                            | New lookup methods may be added.                                                          |
 | `ErrorClassifications()` / `RegisterClassifications(reg)`                              | Classification mapping may grow as new sentinels are added.                               |
 | I/O sentinel errors (`ErrReportLoadFailed`, `ErrRenderFailed`, `ErrExportWriteFailed`) | Sentinel set is stable; wrapping messages may evolve.                                     |
-| `go-error-family` dependency (v0.7.0)                                                  | Transitive: classification metadata depends on this external library. Pinned in go.mod.   |
+| `go-error-family` dependency (v0.9.0)                                                  | Transitive: classification metadata depends on this external library. Pinned in go.mod.   |
 | `NDJSONStreamer` / `NewNDJSONStreamer` / `CreateNDJSONStreamer`                        | New streaming API; type and method set may grow. Output format (NDJSON) is stable.        |
 | `WithAutoFlush()` / `WithBufferSize(n)` / `NDJSONStreamerOption`                       | Option set may expand; existing options keep their semantics.                             |
 | Dashboard graph enhancements (critical path, retry badges, search, duration labels)    | JS post-processing layer on daghtml SVG; behavior may evolve with go-output daghtml SDK.  |
@@ -51,7 +51,7 @@ These surfaces are new and may change between 0.x releases:
 | Surface                                                                   | Reason                                                                         |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | `live.Config.Prefix`                                                      | Configurable route prefix (default "/"); URL construction may evolve.          |
-| `live.Config.CORSAllowedOrigins`                                          | CORS header control (default "*", "off" disables); sentinel values may expand. |
+| `live.Config.CORSAllowedOrigins`                                          | CORS header control (empty = disabled, secure-by-default; set to a specific origin or `"*"` to enable). |
 | `live.Server` export endpoints (`/api/export/ndjson`, `/api/export/html`) | New endpoints; Content-Disposition headers may evolve.                         |
 | `WorkflowReport.WriteCSV` / `WriteTSV` / `ExportCSV` / `ExportTSV`        | New delimited-value export; column set may expand.                             |
 
