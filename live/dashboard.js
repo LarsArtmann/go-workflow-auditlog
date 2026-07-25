@@ -1199,12 +1199,22 @@
     var originalSvg = els.graphContainer.querySelector("svg");
     if (!originalSvg) return;
 
+    // Capture full graph bounds from the main SVG's initial viewBox.
+    // daghtml sets the viewBox once at render; pan/zoom mutate it afterwards.
+    var fullVB = originalSvg.viewBox.baseVal;
+    var fullX = fullVB.x,
+      fullY = fullVB.y,
+      fullW = fullVB.width,
+      fullH = fullVB.height;
+
     var clone = originalSvg.cloneNode(true);
     clone.removeAttribute("width");
     clone.removeAttribute("height");
     clone.style.width = "100%";
     clone.style.height = "100%";
     clone.style.pointerEvents = "none";
+    // Lock the clone's viewBox to the full graph so it always shows everything
+    clone.setAttribute("viewBox", fullX + " " + fullY + " " + fullW + " " + fullH);
 
     minimapEl.appendChild(clone);
 
@@ -1223,22 +1233,48 @@
       cloneSvg.appendChild(viewport);
     }
 
-    // Click-to-navigate on minimap
+    // Update the viewport indicator to match the main SVG's current viewBox.
+    function syncViewport() {
+      var vb = originalSvg.viewBox.baseVal;
+      if (!vb || !vb.width) return;
+      viewport.setAttribute("x", vb.x);
+      viewport.setAttribute("y", vb.y);
+      viewport.setAttribute("width", vb.width);
+      viewport.setAttribute("height", vb.height);
+    }
+
+    syncViewport();
+
+    // Watch main SVG viewBox attribute changes (daghtml updates via setAttribute)
+    var minimapObserver = new MutationObserver(function () {
+      syncViewport();
+    });
+    minimapObserver.observe(originalSvg, {
+      attributes: true,
+      attributeFilter: ["viewBox"],
+    });
+
+    // Click-to-navigate: center the main graph on the clicked point
     minimapEl.style.pointerEvents = "auto";
     minimapEl.addEventListener("click", function (e) {
       var rect = minimapEl.getBoundingClientRect();
       var pctX = (e.clientX - rect.left) / rect.width;
       var pctY = (e.clientY - rect.top) / rect.height;
 
-      // Pan the main graph to center on clicked point
       var mainSvg = els.graphContainer.querySelector("svg");
-      if (mainSvg) {
-        var vb = mainSvg.viewBox.baseVal;
-        if (vb && vb.width) {
-          vb.x = pctX * vb.width - vb.width / 2;
-          vb.y = pctY * vb.height - vb.height / 2;
-        }
-      }
+      if (!mainSvg) return;
+
+      var vb = mainSvg.viewBox.baseVal;
+      if (!vb || !vb.width) return;
+
+      // Map click percentage to graph coordinates, then center
+      var targetX = fullX + pctX * fullW - vb.width / 2;
+      var targetY = fullY + pctY * fullH - vb.height / 2;
+      mainSvg.setAttribute(
+        "viewBox",
+        targetX + " " + targetY + " " + vb.width + " " + vb.height,
+      );
+      // MutationObserver will sync the minimap indicator
     });
   }
 
