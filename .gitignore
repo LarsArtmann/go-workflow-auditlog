@@ -45,6 +45,7 @@ Thumbs.db
 *.log
 # Build artifacts
 /go-workflow-auditlog
+/example
 # Coverage
 cover.out
 cover.html
