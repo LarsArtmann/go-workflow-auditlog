@@ -464,7 +464,7 @@
   var stepSortDir = 1;
   var numericSortKeys = ["attempts", "duration"];
 
-  function buildStepRows() {
+  function getSortedSteps() {
     var steps = Object.keys(state.steps).map(function (n) {
       return state.steps[n];
     });
@@ -474,168 +474,235 @@
       if (stepSortKey === "name") {
         av = (a.step_name || "").toLowerCase();
         bv = (b.step_name || "").toLowerCase();
-        return av < bv ? -1 : av > bv ? 1 : 0;
+        return ((av < bv ? -1 : av > bv ? 1 : 0)) * stepSortDir;
       } else if (stepSortKey === "type") {
         av = a.step_type || "";
         bv = b.step_type || "";
-        return av < bv ? -1 : av > bv ? 1 : 0;
+        return ((av < bv ? -1 : av > bv ? 1 : 0)) * stepSortDir;
       } else if (stepSortKey === "status") {
         av = a.status || "";
         bv = b.status || "";
-        return av < bv ? -1 : av > bv ? 1 : 0;
+        return ((av < bv ? -1 : av > bv ? 1 : 0)) * stepSortDir;
       } else if (stepSortKey === "attempts") {
-        return (a.attempt_count || 0) - (b.attempt_count || 0);
+        return ((a.attempt_count || 0) - (b.attempt_count || 0)) * stepSortDir;
       } else if (stepSortKey === "duration") {
-        return (a.duration_ms || 0) - (b.duration_ms || 0);
+        return ((a.duration_ms || 0) - (b.duration_ms || 0)) * stepSortDir;
       }
       return 0;
     });
 
-    return steps.map(function (s) {
-      var isNew = state.newStepNames[s.step_name];
-      var isRunning = s.status === "running";
-      var rowCls = "";
-      if (isNew) rowCls += " step-row-new";
-      if (isRunning) rowCls += " step-row-running";
-      if (s.status === "failed") rowCls += " row-failed";
-      if (s.status === "canceled") rowCls += " row-canceled";
+    return steps;
+  }
 
-      var deps = (s.dependencies || [])
-        .map(function (d) {
-          return esc(d.step_name || d);
-        })
-        .join(", ");
-      var depsR = (s.dependents || [])
-        .map(function (d) {
-          return esc(d.step_name || d);
-        })
-        .join(", ");
+  // Build the HTML for a single step row's <td> cells (not the <tr> wrapper).
+  function buildStepCellsHTML(s) {
+    var deps = (s.dependencies || [])
+      .map(function (d) {
+        return esc(d.step_name || d);
+      })
+      .join(", ");
+    var depsR = (s.dependents || [])
+      .map(function (d) {
+        return esc(d.step_name || d);
+      })
+      .join(", ");
 
-      var errMsg = s.error ? esc(s.error) : "";
-      var statusBadge =
-        '<span class="status-badge ' +
-        esc(s.status) +
-        '"' +
-        (errMsg ? ' data-error="' + errMsg + '"' : "") +
-        ">" +
-        (statusIcons[s.status] || "") +
-        " " +
-        esc(s.status) +
-        "</span>";
+    var errMsg = s.error ? esc(s.error) : "";
+    var statusBadge =
+      '<span class="status-badge ' +
+      esc(s.status) +
+      '"' +
+      (errMsg ? ' data-error="' + errMsg + '"' : "") +
+      ">" +
+      (statusIcons[s.status] || "") +
+      " " +
+      esc(s.status) +
+      "</span>";
 
-      var hasError = s.status === "failed" || s.status === "canceled" ? "1" : "0";
+    var cfgBadges = "";
+    if (s.has_retry) {
+      cfgBadges +=
+        '<span class="config-badge retry" title="Max attempts: ' +
+        (s.max_attempts || 0) +
+        '">\u{1F501} retry</span> ';
+    }
+    if (s.has_timeout) cfgBadges += '<span class="config-badge timeout">\u23F2 timeout</span>';
 
-      var cfgBadges = "";
-      if (s.has_retry) {
-        cfgBadges +=
-          '<span class="config-badge retry" title="Max attempts: ' +
-          (s.max_attempts || 0) +
-          '">\u{1F501} retry</span> ';
-      }
-      if (s.has_timeout) cfgBadges += '<span class="config-badge timeout">\u23F2 timeout</span>';
+    return (
+      '<td class="mono">' +
+      esc(s.step_name) +
+      "</td>" +
+      '<td class="mono" style="color:var(--text-dim)">' +
+      esc(s.step_type || "\u2014") +
+      "</td>" +
+      "<td>" +
+      statusBadge +
+      "</td>" +
+      "<td>" +
+      s.attempt_count +
+      (s.max_attempts > 1 ? "/" + s.max_attempts : "") +
+      "</td>" +
+      "<td>" +
+      (s.duration_ms ? humanizeDuration(s.duration_ms) : "\u2014") +
+      "</td>" +
+      '<td class="deps-list">' +
+      (deps || "\u2014") +
+      "</td>" +
+      '<td class="deps-list">' +
+      (depsR || "\u2014") +
+      "</td>" +
+      "<td>" +
+      cfgBadges +
+      "</td>" +
+      '<td class="error-cell' +
+      (errMsg ? "" : " empty") +
+      '"' +
+      (errMsg ? ' title="' + errMsg + '"' : "") +
+      ">" +
+      (errMsg || "\u2014") +
+      "</td>"
+    );
+  }
 
-      return (
-        '<tr data-search="' +
-        esc(
-          (
-            s.step_name +
-            " " +
-            (s.step_type || "") +
-            " " +
-            s.status +
-            " " +
-            (s.error || "")
-          ).toLowerCase(),
-        ) +
-        '" class="' +
-        rowCls.trim() +
-        '"' +
-        ' data-has-error="' +
-        hasError +
-        '"' +
-        ">" +
-        '<td class="mono">' +
-        esc(s.step_name) +
-        "</td>" +
-        '<td class="mono" style="color:var(--text-dim)">' +
-        esc(s.step_type || "\u2014") +
-        "</td>" +
-        "<td>" +
-        statusBadge +
-        "</td>" +
-        "<td>" +
-        s.attempt_count +
-        (s.max_attempts > 1 ? "/" + s.max_attempts : "") +
-        "</td>" +
-        "<td>" +
-        (s.duration_ms ? humanizeDuration(s.duration_ms) : "\u2014") +
-        "</td>" +
-        '<td class="deps-list">' +
-        (deps || "\u2014") +
-        "</td>" +
-        '<td class="deps-list">' +
-        (depsR || "\u2014") +
-        "</td>" +
-        "<td>" +
-        cfgBadges +
-        "</td>" +
-        '<td class="error-cell' +
-        (errMsg ? "" : " empty") +
-        '"' +
-        (errMsg ? ' title="' + errMsg + '"' : "") +
-        ">" +
-        (errMsg || "\u2014") +
-        "</td>" +
-        "</tr>"
-      );
-    });
+  // Compact state key for change detection — only volatile fields.
+  function stepStateKey(s) {
+    return [
+      s.status,
+      s.attempt_count,
+      s.duration_ms || 0,
+      s.error || "",
+      s.has_retry ? 1 : 0,
+      s.max_attempts || 0,
+    ].join("|");
+  }
+
+  // Update only the volatile cells of an existing row (status, attempts,
+  // duration, error). Stable cells (name, type, deps, config) are left alone.
+  function updateStepRow(tr, s) {
+    tr.classList.toggle("step-row-running", s.status === "running");
+    tr.classList.toggle("row-failed", s.status === "failed");
+    tr.classList.toggle("row-canceled", s.status === "canceled");
+    tr.setAttribute("data-has-error", s.status === "failed" || s.status === "canceled" ? "1" : "0");
+
+    // Cell 2: status badge
+    var errMsg = s.error ? esc(s.error) : "";
+    tr.children[2].innerHTML =
+      '<span class="status-badge ' +
+      esc(s.status) +
+      '"' +
+      (errMsg ? ' data-error="' + errMsg + '"' : "") +
+      ">" +
+      (statusIcons[s.status] || "") +
+      " " +
+      esc(s.status) +
+      "</span>";
+
+    // Cell 3: attempts
+    tr.children[3].textContent =
+      s.attempt_count + (s.max_attempts > 1 ? "/" + s.max_attempts : "");
+
+    // Cell 4: duration
+    tr.children[4].textContent = s.duration_ms ? humanizeDuration(s.duration_ms) : "\u2014";
+
+    // Cell 8: error
+    tr.children[8].className = "error-cell" + (errMsg ? "" : " empty");
+    if (errMsg) {
+      tr.children[8].setAttribute("title", errMsg);
+    } else {
+      tr.children[8].removeAttribute("title");
+    }
+    tr.children[8].textContent = errMsg || "\u2014";
   }
 
   var STEP_PAGE_SIZE = 50;
   var stepExpanded = false;
 
+  // stepRows tracks rendered rows for diff-based incremental updates.
+  // Map: stepName → { tr: HTMLTableRowElement, key: string }
+  var stepRows = {};
+
   function renderStepsTable() {
-    var rows = buildStepRows();
+    var sortedSteps = getSortedSteps();
 
     var q = (els.stepSearch.value || "").toLowerCase();
     var errorsOnly = els.stepErrorsOnly.getAttribute("aria-pressed") === "true";
-    var searching = q.length > 0;
+    var filtering = q.length > 0 || errorsOnly;
 
-    var filtered = rows.filter(function (html, i) {
-      var step = Object.keys(state.steps)
-        .map(function (n) {
-          return state.steps[n];
-        })
-        .sort(function (a, b) {
-          return (a.step_name || "").toLowerCase() < (b.step_name || "").toLowerCase() ? -1 : 1;
-        })[i];
-      if (!step) return true;
-      if (searching) {
+    var visibleSteps = sortedSteps.filter(function (s) {
+      if (errorsOnly && s.status !== "failed" && s.status !== "canceled") return false;
+      if (q.length > 0) {
         var searchText = (
-          step.step_name +
+          s.step_name +
           " " +
-          (step.step_type || "") +
+          (s.step_type || "") +
           " " +
-          step.status +
+          s.status +
           " " +
-          (step.error || "")
+          (s.error || "")
         ).toLowerCase();
         if (searchText.indexOf(q) < 0) return false;
       }
-      if (errorsOnly && step.status !== "failed" && step.status !== "canceled") return false;
       return true;
     });
 
-    var visible = filtered;
-    if (!stepExpanded && visible.length > STEP_PAGE_SIZE) {
-      visible = visible.slice(0, STEP_PAGE_SIZE);
-    }
+    var pageSteps =
+      !stepExpanded && visibleSteps.length > STEP_PAGE_SIZE
+        ? visibleSteps.slice(0, STEP_PAGE_SIZE)
+        : visibleSteps;
 
-    els.stepsTbody.innerHTML = visible.join("");
-    els.stepsEmpty.style.display = visible.length ? "none" : "";
+    var visibleNames = {};
+    pageSteps.forEach(function (s) {
+      visibleNames[s.step_name] = true;
+    });
 
-    els.stepResultCount.textContent =
-      searching || errorsOnly ? filtered.length + " / " + rows.length + " steps" : "";
+    // Remove rows that are no longer visible (filtered out or beyond page)
+    Object.keys(stepRows).forEach(function (name) {
+      if (!visibleNames[name]) {
+        stepRows[name].tr.remove();
+        delete stepRows[name];
+      }
+    });
+
+    // Create / update / position rows in sorted order
+    var prevTr = null;
+    pageSteps.forEach(function (step) {
+      var entry = stepRows[step.step_name];
+
+      if (!entry) {
+        // Create new row — one-time innerHTML cost per step
+        var tr = document.createElement("tr");
+        tr.innerHTML = buildStepCellsHTML(step);
+        if (state.newStepNames[step.step_name]) tr.classList.add("step-row-new");
+        if (step.status === "running") tr.classList.add("step-row-running");
+        if (step.status === "failed") tr.classList.add("row-failed");
+        if (step.status === "canceled") tr.classList.add("row-canceled");
+        tr.setAttribute("data-has-error", step.status === "failed" || step.status === "canceled" ? "1" : "0");
+
+        stepRows[step.step_name] = { tr: tr, key: stepStateKey(step) };
+      } else {
+        // Update existing row only if volatile state changed
+        var newKey = stepStateKey(step);
+        if (entry.key !== newKey) {
+          updateStepRow(entry.tr, step);
+          entry.key = newKey;
+        }
+      }
+
+      // Position the row correctly in the DOM (cheap pointer move)
+      var tr = stepRows[step.step_name].tr;
+      if (prevTr) {
+        if (prevTr.nextSibling !== tr) prevTr.after(tr);
+      } else {
+        if (els.stepsTbody.firstChild !== tr) els.stepsTbody.prepend(tr);
+      }
+      prevTr = tr;
+    });
+
+    els.stepsEmpty.style.display = pageSteps.length ? "none" : "";
+
+    els.stepResultCount.textContent = filtering
+      ? visibleSteps.length + " / " + sortedSteps.length + " steps"
+      : "";
 
     // Clear new-step markers after render
     state.newStepNames = {};
