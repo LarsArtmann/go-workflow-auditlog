@@ -11,7 +11,9 @@ import (
 
 // WriteCSV writes all steps as comma-separated values to the writer.
 // The first row is a header. Pointer fields render as empty strings when nil.
-// Dependencies and dependents are semicolon-separated step names.
+// Dependencies and dependents are rendered as semicolon-separated step names.
+// Names containing ';' cannot be distinguished from the separator on re-parse;
+// for lossless dependency data use WriteJSON or WriteNDJSON instead.
 func (r WorkflowReport) WriteCSV(writer io.Writer) error {
 	return r.writeDelimited(writer, ',')
 }
@@ -38,13 +40,13 @@ func (r WorkflowReport) writeDelimited(writer io.Writer, comma rune) error {
 
 	err := w.Write(header)
 	if err != nil {
-		return fmt.Errorf("write header: %w", err)
+		return fmt.Errorf("%w: write header: %w", ErrExportWriteFailed, err)
 	}
 
 	for _, step := range r.Steps {
 		err := w.Write(stepToCSVRow(step))
 		if err != nil {
-			return fmt.Errorf("write step %q: %w", step.Name, err)
+			return fmt.Errorf("%w: write step %q: %w", ErrExportWriteFailed, step.Name, err)
 		}
 	}
 

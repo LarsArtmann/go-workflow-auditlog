@@ -221,6 +221,14 @@ attachment`.
   ~94%→~96% coverage).
 - **AGENTS.md** — corrected test count (~310→319 with breakdown) and updated
   golden test reference to describe the new structural validation approach.
+- **CSV `;` limitation documented** — `WriteCSV` doc comment now warns that
+  dependency/dependent names containing `;` cannot be round-tripped in the
+  semicolon-separated cells, and directs users to JSON/NDJSON for lossless
+  dependency data.
+- **`failAfterNFlusher` → `failAfterFlushWriter`** (`live/server_internal_test.go`)
+  — the heartbeat write-failure test used a magic write-count threshold
+  (`n: 8`). The new writer fails on the first Write after the first Flush,
+  robust regardless of snapshot payload size.
 
 ### Removed
 
@@ -244,6 +252,12 @@ attachment`.
   output. D2 treats `#` as a comment character; DOT edge `color` attributes
   needed double-quote wrapping. Fix is in go-output v0.31.1 (commit `d91cc22`),
   now consumed by `viz/go.mod` (bumped from v0.30.4).
+- **`writeDelimited` sentinel-error consistency** (`csv.go`) — header and
+  step-row write errors are now wrapped with `ErrExportWriteFailed`, matching
+  the flush-error path. All three delimited-writer error branches now satisfy
+  `errors.Is(err, ErrExportWriteFailed)`. Today `csv.Writer` buffers writes so
+  only the flush branch fires, but the wrapping defends against a future
+  write-through change.
 
 ## [0.7.0] - 2026-07-22
 

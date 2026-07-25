@@ -257,24 +257,24 @@ func (f *failingFlusher) Header() http.Header {
 func (f *failingFlusher) WriteHeader(int) {}
 func (f *failingFlusher) Flush()          {}
 
-// failAfterNFlusher succeeds for the first n writes then fails every
-// subsequent Write. Lets a snapshot fully flush before a heartbeat write fails.
-type failAfterNFlusher struct {
-	n      int
-	header http.Header
+// failAfterFlushWriter succeeds for all Write calls until the first Flush,
+// then fails every subsequent Write. This lets a snapshot fully flush before
+// a heartbeat write fails — robust regardless of snapshot payload size (no
+// magic write-count threshold).
+type failAfterFlushWriter struct {
+	flushed bool
+	header  http.Header
 }
 
-func (f *failAfterNFlusher) Write(p []byte) (int, error) {
-	if f.n <= 0 {
+func (f *failAfterFlushWriter) Write(p []byte) (int, error) {
+	if f.flushed {
 		return 0, errProviderFailure
 	}
-
-	f.n--
 
 	return len(p), nil
 }
 
-func (f *failAfterNFlusher) Header() http.Header {
+func (f *failAfterFlushWriter) Header() http.Header {
 	if f.header == nil {
 		f.header = http.Header{}
 	}
@@ -282,8 +282,8 @@ func (f *failAfterNFlusher) Header() http.Header {
 	return f.header
 }
 
-func (f *failAfterNFlusher) WriteHeader(int) {}
-func (f *failAfterNFlusher) Flush()          {}
+func (f *failAfterFlushWriter) WriteHeader(int) {}
+func (f *failAfterFlushWriter) Flush()          { f.flushed = true }
 
 // nonFlusherWriter wraps a ResponseRecorder but hides its Flush method so the
 // SSE handler sees a writer that does not support streaming.
@@ -471,7 +471,7 @@ func TestServer_HandleSSE_HeartbeatWriteFailure(t *testing.T) {
 
 	go func() {
 		// Allow the snapshot to flush, then fail on a subsequent heartbeat.
-		srv.handleSSE(&failAfterNFlusher{n: 8}, req)
+		srv.handleSSE(&failAfterFlushWriter{}, req)
 		close(done)
 	}()
 
