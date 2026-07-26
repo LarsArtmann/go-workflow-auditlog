@@ -112,6 +112,11 @@ jobs:
       - name: govulncheck (viz)
         working-directory: ./viz
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+      - name: govulncheck (live)
+        working-directory: ./live
+        env:
+          GOWORK: off
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
   mod-tidy:
     name: go mod tidy check
@@ -124,12 +129,23 @@ jobs:
           cache: true
       - name: go mod tidy (core)
         run: go mod tidy
+      # viz/live use `-e` (error-tolerant) because go-output's published
+      # go.mod contains local `replace => ./testhelpers` directives that
+      # resolve to an invalid zero version when go-output is consumed as a
+      # dependency. Plain `go mod tidy` exits 1 on the sub-modules. `-e`
+      # proceeds past the unresolvable test graph while still tidying
+      # everything else; the drift check below still catches real go.sum
+      # skew. Tracked upstream in go-output. See AGENTS.md.
       - name: go mod tidy (viz)
         working-directory: ./viz
-        run: go mod tidy
+        env:
+          GOWORK: off
+        run: go mod tidy -e
       - name: go mod tidy (live)
         working-directory: ./live
-        run: go mod tidy
+        env:
+          GOWORK: off
+        run: go mod tidy -e
       - name: Check for drift
         run: |
           if ! git diff --exit-code; then
