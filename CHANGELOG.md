@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - **Re-enabled `govulncheck` for the `live` module in `nix run .#check`.** It was deliberately omitted since the module split because `live.Server.ListenAndServe` sat on the GO-2026-5856 affected call path under the 1.26.4 toolchain. Now that nixpkgs ships `go_1_26` at 1.26.5, all three modules pass `govulncheck` with no findings.
+- **Synced `viz` and `live` transitive dependency versions** (`go-error-family` v0.9.0 → v0.10.0, `go-atomic-write` v0.3.0 → v0.4.0) to match the core module's bumps. The post-v0.8.0 core dep bumps had left the sub-modules' `go.mod`/`go.sum` stale, breaking standalone (`GOWORK=off`) builds — i.e. exactly what `go get` consumers experience. Verified: all three modules now build and test standalone.
 
 ## [0.8.0] - 2026-07-25
 
