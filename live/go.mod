@@ -2,19 +2,14 @@ module github.com/larsartmann/go-workflow-auditlog/live
 
 go 1.26.5
 
-replace (
-	github.com/larsartmann/go-workflow-auditlog => ..
-	github.com/larsartmann/go-workflow-auditlog/viz => ../viz
-)
-
 require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/larsartmann/go-output/daghtml v0.31.1
 	github.com/larsartmann/go-sse v0.2.0
-	github.com/larsartmann/go-workflow-auditlog v0.0.0-00010101000000-000000000000
-	github.com/larsartmann/go-workflow-auditlog/viz v0.0.0-00010101000000-000000000000
+	github.com/larsartmann/go-workflow-auditlog v0.8.1
+	github.com/larsartmann/go-workflow-auditlog/viz v0.8.1
 )
 
 require (

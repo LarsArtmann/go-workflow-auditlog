@@ -17,7 +17,7 @@ require (
 	github.com/larsartmann/go-output/serialization v0.31.1
 	github.com/larsartmann/go-output/table v0.31.1
 	github.com/larsartmann/go-output/tree v0.31.1
-	github.com/larsartmann/go-workflow-auditlog v0.0.0-00010101000000-000000000000
+	github.com/larsartmann/go-workflow-auditlog v0.8.1
 )
 
 require (
@@ -52,5 +52,3 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
 )
-
-replace github.com/larsartmann/go-workflow-auditlog => ..
