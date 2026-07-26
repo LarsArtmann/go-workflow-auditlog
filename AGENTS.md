@@ -12,7 +12,7 @@ Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that re
 | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `GOEXPERIMENT=jsonv2 go test ./...`                                                 | Run core tests (requires jsonv2)                                                                             |
 | `GOEXPERIMENT=jsonv2 go test -race ./...`                                           | Run core tests with race detector                                                                            |
-| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic ./...` | Core tests with coverage (~94.9%)                                                                            |
+| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic ./...` | Core tests with coverage (~95.3%)                                                                            |
 | `GOEXPERIMENT=jsonv2 go vet ./...`                                                  | Core static analysis                                                                                         |
 | `golangci-lint run ./...`                                                           | Lint core (golangci-lint v2, 0 issues)                                                                       |
 | `cd viz && GOEXPERIMENT=jsonv2 go test ./...`                                       | Run viz tests (requires jsonv2)                                                                              |
@@ -55,14 +55,20 @@ itself is transport-only and owns no domain types here.
 A `go.work` workspace links only the project's own modules (core `.`, `./viz`, `./live`)
 for local development; **all external `larsartmann/*` modules are resolved from published
 versions** (no local `use`/`replace` for them): `go-output` v0.31.1 + its sub-modules
-(`viz`, `live`), `go-sse` v0.2.0 (`live`), `go-atomic-write` v0.3.0 and `go-ndjson` v0.0.1
-(`core`). `go.work` and `go.work.sum` are gitignored (local dev artifacts). Standalone
-(`GOWORK=off`) builds work for all three modules because every dependency has a real,
-checksum-verified version in `go.sum`. **Note:** `go work sync` prints harmless
-`downloading ... go-output/testhelpers v0.0.0-00010101000000-000000000000` lines because the
-_published_ `go-output@v0.31.1/go.mod` contains local `replace` directives (`=> ./testhelpers`)
-that Go ignores when consuming it as a dependency — builds/tests are unaffected; this is a
-defect in go-output's release, not this repo.
+(`viz`, `live`), `go-sse` v0.2.0 (`live`), `go-atomic-write` v0.4.0,
+`go-error-family` v0.10.0, and `go-ndjson` v0.0.1 (`core`). `go.work` and `go.work.sum` are
+gitignored (local dev artifacts). Standalone (`GOWORK=off`) builds work for all three
+modules because every dependency has a real, checksum-verified version in `go.sum`.
+**Note:** `go work sync` prints harmless `downloading ... go-output/testhelpers
+v0.0.0-00010101000000-000000000000` lines because the _published_
+`go-output@v0.31.1/go.mod` contains local `replace` directives (`=> ./testhelpers`) that Go
+ignores when consuming it as a dependency — builds/tests are unaffected. **However**, the same
+defect breaks `go mod tidy` on the `viz` and `live` sub-modules in standalone mode: tidy tries
+to resolve the test graph and exits 1. The workaround is `go mod tidy -e` (error-tolerant),
+which proceeds past the unresolvable testhelpers while still tidying everything else and
+catching real `go.sum` drift. This is applied in CI (`.github/workflows/ci.yml` `mod-tidy`
+job) and in `.goreleaser.yml` `before:` hooks. go-output v0.32.0 still has the same replace
+directives, so the defect is not yet fixed upstream.
 
 ### Core module source files
 
@@ -209,7 +215,31 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - **Error classification** (`classify.go`) registers all sentinel errors with [go-error-family](https://github.com/larsartmann/go-error-family) via `init()` auto-registration into `DefaultRegistry`. Consumers importing auditlog automatically get `errorfamily.Classify(err)`, `errorfamily.IsRetryable(err)`, and `errorfamily.ExitCode(err)` on auditlog errors. Strategy A (registration, not replacement) — sentinels stay as plain `error` values; `errors.Is` semantics are unchanged. Mapping: **Corruption** (exit 65, not retryable) = `ErrEventCountMismatch`, `ErrStepCountMismatch`, `ErrStatusDrift`, `ErrCountMismatch` (data integrity violations). **Rejection** (exit 1, not retryable) = `ErrEmpty`, `ErrNoEvents`, `ErrOversizedLine`, `ErrWorkflowIDPathSep`, `ErrReplayNoEvents` (bad caller input). **Transient** (exit 75, retryable) = `ErrReportLoadFailed` (retryable load/decode failures). **Infrastructure** (exit 69, not retryable) = `ErrRenderFailed` (rendering/marshaling), `ErrExportWriteFailed` (file write/flush/rename). Private sentinels `errUnknownEventType`/`errUnknownPhase` are also registered as Rejection. All 24 I/O error paths are wrapped with sentinels (loader, plugin/WriteToFile, export, report.WriteJSON, csv header/step/flush, viz diagram/table/tree/html render+write). `ErrorClassifications()` returns the canonical map for consumer-side custom registries. `RegisterClassifications(*Registry)` registers into a custom registry for test isolation or scoped overrides. Unregistered errors default to Transient (fail-open for retry).
 - **Critical path steps are injected from Go into report JSON.** The Go implementation (`computeCriticalPath()` in `report_builder.go`) computes the memoized DFS and populates `CriticalPathSteps []string` on the report (serialized as `critical_path_steps`). The JS implementation (`computeCriticalPathSteps()` in `dashboard.js`) uses the injected field directly, falling back to a client-side DFS for older reports without the field. The duplication is now a graceful-degradation fallback, not a maintenance burden — changing the Go algorithm automatically updates the dashboard for new reports.
 - **`enhanceGraph()` is coupled to daghtml DOM internals.** It reads `dataset.id`, `dataset.source`, `dataset.target` on SVG elements produced by the daghtml SDK's `initDAGGraph()`. If daghtml changes its DOM structure or data attributes, the post-processing (retry badges, critical path, search, edge coloring, node click navigation) breaks silently. The function is idempotent (guarded by `container.dataset.enhanced`), so switching graph tabs multiple times is safe.
-- **Module split:** Core (`github.com/larsartmann/go-workflow-auditlog`) and visualization (`github.com/larsartmann/go-workflow-auditlog/viz`) are separate Go modules. The core module has no `go-output` dependency. Both modules share a `go.work` workspace in development; CI also verifies `GOWORK=off` standalone builds. The `testhelpers` package lives inside the core module so both core and viz tests can import it without a circular module dependency.
+- **Module split:** Core (`github.com/larsartmann/go-workflow-auditlog`), visualization
+  (`github.com/larsartmann/go-workflow-auditlog/viz`), and live
+  (`github.com/larsartmann/go-workflow-auditlog/live`) are separate Go modules. The core
+  module has no `go-output` dependency. All three modules share a `go.work` workspace in
+  development; CI also verifies `GOWORK=off` standalone builds. The `testhelpers` package
+  lives inside the core module so both core and viz tests can import it without a circular
+  module dependency.
+- **Release tagging convention:** Each release produces **three annotated tags** at the same
+  commit: `vX.Y.Z` (core), `viz/vX.Y.Z` (viz), `live/vX.Y.Z` (live). The path prefixes are
+  required by the Go module system so `go get` resolves each module independently. The
+  full release process is documented in [`RELEASE.md`](RELEASE.md) — **read it before
+  cutting a release.** The previous ad-hoc release (v0.8.1) bypassed the documented process
+  and is the reason RELEASE.md now exists.
+- **goreleaser multi-module gotchas:** `.goreleaser.yml` releases the core module only (the
+  GitHub Release + demo binary represent the whole monorepo). Three things are required:
+  (1) `GORELEASER_CURRENT_TAG=vX.Y.Z` must be set — three tags share one commit and
+  goreleaser's `git describe` picks the alphabetically-last (`live/v*`) without it.
+  (2) Before-hooks are wrapped in `sh -c "..."` because goreleaser OSS uses direct
+  `exec.CommandContext` (not a shell) — inline env vars (`FOO=bar cmd`) and shell builtins
+  (`cd`, `&&`) silently fail without the wrapper. (3) A **clean working tree** is required
+  (the auto-commit daemon must have committed all pending changes). If the tree is dirty,
+  fall back to `gh release create` + manual binary upload (see RELEASE.md).
+- **CI `mod-tidy` job** uses `go mod tidy -e` for viz/live (see go-output testhelpers defect
+  above). Core uses plain `go mod tidy`. The drift check (`git diff --exit-code`) still
+  catches real `go.sum` skew.
 
 ---
 
@@ -222,7 +252,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - Shared test helpers live in `testhelpers` (exported package inside the core module) and are imported by both core and viz tests.
 - `t.Setenv()` for env var tests (runs sequentially).
 - 459 test functions across 3 modules (core: 165; viz: 229; live: 65) covering: disabled/enabled, success/failure, dependencies, retry, timeout/cancel, skip, concurrent steps, fan-out/fan-in, event ordering, OnEvent callback, **CaptureDAG** (pre-execution DAG population, idempotent, disabled no-op, nil workflow safety, sub-workflow traversal, retry config capture, no events generated), export formats (JSON/NDJSON/D2/table/tree/HTML), streaming NDJSON (NDJSONStreamer real-time, concurrent safety 16 goroutines, auto-flush, WithBufferSize, encode-error path, flush/Close error paths, round-trip, workflow integration, 100% stream.go coverage), report validation, query methods, filter (combined type+time interaction), diff, replay, load, diagrams (Mermaid/PlantUML/DOT/D2), diagram direction (TD/LR/BT/RL across 4 formats), table column configuration (10 columns, custom selection, ordering, replayed reports), edge-direction consistency (diagrams vs tree), API symmetry (Write\*String functions in `viz`, Export\* functions in `viz`), high-fan-out peak concurrency, diamond-DAG critical path, CriticalPath() step chain, PeakConcurrencySteps(), HTML from replayed/loaded reports, HTML diamond DAG + high fan-out, HTML structural integrity, HTML golden content validation, HTML determinism, edge cases, error classification (all 12 public sentinels mapped to Family, wrapped error chain classification, custom registry registration, ExitCode/IsRetryable behavior, errors.Is identity preserved), **error-path tests** (failing io.Writer injection into all `viz.Write*` methods, unwritable directories for `viz.Export*`, invalid input for `Load*` — verifying errors.Is matches `ErrRenderFailed`/`ErrExportWriteFailed`/`ErrReportLoadFailed` on all wrapped paths), plus regression tests for fixed bugs (status drift, diff ordering, NDJSON line numbers, WorkflowSucceeded honesty about pending steps, stale error cleared on retry success), **fuzz tests** (diagram special-char injection across Mermaid/PlantUML/DOT/D2; multi-step diagram sanitization with unicode/control-char/keyword-collision seeds; HTML XSS injection with structural integrity checks; Classify adversarial wrapped error chains), **property-based tests** (Diff algebra: identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output — 200 iterations each, deterministic seeds; Classify wrapping-preserves-family through arbitrary depth, Classify identity matches ErrorClassifications map — 200 iterations), and **benchmarks** (runtime overhead: Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit, MermaidExport; export rendering: viz.WriteD2/viz.WriteTable/viz.WriteTree/viz.WriteJSON/viz.WriteMermaid on 100-step reports; renderHTML small 3-step + large 1000-step reports; godoc examples: Duration, Filtered, PeakConcurrency, CriticalPathDurationMs, WallClockDurationMs).
-- Coverage: **~94.9%** of statements (auditlog package), **91.7%** viz, **95.5%** live.
+- Coverage: **~95.3%** of statements (auditlog package), **91.7%** viz, **95.5%** live.
 - **Fuzz targets**: `FuzzDiagramSpecialChars` — diagram export structural integrity against injection payloads; `FuzzDiagramSanitization_MultiStep` — multi-step diagram sanitization (17 seed pairs: unicode/emoji/CJK/Arabic, control chars, diagram-keyword collisions, whitespace-only, length extremes, edge sanitization) across Mermaid/PlantUML/DOT/D2; `FuzzHTMLSpecialChars` — HTML dashboard XSS containment (12 seed payloads via step names, errors, dependency names) + structural integrity validation (balanced script tags, DOCTYPE, CSP).
 - **Property tests**: 5 Diff algebra properties with 200 random report pairs each; HTML determinism (same report → identical output).
 - **Benchmarks**: `BenchmarkRenderHTML_LargeReport` (1000 steps) + `BenchmarkRenderHTML_SmallReport` (3 steps) + `BenchmarkNDJSONStreamer_{100,1000,10000}Events` (streaming throughput to io.Discard) + `BenchmarkWriteCSV_LargeReport` (100 steps, core CSV export).

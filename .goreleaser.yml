@@ -6,9 +6,14 @@
 # library's output without writing code first.
 #
 # Usage:
-#   GOEXPERIMENT=jsonv2 goreleaser release --clean          # full release
-#   GOEXPERIMENT=jsonv2 goreleaser release --snapshot --clean # local dry-run
-#   goreleaser check                                         # validate config
+#   GORELEASER_CURRENT_TAG=vX.Y.Z GOEXPERIMENT=jsonv2 goreleaser release --clean            # full release
+#   GORELEASER_CURRENT_TAG=vX.Y.Z GOEXPERIMENT=jsonv2 goreleaser release --snapshot --clean  # local dry-run
+#   goreleaser check                                           # validate config
+#
+# GORELEASER_CURRENT_TAG is REQUIRED: this is a multi-module monorepo where
+# core (vX.Y.Z), viz (viz/vX.Y.Z), and live (live/vX.Y.Z) tags share one
+# commit. goreleaser's git-describe picks the wrong tag (alphabetically last)
+# without the override. Always pass the CORE tag.
 #
 # NOTE: GOEXPERIMENT=jsonv2 is set explicitly on every hook and build below so
 # the release is reproducible without the caller remembering to export it. The
