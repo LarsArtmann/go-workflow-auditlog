@@ -36,7 +36,7 @@ These surfaces are functional but their exact shape may change:
 | `ReportIndex` query methods                                                            | New lookup methods may be added.                                                          |
 | `ErrorClassifications()` / `RegisterClassifications(reg)`                              | Classification mapping may grow as new sentinels are added.                               |
 | I/O sentinel errors (`ErrReportLoadFailed`, `ErrRenderFailed`, `ErrExportWriteFailed`) | Sentinel set is stable; wrapping messages may evolve.                                     |
-| `go-error-family` dependency (v0.9.0)                                                  | Transitive: classification metadata depends on this external library. Pinned in go.mod.   |
+| `go-error-family` dependency (v0.10.0)                                                 | Transitive: classification metadata depends on this external library. Pinned in go.mod.   |
 | `NDJSONStreamer` / `NewNDJSONStreamer` / `CreateNDJSONStreamer`                        | New streaming API; type and method set may grow. Output format (NDJSON) is stable.        |
 | `WithAutoFlush()` / `WithBufferSize(n)` / `NDJSONStreamerOption`                       | Option set may expand; existing options keep their semantics.                             |
 | Dashboard graph enhancements (critical path, retry badges, search, duration labels)    | JS post-processing layer on daghtml SVG; behavior may evolve with go-output daghtml SDK.  |

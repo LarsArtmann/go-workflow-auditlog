@@ -6,13 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-07-26
+
 ### Added
 
 - **`DiffResult.IsEmpty()`** — polarity reconciliation with the `samber-do-auditlog` twin (which exposes `HasChanges()`). Both twins now offer both methods so consumers can ask either question regardless of which library they use.
+- **First properly tagged release of the `viz` and `live` sub-modules.** The v0.8.0 module split introduced `viz/go.mod` and `live/go.mod` but never created the `viz/v*` and `live/v*` tags required for `go get` to resolve them. This release adds `viz/v0.8.1` and `live/v0.8.1`, making the documented `go get github.com/larsartmann/go-workflow-auditlog/viz` and `/live` install commands actually work.
 
 ### Changed
 
-- **Adopted the new `go-atomic-write` API** (`helpers.go`) — `WriteFunc(path, fn, Fingerprint{})` migrated to the plain `WriteFunc(path, fn)` variant (no TOCTOU verification needed here). Tracks the `go-atomic-write` breaking API split.
+- **Adopted the new `go-atomic-write` API** (`helpers.go`) — `WriteFunc(path, fn, Fingerprint{})` migrated to the plain `WriteFunc(path, fn)` variant (no TOCTOU verification needed here). Tracks the `go-atomic-write` breaking API split (`v0.3.0` → `v0.4.0`).
+- **Bumped Go directive to 1.26.5** (from 1.26.4) across all three modules. Picks up the fix for [GO-2026-5856](https://pkg.go.dev/vuln/GO-2026-5856) (crypto/tls ECH privacy leak), which had previously kept the live module's `govulncheck` disabled.
+- **Bumped `go-error-family` to v0.10.0** (from v0.9.0) in the core module.
+
+### Fixed
+
+- **Re-enabled `govulncheck` for the `live` module in `nix run .#check`.** It was deliberately omitted since the module split because `live.Server.ListenAndServe` sat on the GO-2026-5856 affected call path under the 1.26.4 toolchain. Now that nixpkgs ships `go_1_26` at 1.26.5, all three modules pass `govulncheck` with no findings.
 
 ## [0.8.0] - 2026-07-25
 
