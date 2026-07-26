@@ -107,14 +107,8 @@
               echo "==> golangci-lint (live)"
               (cd live && golangci-lint run --timeout=10m ./...)
 
-              # govulncheck on the live module is intentionally omitted: the
-              # live HTTP server is affected by GO-2026-5856 (crypto/tls ECH
-              # privacy leak, fixed in go1.26.5), and nixpkgs currently ships
-              # go_1_26 at 1.26.4. govulncheck exits non-zero (code 3) on
-              # findings, so enabling it now would keep `nix run .#check` red
-              # until the toolchain bumps. Re-enable once nixpkgs provides
-              # go_1_26 >= 1.26.5:
-              #   (cd live && GOWORK=off govulncheck ./...)
+              echo "==> govulncheck (live)"
+              (cd live && GOWORK=off govulncheck ./...)
 
               echo "All checks passed."
             '';
