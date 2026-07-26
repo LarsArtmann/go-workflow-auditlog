@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Adopted the new `go-atomic-write` API** (`helpers.go`) — `WriteFunc(path, fn, Fingerprint{})` migrated to the plain `WriteFunc(path, fn)` variant (no TOCTOU verification needed here). Tracks the `go-atomic-write` breaking API split (`v0.3.0` → `v0.4.0`).
 - **Bumped Go directive to 1.26.5** (from 1.26.4) across all three modules. Picks up the fix for [GO-2026-5856](https://pkg.go.dev/vuln/GO-2026-5856) (crypto/tls ECH privacy leak), which had previously kept the live module's `govulncheck` disabled.
-- **Bumped `go-error-family` to v0.10.0** (from v0.9.0) in the core module.
+- **Bumped `go-error-family` to v0.10.0** (from v0.9.0) across all three modules.
 
 ### Fixed
 
