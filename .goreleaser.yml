@@ -13,28 +13,33 @@
 # NOTE: GOEXPERIMENT=jsonv2 is set explicitly on every hook and build below so
 # the release is reproducible without the caller remembering to export it. The
 # library imports the stdlib encoding/json/v2 (gated behind that experiment).
+#
+# NOTE: goreleaser OSS executes before-hooks via direct exec.CommandContext —
+# NOT through a shell (no sh -c). Inline env vars (FOO=bar cmd) and shell
+# builtins (cd, &&) are therefore ineffective unless wrapped in sh -c.
+# See https://goreleaser.com/customization/hooks/
 
 version: 2
 
 before:
   hooks:
     # Core module (workspace mode — resolves viz/live via go.work).
-    - GOEXPERIMENT=jsonv2 go mod tidy
-    - GOEXPERIMENT=jsonv2 go vet ./...
-    - GOEXPERIMENT=jsonv2 go test -race ./...
+    - sh -c "GOEXPERIMENT=jsonv2 go mod tidy"
+    - sh -c "GOEXPERIMENT=jsonv2 go vet ./..."
+    - sh -c "GOEXPERIMENT=jsonv2 go test -race ./..."
     # Viz module (standalone — proves consumers can build it without go.work).
     # `tidy -e`: error-tolerant. go-output's published go.mod ships local
     # `replace => ./testhelpers` directives that resolve to an invalid zero
     # version when consumed as a dependency; plain `go mod tidy` exits 1.
     # `-e` proceeds past the unresolvable test graph while still tidying the
     # rest. See AGENTS.md "go-output testhelpers defect".
-    - cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy -e
-    - cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go vet ./...
-    - cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./...
+    - sh -c "cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy -e"
+    - sh -c "cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go vet ./..."
+    - sh -c "cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./..."
     # Live module (standalone — proves consumers can build it without go.work).
-    - cd live && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy -e
-    - cd live && GOWORK=off GOEXPERIMENT=jsonv2 go vet ./...
-    - cd live && GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./...
+    - sh -c "cd live && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy -e"
+    - sh -c "cd live && GOWORK=off GOEXPERIMENT=jsonv2 go vet ./..."
+    - sh -c "cd live && GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./..."
 
 builds:
   - id: demo
