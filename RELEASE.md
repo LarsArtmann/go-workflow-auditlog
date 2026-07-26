@@ -55,7 +55,14 @@ breaking changes in 0.x minor releases.
    cd live && GOWORK=off GOEXPERIMENT=jsonv2 go test -count=1 ./...
    ```
 
-5. **Commit all changes.** The auto-commit daemon handles this, but verify:
+5. **CRITICAL: Verify no `replace` directives in sub-module go.mod files:**
+   ```bash
+   grep -r '^replace' viz/go.mod live/go.mod
+   # MUST return nothing. replace directives produce pseudo-version requirements
+   # that break consumer go get. Local dev uses go.work use directives, not replace.
+   ```
+
+6. **Commit all changes.** The auto-commit daemon handles this, but verify:
    ```bash
    git status   # should be clean before tagging
    ```
@@ -203,12 +210,19 @@ Verify the pages render:
 ## Step 5 — Post-release Verification
 
 1. **CI is green** on master after the tag push.
-2. **`go get` resolves** in a clean directory:
+2. **`go get` resolves** in a clean directory (test each independently):
    ```bash
-   cd /tmp/test-get && go mod init test && \
-   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog@v${VERSION} && \
-   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog/viz@viz/v${VERSION} && \
-   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog/live@live/v${VERSION}
+   # Core
+   cd /tmp/test-core && go mod init test && \
+   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog@v${VERSION}
+
+   # Viz (standalone — proves no replace-directive leak)
+   cd /tmp/test-viz && go mod init test && \
+   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog/viz@v${VERSION}
+
+   # Live (standalone — proves no replace-directive leak)
+   cd /tmp/test-live && go mod init test && \
+   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog/live@v${VERSION}
    ```
 3. **GitHub Release** has correct assets and notes.
 4. **CHANGELOG.md** has an empty `[Unreleased]` section.
@@ -219,8 +233,10 @@ Verify the pages render:
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
+| **Consumer `go get` fails with `invalid version: unknown revision 000000000000`** | Sub-module `go.mod` has `replace => ..` directive producing pseudo-version requirement | **Remove the `replace` directive.** Set real version in `require`. Local dev uses `go.work` `use` directives. |
 | `go mod tidy` fails on viz/live | go-output's published `go.mod` has broken `replace => ./testhelpers` | Use `go mod tidy -e` (error-tolerant) |
 | goreleaser picks wrong tag | Three tags at same commit; `git describe` returns `live/v*` | Set `GORELEASER_CURRENT_TAG=vX.Y.Z` |
 | goreleaser hooks fail with "executable not found" | OSS hooks use direct exec, not shell | Wrap hooks in `sh -c "..."` |
 | goreleaser "git is in a dirty state" | Auto-commit daemon hasn't committed yet | Wait for daemon, or use `gh release create` |
 | `git work sync` downloads invalid testhelpers version | Same go-output replace defect | Harmless; builds/tests are unaffected |
+| `sum.golang.org` returns 500 for newly-pushed tags | Checksum DB propagation delay (minutes to hours) | Wait; resolves automatically. Test with `GOSUMDB=off` in the meantime. |

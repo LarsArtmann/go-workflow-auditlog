@@ -240,6 +240,15 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 - **CI `mod-tidy` job** uses `go mod tidy -e` for viz/live (see go-output testhelpers defect
   above). Core uses plain `go mod tidy`. The drift check (`git diff --exit-code`) still
   catches real `go.sum` skew.
+- **CRITICAL — sub-module `go.mod` files must NOT contain `replace` directives for sibling
+  modules.** The v0.8.0 module split left `replace github.com/larsartmann/go-workflow-auditlog
+  => ..` in `viz/go.mod` and `live/go.mod`. These local filesystem redirects work in
+  `go.work` workspace mode but produce invalid pseudo-version requirements
+  (`v0.0.0-00010101000000-000000000000`) that **completely break consumer `go get`** for
+  viz and live when fetched in isolation. Local development is handled by `go.work`'s `use`
+  directives — `replace` directives in sub-module `go.mod` files are redundant and harmful.
+  Fixed in v0.8.2. **Pre-release check:** `grep -r '^replace' viz/go.mod live/go.mod` must
+  return nothing. See RELEASE.md.
 
 ---
 
