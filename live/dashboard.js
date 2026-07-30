@@ -1371,29 +1371,26 @@
       g.appendChild(badge);
     });
 
-    // Node click → navigate to step in Steps tab
+    // Node click / keyboard navigation setup
+    buildGraphAdjacency();
     nodeEls.forEach(function (g) {
+      var idx = parseInt(g.getAttribute("data-id"));
+      var stepName = nameMap[idx];
+      var step = stepByName[stepName] || state.steps[stepName];
       g.style.cursor = "pointer";
+      g.setAttribute("tabindex", "0");
+      g.setAttribute("role", "button");
+      var label = (stepName || "node") + " " + (step ? step.status : "pending");
+      if (step && step.duration_ms && step.duration_ms > 0) {
+        label += " " + humanizeMs(step.duration_ms);
+      }
+      g.setAttribute("aria-label", label);
       g.addEventListener("click", function () {
-        var idx = parseInt(g.getAttribute("data-id"));
-        var stepName = nameMap[idx];
-        if (!stepName) return;
-
-        var stepsTab = document.querySelector('.tab[data-tab="steps"]');
-        if (stepsTab) switchTab(stepsTab);
-
-        setTimeout(function () {
-          var rows = document.querySelectorAll("#steps-tbody tr");
-          rows.forEach(function (row) {
-            if (row.textContent.indexOf(stepName) !== -1) {
-              row.classList.add("row-highlight");
-              row.scrollIntoView({ behavior: "smooth", block: "center" });
-              setTimeout(function () {
-                row.classList.remove("row-highlight");
-              }, 2000);
-            }
-          });
-        }, 50);
+        selectGraphNode(g);
+      });
+      g.addEventListener("keydown", handleGraphNodeKeydown);
+      g.addEventListener("focus", function () {
+        focusGraphNodeLabel(g);
       });
     });
 
@@ -1729,8 +1726,6 @@
 
   // === Global Keyboard Shortcuts ===
 
-  var keyMode = { graphZoom: false };
-
   function handleKeyboardShortcut(e) {
     var tag = e.target.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
@@ -1956,6 +1951,18 @@
   if (exportJson) exportJson.href = pfx + "/api/report";
   if (exportNdjson) exportNdjson.href = pfx + "/api/export/ndjson";
   if (exportHtml) exportHtml.href = pfx + "/api/export/html";
+
+  if (els.helpClose) {
+    els.helpClose.addEventListener("click", closeHelp);
+  }
+  if (els.helpModal) {
+    els.helpModal.addEventListener("click", function (e) {
+      if (e.target === els.helpModal) closeHelp();
+    });
+  }
+  if (els.helpHint) {
+    els.helpHint.addEventListener("click", openHelp);
+  }
 
   connect();
 })();

@@ -81,6 +81,47 @@ func TestServer_DashboardHTML(t *testing.T) {
 	}
 }
 
+// TestServer_DashboardHTML_Accessibility validates that the live dashboard HTML
+// contains keyboard-navigation and accessibility landmarks added during the
+// keyboard navigation improvement work.
+func TestServer_DashboardHTML_Accessibility(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	ctx := t.Context()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+
+	body := rec.Body.String()
+
+	for _, want := range []string{
+		"class=\"skip-link\"",
+		"id=\"main-content\"",
+		"role=\"main\"",
+		"role=\"banner\"",
+		"role=\"navigation\"",
+		"aria-live=\"polite\"",
+		"role=\"dialog\"",
+		"id=\"keyboard-help\"",
+		"tabindex=\"0\"",
+		"role=\"button\"",
+		"aria-sort=\"ascending\"",
+		"id=\"help-hint\"",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("dashboard HTML accessibility missing %q", want)
+		}
+	}
+}
+
 func TestServer_HealthEndpoint(t *testing.T) {
 	t.Parallel()
 

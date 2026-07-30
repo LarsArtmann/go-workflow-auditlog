@@ -57,6 +57,23 @@ func TestDashboardJS_StructuralIntegrity(t *testing.T) {
 		"function renderTimeline()",
 		"function renderFooter()",
 		"function switchTab(",
+		"function handleKeyboardShortcut(",
+		"function openHelp()",
+		"function closeHelp()",
+		"function helpIsOpen()",
+		"function focusHelpTrap(",
+		"function isInputTarget(",
+		"function buildGraphAdjacency()",
+		"function handleGraphNodeKeydown(",
+		"function selectGraphNode(",
+		"function handleStepRowKeydown(",
+		"function refreshStepRowTabIndexes()",
+		"function updateSortableHeaders()",
+		"function activateSortHeader(",
+		"function focusStepRow(",
+		"function showTooltipForRow(",
+		"function focusGraphNodeLabel(",
+		"function navigateGraphNode(",
 	}
 
 	for _, fn := range expectedFunctions {
@@ -147,6 +164,14 @@ func TestDashboardCSS_StructuralIntegrity(t *testing.T) {
 		".critical-path",
 		".search-dimmed",
 		".retry-badge",
+		".skip-link",
+		".help-modal",
+		".help-hint",
+		".sort-asc",
+		".sort-desc",
+		"#tab-steps th.sortable:focus-visible",
+		"#tab-steps tr:focus-visible",
+		".graph-node:focus",
 	}
 
 	for _, cls := range expectedClasses {
