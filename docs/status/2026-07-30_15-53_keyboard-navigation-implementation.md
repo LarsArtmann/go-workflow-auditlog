@@ -9,44 +9,44 @@
 
 ## a) FULLY DONE (shipped and verified)
 
-| # | Item | Evidence |
-|---|------|----------|
-| 1 | **Skip link + landmark structure** | `dashboard.go`: `<a class="skip-link">`, `<header role="banner">`, `<nav role="navigation">`, `<main id="main-content" role="main">` |
-| 2 | **Global keyboard shortcuts** | `dashboard.js`: `handleKeyboardShortcut()` — digits 1-4 (tabs), `/` (step search), `g` (graph search), `e` (errors-only), `c` (critical path), `f` (fit), `+`/`=`/`-` (zoom), `x` (expand), `?` (help), `Esc` (close) |
-| 3 | **`:focus-visible` rings** | `dashboard.css`: tabs, chips, export links, graph nodes, sortable headers, step rows, graph controls, help buttons, gantt rows |
-| 4 | **Sortable header keyboard accessibility** | `dashboard.go`: `tabindex="0"`, `role="button"`, `aria-sort` on all headers; `dashboard.js`: `activateSortHeader()` with `Enter`/`Space` keydown handler, `updateSortableHeaders()` syncs `aria-sort` + CSS classes |
-| 5 | **Tab-list ARIA keyboard behavior** | `dashboard.js`: Arrow Left/Right navigate + activate, `Home`/`End` jump to first/last tab, roving `tabindex` pattern |
-| 6 | **Step-row keyboard navigation** | `dashboard.js`: roving `tabindex` (`refreshStepRowTabIndexes()`), `handleStepRowKeydown()` — Up/Down/Home/End/Enter(tooltip)/Esc |
-| 7 | **Graph node keyboard navigation** | `dashboard.js`: `buildGraphAdjacency()`, `navigateGraphNode()`, `handleGraphNodeKeydown()`, `selectGraphNode()`, `focusGraphNodeLabel()` — nodes are `tabindex="0"` `role="button"` with `aria-label` |
-| 8 | **Help modal** | `dashboard.go`: dialog HTML with shortcut table; `dashboard.js`: `openHelp()`/`closeHelp()` with focus return + basic trap; `dashboard.css`: full modal styling |
-| 9 | **`aria-live` regions** | `dashboard.go`: live badge, connection status, stats, waveform, step result count, graph info text |
-| 10 | **Event filter shortcuts** | `dashboard.js`: digits 1/2/3 on Events tab trigger filter chips |
-| 11 | **Structural tests** | `dashboardjs_test.go`: 18 new expected functions; `server_test.go`: `TestServer_DashboardHTML_Accessibility` verifies 12 ARIA/HTML strings |
-| 12 | **Documentation** | `AGENTS.md`: updated source-file descriptions + new "Keyboard Navigation" subsection; `CHANGELOG.md`: full Unreleased entry |
+| #   | Item                                       | Evidence                                                                                                                                                                                                              |
+| --- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Skip link + landmark structure**         | `dashboard.go`: `<a class="skip-link">`, `<header role="banner">`, `<nav role="navigation">`, `<main id="main-content" role="main">`                                                                                  |
+| 2   | **Global keyboard shortcuts**              | `dashboard.js`: `handleKeyboardShortcut()` — digits 1-4 (tabs), `/` (step search), `g` (graph search), `e` (errors-only), `c` (critical path), `f` (fit), `+`/`=`/`-` (zoom), `x` (expand), `?` (help), `Esc` (close) |
+| 3   | **`:focus-visible` rings**                 | `dashboard.css`: tabs, chips, export links, graph nodes, sortable headers, step rows, graph controls, help buttons, gantt rows                                                                                        |
+| 4   | **Sortable header keyboard accessibility** | `dashboard.go`: `tabindex="0"`, `role="button"`, `aria-sort` on all headers; `dashboard.js`: `activateSortHeader()` with `Enter`/`Space` keydown handler, `updateSortableHeaders()` syncs `aria-sort` + CSS classes   |
+| 5   | **Tab-list ARIA keyboard behavior**        | `dashboard.js`: Arrow Left/Right navigate + activate, `Home`/`End` jump to first/last tab, roving `tabindex` pattern                                                                                                  |
+| 6   | **Step-row keyboard navigation**           | `dashboard.js`: roving `tabindex` (`refreshStepRowTabIndexes()`), `handleStepRowKeydown()` — Up/Down/Home/End/Enter(tooltip)/Esc                                                                                      |
+| 7   | **Graph node keyboard navigation**         | `dashboard.js`: `buildGraphAdjacency()`, `navigateGraphNode()`, `handleGraphNodeKeydown()`, `selectGraphNode()`, `focusGraphNodeLabel()` — nodes are `tabindex="0"` `role="button"` with `aria-label`                 |
+| 8   | **Help modal**                             | `dashboard.go`: dialog HTML with shortcut table; `dashboard.js`: `openHelp()`/`closeHelp()` with focus return + basic trap; `dashboard.css`: full modal styling                                                       |
+| 9   | **`aria-live` regions**                    | `dashboard.go`: live badge, connection status, stats, waveform, step result count, graph info text                                                                                                                    |
+| 10  | **Event filter shortcuts**                 | `dashboard.js`: digits 1/2/3 on Events tab trigger filter chips                                                                                                                                                       |
+| 11  | **Structural tests**                       | `dashboardjs_test.go`: 18 new expected functions; `server_test.go`: `TestServer_DashboardHTML_Accessibility` verifies 12 ARIA/HTML strings                                                                            |
+| 12  | **Documentation**                          | `AGENTS.md`: updated source-file descriptions + new "Keyboard Navigation" subsection; `CHANGELOG.md`: full Unreleased entry                                                                                           |
 
 ---
 
 ## b) PARTIALLY DONE (shipped with gaps)
 
-| # | Item | What's missing |
-|---|------|----------------|
-| 1 | **Graph zoom/fit shortcuts** | `handleKeyboardShortcut()` references `fitDAGGraph()`, `zoomInDAGGraph()`, `zoomOutDAGGraph()` — **these functions do not exist**. Guarded by `typeof ... === "function"` so they're silent no-ops. The `f`, `+`, `-` shortcuts do nothing. Need to delegate to daghtml's zoom API or wire to the existing `.graph-zoom-in` / `.graph-zoom-out` / `.graph-fit` button clicks. |
-| 2 | **Help modal focus trap** | `focusHelpTrap()` has a bug: `if (e.key === "Tab" || e.key === "Tab")` — the same condition is duplicated (should be checking for the Tab key, which it does, but the redundancy is a copy-paste artifact). The trap only runs when called from `handleKeyboardShortcut`, not as a standalone listener. Focus trap is minimal — no `Shift+Tab` edge wrapping test works correctly in practice. |
-| 3 | **Graph node `aria-label` refresh** | `aria-label` is set once during `enhanceGraph()`. When `updateGraphLive()` changes node colors and text labels during streaming, the `aria-label` is NOT updated. A screen-reader user would hear stale status info for nodes that changed after initial render. |
-| 4 | **Step row focus preservation** | `refreshStepRowTabIndexes()` runs at the end of every `renderStepsTable()`. If focus is on row 3 and a sort/filter re-renders, the row's `tabindex` may change to `-1` while still focused, or the row may be removed entirely. No attempt to restore focus to the logically-equivalent row after re-render. |
-| 5 | **No `aria-hidden` management** | When the help modal opens, the rest of the page is not marked `aria-hidden="true"`. Screen readers may read behind the modal. |
+| #   | Item                                | What's missing                                                                                                                                                                                                                                                                                                                                                                |
+| --- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Graph zoom/fit shortcuts**        | `handleKeyboardShortcut()` references `fitDAGGraph()`, `zoomInDAGGraph()`, `zoomOutDAGGraph()` — **these functions do not exist**. Guarded by `typeof ... === "function"` so they're silent no-ops. The `f`, `+`, `-` shortcuts do nothing. Need to delegate to daghtml's zoom API or wire to the existing `.graph-zoom-in` / `.graph-zoom-out` / `.graph-fit` button clicks. |
+| 2   | **Help modal focus trap**           | `focusHelpTrap()` has a bug: `if (e.key === "Tab"                                                                                                                                                                                                                                                                                                                             |     | e.key === "Tab")`— the same condition is duplicated (should be checking for the Tab key, which it does, but the redundancy is a copy-paste artifact). The trap only runs when called from`handleKeyboardShortcut`, not as a standalone listener. Focus trap is minimal — no `Shift+Tab` edge wrapping test works correctly in practice. |
+| 3   | **Graph node `aria-label` refresh** | `aria-label` is set once during `enhanceGraph()`. When `updateGraphLive()` changes node colors and text labels during streaming, the `aria-label` is NOT updated. A screen-reader user would hear stale status info for nodes that changed after initial render.                                                                                                              |
+| 4   | **Step row focus preservation**     | `refreshStepRowTabIndexes()` runs at the end of every `renderStepsTable()`. If focus is on row 3 and a sort/filter re-renders, the row's `tabindex` may change to `-1` while still focused, or the row may be removed entirely. No attempt to restore focus to the logically-equivalent row after re-render.                                                                  |
+| 5   | **No `aria-hidden` management**     | When the help modal opens, the rest of the page is not marked `aria-hidden="true"`. Screen readers may read behind the modal.                                                                                                                                                                                                                                                 |
 
 ---
 
 ## c) NOT STARTED
 
-| # | Item | Notes |
-|---|------|-------|
-| 1 | **Commit** | No git commit was made. All changes are in the working tree. |
-| 2 | **Runtime browser testing** | No manual or automated browser testing of actual keyboard behavior. All tests are structural (string matching on source). |
-| 3 | **Website docs** (`docs/website/live-dashboard.mdx` or equivalent) | Plan task 12.3 mentioned this; not done. |
-| 4 | **`prefers-reduced-motion` support** | New CSS animations and transitions don't respect reduced motion. |
-| 5 | **CSP compliance check** | The help modal adds `onclick`-free buttons, but no verification that the existing CSP (`script-src 'unsafe-inline'`) still covers the new inline event listeners (it does, since they're in the embedded JS, not inline attributes — but worth confirming). |
+| #   | Item                                                               | Notes                                                                                                                                                                                                                                                       |
+| --- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Commit**                                                         | No git commit was made. All changes are in the working tree.                                                                                                                                                                                                |
+| 2   | **Runtime browser testing**                                        | No manual or automated browser testing of actual keyboard behavior. All tests are structural (string matching on source).                                                                                                                                   |
+| 3   | **Website docs** (`docs/website/live-dashboard.mdx` or equivalent) | Plan task 12.3 mentioned this; not done.                                                                                                                                                                                                                    |
+| 4   | **`prefers-reduced-motion` support**                               | New CSS animations and transitions don't respect reduced motion.                                                                                                                                                                                            |
+| 5   | **CSP compliance check**                                           | The help modal adds `onclick`-free buttons, but no verification that the existing CSP (`script-src 'unsafe-inline'`) still covers the new inline event listeners (it does, since they're in the embedded JS, not inline attributes — but worth confirming). |
 
 ---
 
@@ -80,6 +80,7 @@ These are harmless (no side effects) but they're litter. A reviewer would flag t
 ## f) Up to 50 things to get done next
 
 ### Immediate cleanup (this session's debt)
+
 1. Remove `isInputTarget` dead code OR wire it into `handleKeyboardShortcut`
 2. Remove `focusTabPanel` dead code
 3. Remove `getGraphSvgNodes` dead code
@@ -88,6 +89,7 @@ These are harmless (no side effects) but they're litter. A reviewer would flag t
 6. Commit all changes with a detailed message
 
 ### Accessibility hardening
+
 7. Update `aria-label` on graph nodes during `updateGraphLive()`
 8. Add `aria-hidden` management on `<main>` when modal opens
 9. Restore focus to equivalent step row after sort/filter re-render
@@ -99,6 +101,7 @@ These are harmless (no side effects) but they're litter. A reviewer would flag t
 15. Add `inert` attribute support (or fallback) on background content when modal is open
 
 ### Graph keyboard navigation
+
 16. Implement multi-neighbor navigation (when a node has 3+ neighbors, cycle through them)
 17. Add visual focus indicator that's distinct from the `:focus` CSS (SVG focus rings can be inconsistent across browsers)
 18. Add `aria-describedby` on graph nodes pointing to a hidden description of the node's dependencies
@@ -106,6 +109,7 @@ These are harmless (no side effects) but they're litter. A reviewer would flag t
 20. Add keyboard shortcut to reset graph zoom/pan to default
 
 ### Step table keyboard navigation
+
 21. Add `Ctrl+Home`/`Ctrl+End` for first/last page when pagination is active
 22. Add column header sorting via keyboard when a row is focused (e.g., `s` then arrow)
 23. Add `aria-rowcount` and `aria-colcount` on the table for screen readers
@@ -113,15 +117,18 @@ These are harmless (no side effects) but they're litter. A reviewer would flag t
 25. Announce sort changes via `aria-live` (e.g., "Sorted by duration, descending")
 
 ### Tab panel improvements
+
 26. Move focus to the tabpanel content after tab activation (currently focuses the tab button)
 27. Add `aria-labelledby` cycle: tab → tabpanel → first focusable in panel
 28. Persist last-active tab across page reloads (via `sessionStorage`)
 
 ### Event filters
+
 29. Add `aria-pressed` sync on event filter chips after keyboard activation
 30. Add keyboard shortcut for "clear all filters" (e.g., `Shift+/` or `Backspace` when not in an input)
 
 ### Testing
+
 31. Add a Go test that parses the HTML template and verifies all `id=` attributes referenced in `dashboard.js` `getElementById` calls exist in `dashboard.go`
 32. Add a test that verifies no `function` is defined twice (catches accidental duplication)
 33. Add a test for the help modal shortcut table completeness (every shortcut in the JS has a row in the HTML table)
@@ -130,6 +137,7 @@ These are harmless (no side effects) but they're litter. A reviewer would flag t
 36. Add a race-detector run specifically for the live module (already in `nix run .#check`, but call out explicitly)
 
 ### Documentation
+
 37. Update `docs/DOMAIN_LANGUAGE.md` with keyboard navigation terms
 38. Add keyboard navigation section to README.md (if it has a live dashboard section)
 39. Update `FEATURES.md` with keyboard accessibility status
@@ -137,12 +145,14 @@ These are harmless (no side effects) but they're litter. A reviewer would flag t
 41. Add a `KEYBOARD_SHORTCUTS.md` reference file or inline it in the help modal (already in modal, but a standalone reference is useful)
 
 ### Code quality
+
 42. Extract the `handleKeyboardShortcut` switch into a dispatch table for readability
 43. Consolidate the two separate `document.addEventListener("keydown", ...)` calls (one for shortcuts, one for tab arrows) into a single handler
 44. Add JSDoc comments to exported keyboard functions
 45. Run a JS linter (eslint/standardjs) on `dashboard.js` — the project doesn't have one, but the file is getting large
 
 ### Release
+
 46. Decide if keyboard navigation ships as v0.9.0 (new feature) or v0.8.3 (patch)
 47. Tag the release following `RELEASE.md` (three tags: core, viz, live)
 48. Verify `grep -r '^replace' viz/go.mod live/go.mod` returns nothing before release

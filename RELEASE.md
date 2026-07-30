@@ -7,11 +7,11 @@ This is a **multi-module monorepo**: every release produces **three tags**.
 
 ## Tag Convention
 
-| Module | Import path | Tag format | Example |
-|--------|------------|------------|---------|
-| Core | `github.com/larsartmann/go-workflow-auditlog` | `vX.Y.Z` | `v0.8.1` |
-| Visualization | `github.com/larsartmann/go-workflow-auditlog/viz` | `viz/vX.Y.Z` | `viz/v0.8.1` |
-| Live | `github.com/larsartmann/go-workflow-auditlog/live` | `live/vX.Y.Z` | `live/v0.8.1` |
+| Module        | Import path                                        | Tag format    | Example       |
+| ------------- | -------------------------------------------------- | ------------- | ------------- |
+| Core          | `github.com/larsartmann/go-workflow-auditlog`      | `vX.Y.Z`      | `v0.8.1`      |
+| Visualization | `github.com/larsartmann/go-workflow-auditlog/viz`  | `viz/vX.Y.Z`  | `viz/v0.8.1`  |
+| Live          | `github.com/larsartmann/go-workflow-auditlog/live` | `live/vX.Y.Z` | `live/v0.8.1` |
 
 All three tags point to the **same commit**. Sub-module path prefixes are
 required by the Go module system so `go get` can resolve each module
@@ -32,14 +32,17 @@ breaking changes in 0.x minor releases.
 ## Pre-release Checklist
 
 1. **Run the canonical check suite:**
+
    ```bash
    nix run .#check
    ```
+
    This runs `go vet`, `go test -race`, `golangci-lint`, and `govulncheck`
    for **all three modules** (core, viz, live) in standalone `GOWORK=off`
    mode. Zero findings required.
 
 2. **Verify coverage** is at or above the 92% gate:
+
    ```bash
    GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic -coverpkg=./ ./...
    go tool cover -func=cover.out | tail -1
@@ -50,12 +53,14 @@ breaking changes in 0.x minor releases.
    - Use Keep a Changelog categories: Added / Changed / Fixed / Removed.
 
 4. **Verify standalone builds** (proves consumers can `go get`):
+
    ```bash
    cd viz  && GOWORK=off GOEXPERIMENT=jsonv2 go test -count=1 ./...
    cd live && GOWORK=off GOEXPERIMENT=jsonv2 go test -count=1 ./...
    ```
 
 5. **CRITICAL: Verify no `replace` directives in sub-module go.mod files:**
+
    ```bash
    grep -r '^replace' viz/go.mod live/go.mod
    # MUST return nothing. replace directives produce pseudo-version requirements
@@ -83,6 +88,7 @@ git tag -a "live/v${VERSION}"    -m "Release live/v${VERSION}"    "${COMMIT}"
 ```
 
 Verify:
+
 ```bash
 git tag -l --sort=-creatordate | head
 git tag --points-at HEAD
@@ -201,6 +207,7 @@ curl -s "https://pkg.go.dev/fetch/github.com/larsartmann/go-workflow-auditlog/li
 ```
 
 Verify the pages render:
+
 - https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog
 - https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog/viz
 - https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog/live
@@ -231,12 +238,12 @@ Verify the pages render:
 
 ## Common Gotchas
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
+| Issue                                                                             | Cause                                                                                  | Fix                                                                                                           |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | **Consumer `go get` fails with `invalid version: unknown revision 000000000000`** | Sub-module `go.mod` has `replace => ..` directive producing pseudo-version requirement | **Remove the `replace` directive.** Set real version in `require`. Local dev uses `go.work` `use` directives. |
-| `go mod tidy` fails on viz/live | go-output's published `go.mod` has broken `replace => ./testhelpers` | Use `go mod tidy -e` (error-tolerant) |
-| goreleaser picks wrong tag | Three tags at same commit; `git describe` returns `live/v*` | Set `GORELEASER_CURRENT_TAG=vX.Y.Z` |
-| goreleaser hooks fail with "executable not found" | OSS hooks use direct exec, not shell | Wrap hooks in `sh -c "..."` |
-| goreleaser "git is in a dirty state" | Auto-commit daemon hasn't committed yet | Wait for daemon, or use `gh release create` |
-| `git work sync` downloads invalid testhelpers version | Same go-output replace defect | Harmless; builds/tests are unaffected |
-| `sum.golang.org` returns 500 for newly-pushed tags | Checksum DB propagation delay (minutes to hours) | Wait; resolves automatically. Test with `GOSUMDB=off` in the meantime. |
+| `go mod tidy` fails on viz/live                                                   | go-output's published `go.mod` has broken `replace => ./testhelpers`                   | Use `go mod tidy -e` (error-tolerant)                                                                         |
+| goreleaser picks wrong tag                                                        | Three tags at same commit; `git describe` returns `live/v*`                            | Set `GORELEASER_CURRENT_TAG=vX.Y.Z`                                                                           |
+| goreleaser hooks fail with "executable not found"                                 | OSS hooks use direct exec, not shell                                                   | Wrap hooks in `sh -c "..."`                                                                                   |
+| goreleaser "git is in a dirty state"                                              | Auto-commit daemon hasn't committed yet                                                | Wait for daemon, or use `gh release create`                                                                   |
+| `git work sync` downloads invalid testhelpers version                             | Same go-output replace defect                                                          | Harmless; builds/tests are unaffected                                                                         |
+| `sum.golang.org` returns 500 for newly-pushed tags                                | Checksum DB propagation delay (minutes to hours)                                       | Wait; resolves automatically. Test with `GOSUMDB=off` in the meantime.                                        |

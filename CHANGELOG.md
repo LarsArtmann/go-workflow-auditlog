@@ -16,7 +16,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Accessible keyboard shortcut help modal** with focus trap, `?` to open, `Esc` to close, and a floating hint button.
 - **Structural tests** for the new accessibility features in `live/dashboardjs_test.go` and `live/server_test.go`.
 
-
 ### Fixed
 
 - **CRITICAL: Removed local `replace` directives from `viz/go.mod` and `live/go.mod`.** The v0.8.0 module split left `replace github.com/larsartmann/go-workflow-auditlog => ..` (and `=> ../viz`) in the published go.mod files. These local filesystem redirects produce invalid pseudo-version requirements (`v0.0.0-00010101000000-000000000000`) that **completely break consumer `go get`** for the `viz` and `live` sub-modules when fetched in isolation. Core was unaffected. All three modules now carry real version requirements and resolve cleanly from the Go module proxy.

@@ -158,7 +158,7 @@
   function focusHelpTrap(e) {
     if (!helpIsOpen() || !els.helpModal) return;
     var focusable = els.helpModal.querySelectorAll(
-      "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+      "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
     );
     if (!focusable.length) return;
     var first = focusable[0];
@@ -840,7 +840,12 @@
         tr.setAttribute("data-step-name", step.step_name);
         tr.setAttribute(
           "aria-label",
-          step.step_name + " " + (step.status || "pending") + " " + (step.attempt_count || 0) + " attempts",
+          step.step_name +
+            " " +
+            (step.status || "pending") +
+            " " +
+            (step.attempt_count || 0) +
+            " attempts",
         );
         tr.addEventListener("keydown", handleStepRowKeydown);
 
@@ -1273,15 +1278,19 @@
     var rect = node.getBoundingClientRect();
     var containerRect = els.graphContainer.getBoundingClientRect();
     var pad = 60;
-    if (rect.left < containerRect.left + pad || rect.right > containerRect.right - pad ||
-        rect.top < containerRect.top + pad || rect.bottom > containerRect.bottom - pad) {
+    if (
+      rect.left < containerRect.left + pad ||
+      rect.right > containerRect.right - pad ||
+      rect.top < containerRect.top + pad ||
+      rect.bottom > containerRect.bottom - pad
+    ) {
       var shape = node.querySelector("rect, circle, ellipse");
       if (shape) {
         var x = parseFloat(shape.getAttribute("x") || shape.getAttribute("cx") || 0);
         var y = parseFloat(shape.getAttribute("y") || shape.getAttribute("cy") || 0);
         var w = vb.width;
         var h = vb.height;
-        svg.setAttribute("viewBox", (x - w / 2) + " " + (y - h / 2) + " " + w + " " + h);
+        svg.setAttribute("viewBox", x - w / 2 + " " + (y - h / 2) + " " + w + " " + h);
       }
     }
   }
@@ -1835,7 +1844,7 @@
     // Event filter shortcuts when Events tab is active
     var activeTab = document.querySelector(".tab.active");
     if (activeTab && activeTab.dataset.tab === "events" && !shift && !ctrl) {
-      var filterMap = { "1": "all", "2": "attempt_start", "3": "attempt_end" };
+      var filterMap = { 1: "all", 2: "attempt_start", 3: "attempt_end" };
       if (filterMap[key]) {
         e.preventDefault();
         var target = els.eventFilters.querySelector('[data-filter="' + filterMap[key] + '"]');
@@ -1849,7 +1858,8 @@
 
   // Arrow-key navigation within the tab bar (ARIA tabs pattern)
   document.addEventListener("keydown", function (e) {
-    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End") return;
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End")
+      return;
     var focused = document.querySelector(".tab:focus");
     if (!focused) return;
     e.preventDefault();
@@ -1877,7 +1887,10 @@
       var key = th.dataset.sort;
       var isActive = stepSortKey === key;
       th.classList.remove("sort-asc", "sort-desc");
-      th.setAttribute("aria-sort", isActive ? (stepSortDir === 1 ? "ascending" : "descending") : "none");
+      th.setAttribute(
+        "aria-sort",
+        isActive ? (stepSortDir === 1 ? "ascending" : "descending") : "none",
+      );
       if (isActive) th.classList.add(stepSortDir === 1 ? "sort-asc" : "sort-desc");
     });
   }
