@@ -83,6 +83,64 @@ func TestDashboardJS_StructuralIntegrity(t *testing.T) {
 	}
 }
 
+// TestDashboardJS_NoDeadCode verifies that previously-removed dead code
+// functions are not present. These were identified during self-audit and
+// removed: focusTabPanel, getGraphSvgNodes.
+func TestDashboardJS_NoDeadCode(t *testing.T) {
+	t.Parallel()
+
+	jsBytes, err := os.ReadFile("dashboard.js")
+	if err != nil {
+		t.Fatalf("read dashboard.js: %v", err)
+	}
+
+	js := string(jsBytes)
+
+	deadFunctions := []string{
+		"function focusTabPanel(",
+		"function getGraphSvgNodes(",
+		// Non-existent zoom functions that were guarded by typeof checks
+		"typeof fitDAGGraph",
+		"typeof zoomInDAGGraph",
+		"typeof zoomOutDAGGraph",
+		// Duplicate Tab condition in focusHelpTrap
+		`e.key === "Tab" || e.key === "Tab"`,
+	}
+
+	for _, dead := range deadFunctions {
+		if strings.Contains(js, dead) {
+			t.Errorf("dashboard.js should not contain dead/buggy code: %s", dead)
+		}
+	}
+}
+
+// TestDashboardJS_GraphZoomDelegation verifies that zoom/fit keyboard
+// shortcuts delegate to daghtml's own buttons via .click() rather than
+// calling non-existent global functions.
+func TestDashboardJS_GraphZoomDelegation(t *testing.T) {
+	t.Parallel()
+
+	jsBytes, err := os.ReadFile("dashboard.js")
+	if err != nil {
+		t.Fatalf("read dashboard.js: %v", err)
+	}
+
+	js := string(jsBytes)
+
+	// The keyboard handler must delegate to the existing buttons
+	requiredPatterns := []string{
+		"els.graphFit.click()",
+		"els.graphZoomIn.click()",
+		"els.graphZoomOut.click()",
+	}
+
+	for _, pat := range requiredPatterns {
+		if !strings.Contains(js, pat) {
+			t.Errorf("dashboard.js missing zoom delegation: %s", pat)
+		}
+	}
+}
+
 // TestDashboardJS_BalancedBraces verifies basic syntactic validity by checking
 // that the file has a reasonable ratio of opening to closing braces.
 // A perfect count is impossible due to regex literals containing quote chars,

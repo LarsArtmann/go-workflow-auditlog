@@ -124,21 +124,10 @@
     return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target.isContentEditable;
   }
 
-  function focusTabPanel(tabName) {
-    var panel = document.getElementById("tab-" + tabName);
-    if (panel && panel.focus) panel.focus();
-  }
-
   function getVisibleStepRows() {
     return Array.prototype.slice.call(els.stepsTbody.querySelectorAll("tr")).filter(function (tr) {
       return tr.offsetParent !== null;
     });
-  }
-
-  function getGraphSvgNodes() {
-    var svg = els.graphContainer.querySelector("svg");
-    if (!svg) return [];
-    return Array.prototype.slice.call(svg.querySelectorAll(".graph-node"));
   }
 
   function helpIsOpen() {
@@ -151,12 +140,18 @@
     if (!els.helpModal) return;
     helpLastFocus = document.activeElement;
     els.helpModal.style.display = "";
+    document.querySelectorAll("header, main, nav").forEach(function (el) {
+      el.setAttribute("aria-hidden", "true");
+    });
     if (els.helpClose) els.helpClose.focus();
   }
 
   function closeHelp() {
     if (!els.helpModal) return;
     els.helpModal.style.display = "none";
+    document.querySelectorAll("header, main, nav").forEach(function (el) {
+      el.removeAttribute("aria-hidden");
+    });
     if (helpLastFocus && helpLastFocus.focus) helpLastFocus.focus();
   }
 
@@ -168,7 +163,7 @@
     if (!focusable.length) return;
     var first = focusable[0];
     var last = focusable[focusable.length - 1];
-    if (e.key === "Tab" || e.key === "Tab") {
+    if (e.key === "Tab") {
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
         last.focus();
@@ -778,6 +773,13 @@
   function renderStepsTable() {
     var sortedSteps = getSortedSteps();
 
+    // Preserve keyboard focus across re-renders (sort/filter/expand)
+    var prevFocusedName = null;
+    var activeEl = document.activeElement;
+    if (activeEl && activeEl.tagName === "TR" && activeEl.closest("#steps-tbody")) {
+      prevFocusedName = activeEl.getAttribute("data-step-name");
+    }
+
     var q = (els.stepSearch.value || "").toLowerCase();
     var errorsOnly = els.stepErrorsOnly.getAttribute("aria-pressed") === "true";
     var filtering = q.length > 0 || errorsOnly;
@@ -873,6 +875,11 @@
     state.changedSteps = {};
 
     refreshStepRowTabIndexes();
+
+    // Restore focus to the same step row if it survived the re-render
+    if (prevFocusedName && stepRows[prevFocusedName]) {
+      focusStepRow(stepRows[prevFocusedName].tr);
+    }
   }
 
   function refreshStepRowTabIndexes() {
@@ -1084,6 +1091,13 @@
         }
         textEl.textContent = label;
       }
+
+      // Keep aria-label in sync with live status changes
+      var arialabel = (nodeId || "node") + " " + (step.status || "pending");
+      if (step.duration_ms && step.duration_ms > 0) {
+        arialabel += " " + humanizeMs(step.duration_ms);
+      }
+      node.setAttribute("aria-label", arialabel);
 
       // Flash recently changed nodes
       if (state.changedSteps[nodeId]) {
@@ -1727,8 +1741,7 @@
   // === Global Keyboard Shortcuts ===
 
   function handleKeyboardShortcut(e) {
-    var tag = e.target.tagName;
-    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if (isInputTarget(e)) return;
 
     var key = e.key;
     var shift = e.shiftKey;
@@ -1792,22 +1805,22 @@
       return;
     }
 
-    // Fit graph to view
+    // Fit graph to view (daghtml wires the .graph-fit click handler)
     if (key === "f" && !shift && !ctrl) {
       e.preventDefault();
-      if (els.graphFit && typeof fitDAGGraph === "function") fitDAGGraph();
+      if (els.graphFit) els.graphFit.click();
       return;
     }
 
     // Graph zoom with + / - (and = as unshifted +)
     if ((key === "+" || key === "=") && !ctrl) {
       e.preventDefault();
-      if (els.graphZoomIn && typeof zoomInDAGGraph === "function") zoomInDAGGraph();
+      if (els.graphZoomIn) els.graphZoomIn.click();
       return;
     }
     if (key === "-" && !ctrl) {
       e.preventDefault();
-      if (els.graphZoomOut && typeof zoomOutDAGGraph === "function") zoomOutDAGGraph();
+      if (els.graphZoomOut) els.graphZoomOut.click();
       return;
     }
 
