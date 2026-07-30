@@ -39,19 +39,20 @@ const liveTemplate = `<!DOCTYPE html>
 %s</style>
 </head>
 <body>
-<header>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<header role="banner">
   <div class="header-left">
-    <h1><span class="logo-dot live-dot"></span>workflow-auditlog<span class="version">v%s</span> <span class="live-badge" id="live-badge"><span class="live-pulse"></span>LIVE</span></h1>
-    <p class="subtitle">Workflow <span class="mono" id="workflow-id">&mdash;</span> &middot; Run <span class="mono" id="run-id">&mdash;</span> &mdash; <span id="connection-status" class="conn-status connecting">connecting...</span></p>
+    <h1><span class="logo-dot live-dot"></span>workflow-auditlog<span class="version">v%s</span> <span class="live-badge" id="live-badge" aria-live="polite"><span class="live-pulse"></span>LIVE</span></h1>
+    <p class="subtitle">Workflow <span class="mono" id="workflow-id">&mdash;</span> &middot; Run <span class="mono" id="run-id">&mdash;</span> &mdash; <span id="connection-status" class="conn-status connecting" aria-live="polite">connecting...</span></p>
   </div>
   <div class="legend" id="legend"></div>
-  <div class="export-bar">
+  <div class="export-bar" role="group" aria-label="Export report formats">
     <a class="export-btn" id="export-json" download="workflow-report.json" title="Download JSON report">JSON</a>
     <a class="export-btn" id="export-ndjson" download="workflow-events.ndjson" title="Download NDJSON event stream">NDJSON</a>
     <a class="export-btn" id="export-html" download="workflow-report.html" title="Download HTML report">HTML</a>
   </div>
 </header>
-<div class="failure-banner" id="failure-banner" style="display:none">
+<div class="failure-banner" id="failure-banner" role="alert" aria-live="assertive" style="display:none">
   <div class="failure-banner-header">
     <span class="failure-banner-icon">&#9888;</span>
     <span class="failure-banner-title">Workflow Failed</span>
@@ -61,7 +62,7 @@ const liveTemplate = `<!DOCTYPE html>
 </div>
 <div class="waveform-section">
   <span class="waveform-label">Event Timeline</span>
-  <div class="waveform" id="waveform">
+  <div class="waveform" id="waveform" aria-live="polite" aria-label="Event timeline">
     <span class="waveform-placeholder">Waiting for events...</span>
   </div>
   <div class="waveform-legend">
@@ -70,31 +71,34 @@ const liveTemplate = `<!DOCTYPE html>
     <span class="wf-legend-item"><span class="wf-legend-dot" style="background:var(--error)"></span>error</span>
   </div>
 </div>
-<div class="stats" id="stats">
+<div class="stats" id="stats" aria-live="polite" aria-label="Workflow statistics">
   <div class="stat-placeholder">Connect to see live stats...</div>
 </div>
+<nav aria-label="Report sections" role="navigation">
 <div class="tab-bar" role="tablist" aria-label="Report sections">
-  <button class="tab active" data-tab="steps" role="tab" aria-selected="true" aria-controls="tab-steps" id="tab-btn-steps">Steps</button>
-  <button class="tab" data-tab="graph" role="tab" aria-selected="false" aria-controls="tab-graph" id="tab-btn-graph">DAG Graph</button>
-  <button class="tab" data-tab="timeline" role="tab" aria-selected="false" aria-controls="tab-timeline" id="tab-btn-timeline">Timeline</button>
-  <button class="tab" data-tab="events" role="tab" aria-selected="false" aria-controls="tab-events" id="tab-btn-events">Events</button>
+  <button class="tab active" data-tab="steps" role="tab" aria-selected="true" aria-controls="tab-steps" id="tab-btn-steps" tabindex="0">Steps</button>
+  <button class="tab" data-tab="graph" role="tab" aria-selected="false" aria-controls="tab-graph" id="tab-btn-graph" tabindex="-1">DAG Graph</button>
+  <button class="tab" data-tab="timeline" role="tab" aria-selected="false" aria-controls="tab-timeline" id="tab-btn-timeline" tabindex="-1">Timeline</button>
+  <button class="tab" data-tab="events" role="tab" aria-selected="false" aria-controls="tab-events" id="tab-btn-events" tabindex="-1">Events</button>
 </div>
-<div class="tab-content active" id="tab-steps" role="tabpanel" aria-labelledby="tab-btn-steps">
+</nav>
+<main id="main-content" role="main">
+<div class="tab-content active" id="tab-steps" role="tabpanel" aria-labelledby="tab-btn-steps" tabindex="-1">
   <div class="filter-bar">
     <label for="step-search" class="sr-only">Filter steps by name</label>
     <input type="text" id="step-search" placeholder="Filter steps..." aria-label="Filter steps by name">
     <button class="chip" id="step-errors-only" aria-pressed="false" title="Show only steps with errors">Errors only</button>
-    <span id="step-result-count" style="font-size:0.75rem;color:var(--text-dim);font-family:var(--font-mono)"></span>
+    <span id="step-result-count" style="font-size:0.75rem;color:var(--text-dim);font-family:var(--font-mono)" aria-live="polite"></span>
   </div>
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th class="sortable" data-sort="name">Step</th>
-          <th class="sortable" data-sort="type">Type</th>
-          <th class="sortable" data-sort="status">Status</th>
-          <th class="sortable" data-sort="attempts">Attempts</th>
-          <th class="sortable" data-sort="duration">Duration</th>
+          <th class="sortable" data-sort="name" tabindex="0" role="button" aria-sort="ascending">Step</th>
+          <th class="sortable" data-sort="type" tabindex="0" role="button" aria-sort="none">Type</th>
+          <th class="sortable" data-sort="status" tabindex="0" role="button" aria-sort="none">Status</th>
+          <th class="sortable" data-sort="attempts" tabindex="0" role="button" aria-sort="none">Attempts</th>
+          <th class="sortable" data-sort="duration" tabindex="0" role="button" aria-sort="none">Duration</th>
           <th>Dependencies</th>
           <th>Dependents</th>
           <th>Config</th>
@@ -106,30 +110,30 @@ const liveTemplate = `<!DOCTYPE html>
     </table>
   </div>
 </div>
-<div class="tab-content" id="tab-graph" role="tabpanel" aria-labelledby="tab-btn-graph">
+<div class="tab-content" id="tab-graph" role="tabpanel" aria-labelledby="tab-btn-graph" tabindex="-1">
   <div class="filter-bar">
     <label for="graph-search" class="sr-only">Filter graph nodes</label>
     <input type="text" id="graph-search" placeholder="Highlight nodes..." aria-label="Filter graph nodes by name">
     <button class="chip" id="graph-critical-path" aria-pressed="false" title="Highlight the longest dependency chain (bottleneck)">Critical Path</button>
-    <span id="graph-info-text" style="font-size:0.75rem;color:var(--text-dim);font-family:var(--font-mono)"></span>
+    <span id="graph-info-text" style="font-size:0.75rem;color:var(--text-dim);font-family:var(--font-mono)" aria-live="polite"></span>
   </div>
-  <div id="graph-container">
+  <div id="graph-container" aria-label="Workflow dependency graph" role="application">
     <div class="graph-controls">
-      <button class="graph-zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
-      <button class="graph-zoom-out" title="Zoom out" aria-label="Zoom out">&minus;</button>
-      <button class="graph-fit" title="Fit to view" aria-label="Fit to view">&#8982;</button>
+      <button class="graph-zoom-in" title="Zoom in (shortcut +)" aria-label="Zoom in">+</button>
+      <button class="graph-zoom-out" title="Zoom out (shortcut -)" aria-label="Zoom out">&minus;</button>
+      <button class="graph-fit" title="Fit to view (shortcut f)" aria-label="Fit to view">&#8982;</button>
     </div>
-    <div class="graph-info">Scroll/pinch to zoom &middot; Drag to pan &middot; Click node to highlight</div>
+    <div class="graph-info" id="graph-info" aria-live="polite">Scroll/pinch to zoom &middot; Drag to pan &middot; Click node to highlight &middot; Use arrow keys to navigate nodes</div>
     <div class="graph-placeholder" id="graph-placeholder">DAG graph will appear here when steps are available...</div>
     <div id="graph-minimap" class="graph-minimap" style="display:none"></div>
   </div>
 </div>
-<div class="tab-content" id="tab-timeline" role="tabpanel" aria-labelledby="tab-btn-timeline">
-  <div id="timeline-container">
+<div class="tab-content" id="tab-timeline" role="tabpanel" aria-labelledby="tab-btn-timeline" tabindex="-1">
+  <div id="timeline-container" aria-label="Workflow timeline" role="region">
     <div class="graph-placeholder">Timeline will appear here as events arrive...</div>
   </div>
 </div>
-<div class="tab-content" id="tab-events" role="tabpanel" aria-labelledby="tab-btn-events">
+<div class="tab-content" id="tab-events" role="tabpanel" aria-labelledby="tab-btn-events" tabindex="-1">
   <div class="filter-bar" id="event-filters" role="group" aria-label="Filter events by type"></div>
   <div class="table-wrap">
     <table>
@@ -141,7 +145,40 @@ const liveTemplate = `<!DOCTYPE html>
     </table>
   </div>
 </div>
-<div id="error-tooltip" class="tooltip"></div>
+</main>
+<div id="error-tooltip" class="tooltip" role="tooltip" aria-live="assertive"></div>
+<div id="keyboard-help" class="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title" style="display:none">
+  <div class="help-modal-content" role="document">
+    <div class="help-modal-header">
+      <h2 id="help-title">Keyboard Shortcuts</h2>
+      <button class="help-close" id="help-close" aria-label="Close keyboard shortcuts">&times;</button>
+    </div>
+    <div class="help-modal-body">
+      <p class="help-intro">Press <kbd>?</kbd> anywhere to reopen this dialog. Shortcuts are ignored while typing in inputs.</p>
+      <table class="help-table">
+        <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>1</kbd> &ndash; <kbd>4</kbd></td><td>Switch tabs (Steps, Graph, Timeline, Events)</td></tr>
+          <tr><td><kbd>/</kbd></td><td>Focus step search</td></tr>
+          <tr><td><kbd>g</kbd></td><td>Focus graph search</td></tr>
+          <tr><td><kbd>e</kbd></td><td>Toggle errors-only filter</td></tr>
+          <tr><td><kbd>c</kbd></td><td>Toggle critical-path highlight</td></tr>
+          <tr><td><kbd>f</kbd></td><td>Fit graph to view</td></tr>
+          <tr><td><kbd>+</kbd> / <kbd>=</kbd></td><td>Zoom graph in</td></tr>
+          <tr><td><kbd>-</kbd></td><td>Zoom graph out</td></tr>
+          <tr><td><kbd>x</kbd></td><td>Expand all step rows</td></tr>
+          <tr><td><kbd>?</kbd></td><td>Open this help dialog</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Close dialogs, error tooltip, or help</td></tr>
+          <tr><td><kbd>Home</kbd></td><td>First tab / first visible step row</td></tr>
+          <tr><td><kbd>End</kbd></td><td>Last tab / last visible step row</td></tr>
+          <tr><td><kbd>Enter</kbd> / <kbd>Space</kbd></td><td>Activate sort header, graph node, or step row</td></tr>
+          <tr><td><kbd>&uarr;</kbd> / <kbd>&darr;</kbd></td><td>Navigate step rows</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<button class="help-hint" id="help-hint" aria-label="Keyboard shortcuts">?</button>
 <script type="application/json" id="type-metadata">%s</script>
 <script>
 %s</script>
