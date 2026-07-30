@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/larsartmann/go-atomic-write v0.4.0
+	github.com/larsartmann/go-atomic-write v0.4.1
 	github.com/larsartmann/go-error-family v0.10.0
 	github.com/larsartmann/go-ndjson v0.0.1
 )
