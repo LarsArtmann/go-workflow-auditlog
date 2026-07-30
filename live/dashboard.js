@@ -101,6 +101,13 @@
     timelineContainer: document.getElementById("timeline-container"),
     footerTs: document.getElementById("footer-ts"),
     footerStats: document.getElementById("footer-stats"),
+    helpModal: document.getElementById("keyboard-help"),
+    helpClose: document.getElementById("help-close"),
+    helpHint: document.getElementById("help-hint"),
+    graphInfo: document.getElementById("graph-info"),
+    graphZoomIn: document.querySelector(".graph-zoom-in"),
+    graphZoomOut: document.querySelector(".graph-zoom-out"),
+    graphFit: document.querySelector(".graph-fit"),
   };
 
   // === Connection status ===
@@ -108,6 +115,68 @@
   function setConnStatus(cls, text) {
     els.connStatus.className = "conn-status " + cls;
     els.connStatus.textContent = text;
+  }
+
+  // === Keyboard accessibility helpers ===
+
+  function isInputTarget(e) {
+    var tag = e.target.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target.isContentEditable;
+  }
+
+  function focusTabPanel(tabName) {
+    var panel = document.getElementById("tab-" + tabName);
+    if (panel && panel.focus) panel.focus();
+  }
+
+  function getVisibleStepRows() {
+    return Array.prototype.slice.call(els.stepsTbody.querySelectorAll("tr")).filter(function (tr) {
+      return tr.offsetParent !== null;
+    });
+  }
+
+  function getGraphSvgNodes() {
+    var svg = els.graphContainer.querySelector("svg");
+    if (!svg) return [];
+    return Array.prototype.slice.call(svg.querySelectorAll(".graph-node"));
+  }
+
+  function helpIsOpen() {
+    return els.helpModal && els.helpModal.style.display !== "none";
+  }
+
+  var helpLastFocus = null;
+
+  function openHelp() {
+    if (!els.helpModal) return;
+    helpLastFocus = document.activeElement;
+    els.helpModal.style.display = "";
+    if (els.helpClose) els.helpClose.focus();
+  }
+
+  function closeHelp() {
+    if (!els.helpModal) return;
+    els.helpModal.style.display = "none";
+    if (helpLastFocus && helpLastFocus.focus) helpLastFocus.focus();
+  }
+
+  function focusHelpTrap(e) {
+    if (!helpIsOpen() || !els.helpModal) return;
+    var focusable = els.helpModal.querySelectorAll(
+      "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+    );
+    if (!focusable.length) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    if (e.key === "Tab" || e.key === "Tab") {
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
   }
 
   // === Connection (SSE with WebSocket fallback) ===
@@ -765,6 +834,13 @@
           "data-has-error",
           step.status === "failed" || step.status === "canceled" ? "1" : "0",
         );
+        tr.setAttribute("tabindex", "-1");
+        tr.setAttribute("data-step-name", step.step_name);
+        tr.setAttribute(
+          "aria-label",
+          step.step_name + " " + (step.status || "pending") + " " + (step.attempt_count || 0) + " attempts",
+        );
+        tr.addEventListener("keydown", handleStepRowKeydown);
 
         stepRows[step.step_name] = { tr: tr, key: stepStateKey(step) };
       } else {
@@ -795,6 +871,67 @@
     // Clear new-step markers after render
     state.newStepNames = {};
     state.changedSteps = {};
+
+    refreshStepRowTabIndexes();
+  }
+
+  function refreshStepRowTabIndexes() {
+    var rows = getVisibleStepRows();
+    rows.forEach(function (tr, i) {
+      tr.setAttribute("tabindex", i === 0 ? "0" : "-1");
+    });
+  }
+
+  function showTooltipForRow(row) {
+    var badge = row.querySelector(".status-badge.failed, .status-badge.canceled");
+    if (!badge) return;
+    var msg = badge.getAttribute("data-error");
+    if (!msg) return;
+    var r = badge.getBoundingClientRect();
+    tooltip.textContent = msg;
+    tooltip.style.left = "-9999px";
+    tooltip.classList.add("visible");
+    var tw = tooltip.offsetWidth;
+    var th = tooltip.offsetHeight;
+    var left = r.left;
+    var top = r.bottom + 6;
+    if (left + tw > window.innerWidth - 12) left = Math.max(12, window.innerWidth - tw - 12);
+    if (top + th > window.innerHeight - 12) top = Math.max(12, r.top - th - 6);
+    tooltip.style.left = left + "px";
+    tooltip.style.top = top + "px";
+  }
+
+  function focusStepRow(row) {
+    var rows = getVisibleStepRows();
+    rows.forEach(function (tr) {
+      tr.setAttribute("tabindex", tr === row ? "0" : "-1");
+    });
+    row.focus();
+  }
+
+  function handleStepRowKeydown(e) {
+    var rows = getVisibleStepRows();
+    var idx = rows.indexOf(e.currentTarget);
+    if (idx < 0) return;
+
+    if (e.key === "ArrowDown" || e.key === "Down") {
+      e.preventDefault();
+      if (idx + 1 < rows.length) focusStepRow(rows[idx + 1]);
+    } else if (e.key === "ArrowUp" || e.key === "Up") {
+      e.preventDefault();
+      if (idx > 0) focusStepRow(rows[idx - 1]);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      focusStepRow(rows[0]);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      focusStepRow(rows[rows.length - 1]);
+    } else if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      showTooltipForRow(e.currentTarget);
+    } else if (e.key === "Escape") {
+      tooltip.classList.remove("visible");
+    }
   }
 
   // === Events Table ===
@@ -1024,6 +1161,115 @@
       map[i] = n.id;
     });
     return map;
+  }
+
+  // Graph adjacency for keyboard navigation.
+  var graphAdjacency = {};
+  var graphNodeIndexByName = {};
+
+  function buildGraphAdjacency() {
+    var dataEl = document.getElementById("dag-data");
+    if (!dataEl) return;
+    var data = JSON.parse(dataEl.textContent);
+    graphAdjacency = {};
+    graphNodeIndexByName = {};
+    (data.nodes || []).forEach(function (n, i) {
+      graphNodeIndexByName[n.id] = i;
+    });
+    (data.edges || []).forEach(function (e) {
+      var source = typeof e.source === "number" ? e.source : graphNodeIndexByName[e.source];
+      var target = typeof e.target === "number" ? e.target : graphNodeIndexByName[e.target];
+      if (source == null || target == null) return;
+      graphAdjacency[source] = graphAdjacency[source] || [];
+      graphAdjacency[target] = graphAdjacency[target] || [];
+      graphAdjacency[source].push(target);
+      graphAdjacency[target].push(source);
+    });
+  }
+
+  function getGraphNodesArray() {
+    var svg = els.graphContainer.querySelector("svg");
+    if (!svg) return [];
+    return Array.prototype.slice.call(svg.querySelectorAll(".graph-node"));
+  }
+
+  function navigateGraphNode(node, direction) {
+    var idx = parseInt(node.getAttribute("data-id"));
+    if (isNaN(idx)) return;
+    var neighbors = graphAdjacency[idx] || [];
+    if (!neighbors.length) return;
+    var nodes = getGraphNodesArray();
+    var map = {};
+    nodes.forEach(function (n) {
+      map[parseInt(n.getAttribute("data-id"))] = n;
+    });
+    var next = neighbors[0];
+    if (direction === "next") {
+      next = neighbors[neighbors.length - 1];
+    }
+    if (map[next]) {
+      map[next].focus();
+    }
+  }
+
+  function selectGraphNode(node) {
+    var nameMap = buildNodeNameMap();
+    var idx = parseInt(node.getAttribute("data-id"));
+    var stepName = nameMap[idx];
+    if (!stepName) return;
+
+    var stepsTab = document.querySelector('.tab[data-tab="steps"]');
+    if (stepsTab) switchTab(stepsTab);
+
+    setTimeout(function () {
+      var rows = document.querySelectorAll("#steps-tbody tr");
+      rows.forEach(function (row) {
+        if (row.textContent.indexOf(stepName) !== -1) {
+          row.classList.add("row-highlight");
+          row.scrollIntoView({ behavior: "smooth", block: "center" });
+          focusStepRow(row);
+          setTimeout(function () {
+            row.classList.remove("row-highlight");
+          }, 2000);
+        }
+      });
+    }, 50);
+  }
+
+  function handleGraphNodeKeydown(e) {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "Right" || e.key === "Down") {
+      e.preventDefault();
+      navigateGraphNode(e.currentTarget, "next");
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "Left" || e.key === "Up") {
+      e.preventDefault();
+      navigateGraphNode(e.currentTarget, "prev");
+    } else if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      selectGraphNode(e.currentTarget);
+    } else if (e.key === "Tab" && !e.shiftKey) {
+      // Allow natural tab out, but ensure focus order is sensible
+    }
+  }
+
+  function focusGraphNodeLabel(node) {
+    // Ensure the node is visible in the viewport by panning if needed
+    var svg = els.graphContainer.querySelector("svg");
+    if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+    var vb = svg.viewBox.baseVal;
+    var rect = node.getBoundingClientRect();
+    var containerRect = els.graphContainer.getBoundingClientRect();
+    var pad = 60;
+    if (rect.left < containerRect.left + pad || rect.right > containerRect.right - pad ||
+        rect.top < containerRect.top + pad || rect.bottom > containerRect.bottom - pad) {
+      var shape = node.querySelector("rect, circle, ellipse");
+      if (shape) {
+        var x = parseFloat(shape.getAttribute("x") || shape.getAttribute("cx") || 0);
+        var y = parseFloat(shape.getAttribute("y") || shape.getAttribute("cy") || 0);
+        var w = vb.width;
+        var h = vb.height;
+        svg.setAttribute("viewBox", (x - w / 2) + " " + (y - h / 2) + " " + w + " " + h);
+      }
+    }
   }
 
   function renderGraph() {
@@ -1454,6 +1700,8 @@
 
   // === Tab Management ===
 
+  var tabList = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+
   document.querySelectorAll(".tab").forEach(function (tab) {
     tab.addEventListener("click", function () {
       switchTab(tab);
@@ -1479,44 +1727,178 @@
     if (tab.dataset.tab === "graph") renderGraph();
   }
 
-  // Keyboard shortcuts
-  var tabList = Array.prototype.slice.call(document.querySelectorAll(".tab"));
-  document.addEventListener("keydown", function (e) {
+  // === Global Keyboard Shortcuts ===
+
+  var keyMode = { graphZoom: false };
+
+  function handleKeyboardShortcut(e) {
     var tag = e.target.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
-    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-      var focused = document.querySelector(".tab:focus");
-      if (focused) {
+    var key = e.key;
+    var shift = e.shiftKey;
+    var ctrl = e.ctrlKey || e.metaKey;
+
+    // Help modal: ? to open, Esc to close
+    if (key === "?" || (shift && key === "?")) {
+      e.preventDefault();
+      openHelp();
+      return;
+    }
+    if (key === "Escape" && helpIsOpen()) {
+      e.preventDefault();
+      closeHelp();
+      return;
+    }
+    if (helpIsOpen()) {
+      focusHelpTrap(e);
+      return;
+    }
+
+    // Tab switching with digits 1-4
+    if (!shift && !ctrl && key >= "1" && key <= "4") {
+      var idx = parseInt(key, 10) - 1;
+      if (idx < tabList.length) {
         e.preventDefault();
-        var cur = tabList.indexOf(focused);
-        var next =
-          e.key === "ArrowRight"
-            ? (cur + 1) % tabList.length
-            : (cur - 1 + tabList.length) % tabList.length;
-        switchTab(tabList[next]);
+        switchTab(tabList[idx]);
+      }
+      return;
+    }
+
+    // Focus step search
+    if (key === "/" && !shift && !ctrl) {
+      e.preventDefault();
+      els.stepSearch.focus();
+      return;
+    }
+
+    // Focus graph search
+    if (key === "g" && !shift && !ctrl) {
+      e.preventDefault();
+      var graphTab = document.querySelector('.tab[data-tab="graph"]');
+      if (graphTab && !graphTab.classList.contains("active")) switchTab(graphTab);
+      var gs = document.getElementById("graph-search");
+      if (gs) gs.focus();
+      return;
+    }
+
+    // Toggle errors-only
+    if (key === "e" && !shift && !ctrl) {
+      e.preventDefault();
+      els.stepErrorsOnly.click();
+      return;
+    }
+
+    // Toggle critical path
+    if (key === "c" && !shift && !ctrl) {
+      e.preventDefault();
+      var cpBtn = document.getElementById("graph-critical-path");
+      if (cpBtn && cpBtn.style.display !== "none") cpBtn.click();
+      return;
+    }
+
+    // Fit graph to view
+    if (key === "f" && !shift && !ctrl) {
+      e.preventDefault();
+      if (els.graphFit && typeof fitDAGGraph === "function") fitDAGGraph();
+      return;
+    }
+
+    // Graph zoom with + / - (and = as unshifted +)
+    if ((key === "+" || key === "=") && !ctrl) {
+      e.preventDefault();
+      if (els.graphZoomIn && typeof zoomInDAGGraph === "function") zoomInDAGGraph();
+      return;
+    }
+    if (key === "-" && !ctrl) {
+      e.preventDefault();
+      if (els.graphZoomOut && typeof zoomOutDAGGraph === "function") zoomOutDAGGraph();
+      return;
+    }
+
+    // Expand step rows
+    if (key === "x" && !shift && !ctrl) {
+      e.preventDefault();
+      stepExpanded = !stepExpanded;
+      renderStepsTable();
+      return;
+    }
+
+    // Event filter shortcuts when Events tab is active
+    var activeTab = document.querySelector(".tab.active");
+    if (activeTab && activeTab.dataset.tab === "events" && !shift && !ctrl) {
+      var filterMap = { "1": "all", "2": "attempt_start", "3": "attempt_end" };
+      if (filterMap[key]) {
+        e.preventDefault();
+        var target = els.eventFilters.querySelector('[data-filter="' + filterMap[key] + '"]');
+        if (target) target.click();
+        return;
       }
     }
+  }
+
+  document.addEventListener("keydown", handleKeyboardShortcut);
+
+  // Arrow-key navigation within the tab bar (ARIA tabs pattern)
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End") return;
+    var focused = document.querySelector(".tab:focus");
+    if (!focused) return;
+    e.preventDefault();
+    var cur = tabList.indexOf(focused);
+    if (e.key === "Home") {
+      tabList[0].focus();
+      return;
+    }
+    if (e.key === "End") {
+      tabList[tabList.length - 1].focus();
+      return;
+    }
+    var next =
+      e.key === "ArrowRight"
+        ? (cur + 1) % tabList.length
+        : (cur - 1 + tabList.length) % tabList.length;
+    tabList[next].focus();
+    if (!e.shiftKey) switchTab(tabList[next]);
   });
 
   // === Sortable headers ===
 
+  function updateSortableHeaders() {
+    document.querySelectorAll("#tab-steps th.sortable").forEach(function (th) {
+      var key = th.dataset.sort;
+      var isActive = stepSortKey === key;
+      th.classList.remove("sort-asc", "sort-desc");
+      th.setAttribute("aria-sort", isActive ? (stepSortDir === 1 ? "ascending" : "descending") : "none");
+      if (isActive) th.classList.add(stepSortDir === 1 ? "sort-asc" : "sort-desc");
+    });
+  }
+
+  function activateSortHeader(th) {
+    var key = th.dataset.sort;
+    if (stepSortKey === key) {
+      stepSortDir *= -1;
+    } else {
+      stepSortKey = key;
+      stepSortDir = 1;
+    }
+    updateSortableHeaders();
+    renderStepsTable();
+  }
+
   document.querySelectorAll("#tab-steps th.sortable").forEach(function (th) {
     th.addEventListener("click", function () {
-      var key = th.dataset.sort;
-      if (stepSortKey === key) {
-        stepSortDir *= -1;
-      } else {
-        stepSortKey = key;
-        stepSortDir = 1;
+      activateSortHeader(th);
+    });
+    th.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        activateSortHeader(th);
       }
-      document.querySelectorAll("#tab-steps th.sortable").forEach(function (t) {
-        t.classList.remove("sort-asc", "sort-desc");
-      });
-      th.classList.add(stepSortDir === 1 ? "sort-asc" : "sort-desc");
-      renderStepsTable();
     });
   });
+
+  updateSortableHeaders();
 
   // === Search + filter ===
 
