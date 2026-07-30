@@ -139,9 +139,9 @@ doc.go             — Package doc comment
 hub.go             — Hub: SSE subscriber registry, fan-out OnEvent, SignalComplete, non-blocking broadcast
 websocket.go       — WebSocket transport: `/api/ws` endpoint with same snapshot→events→complete flow as SSE. JSON `{type, data}` envelopes. SSE fallback after 2 failures.
 server.go          — HTTP server: SSE handler, /api/report, /api/health, /api/export/ndjson, /api/export/html, /api/ws, dashboard serving, configurable Prefix, CORS middleware (secure-by-default: empty=disabled), New() convenience, ServeHTTP
-dashboard.go       — HTML template assembly: reuses viz CSS + embeds live CSS + JS + daghtml graph JS; export buttons (JSON/NDJSON/HTML) in header with ROUTE_PREFIX-aware URLs
-dashboard.css      — Live-specific CSS: pulsing live badge, connection status, step animations, graph placeholders, export button styles
-dashboard.js       — SSE+WebSocket client + incremental rendering engine: state management, requestAnimationFrame batching, diff-based steps table (no innerHTML rebuild), live graph node updates (colors + duration labels), critical path/retry badges/search, minimap with MutationObserver viewport tracking
+dashboard.go       — HTML template assembly: reuses viz CSS + embeds live CSS + JS + daghtml graph JS; skip link, ARIA landmarks, focusable sortable headers, help modal, export buttons (JSON/NDJSON/HTML) in header with ROUTE_PREFIX-aware URLs
+dashboard.css      — Live-specific CSS: pulsing live badge, connection status, step animations, graph placeholders, export button styles, :focus-visible rings, sort-direction indicators, help modal, skip link
+dashboard.js       — SSE+WebSocket client + incremental rendering engine: state management, requestAnimationFrame batching, diff-based steps table (no innerHTML rebuild), live graph node updates (colors + duration labels), critical path/retry badges/search, minimap with MutationObserver viewport tracking, global keyboard shortcuts, graph and step-row keyboard navigation, accessible help modal
 demo/              — Demo pipeline with retry: fetch → validate → transform/enrich → save (flaky, retries) → notify
 ```
 
@@ -155,6 +155,17 @@ demo/              — Demo pipeline with retry: fetch → validate → transfor
 6. Browser incrementally renders: new steps appear, running steps animate, statuses change with flash effects
 7. After `auditor.Snapshot(w)` + `server.SignalComplete()`, all clients receive a `complete` event with the final report + full DAG
 8. The DAG graph tab activates with the Sugiyama layout from daghtml, showing the complete dependency structure
+
+### Keyboard Navigation (live dashboard)
+
+The live dashboard is operable without a mouse. All keyboard shortcuts are suppressed while focus is inside an `<input>`, `<textarea>`, or `<select>`.
+
+- **Global shortcuts** — `1`–`4` switch tabs (Steps, Graph, Timeline, Events); `/` focuses the step search; `g` focuses the graph search; `e` toggles errors-only; `c` toggles critical-path highlight; `f` fits the graph; `+`/`=` zooms in, `-` zooms out; `x` expands/collapses the step list; `?` opens the shortcut help modal; `Esc` closes the modal, error tooltip, or help.
+- **Tab bar** — Arrow keys move focus between tabs; `Home`/`End` jump to first/last tab; activation switches the visible tabpanel and moves focus into it.
+- **Sortable headers** — `Tab` reaches each header; `Enter`/`Space` activates sorting; `aria-sort` reflects the current direction.
+- **Step table rows** — The first visible row is in the tab order (`tabindex="0"`), others are `tabindex="-1"`. Arrow `Up`/`Down` move between rows; `Home`/`End` jump to first/last; `Enter`/`Space` on a row with an error opens the error tooltip; `Esc` closes it.
+- **Graph nodes** — Nodes are focusable SVG groups (`tabindex="0"`, `role="button"`, `aria-label` includes name, status, and duration). Arrow keys move to connected neighbors; `Enter`/`Space` jumps to the matching step row in the Steps tab.
+- **Landmarks** — Skip-to-main link, `<header role="banner">`, `<nav role="navigation">` around the tab bar, `<main id="main-content" role="main">` around tab panels, and `aria-live` regions on the live badge, connection status, stats, and result counters.
 
 ### Concurrency Model
 

@@ -6,7 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.8.2] - 2026-07-27
+### Added
+
+- **Full keyboard navigation for the live dashboard** (`live/dashboard.go`, `live/dashboard.css`, `live/dashboard.js`). Added a skip-to-main link, ARIA landmarks (`banner`, `navigation`, `main`, `dialog`), `aria-live` regions for the live badge, connection status, and stats, and visible `:focus-visible` rings for tabs, chips, export links, graph nodes, sortable headers, and step rows.
+- **Global keyboard shortcuts** — `1`–`4` switch tabs, `/` focuses step search, `g` focuses graph search, `e` toggles errors-only, `c` toggles critical-path highlight, `f` fits the graph, `+`/`=` zooms in, `-` zooms out, `x` expands/collapses the step list, `?` opens the help modal, and `Esc` closes dialogs/tooltips. Shortcuts are suppressed while typing in inputs.
+- **Focusable sortable table headers** with `role="button"`, `aria-sort`, and `Enter`/`Space` activation.
+- **Keyboard navigation for step table rows** — roving `tabindex`, `Up`/`Down`/`Home`/`End` movement, and `Enter`/`Space` to open the error tooltip.
+- **Keyboard navigation for graph nodes** — nodes are focusable, arrow keys move along edges, and `Enter`/`Space` jumps to the matching step row in the Steps tab.
+- **Accessible keyboard shortcut help modal** with focus trap, `?` to open, `Esc` to close, and a floating hint button.
+- **Structural tests** for the new accessibility features in `live/dashboardjs_test.go` and `live/server_test.go`.
+
 
 ### Fixed
 
