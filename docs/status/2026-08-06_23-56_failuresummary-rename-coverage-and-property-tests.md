@@ -21,6 +21,7 @@ report and event scope got incompatible types.
 event-level enum keeps `"failure_reason"` — it is the structured, machine-readable contract.
 
 **Files changed**:
+
 - `report.go:59` — field renamed, JSON tag updated
 - `report.go:409-410` — `Summary()` method updated
 - `report_builder.go:165` — `report.FailureReason = buildFailureReason` → `report.FailureSummary = buildFailureSummary`
@@ -53,6 +54,7 @@ line and verifies `errors.Is(err, auditlog.ErrOversizedLine)`.
 actual go-workflow pipeline. Added `TestTimeout_FailureReasonClassified` in `auditlog_test.go` —
 wires `testhelpers.NewSlow("timeout-step", 5*time.Second)` with `.Timeout(50*time.Millisecond)`,
 runs the workflow, scans `report.Events` for the `attempt_end` event, and verifies:
+
 - `evt.FailureReason == auditlog.FailureReasonTimeout`
 - `evt.IsTimeout() == true`
 
@@ -64,11 +66,11 @@ go-workflow's actual timeout/cancel wrapping. The test passes with `-race`.
 Extended `diff_property_test.go` with 3 new property tests (200 iterations each, deterministic
 seeds):
 
-| Test | Property | Seed |
-|------|----------|------|
-| `TestDiff_CriticalPathAntiSymmetry` | `Δ(a→b) == -Δ(b→a)` for CriticalPathDeltaMs | PCG(6,6) |
-| `TestDiff_PeakConcurrencyAntiSymmetry` | `Δ(a→b) == -Δ(b→a)` for PeakConcurrencyDelta | PCG(7,7) |
-| `TestDiff_CriticalPathStepsDuality` | `Added(a→b) == Removed(b→a)` for critical-path membership | PCG(8,8) |
+| Test                                   | Property                                                  | Seed     |
+| -------------------------------------- | --------------------------------------------------------- | -------- |
+| `TestDiff_CriticalPathAntiSymmetry`    | `Δ(a→b) == -Δ(b→a)` for CriticalPathDeltaMs               | PCG(6,6) |
+| `TestDiff_PeakConcurrencyAntiSymmetry` | `Δ(a→b) == -Δ(b→a)` for PeakConcurrencyDelta              | PCG(7,7) |
+| `TestDiff_CriticalPathStepsDuality`    | `Added(a→b) == Removed(b→a)` for critical-path membership | PCG(8,8) |
 
 Also extended `TestDiff_OutputSorted` to verify `CriticalPathStepsAdded` and
 `CriticalPathStepsRemoved` are sorted by name.
@@ -84,23 +86,23 @@ Total property tests in `diff_property_test.go`: 8 (was 5).
 
 Three new `Example_*` functions in `example_test.go`:
 
-| Example | Demonstrates | Output verified |
-|---------|-------------|----------------|
-| `ExampleNewMultiWriter` | Fan-out to multiple callbacks; direct `Config.OnEvent` composition | ✅ |
-| `ExampleStreamEvents` | Per-event callback processing without full-slice buffering | ✅ |
-| `ExampleWorkflowReport_Diff` | Comparing two reports: duration delta, added/removed steps | ✅ |
+| Example                      | Demonstrates                                                       | Output verified |
+| ---------------------------- | ------------------------------------------------------------------ | --------------- |
+| `ExampleNewMultiWriter`      | Fan-out to multiple callbacks; direct `Config.OnEvent` composition | ✅              |
+| `ExampleStreamEvents`        | Per-event callback processing without full-slice buffering         | ✅              |
+| `ExampleWorkflowReport_Diff` | Comparing two reports: duration delta, added/removed steps         | ✅              |
 
 All examples pass `go test` with verified `// Output:` comments. Total examples in core: 8.
 
 ### 7. Documentation Updated
 
-| File | Changes |
-|------|---------|
+| File                      | Changes                                                                                                                                                                                                                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `docs/DOMAIN_LANGUAGE.md` | Added: `MultiWriter`, `StreamEvents`, `FailureReason`, `FailureSummary` entities; `WithFlushInterval`, `StreamEvents`, `NewMultiWriter`, `TimedOutSteps`/`HasWorkflowTimeouts`, `HasWorkflowRetries` commands; updated `Diff` description; updated Streaming bounded context |
-| `CHANGELOG.md` | Added `FailureSummary` rename entry under `[Unreleased] > ### Changed` with migration note |
-| `docs/MIGRATION.md` | New section: "Report `failure_reason` → `failure_summary`" with before/after table, code examples, and rationale |
-| `AGENTS.md` | Updated `report_builder.go` description; added `FailureSummary` gotcha paragraph; updated test count 454 → 510 |
-| `FEATURES.md` | Added `FailureSummary` bullet alongside `FailureReason` |
+| `CHANGELOG.md`            | Added `FailureSummary` rename entry under `[Unreleased] > ### Changed` with migration note                                                                                                                                                                                   |
+| `docs/MIGRATION.md`       | New section: "Report `failure_reason` → `failure_summary`" with before/after table, code examples, and rationale                                                                                                                                                             |
+| `AGENTS.md`               | Updated `report_builder.go` description; added `FailureSummary` gotcha paragraph; updated test count 454 → 510                                                                                                                                                               |
+| `FEATURES.md`             | Added `FailureSummary` bullet alongside `FailureReason`                                                                                                                                                                                                                      |
 
 ---
 
@@ -303,7 +305,7 @@ test count description was not explicitly updated.
 ### Testing improvements
 
 18. **Add property test for Diff `HasChanges()` / `IsEmpty()` duality** — `d.HasChanges() ==
-    !d.IsEmpty()` for all random report pairs.
+!d.IsEmpty()` for all random report pairs.
 19. **Add fuzz test for `StreamEvents`** — fuzz the input with arbitrary bytes, verify no panic.
 20. **Add fuzz test for `classifyFailure`** — fuzz with arbitrary error chains, verify no panic
     and always returns a valid value.
@@ -383,6 +385,7 @@ test count description was not explicitly updated.
 
 The viz standalone failure in `nix run .#check` will persist until a coordinated release publishes
 the new core with `FailureSummary`. The options:
+
 - **Release v0.9.0 now** — resolves the standalone failure, publishes the breaking rename, ships
   all the Phase C/D features.
 - **Batch with more** — wait until CLI tool, OTel bridge, or other ROADMAP items are ready.
@@ -417,15 +420,15 @@ upstream failed" is an observation worth recording as an event.
 
 ## Summary
 
-| Category | Count | Status |
-|----------|-------|--------|
-| Fully done | 7 | All verified, tests pass, lint clean, docs updated |
-| Partially done | 3 | StreamEvents 93.9%, classifyFailure 85.7%, viz standalone pending release |
-| Not started | 6 | Pre-commit hook, README, STABILITY.md, ADRs, MIGRATION for Event field |
-| Totally fucked up | 0 (this session) | Prior: empty commit message, release coordination friction |
-| Improvements identified | 7 | randWorkflowReport audit, JSON golden test, signature asymmetry, etc. |
-| Next steps | 50 | Prioritized by impact |
-| Questions | 3 | Release timing, empty commit, synthetic events |
+| Category                | Count            | Status                                                                    |
+| ----------------------- | ---------------- | ------------------------------------------------------------------------- |
+| Fully done              | 7                | All verified, tests pass, lint clean, docs updated                        |
+| Partially done          | 3                | StreamEvents 93.9%, classifyFailure 85.7%, viz standalone pending release |
+| Not started             | 6                | Pre-commit hook, README, STABILITY.md, ADRs, MIGRATION for Event field    |
+| Totally fucked up       | 0 (this session) | Prior: empty commit message, release coordination friction                |
+| Improvements identified | 7                | randWorkflowReport audit, JSON golden test, signature asymmetry, etc.     |
+| Next steps              | 50               | Prioritized by impact                                                     |
+| Questions               | 3                | Release timing, empty commit, synthetic events                            |
 
 **Bottom line**: The JSON collision is fixed, coverage gaps are closed, property tests prove
 aggregate algebra, godoc examples are discoverable, and all docs are current. The only remaining

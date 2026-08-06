@@ -18,14 +18,14 @@ The [deep-dive audit](../research/2026-08-06_go-sse-deep-dive.html) found that `
 
 The `live` module is the **most well-tested module** in the project: 68 test functions, 95.5% coverage, race-tested. The SSE transport works today. Every change must be justified against the risk of breaking working, tested code.
 
-| Opportunity | Customer value | Code quality gain | Verschlimmbessern risk | Verdict |
-|---|---|---|---|---|
-| v0.4.0 upgrade | Low (enables features) | Low | **None** — no breaking changes, same deps | ✅ DO |
-| Stream adoption in handleSSE | None (same behavior) | Medium (~40 lines eliminated) | **Low** — mechanical replacement, same semantics | ✅ DO |
-| Reconnection replay | **HIGH** — clients miss events on reconnect | N/A (new feature) | **Low** — additive, doesn't change existing paths | ✅ DO |
-| Graceful shutdown drain | Medium — prevents event loss on shutdown | N/A (new feature) | **Low** — additive | ✅ DO |
-| Health() integration | Low — marginal observability | Low | **Low** — additive | ✅ DO |
-| Hub → Broadcaster refactor | **None** | Low (~15-30 real lines saved, NOT 141) | **HIGH** — 18 call sites, 12 test references, API shape mismatch | ⚠️ DEFER |
+| Opportunity                  | Customer value                              | Code quality gain                      | Verschlimmbessern risk                                           | Verdict  |
+| ---------------------------- | ------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------- | -------- |
+| v0.4.0 upgrade               | Low (enables features)                      | Low                                    | **None** — no breaking changes, same deps                        | ✅ DO    |
+| Stream adoption in handleSSE | None (same behavior)                        | Medium (~40 lines eliminated)          | **Low** — mechanical replacement, same semantics                 | ✅ DO    |
+| Reconnection replay          | **HIGH** — clients miss events on reconnect | N/A (new feature)                      | **Low** — additive, doesn't change existing paths                | ✅ DO    |
+| Graceful shutdown drain      | Medium — prevents event loss on shutdown    | N/A (new feature)                      | **Low** — additive                                               | ✅ DO    |
+| Health() integration         | Low — marginal observability                | Low                                    | **Low** — additive                                               | ✅ DO    |
+| Hub → Broadcaster refactor   | **None**                                    | Low (~15-30 real lines saved, NOT 141) | **HIGH** — 18 call sites, 12 test references, API shape mismatch | ⚠️ DEFER |
 
 **Critical finding about Hub refactor:** The deep-dive report claimed 141 lines of duplication. After careful analysis, the Hub has ~60 lines of domain-specific code (SignalComplete, done channels, subscriber IDs) that Broadcaster does NOT provide. The actual eliminable duplication is ~15-30 lines (the `broadcast()` method body and `ClientCount()`). The API shapes are incompatible: Hub.Unsubscribe takes `uint64`, Broadcaster.Unsubscribe takes `<-chan T`. Refactoring would touch 18 call sites across 3 files and risk breaking 68 tests for ~20 lines of savings. **Not recommended.**
 
@@ -65,23 +65,23 @@ The Hub refactor is **deferred** (see risk assessment above). Documentation upda
 
 Sorted by impact × customer-value ÷ effort. Risk level annotated.
 
-| # | Task | Phase | Impact | Effort | Risk | Dependencies |
-|---|---|---|---|---|---|---|
-| M1 | Upgrade go-sse v0.3.0 → v0.4.0 in live/go.mod | Foundation | Medium | 30 min | None | — |
-| M2 | Adopt sse.Stream in handleSSE — replace manual headers, flusher, WriteEvent+Flush | Foundation | High | 60 min | Low | M1 |
-| M3 | Adopt Stream.Heartbeat goroutine — replace manual heartbeat ticker case | Foundation | Medium | 30 min | Low | M2 |
-| M4 | Update server tests for Stream adoption (heartbeat test, header test, snapshot test) | Foundation | High | 45 min | Low | M2, M3 |
-| M5 | Implement bounded event ring buffer (EventStore) for reconnection replay | Customer Value | Critical | 60 min | Low | M1 |
-| M6 | Assign EventIDs to broadcast events + wire EventStore into Hub | Customer Value | Critical | 45 min | Low | M5 |
-| M7 | Wire sse.Replay into handleSSE — read Last-Event-ID, replay before event loop | Customer Value | Critical | 45 min | Low | M5, M6 |
-| M8 | Test reconnection replay end-to-end (reconnect → missed events arrive) | Customer Value | Critical | 45 min | None | M7 |
-| M9 | Add graceful subscriber drain in Server.Shutdown | Lifecycle | Medium | 30 min | Low | M1 |
-| M10 | Test graceful shutdown drain | Lifecycle | Medium | 30 min | None | M9 |
-| M11 | Integrate lifecycle info into health endpoint | Lifecycle | Low | 30 min | Low | M9 |
-| M12 | Update dashboard.js for reconnection awareness (status indicator, EventSource handling) | UX | Medium | 45 min | Low | M7 |
-| M13 | Update AGENTS.md, FEATURES.md, CHANGELOG.md with new SSE architecture | Docs | Medium | 45 min | None | M2-M11 |
-| M14 | Full test suite verification (all 3 modules, race detector) | Quality | High | 30 min | None | All |
-| M15 | **[DEFERRED]** Refactor Hub to delegate fan-out to Broadcaster internally | Code Quality | Low | 90 min | **HIGH** | All |
+| #   | Task                                                                                    | Phase          | Impact   | Effort | Risk     | Dependencies |
+| --- | --------------------------------------------------------------------------------------- | -------------- | -------- | ------ | -------- | ------------ |
+| M1  | Upgrade go-sse v0.3.0 → v0.4.0 in live/go.mod                                           | Foundation     | Medium   | 30 min | None     | —            |
+| M2  | Adopt sse.Stream in handleSSE — replace manual headers, flusher, WriteEvent+Flush       | Foundation     | High     | 60 min | Low      | M1           |
+| M3  | Adopt Stream.Heartbeat goroutine — replace manual heartbeat ticker case                 | Foundation     | Medium   | 30 min | Low      | M2           |
+| M4  | Update server tests for Stream adoption (heartbeat test, header test, snapshot test)    | Foundation     | High     | 45 min | Low      | M2, M3       |
+| M5  | Implement bounded event ring buffer (EventStore) for reconnection replay                | Customer Value | Critical | 60 min | Low      | M1           |
+| M6  | Assign EventIDs to broadcast events + wire EventStore into Hub                          | Customer Value | Critical | 45 min | Low      | M5           |
+| M7  | Wire sse.Replay into handleSSE — read Last-Event-ID, replay before event loop           | Customer Value | Critical | 45 min | Low      | M5, M6       |
+| M8  | Test reconnection replay end-to-end (reconnect → missed events arrive)                  | Customer Value | Critical | 45 min | None     | M7           |
+| M9  | Add graceful subscriber drain in Server.Shutdown                                        | Lifecycle      | Medium   | 30 min | Low      | M1           |
+| M10 | Test graceful shutdown drain                                                            | Lifecycle      | Medium   | 30 min | None     | M9           |
+| M11 | Integrate lifecycle info into health endpoint                                           | Lifecycle      | Low      | 30 min | Low      | M9           |
+| M12 | Update dashboard.js for reconnection awareness (status indicator, EventSource handling) | UX             | Medium   | 45 min | Low      | M7           |
+| M13 | Update AGENTS.md, FEATURES.md, CHANGELOG.md with new SSE architecture                   | Docs           | Medium   | 45 min | None     | M2-M11       |
+| M14 | Full test suite verification (all 3 modules, race detector)                             | Quality        | High     | 30 min | None     | All          |
+| M15 | **[DEFERRED]** Refactor Hub to delegate fan-out to Broadcaster internally               | Code Quality   | Low      | 90 min | **HIGH** | All          |
 
 **Total estimated effort (excluding M15):** ~10.5 hours
 **Total estimated effort (including M15):** ~12 hours
@@ -94,88 +94,88 @@ Sorted by execution order within each phase. Each task is atomic: one logical ch
 
 ### Phase A: Foundation (v0.4.0 upgrade + Stream adoption)
 
-| # | Task | Parent | Est | Verify |
-|---|---|---|---|---|
-| F1 | Read go-sse v0.4.0 CHANGELOG for any hidden breaking changes | M1 | 5 min | Mental |
-| F2 | Bump `github.com/larsartmann/go-sse v0.3.0` → `v0.4.0` in live/go.mod | M1 | 2 min | Diff |
-| F3 | Run `cd live && go mod tidy -e && GOEXPERIMENT=jsonv2 go build ./...` | M1 | 5 min | Build passes |
-| F4 | Run `cd live && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...` | M1 | 5 min | Tests pass |
-| F5 | In handleSSE: set `X-Accel-Buffering: no` header BEFORE NewStream call | M2 | 5 min | Compile |
-| F6 | In handleSSE: replace manual header block (Content-Type, Cache-Control, Connection) with `stream := sse.NewStream(w, r)` | M2 | 10 min | Compile |
-| F7 | In handleSSE: replace manual `flusher, ok := w.(http.Flusher)` check with Stream's internal flusher | M2 | 5 min | Compile |
-| F8 | In sendSnapshot: change signature from `(w, flusher)` to `(stream *sse.Stream)` | M2 | 5 min | Compile |
-| F9 | In sendSnapshot: replace `sse.WriteEvent + flusher.Flush` with `stream.Send` | M2 | 5 min | Compile |
-| F10 | In handleSSE event case: replace `sse.WriteEvent + flusher.Flush` with `stream.Send` | M2 | 5 min | Compile |
-| F11 | In sendComplete: change signature from `(w, flusher)` to `(stream *sse.Stream)` | M2 | 5 min | Compile |
-| F12 | In sendComplete: replace `sse.WriteEvent + flusher.Flush` with `stream.Send` | M2 | 5 min | Compile |
-| F13 | In handleSSE: remove manual heartbeat ticker + heartbeat.C case from select loop | M3 | 5 min | Compile |
-| F14 | In handleSSE: add `go stream.Heartbeat(stream.Context(), srv.config.HeartbeatInterval)` before select loop | M3 | 5 min | Compile |
-| F15 | Run `go build ./...` to verify compilation | M2-M3 | 3 min | Build passes |
-| F16 | Run live tests — identify any failures from Stream adoption | M4 | 10 min | Test output |
-| F17 | Fix heartbeat test: update to work with Stream.Heartbeat goroutine (if needed) | M4 | 10 min | Test passes |
-| F18 | Fix any header-checking tests: update assertions for Stream's header set | M4 | 10 min | Test passes |
-| F19 | Run full live test suite with race detector | M4 | 5 min | All green |
+| #   | Task                                                                                                                     | Parent | Est    | Verify       |
+| --- | ------------------------------------------------------------------------------------------------------------------------ | ------ | ------ | ------------ |
+| F1  | Read go-sse v0.4.0 CHANGELOG for any hidden breaking changes                                                             | M1     | 5 min  | Mental       |
+| F2  | Bump `github.com/larsartmann/go-sse v0.3.0` → `v0.4.0` in live/go.mod                                                    | M1     | 2 min  | Diff         |
+| F3  | Run `cd live && go mod tidy -e && GOEXPERIMENT=jsonv2 go build ./...`                                                    | M1     | 5 min  | Build passes |
+| F4  | Run `cd live && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...`                                                        | M1     | 5 min  | Tests pass   |
+| F5  | In handleSSE: set `X-Accel-Buffering: no` header BEFORE NewStream call                                                   | M2     | 5 min  | Compile      |
+| F6  | In handleSSE: replace manual header block (Content-Type, Cache-Control, Connection) with `stream := sse.NewStream(w, r)` | M2     | 10 min | Compile      |
+| F7  | In handleSSE: replace manual `flusher, ok := w.(http.Flusher)` check with Stream's internal flusher                      | M2     | 5 min  | Compile      |
+| F8  | In sendSnapshot: change signature from `(w, flusher)` to `(stream *sse.Stream)`                                          | M2     | 5 min  | Compile      |
+| F9  | In sendSnapshot: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`                                             | M2     | 5 min  | Compile      |
+| F10 | In handleSSE event case: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`                                     | M2     | 5 min  | Compile      |
+| F11 | In sendComplete: change signature from `(w, flusher)` to `(stream *sse.Stream)`                                          | M2     | 5 min  | Compile      |
+| F12 | In sendComplete: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`                                             | M2     | 5 min  | Compile      |
+| F13 | In handleSSE: remove manual heartbeat ticker + heartbeat.C case from select loop                                         | M3     | 5 min  | Compile      |
+| F14 | In handleSSE: add `go stream.Heartbeat(stream.Context(), srv.config.HeartbeatInterval)` before select loop               | M3     | 5 min  | Compile      |
+| F15 | Run `go build ./...` to verify compilation                                                                               | M2-M3  | 3 min  | Build passes |
+| F16 | Run live tests — identify any failures from Stream adoption                                                              | M4     | 10 min | Test output  |
+| F17 | Fix heartbeat test: update to work with Stream.Heartbeat goroutine (if needed)                                           | M4     | 10 min | Test passes  |
+| F18 | Fix any header-checking tests: update assertions for Stream's header set                                                 | M4     | 10 min | Test passes  |
+| F19 | Run full live test suite with race detector                                                                              | M4     | 5 min  | All green    |
 
 ### Phase B: Reconnection Replay (customer-facing feature)
 
-| # | Task | Parent | Est | Verify |
-|---|---|---|---|---|
-| F20 | Define `eventRingBuffer` struct: bounded slice of `sse.Event` with mutex + capacity | M5 | 10 min | Compile |
-| F21 | Implement `EventsAfter(lastID sse.EventID) ([]sse.Event, error)` on eventRingBuffer | M5 | 10 min | Unit test |
-| F22 | Add `nextEventID()` method: atomic counter → `sse.NewEventID(strconv.Itoa(n))` | M6 | 5 min | Compile |
-| F23 | In Hub.OnEvent: create `sse.Event` with ID, store in ring buffer, broadcast Data | M6 | 10 min | Compile |
-| F24 | Add `EventStore()` method on Hub: return the ring buffer as `sse.EventStore` | M6 | 5 min | Compile |
-| F25 | Add ring buffer capacity to `Config` (default 1000) | M5 | 5 min | Compile |
-| F26 | Wire ring buffer into Hub struct + NewHub constructor | M5 | 5 min | Compile |
-| F27 | In handleSSE: call `stream.LastEventID()` to read reconnection header | M7 | 5 min | Compile |
-| F28 | In handleSSE: if Last-Event-ID is non-zero, call `sse.Replay(stream, store, lastID)` before snapshot | M7 | 10 min | Compile |
-| F29 | Handle replay error: log + continue to snapshot fallback | M7 | 5 min | Compile |
-| F30 | Run live tests — verify replay doesn't break existing behavior | M7 | 5 min | Tests pass |
-| F31 | Write test: basic reconnection replay (broadcast 3 events, reconnect with Last-Event-ID, verify 2 replayed) | M8 | 10 min | Test passes |
-| F32 | Write test: replay with empty store (Last-Event-ID not found) | M8 | 5 min | Test passes |
-| F33 | Write test: replay with zero Last-Event-ID (initial connection, no replay) | M8 | 5 min | Test passes |
-| F34 | Write test: concurrent broadcast during replay (race safety) | M8 | 10 min | Race clean |
-| F35 | Write test: ring buffer overflow (capacity exceeded, oldest events dropped) | M8 | 10 min | Test passes |
+| #   | Task                                                                                                        | Parent | Est    | Verify      |
+| --- | ----------------------------------------------------------------------------------------------------------- | ------ | ------ | ----------- |
+| F20 | Define `eventRingBuffer` struct: bounded slice of `sse.Event` with mutex + capacity                         | M5     | 10 min | Compile     |
+| F21 | Implement `EventsAfter(lastID sse.EventID) ([]sse.Event, error)` on eventRingBuffer                         | M5     | 10 min | Unit test   |
+| F22 | Add `nextEventID()` method: atomic counter → `sse.NewEventID(strconv.Itoa(n))`                              | M6     | 5 min  | Compile     |
+| F23 | In Hub.OnEvent: create `sse.Event` with ID, store in ring buffer, broadcast Data                            | M6     | 10 min | Compile     |
+| F24 | Add `EventStore()` method on Hub: return the ring buffer as `sse.EventStore`                                | M6     | 5 min  | Compile     |
+| F25 | Add ring buffer capacity to `Config` (default 1000)                                                         | M5     | 5 min  | Compile     |
+| F26 | Wire ring buffer into Hub struct + NewHub constructor                                                       | M5     | 5 min  | Compile     |
+| F27 | In handleSSE: call `stream.LastEventID()` to read reconnection header                                       | M7     | 5 min  | Compile     |
+| F28 | In handleSSE: if Last-Event-ID is non-zero, call `sse.Replay(stream, store, lastID)` before snapshot        | M7     | 10 min | Compile     |
+| F29 | Handle replay error: log + continue to snapshot fallback                                                    | M7     | 5 min  | Compile     |
+| F30 | Run live tests — verify replay doesn't break existing behavior                                              | M7     | 5 min  | Tests pass  |
+| F31 | Write test: basic reconnection replay (broadcast 3 events, reconnect with Last-Event-ID, verify 2 replayed) | M8     | 10 min | Test passes |
+| F32 | Write test: replay with empty store (Last-Event-ID not found)                                               | M8     | 5 min  | Test passes |
+| F33 | Write test: replay with zero Last-Event-ID (initial connection, no replay)                                  | M8     | 5 min  | Test passes |
+| F34 | Write test: concurrent broadcast during replay (race safety)                                                | M8     | 10 min | Race clean  |
+| F35 | Write test: ring buffer overflow (capacity exceeded, oldest events dropped)                                 | M8     | 10 min | Test passes |
 
 ### Phase C: Lifecycle Improvements
 
-| # | Task | Parent | Est | Verify |
-|---|---|---|---|---|
-| F36 | In Server.Shutdown: add `srv.hub.Drain(ctx)` call before `httpServer.Shutdown(ctx)` | M9 | 10 min | Compile |
-| F37 | Implement `Hub.Drain(ctx)`: wait for all subscriber channels to empty or ctx timeout | M9 | 10 min | Compile |
-| F38 | Write test: graceful drain delivers buffered events before shutdown | M10 | 10 min | Test passes |
-| F39 | Write test: drain timeout falls back to force-close | M10 | 10 min | Test passes |
-| F40 | In handleHealth: add `draining` and `event_buffer_size` fields from Hub state | M11 | 5 min | Compile |
-| F41 | Update healthResponse struct with new fields | M11 | 5 min | Compile |
-| F42 | Write test: health endpoint reports drain state | M11 | 5 min | Test passes |
+| #   | Task                                                                                 | Parent | Est    | Verify      |
+| --- | ------------------------------------------------------------------------------------ | ------ | ------ | ----------- |
+| F36 | In Server.Shutdown: add `srv.hub.Drain(ctx)` call before `httpServer.Shutdown(ctx)`  | M9     | 10 min | Compile     |
+| F37 | Implement `Hub.Drain(ctx)`: wait for all subscriber channels to empty or ctx timeout | M9     | 10 min | Compile     |
+| F38 | Write test: graceful drain delivers buffered events before shutdown                  | M10    | 10 min | Test passes |
+| F39 | Write test: drain timeout falls back to force-close                                  | M10    | 10 min | Test passes |
+| F40 | In handleHealth: add `draining` and `event_buffer_size` fields from Hub state        | M11    | 5 min  | Compile     |
+| F41 | Update healthResponse struct with new fields                                         | M11    | 5 min  | Compile     |
+| F42 | Write test: health endpoint reports drain state                                      | M11    | 5 min  | Test passes |
 
 ### Phase D: Dashboard UX
 
-| # | Task | Parent | Est | Verify |
-|---|---|---|---|---|
-| F43 | In dashboard.js: add EventSource onerror handler showing "Reconnecting..." badge | M12 | 10 min | JS structural test |
-| F44 | In dashboard.js: handle reconnection by updating connection status indicator | M12 | 10 min | JS structural test |
-| F45 | In dashboard.js: hide "Reconnecting..." badge when events resume after reconnect | M12 | 5 min | JS structural test |
-| F46 | Update dashboardjs_test.go to verify reconnection indicator presence | M12 | 10 min | Test passes |
+| #   | Task                                                                             | Parent | Est    | Verify             |
+| --- | -------------------------------------------------------------------------------- | ------ | ------ | ------------------ |
+| F43 | In dashboard.js: add EventSource onerror handler showing "Reconnecting..." badge | M12    | 10 min | JS structural test |
+| F44 | In dashboard.js: handle reconnection by updating connection status indicator     | M12    | 10 min | JS structural test |
+| F45 | In dashboard.js: hide "Reconnecting..." badge when events resume after reconnect | M12    | 5 min  | JS structural test |
+| F46 | Update dashboardjs_test.go to verify reconnection indicator presence             | M12    | 10 min | Test passes        |
 
 ### Phase E: Documentation
 
-| # | Task | Parent | Est | Verify |
-|---|---|---|---|---|
-| F47 | Update AGENTS.md: SSE architecture section (Stream, Replay, ring buffer, graceful drain) | M13 | 10 min | Read |
-| F48 | Update FEATURES.md: reconnection replay feature, graceful drain feature | M13 | 10 min | Read |
-| F49 | Update CHANGELOG.md [Unreleased]: Added (replay, drain), Changed (Stream adoption, v0.4.0) | M13 | 10 min | Read |
-| F50 | Update live/go.mod comment or FEATURES.md: note Cache-Control no-transform trade-off | M13 | 5 min | Read |
+| #   | Task                                                                                       | Parent | Est    | Verify |
+| --- | ------------------------------------------------------------------------------------------ | ------ | ------ | ------ |
+| F47 | Update AGENTS.md: SSE architecture section (Stream, Replay, ring buffer, graceful drain)   | M13    | 10 min | Read   |
+| F48 | Update FEATURES.md: reconnection replay feature, graceful drain feature                    | M13    | 10 min | Read   |
+| F49 | Update CHANGELOG.md [Unreleased]: Added (replay, drain), Changed (Stream adoption, v0.4.0) | M13    | 10 min | Read   |
+| F50 | Update live/go.mod comment or FEATURES.md: note Cache-Control no-transform trade-off       | M13    | 5 min  | Read   |
 
 ### Phase F: Final Verification
 
-| # | Task | Parent | Est | Verify |
-|---|---|---|---|---|
-| F51 | Run full test suite: `GOEXPERIMENT=jsonv2 go test -race -count=1 ./...` (core) | M14 | 5 min | Green |
-| F52 | Run full test suite: `cd viz && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...` | M14 | 5 min | Green |
-| F53 | Run full test suite: `cd live && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...` | M14 | 5 min | Green |
-| F54 | Run lint: `cd live && golangci-lint run ./...` | M14 | 5 min | Clean |
-| F55 | Verify no `replace` directives in live/go.mod: `grep '^replace' live/go.mod` | M14 | 2 min | Empty |
+| #   | Task                                                                               | Parent | Est   | Verify |
+| --- | ---------------------------------------------------------------------------------- | ------ | ----- | ------ |
+| F51 | Run full test suite: `GOEXPERIMENT=jsonv2 go test -race -count=1 ./...` (core)     | M14    | 5 min | Green  |
+| F52 | Run full test suite: `cd viz && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...`  | M14    | 5 min | Green  |
+| F53 | Run full test suite: `cd live && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...` | M14    | 5 min | Green  |
+| F54 | Run lint: `cd live && golangci-lint run ./...`                                     | M14    | 5 min | Clean  |
+| F55 | Verify no `replace` directives in live/go.mod: `grep '^replace' live/go.mod`       | M14    | 2 min | Empty  |
 
 **Total fine-grained tasks: 55**
 **Total estimated effort: ~9.5 hours (excluding deferred M15)**
@@ -261,6 +261,7 @@ The Hub broadcasts pre-marshaled `jsontext.Value` through subscriber channels. T
 ## What This Unlocks
 
 After execution:
+
 - **Adoption score:** 28/100 → ~65/100 (Strong)
 - **Customer-facing:** Dashboard clients survive connection drops without missing events
 - **Code quality:** ~40 lines of manual SSE plumbing eliminated (Stream adoption)

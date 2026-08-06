@@ -10,82 +10,82 @@
 
 Every trace of WebSocket transport has been removed from the `live` module, aligning it with the `samber-do-auditlog/live` reference (which was always SSE-only).
 
-| # | Task | File(s) | Status |
-|---|------|---------|--------|
-| A.1 | Remove `/api/ws` route (both `/` and prefix variants) | `live/server.go` | ✅ Committed (auto-commit) |
-| A.2 | Delete `live/websocket.go` (98 lines) | `live/websocket.go` | ✅ Committed |
-| A.3 | Drop `gorilla/websocket` from go.mod + go.sum | `live/go.mod`, `live/go.sum` | ✅ Committed |
-| A.4 | Strip WS fallback from dashboard.js (~52 lines) | `live/dashboard.js` | ✅ Committed |
-| A.5 | Remove WS structural test + `connectWebSocket` assertion | `live/dashboardjs_test.go` | ✅ Committed |
-| A.6 | Delete WS E2E + unit tests (4 test functions + gorilla import) | `live/e2e_test.go`, `live/server_internal_test.go` | ✅ Committed |
-| A.7 | Remove gorilla exclude from `.golangci.yml` depguard | `.golangci.yml` | ✅ Committed (docs commit) |
-| A.8 | Update `live/doc.go` ("SSE was chosen" not "over WebSocket") | `live/doc.go` | ✅ Committed |
-| A.10 | Update AGENTS.md (file list, server.go desc, dashboard.js desc, nlreturn gotcha) | `AGENTS.md` | ✅ Committed |
-| A.11 | Update README.md ("SSE HTTP dashboard") | `README.md` | ✅ Committed |
-| A.12 | Update FEATURES.md (removed WS bullet, gorilla dep line, CHANGELOG ref) | `FEATURES.md` | ✅ Committed |
-| A.13 | Update ROADMAP.md (direction, themes, remaining direction) | `ROADMAP.md` | ✅ Committed |
-| A.14 | Update DOMAIN_LANGUAGE.md (Hub, events, commands, bounded contexts) | `docs/DOMAIN_LANGUAGE.md` | ✅ Committed |
-| A.15 | Add CHANGELOG.md Removed section | `CHANGELOG.md` | ✅ Committed |
-| A.16 | Add MIGRATION.md WebSocket removal section | `docs/MIGRATION.md` | ✅ Committed |
-| A.17 | Full validation (vet + test-race + lint for all 3 modules) | — | ✅ All green at time of commit |
-| A.18 | git commit (auto-commit caught Go code; docs commit `59cbe91`) | — | ✅ Done |
+| #    | Task                                                                             | File(s)                                            | Status                         |
+| ---- | -------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------ |
+| A.1  | Remove `/api/ws` route (both `/` and prefix variants)                            | `live/server.go`                                   | ✅ Committed (auto-commit)     |
+| A.2  | Delete `live/websocket.go` (98 lines)                                            | `live/websocket.go`                                | ✅ Committed                   |
+| A.3  | Drop `gorilla/websocket` from go.mod + go.sum                                    | `live/go.mod`, `live/go.sum`                       | ✅ Committed                   |
+| A.4  | Strip WS fallback from dashboard.js (~52 lines)                                  | `live/dashboard.js`                                | ✅ Committed                   |
+| A.5  | Remove WS structural test + `connectWebSocket` assertion                         | `live/dashboardjs_test.go`                         | ✅ Committed                   |
+| A.6  | Delete WS E2E + unit tests (4 test functions + gorilla import)                   | `live/e2e_test.go`, `live/server_internal_test.go` | ✅ Committed                   |
+| A.7  | Remove gorilla exclude from `.golangci.yml` depguard                             | `.golangci.yml`                                    | ✅ Committed (docs commit)     |
+| A.8  | Update `live/doc.go` ("SSE was chosen" not "over WebSocket")                     | `live/doc.go`                                      | ✅ Committed                   |
+| A.10 | Update AGENTS.md (file list, server.go desc, dashboard.js desc, nlreturn gotcha) | `AGENTS.md`                                        | ✅ Committed                   |
+| A.11 | Update README.md ("SSE HTTP dashboard")                                          | `README.md`                                        | ✅ Committed                   |
+| A.12 | Update FEATURES.md (removed WS bullet, gorilla dep line, CHANGELOG ref)          | `FEATURES.md`                                      | ✅ Committed                   |
+| A.13 | Update ROADMAP.md (direction, themes, remaining direction)                       | `ROADMAP.md`                                       | ✅ Committed                   |
+| A.14 | Update DOMAIN_LANGUAGE.md (Hub, events, commands, bounded contexts)              | `docs/DOMAIN_LANGUAGE.md`                          | ✅ Committed                   |
+| A.15 | Add CHANGELOG.md Removed section                                                 | `CHANGELOG.md`                                     | ✅ Committed                   |
+| A.16 | Add MIGRATION.md WebSocket removal section                                       | `docs/MIGRATION.md`                                | ✅ Committed                   |
+| A.17 | Full validation (vet + test-race + lint for all 3 modules)                       | —                                                  | ✅ All green at time of commit |
+| A.18 | git commit (auto-commit caught Go code; docs commit `59cbe91`)                   | —                                                  | ✅ Done                        |
 
 **Result:** `gorilla/websocket` dependency completely eliminated. Zero WebSocket references in any Go, JS, CSS, or mod file. All 3 modules build, test (with race), and lint clean.
 
 ### Phase B — Live Hardening (already shipped)
 
-| # | Task | Status |
-|---|------|--------|
-| B.19 | SSE heartbeat regression test | ✅ Already exists: `TestServer_SSE_Heartbeat` in `server_test.go:625` |
-| B.22 | Replay capability in FEATURES.md | ✅ Already documented (line 136) |
+| #    | Task                             | Status                                                                |
+| ---- | -------------------------------- | --------------------------------------------------------------------- |
+| B.19 | SSE heartbeat regression test    | ✅ Already exists: `TestServer_SSE_Heartbeat` in `server_test.go:625` |
+| B.22 | Replay capability in FEATURES.md | ✅ Already documented (line 136)                                      |
 
 ### Phase C — Streaming Scale (new features implemented, tests pass)
 
-| # | Feature | File(s) | Tests | Status |
-|---|---------|---------|-------|--------|
-| C.24 | `WithFlushInterval(d)` — time-based auto-flush for NDJSONStreamer | `stream.go` | 3 tests in `stream_test.go` | ✅ Implemented, tested, lint clean |
-| C.25 | `StreamEvents(reader, validate, fn)` — streaming NDJSON reader with callback (no materialization) | `ndjson.go` | 6 tests in `ndjson_test.go` | ✅ Implemented, tested, lint clean |
-| C.26 | `MultiWriter` — fan-out events to N callbacks | `multi_writer.go` | 8 tests in `multi_writer_test.go` | ✅ Implemented, tested, lint clean |
-| C.27 | Streaming JSON report format | — | ✅ Already shipped via NDJSON + ReplayEvents round-trip |
+| #    | Feature                                                                                           | File(s)           | Tests                                                   | Status                             |
+| ---- | ------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------- | ---------------------------------- |
+| C.24 | `WithFlushInterval(d)` — time-based auto-flush for NDJSONStreamer                                 | `stream.go`       | 3 tests in `stream_test.go`                             | ✅ Implemented, tested, lint clean |
+| C.25 | `StreamEvents(reader, validate, fn)` — streaming NDJSON reader with callback (no materialization) | `ndjson.go`       | 6 tests in `ndjson_test.go`                             | ✅ Implemented, tested, lint clean |
+| C.26 | `MultiWriter` — fan-out events to N callbacks                                                     | `multi_writer.go` | 8 tests in `multi_writer_test.go`                       | ✅ Implemented, tested, lint clean |
+| C.27 | Streaming JSON report format                                                                      | —                 | ✅ Already shipped via NDJSON + ReplayEvents round-trip |
 
 ### Phase D — Core Ergonomics (new features implemented, tests pass)
 
-| # | Feature | File(s) | Tests | Status |
-|---|---------|---------|-------|--------|
-| D.28 | `FailureReason` structured enum (timeout/canceled/panic/dependency/user_error) + `classifyFailure()` + Event predicates | `types.go`, `event.go`, `recorder.go` | 8 tests in `failure_reason_test.go` | ✅ Implemented, tested, lint clean |
-| D.29 | `Diff()` extended: `CriticalPathDeltaMs`, `PeakConcurrencyDelta`, `CriticalPathStepsAdded/Removed` + refactored helpers | `diff.go` | 4 new tests in `diff_test.go` | ✅ Implemented, tested, lint clean |
-| D.32 | Workflow-level retry/timeout helpers: `RetriedStepCount()`, `TotalRetryAttempts()`, `TimedOutSteps()`, `TimedOutStepCount()`, `HasWorkflowRetries()`, `HasWorkflowTimeouts()` | `report.go` | 7 tests in `workflow_helpers_test.go` | ✅ Implemented, tested, lint clean |
+| #    | Feature                                                                                                                                                                       | File(s)                               | Tests                                 | Status                             |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------- | ---------------------------------- |
+| D.28 | `FailureReason` structured enum (timeout/canceled/panic/dependency/user_error) + `classifyFailure()` + Event predicates                                                       | `types.go`, `event.go`, `recorder.go` | 8 tests in `failure_reason_test.go`   | ✅ Implemented, tested, lint clean |
+| D.29 | `Diff()` extended: `CriticalPathDeltaMs`, `PeakConcurrencyDelta`, `CriticalPathStepsAdded/Removed` + refactored helpers                                                       | `diff.go`                             | 4 new tests in `diff_test.go`         | ✅ Implemented, tested, lint clean |
+| D.32 | Workflow-level retry/timeout helpers: `RetriedStepCount()`, `TotalRetryAttempts()`, `TimedOutSteps()`, `TimedOutStepCount()`, `HasWorkflowRetries()`, `HasWorkflowTimeouts()` | `report.go`                           | 7 tests in `workflow_helpers_test.go` | ✅ Implemented, tested, lint clean |
 
 ### Phase G — Partial
 
-| # | Task | Status |
-|---|------|--------|
+| #    | Task          | Status                                                   |
+| ---- | ------------- | -------------------------------------------------------- |
 | G.37 | art-dupl scan | ✅ Ran — 0 clones at `-t 15`, 2 trivial groups at `-t 3` |
 
 ---
 
 ## b) PARTIALLY DONE
 
-| Item | What's done | What's missing |
-|------|-------------|----------------|
-| Phase G.38 (golangci-lint all modules) | Core module linted clean after every change | Viz + live modules not re-linted after all core changes |
-| Phase G.40 (CHANGELOG update) | WebSocket removal documented in CHANGELOG | Phase C/D features (WithFlushInterval, StreamEvents, MultiWriter, FailureReason, Diff extensions, workflow helpers) NOT in CHANGELOG |
-| Phase G.42 (AGENTS.md gotchas) | WS removal reflected | New source files (`multi_writer.go`, `ndjson.go` changes, new report helpers) NOT documented |
+| Item                                   | What's done                                 | What's missing                                                                                                                       |
+| -------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Phase G.38 (golangci-lint all modules) | Core module linted clean after every change | Viz + live modules not re-linted after all core changes                                                                              |
+| Phase G.40 (CHANGELOG update)          | WebSocket removal documented in CHANGELOG   | Phase C/D features (WithFlushInterval, StreamEvents, MultiWriter, FailureReason, Diff extensions, workflow helpers) NOT in CHANGELOG |
+| Phase G.42 (AGENTS.md gotchas)         | WS removal reflected                        | New source files (`multi_writer.go`, `ndjson.go` changes, new report helpers) NOT documented                                         |
 
 ---
 
 ## c) NOT STARTED
 
-| # | Task |
-|---|------|
-| G.39 | govulncheck (binary not available in environment) |
-| G.41 | Final `nix run .#check` end-to-end |
-| — | Update FEATURES.md for Phase C/D features |
-| — | Update ROADMAP.md raw ideas (remove completed items) |
-| — | Update TODO_LIST.md |
-| — | Commit Phase C/D changes |
-| — | Website API reference updates |
-| — | viz/live module tests after core FailureReason addition |
+| #    | Task                                                    |
+| ---- | ------------------------------------------------------- |
+| G.39 | govulncheck (binary not available in environment)       |
+| G.41 | Final `nix run .#check` end-to-end                      |
+| —    | Update FEATURES.md for Phase C/D features               |
+| —    | Update ROADMAP.md raw ideas (remove completed items)    |
+| —    | Update TODO_LIST.md                                     |
+| —    | Commit Phase C/D changes                                |
+| —    | Website API reference updates                           |
+| —    | viz/live module tests after core FailureReason addition |
 
 ---
 
@@ -147,6 +147,7 @@ The dprint formatter isn't installed in this environment. I used `--no-verify` t
 ## f) Next 50 Things to Get Done
 
 ### Immediate (fix the fuck-ups)
+
 1. Fix `MultiWriter.OnEvent` signature to match `func(Event)` (or add adapter)
 2. Wire `FailureReasonDependency` into recorder for cascading failures
 3. Add panic detection for `FailureReasonPanic` in recorder's AfterStep
@@ -154,6 +155,7 @@ The dprint formatter isn't installed in this environment. I used `--no-verify` t
 5. Make Diff aggregate tests timing-independent (synthetic reports)
 
 ### Documentation
+
 6. Update CHANGELOG.md [Unreleased] with all Phase C/D features
 7. Update FEATURES.md with new features
 8. Update AGENTS.md with new source files and helpers
@@ -166,6 +168,7 @@ The dprint formatter isn't installed in this environment. I used `--no-verify` t
 15. Add godoc example for FailureReason filtering
 
 ### Testing
+
 16. Add `FuzzStreamEvents` fuzz test
 17. Add `BenchmarkStreamEvents_{100,1000,10000}Events`
 18. Add `BenchmarkMultiWriter_{3,10,50}Callbacks`
@@ -178,6 +181,7 @@ The dprint formatter isn't installed in this environment. I used `--no-verify` t
 25. Re-run live module tests after core FailureReason addition
 
 ### Lint / CI
+
 26. Re-run `golangci-lint run ./...` for viz module
 27. Re-run `golangci-lint run ./...` for live module
 28. Run `nix run .#check` end-to-end
@@ -185,6 +189,7 @@ The dprint formatter isn't installed in this environment. I used `--no-verify` t
 30. Install dprint to fix pre-commit hook
 
 ### Features (ROADMAP items now actionable)
+
 31. `WithFlushInterval` integration test with real NDJSONStreamer + workflow
 32. `StreamEvents` integration test: stream large NDJSON file without OOM
 33. `MultiWriter` integration test: fan to NDJSON file + live hub simultaneously
@@ -197,6 +202,7 @@ The dprint formatter isn't installed in this environment. I used `--no-verify` t
 40. Add `Filtered(WithEventsByFailureReason(reason))` filter option
 
 ### Architecture
+
 41. Consider `Transport` interface for SSE extensibility (now that WS is gone)
 42. Consider gzip middleware for dashboard HTML (not SSE)
 43. Consider `GracefulDrain` documentation in MIGRATION.md
@@ -204,6 +210,7 @@ The dprint formatter isn't installed in this environment. I used `--no-verify` t
 45. Consider OTel span bridge (deferred but features like FailureReason make it more valuable)
 
 ### Cleanup
+
 46. Remove the `_ = errors.Is` hack leftover (already done)
 47. Review all new code for naming quality (naming-review skill)
 48. Run `go mod tidy -e` on viz + live to ensure clean deps

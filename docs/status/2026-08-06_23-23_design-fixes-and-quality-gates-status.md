@@ -54,15 +54,15 @@ All six critical design flaws from the previous status report were addressed:
 
 ### Phase G — Final Quality Gates
 
-| Gate | Core | Viz | Live |
-|------|------|-----|------|
-| `go build` | ✅ | ✅ | ✅ |
-| `go test -race` | ✅ 2.8s | ✅ 2.5s | ✅ 1.3s |
-| `golangci-lint` | 0 issues | 0 issues | 0 issues |
-| `govulncheck` | clean | clean | clean |
-| `nix run .#check` | **All checks passed** | | |
-| `art-dupl -t 15` | **0 clone groups** | | |
-| `art-dupl -t 3` | 2 trivial groups (test boilerplate + RLock pattern) | | |
+| Gate              | Core                                                | Viz      | Live     |
+| ----------------- | --------------------------------------------------- | -------- | -------- |
+| `go build`        | ✅                                                  | ✅       | ✅       |
+| `go test -race`   | ✅ 2.8s                                             | ✅ 2.5s  | ✅ 1.3s  |
+| `golangci-lint`   | 0 issues                                            | 0 issues | 0 issues |
+| `govulncheck`     | clean                                               | clean    | clean    |
+| `nix run .#check` | **All checks passed**                               |          |          |
+| `art-dupl -t 15`  | **0 clone groups**                                  |          |          |
+| `art-dupl -t 3`   | 2 trivial groups (test boilerplate + RLock pattern) |          |          |
 
 **Coverage:** Core 95.2%. New functions all at 85.7%–100%.
 
@@ -96,10 +96,10 @@ Nothing is in a half-finished state. Everything that was committed is fully impl
 
 Two completely different concepts share the same JSON key `failure_reason`:
 
-| Type | Field | Go type | Meaning |
-|------|-------|---------|---------|
-| `Event` | `FailureReason` | `FailureReason` (typed enum string) | Structured category: `"timeout"`, `"canceled"`, `"user_error"` |
-| `WorkflowReport` | `FailureReason` | `string` (plain) | Human-readable summary: `"3 step(s) failed: fetch, transform, save"` |
+| Type             | Field           | Go type                             | Meaning                                                              |
+| ---------------- | --------------- | ----------------------------------- | -------------------------------------------------------------------- |
+| `Event`          | `FailureReason` | `FailureReason` (typed enum string) | Structured category: `"timeout"`, `"canceled"`, `"user_error"`       |
+| `WorkflowReport` | `FailureReason` | `string` (plain)                    | Human-readable summary: `"3 step(s) failed: fetch, transform, save"` |
 
 When an `Event` is serialized inside the `Events` array of a `WorkflowReport`, the reader sees `failure_reason` at both levels. The event-level value is a machine-readable enum; the report-level value is a human-readable sentence. A consumer parsing `failure_reason` from the report JSON gets different types depending on which object they're looking at. This was pre-existing (the report-level `FailureReason string` was there before this session), but I introduced the Event-level `FailureReason FailureReason` field without checking for collision — making it worse.
 
@@ -237,6 +237,7 @@ Every commit in this session bypassed the BuildFlow pre-commit hook because `dpr
 ### 1. Should `WorkflowReport.FailureReason` be renamed to `FailureSummary` (breaking JSON change)?
 
 The JSON key `failure_reason` is used by **two different fields** with **different types and meanings**:
+
 - `Event.FailureReason` (type `FailureReason`, values: `"timeout"`, `"canceled"`, `"user_error"`) — machine-readable enum
 - `WorkflowReport.FailureReason` (type `string`, values: `"3 step(s) failed: fetch, transform"`) — human-readable summary
 

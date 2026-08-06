@@ -137,10 +137,10 @@ human-readable sentence.
 
 ### What changed
 
-| Scope              | JSON key before    | JSON key after       | Type     | Example value                         |
-| ------------------ | ------------------ | -------------------- | -------- | ------------------------------------- |
-| `WorkflowReport`   | `failure_reason`   | `failure_summary`    | `string` | `"3 step(s) failed: fetch, transform"`|
-| `Event`            | `failure_reason`   | `failure_reason` (unchanged) | `FailureReason` enum | `"timeout"`              |
+| Scope            | JSON key before  | JSON key after               | Type                 | Example value                          |
+| ---------------- | ---------------- | ---------------------------- | -------------------- | -------------------------------------- |
+| `WorkflowReport` | `failure_reason` | `failure_summary`            | `string`             | `"3 step(s) failed: fetch, transform"` |
+| `Event`          | `failure_reason` | `failure_reason` (unchanged) | `FailureReason` enum | `"timeout"`                            |
 
 ### Migration
 
