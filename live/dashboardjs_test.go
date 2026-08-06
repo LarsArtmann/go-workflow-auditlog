@@ -199,6 +199,11 @@ func TestDashboardJS_UsesEventSource(t *testing.T) {
 	if !strings.Contains(js, "reconnect") {
 		t.Error("dashboard.js missing reconnection logic")
 	}
+
+	// Must show a visible "reconnecting" status indicator on SSE error
+	if !strings.Contains(js, `"reconnecting"`) {
+		t.Error("dashboard.js missing 'reconnecting' status indicator")
+	}
 }
 
 // TestDashboardCSS_StructuralIntegrity validates key CSS classes exist.

@@ -133,11 +133,11 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Live data flow** — browser connects to `/api/events` → receives `snapshot` event (current report + events + metadata + DAG) → incremental `event` messages as steps execute → `complete` event with final report + full DAG on `SignalComplete()`. DAG is available immediately via `CaptureDAG(w)` — no need to wait for execution.
 - **Live graph enhancements** — critical path auto-highlight on graph open (if path >1 step), retry count badges, node search/filter, minimap for >20 nodes with real-time viewport tracking via `MutationObserver`, daghtml-native zoom/fit handlers, live duration labels on nodes, incremental node color updates via `updateGraphLive()`
 - **Live timeline** — Gantt-style timeline updates in real-time as step timing data arrives
-- **SSE heartbeat** — configurable keepalive interval (default 15s) prevents proxy timeouts
-- **Reconnection** — automatic reconnection with exponential backoff on SSE errors
-- **Demo pipeline** at `live/demo` (fetch → validate → transform → save → notify with retry) serving at `http://localhost:18080`
+- **SSE heartbeat** — configurable keepalive interval (default 15s) prevents proxy timeouts. Uses `sse.Stream.Heartbeat` goroutine (go-sse v0.4.0)
+- **Reconnection replay** — when a dashboard client's SSE connection drops and reconnects, the browser sends `Last-Event-ID` automatically. The server replays missed events from a bounded ring buffer (default 1000, configurable via `Config.ReplayBufferSize`) before sending the snapshot. No events are lost on brief disconnects.
+- **Graceful shutdown drain** — `Server.Shutdown` drains subscriber channel buffers before closing HTTP connections, preventing event loss. The `/api/health` endpoint reports `draining` and `event_buffer_size` state. at `live/demo` (fetch → validate → transform → save → notify with retry) serving at `http://localhost:18080`
 - **Diff-based steps table rendering** — rows tracked by step name in a `stepRows` map; only changed cells (status, attempts, duration, error) are updated in-place via `updateStepRow()` instead of rebuilding `innerHTML` on every tick, eliminating flicker for 100+ step workflows
-- **Depends on `go-sse`** (`github.com/larsartmann/go-sse` v0.2.0, public, pinned in `live/go.mod`) for SSE wire-format primitives (`sse.Event`, `sse.WriteEvent`, `sse.ContentType`)
+- **Depends on `go-sse`** (`github.com/larsartmann/go-sse` v0.4.0, public, pinned in `live/go.mod`) for SSE transport primitives: `sse.Stream` (connection lifecycle, heartbeat, `LastEventID`), `sse.Replay` + `sse.EventStore` (reconnection replay), and `sse.Event`/`sse.WriteEvent`/`sse.ContentType` (wire format)
 
 ### Infrastructure
 

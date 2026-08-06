@@ -62,7 +62,7 @@ func (srv *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 			return
 		case evt := <-sub.ch:
-			if !srv.writeWS(conn, wsMessage{Type: "event", Data: evt}) {
+			if !srv.writeWS(conn, wsMessage{Type: eventNameEvent, Data: evt.Data}) {
 				return
 			}
 		}

@@ -47,6 +47,11 @@ type Config struct {
 	// HeartbeatInterval is how often to send SSE keepalive comments.
 	// Default 15 seconds. Set to 0 to disable heartbeats.
 	HeartbeatInterval time.Duration
+	// ReplayBufferSize is the maximum number of events retained for
+	// SSE reconnection replay. When a client reconnects with a Last-Event-ID
+	// header, missed events are replayed from this buffer. Default 1000.
+	// Set to 0 for the default.
+	ReplayBufferSize int
 	// CORSAllowedOrigins controls the Access-Control-Allow-Origin
 	// header on API endpoints. Empty (default) disables CORS
 	// (secure by default). Set to "*" to allow all origins, or a
@@ -118,7 +123,7 @@ type Server struct {
 // auditlog OnEvent callback, creates the Auditor, and returns a ready-to-use
 // Server.
 func New(auditCfg auditlog.Config, serverCfg Config) (*Server, *auditlog.Auditor, error) {
-	hub := NewHub()
+	hub := NewHubWithReplay(serverCfg.ReplayBufferSize)
 
 	auditCfg.OnEvent = hub.OnEvent
 	auditCfg.Enabled = true
@@ -277,7 +282,9 @@ func (srv *Server) Addr() string {
 	return srv.config.Addr
 }
 
-// Shutdown gracefully shuts down the server.
+// Shutdown gracefully shuts down the server. It first drains subscriber
+// buffers (allowing SSE clients to consume buffered events), then shuts
+// down the HTTP server.
 func (srv *Server) Shutdown(ctx context.Context) error {
 	srv.serverMu.Lock()
 	server := srv.httpServer
@@ -286,6 +293,10 @@ func (srv *Server) Shutdown(ctx context.Context) error {
 	if server == nil {
 		return nil
 	}
+
+	// Drain subscriber buffers before closing HTTP connections.
+	// This gives SSE clients time to consume buffered events.
+	_ = srv.hub.Drain(ctx)
 
 	err := server.Shutdown(ctx)
 	if err != nil {
@@ -389,22 +400,26 @@ func (srv *Server) handleExportHTML(w http.ResponseWriter, _ *http.Request) {
 }
 
 type healthResponse struct {
-	Status   string  `json:"status"`
-	UptimeS  float64 `json:"uptime_s"`
-	Clients  int     `json:"clients"`
-	Events   int     `json:"events"`
-	Complete bool    `json:"complete"`
-	Dropped  int64   `json:"dropped"`
+	Status      string  `json:"status"`
+	UptimeS     float64 `json:"uptime_s"`
+	Clients     int     `json:"clients"`
+	Events      int     `json:"events"`
+	Complete    bool    `json:"complete"`
+	Draining    bool    `json:"draining"`
+	EventBuffer int     `json:"event_buffer_size"`
+	Dropped     int64   `json:"dropped"`
 }
 
 func (srv *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	resp := healthResponse{
-		Status:   "ok",
-		UptimeS:  time.Since(srv.startTime).Seconds(),
-		Clients:  srv.hub.ClientCount(),
-		Complete: srv.hub.IsComplete(),
+		Status:      "ok",
+		UptimeS:     time.Since(srv.startTime).Seconds(),
+		Clients:     srv.hub.ClientCount(),
+		Complete:    srv.hub.IsComplete(),
+		Draining:    srv.hub.IsDraining(),
+		EventBuffer: srv.hub.BufferedEventCount(),
 	}
 
 	if srv.healthProvider != nil {
@@ -424,61 +439,60 @@ func (srv *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
-	flusher, ok := w.(http.Flusher)
-	if !ok {
+	// Defensive check: Stream silently degrades to non-flushing mode if the
+	// writer lacks Flush, but for SSE that means data never reaches the client
+	// until the buffer fills. Reject early with an honest 500 instead.
+	if _, ok := w.(http.Flusher); !ok {
 		http.Error(w, "streaming not supported", http.StatusInternalServerError)
 
 		return
 	}
 
-	w.Header().Set("Content-Type", sse.ContentType)
-	w.Header().Set("Cache-Control", "no-cache, no-transform")
-	w.Header().Set("Connection", "keep-alive")
+	// X-Accel-Buffering must be set before NewStream — SetHeaders does not
+	// touch it, so it survives the header reset. Cache-Control: no-transform
+	// is lost (SetHeaders overwrites to no-cache); X-Accel-Buffering is the
+	// primary proxy-defense header so the trade-off is acceptable.
 	w.Header().Set("X-Accel-Buffering", "no")
+
+	stream := sse.NewStream(w, r)
+	defer func() { _ = stream.Close() }()
 
 	sub := srv.hub.Subscribe()
 	defer srv.hub.Unsubscribe(sub.id)
 
-	err := srv.sendSnapshot(w, flusher)
-	if err != nil {
+	// Reconnection replay: if the client sends Last-Event-ID, replay any
+	// missed events from the ring buffer before sending the snapshot.
+	if lastID := stream.LastEventID(); !lastID.IsZero() {
+		if _, err := sse.Replay(stream, srv.hub.EventStore(), lastID); err != nil {
+			return
+		}
+	}
+
+	if err := srv.sendSnapshot(stream); err != nil {
 		return
 	}
 
-	heartbeat := time.NewTicker(srv.config.HeartbeatInterval)
-	defer heartbeat.Stop()
-
-	ctx := r.Context()
+	go stream.Heartbeat(r.Context(), srv.config.HeartbeatInterval)
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-r.Context().Done():
 			return
 
 		case <-sub.done:
-			srv.sendComplete(w, flusher)
+			srv.sendComplete(stream)
 
 			return
 
 		case evt := <-sub.ch:
-			err := sse.WriteEvent(w, sse.Event{Event: "event", Data: string(evt)})
-			if err != nil {
+			if err := stream.Send(sse.Event{Event: eventNameEvent, ID: evt.ID, Data: string(evt.Data)}); err != nil {
 				return
 			}
-
-			flusher.Flush()
-
-		case <-heartbeat.C:
-			_, writeErr := w.Write([]byte(": heartbeat\n\n"))
-			if writeErr != nil {
-				return
-			}
-
-			flusher.Flush()
 		}
 	}
 }
 
-func (srv *Server) sendSnapshot(w http.ResponseWriter, flusher http.Flusher) error {
+func (srv *Server) sendSnapshot(stream *sse.Stream) error {
 	if srv.snapshotProvider == nil {
 		return nil
 	}
@@ -488,17 +502,10 @@ func (srv *Server) sendSnapshot(w http.ResponseWriter, flusher http.Flusher) err
 		return fmt.Errorf("build snapshot: %w", err)
 	}
 
-	err = sse.WriteEvent(w, sse.Event{Event: "snapshot", Data: string(data)})
-	if err != nil {
-		return err
-	}
-
-	flusher.Flush()
-
-	return nil
+	return stream.Send(sse.Event{Event: "snapshot", Data: string(data)})
 }
 
-func (srv *Server) sendComplete(w http.ResponseWriter, flusher http.Flusher) {
+func (srv *Server) sendComplete(stream *sse.Stream) {
 	if srv.completeProvider == nil {
 		return
 	}
@@ -508,9 +515,7 @@ func (srv *Server) sendComplete(w http.ResponseWriter, flusher http.Flusher) {
 		return
 	}
 
-	_ = sse.WriteEvent(w, sse.Event{Event: "complete", Data: string(data)})
-
-	flusher.Flush()
+	_ = stream.Send(sse.Event{Event: "complete", Data: string(data)})
 }
 
 // --- Provider Factories ---

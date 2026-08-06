@@ -47,15 +47,26 @@ The project is split into three Go modules:
 ### Shared infrastructure: `go-sse`
 
 The `live/` module depends on [`github.com/larsartmann/go-sse`](https://github.com/larsartmann/go-sse)
-v0.2.0 (public, pinned) for the SSE wire-format primitives — `sse.Event`, `sse.WriteEvent`,
-and `sse.ContentType`. The domain-specific Hub and Server are implemented locally in `live/`
-(go-workflow event types, report structure, dashboard HTML) on top of those primitives; go-sse
-itself is transport-only and owns no domain types here.
+v0.4.0 (public, pinned) for SSE transport primitives. The live module uses:
+- `sse.Stream` — replaces manual SSE plumbing in `handleSSE` (headers, flusher,
+  heartbeat, `WriteEvent`+`Flush`). `sse.NewStream(w, r)` sets the required
+  SSE headers and writes 200 OK. `stream.Send(evt)` serializes and flushes.
+  `go stream.Heartbeat(ctx, interval)` sends keepalive comment frames.
+- `sse.Replay` + `sse.EventStore` — reconnection replay. The Hub maintains a
+  bounded event ring buffer (`replay.go`) that implements `sse.EventStore`.
+  When a client reconnects with `Last-Event-ID`, `sse.Replay(stream, store,
+  lastID)` replays missed events before the snapshot.
+- `sse.Event`, `sse.EventID`, `sse.WriteEvent`, `sse.ContentType` — wire-format
+  primitives used by both Stream and direct calls.
+
+The domain-specific Hub, Server, ring buffer, and drain logic are implemented
+locally in `live/` on top of these primitives; go-sse itself is transport-only
+and owns no domain types here.
 
 A `go.work` workspace links only the project's own modules (core `.`, `./viz`, `./live`)
 for local development; **all external `larsartmann/*` modules are resolved from published
-versions** (no local `use`/`replace` for them): `go-output` v0.31.1 + its sub-modules
-(`viz`, `live`), `go-sse` v0.2.0 (`live`), `go-atomic-write` v0.4.0,
+versions** (no local `use`/`replace` for them): `go-output` v0.35.0 + its sub-modules
+(`viz`, `live`), `go-sse` v0.4.0 (`live`), `go-atomic-write` v0.4.1,
 `go-error-family` v0.10.0, and `go-ndjson` v0.0.1 (`core`). `go.work` and `go.work.sum` are
 gitignored (local dev artifacts). Standalone (`GOWORK=off`) builds work for all three
 modules because every dependency has a real, checksum-verified version in `go.sum`.
@@ -136,9 +147,10 @@ example/            — Data pipeline demo (now in viz module)
 
 ```
 doc.go             — Package doc comment
-hub.go             — Hub: SSE subscriber registry, fan-out OnEvent, SignalComplete, non-blocking broadcast
+hub.go             — Hub: SSE subscriber registry, fan-out OnEvent (assigns SSE event IDs, stores in ring buffer), SignalComplete, Drain (graceful shutdown), non-blocking broadcast
+replay.go          — eventRingBuffer: bounded thread-safe ring buffer implementing sse.EventStore for reconnection replay
 websocket.go       — WebSocket transport: `/api/ws` endpoint with same snapshot→events→complete flow as SSE. JSON `{type, data}` envelopes. SSE fallback after 2 failures.
-server.go          — HTTP server: SSE handler, /api/report, /api/health, /api/export/ndjson, /api/export/html, /api/ws, dashboard serving, configurable Prefix, CORS middleware (secure-by-default: empty=disabled), New() convenience, ServeHTTP
+server.go          — HTTP server: SSE handler (uses sse.Stream + sse.Replay), /api/report, /api/health (with drain/buffer state), /api/export/ndjson, /api/export/html, /api/ws, dashboard serving, configurable Prefix, CORS middleware (secure-by-default: empty=disabled), New() convenience, ServeHTTP, graceful Shutdown (drains subscriber buffers first)
 dashboard.go       — HTML template assembly: reuses viz CSS + embeds live CSS + JS + daghtml graph JS; skip link, ARIA landmarks, focusable sortable headers, help modal, export buttons (JSON/NDJSON/HTML) in header with ROUTE_PREFIX-aware URLs
 dashboard.css      — Live-specific CSS: pulsing live badge, connection status, step animations, graph placeholders, export button styles, :focus-visible rings, sort-direction indicators, help modal, skip link
 dashboard.js       — SSE+WebSocket client + incremental rendering engine: state management, requestAnimationFrame batching, diff-based steps table (no innerHTML rebuild), live graph node updates (colors + duration labels), critical path/retry badges/search, minimap with MutationObserver viewport tracking, global keyboard shortcuts, graph and step-row keyboard navigation, accessible help modal

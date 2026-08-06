@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/larsartmann/go-sse"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -45,8 +46,10 @@ func TestServer_SendSnapshotNilProvider(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/events", nil)
+	stream := sse.NewStream(rec, req)
 
-	err := srv.sendSnapshot(rec, rec)
+	err := srv.sendSnapshot(stream)
 	if err != nil {
 		t.Errorf("expected nil error for nil snapshotProvider, got %v", err)
 	}
@@ -61,8 +64,10 @@ func TestServer_SendCompleteNilProvider(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/events", nil)
+	stream := sse.NewStream(rec, req)
 
-	srv.sendComplete(rec, rec)
+	srv.sendComplete(stream)
 }
 
 func TestServer_NewErrorInvalidConfig(t *testing.T) {
@@ -386,8 +391,10 @@ func TestServer_SendSnapshotProviderError(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/events", nil)
+	stream := sse.NewStream(rec, req)
 
-	err := srv.sendSnapshot(rec, rec)
+	err := srv.sendSnapshot(stream)
 	if err == nil {
 		t.Fatal("expected error from failing snapshotProvider")
 	}
@@ -408,9 +415,11 @@ func TestServer_SendCompleteProviderError(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/events", nil)
+	stream := sse.NewStream(rec, req)
 
 	// Must not panic and must return without writing a complete event.
-	srv.sendComplete(rec, rec)
+	srv.sendComplete(stream)
 
 	if rec.Body.Len() != 0 {
 		t.Errorf("expected empty body when completeProvider errors, got: %s", rec.Body.String())
@@ -450,9 +459,12 @@ func TestServer_HandleSSE_SnapshotWriteFailure(t *testing.T) {
 	}
 }
 
-// TestServer_HandleSSE_HeartbeatWriteFailure lets the snapshot flush, then the
-// next heartbeat write fails and the handler returns.
-func TestServer_HandleSSE_HeartbeatWriteFailure(t *testing.T) {
+// TestServer_HandleSSE_WriteFailureAfterSnapshot lets the snapshot flush,
+// then verifies the handler exits when a subsequent event Send fails.
+// With Stream.Heartbeat running in a goroutine, heartbeat write failures are
+// handled internally by go-sse (the goroutine exits silently); this test now
+// covers the event Send failure path after a successful snapshot flush.
+func TestServer_HandleSSE_WriteFailureAfterSnapshot(t *testing.T) {
 	t.Parallel()
 
 	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
@@ -470,16 +482,27 @@ func TestServer_HandleSSE_HeartbeatWriteFailure(t *testing.T) {
 	done := make(chan struct{})
 
 	go func() {
-		// Allow the snapshot to flush, then fail on a subsequent heartbeat.
+		// Allow the snapshot to flush, then fail on a subsequent event Send.
 		srv.handleSSE(&failAfterFlushWriter{}, req)
 		close(done)
 	}()
+
+	// Wait for the handler to subscribe and flush the snapshot, then
+	// broadcast an event whose Send will fail on the dead writer.
+	time.Sleep(30 * time.Millisecond)
+
+	srv.hub.OnEvent(auditlog.Event{
+		Sequence:  1,
+		StepRef:   auditlog.StepRef{Name: "post-snapshot-fail"},
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+	})
 
 	select {
 	case <-done:
 	case <-time.After(2 * time.Second):
 		cancel()
-		t.Fatal("handleSSE did not return after heartbeat write failure")
+		t.Fatal("handleSSE did not return after event write failure")
 	}
 }
 

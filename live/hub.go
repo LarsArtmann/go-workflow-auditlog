@@ -1,22 +1,39 @@
 package live
 
 import (
+	"context"
 	"encoding/json/jsontext"
 	"encoding/json/v2"
+	"fmt"
+	"strconv"
 	"sync"
+	"sync/atomic"
+	"time"
 
+	"github.com/larsartmann/go-sse"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 // subscriberBufferSize is the per-client event buffer. Events that overflow
 // are dropped for that client — the snapshot mechanism on reconnect will
 // recover the full state.
-const subscriberBufferSize = 128
+const (
+	subscriberBufferSize = 128
+	eventNameEvent       = "event"
+)
+
+// BroadcastEvent carries a marshaled event payload alongside its SSE event ID.
+// SSE clients use the ID for Last-Event-ID reconnection replay; WebSocket
+// clients ignore it.
+type BroadcastEvent struct {
+	ID   sse.EventID
+	Data jsontext.Value
+}
 
 // Subscriber represents a single SSE client connection.
 type Subscriber struct {
 	id        uint64
-	ch        chan jsontext.Value
+	ch        chan BroadcastEvent
 	done      chan struct{}
 	closeOnce sync.Once
 }
@@ -25,7 +42,7 @@ type Subscriber struct {
 func (s *Subscriber) ID() uint64 { return s.id }
 
 // Events returns the channel that receives broadcast events.
-func (s *Subscriber) Events() <-chan jsontext.Value { return s.ch }
+func (s *Subscriber) Events() <-chan BroadcastEvent { return s.ch }
 
 // Done returns a channel that is closed when the lifecycle completes
 // or the subscriber is removed.
@@ -40,39 +57,55 @@ func (s *Subscriber) closeDone() {
 // The hub is safe for concurrent use. OnEvent is called from recorder
 // goroutines, and Subscribe/Unsubscribe are called from HTTP handler goroutines.
 type Hub struct {
-	mu       sync.RWMutex
-	clients  map[uint64]*Subscriber
-	nextID   uint64
-	complete bool
+	mu         sync.RWMutex
+	clients    map[uint64]*Subscriber
+	nextID     uint64
+	complete   bool
+	draining   bool
+	eventSeq   atomic.Uint64
+	ringBuffer *eventRingBuffer
 }
 
-// NewHub creates a Hub ready for use.
+// NewHub creates a Hub ready for use with the default replay buffer size.
 func NewHub() *Hub {
+	return NewHubWithReplay(0)
+}
+
+// NewHubWithReplay creates a Hub with a replay ring buffer of the given
+// capacity. Non-positive capacity uses the default (1000).
+func NewHubWithReplay(replayBufferSize int) *Hub {
 	return &Hub{
-		clients: make(map[uint64]*Subscriber),
+		clients:    make(map[uint64]*Subscriber),
+		ringBuffer: newEventRingBuffer(replayBufferSize),
 	}
 }
 
-// OnEvent marshals a workflow Event to JSON and broadcasts it to all
-// connected SSE clients.
+// OnEvent marshals a workflow Event to JSON, assigns it a sequential SSE
+// event ID, stores it in the replay ring buffer, and broadcasts it to all
+// connected clients.
 func (h *Hub) OnEvent(evt auditlog.Event) {
 	data, err := json.Marshal(evt)
 	if err != nil {
 		return
 	}
 
-	h.broadcast(data)
+	seq := h.eventSeq.Add(1)
+	id := sse.NewEventID(strconv.FormatUint(seq, 10))
+
+	h.ringBuffer.add(sse.Event{Event: eventNameEvent, ID: id, Data: string(data)})
+
+	h.broadcast(BroadcastEvent{ID: id, Data: data})
 }
 
-// broadcast sends raw JSON to all connected subscribers. Non-blocking:
+// broadcast sends a message to all connected subscribers. Non-blocking:
 // if a subscriber's buffer is full, the event is dropped for that subscriber.
-func (h *Hub) broadcast(data jsontext.Value) {
+func (h *Hub) broadcast(msg BroadcastEvent) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
 	for _, sub := range h.clients {
 		select {
-		case sub.ch <- data:
+		case sub.ch <- msg:
 		default:
 		}
 	}
@@ -88,7 +121,7 @@ func (h *Hub) Subscribe() *Subscriber {
 
 	sub := &Subscriber{
 		id:   subID,
-		ch:   make(chan jsontext.Value, subscriberBufferSize),
+		ch:   make(chan BroadcastEvent, subscriberBufferSize),
 		done: make(chan struct{}),
 	}
 	h.clients[subID] = sub
@@ -137,4 +170,71 @@ func (h *Hub) ClientCount() int {
 	defer h.mu.RUnlock()
 
 	return len(h.clients)
+}
+
+// EventStore returns the replay ring buffer as an sse.EventStore for
+// SSE reconnection replay via sse.Replay.
+//
+//nolint:ireturn // consumers need the interface for sse.Replay
+func (h *Hub) EventStore() sse.EventStore {
+	return h.ringBuffer
+}
+
+// BufferedEventCount returns the number of events currently stored in the
+// replay ring buffer.
+func (h *Hub) BufferedEventCount() int {
+	return h.ringBuffer.len()
+}
+
+// drainPollInterval is how often Drain re-checks subscriber channel buffers.
+const drainPollInterval = time.Millisecond
+
+// Drain gracefully waits for all subscriber channel buffers to empty
+// (consumers catch up) or the context to timeout. After drain begins, the
+// hub is marked draining. Returns nil on a clean drain, or ctx.Err() if the
+// deadline fires before buffers empty.
+func (h *Hub) Drain(ctx context.Context) error {
+	h.mu.Lock()
+	h.draining = true
+
+	subs := make([]*Subscriber, 0, len(h.clients))
+	for _, sub := range h.clients {
+		subs = append(subs, sub)
+	}
+
+	h.mu.Unlock()
+
+	ticker := time.NewTicker(drainPollInterval)
+	defer ticker.Stop()
+
+	for {
+		allEmpty := true
+
+		for _, sub := range subs {
+			if len(sub.ch) > 0 {
+				allEmpty = false
+
+				break
+			}
+		}
+
+		if allEmpty {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("drain: %w", ctx.Err())
+		case <-ticker.C:
+		}
+	}
+}
+
+// IsDraining returns whether the hub is currently in a drain state
+// (Server.Shutdown is waiting for subscriber buffers to empty).
+func (h *Hub) IsDraining() bool {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	return h.draining
 }

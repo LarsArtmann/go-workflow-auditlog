@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **SSE reconnection replay** — the live dashboard now survives connection drops without missing events. A bounded event ring buffer (default 1000 events) stores SSE events with sequential IDs. When a client reconnects with a `Last-Event-ID` header (sent automatically by the browser's `EventSource` API), missed events are replayed via `sse.Replay` before the snapshot. Configurable via `live.Config.ReplayBufferSize`.
+- **Graceful shutdown drain** — `Server.Shutdown` now drains subscriber channel buffers before closing HTTP connections, preventing event loss during shutdown. The hub's drain state is surfaced in the `/api/health` endpoint as `draining` and `event_buffer_size` fields.
+- **SSE event IDs** — live SSE events now include `id:` fields, enabling the browser's built-in reconnection tracking. The WebSocket transport is unaffected (IDs are SSE-specific).
+- **`Hub.Drain(ctx)`**, **`Hub.IsDraining()`**, **`Hub.EventStore()`**, **`Hub.BufferedEventCount()`**, **`Hub.NewHubWithReplay(capacity)`** — new public Hub methods for drain lifecycle and replay introspection.
 - **Full keyboard navigation for the live dashboard** (`live/dashboard.go`, `live/dashboard.css`, `live/dashboard.js`). Added a skip-to-main link, ARIA landmarks (`banner`, `navigation`, `main`, `dialog`), `aria-live` regions for the live badge, connection status, and stats, and visible `:focus-visible` rings for tabs, chips, export links, graph nodes, sortable headers, and step rows.
 - **Global keyboard shortcuts** — `1`–`4` switch tabs, `/` focuses step search, `g` focuses graph search, `e` toggles errors-only, `c` toggles critical-path highlight, `f` fits the graph, `+`/`=` zooms in, `-` zooms out, `x` expands/collapses the step list, `?` opens the help modal, and `Esc` closes dialogs/tooltips. Shortcuts are suppressed while typing in inputs.
 - **Focusable sortable table headers** with `role="button"`, `aria-sort`, and `Enter`/`Space` activation.
@@ -15,6 +19,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Keyboard navigation for graph nodes** — nodes are focusable, arrow keys move along edges, and `Enter`/`Space` jumps to the matching step row in the Steps tab.
 - **Accessible keyboard shortcut help modal** with focus trap, `?` to open, `Esc` to close, and a floating hint button.
 - **Structural tests** for the new accessibility features in `live/dashboardjs_test.go` and `live/server_test.go`.
+
+### Changed
+
+- **Adopted `sse.Stream` in `handleSSE`** — replaced ~40 lines of manual SSE plumbing (manual header setup, flusher type-assertion, heartbeat ticker, `WriteEvent`+`Flush` calls) with `sse.NewStream`, `stream.Send`, and `go stream.Heartbeat`. `X-Accel-Buffering: no` is preserved (set before `NewStream`); `Cache-Control: no-transform` is lost (overwritten by `SetHeaders` to `no-cache`).
+- **Upgraded go-sse v0.3.0 → v0.4.0** — gains `Stream.Heartbeat`, `Stream.LastEventID`, `sse.Replay`, `sse.EventStore`, `Broadcaster.Shutdown`, and `Broadcaster.Health`.
+- **Hub broadcast type changed** from `jsontext.Value` to `BroadcastEvent{ID, Data}` — SSE events now carry `id:` fields for Last-Event-ID reconnection. WebSocket handler ignores the ID field (unchanged behavior).
+- **`Server.Shutdown`** now calls `hub.Drain(ctx)` before `httpServer.Shutdown(ctx)` to let SSE clients consume buffered events.
+- **Health endpoint** now includes `draining` and `event_buffer_size` fields.
 
 ### Fixed
 

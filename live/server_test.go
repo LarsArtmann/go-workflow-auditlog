@@ -458,7 +458,7 @@ func TestHub_OnEventDelivery(t *testing.T) {
 			Sequence int `json:"sequence"`
 		}
 
-		err := json.Unmarshal(received, &parsed)
+		err := json.Unmarshal(received.Data, &parsed)
 		if err != nil {
 			t.Fatalf("failed to unmarshal event: %v", err)
 		}
