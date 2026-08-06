@@ -56,7 +56,7 @@ type WorkflowReport struct {
 	PeakConcurrency        int       `json:"peak_concurrency,omitempty"`
 	CriticalPathDurationMs float64   `json:"critical_path_duration_ms,omitempty"`
 	CriticalPathSteps      []string  `json:"critical_path_steps,omitempty"`
-	FailureSummary          string    `json:"failure_summary,omitempty"`
+	FailureSummary         string    `json:"failure_summary,omitempty"`
 	// Reconstructed is true when the report was built by ReplayEvents from a
 	// flat event stream rather than from live workflow hooks.
 	Reconstructed bool       `json:"reconstructed,omitempty"`

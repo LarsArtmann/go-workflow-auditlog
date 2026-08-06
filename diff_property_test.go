@@ -45,6 +45,7 @@ func randWorkflowReport(rng *rand.Rand) auditlog.WorkflowReport {
 
 	// Randomly select a subset of step names as the critical path.
 	critN := rng.IntN(n + 1)
+
 	criticalPath := make([]string, 0, critN)
 	for i := range critN {
 		criticalPath = append(criticalPath, namePool[i])
