@@ -28,9 +28,11 @@ Objects with identity and lifecycle.
 | StepInfo       | Aggregated observation for a single step (status, attempts, deps, errors) | Public; serialized in report.Steps               |
 | Event          | A single observation (attempt_start / attempt_end)                        | Public; serialized in report.Events              |
 | WorkflowReport | Denormalized report with aggregates (counts, durations)                   | Public; serialized as JSON                       |
-| DiffResult     | Difference between two reports (added/removed/changed steps)              | Computed by `WorkflowReport.Diff()`              |
+| DiffResult     | Difference between two reports (added/removed/changed steps + aggregate deltas) | Computed by `WorkflowReport.Diff()`              |
 | StepDiff       | A single step's state in a diff context                                   | Embedded in DiffResult slices                    |
 | NDJSONStreamer | Real-time NDJSON writer that streams events via `Config.OnEvent`          | Thread-safe, mutex-protected writes              |
+| MultiWriter    | Fan-out callback multiplexer for composing multiple event sinks           | `OnEvent` matches `Config.OnEvent` directly      |
+| StreamEvents   | Streaming NDJSON reader with per-event callback (no full-slice buffering) | Pull-model counterpart to ReadEvents             |
 | Hub            | Subscriber registry with non-blocking fan-out broadcast (SSE)             | Live module; manages browser connections         |
 | Server         | HTTP server serving the live dashboard + SSE endpoint                     | Live module; `ServeHTTP` for handler integration |
 
@@ -47,6 +49,8 @@ Immutable objects defined by attributes.
 | ReportOption       | Functional-option predicate for filtering reports                   | `WithStepsByName`, `WithStepsByStatus`, etc.                             |
 | RunID              | 128-bit hex identifier for one workflow execution                   | Stamped on every Event and WorkflowReport for trace correlation          |
 | StepID             | 1-based integer, unique within a run                                | Disambiguates steps that share the same `String()` output                |
+| FailureReason      | Typed enum: `timeout` / `canceled` / `user_error`                  | Set on `attempt_end` events; complements free-form `Error` string        |
+| FailureSummary     | Human-readable summary of why a workflow did not succeed             | Report-level field (JSON: `failure_summary`); e.g. "2 step(s) failed"      |
 | Prefix             | URL path prefix for all live dashboard routes (default `/`)         | `live.Config.Prefix`; e.g. `/workflow` mounts routes at `/workflow/...`  |
 | CORSAllowedOrigins | Allowed origins for `Access-Control-Allow-Origin` on API endpoints  | `live.Config`; empty (default) disables CORS — secure by default         |
 
@@ -73,7 +77,12 @@ Actions the system can perform.
 | `Snapshot(w)`                                     | Read post-execution DAG state into the recorder.                                                                    | After `w.Do(ctx)` returns.                                                   |
 | `Report()`                                        | Assemble and return the consolidated WorkflowReport.                                                                | Read-only; uses RLock.                                                       |
 | `Filtered(opts)`                                  | Return a filtered copy of a report.                                                                                 | Aggregates recomputed.                                                       |
-| `Diff(other)`                                     | Compare two reports.                                                                                                | Returns added/removed/changed.                                               |
+| `Diff(other)`                                     | Compare two reports (steps + aggregate deltas: critical path, peak concurrency).       | Returns DiffResult.                                                          |
+| `StreamEvents(reader, validate, fn)`              | Process NDJSON events one at a time without buffering the full slice.                  | Pull-model streaming for high-event-count runs.                             |
+| `NewMultiWriter(fn...)`                            | Create a fan-out event multiplexer.                                                    | `mw.OnEvent` wires directly as `Config.OnEvent`.                            |
+| `WithFlushInterval(d)`                             | Configure bounded-latency flushing for NDJSON streaming.                               | Default: flush on buffer full or explicit Flush/Close.                      |
+| `TimedOutSteps()` / `HasWorkflowTimeouts()`        | Query steps whose `FailureReason` is `timeout`.                                        | Uses event-level classification, not step-level status.                     |
+| `HasWorkflowRetries()`                             | Quick predicate: did any step retry?                                                   | Checks `AttemptCount > 1` across all steps.                                 |
 | `ReplayEvents(events)`                            | Reconstruct a report from a flat event stream.                                                                      | `Reconstructed=true` on the result.                                          |
 | `LoadReport(path)`                                | Read a JSON report from disk.                                                                                       | Inverse of `ExportJSON`.                                                     |
 | `WriteMermaid(w)` / `PlantUML(w)` / `Graphviz(w)` | Serialize the step DAG as a diagram.                                                                                | For visualization tools.                                                     |
@@ -91,8 +100,8 @@ Actions the system can perform.
 | Reporting  | Building and querying WorkflowReport (BuildReport, query methods).         |
 | Export     | Serializing reports/events to JSON, NDJSON, or diagram formats.            |
 | Replay     | Reconstructing reports from event streams (ReplayEvents, ReadEvents).      |
-| Diff       | Comparing two reports for regression detection (Diff, Duration, Summary).  |
-| Streaming  | Real-time event delivery to external consumers (NDJSONStreamer, SSE Hub).  |
+| Diff       | Comparing two reports for regression detection (Diff, aggregate deltas, Summary). |
+| Streaming  | Real-time event delivery to external consumers (NDJSONStreamer, StreamEvents, MultiWriter, SSE Hub). |
 | Monitoring | Real-time browser dashboard with live updates over SSE (live.Server, Hub). |
 
 ---

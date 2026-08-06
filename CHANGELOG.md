@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **`WorkflowReport.FailureReason` renamed to `FailureSummary`** (JSON key: `"failure_reason"` → `"failure_summary"`) — the report-level field held a human-readable summary (e.g., "3 step(s) failed: fetch"), colliding semantically with the new structured `Event.FailureReason` enum (`timeout`/`canceled`/`user_error`). The Event-level field retains `"failure_reason"`. **Migration**: update JSON parsing of report-level `failure_reason` to `failure_summary`.
 - **Adopted `sse.Stream` in `handleSSE`** — replaced ~40 lines of manual SSE plumbing (manual header setup, flusher type-assertion, heartbeat ticker, `WriteEvent`+`Flush` calls) with `sse.NewStream`, `stream.Send`, and `go stream.Heartbeat`. `X-Accel-Buffering: no` is preserved (set before `NewStream`); `Cache-Control: no-transform` is lost (overwritten by `SetHeaders` to `no-cache`).
 - **Upgraded go-sse v0.3.0 → v0.4.0** — gains `Stream.Heartbeat`, `Stream.LastEventID`, `sse.Replay`, `sse.EventStore`, `Broadcaster.Shutdown`, and `Broadcaster.Health`.
 - **Hub broadcast type changed** from `jsontext.Value` to `BroadcastEvent{ID, Data}` — SSE events now carry `id:` fields for Last-Event-ID reconnection.

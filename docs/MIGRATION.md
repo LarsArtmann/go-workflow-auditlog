@@ -126,3 +126,49 @@ dependency (`gorilla/websocket` v1.5.3) for no concrete customer benefit.
 The sibling [`samber-do-auditlog/live`](https://github.com/larsartmann/samber-do-auditlog)
 module has always been SSE-only; this aligns the two siblings on the same
 architecture.
+
+## Report `failure_reason` → `failure_summary` (Unreleased)
+
+The `WorkflowReport` JSON field `"failure_reason"` has been renamed to
+`"failure_summary"`. This resolves a naming collision with the new
+`Event.FailureReason` enum (JSON: `"failure_reason"`), which carries a
+structured category (`timeout`, `canceled`, `user_error`) rather than a
+human-readable sentence.
+
+### What changed
+
+| Scope              | JSON key before    | JSON key after       | Type     | Example value                         |
+| ------------------ | ------------------ | -------------------- | -------- | ------------------------------------- |
+| `WorkflowReport`   | `failure_reason`   | `failure_summary`    | `string` | `"3 step(s) failed: fetch, transform"`|
+| `Event`            | `failure_reason`   | `failure_reason` (unchanged) | `FailureReason` enum | `"timeout"`              |
+
+### Migration
+
+1. **If you parse report JSON**: rename your struct field or JSON tag from
+   `failure_reason` to `failure_summary`.
+
+   ```go
+   // Before
+   type MyReport struct {
+       FailureReason string `json:"failure_reason"`
+   }
+
+   // After
+   type MyReport struct {
+       FailureSummary string `json:"failure_summary"`
+   }
+   ```
+
+2. **If you parse event NDJSON**: no changes needed — the event-level
+   `"failure_reason"` key is unchanged.
+
+3. **If you use the Go API directly**: rename field accesses from
+   `report.FailureReason` to `report.FailureSummary`.
+
+### Why
+
+The report-level field is a human-readable summary, not a structured reason.
+The new `Event.FailureReason` typed enum owns the `"failure_reason"` JSON key
+with a clear semantic contract (three machine-readable values). Reusing the
+same key name for a free-form sentence on a different type created ambiguity
+for consumers parsing both events and reports.

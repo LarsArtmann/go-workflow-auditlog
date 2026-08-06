@@ -53,6 +53,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-24.
 - `PeakConcurrency` — max in-flight attempts (event-stream scan)
 - `CriticalPathDurationMs` — longest dependency-chain duration (memoized DFS)
 - `FailureReason` — structured enum on Event (`timeout`, `canceled`, `user_error`); zero value = unclassified (success)
+- `FailureSummary` — human-readable report-level summary (e.g., "3 step(s) failed: fetch"); JSON key `failure_summary`
 - `PendingCount` / `RunningCount` — split lifecycle-state counters
 - `TotalDurationMs` — sum of per-step durations (kept for completeness)
 
