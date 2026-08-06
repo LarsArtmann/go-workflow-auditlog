@@ -101,7 +101,9 @@ dashboard JS is the only intended consumer), switch to `EventSource` against
 ```js
 // Before (no longer supported)
 const ws = new WebSocket(`ws://${host}/api/ws`);
-ws.onmessage = (e) => { handle(JSON.parse(e.data)); };
+ws.onmessage = (e) => {
+	handle(JSON.parse(e.data));
+};
 
 // After
 const es = new EventSource(`http://${host}/api/events`);

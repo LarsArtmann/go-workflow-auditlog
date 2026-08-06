@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"sync"
+	"time"
 )
 
 // ndjsonBufferSize is the default buffer size for NDJSON streaming writes.
@@ -51,6 +52,8 @@ type NDJSONStreamer struct {
 	err        error
 	bufferSize int
 	autoFlush  bool
+	flushEvery time.Duration
+	lastFlush  time.Time
 	closed     bool
 }
 
@@ -62,6 +65,25 @@ type NDJSONStreamerOption func(*NDJSONStreamer)
 // pipelines where consumers tail the output file.
 func WithAutoFlush() NDJSONStreamerOption {
 	return func(s *NDJSONStreamer) { s.autoFlush = true }
+}
+
+// WithFlushInterval enables time-based flushing: the streamer flushes its
+// buffer at most once per d. This bounds worst-case event visibility latency
+// without paying the per-event syscall cost of [WithAutoFlush] — ideal for
+// high-throughput workflows that need consumers to see events within d but
+// don't require immediate flushing of every single event.
+//
+// A value of 0 disables time-based flushing (default). Values <= 0 are
+// ignored. Must not be combined with [WithAutoFlush]; if both are passed the
+// last option applied wins, with [WithAutoFlush] taking precedence because it
+// guarantees strict event-by-event visibility.
+func WithFlushInterval(d time.Duration) NDJSONStreamerOption {
+	return func(s *NDJSONStreamer) {
+		if d > 0 {
+			s.flushEvery = d
+			s.lastFlush = time.Now()
+		}
+	}
 }
 
 // WithBufferSize sets the internal buffer size in bytes. The default is 64 KB
@@ -136,6 +158,19 @@ func (s *NDJSONStreamer) OnEvent(evt Event) {
 		if flushErr != nil {
 			s.err = fmt.Errorf("%w: flush ndjson stream: %w", ErrExportWriteFailed, flushErr)
 		}
+
+		return
+	}
+
+	if s.flushEvery > 0 && time.Since(s.lastFlush) >= s.flushEvery {
+		flushErr := s.buf.Flush()
+		if flushErr != nil {
+			s.err = fmt.Errorf("%w: flush ndjson stream: %w", ErrExportWriteFailed, flushErr)
+
+			return
+		}
+
+		s.lastFlush = time.Now()
 	}
 }
 

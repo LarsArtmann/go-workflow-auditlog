@@ -48,6 +48,7 @@ The project is split into three Go modules:
 
 The `live/` module depends on [`github.com/larsartmann/go-sse`](https://github.com/larsartmann/go-sse)
 v0.4.0 (public, pinned) for SSE transport primitives. The live module uses:
+
 - `sse.Stream` — replaces manual SSE plumbing in `handleSSE` (headers, flusher,
   heartbeat, `WriteEvent`+`Flush`). `sse.NewStream(w, r)` sets the required
   SSE headers and writes 200 OK. `stream.Send(evt)` serializes and flushes.
@@ -55,7 +56,7 @@ v0.4.0 (public, pinned) for SSE transport primitives. The live module uses:
 - `sse.Replay` + `sse.EventStore` — reconnection replay. The Hub maintains a
   bounded event ring buffer (`replay.go`) that implements `sse.EventStore`.
   When a client reconnects with `Last-Event-ID`, `sse.Replay(stream, store,
-  lastID)` replays missed events before the snapshot.
+lastID)` replays missed events before the snapshot.
 - `sse.Event`, `sse.EventID`, `sse.WriteEvent`, `sse.ContentType` — wire-format
   primitives used by both Stream and direct calls.
 
