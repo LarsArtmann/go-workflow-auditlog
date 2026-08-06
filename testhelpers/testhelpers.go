@@ -350,13 +350,13 @@ func AssertPeakConcurrency(t *testing.T, report auditlog.WorkflowReport, want in
 	}
 }
 
-// AssertFailureReason fails the test if the report's FailureReason does not
+// AssertFailureSummary fails the test if the report's FailureSummary does not
 // match want.
-func AssertFailureReason(t *testing.T, report auditlog.WorkflowReport, want string) {
+func AssertFailureSummary(t *testing.T, report auditlog.WorkflowReport, want string) {
 	t.Helper()
 
-	if report.FailureReason != want {
-		t.Errorf("expected FailureReason=%q, got %q", want, report.FailureReason)
+	if report.FailureSummary != want {
+		t.Errorf("expected FailureSummary=%q, got %q", want, report.FailureSummary)
 	}
 }
 

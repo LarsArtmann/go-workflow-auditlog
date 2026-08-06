@@ -162,7 +162,7 @@ func finalizeDenormalized(report *WorkflowReport) {
 	report.CriticalPathSteps = criticalPathNames
 
 	report.WallClockDurationMs = computeWallClockDurationMs(report.Events)
-	report.FailureReason = buildFailureReason(*report)
+	report.FailureSummary = buildFailureSummary(*report)
 }
 
 // sortEventsByTime returns a copy of events sorted by timestamp ascending,
@@ -342,8 +342,8 @@ func buildCriticalPathDFS(
 	return dfs
 }
 
-// buildFailureReason returns a human-readable summary when the workflow failed.
-func buildFailureReason(report WorkflowReport) string {
+// buildFailureSummary returns a human-readable summary when the workflow failed.
+func buildFailureSummary(report WorkflowReport) string {
 	if report.WorkflowSucceeded {
 		return ""
 	}
