@@ -174,23 +174,14 @@
     }
   }
 
-  // === Connection (SSE with WebSocket fallback) ===
+  // === Connection (SSE) ===
 
   var eventSource = null;
-  var wsConnection = null;
   var reconnectDelay = 1000;
   var maxReconnectDelay = 10000;
-  var sseFailCount = 0;
 
   function connect() {
     setConnStatus("connecting", "connecting...");
-
-    // After 2 SSE failures, fall back to WebSocket (corporate proxies, etc.)
-    if (sseFailCount >= 2) {
-      connectWebSocket();
-      return;
-    }
-
     connectSSE();
   }
 
@@ -200,7 +191,6 @@
     eventSource.addEventListener("snapshot", function (e) {
       setConnStatus("connected", "connected");
       reconnectDelay = 1000;
-      sseFailCount = 0;
       handleSnapshot(JSON.parse(e.data));
     });
 
@@ -215,7 +205,6 @@
     eventSource.onopen = function () {
       setConnStatus("connected", "connected");
       reconnectDelay = 1000;
-      sseFailCount = 0;
     };
 
     eventSource.onerror = function () {
@@ -225,73 +214,12 @@
         return;
       }
 
-      sseFailCount++;
-
-      if (sseFailCount >= 2) {
-        if (eventSource) eventSource.close();
-        connectWebSocket();
-        return;
-      }
-
       setConnStatus("reconnecting", "reconnecting...");
       if (eventSource) eventSource.close();
 
       setTimeout(function () {
         reconnectDelay = Math.min(reconnectDelay * 1.5, maxReconnectDelay);
         connectSSE();
-      }, reconnectDelay);
-    };
-  }
-
-  function connectWebSocket() {
-    setConnStatus("connecting", "connecting (ws)...");
-
-    var pfx = window.ROUTE_PREFIX || "";
-    var wsScheme = location.protocol === "https:" ? "wss:" : "ws:";
-    var wsUrl = wsScheme + "//" + location.host + pfx + "/api/ws";
-
-    try {
-      wsConnection = new WebSocket(wsUrl);
-    } catch (e) {
-      setConnStatus("disconnected", "ws unavailable");
-      return;
-    }
-
-    wsConnection.onopen = function () {
-      setConnStatus("connected", "connected (ws)");
-      reconnectDelay = 1000;
-    };
-
-    wsConnection.onmessage = function (e) {
-      var msg = JSON.parse(e.data);
-      switch (msg.type) {
-        case "snapshot":
-          handleSnapshot(msg.data);
-          break;
-        case "event":
-          handleEvent(msg.data);
-          break;
-        case "complete":
-          handleComplete(msg.data);
-          break;
-      }
-    };
-
-    wsConnection.onerror = function () {
-      setConnStatus("reconnecting", "reconnecting (ws)...");
-    };
-
-    wsConnection.onclose = function () {
-      if (state.complete) {
-        setConnStatus("disconnected", "disconnected");
-        return;
-      }
-
-      setConnStatus("reconnecting", "reconnecting (ws)...");
-
-      setTimeout(function () {
-        reconnectDelay = Math.min(reconnectDelay * 1.5, maxReconnectDelay);
-        connectWebSocket();
       }, reconnectDelay);
     };
   }

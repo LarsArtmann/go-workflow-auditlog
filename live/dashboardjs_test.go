@@ -27,7 +27,6 @@ func TestDashboardJS_StructuralIntegrity(t *testing.T) {
 		"function humanizeMs(",
 		"function connect()",
 		"function connectSSE()",
-		"function connectWebSocket()",
 		"function handleSnapshot(",
 		"function handleEvent(",
 		"function handleComplete(",
@@ -241,41 +240,6 @@ func TestDashboardCSS_StructuralIntegrity(t *testing.T) {
 		if !strings.Contains(css, cls) {
 			t.Errorf("dashboard.css missing expected class: %s", cls)
 		}
-	}
-}
-
-// TestDashboardJS_WebSocketFallback validates the SSE→WebSocket fallback
-// logic exists and the WebSocket message handling is wired correctly.
-func TestDashboardJS_WebSocketFallback(t *testing.T) {
-	t.Parallel()
-
-	jsBytes, err := os.ReadFile("dashboard.js")
-	if err != nil {
-		t.Fatalf("read dashboard.js: %v", err)
-	}
-
-	js := string(jsBytes)
-
-	// Must create WebSocket connection in fallback
-	if !strings.Contains(js, "new WebSocket") {
-		t.Error("dashboard.js should create WebSocket for fallback transport")
-	}
-
-	// Must have SSE fail counter for fallback trigger
-	if !strings.Contains(js, "sseFailCount") {
-		t.Error("dashboard.js missing sseFailCount for fallback detection")
-	}
-
-	// Must handle all three WebSocket message types
-	for _, msgType := range []string{`case "snapshot"`, `case "event"`, `case "complete"`} {
-		if !strings.Contains(js, msgType) {
-			t.Errorf("dashboard.js missing WebSocket message handler for %s", msgType)
-		}
-	}
-
-	// Must build ws:// or wss:// URL
-	if !strings.Contains(js, "ws:") || !strings.Contains(js, "wss:") {
-		t.Error("dashboard.js missing WebSocket URL scheme construction")
 	}
 }
 

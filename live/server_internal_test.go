@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/larsartmann/go-sse"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
@@ -145,35 +144,6 @@ func TestServer_NilHTMLWriter(t *testing.T) {
 	if rec.Code != http.StatusServiceUnavailable {
 		t.Errorf("expected 503 for nil htmlWriter, got %d", rec.Code)
 	}
-}
-
-func TestServer_SendWSCompleteNilProvider(t *testing.T) {
-	t.Parallel()
-
-	srv := &Server{hub: NewHub()}
-	// Should not panic with nil completeProvider
-	srv.sendWSComplete(nil)
-}
-
-func TestServer_HandleWebSocketNilSnapshot(t *testing.T) {
-	t.Parallel()
-
-	srv := &Server{
-		hub: NewHub(),
-		mux: http.NewServeMux(),
-	}
-
-	// Without snapshotProvider, handleWebSocket should still work
-	// (sends no snapshot, waits for events)
-	srv.hub.SignalComplete()
-
-	ctx, cancel := context.WithCancel(t.Context())
-	defer cancel()
-
-	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/ws", nil)
-	rec := httptest.NewRecorder()
-
-	srv.handleWebSocket(rec, req)
 }
 
 func TestNormalizePrefix(t *testing.T) {
@@ -547,75 +517,5 @@ func TestServer_HandleSSE_EventWriteFailure(t *testing.T) {
 	case <-time.After(time.Second):
 		cancel()
 		t.Fatal("handleSSE did not return after event write failure")
-	}
-}
-
-// TestServer_SendWSCompleteProviderError exercises the WebSocket complete path
-// when the completeProvider errors: it must return without touching the
-// connection. A nil conn is safe because the error branch returns before any
-// write.
-func TestServer_SendWSCompleteProviderError(t *testing.T) {
-	t.Parallel()
-
-	srv := &Server{
-		hub: NewHub(),
-		completeProvider: func() (jsontext.Value, error) {
-			return nil, errProviderFailure
-		},
-	}
-
-	// Must not panic and must return without writing (conn is nil by design).
-	srv.sendWSComplete(nil)
-}
-
-// TestServer_HandleWebSocket_SnapshotProviderError verifies graceful
-// degradation over a real WebSocket upgrade: when snapshotProvider errors, the
-// snapshot is skipped, and the FIRST frame the client receives is the
-// completion (never a snapshot).
-func TestServer_HandleWebSocket_SnapshotProviderError(t *testing.T) {
-	t.Parallel()
-
-	auditor, err := auditlog.New(auditlog.Config{Enabled: true})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	srv := NewServer(NewHub(), auditor, Config{})
-	srv.snapshotProvider = func(bool) (jsontext.Value, error) {
-		return nil, errProviderFailure
-	}
-
-	ts := httptest.NewServer(srv)
-	defer ts.Close()
-
-	wsURL := "ws" + strings.TrimPrefix(ts.URL, "http") + "/api/ws"
-
-	conn, resp, dialErr := websocket.DefaultDialer.DialContext(t.Context(), wsURL, nil)
-	if resp != nil {
-		_ = resp.Body.Close()
-	}
-
-	if dialErr != nil {
-		t.Fatalf("dial websocket: %v", dialErr)
-	}
-
-	defer func() { _ = conn.Close() }()
-
-	// Let the handler skip the failed snapshot and reach its select loop.
-	time.Sleep(30 * time.Millisecond)
-
-	srv.SignalComplete()
-
-	// The first frame must be "complete" — never "snapshot" — proving the
-	// snapshot was skipped when its provider errored.
-	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-
-	_, msg, readErr := conn.ReadMessage()
-	if readErr != nil {
-		t.Fatalf("expected complete frame, got read error: %v", readErr)
-	}
-
-	if !strings.Contains(string(msg), `"complete"`) {
-		t.Errorf("expected first frame to be complete (snapshot skipped), got: %s", string(msg))
 	}
 }
