@@ -452,6 +452,44 @@ func TestTimeout_Configured(t *testing.T) {
 	}
 }
 
+// TestTimeout_FailureReasonClassified verifies that classifyFailure correctly
+// identifies a real go-workflow timeout through the AfterStep callback pipeline.
+// The SlowStep.Do returns a wrapped context.DeadlineExceeded when the .Timeout
+// fires; classifyFailure must unwrap it and tag the event with FailureReasonTimeout.
+func TestTimeout_FailureReasonClassified(t *testing.T) {
+	t.Parallel()
+
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	step := testhelpers.NewSlow("timeout-step", 5*time.Second)
+	w.Add(
+		flow.Step(step).Timeout(50 * time.Millisecond),
+	)
+	testhelpers.RunWorkflow(t, a, w)
+
+	report := a.Report()
+
+	var found bool
+
+	for _, evt := range report.Events {
+		if evt.Name == "timeout-step" && evt.IsAttemptEnd() {
+			found = true
+
+			if evt.FailureReason != auditlog.FailureReasonTimeout {
+				t.Errorf("expected FailureReason=%q, got %q",
+					auditlog.FailureReasonTimeout, evt.FailureReason)
+			}
+
+			if !evt.IsTimeout() {
+				t.Error("IsTimeout() should return true for a timed-out step")
+			}
+		}
+	}
+
+	if !found {
+		t.Fatal("no attempt_end event found for timeout-step")
+	}
+}
+
 func TestPipe_DependencyChain(t *testing.T) {
 	t.Parallel()
 

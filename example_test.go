@@ -137,6 +137,80 @@ func ExampleReadEvents() {
 	// Output: read 2 events
 }
 
+// ExampleNewMultiWriter demonstrates fanning out events to multiple sinks
+// simultaneously. MultiWriter.OnEvent matches the Config.OnEvent signature
+// exactly, so it can be wired directly as the auditor's callback.
+func ExampleNewMultiWriter() {
+	var buf bytes.Buffer
+
+	mw := auditlog.NewMultiWriter(
+		func(evt auditlog.Event) { fmt.Fprintf(&buf, "log: %s\n", evt.Name) },
+		func(evt auditlog.Event) { fmt.Fprintf(&buf, "otel: %s\n", evt.Name) },
+	)
+
+	mw.OnEvent(auditlog.Event{StepRef: auditlog.StepRef{Name: "fetch"}})
+
+	fmt.Print(buf.String())
+
+	// Output:
+	// log: fetch
+	// otel: fetch
+}
+
+// ExampleStreamEvents demonstrates processing events one at a time from an
+// NDJSON stream without materializing the entire slice in memory — useful for
+// multi-hour runs with 10k+ events.
+func ExampleStreamEvents() {
+	ndjson := `{"sequence":1,"timestamp":"2026-01-01T00:00:00Z","event_type":"attempt_start","phase":"before","step_name":"fetch","attempt":1}` + "\n" +
+		`{"sequence":2,"timestamp":"2026-01-01T00:00:01Z","event_type":"attempt_end","phase":"after","step_name":"fetch","attempt":1,"status":"succeeded"}` + "\n"
+
+	var count int
+
+	_ = auditlog.StreamEvents(
+		bytes.NewReader([]byte(ndjson)),
+		nil,
+		func(_ int, evt auditlog.Event) error {
+			if evt.IsAttemptEnd() {
+				count++
+			}
+
+			return nil
+		},
+	)
+
+	fmt.Printf("completed steps: %d\n", count)
+
+	// Output: completed steps: 1
+}
+
+// ExampleWorkflowReport_Diff demonstrates comparing two workflow runs to
+// detect regressions: which steps were added/removed, changed status, and how
+// the overall duration shifted.
+func ExampleWorkflowReport_Diff() {
+	baseline := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
+			{StepRef: auditlog.StepRef{Name: "save"}, Status: auditlog.StepStatusSucceeded},
+		},
+		WallClockDurationMs: 1000,
+	}
+
+	current := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusFailed},
+			{StepRef: auditlog.StepRef{Name: "notify"}, Status: auditlog.StepStatusSucceeded},
+		},
+		WallClockDurationMs: 1500,
+	}
+
+	diff := baseline.Diff(current)
+
+	fmt.Printf("duration delta: %.0fms, added: %d, removed: %d\n",
+		diff.DurationDelta, len(diff.AddedSteps), len(diff.RemovedSteps))
+
+	// Output: duration delta: 500ms, added: 1, removed: 1
+}
+
 // finalizeForExample populates denormalized fields so Summary() works in
 // examples without running a full Auditor lifecycle.
 func finalizeForExample(r *auditlog.WorkflowReport) {

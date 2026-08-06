@@ -1,6 +1,7 @@
 package auditlog_test
 
 import (
+	"cmp"
 	"math/rand/v2"
 	"slices"
 	"testing"
@@ -23,7 +24,8 @@ var diffStepStatuses = []auditlog.StepStatus{
 var diffStepNames = []string{"fetch", "validate", "transform", "save", "notify", "cleanup", "retry", "deploy"}
 
 // randWorkflowReport builds a pseudo-random WorkflowReport from a deterministic
-// RNG. Only the fields Diff inspects (Steps, WallClockDurationMs) are populated.
+// RNG. Only the fields Diff inspects are populated: Steps, WallClockDurationMs,
+// CriticalPathDurationMs, PeakConcurrency, and CriticalPathSteps.
 func randWorkflowReport(rng *rand.Rand) auditlog.WorkflowReport {
 	n := rng.IntN(len(diffStepNames) + 1)
 	namePool := slices.Clone(diffStepNames)
@@ -41,9 +43,19 @@ func randWorkflowReport(rng *rand.Rand) auditlog.WorkflowReport {
 		})
 	}
 
+	// Randomly select a subset of step names as the critical path.
+	critN := rng.IntN(n + 1)
+	criticalPath := make([]string, 0, critN)
+	for i := range critN {
+		criticalPath = append(criticalPath, namePool[i])
+	}
+
 	return auditlog.WorkflowReport{
-		Steps:               steps,
-		WallClockDurationMs: float64(rng.IntN(50000)),
+		Steps:                  steps,
+		WallClockDurationMs:    float64(rng.IntN(50000)),
+		CriticalPathDurationMs: float64(rng.IntN(50000)),
+		PeakConcurrency:        rng.IntN(16),
+		CriticalPathSteps:      criticalPath,
 	}
 }
 
@@ -155,6 +167,67 @@ func TestDiff_OutputSorted(t *testing.T) {
 		if !slices.IsSortedFunc(d.StatusChanged, cmpStepDiff) {
 			t.Error("StatusChanged not sorted by name")
 		}
+
+		if !slices.IsSortedFunc(d.CriticalPathStepsAdded, cmp.Compare) {
+			t.Error("CriticalPathStepsAdded not sorted by name")
+		}
+
+		if !slices.IsSortedFunc(d.CriticalPathStepsRemoved, cmp.Compare) {
+			t.Error("CriticalPathStepsRemoved not sorted by name")
+		}
+	}
+}
+
+func TestDiff_CriticalPathAntiSymmetry(t *testing.T) {
+	t.Parallel()
+
+	rng := rand.New(rand.NewPCG(6, 6))
+
+	for range 200 {
+		a, b := randWorkflowReport(rng), randWorkflowReport(rng)
+		forward, reverse := a.Diff(b), b.Diff(a)
+
+		if forward.CriticalPathDeltaMs != -reverse.CriticalPathDeltaMs {
+			t.Errorf("CriticalPathDelta(a→b)=%.2f should equal -Δ(b→a)=%.2f",
+				forward.CriticalPathDeltaMs, -reverse.CriticalPathDeltaMs)
+		}
+	}
+}
+
+func TestDiff_PeakConcurrencyAntiSymmetry(t *testing.T) {
+	t.Parallel()
+
+	rng := rand.New(rand.NewPCG(7, 7))
+
+	for range 200 {
+		a, b := randWorkflowReport(rng), randWorkflowReport(rng)
+		forward, reverse := a.Diff(b), b.Diff(a)
+
+		if forward.PeakConcurrencyDelta != -reverse.PeakConcurrencyDelta {
+			t.Errorf("PeakConcurrencyDelta(a→b)=%d should equal -Δ(b→a)=%d",
+				forward.PeakConcurrencyDelta, -reverse.PeakConcurrencyDelta)
+		}
+	}
+}
+
+func TestDiff_CriticalPathStepsDuality(t *testing.T) {
+	t.Parallel()
+
+	rng := rand.New(rand.NewPCG(8, 8))
+
+	for range 200 {
+		a, b := randWorkflowReport(rng), randWorkflowReport(rng)
+		forward, reverse := a.Diff(b), b.Diff(a)
+
+		if !stringSetEqual(forward.CriticalPathStepsAdded, reverse.CriticalPathStepsRemoved) {
+			t.Errorf("CriticalPathStepsAdded(a→b) != Removed(b→a)\n  added: %v\n  removed: %v",
+				forward.CriticalPathStepsAdded, reverse.CriticalPathStepsRemoved)
+		}
+
+		if !stringSetEqual(forward.CriticalPathStepsRemoved, reverse.CriticalPathStepsAdded) {
+			t.Errorf("CriticalPathStepsRemoved(a→b) != Added(b→a)\n  removed: %v\n  added: %v",
+				forward.CriticalPathStepsRemoved, reverse.CriticalPathStepsAdded)
+		}
 	}
 }
 
@@ -202,4 +275,23 @@ func cmpStepDiff(a, b auditlog.StepDiff) int {
 	}
 
 	return 0
+}
+
+func stringSetEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	set := make(map[string]struct{}, len(a))
+	for _, s := range a {
+		set[s] = struct{}{}
+	}
+
+	for _, s := range b {
+		if _, ok := set[s]; !ok {
+			return false
+		}
+	}
+
+	return true
 }
