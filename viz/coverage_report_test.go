@@ -594,7 +594,7 @@ func TestReport_PeakConcurrencySteps_Empty(t *testing.T) {
 	}
 }
 
-func TestReport_FailureReason_FailedSteps(t *testing.T) {
+func TestReport_FailureSummary_FailedSteps(t *testing.T) {
 	t.Parallel()
 
 	raw := auditlog.WorkflowReport{
@@ -611,10 +611,10 @@ func TestReport_FailureReason_FailedSteps(t *testing.T) {
 		t.Error("expected workflow to be failed")
 	}
 
-	testhelpers.AssertFailureReason(t, recomputed, "2 step(s) failed: bad-a, bad-b")
+	testhelpers.AssertFailureSummary(t, recomputed, "2 step(s) failed: bad-a, bad-b")
 }
 
-func TestReport_FailureReason_CanceledSteps(t *testing.T) {
+func TestReport_FailureSummary_CanceledSteps(t *testing.T) {
 	t.Parallel()
 
 	raw := auditlog.WorkflowReport{
@@ -626,10 +626,10 @@ func TestReport_FailureReason_CanceledSteps(t *testing.T) {
 
 	recomputed := raw.Filtered()
 
-	testhelpers.AssertFailureReason(t, recomputed, "1 step(s) canceled: cancel")
+	testhelpers.AssertFailureSummary(t, recomputed, "1 step(s) canceled: cancel")
 }
 
-func TestReport_FailureReason_Success(t *testing.T) {
+func TestReport_FailureSummary_Success(t *testing.T) {
 	t.Parallel()
 
 	raw := auditlog.WorkflowReport{
@@ -644,8 +644,8 @@ func TestReport_FailureReason_Success(t *testing.T) {
 		t.Error("expected workflow to be succeeded")
 	}
 
-	if recomputed.FailureReason != "" {
-		t.Errorf("expected empty FailureReason for success, got %q", recomputed.FailureReason)
+	if recomputed.FailureSummary != "" {
+		t.Errorf("expected empty FailureSummary for success, got %q", recomputed.FailureSummary)
 	}
 }
 
@@ -685,7 +685,7 @@ func TestReport_WallClockDuration_EmptyReport(t *testing.T) {
 	}
 }
 
-func TestReport_Summary_WithFailureReason(t *testing.T) {
+func TestReport_Summary_WithFailureSummary(t *testing.T) {
 	t.Parallel()
 
 	raw := auditlog.WorkflowReport{
@@ -876,7 +876,7 @@ func TestCoverage_Summary_AllBranches(t *testing.T) {
 	// Failure with explicit reason.
 	failedReport := auditlog.WorkflowReport{
 		WorkflowID: "wf", StepCount: 2, FailedCount: 1,
-		FailureReason: "1 step(s) failed: bad",
+		FailureSummary: "1 step(s) failed: bad",
 	}
 	if !strings.Contains(failedReport.Summary(), "1 step(s) failed: bad") {
 		t.Errorf("failure-with-reason summary unexpected: %s", failedReport.Summary())

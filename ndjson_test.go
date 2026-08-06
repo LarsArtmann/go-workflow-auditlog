@@ -193,3 +193,23 @@ func TestStreamEvents_InvokesValidate(t *testing.T) {
 		t.Errorf("validate should be called once; got %d", validated)
 	}
 }
+
+// TestStreamEvents_OversizedLine verifies that a line exceeding
+// ndjson.MaxLineBytes (1 MB) is rejected with ErrOversizedLine.
+func TestStreamEvents_OversizedLine(t *testing.T) {
+	t.Parallel()
+
+	// Build a valid JSON event whose serialized form exceeds 1 MB
+	// by embedding a huge step name.
+	pad := strings.Repeat("x", 1<<20) // 1 MiB of padding
+	huge := `{"sequence":1,"timestamp":"2026-01-01T00:00:00Z","event_type":"attempt_start","phase":"before","step_name":"` + pad + `"}` + "\n"
+
+	err := auditlog.StreamEvents(
+		strings.NewReader(huge),
+		nil,
+		func(int, auditlog.Event) error { return nil },
+	)
+	if !errors.Is(err, auditlog.ErrOversizedLine) {
+		t.Errorf("expected ErrOversizedLine, got %v", err)
+	}
+}

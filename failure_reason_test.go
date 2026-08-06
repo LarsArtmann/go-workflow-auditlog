@@ -56,7 +56,7 @@ func TestAllFailureReasons(t *testing.T) {
 	all := auditlog.AllFailureReasons()
 
 	if len(all) != 3 {
-		t.Errorf("expected 5 FailureReason values, got %d", len(all))
+		t.Errorf("expected 3 FailureReason values, got %d", len(all))
 	}
 
 	for _, r := range all {
