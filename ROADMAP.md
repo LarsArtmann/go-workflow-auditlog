@@ -61,11 +61,12 @@ for immediate visibility, `CreateNDJSONStreamer(path)` file convenience
 constructor. Output is `ReadEvents`-compatible for round-trip replay.
 
 **Remaining scale direction**: The in-memory `Report()` path still
-materializes all events. For workflows exceeding 10000+ events, a
-streaming-only consumption model (skip `Report()` entirely) is the path
-forward. Potential enhancements: time-based flush (`WithFlushInterval`),
-async channel-based writer for backpressure decoupling, and a streaming
-JSON report format (not just NDJSON events).
+materializes all events. For workflows exceeding 10000+ events,
+`StreamEvents(reader, validate, fn)` provides a streaming-only consumption
+model (per-event callback, no full-slice materialization) for reading exported
+NDJSON without buffering. `WithFlushInterval(d)` bounds write-side visibility
+latency. Still open: async channel-based writer for backpressure decoupling,
+and a streaming JSON report format (not just NDJSON events).
 
 ### Observability Integration
 
@@ -104,13 +105,8 @@ already cover the wiring.
 ## Raw Ideas (not yet scoped)
 
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
-- `FailureReason` structured categories (typed enum, not just a string)
-- `Diff()` on PeakConcurrency / CriticalPath (currently only duration delta)
 - Configurable node shapes/icons per step type in diagrams
-- Workflow-level retry/timeout surfacing in the report
-- Time-based streaming flush (`WithFlushInterval(d time.Duration)`)
 - Async channel-based streaming writer (decouple step execution from I/O latency)
-- `MultiWriter` that fans events to multiple `OnEvent` callbacks simultaneously
 
 ---
 

@@ -24,16 +24,19 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-24.
 - **Branded `RunID` type** (`type RunID string`) — compile-time safety against confusing `RunID` with `WorkflowID`, serializes as a plain JSON string
 - **`Validate()`** — checks count consistency (event, step, 6 status-count fields) + status drift via sentinel errors
 - **`Filtered(opts...)`** — filter by step name, status, event type, time range
-- **`Diff(other)`** — compare two runs (added/removed/changed steps + wall-clock duration delta)
+- **`Diff(other)`** — compare two runs (added/removed/changed steps + wall-clock duration delta + critical-path duration delta + peak-concurrency delta + critical-path step membership changes)
 - **`Summary()`** — one-line human-readable summary (uses wall-clock + failure reason)
 - **`Duration()`** — wall-clock duration as `time.Duration`
 - **`CriticalPath()`** — returns the ordered step chain (root-to-leaf) of the bottleneck dependency path
+- **Workflow-level retry/timeout surfacing** — `RetriedStepCount()`, `TotalRetryAttempts()`, `TimedOutSteps()`, `TimedOutStepCount()`, `HasWorkflowRetries()`, `HasWorkflowTimeouts()`
 - **`PeakConcurrencySteps()`** — returns the unique steps that were in-flight at peak concurrency
 - **`ReportIndex`** — O(1) lookup maps for repeated queries
 - **`ReplayEvents()`** — reconstruct report from flat NDJSON event stream
 - **`LoadReport()` / `LoadReportFromReader()` / `LoadReportFromBytes()`**
 - **`ReadEvents()`** — NDJSON reader (inverse of WriteNDJSON)
-- **Streaming NDJSON** (`NDJSONStreamer` in `stream.go`) — real-time event streaming via `Config.OnEvent`; thread-safe mutex-protected writes, 64KB default buffer (configurable via `WithBufferSize`), `WithAutoFlush()` for tailing, `CreateNDJSONStreamer(path)` file convenience constructor, first-error-wins error handling. Output is `ReadEvents`-compatible.
+- **`StreamEvents(reader, validate, fn)`** — streaming NDJSON reader with per-event callback (no full-slice materialization, for 10k+ event workflows)
+- **Streaming NDJSON** (`NDJSONStreamer` in `stream.go`) — real-time event streaming via `Config.OnEvent`; thread-safe mutex-protected writes, 64KB default buffer (configurable via `WithBufferSize`), `WithAutoFlush()` for tailing, `WithFlushInterval(d)` for bounded-latency coalescing, `CreateNDJSONStreamer(path)` file convenience constructor, first-error-wins error handling. Output is `ReadEvents`-compatible.
+- **`MultiWriter`** — fan-out `OnEvent` to multiple `func(Event)` callbacks (composes directly with `Config.OnEvent`, `NDJSONStreamer.OnEvent`, `hub.OnEvent`)
 
 ### Error Classification
 
@@ -49,7 +52,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-07-24.
 - `WallClockDurationMs` — actual elapsed time (earliest → latest event)
 - `PeakConcurrency` — max in-flight attempts (event-stream scan)
 - `CriticalPathDurationMs` — longest dependency-chain duration (memoized DFS)
-- `FailureReason` — human-readable failure summary
+- `FailureReason` — structured enum on Event (`timeout`, `canceled`, `user_error`); zero value = unclassified (success)
 - `PendingCount` / `RunningCount` — split lifecycle-state counters
 - `TotalDurationMs` — sum of per-step durations (kept for completeness)
 
