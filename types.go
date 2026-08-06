@@ -294,31 +294,25 @@ func fromFlowStatus(s string) StepStatus {
 // values let consumers filter, route, and alert on specific failure modes
 // without parsing free-form text.
 //
+// The set is exactly the failure modes the recorder can observe at the
+// [AfterStep] callback level (timeout, cancellation, or a generic step error).
 // A zero value (empty string) means "no failure classified" — typically
-// because the attempt succeeded. Unknown or unclassifiable errors remain
-// represented by their raw [Event.Error] string with FailureReason = "".
+// because the attempt succeeded.
 type FailureReason string
 
 const (
 	// FailureReasonTimeout marks an attempt that exceeded its deadline.
-	// Detected when the parent context was cancelled with DeadlineExceeded.
+	// Detected when the returned error wraps context.DeadlineExceeded.
 	FailureReasonTimeout FailureReason = "timeout"
 
 	// FailureReasonCanceled marks an attempt that was cancelled by the caller
 	// (parent context cancellation before deadline, or explicit cancel).
+	// Detected when the returned error wraps context.Canceled.
 	FailureReasonCanceled FailureReason = "canceled"
 
-	// FailureReasonPanic marks an attempt that recovered from a runtime panic.
-	FailureReasonPanic FailureReason = "panic"
-
-	// FailureReasonDependency marks an attempt that failed because an
-	// upstream step failed or was canceled (go-workflow propagates failures
-	// to dependents without re-running them).
-	FailureReasonDependency FailureReason = "dependency"
-
 	// FailureReasonUserError marks an attempt that returned a non-nil error
-	// from Do() — the default classification when no more specific reason
-	// applies.
+	// from Do() that is neither a timeout nor a cancellation — the default
+	// classification when no more specific reason applies.
 	FailureReasonUserError FailureReason = "user_error"
 )
 
@@ -329,8 +323,6 @@ func AllFailureReasons() []FailureReason {
 	return []FailureReason{
 		FailureReasonTimeout,
 		FailureReasonCanceled,
-		FailureReasonPanic,
-		FailureReasonDependency,
 		FailureReasonUserError,
 	}
 }
@@ -338,8 +330,7 @@ func AllFailureReasons() []FailureReason {
 // IsKnown returns true if the reason is a recognized value.
 func (r FailureReason) IsKnown() bool {
 	switch r {
-	case FailureReasonTimeout, FailureReasonCanceled, FailureReasonPanic,
-		FailureReasonDependency, FailureReasonUserError:
+	case FailureReasonTimeout, FailureReasonCanceled, FailureReasonUserError:
 		return true
 	default:
 		return false
@@ -355,26 +346,19 @@ func (r FailureReason) String() string { return string(r) }
 //
 // Classification priority (most specific first):
 //
-//  1. FailureReasonPanic — error is or wraps a panic value
-//  2. FailureReasonTimeout — errors.Is(err, context.DeadlineExceeded)
-//  3. FailureReasonCanceled — errors.Is(err, context.Canceled)
-//  4. FailureReasonUserError — any other non-nil error
+//  1. FailureReasonTimeout — errors.Is(err, context.DeadlineExceeded)
+//  2. FailureReasonCanceled — errors.Is(err, context.Canceled)
+//  3. FailureReasonUserError — any other non-nil error
 //
-// Dependency failures are detected at a higher level (the recorder sees the
-// flow's status, not the error the step returned), so this helper does not
-// return FailureReasonDependency; callers populate it explicitly when the
-// flow-level state is "Failed" due to an upstream.
+// Panics and dependency-driven skips are not representable here: a panicking
+// step crashes the workflow goroutine (go-workflow does not recover it into
+// an error that reaches AfterStep), and steps skipped due to upstream failure
+// bypass the AfterStep callback entirely (they never produce an attempt_end
+// event). Their final status is captured by Snapshot via flow.StateOf instead.
 func classifyFailure(err error) FailureReason {
 	if err == nil {
 		return ""
 	}
-
-	// Recovered panics: errors from runtime.Goexit / recover look like plain
-	// runtime.ErrorPanic values. Go 1.21+ panics carry a *runtime.PanicNilError
-	// for `panic(nil)`, but consumers wrap them as fmt.Errorf("panic: %v", r).
-	// We don't try to detect panics heuristically here — that would produce
-	// false positives for fmt.Errorf("panic: ...")-style errors. Callers who
-	// wrap their own panics should pass FailureReasonPanic explicitly.
 
 	if errors.Is(err, context.DeadlineExceeded) {
 		return FailureReasonTimeout

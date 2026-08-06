@@ -18,8 +18,6 @@ func TestFailureReason_KnownValues(t *testing.T) {
 	}{
 		{auditlog.FailureReasonTimeout, "timeout"},
 		{auditlog.FailureReasonCanceled, "canceled"},
-		{auditlog.FailureReasonPanic, "panic"},
-		{auditlog.FailureReasonDependency, "dependency"},
 		{auditlog.FailureReasonUserError, "user_error"},
 	}
 
@@ -57,7 +55,7 @@ func TestAllFailureReasons(t *testing.T) {
 
 	all := auditlog.AllFailureReasons()
 
-	if len(all) != 5 {
+	if len(all) != 3 {
 		t.Errorf("expected 5 FailureReason values, got %d", len(all))
 	}
 
@@ -85,16 +83,6 @@ func TestFailureReason_ClassifyHelpers(t *testing.T) {
 			reason: auditlog.FailureReasonCanceled,
 			check:  func(e auditlog.Event) bool { return e.IsCanceled() },
 			name:   "IsCanceled",
-		},
-		{
-			reason: auditlog.FailureReasonPanic,
-			check:  func(e auditlog.Event) bool { return e.IsPanic() },
-			name:   "IsPanic",
-		},
-		{
-			reason: auditlog.FailureReasonDependency,
-			check:  func(e auditlog.Event) bool { return e.IsDependencyFailure() },
-			name:   "IsDependencyFailure",
 		},
 		{
 			reason: auditlog.FailureReasonUserError,

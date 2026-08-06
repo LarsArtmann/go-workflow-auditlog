@@ -1,7 +1,6 @@
 package auditlog_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -188,151 +187,81 @@ func TestSummary(t *testing.T) {
 func TestDiff_CriticalPathDelta(t *testing.T) {
 	t.Parallel()
 
-	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
-	a1.Attach(w1)
-	a1.CaptureDAG(w1)
+	// Diff() reads the precomputed CriticalPathDurationMs field directly, so
+	// synthetic reports exercise the arithmetic deterministically without
+	// relying on wall-clock execution timing (which is noisy under -race or
+	// loaded CI and previously forced a t.Skip).
+	base := auditlog.WorkflowReport{CriticalPathDurationMs: 500}
+	other := auditlog.WorkflowReport{CriticalPathDurationMs: 800}
 
-	a1a := testhelpers.NewSlow("a", 10*time.Millisecond)
-	a1b := testhelpers.NewSlow("b", 10*time.Millisecond)
-	a1c := testhelpers.NewSucceed("c")
+	diff := base.Diff(other)
 
-	w1.Add(flow.Step(a1a))
-	testhelpers.AddDependentStep(w1, a1a, a1b)
-	testhelpers.AddDependentStep(w1, a1b, a1c)
-
-	testhelpers.RunWorkflow(t, a1, w1)
-
-	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
-	a2.Attach(w2)
-	a2.CaptureDAG(w2)
-
-	a2a := testhelpers.NewSlow("a", 100*time.Millisecond)
-	a2b := testhelpers.NewSlow("b", 100*time.Millisecond)
-	a2c := testhelpers.NewSucceed("c")
-
-	w2.Add(flow.Step(a2a))
-	testhelpers.AddDependentStep(w2, a2a, a2b)
-	testhelpers.AddDependentStep(w2, a2b, a2c)
-
-	testhelpers.RunWorkflow(t, a2, w2)
-
-	r1, r2 := a1.Report(), a2.Report()
-
-	if r2.CriticalPathDurationMs <= r1.CriticalPathDurationMs {
-		t.Skipf("second run did not produce a strictly larger critical-path "+
-			"duration (r1=%v, r2=%v); environment too noisy",
-			r1.CriticalPathDurationMs, r2.CriticalPathDurationMs)
-	}
-
-	diff := r1.Diff(r2)
-	if diff.CriticalPathDeltaMs <= 0 {
-		t.Errorf("expected positive critical-path delta, got %f", diff.CriticalPathDeltaMs)
+	if diff.CriticalPathDeltaMs != 300 {
+		t.Errorf("CriticalPathDeltaMs = %f, want 300", diff.CriticalPathDeltaMs)
 	}
 
 	if !diff.HasChanges() {
 		t.Error("diff with critical-path change should report changes")
+	}
+
+	// Symmetry: reversing operands negates the delta.
+	if reverse := other.Diff(base); reverse.CriticalPathDeltaMs != -300 {
+		t.Errorf("reversed CriticalPathDeltaMs = %f, want -300", reverse.CriticalPathDeltaMs)
 	}
 }
 
 func TestDiff_CriticalPathStepsAddedRemoved(t *testing.T) {
 	t.Parallel()
 
-	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
-	a1.Attach(w1)
-	a1.CaptureDAG(w1)
+	// Diff() computes critical-path membership diffs from the precomputed
+	// CriticalPathSteps field. Synthetic reports make the set difference
+	// deterministic — no dependency on which branch the scheduler picks first.
+	r1 := auditlog.WorkflowReport{CriticalPathSteps: []string{"a", "b", "c", "d"}}
+	r2 := auditlog.WorkflowReport{CriticalPathSteps: []string{"a", "b", "e"}}
 
-	// Diamond: a → (b, c) → d. d depends on both b and c.
-	a := testhelpers.NewSlow("a", 5*time.Millisecond)
-	b := testhelpers.NewSlow("b", 5*time.Millisecond)
-	c := testhelpers.NewSlow("c", 5*time.Millisecond)
-	d := testhelpers.NewSucceed("d")
+	diff := r1.Diff(r2)
 
-	w1.Add(flow.Step(a))
-	testhelpers.AddDependentStep(w1, a, b)
-	testhelpers.AddDependentStep(w1, a, c)
-	testhelpers.AddDependentStep(w1, b, d)
-	testhelpers.AddDependentStep(w1, c, d)
+	// r1's path has c and d; r2's does not → removed.
+	if len(diff.CriticalPathStepsRemoved) != 2 {
+		t.Errorf("CriticalPathStepsRemoved = %v, want [c d]", diff.CriticalPathStepsRemoved)
+	}
 
-	testhelpers.RunWorkflow(t, a1, w1)
+	// r2's path has e; r1's does not → added.
+	if len(diff.CriticalPathStepsAdded) != 1 || diff.CriticalPathStepsAdded[0] != "e" {
+		t.Errorf("CriticalPathStepsAdded = %v, want [e]", diff.CriticalPathStepsAdded)
+	}
 
-	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
-	a2.Attach(w2)
-	a2.CaptureDAG(w2)
-
-	// Different shape: a → b → e. Different downstream — only one leaf.
-	a2a := testhelpers.NewSlow("a", 5*time.Millisecond)
-	a2b := testhelpers.NewSlow("b", 5*time.Millisecond)
-	a2e := testhelpers.NewSucceed("e")
-
-	w2.Add(flow.Step(a2a))
-	testhelpers.AddDependentStep(w2, a2a, a2b)
-	testhelpers.AddDependentStep(w2, a2b, a2e)
-
-	testhelpers.RunWorkflow(t, a2, w2)
-
-	diff := a1.Report().Diff(a2.Report())
-
-	// r1 has critical-path steps including "d" (or "c", depending on tie
-	// breaking). r2 does NOT include "d" or "c". So at least one of those
-	// must appear in CriticalPathStepsRemoved.
-	removedHasDOrC := false
+	// Shared steps (a, b) appear in neither slice.
+	for _, n := range diff.CriticalPathStepsAdded {
+		if n == "a" || n == "b" {
+			t.Errorf("shared step %q must not appear in Added", n)
+		}
+	}
 
 	for _, n := range diff.CriticalPathStepsRemoved {
-		if n == "d" || n == "c" {
-			removedHasDOrC = true
+		if n == "a" || n == "b" {
+			t.Errorf("shared step %q must not appear in Removed", n)
 		}
-	}
-
-	if !removedHasDOrC {
-		t.Errorf("expected 'd' or 'c' in CriticalPathStepsRemoved, got %v", diff.CriticalPathStepsRemoved)
-	}
-
-	// r2's critical path includes "e" which r1 does NOT have.
-	addedHasE := false
-
-	for _, n := range diff.CriticalPathStepsAdded {
-		if n == "e" {
-			addedHasE = true
-		}
-	}
-
-	if !addedHasE {
-		t.Errorf("expected 'e' in CriticalPathStepsAdded, got %v", diff.CriticalPathStepsAdded)
 	}
 }
 
 func TestDiff_PeakConcurrencyDelta(t *testing.T) {
 	t.Parallel()
 
-	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
-	a1.Attach(w1)
-	a1.CaptureDAG(w1)
-
-	for i := range 3 {
-		w1.Add(flow.Step(testhelpers.NewSlow(fmt.Sprintf("p%d", i), 20*time.Millisecond)))
-	}
-
-	testhelpers.RunWorkflow(t, a1, w1)
-
-	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
-	a2.Attach(w2)
-	a2.CaptureDAG(w2)
-
-	for i := range 5 {
-		w2.Add(flow.Step(testhelpers.NewSlow(fmt.Sprintf("p%d", i), 20*time.Millisecond)))
-	}
-
-	testhelpers.RunWorkflow(t, a2, w2)
-
-	r1, r2 := a1.Report(), a2.Report()
-	if r2.PeakConcurrency <= r1.PeakConcurrency {
-		t.Skipf("second run did not reach higher peak concurrency (r1=%d, r2=%d); environment too noisy",
-			r1.PeakConcurrency, r2.PeakConcurrency)
-	}
+	// Diff() reads the precomputed PeakConcurrency field, so synthetic reports
+	// are deterministic — no dependency on scheduler timing (which previously
+	// forced a t.Skip under -race or loaded CI).
+	r1 := auditlog.WorkflowReport{PeakConcurrency: 3}
+	r2 := auditlog.WorkflowReport{PeakConcurrency: 5}
 
 	diff := r1.Diff(r2)
-	if diff.PeakConcurrencyDelta <= 0 {
-		t.Errorf("expected positive peak-concurrency delta, got %d", diff.PeakConcurrencyDelta)
+
+	if diff.PeakConcurrencyDelta != 2 {
+		t.Errorf("PeakConcurrencyDelta = %d, want 2", diff.PeakConcurrencyDelta)
+	}
+
+	if !diff.HasChanges() {
+		t.Error("diff with peak-concurrency change should report changes")
 	}
 }
 

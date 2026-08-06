@@ -39,16 +39,6 @@ func (e Event) IsTimeout() bool { return e.FailureReason == FailureReasonTimeout
 // IsCanceled returns true if the event's FailureReason is FailureReasonCanceled.
 func (e Event) IsCanceled() bool { return e.FailureReason == FailureReasonCanceled }
 
-// IsPanic returns true if the event's FailureReason is FailureReasonPanic.
-func (e Event) IsPanic() bool { return e.FailureReason == FailureReasonPanic }
-
-// IsDependencyFailure returns true if the event's FailureReason is
-// FailureReasonDependency (the step failed because an upstream did, not
-// because its own Do() returned an error).
-func (e Event) IsDependencyFailure() bool {
-	return e.FailureReason == FailureReasonDependency
-}
-
 // IsUserError returns true if the event's FailureReason is FailureReasonUserError
 // (the step's own Do() returned a non-nil error).
 func (e Event) IsUserError() bool { return e.FailureReason == FailureReasonUserError }

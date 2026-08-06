@@ -429,6 +429,42 @@ func TestServer_HandleSSE_SnapshotWriteFailure(t *testing.T) {
 	}
 }
 
+// TestServer_HandleSSE_SnapshotProviderError drives handleSSE end-to-end with a
+// snapshotProvider that always errors, verifying the handler returns
+// gracefully (no panic, no hang) instead of entering the event loop. This is
+// the SSE equivalent of the removed WebSocket provider-error test.
+func TestServer_HandleSSE_SnapshotProviderError(t *testing.T) {
+	t.Parallel()
+
+	srv := &Server{
+		hub: NewHub(),
+		snapshotProvider: func(bool) (jsontext.Value, error) {
+			return nil, errProviderFailure
+		},
+	}
+
+	rec := httptest.NewRecorder()
+
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/events", nil)
+
+	done := make(chan struct{})
+
+	go func() {
+		srv.handleSSE(rec, req)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		cancel()
+		t.Fatal("handleSSE did not return after snapshotProvider error")
+	}
+}
+
 // TestServer_HandleSSE_WriteFailureAfterSnapshot lets the snapshot flush,
 // then verifies the handler exits when a subsequent event Send fails.
 // With Stream.Heartbeat running in a goroutine, heartbeat write failures are
