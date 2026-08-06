@@ -9,7 +9,7 @@ require (
 	github.com/larsartmann/go-output v0.35.0
 	github.com/larsartmann/go-output/d2 v0.35.0
 	github.com/larsartmann/go-output/daghtml v0.35.0
-	github.com/larsartmann/go-output/delimited v0.35.0
+	github.com/larsartmann/go-output/delimited v0.36.0
 	github.com/larsartmann/go-output/graph v0.35.0
 	github.com/larsartmann/go-output/markdown v0.35.0
 	github.com/larsartmann/go-output/markup v0.35.0
