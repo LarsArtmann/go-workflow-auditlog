@@ -135,7 +135,8 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Live timeline** — Gantt-style timeline updates in real-time as step timing data arrives
 - **SSE heartbeat** — configurable keepalive interval (default 15s) prevents proxy timeouts. Uses `sse.Stream.Heartbeat` goroutine (go-sse v0.4.0)
 - **Reconnection replay** — when a dashboard client's SSE connection drops and reconnects, the browser sends `Last-Event-ID` automatically. The server replays missed events from a bounded ring buffer (default 1000, configurable via `Config.ReplayBufferSize`) before sending the snapshot. No events are lost on brief disconnects.
-- **Graceful shutdown drain** — `Server.Shutdown` drains subscriber channel buffers before closing HTTP connections, preventing event loss. The `/api/health` endpoint reports `draining` and `event_buffer_size` state. at `live/demo` (fetch → validate → transform → save → notify with retry) serving at `http://localhost:18080`
+- **Graceful shutdown drain** — `Server.Shutdown` drains subscriber channel buffers before closing HTTP connections, preventing event loss. The `/api/health` endpoint reports `draining` and `event_buffer_size` state.
+- **Demo pipeline** at `live/demo` (fetch → validate → transform → save → notify with retry) serving at `http://localhost:18080`
 - **Diff-based steps table rendering** — rows tracked by step name in a `stepRows` map; only changed cells (status, attempts, duration, error) are updated in-place via `updateStepRow()` instead of rebuilding `innerHTML` on every tick, eliminating flicker for 100+ step workflows
 - **Depends on `go-sse`** (`github.com/larsartmann/go-sse` v0.4.0, public, pinned in `live/go.mod`) for SSE transport primitives: `sse.Stream` (connection lifecycle, heartbeat, `LastEventID`), `sse.Replay` + `sse.EventStore` (reconnection replay), and `sse.Event`/`sse.WriteEvent`/`sse.ContentType` (wire format)
 
@@ -144,7 +145,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Three Go modules**: core (`auditlog`), visualization (`viz`), live dashboard (`live`) — linked via `go.work` workspace
 - **go-output** at v0.31.1 (root + graph/plantuml/d2/daghtml/tree/table/markup/delimited/serialization sub-modules) — includes D2/DOT quoting fix; resolved from published tags (no local `replace`)
 - **go-error-family** at v0.9.0
-- **go-sse** at v0.2.0 (public, pinned in `live/go.mod`)
+- **go-sse** at v0.4.0 (public, pinned in `live/go.mod`)
 - **go-atomic-write** at v0.3.0 and **go-ndjson** at v0.0.1 (pinned in core `go.mod`)
 - **gorilla/websocket** v1.5.3 (live module, for `/api/ws`)
 - **go-branded-id** v0.3.2 (indirect, via go-output)
