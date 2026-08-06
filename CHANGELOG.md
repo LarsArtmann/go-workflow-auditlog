@@ -24,9 +24,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Adopted `sse.Stream` in `handleSSE`** — replaced ~40 lines of manual SSE plumbing (manual header setup, flusher type-assertion, heartbeat ticker, `WriteEvent`+`Flush` calls) with `sse.NewStream`, `stream.Send`, and `go stream.Heartbeat`. `X-Accel-Buffering: no` is preserved (set before `NewStream`); `Cache-Control: no-transform` is lost (overwritten by `SetHeaders` to `no-cache`).
 - **Upgraded go-sse v0.3.0 → v0.4.0** — gains `Stream.Heartbeat`, `Stream.LastEventID`, `sse.Replay`, `sse.EventStore`, `Broadcaster.Shutdown`, and `Broadcaster.Health`.
-- **Hub broadcast type changed** from `jsontext.Value` to `BroadcastEvent{ID, Data}` — SSE events now carry `id:` fields for Last-Event-ID reconnection. WebSocket handler ignores the ID field (unchanged behavior).
+- **Hub broadcast type changed** from `jsontext.Value` to `BroadcastEvent{ID, Data}` — SSE events now carry `id:` fields for Last-Event-ID reconnection.
 - **`Server.Shutdown`** now calls `hub.Drain(ctx)` before `httpServer.Shutdown(ctx)` to let SSE clients consume buffered events.
 - **Health endpoint** now includes `draining` and `event_buffer_size` fields.
+
+### Removed
+
+- **WebSocket transport** — the `/api/ws` endpoint and its `gorilla/websocket` dependency have been removed from the `live` module. The dashboard now uses SSE exclusively (with reconnection replay via `Last-Event-ID`). This aligns the live module with the sibling `samber-do-auditlog/live` module (which was always SSE-only) and removes a divergent transport that lacked replay semantics. **Migration**: no client-side changes required — all browsers support SSE natively via `EventSource`, and the dashboard's reconnect/replay behavior covers any corporate-proxy fallback scenarios that motivated the WebSocket transport. The `gorilla/websocket` dependency is no longer required at build time. See [`docs/MIGRATION.md`](docs/MIGRATION.md) for details.
 
 ### Fixed
 

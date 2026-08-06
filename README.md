@@ -93,7 +93,7 @@ go get github.com/larsartmann/go-workflow-auditlog
 # Visualization module (diagrams, tables, trees, HTML dashboard)
 go get github.com/larsartmann/go-workflow-auditlog/viz
 
-# Live dashboard module (real-time SSE + WebSocket HTTP dashboard)
+# Live dashboard module (real-time SSE HTTP dashboard)
 go get github.com/larsartmann/go-workflow-auditlog/live
 ```
 

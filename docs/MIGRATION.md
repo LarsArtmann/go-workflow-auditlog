@@ -81,3 +81,46 @@ These backward-compat aliases were removed in v0.5.1 (never in a released v1.0):
 | `WriteEventsNDJSON`    | `WriteNDJSON`  |
 | `ExportToFile`         | `ExportJSON`   |
 | `ExportEventsToNDJSON` | `ExportNDJSON` |
+
+## WebSocket Transport Removal (v0.8.3)
+
+The `/api/ws` WebSocket endpoint and its `gorilla/websocket` dependency have
+been removed from the `live` module. The dashboard now uses SSE exclusively.
+
+### Migration
+
+**No client-side changes are required.** All browsers support SSE natively via
+the `EventSource` API, and the live module's reconnection replay
+(via `Last-Event-ID`) covers any transient disconnects — including scenarios
+behind corporate proxies that originally motivated the WebSocket fallback.
+
+**If you wrote custom code that dialed `/api/ws` directly** (rare; the
+dashboard JS is the only intended consumer), switch to `EventSource` against
+`/api/events`:
+
+```js
+// Before (no longer supported)
+const ws = new WebSocket(`ws://${host}/api/ws`);
+ws.onmessage = (e) => { handle(JSON.parse(e.data)); };
+
+// After
+const es = new EventSource(`http://${host}/api/events`);
+es.addEventListener("snapshot", (e) => handle(JSON.parse(e.data)));
+es.addEventListener("event", (e) => handle(JSON.parse(e.data)));
+es.addEventListener("complete", (e) => handle(JSON.parse(e.data)));
+```
+
+**If your `go.mod` references `gorilla/websocket` solely for this transport**,
+you can drop the dependency. The `live` module no longer requires it.
+
+### Why
+
+The WebSocket transport was an additive convenience, never required: SSE
+serves every browser without a framing protocol, with native reconnection
+support, and with `Last-Event-ID` replay now (v0.8.x) preserving events
+across brief disconnects. The parallel transport duplicated snapshot/event/
+complete envelope logic, lacked replay semantics, and required a heavyweight
+dependency (`gorilla/websocket` v1.5.3) for no concrete customer benefit.
+The sibling [`samber-do-auditlog/live`](https://github.com/larsartmann/samber-do-auditlog)
+module has always been SSE-only; this aligns the two siblings on the same
+architecture.

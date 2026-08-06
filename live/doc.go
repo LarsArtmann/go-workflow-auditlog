@@ -34,9 +34,10 @@
 //   - GET /api/events  - SSE stream (snapshot + live events + completion)
 //   - GET /api/health  - Health check
 //
-// SSE was chosen over WebSocket because the data flow is one-way
-// (server to browser), SSE has native browser support via EventSource,
-// auto-reconnects on disconnect, and requires no framing protocol.
+// SSE was chosen because the data flow is one-way (server to browser), SSE
+// has native browser support via EventSource, auto-reconnects on disconnect,
+// supports reconnection replay via Last-Event-ID, and requires no framing
+// protocol.
 //
 // # Protocol
 //

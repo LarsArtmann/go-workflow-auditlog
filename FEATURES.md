@@ -122,9 +122,8 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ### Live Real-Time Dashboard (`live/` module)
 
 - **SSE streaming dashboard** — real-time HTTP dashboard where steps light up as they execute, with incremental rendering via `requestAnimationFrame` batching
-- **WebSocket transport** — `/api/ws` endpoint as an alternative to SSE, with automatic SSE→WebSocket fallback after 2 connection failures (uses `gorilla/websocket` v1.5.3). Same snapshot→events→complete flow as SSE, encoded as JSON `{type, data}` envelopes.
 - **Hub** — SSE subscriber registry with non-blocking fan-out `OnEvent` broadcast; `SignalComplete()` notifies all clients when the workflow finishes
-- **Server** — HTTP server with SSE handler (`/api/events`), WebSocket endpoint (`/api/ws`), `/api/report`, `/api/health`, `/api/export/ndjson`, `/api/export/html` (Content-Disposition attachment downloads), dashboard serving, `ServeHTTP` for `http.Handler` integration
+- **Server** — HTTP server with SSE handler (`/api/events`), `/api/report`, `/api/health`, `/api/export/ndjson`, `/api/export/html` (Content-Disposition attachment downloads), dashboard serving, `ServeHTTP` for `http.Handler` integration
 - **`live.New(config, serverConfig)`** — convenience constructor that wires `hub.OnEvent` as `Config.OnEvent`, returns `(*Server, *Auditor, error)`
 - **Configurable route prefix** — `Prefix` config field (default `/`) mounts all routes at a sub-path (e.g., `/workflow/`). Dual-route registration avoids ServeMux 307 redirects.
 - **CORS support** — `CORSAllowedOrigins` config field controls `Access-Control-Allow-Origin` on API endpoints. Empty (default) disables CORS (secure by default); set to `"*"` or a specific origin to enable. OPTIONS preflight handled automatically.
@@ -147,7 +146,6 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **go-error-family** at v0.9.0
 - **go-sse** at v0.4.0 (public, pinned in `live/go.mod`)
 - **go-atomic-write** at v0.3.0 and **go-ndjson** at v0.0.1 (pinned in core `go.mod`)
-- **gorilla/websocket** v1.5.3 (live module, for `/api/ws`)
 - **go-branded-id** v0.3.2 (indirect, via go-output)
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
 - **govulncheck** in CI (golang/govulncheck-action)
@@ -163,7 +161,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns, 3-module architecture)
 - `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer, streaming section, screenshots
-- `CHANGELOG.md` — v0.7.0 tagged (table columns + diagram direction + CriticalPath/PeakConcurrencySteps + json/v2 + website); `[Unreleased]` covers streaming NDJSON, DAG viz enhancements, module split, live dashboard module, WebSocket transport, CSV/TSV export, CORS/prefix/export endpoints, diff-based rendering, dependency pinning
+- `CHANGELOG.md` — v0.7.0 tagged (table columns + diagram direction + CriticalPath/PeakConcurrencySteps + json/v2 + website); `[Unreleased]` covers streaming NDJSON, DAG viz enhancements, module split, live dashboard module, CSV/TSV export, CORS/prefix/export endpoints, diff-based rendering, dependency pinning, WebSocket transport removal
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
 - `example/main.go` — demos all export formats via `--export` flag (in `viz/` module)
 - `live/demo/main.go` — demos real-time SSE dashboard with retry pipeline
