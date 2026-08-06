@@ -1,7 +1,6 @@
 package auditlog_test
 
 import (
-	"errors"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -19,7 +18,7 @@ func TestMultiWriter_FansOutToAllCallbacks(t *testing.T) {
 		got []auditlog.Event
 	)
 
-	callback := func(e auditlog.Event) error {
+	callback := func(e auditlog.Event) {
 		mu.Lock()
 
 		got = append(got, e)
@@ -27,8 +26,6 @@ func TestMultiWriter_FansOutToAllCallbacks(t *testing.T) {
 		mu.Unlock()
 
 		wg.Done()
-
-		return nil
 	}
 
 	mw := auditlog.NewMultiWriter(callback, callback, callback)
@@ -42,9 +39,7 @@ func TestMultiWriter_FansOutToAllCallbacks(t *testing.T) {
 
 	wg.Add(3)
 
-	if err := mw.OnEvent(evt); err != nil {
-		t.Fatalf("OnEvent: %v", err)
-	}
+	mw.OnEvent(evt)
 
 	wg.Wait()
 
@@ -62,55 +57,49 @@ func TestMultiWriter_FansOutToAllCallbacks(t *testing.T) {
 func TestMultiWriter_PreservesRegistrationOrder(t *testing.T) {
 	t.Parallel()
 
-	var order []int
+	var (
+		order []int
+		mu    sync.Mutex
+	)
 
 	cb := func(n int) auditlog.MultiWriterCallback {
-		return func(auditlog.Event) error {
-			order = append(order, n)
+		return func(auditlog.Event) {
+			mu.Lock()
+			defer mu.Unlock()
 
-			return nil
+			order = append(order, n)
 		}
 	}
 
 	mw := auditlog.NewMultiWriter(cb(1), cb(2), cb(3))
 
-	if err := mw.OnEvent(auditlog.Event{}); err != nil {
-		t.Fatalf("OnEvent: %v", err)
-	}
+	mw.OnEvent(auditlog.Event{})
 
 	if len(order) != 3 || order[0] != 1 || order[1] != 2 || order[2] != 3 {
 		t.Errorf("callback order violated: %v", order)
 	}
 }
 
-func TestMultiWriter_ReturnsFirstError(t *testing.T) {
+// TestMultiWriter_ComposableWithConfigOnEvent verifies the core design
+// contract: a MultiWriter can be wired directly as Config.OnEvent without an
+// adapter lambda, because OnEvent has the exact func(Event) signature.
+func TestMultiWriter_ComposableWithConfigOnEvent(t *testing.T) {
 	t.Parallel()
 
-	sentinel := errors.New("callback-2 failure")
-
-	var thirdCalled atomic.Bool
+	var called atomic.Int64
 
 	mw := auditlog.NewMultiWriter(
-		func(auditlog.Event) error {
-			return nil
-		},
-		func(auditlog.Event) error {
-			return sentinel
-		},
-		func(auditlog.Event) error {
-			thirdCalled.Store(true)
-
-			return nil
-		},
+		func(auditlog.Event) { called.Add(1) },
+		func(auditlog.Event) { called.Add(1) },
 	)
 
-	err := mw.OnEvent(auditlog.Event{})
-	if !errors.Is(err, sentinel) {
-		t.Errorf("expected wrapped sentinel error, got %v", err)
-	}
+	// Assignment to Config.OnEvent compiles only if signatures match exactly.
+	cfg := auditlog.Config{Enabled: true, OnEvent: mw.OnEvent}
 
-	if !thirdCalled.Load() {
-		t.Error("third callback must run even when an earlier callback errors (fail-open)")
+	cfg.OnEvent(auditlog.Event{Sequence: 7})
+
+	if got := called.Load(); got != 2 {
+		t.Errorf("expected 2 invocations via Config.OnEvent, got %d", got)
 	}
 }
 
@@ -120,10 +109,8 @@ func TestMultiWriter_ConcurrentSafety(t *testing.T) {
 	var counter atomic.Int64
 
 	cb := func() auditlog.MultiWriterCallback {
-		return func(auditlog.Event) error {
+		return func(auditlog.Event) {
 			counter.Add(1)
-
-			return nil
 		}
 	}
 
@@ -137,7 +124,7 @@ func TestMultiWriter_ConcurrentSafety(t *testing.T) {
 		go func(seq int) {
 			defer wg.Done()
 
-			_ = mw.OnEvent(auditlog.Event{Sequence: seq})
+			mw.OnEvent(auditlog.Event{Sequence: seq})
 		}(i)
 	}
 
@@ -162,9 +149,7 @@ func TestMultiWriter_NilReceiver(t *testing.T) {
 
 	var mw *auditlog.MultiWriter
 
-	if err := mw.OnEvent(auditlog.Event{}); err != nil {
-		t.Errorf("nil MultiWriter.OnEvent should return nil, got %v", err)
-	}
+	mw.OnEvent(auditlog.Event{})
 
 	if got := mw.CallbackCount(); got != 0 {
 		t.Errorf("nil MultiWriter.CallbackCount should return 0, got %d", got)
@@ -178,17 +163,11 @@ func TestMultiWriter_SkipsNilCallback(t *testing.T) {
 
 	mw := auditlog.NewMultiWriter(
 		nil,
-		func(auditlog.Event) error {
-			called = true
-
-			return nil
-		},
+		func(auditlog.Event) { called = true },
 		nil,
 	)
 
-	if err := mw.OnEvent(auditlog.Event{}); err != nil {
-		t.Fatalf("OnEvent: %v", err)
-	}
+	mw.OnEvent(auditlog.Event{})
 
 	if !called {
 		t.Error("non-nil callback should run between nil callbacks")
@@ -199,12 +178,8 @@ func TestMultiWriter_CallbackCount(t *testing.T) {
 	t.Parallel()
 
 	mw := auditlog.NewMultiWriter(
-		func(auditlog.Event) error {
-			return nil
-		},
-		func(auditlog.Event) error {
-			return nil
-		},
+		func(auditlog.Event) {},
+		func(auditlog.Event) {},
 	)
 
 	if got := mw.CallbackCount(); got != 2 {
