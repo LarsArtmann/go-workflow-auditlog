@@ -1,6 +1,6 @@
 # Features — go-workflow-auditlog
 
-Honest feature inventory by status. Verified against the codebase on 2026-07-24.
+Honest feature inventory by status. Verified against the codebase on 2026-08-06.
 
 **Modules**: `github.com/larsartmann/go-workflow-auditlog` (core) · `…/viz` (visualization) · `…/live` (real-time dashboard) · **Go**: 1.26+ · **Status**: ALPHA
 
@@ -140,22 +140,23 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Reconnection replay** — when a dashboard client's SSE connection drops and reconnects, the browser sends `Last-Event-ID` automatically. The server replays missed events from a bounded ring buffer (default 1000, configurable via `Config.ReplayBufferSize`) before sending the snapshot. No events are lost on brief disconnects.
 - **Graceful shutdown drain** — `Server.Shutdown` drains subscriber channel buffers before closing HTTP connections, preventing event loss. The `/api/health` endpoint reports `draining` and `event_buffer_size` state.
 - **Demo pipeline** at `live/demo` (fetch → validate → transform → save → notify with retry) serving at `http://localhost:18080`
+- **Full keyboard navigation** — the dashboard is operable without a mouse: global shortcuts (`1`–`4` switch tabs, `/` focuses search, `?` opens help modal, `Esc` closes dialogs), roving `tabindex` on step rows and graph nodes with arrow-key navigation, sortable headers with `Enter`/`Space` activation, and ARIA landmarks + `aria-live` regions for assistive technology
 - **Diff-based steps table rendering** — rows tracked by step name in a `stepRows` map; only changed cells (status, attempts, duration, error) are updated in-place via `updateStepRow()` instead of rebuilding `innerHTML` on every tick, eliminating flicker for 100+ step workflows
 - **Depends on `go-sse`** (`github.com/larsartmann/go-sse` v0.4.0, public, pinned in `live/go.mod`) for SSE transport primitives: `sse.Stream` (connection lifecycle, heartbeat, `LastEventID`), `sse.Replay` + `sse.EventStore` (reconnection replay), and `sse.Event`/`sse.WriteEvent`/`sse.ContentType` (wire format)
 
 ### Infrastructure
 
 - **Three Go modules**: core (`auditlog`), visualization (`viz`), live dashboard (`live`) — linked via `go.work` workspace
-- **go-output** at v0.31.1 (root + graph/plantuml/d2/daghtml/tree/table/markup/delimited/serialization sub-modules) — includes D2/DOT quoting fix; resolved from published tags (no local `replace`)
-- **go-error-family** at v0.9.0
+- **go-output** at v0.35.0 (root + graph/plantuml/d2/daghtml/tree/table/markup/delimited/serialization sub-modules) — includes D2/DOT quoting fix; resolved from published tags (no local `replace`)
+- **go-error-family** at v0.10.0
 - **go-sse** at v0.4.0 (public, pinned in `live/go.mod`)
-- **go-atomic-write** at v0.3.0 and **go-ndjson** at v0.0.1 (pinned in core `go.mod`)
-- **go-branded-id** v0.3.2 (indirect, via go-output)
+- **go-atomic-write** at v0.4.1 and **go-ndjson** at v0.0.1 (pinned in core `go.mod`)
+- **go-branded-id** v0.5.1 (indirect, via go-output)
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
-- **govulncheck** in CI (golang/govulncheck-action)
+- **govulncheck** in CI (golang/govulncheck-action) — all three modules scanned
 - **actionlint** in CI (workflow linting)
-- **Coverage**: core 94.9%, viz 91.7%, live 90.3%
-- **flake.nix** devShell (Go 1.26.4, golangci-lint, govulncheck, actionlint, `d2` CLI; GOEXPERIMENT=jsonv2)
+- **Coverage**: core 95.4%, viz 91.7%, live 96.2%
+- **flake.nix** devShell (Go 1.26.5, golangci-lint, govulncheck, actionlint, `d2` CLI; GOEXPERIMENT=jsonv2)
 - **flake-parts** + **treefmt-nix** for build automation (includes `d2-fmt`, `nixfmt`, `gofmt`)
 - **Pre-commit hook** (vet + lint + test)
 - **STABILITY.md** documenting API stability promises
@@ -165,20 +166,20 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns, 3-module architecture)
 - `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer, streaming section, screenshots
-- `CHANGELOG.md` — v0.7.0 tagged (table columns + diagram direction + CriticalPath/PeakConcurrencySteps + json/v2 + website); `[Unreleased]` covers streaming NDJSON, DAG viz enhancements, module split, live dashboard module, CSV/TSV export, CORS/prefix/export endpoints, diff-based rendering, dependency pinning, WebSocket transport removal
+- `CHANGELOG.md` — v0.8.1 tagged (module split sub-module tags + go-atomic-write/go-error-family bumps + govulncheck fix); `[Unreleased]` covers SSE reconnection replay, graceful shutdown drain, go-sse v0.4.0 adoption, WebSocket transport removal, `WithFlushInterval`, `StreamEvents`, `MultiWriter`, `FailureReason` enum, extended `Diff()`, workflow-level helpers, `FailureSummary` rename, keyboard navigation accessibility, RELEASE.md
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
-- `example/main.go` — demos all export formats via `--export` flag (in `viz/` module)
+- `viz/example/` — demos all export formats via `--export` flag
 - `live/demo/main.go` — demos real-time SSE dashboard with retry pipeline
 
 ### Testing & Quality
 
 - **`encoding/json/v2` migration** — migrated to Go 1.26 `encoding/json/v2` + `jsontext` (GOEXPERIMENT=jsonv2), full XSS hardening, deterministic output
 - **Fuzz tests**: `FuzzDiagramSpecialChars` (diagram injection), `FuzzDiagramSanitization_MultiStep` (multi-step edge sanitization, 17 seed pairs across 4 formats), `FuzzHTMLSpecialChars` (HTML XSS, 12 seed payloads), `FuzzReadEvents` (NDJSON resilience), `FuzzClassify` (adversarial error chains)
-- **Property-based tests**: Diff algebra (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output) — 200 iterations each, deterministic seeds; Classify wrapping-preserves-family + identity matches map
+- **Property-based tests**: 8 Diff algebra properties (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output, critical-path anti-symmetry, peak-concurrency anti-symmetry, critical-path steps duality) — 200 iterations each, deterministic seeds; Classify wrapping-preserves-family + identity matches map
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
 - **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + NDJSONStreamer throughput (100/1000/10000 events) + godoc examples
-- **445 test functions** across 3 modules (core: 162; viz: 229; live: 54), all passing with `-race`
+- **491 test functions** across 3 modules (core: 205; viz: 214; live: 72), all passing with `-race`
 
 ---
 
@@ -188,3 +189,6 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
 - JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor)
 - `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md` exists)
+- `FailureReason` surfacing in viz dashboard, CSV export, and `StepInfo` denormalization
+- Synthetic `attempt_end` events for dependency-failed steps (restoring `FailureReasonDependency` as a real value)
+- `Events()` / `CriticalPath()` iterator patterns (Go `iter.Seq`) for lazy evaluation on large reports

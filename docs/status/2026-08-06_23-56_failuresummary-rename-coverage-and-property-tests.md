@@ -381,6 +381,8 @@ test count description was not explicitly updated.
 
 ## g) Questions (3 max — things I genuinely cannot figure out)
 
+> **Resolved (2026-08-06):** Q1 (v0.9.0 release) and Q2 (empty commit) routed to TODO_LIST. Latest in the session chain — remaining open items harvested.
+
 ### Q1: Should we cut v0.9.0 now, or batch with more features first?
 
 The viz standalone failure in `nix run .#check` will persist until a coordinated release publishes

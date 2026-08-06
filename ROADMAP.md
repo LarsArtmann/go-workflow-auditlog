@@ -65,8 +65,10 @@ materializes all events. For workflows exceeding 10000+ events,
 `StreamEvents(reader, validate, fn)` provides a streaming-only consumption
 model (per-event callback, no full-slice materialization) for reading exported
 NDJSON without buffering. `WithFlushInterval(d)` bounds write-side visibility
-latency. Still open: async channel-based writer for backpressure decoupling,
-and a streaming JSON report format (not just NDJSON events).
+latency. `MultiWriter` fans each event out to multiple callbacks for
+simultaneous streaming + live dashboard + custom sinks. Still open: async
+channel-based writer for backpressure decoupling, and a streaming JSON report
+format (not just NDJSON events).
 
 ### Observability Integration
 
@@ -107,6 +109,14 @@ already cover the wiring.
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
 - Configurable node shapes/icons per step type in diagrams
 - Async channel-based streaming writer (decouple step execution from I/O latency)
+- Iterator patterns (`iter.Seq`) for `Events()`, `CriticalPath()`, `Filter()` — lazy evaluation avoiding full-slice materialization on large reports
+- Streaming JSON report format (not just NDJSON events)
+- JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor) for type-safe consumption from non-Go languages
+- `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md` exists)
+- `Diff()` with configurable thresholds — "only report changes > Nms" or "ignore status changes for these steps"
+- `ReplayEvents` streaming variant — callback-based like `StreamEvents`
+- Diff report HTML visualization — render `DiffResult` as a side-by-side HTML page
+- Emit synthetic `attempt_end` events for dependency-failed steps during `Snapshot` — would restore `FailureReasonDependency` as a real, reachable value and make the event stream complete for failure analysis
 
 ---
 
@@ -145,3 +155,23 @@ reported issues.
 
 `attempt_start` → span start, `attempt_end` → span end with attributes.
 **Defer** until a consumer has an OTel stack.
+
+### SSE-Only Transport — Done
+
+**Shipped (2026-08-06).** The `live` module dropped `gorilla/websocket` and
+uses SSE exclusively, with reconnection replay via `Last-Event-ID` + a bounded
+ring buffer. SSE is natively supported by all browsers via `EventSource`, and
+its built-in reconnection semantics (automatic retry, `Last-Event-ID` tracking)
+make WebSocket's manual reconnection logic unnecessary. The `gorilla/websocket`
+dependency is eliminated. See [`docs/MIGRATION.md`](docs/MIGRATION.md).
+
+### FailureReason Enum — Done
+
+**Shipped (2026-08-06).** `Event.FailureReason` classifies step failures into
+three values the recorder can observe at the `AfterStep` callback level:
+`timeout`, `canceled`, `user_error`. `panic` and `dependency` values were
+considered but dropped — panics are not catchable at the `AfterStep` boundary
+(go-workflow recovers them internally), and dependency-failed steps bypass
+`AfterStep` entirely (they are settled inline by Conditions). If synthetic
+events for dependency-failed steps are added later (see Raw Ideas),
+`FailureReasonDependency` becomes a real value again.

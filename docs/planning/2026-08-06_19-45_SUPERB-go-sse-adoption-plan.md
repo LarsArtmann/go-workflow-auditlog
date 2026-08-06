@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-06 19:45
 **Trigger:** [go-sse deep-dive report](../research/2026-08-06_go-sse-deep-dive.html) scored adoption at 28/100 (Surface-level)
-**Status:** Planning — awaiting approval before execution
+**Status:** ✅ Executed — see [status report](../status/2026-08-06_20-14_go-sse-adoption-implementation-status.md). All 6 phases (A–F) complete; M15 (Hub→Broadcaster refactor) correctly deferred.
 
 ---
 

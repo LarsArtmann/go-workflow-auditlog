@@ -25,6 +25,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`FailureReason` enum** — structured failure classification on `Event` (`failure_reason` JSON field). Three values the recorder can observe at the `AfterStep` callback level: `FailureReasonTimeout` (wraps `context.DeadlineExceeded`), `FailureReasonCanceled` (wraps `context.Canceled`), `FailureReasonUserError` (any other non-nil error). Predicate methods `Event.IsTimeout()`, `Event.IsCanceled()`, `Event.IsUserError()`. Zero value = unclassified (success or no error).
 - **Extended `Diff()`** — `DiffResult` now carries aggregate deltas beyond step-level changes: `CriticalPathDeltaMs` (critical-path duration difference), `PeakConcurrencyDelta` (peak concurrent step count difference), and `CriticalPathStepsAdded`/`CriticalPathStepsRemoved` (set difference of critical-path membership). `HasChanges()` reflects all new fields.
 - **Workflow-level retry/timeout surfacing** — six new `WorkflowReport` methods that answer whole-workflow questions without step-level iteration: `RetriedStepCount()`, `TotalRetryAttempts()`, `TimedOutSteps()`, `TimedOutStepCount()`, `HasWorkflowRetries()`, `HasWorkflowTimeouts()`.
+- **[`RELEASE.md`](RELEASE.md)** — comprehensive step-by-step release process guide covering tag conventions, goreleaser usage, the multi-module gotchas (`GORELEASER_CURRENT_TAG`, `sh -c` hooks, `go mod tidy -e`), demo binary building, and pkg.go.dev probing. Prevents ad-hoc releases.
+- **Sub-module tagging convention** documented in `AGENTS.md`: core `vX.Y.Z`, viz `viz/vX.Y.Z`, live `live/vX.Y.Z` — all at the same commit.
+- **`govulncheck` for the `live` module in CI** — the GitHub Actions `vulncheck` job previously scanned only core and viz. Now all three modules are scanned, matching `nix run .#check`.
 
 ### Changed
 
@@ -44,12 +47,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **CRITICAL: Removed local `replace` directives from `viz/go.mod` and `live/go.mod`.** The v0.8.0 module split left `replace github.com/larsartmann/go-workflow-auditlog => ..` (and `=> ../viz`) in the published go.mod files. These local filesystem redirects produce invalid pseudo-version requirements (`v0.0.0-00010101000000-000000000000`) that **completely break consumer `go get`** for the `viz` and `live` sub-modules when fetched in isolation. Core was unaffected. All three modules now carry real version requirements and resolve cleanly from the Go module proxy.
 - **Fixed CI `mod-tidy` job** — `viz` and `live` steps now use `go mod tidy -e` (error-tolerant) to work around the go-output testhelpers replace-directive defect that caused `go mod tidy` to exit 1 on the sub-modules. Added `GOWORK: off` for standalone consistency.
 - **Fixed `.goreleaser.yml` before-hooks** — all hooks wrapped in `sh -c "..."` because goreleaser OSS executes hooks via direct `exec.CommandContext` (not a shell), making inline env vars (`FOO=bar cmd`) and shell builtins (`cd`) silently fail. Sub-module hooks use `go mod tidy -e`. Documented `GORELEASER_CURRENT_TAG` requirement for multi-module monorepos.
-- **Added `govulncheck` for the `live` module to CI** — the GitHub Actions `vulncheck` job previously scanned only core and viz. Now all three modules are scanned, matching `nix run .#check`.
-
-### Added
-
-- **[`RELEASE.md`](RELEASE.md)** — comprehensive step-by-step release process guide covering tag conventions, goreleaser usage, the multi-module gotchas (`GORELEASER_CURRENT_TAG`, `sh -c` hooks, `go mod tidy -e`), demo binary building, and pkg.go.dev probing. Prevents ad-hoc releases.
-- **Sub-module tagging convention** documented in `AGENTS.md`: core `vX.Y.Z`, viz `viz/vX.Y.Z`, live `live/vX.Y.Z` — all at the same commit.
 
 ## [0.8.1] - 2026-07-26
 

@@ -4,6 +4,8 @@
 **Session goal:** Execute the SUPERB go-sse adoption plan (`docs/planning/2026-08-06_19-45_SUPERB-go-sse-adoption-plan.md`)
 **Status:** ~85% complete — all code implemented and tested, documentation mostly done, several gaps found
 
+> **Resolution (2026-08-06):** All 3 questions in §g resolved or routed to TODO_LIST. Version drift (§b) fixed in FEATURES.md + AGENTS.md. Documentation gaps (§b) addressed in subsequent sessions.
+
 ---
 
 ## a) FULLY DONE ✅
@@ -253,8 +255,10 @@
 
 ## g) Questions I Cannot Answer Myself ❓
 
-1. **Should `Server.Shutdown` return the Drain error or silently ignore it?** Currently I do `_ = srv.hub.Drain(ctx)` — if the drain times out, the error is silently swallowed and shutdown proceeds to close HTTP anyway. The alternative is to return the drain error and let the caller decide (retry or force-close). go-sse's `Broadcaster.Shutdown` returns the error. Which behavior do you want for `live.Server`?
+> **Resolved (2026-08-06):** Q1 deferred (acceptable as-is). Q2 DONE — version drift fixed in FEATURES.md + AGENTS.md this session. Q3 routed to TODO_LIST (cut v0.9.0).
 
-2. **Should I fix the pre-existing version drift in FEATURES.md and AGENTS.md now, or leave it for a separate docs-cleanup pass?** The go-output (v0.31.1 → v0.35.0), go-error-family (v0.9.0 → v0.10.0), and go-atomic-write (v0.3.0 → v0.4.1) version references are stale from before this session. I can fix them in one sweep, or you may prefer to keep this session's diff focused on go-sse adoption only.
+1. **~~Should `Server.Shutdown` return the Drain error or silently ignore it?~~** Currently I do `_ = srv.hub.Drain(ctx)` — if the drain times out, the error is silently swallowed and shutdown proceeds to close HTTP anyway. The alternative is to return the drain error and let the caller decide (retry or force-close). go-sse's `Broadcaster.Shutdown` returns the error. Which behavior do you want for `live.Server`?
 
-3. **Do you want a v0.9.0 release cut with these changes, or should they accumulate with other pending work first?** The CHANGELOG `[Unreleased]` section now has significant new features (reconnection replay, graceful drain, Stream adoption, keyboard navigation from the prior session). If you want a release, I should verify the RELEASE.md process and check if the auto-commit daemon's commits are clean enough to tag.
+2. **~~Should I fix the pre-existing version drift in FEATURES.md and AGENTS.md now, or leave it for a separate docs-cleanup pass?~~** **DONE.** All version references updated to match go.mod files (go-output v0.35.0, go-error-family v0.10.0, go-atomic-write v0.4.1, go-branded-id v0.5.1).
+
+3. **~~Do you want a v0.9.0 release cut with these changes, or should they accumulate with other pending work first?~~** Routed to TODO_LIST — cut v0.9.0 coordinated three-module release when ready.
