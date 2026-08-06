@@ -48,8 +48,8 @@ github.com/larsartmann/go-ndjson v0.0.1 h1:wchwH5pv+0ZnFem/WrlGZA8dDGvZumT+OcVn5
 github.com/larsartmann/go-ndjson v0.0.1/go.mod h1:ueEJJ39Jei+zfPCEx455kpunYWZf/pkwn7HqETHrQkU=
 github.com/larsartmann/go-output v0.35.0 h1:82Oo5GeXIgmh+Ik0apYYmLegC867ZMy9NxEvnLdDd+s=
 github.com/larsartmann/go-output v0.35.0/go.mod h1:LXQxCRNtrIIWWk2T41zlFQZNuxhKtFENFTIYLPqkX7o=
-github.com/larsartmann/go-output/d2 v0.35.0 h1:3cid8H9y3SZpXzSt7RR9aypZ+g0ig1Y3hKaYHqfr094=
-github.com/larsartmann/go-output/d2 v0.35.0/go.mod h1:1Q9Y3wv1J1nGtEumeyOx1DB3ciyhIyBOEI5VRFDIEaY=
+github.com/larsartmann/go-output/d2 v0.36.0 h1:wh8VBOX9mP1qbBtdYSTGmprowqk9Bn7OSkB7KGB96fY=
+github.com/larsartmann/go-output/d2 v0.36.0/go.mod h1:l7oOuPNq6OvFGvNDwTr70Ud/kpBwrXEy5PCLNbS1F20=
 github.com/larsartmann/go-output/daghtml v0.35.0 h1:tdVR56Da1adXbhq1oZi0qtw+RXHtsyufa0Zj+S69d68=
 github.com/larsartmann/go-output/daghtml v0.35.0/go.mod h1:PMlfYzKRSnRkohhr1RNh8LsbebNE61JKjDx3Vd1uYGM=
 github.com/larsartmann/go-output/delimited v0.35.0 h1:dm84YfKY/P5kjsjL4hPfRY0RSUsk/ehGuKiyLuBcqew=
@@ -68,10 +68,10 @@ github.com/larsartmann/go-output/serialization v0.35.0 h1:Wf7ExGfIlpsFzkuyQ2JE8G
 github.com/larsartmann/go-output/serialization v0.35.0/go.mod h1:JXgIbAGg43i+PlR5uI+kEqbkq/8jUOd+EuGqOL6xfqg=
 github.com/larsartmann/go-output/table v0.35.0 h1:/5OyUe2T5iXG+yw/9QwCDO1BaIVis/C7QvnTbP4jjDE=
 github.com/larsartmann/go-output/table v0.35.0/go.mod h1:1m8WRiLKUTX2HkrdD+FQsX7qFdKIYnlwECRe+1fO6WE=
-github.com/larsartmann/go-output/testhelpers v0.34.0 h1:6Lw5Y18UT2eIKOp7+qbhD678/EWkcMFWEOW3wlAYt+s=
-github.com/larsartmann/go-output/testhelpers v0.34.0/go.mod h1:CtP2aiCXEjiH/rh1cO2UJ0H8bW0eoqoqcTpUxqG6O6w=
-github.com/larsartmann/go-output/testhelpers/graphtest v0.34.0 h1:Aa8x/8ik+VM4QxbOwtc3Wta1ohASjyhff+BoQwDmszo=
-github.com/larsartmann/go-output/testhelpers/graphtest v0.34.0/go.mod h1:u8gCtwVTjsJInrulwuDXl4JJttxcJTKdzz6RsVIL7jc=
+github.com/larsartmann/go-output/testhelpers v0.35.0 h1:VnEw9DZMWx/BS2pejESEVac6izYnbsVCugPfD4q2kC8=
+github.com/larsartmann/go-output/testhelpers v0.35.0/go.mod h1:CtP2aiCXEjiH/rh1cO2UJ0H8bW0eoqoqcTpUxqG6O6w=
+github.com/larsartmann/go-output/testhelpers/graphtest v0.35.0 h1:QL2UQUZla7PwnWV10v4u9oeJ7ljXIua6iTfO0ivo7kU=
+github.com/larsartmann/go-output/testhelpers/graphtest v0.35.0/go.mod h1:317sDBF4S0VtrINdeM3wSC8VVjNTtLe/qXwex+QbVk0=
 github.com/larsartmann/go-output/tree v0.35.0 h1:iCXUM4IDlEH5VKwRVUjqahJGjPXk7zzmcZA+/2Y0tCE=
 github.com/larsartmann/go-output/tree v0.35.0/go.mod h1:9uYXXrmMeImVyHPGadE53EmVVtArPM2AsNypbVMDo7g=
 github.com/larsartmann/go-workflow-auditlog v0.8.2 h1:/t+9h7RDP+qnpBfgBsNdOGCFxjOPVpOA2NLbhQeljjo=
