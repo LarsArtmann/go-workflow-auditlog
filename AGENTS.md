@@ -191,6 +191,15 @@ The live dashboard is operable without a mouse. All keyboard shortcuts are suppr
   and delivery order is not guaranteed to match event Sequence (sort if needed).
 - `BuildReport()` uses `mu.RLock()` for reading.
 
+### Live module concurrency (Hub)
+
+- **Single `sync.RWMutex` (`mu`)** on `Hub` protects `clients` map and `complete`/`draining` flags.
+- **`eventSeq` is `atomic.Uint64`** — monotonic SSE event ID assignment with no mutex needed.
+- **`BroadcastEvent{ID sse.EventID, Data jsontext.Value}`** is the channel type — SSE clients use `ID` for Last-Event-ID reconnection replay; the `Data` is pre-marshaled JSON.
+- **`OnEvent`** marshals the event to JSON (outside any lock), assigns a sequential ID via `atomic.Uint64.Add(1)`, stores the `sse.Event` in the ring buffer (mutex-guarded), then broadcasts `BroadcastEvent` to all subscribers via non-blocking `select` with `default` (drop-on-full).
+- **Ring buffer** (`eventRingBuffer` in `replay.go`) has its own `sync.Mutex` — concurrent `add` and `EventsAfter` are safe.
+- **`Drain(ctx)`** polls subscriber channel lengths every 1ms (same pattern as go-sse's `fanOut.Shutdown`) until all buffers empty or context expires.
+
 ---
 
 ## Integration Model
