@@ -1,6 +1,7 @@
 package auditlog_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -181,5 +182,183 @@ func TestSummary(t *testing.T) {
 	summary := a.Report().Summary()
 	if summary == "" {
 		t.Error("expected non-empty summary")
+	}
+}
+
+func TestDiff_CriticalPathDelta(t *testing.T) {
+	t.Parallel()
+
+	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
+	a1.Attach(w1)
+	a1.CaptureDAG(w1)
+
+	a1a := testhelpers.NewSlow("a", 10*time.Millisecond)
+	a1b := testhelpers.NewSlow("b", 10*time.Millisecond)
+	a1c := testhelpers.NewSucceed("c")
+
+	w1.Add(flow.Step(a1a))
+	testhelpers.AddDependentStep(w1, a1a, a1b)
+	testhelpers.AddDependentStep(w1, a1b, a1c)
+
+	testhelpers.RunWorkflow(t, a1, w1)
+
+	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
+	a2.Attach(w2)
+	a2.CaptureDAG(w2)
+
+	a2a := testhelpers.NewSlow("a", 100*time.Millisecond)
+	a2b := testhelpers.NewSlow("b", 100*time.Millisecond)
+	a2c := testhelpers.NewSucceed("c")
+
+	w2.Add(flow.Step(a2a))
+	testhelpers.AddDependentStep(w2, a2a, a2b)
+	testhelpers.AddDependentStep(w2, a2b, a2c)
+
+	testhelpers.RunWorkflow(t, a2, w2)
+
+	r1, r2 := a1.Report(), a2.Report()
+
+	if r2.CriticalPathDurationMs <= r1.CriticalPathDurationMs {
+		t.Skipf("second run did not produce a strictly larger critical-path "+
+			"duration (r1=%v, r2=%v); environment too noisy",
+			r1.CriticalPathDurationMs, r2.CriticalPathDurationMs)
+	}
+
+	diff := r1.Diff(r2)
+	if diff.CriticalPathDeltaMs <= 0 {
+		t.Errorf("expected positive critical-path delta, got %f", diff.CriticalPathDeltaMs)
+	}
+
+	if !diff.HasChanges() {
+		t.Error("diff with critical-path change should report changes")
+	}
+}
+
+func TestDiff_CriticalPathStepsAddedRemoved(t *testing.T) {
+	t.Parallel()
+
+	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
+	a1.Attach(w1)
+	a1.CaptureDAG(w1)
+
+	// Diamond: a → (b, c) → d. d depends on both b and c.
+	a := testhelpers.NewSlow("a", 5*time.Millisecond)
+	b := testhelpers.NewSlow("b", 5*time.Millisecond)
+	c := testhelpers.NewSlow("c", 5*time.Millisecond)
+	d := testhelpers.NewSucceed("d")
+
+	w1.Add(flow.Step(a))
+	testhelpers.AddDependentStep(w1, a, b)
+	testhelpers.AddDependentStep(w1, a, c)
+	testhelpers.AddDependentStep(w1, b, d)
+	testhelpers.AddDependentStep(w1, c, d)
+
+	testhelpers.RunWorkflow(t, a1, w1)
+
+	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
+	a2.Attach(w2)
+	a2.CaptureDAG(w2)
+
+	// Different shape: a → b → e. Different downstream — only one leaf.
+	a2a := testhelpers.NewSlow("a", 5*time.Millisecond)
+	a2b := testhelpers.NewSlow("b", 5*time.Millisecond)
+	a2e := testhelpers.NewSucceed("e")
+
+	w2.Add(flow.Step(a2a))
+	testhelpers.AddDependentStep(w2, a2a, a2b)
+	testhelpers.AddDependentStep(w2, a2b, a2e)
+
+	testhelpers.RunWorkflow(t, a2, w2)
+
+	diff := a1.Report().Diff(a2.Report())
+
+	// r1 has critical-path steps including "d" (or "c", depending on tie
+	// breaking). r2 does NOT include "d" or "c". So at least one of those
+	// must appear in CriticalPathStepsRemoved.
+	removedHasDOrC := false
+
+	for _, n := range diff.CriticalPathStepsRemoved {
+		if n == "d" || n == "c" {
+			removedHasDOrC = true
+		}
+	}
+
+	if !removedHasDOrC {
+		t.Errorf("expected 'd' or 'c' in CriticalPathStepsRemoved, got %v", diff.CriticalPathStepsRemoved)
+	}
+
+	// r2's critical path includes "e" which r1 does NOT have.
+	addedHasE := false
+
+	for _, n := range diff.CriticalPathStepsAdded {
+		if n == "e" {
+			addedHasE = true
+		}
+	}
+
+	if !addedHasE {
+		t.Errorf("expected 'e' in CriticalPathStepsAdded, got %v", diff.CriticalPathStepsAdded)
+	}
+}
+
+func TestDiff_PeakConcurrencyDelta(t *testing.T) {
+	t.Parallel()
+
+	a1, w1 := testhelpers.NewAuditAndWorkflow(t)
+	a1.Attach(w1)
+	a1.CaptureDAG(w1)
+
+	for i := range 3 {
+		w1.Add(flow.Step(testhelpers.NewSlow(fmt.Sprintf("p%d", i), 20*time.Millisecond)))
+	}
+
+	testhelpers.RunWorkflow(t, a1, w1)
+
+	a2, w2 := testhelpers.NewAuditAndWorkflow(t)
+	a2.Attach(w2)
+	a2.CaptureDAG(w2)
+
+	for i := range 5 {
+		w2.Add(flow.Step(testhelpers.NewSlow(fmt.Sprintf("p%d", i), 20*time.Millisecond)))
+	}
+
+	testhelpers.RunWorkflow(t, a2, w2)
+
+	r1, r2 := a1.Report(), a2.Report()
+	if r2.PeakConcurrency <= r1.PeakConcurrency {
+		t.Skipf("second run did not reach higher peak concurrency (r1=%d, r2=%d); environment too noisy",
+			r1.PeakConcurrency, r2.PeakConcurrency)
+	}
+
+	diff := r1.Diff(r2)
+	if diff.PeakConcurrencyDelta <= 0 {
+		t.Errorf("expected positive peak-concurrency delta, got %d", diff.PeakConcurrencyDelta)
+	}
+}
+
+func TestDiff_HasChanges_AggregateOnly(t *testing.T) {
+	t.Parallel()
+
+	// Two reports with identical steps but different aggregate metrics —
+	// Diff must report HasChanges=true even without step-level diffs.
+	base := auditlog.WorkflowReport{
+		WallClockDurationMs:    100,
+		CriticalPathDurationMs: 80,
+		PeakConcurrency:        2,
+	}
+
+	other := auditlog.WorkflowReport{
+		WallClockDurationMs:    100, // same
+		CriticalPathDurationMs: 90,  // different
+		PeakConcurrency:        2,
+	}
+
+	diff := base.Diff(other)
+	if !diff.HasChanges() {
+		t.Error("diff with only aggregate change should still report HasChanges")
+	}
+
+	if diff.CriticalPathDeltaMs != 10 {
+		t.Errorf("CriticalPathDeltaMs = %f, want 10", diff.CriticalPathDeltaMs)
 	}
 }

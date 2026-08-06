@@ -180,16 +180,17 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 	status := fromErrorToStatus(err)
 
 	evt := Event{
-		RunID:      r.runID,
-		Sequence:   seq,
-		Timestamp:  now,
-		EventType:  EventTypeAttemptEnd,
-		Phase:      PhaseAfter,
-		StepRef:    StepRef{Name: name, StepType: rec.StepType},
-		Attempt:    rec.attemptCount,
-		DurationMs: durationMs,
-		Error:      errStr,
-		Status:     status,
+		RunID:         r.runID,
+		Sequence:      seq,
+		Timestamp:     now,
+		EventType:     EventTypeAttemptEnd,
+		Phase:         PhaseAfter,
+		StepRef:       StepRef{Name: name, StepType: rec.StepType},
+		Attempt:       rec.attemptCount,
+		DurationMs:    durationMs,
+		Error:         errStr,
+		Status:        status,
+		FailureReason: classifyFailure(err),
 	}
 	r.appendEventLocked(evt)
 

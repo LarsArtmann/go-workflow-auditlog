@@ -211,6 +211,95 @@ func (r WorkflowReport) RetriedSteps() []StepInfo {
 	return result
 }
 
+// RetriedStepCount returns the number of steps that retried at least once.
+// "Retried" means AttemptCount > 1 — i.e. at least one retry attempt fired
+// (regardless of whether the step ultimately succeeded). This is the
+// workflow-level aggregate consumers typically want to track retry pressure.
+func (r WorkflowReport) RetriedStepCount() int {
+	count := 0
+
+	for _, s := range r.Steps {
+		if s.AttemptCount > 1 {
+			count++
+		}
+	}
+
+	return count
+}
+
+// TotalRetryAttempts returns the sum of (AttemptCount - 1) across all steps —
+// i.e. the number of retry attempts beyond the initial try. Workflows with
+// many flaky steps have a high number here even when their RetriedStepCount
+// is modest (one retry per step × 50 steps = 50 retries).
+func (r WorkflowReport) TotalRetryAttempts() int {
+	total := 0
+
+	for _, s := range r.Steps {
+		if s.AttemptCount > 1 {
+			total += s.AttemptCount - 1
+		}
+	}
+
+	return total
+}
+
+// TimedOutSteps returns all steps whose final event FailureReason indicates
+// a timeout (errors.Is(err, context.DeadlineExceeded) at capture time).
+func (r WorkflowReport) TimedOutSteps() []StepInfo {
+	result := make([]StepInfo, 0)
+
+	for _, s := range r.Steps {
+		if stepTimedOut(r, s.Name) {
+			result = append(result, s)
+		}
+	}
+
+	return result
+}
+
+// stepTimedOut checks whether any attempt_end event for the given step has
+// FailureReason == timeout. Internal helper for TimedOutSteps.
+func stepTimedOut(r WorkflowReport, stepName string) bool {
+	for _, e := range r.Events {
+		if e.Name == stepName && e.IsAttemptEnd() && e.IsTimeout() {
+			return true
+		}
+	}
+
+	return false
+}
+
+// TimedOutStepCount returns the count of steps that timed out (see
+// [WorkflowReport.TimedOutSteps]).
+func (r WorkflowReport) TimedOutStepCount() int {
+	return len(r.TimedOutSteps())
+}
+
+// HasWorkflowRetries returns true if any step had more than one attempt.
+// Useful as a quick "did retries happen anywhere?" predicate without
+// iterating the Steps slice at the call site.
+func (r WorkflowReport) HasWorkflowRetries() bool {
+	for _, s := range r.Steps {
+		if s.AttemptCount > 1 {
+			return true
+		}
+	}
+
+	return false
+}
+
+// HasWorkflowTimeouts returns true if any step timed out (any attempt's
+// FailureReason == timeout).
+func (r WorkflowReport) HasWorkflowTimeouts() bool {
+	for _, e := range r.Events {
+		if e.IsAttemptEnd() && e.IsTimeout() {
+			return true
+		}
+	}
+
+	return false
+}
+
 // WriteJSON writes the report as indented JSON to the writer.
 func (r WorkflowReport) WriteJSON(writer io.Writer) error {
 	encoder := jsontext.NewEncoder(writer, jsontext.WithIndent("  "))
