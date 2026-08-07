@@ -106,7 +106,7 @@ stream.go          — NDJSONStreamer: real-time streaming NDJSON writer (thread
 multi_writer.go    — MultiWriter: fan-out OnEvent to multiple func(Event) callbacks (composes directly with Config.OnEvent, NDJSONStreamer.OnEvent, hub.OnEvent)
 classify.go        — Error classification: RegisterClassifications() + ErrorClassifications() map sentinel errors → go-error-family Family
 csv.go             — WriteCSV/WriteTSV/ExportCSV/ExportTSV: delimited-value export of all steps (stdlib encoding/csv, pointer fields as empty strings)
-helpers.go         — Utility helpers: CheckNoClobber, HasPointerAddress, NameCollisions + ErrFileExists sentinel + WriteToFile (atomic temp+rename export helper)
+helpers.go         — Utility helpers: CheckNoClobber, HasPointerAddress, NameCollisions + ErrFileExists sentinel + WriteToFile (atomic temp+rename export helper) + wrapFlushError (bufio/csv flush error wrapping)
 testhelpers/     — Exported test fixtures, step constructors, assertions, and FailingWriter/ErrWriteFailed shared by both modules
 ```
 
@@ -116,7 +116,7 @@ testhelpers/     — Exported test fixtures, step constructors, assertions, and 
 viz.go              — Package doc + type aliases (WorkflowReport, StepInfo, StepStatus, etc.) and re-exports (ErrRenderFailed, ErrExportWriteFailed, WriteToFile, AllStepStatuses, AllEventTypes)
 diagram.go          — Translation layer: buildGraph() converts WorkflowReport → go-output GraphNode/GraphEdge + statusStyle() + stepLabel()
 diagram_options.go  — DiagramOption type + WithDirection(output.Direction) + per-format direction helpers
-render.go           — Shared render helpers: writeRendered, writeRenderedTransformed, writeGraph
+render.go           — Shared render helpers: writeRendered, writeRenderedTransformed, writeGraph, writeToString (WriteXString pattern)
 mermaid.go          — WriteMermaid, WriteMermaidString, ExportMermaid
 plantuml.go         — WritePlantUML, WritePlantUMLString, ExportPlantUML
 graphviz.go         — WriteGraphviz, WriteGraphvizString, ExportGraphviz
@@ -331,23 +331,23 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
 
 ### Duplicate-code policy
 
-- Run `art-dupl --semantic --sort total-tokens -t 15` to find clones.
-- Goal is **zero harmful duplication**, not zero report lines. Some
-  signature-only matches (e.g. multiple `Assert*(t, report, want)` helpers
-  sharing the same parameter shape) are intentional: each helper asserts a
-  different field with different semantics and merging would harm clarity.
-- Production-code duplication is never acceptable: extract helpers (see
-  `sortByName`, `sortStepsByName`, `diffStep`, `writeGraph` in `viz/render.go`).
-- **Current state**: zero clone groups at any threshold from `-t 3` through
-  `-t 30` (production code extracted via `writeGraph` in `viz/render.go`; test
-  `Write*`-into-buffer preamble extracted via
-  `RunSingleSucceedWithBuffer` in `testhelpers`, eliminating the
-  23-occurrence `t.Parallel + runSingleSucceed + var buf strings.Builder`
-  clone group that previously appeared at `-t 3`; test `Export*` preamble
-  extracted via `SingleSucceedExportPath` in `testhelpers`). The
-  formerly-documented "ten acceptable clones" section below was retired
-  when the refactor landed — those patterns no longer appear in the
-  report.
+- Run `art-dupl --type-aware --sort total-tokens -t 1` to find clones.
+- Goal is **zero clone groups** at every threshold (`-t 1` through `-t 30`).
+  Each one represents either a real maintenance burden (extract a helper)
+  or an accepted idiom (mark with `//art-dupl:accept`).
+- Production-code duplication is never acceptable: extract helpers. Recent
+  examples: `writeToString` in `viz/render.go` (replaces 7 duplicated
+  `WriteXString` bodies), `wrapFlushError` in `helpers.go` (replaces the
+  duplicated flush error wrapping in `csv.go` and `export.go`),
+  `serveTestRequest` in `live/server_test.go` (replaces 4 copies of the
+  `server + ctx + req + rec + ServeHTTP` setup).
+- Test boilerplate (e.g. `t.Parallel()` at the start of every parallel
+  test) is accepted idiomatic Go — marked with `//art-dupl:accept
+  idiomatic Go test boilerplate` on the exact flagged line so the tool
+  knows it's intentional. Removing the marker re-surfaces the clone.
+- New duplications introduced in PRs must be either extracted into a
+  helper or annotated with an `//art-dupl:accept` directive explaining
+  why the duplication is intentional.
 
 #### Acceptable clones (documented in source)
 
