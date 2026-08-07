@@ -2,7 +2,6 @@ package viz
 
 import (
 	"io"
-	"strings"
 
 	"github.com/larsartmann/go-output"
 	"github.com/larsartmann/go-output/d2"
@@ -85,14 +84,9 @@ func WriteD2(r WorkflowReport, writer io.Writer, opts ...DiagramOption) error {
 // WriteD2String returns the D2 diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
 func WriteD2String(r WorkflowReport, opts ...DiagramOption) (string, error) {
-	var buf strings.Builder
-
-	err := WriteD2(r, &buf, opts...)
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
+	return writeToString(func(w io.Writer) error {
+		return WriteD2(r, w, opts...)
+	})
 }
 
 // ExportD2 writes the D2 diagram to path.

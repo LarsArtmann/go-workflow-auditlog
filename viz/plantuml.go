@@ -2,7 +2,6 @@ package viz
 
 import (
 	"io"
-	"strings"
 
 	"github.com/larsartmann/go-output/plantuml"
 )
@@ -33,14 +32,9 @@ func WritePlantUML(r WorkflowReport, writer io.Writer, opts ...DiagramOption) er
 // WritePlantUMLString returns the PlantUML diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
 func WritePlantUMLString(r WorkflowReport, opts ...DiagramOption) (string, error) {
-	var buf strings.Builder
-
-	err := WritePlantUML(r, &buf, opts...)
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
+	return writeToString(func(w io.Writer) error {
+		return WritePlantUML(r, w, opts...)
+	})
 }
 
 // ExportPlantUML writes the PlantUML diagram to path.

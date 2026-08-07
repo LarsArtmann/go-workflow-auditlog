@@ -3,6 +3,7 @@ package viz
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/larsartmann/go-output"
 )
@@ -73,4 +74,18 @@ func writeGraph(
 	renderer.SetEdges(edges)
 
 	return writeRenderedTransformed(writer, format, renderer.Render, transform)
+}
+
+// writeToString runs write against an in-memory buffer and returns the
+// accumulated string. Centralizes the WriteXString pattern shared by every
+// diagram/table/tree/HTML exporter (Mermaid, PlantUML, Graphviz DOT, D2, Tree,
+// HTMLTree, Table). Returns ("", err) if write fails.
+func writeToString(write func(io.Writer) error) (string, error) {
+	var buf strings.Builder
+
+	if err := write(&buf); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }

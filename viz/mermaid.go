@@ -37,14 +37,9 @@ func WriteMermaid(r WorkflowReport, writer io.Writer, opts ...DiagramOption) err
 // WriteMermaidString returns the Mermaid diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
 func WriteMermaidString(r WorkflowReport, opts ...DiagramOption) (string, error) {
-	var buf strings.Builder
-
-	err := WriteMermaid(r, &buf, opts...)
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
+	return writeToString(func(w io.Writer) error {
+		return WriteMermaid(r, w, opts...)
+	})
 }
 
 // ExportMermaid writes the Mermaid diagram to path.

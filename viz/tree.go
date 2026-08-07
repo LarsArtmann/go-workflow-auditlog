@@ -2,7 +2,6 @@ package viz
 
 import (
 	"io"
-	"strings"
 
 	"github.com/larsartmann/go-output"
 	"github.com/larsartmann/go-output/markup"
@@ -85,14 +84,9 @@ func WriteTree(r WorkflowReport, writer io.Writer) error {
 // WriteTreeString returns the ASCII tree as a string.
 // Returns a non-nil error only if tree generation fails.
 func WriteTreeString(r WorkflowReport) (string, error) {
-	var buf strings.Builder
-
-	err := WriteTree(r, &buf)
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
+	return writeToString(func(w io.Writer) error {
+		return WriteTree(r, w)
+	})
 }
 
 // ExportTree writes the ASCII tree to path.
@@ -114,14 +108,9 @@ func WriteHTMLTree(r WorkflowReport, writer io.Writer) error {
 // WriteHTMLTreeString returns the HTML tree as a string.
 // Returns a non-nil error only if tree generation fails.
 func WriteHTMLTreeString(r WorkflowReport) (string, error) {
-	var buf strings.Builder
-
-	err := WriteHTMLTree(r, &buf)
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
+	return writeToString(func(w io.Writer) error {
+		return WriteHTMLTree(r, w)
+	})
 }
 
 // ExportHTMLTree writes the HTML tree to path.

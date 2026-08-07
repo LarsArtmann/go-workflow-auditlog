@@ -3,7 +3,6 @@ package viz
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/larsartmann/go-output"
 	// Blank imports register table data renderers for RenderTable dispatch.
@@ -91,14 +90,9 @@ func WriteTableString(
 	opts output.RenderOptions,
 	tableOpts ...TableOption,
 ) (string, error) {
-	var buf strings.Builder
-
-	err := WriteTable(r, &buf, format, opts, tableOpts...)
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
+	return writeToString(func(w io.Writer) error {
+		return WriteTable(r, w, format, opts, tableOpts...)
+	})
 }
 
 // ExportTable writes the step summary table to path.

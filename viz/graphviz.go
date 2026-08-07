@@ -2,7 +2,6 @@ package viz
 
 import (
 	"io"
-	"strings"
 
 	"github.com/larsartmann/go-output/graph"
 )
@@ -30,14 +29,9 @@ func WriteGraphviz(r WorkflowReport, writer io.Writer, opts ...DiagramOption) er
 // WriteGraphvizString returns the Graphviz DOT diagram as a string.
 // Returns a non-nil error only if diagram generation fails.
 func WriteGraphvizString(r WorkflowReport, opts ...DiagramOption) (string, error) {
-	var buf strings.Builder
-
-	err := WriteGraphviz(r, &buf, opts...)
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
+	return writeToString(func(w io.Writer) error {
+		return WriteGraphviz(r, w, opts...)
+	})
 }
 
 // ExportGraphviz writes the Graphviz DOT diagram to path.
