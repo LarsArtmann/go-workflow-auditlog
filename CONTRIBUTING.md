@@ -11,31 +11,37 @@ Thanks for your interest in contributing to `go-workflow-auditlog`!
 
 ## Development Setup
 
-Requires Go 1.26+ and [`golangci-lint` v2](https://golangci-lint.run/).
+Requires Go 1.26+ with `GOEXPERIMENT=jsonv2` and [`golangci-lint` v2](https://golangci-lint.run/).
 
 ```bash
 git clone https://github.com/LarsArtmann/go-workflow-auditlog.git
 cd go-workflow-auditlog
-go build ./...
+GOEXPERIMENT=jsonv2 go build ./...
 ```
 
 Verify your environment:
 
 ```bash
-go test -race ./...    # all tests pass
-golangci-lint run ./... # 0 issues
+GOEXPERIMENT=jsonv2 go test -race ./...    # all tests pass
+golangci-lint run ./...                      # 0 issues
 ```
 
 ## Commands
 
-| Command                                                         | Purpose                          |
-| --------------------------------------------------------------- | -------------------------------- |
-| `go test ./...`                                                 | Run all tests                    |
-| `go test -race ./...`                                           | Run all tests with race detector |
-| `go test -race -coverprofile=cover.out -covermode=atomic ./...` | Tests with coverage              |
-| `go vet ./...`                                                  | Static analysis                  |
-| `golangci-lint run ./...`                                       | Lint (config in `.golangci.yml`) |
-| `go run ./example`                                              | Run the demo pipeline            |
+| Command                                                                 | Purpose                                      |
+| ----------------------------------------------------------------------- | -------------------------------------------- |
+| `GOEXPERIMENT=jsonv2 go test ./...`                                     | Run core tests                               |
+| `GOEXPERIMENT=jsonv2 go test -race ./...`                               | Core tests with race detector                |
+| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out ./...`       | Core tests with coverage                     |
+| `GOEXPERIMENT=jsonv2 go vet ./...`                                      | Core static analysis                         |
+| `golangci-lint run ./...`                                               | Lint core (config in `.golangci.yml`)        |
+| `cd viz && GOEXPERIMENT=jsonv2 go test ./...`                           | Run viz tests                                |
+| `cd viz && golangci-lint run ./...`                                     | Lint viz                                     |
+| `cd live && GOEXPERIMENT=jsonv2 go test ./...`                           | Run live tests                               |
+| `cd live && golangci-lint run ./...`                                     | Lint live                                    |
+| `go run ./viz/example`                                                  | Run the demo pipeline                        |
+| `cd live && GOEXPERIMENT=jsonv2 go run ./demo`                          | Run live dashboard demo (:18080)             |
+| `nix run .#check`                                                       | All checks: vet+test-race+lint+govulncheck   |
 
 A pull request is mergeable only when **all** of the above pass cleanly.
 
@@ -83,10 +89,12 @@ in the changelog.
 3. **Bump `SchemaVersion`** in `types.go` if the JSON report schema changed in a
    backwards-incompatible way. The schema version is independent of the module
    tag.
-4. **Tag** the commit: `git tag v0.X.Y`.
-5. **Push** the tag: `git push origin v0.X.Y`.
-6. **Create a GitHub Release** from the tag, pasting the changelog section as the
-   release notes.
+4. **Tag** the commit with three annotated tags (one per module):
+   `git tag -a v0.X.Y -m "..."`, `git tag -a viz/v0.X.Y -m "..."`,
+   `git tag -a live/v0.X.Y -m "..."`.
+5. **Push** the tags: `git push origin v0.X.Y viz/v0.X.Y live/v0.X.Y`.
+6. **Create a GitHub Release** from the core tag, pasting the changelog section as the
+   release notes. See [`RELEASE.md`](RELEASE.md) for the full process.
 
 `goreleaser` configuration (`.goreleaser.yml`) is provided to automate
 release artifacts and changelog generation. To test it locally without

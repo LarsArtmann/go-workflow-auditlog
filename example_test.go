@@ -211,6 +211,46 @@ func ExampleWorkflowReport_Diff() {
 	// Output: duration delta: 500ms, added: 1, removed: 1
 }
 
+// ExampleWorkflowReport_TimedOutSteps demonstrates querying steps that
+// timed out during execution.
+func ExampleWorkflowReport_TimedOutSteps() {
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
+			{StepRef: auditlog.StepRef{Name: "slow-api"}, Status: auditlog.StepStatusCanceled,
+				FailureReason: auditlog.FailureReasonTimeout},
+		},
+		Events: []auditlog.Event{
+			{EventType: auditlog.EventTypeAttemptEnd, StepRef: auditlog.StepRef{Name: "slow-api"},
+				FailureReason: auditlog.FailureReasonTimeout},
+		},
+	}
+
+	for _, step := range report.TimedOutSteps() {
+		fmt.Printf("timed out: %s (%s)\n", step.Name, step.FailureReason)
+	}
+
+	// Output: timed out: slow-api (timeout)
+}
+
+// ExampleWorkflowReport_HasWorkflowRetries demonstrates the quick predicate
+// for checking whether any step retried.
+func ExampleWorkflowReport_HasWorkflowRetries() {
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded, AttemptCount: 1},
+			{StepRef: auditlog.StepRef{Name: "flaky"}, Status: auditlog.StepStatusSucceeded, AttemptCount: 3},
+		},
+	}
+
+	if report.HasWorkflowRetries() {
+		fmt.Printf("%d steps retried, %d total retry attempts\n",
+			report.RetriedStepCount(), report.TotalRetryAttempts())
+	}
+
+	// Output: 1 steps retried, 2 total retry attempts
+}
+
 // finalizeForExample populates denormalized fields so Summary() works in
 // examples without running a full Auditor lifecycle.
 func finalizeForExample(r *auditlog.WorkflowReport) {

@@ -1083,3 +1083,65 @@ func BenchmarkNDJSONStreamer_1000Events(b *testing.B) { benchmarkNDJSONStreamer(
 func BenchmarkNDJSONStreamer_10000Events(b *testing.B) {
 	benchmarkNDJSONStreamer(b, 10000)
 }
+
+func BenchmarkStreamEvents_1000Lines(b *testing.B) {
+	var lines []string
+
+	for i := range 1000 {
+		lines = append(lines, fmt.Sprintf(
+			`{"sequence":%d,"timestamp":"2026-01-01T00:00:00Z","event_type":"attempt_start","phase":"before","step_name":"step-%d"}`,
+			i+1, i%10,
+		))
+	}
+
+	input := strings.Join(lines, "\n") + "\n"
+
+	b.ResetTimer()
+
+	for range b.N {
+		_ = auditlog.StreamEvents(
+			strings.NewReader(input),
+			nil,
+			func(int, auditlog.Event) error { return nil },
+		)
+	}
+}
+
+func BenchmarkMultiWriter_3Callbacks(b *testing.B) {
+	cb1 := func(auditlog.Event) {}
+	cb2 := func(auditlog.Event) {}
+	cb3 := func(auditlog.Event) {}
+
+	mw := auditlog.NewMultiWriter(cb1, cb2, cb3)
+
+	evt := auditlog.Event{
+		Sequence:  1,
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+		StepRef:   auditlog.StepRef{Name: "bench"},
+	}
+
+	b.ResetTimer()
+
+	for range b.N {
+		mw.OnEvent(evt)
+	}
+}
+
+func BenchmarkMultiWriter_1Callback(b *testing.B) {
+	cb := func(auditlog.Event) {}
+	mw := auditlog.NewMultiWriter(cb)
+
+	evt := auditlog.Event{
+		Sequence:  1,
+		EventType: auditlog.EventTypeAttemptStart,
+		Phase:     auditlog.PhaseBefore,
+		StepRef:   auditlog.StepRef{Name: "bench"},
+	}
+
+	b.ResetTimer()
+
+	for range b.N {
+		mw.OnEvent(evt)
+	}
+}

@@ -1,6 +1,7 @@
 package auditlog_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
