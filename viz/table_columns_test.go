@@ -279,6 +279,32 @@ func TestTable_AllTableColumnsCount(t *testing.T) {
 	}
 }
 
+func TestTable_FailureReasonColumn(t *testing.T) {
+	t.Parallel()
+
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "timed-out"}, Status: auditlog.StepStatusCanceled,
+				FailureReason: auditlog.FailureReasonTimeout},
+			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	out, err := viz.WriteTableString(report, output.FormatCSV, output.RenderOptions{},
+		viz.WithColumns(viz.ColumnStep, viz.ColumnFailureReason))
+	if err != nil {
+		t.Fatalf("WriteTableString: %v", err)
+	}
+
+	if !strings.Contains(out, "Failure Reason") {
+		t.Errorf("expected 'Failure Reason' header, got:\n%s", out)
+	}
+
+	if !strings.Contains(out, "timeout") {
+		t.Errorf("expected 'timeout' value in output, got:\n%s", out)
+	}
+}
+
 func TestTable_ZeroDurationCell(t *testing.T) {
 	t.Parallel()
 

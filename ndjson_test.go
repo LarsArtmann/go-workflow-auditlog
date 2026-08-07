@@ -213,3 +213,27 @@ func TestStreamEvents_OversizedLine(t *testing.T) {
 		t.Errorf("expected ErrOversizedLine, got %v", err)
 	}
 }
+
+// TestStreamEvents_AllLinesFailJSON verifies that non-blank input where every
+// line fails JSON parsing returns a descriptive error (not ErrNoEvents).
+func TestStreamEvents_AllLinesFailJSON(t *testing.T) {
+	t.Parallel()
+
+	input := "not json at all\n{broken\n  \n"
+	err := auditlog.StreamEvents(
+		strings.NewReader(input),
+		nil,
+		func(int, auditlog.Event) error { return nil },
+	)
+	if err == nil {
+		t.Fatal("expected error for all-invalid JSON lines, got nil")
+	}
+
+	if errors.Is(err, auditlog.ErrNoEvents) {
+		t.Errorf("should not be ErrNoEvents for parse failure, got %v", err)
+	}
+
+	if !strings.Contains(err.Error(), "ndjson line") {
+		t.Errorf("error should contain line reference, got %v", err)
+	}
+}

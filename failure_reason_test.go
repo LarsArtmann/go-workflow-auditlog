@@ -227,10 +227,8 @@ func TestStepInfo_FailureReason_ClearedOnRetrySuccess(t *testing.T) {
 	t.Parallel()
 
 	a, w := testhelpers.NewAuditAndWorkflow(t)
-	step := testhelpers.NewFlaky("flaky-step", "transient", 2)
-	w.Add(flow.Step(step).DependsOn(
-		flow.Step(testhelpers.NewSucceed("noop")),
-	).Retry(testhelpers.RetryOpts(3)))
+	step := testhelpers.NewFlaky("flaky-step", 2)
+	testhelpers.AddRetryStep(w, step, 5)
 	testhelpers.RunWorkflow(t, a, w)
 
 	report := a.Report()
@@ -275,9 +273,9 @@ func TestCSV_FailureReasonColumn(t *testing.T) {
 	errMsg := "connection refused"
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{Name: "failed-step", Status: auditlog.StepStatusFailed,
+			{StepRef: auditlog.StepRef{Name: "failed-step"}, Status: auditlog.StepStatusFailed,
 				FailureReason: auditlog.FailureReasonUserError, Error: &errMsg},
-			{Name: "ok-step", Status: auditlog.StepStatusSucceeded},
+			{StepRef: auditlog.StepRef{Name: "ok-step"}, Status: auditlog.StepStatusSucceeded},
 		},
 	}
 
@@ -341,3 +339,48 @@ func TestFailureReason_Color(t *testing.T) {
 }
 
 func strPtr(s string) *string { return &s }
+
+// TestFailureSummary_GoldenJSON verifies the JSON field placement:
+//   - "failure_summary" appears at the report level (WorkflowReport)
+//   - "failure_reason" appears at the event level (Event) on attempt_end events
+//   - Neither field appears in the wrong scope (the v0.8 rename prevents collision)
+func TestFailureSummary_GoldenJSON(t *testing.T) {
+	t.Parallel()
+
+	// Report with a failure: failure_summary should be present at report level.
+	failedReport := auditlog.WorkflowReport{
+		WorkflowID:      "test-pipeline",
+		Steps:           []auditlog.StepInfo{{StepRef: auditlog.StepRef{Name: "fail"}, Status: auditlog.StepStatusFailed}},
+		FailedCount:     1,
+		FailureSummary:  "1 step(s) failed: fail",
+	}
+
+	var buf strings.Builder
+	if err := failedReport.WriteJSON(&buf); err != nil {
+		t.Fatalf("WriteJSON: %v", err)
+	}
+
+	json := buf.String()
+
+	if !strings.Contains(json, `"failure_summary"`) {
+		t.Error("expected report-level failure_summary in JSON")
+	}
+
+	// Report-level JSON should NOT have a bare "failure_reason" key outside of
+	// event objects. We verify by checking that the report object does not
+	// carry the field at the top level by building a report without events.
+	if strings.Contains(json, `"failure_reason"`) {
+		t.Error("report-level JSON should not contain failure_reason (events are empty)")
+	}
+
+	// Successful report: failure_summary should be absent (omitempty).
+	successReport := testhelpers.RunSingleSucceedWithReport(t, "ok-step")
+	var buf2 strings.Builder
+	if err := successReport.WriteJSON(&buf2); err != nil {
+		t.Fatalf("WriteJSON: %v", err)
+	}
+
+	if strings.Contains(buf2.String(), `"failure_summary"`) {
+		t.Error("successful report should omit failure_summary")
+	}
+}
