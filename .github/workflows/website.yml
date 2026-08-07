@@ -28,24 +28,33 @@ jobs:
       run:
         working-directory: website
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@249970729cb0ef358964e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           cache: npm
           cache-dependency-path: website/package-lock.json
 
       - run: npm install
+        working-directory: website
+
+      - name: npm audit
+        run: npm audit --audit-level=high --omit=dev
+        working-directory: website
+        continue-on-error: true
 
       - run: npx astro check
+        working-directory: website
 
       - run: npm run build
+        working-directory: website
 
       - name: HTML Validation
         run: npx html-validate --config .htmlvalidate.json "dist/**/*.html"
+        working-directory: website
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae7c1c64a875d1fc6a0a # v7
         with:
           name: website-dist
           path: website/dist/
@@ -56,13 +65,13 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@249970729cb0ef358964e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: website-dist
           path: website/dist/
@@ -71,7 +80,11 @@ jobs:
         working-directory: website
         run: |
           npm install -g firebase-tools
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > "$RUNNER_TEMP/gcp-key.json"
+          printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "$RUNNER_TEMP/gcp-key.json"
+          if ! node -e "JSON.parse(require('fs').readFileSync('$RUNNER_TEMP/gcp-key.json','utf8'))" 2>/dev/null; then
+            echo "ERROR: gcp-key.json is not valid JSON — secret may be corrupted or empty"
+            exit 1
+          fi
           firebase deploy --only hosting:auditlog --project lars-software
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp-key.json

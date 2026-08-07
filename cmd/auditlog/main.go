@@ -45,6 +45,8 @@ func main() {
 		err = runDiff(args)
 	case "validate":
 		err = runValidate(args)
+	case "schema":
+		err = runSchema(args)
 	case "version", "-v", "--version":
 		fmt.Printf("auditlog %s (schema %s)\n", CLIVersion, auditlog.SchemaVersion)
 
