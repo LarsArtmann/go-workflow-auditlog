@@ -9,14 +9,14 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md) — never retai
 ## Release
 
 - [ ] **Cut v0.9.0** — coordinated three-module release resolving the `nix run .#check` standalone failure (core `FailureSummary` rename breaks `viz` standalone builds until published). Read [`RELEASE.md`](RELEASE.md) first. Three annotated tags at one commit: `v0.9.0`, `viz/v0.9.0`, `live/v0.9.0`. Pre-release: `grep -r '^replace' viz/go.mod live/go.mod` must return nothing; working tree must be clean.
-  _Source: `docs/status/2026-08-06_23-56` §b.3, `docs/status/2026-08-06_23-23` §d.1_
+      _Source: `docs/status/2026-08-06_23-56` §b.3, `docs/status/2026-08-06_23-23` §d.1_
 
 ---
 
 ## Infrastructure
 
 - [ ] **Consider Go 1.26.5 → 1.27 upgrade** — eliminates the `GOEXPERIMENT=jsonv2` experimental flag requirement and the 29 gopls `stdversion` warnings across all files using `encoding/json/v2`.
-  _Source: `docs/status/2026-08-06_20-14` §f.36-37_
+      _Source: `docs/status/2026-08-06_20-14` §f.36-37_
 
 ---
 

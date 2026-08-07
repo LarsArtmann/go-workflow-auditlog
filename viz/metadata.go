@@ -5,8 +5,8 @@ package viz
 // so that JavaScript reads from a single Go-authoritative source instead of
 // maintaining parallel hardcoded constants.
 type TypeMetadata struct {
-	Statuses       map[string]StatusMeta       `json:"statuses"`
-	Events         map[string]EventMeta        `json:"events"`
+	Statuses       map[string]StatusMeta        `json:"statuses"`
+	Events         map[string]EventMeta         `json:"events"`
 	FailureReasons map[string]FailureReasonMeta `json:"failure_reasons"`
 }
 

@@ -489,11 +489,11 @@ streamer, _ := auditlog.CreateNDJSONStreamer("audit.ndjson", auditlog.WithAutoFl
 
 **Options:**
 
-| Option                    | Effect                                                                          |
-| ------------------------- | ------------------------------------------------------------------------------- |
-| `WithAutoFlush()`         | Flushes after every event (real-time tailing, lower throughput)                 |
-| `WithFlushInterval(d)`    | Flushes at most once per d (bounded latency without per-event syscall cost)     |
-| `WithBufferSize(n)`       | Sets internal buffer size in bytes (default 64 KB; values ≤ 0 keep the default) |
+| Option                 | Effect                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| `WithAutoFlush()`      | Flushes after every event (real-time tailing, lower throughput)                 |
+| `WithFlushInterval(d)` | Flushes at most once per d (bounded latency without per-event syscall cost)     |
+| `WithBufferSize(n)`    | Sets internal buffer size in bytes (default 64 KB; values ≤ 0 keep the default) |
 
 **Error handling:** First-error-wins. If a write fails, `streamer.Err()` returns the error and subsequent events are silently dropped. Errors are wrapped with `ErrExportWriteFailed`.
 
@@ -547,17 +547,17 @@ If the callback returns an error, `StreamEvents` stops reading and returns that 
 
 `WorkflowReport` provides workflow-level aggregate methods for common questions:
 
-| Method                         | Returns      | Description                                                                  |
-| ------------------------------ | ------------ | ---------------------------------------------------------------------------- |
-| `RetriedStepCount()`           | `int`        | Number of steps that retried at least once (`AttemptCount > 1`)              |
-| `TotalRetryAttempts()`         | `int`        | Sum of all retry attempts beyond the initial try across all steps            |
-| `HasWorkflowRetries()`         | `bool`       | Quick predicate: did any step retry?                                         |
-| `TimedOutSteps()`              | `[]StepInfo` | Steps whose final attempt failed with `FailureReasonTimeout`                |
-| `TimedOutStepCount()`          | `int`        | Count of steps that timed out                                                |
-| `HasWorkflowTimeouts()`        | `bool`       | Quick predicate: did any step time out?                                      |
-| `CriticalPath()`               | `[]StepInfo` | Ordered step chain (root-to-leaf) of the longest dependency path             |
-| `PeakConcurrencySteps()`       | `[]StepInfo` | Steps in-flight at the moment of peak concurrency                            |
-| `Duration()`                   | `time.Duration` | Wall-clock duration (earliest → latest event)                              |
+| Method                   | Returns         | Description                                                       |
+| ------------------------ | --------------- | ----------------------------------------------------------------- |
+| `RetriedStepCount()`     | `int`           | Number of steps that retried at least once (`AttemptCount > 1`)   |
+| `TotalRetryAttempts()`   | `int`           | Sum of all retry attempts beyond the initial try across all steps |
+| `HasWorkflowRetries()`   | `bool`          | Quick predicate: did any step retry?                              |
+| `TimedOutSteps()`        | `[]StepInfo`    | Steps whose final attempt failed with `FailureReasonTimeout`      |
+| `TimedOutStepCount()`    | `int`           | Count of steps that timed out                                     |
+| `HasWorkflowTimeouts()`  | `bool`          | Quick predicate: did any step time out?                           |
+| `CriticalPath()`         | `[]StepInfo`    | Ordered step chain (root-to-leaf) of the longest dependency path  |
+| `PeakConcurrencySteps()` | `[]StepInfo`    | Steps in-flight at the moment of peak concurrency                 |
+| `Duration()`             | `time.Duration` | Wall-clock duration (earliest → latest event)                     |
 
 ```go
 report := audit.Report()
@@ -648,19 +648,19 @@ _ = viz.ExportHTML(report, "dashboard.html")  // interactive HTML dashboard
 
 The `viz.WriteTable` / `viz.WriteTableString` / `viz.ExportTable` functions accept `viz.WithColumns` to control which columns appear. Eleven columns are available:
 
-| Column       | Constant                 | Default? |
-| ------------ | ------------------------ | -------- |
-| Step name    | `viz.ColumnStep`         | Yes      |
-| Status       | `viz.ColumnStatus`       | Yes      |
-| Duration     | `viz.ColumnDuration`     | Yes      |
-| Attempts     | `viz.ColumnAttempts`     | Yes      |
-| Max Attempts | `viz.ColumnMaxAttempts`  |          |
-| Has Retry    | `viz.ColumnRetry`        | Yes      |
-| Has Timeout  | `viz.ColumnTimeout`      | Yes      |
-| Error        | `viz.ColumnError`        | Yes      |
-| Type         | `viz.ColumnType`         |          |
-| Dependencies    | `viz.ColumnDependencies`    |          |
-| Failure Reason  | `viz.ColumnFailureReason`   |          |
+| Column         | Constant                  | Default? |
+| -------------- | ------------------------- | -------- |
+| Step name      | `viz.ColumnStep`          | Yes      |
+| Status         | `viz.ColumnStatus`        | Yes      |
+| Duration       | `viz.ColumnDuration`      | Yes      |
+| Attempts       | `viz.ColumnAttempts`      | Yes      |
+| Max Attempts   | `viz.ColumnMaxAttempts`   |          |
+| Has Retry      | `viz.ColumnRetry`         | Yes      |
+| Has Timeout    | `viz.ColumnTimeout`       | Yes      |
+| Error          | `viz.ColumnError`         | Yes      |
+| Type           | `viz.ColumnType`          |          |
+| Dependencies   | `viz.ColumnDependencies`  |          |
+| Failure Reason | `viz.ColumnFailureReason` |          |
 
 ```go
 // Compact table: just step name, status, and duration

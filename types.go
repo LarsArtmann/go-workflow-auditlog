@@ -347,8 +347,8 @@ var failureReasonMeta = map[FailureReason]struct {
 	Label string
 	Color string
 }{
-	FailureReasonTimeout: {Label: "Timeout", Color: "var(--warning)"},
-	FailureReasonCanceled: {Label: "Canceled", Color: "var(--text-muted)"},
+	FailureReasonTimeout:   {Label: "Timeout", Color: "var(--warning)"},
+	FailureReasonCanceled:  {Label: "Canceled", Color: "var(--text-muted)"},
 	FailureReasonUserError: {Label: "User Error", Color: "var(--error)"},
 }
 

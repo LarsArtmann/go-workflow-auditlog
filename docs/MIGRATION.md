@@ -182,9 +182,9 @@ enum (`timeout`, `canceled`, `user_error`) is available directly on the step.
 
 ### What changed
 
-| Scope      | JSON key           | Type                 | Example value | Default (success) |
-| ---------- | ------------------ | -------------------- | ------------- | ----------------- |
-| `StepInfo` | `failure_reason`   | `FailureReason` enum | `"timeout"`   | omitted (`omitempty`) |
+| Scope      | JSON key         | Type                 | Example value | Default (success)     |
+| ---------- | ---------------- | -------------------- | ------------- | --------------------- |
+| `StepInfo` | `failure_reason` | `FailureReason` enum | `"timeout"`   | omitted (`omitempty`) |
 
 ### Migration
 

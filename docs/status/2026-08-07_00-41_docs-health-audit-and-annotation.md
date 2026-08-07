@@ -13,6 +13,7 @@
 ### 1. Loaded docs-health skill and read ALL 2026-08-* files
 
 Read the SKILL.md in full (HARVEST, BUILD, VERIFY, ANNOTATE modes). Read all 5 historical docs:
+
 - `docs/planning/2026-08-06_19-45_SUPERB-go-sse-adoption-plan.md`
 - `docs/status/2026-08-06_20-14_go-sse-adoption-implementation-status.md`
 - `docs/status/2026-08-06_22-27_websocket-removal-and-core-features-status.md`
@@ -22,6 +23,7 @@ Read the SKILL.md in full (HARVEST, BUILD, VERIFY, ANNOTATE modes). Read all 5 h
 ### 2. Verified actual state against code
 
 Ran commands to establish ground truth before touching any doc:
+
 - **Dependency versions**: Read all 3 `go.mod` files — go-output v0.35.0, go-error-family v0.10.0, go-sse v0.4.0, go-atomic-write v0.4.1, go-branded-id v0.5.1
 - **Test counts**: `go test -v` top-level `RUN` count — core 205, viz 214, live 72 = **491 total**
 - **Coverage**: core 95.4%, viz 91.7%, live 96.2%
@@ -29,22 +31,23 @@ Ran commands to establish ground truth before touching any doc:
 
 ### 3. FEATURES.md — 11 drift items fixed
 
-| Item | Was | Now |
-|---|---|---|
-| Verification date | 2026-07-24 | 2026-08-06 |
-| go-output version | v0.31.1 | v0.35.0 |
-| go-error-family version | v0.9.0 | v0.10.0 |
-| go-atomic-write version | v0.3.0 | v0.4.1 |
-| go-branded-id version | v0.3.2 | v0.5.1 |
-| Go version in flake.nix ref | 1.26.4 | 1.26.5 |
-| Core coverage | 94.9% | 95.4% |
-| Live coverage | 90.3% | 96.2% |
-| Test count | 445 (162/229/54) | 491 (205/214/72) |
-| Property tests | 5 Diff algebra | 8 Diff algebra |
-| CHANGELOG ref | "v0.7.0 tagged" | "v0.8.1 tagged" + full [Unreleased] summary |
-| Example path | `example/main.go` | `viz/example/` |
+| Item                        | Was               | Now                                         |
+| --------------------------- | ----------------- | ------------------------------------------- |
+| Verification date           | 2026-07-24        | 2026-08-06                                  |
+| go-output version           | v0.31.1           | v0.35.0                                     |
+| go-error-family version     | v0.9.0            | v0.10.0                                     |
+| go-atomic-write version     | v0.3.0            | v0.4.1                                      |
+| go-branded-id version       | v0.3.2            | v0.5.1                                      |
+| Go version in flake.nix ref | 1.26.4            | 1.26.5                                      |
+| Core coverage               | 94.9%             | 95.4%                                       |
+| Live coverage               | 90.3%             | 96.2%                                       |
+| Test count                  | 445 (162/229/54)  | 491 (205/214/72)                            |
+| Property tests              | 5 Diff algebra    | 8 Diff algebra                              |
+| CHANGELOG ref               | "v0.7.0 tagged"   | "v0.8.1 tagged" + full [Unreleased] summary |
+| Example path                | `example/main.go` | `viz/example/`                              |
 
 **Added to FEATURES.md**:
+
 - Keyboard navigation feature bullet (was only in CHANGELOG/AGENTS.md)
 - 3 new PLANNED items: FailureReason surfacing in viz/CSV/StepInfo, synthetic dependency-failed events, iterator patterns
 
@@ -53,30 +56,36 @@ Ran commands to establish ground truth before touching any doc:
 Rebuilt from scratch using HARVEST mode. Extracted forward-looking items from 4 status reports, verified each against code:
 
 **Release** (1 item):
+
 - Cut v0.9.0 coordinated three-module release
 
 **Features** (3 items):
+
 - Surface FailureReason in viz dashboard (verified: 0 grep matches)
 - Surface FailureReason in CSV/TSV export (verified: 0 grep matches)
 - Denormalize FailureReason onto StepInfo
 
 **Coverage & Testing** (4 items):
+
 - Close StreamEvents coverage gap (93.9% → ~100%)
 - Close classifyFailure coverage gap (85.7% → ~100%)
 - Add FailureSummary golden JSON test
 - Add FuzzStreamEvents fuzz target
 
 **Documentation** (4 items):
+
 - Update README.md with new APIs (verified: 0 grep matches)
 - Update STABILITY.md for new API stability promises
 - Add Architecture Decision Records (verified: no docs/adr/ exists)
 - Update docs/MIGRATION.md for Event.FailureReason additive schema
 
 **Infrastructure** (2 items):
+
 - Fix pre-commit hook (buildflow not available)
 - Consider Go 1.27 upgrade (eliminates GOEXPERIMENT=jsonv2 + 29 gopls warnings)
 
 **Deferred** (1 item):
+
 - Browser automation tests (kept from previous TODO_LIST, design decision)
 
 Each item carries `_Source:_` citation linking back to the status report that raised it.
@@ -96,13 +105,16 @@ Each item carries `_Source:_` citation linking back to the status report that ra
 ### 7. Historical docs annotated (5 files)
 
 **Planning doc** (`docs/planning/2026-08-06_19-45_SUPERB-go-sse-adoption-plan.md`):
+
 - Status line: "Planning — awaiting approval" → "Executed" with link to status report
 
 **20-14 report** (go-sse adoption):
+
 - Added resolution header noting questions resolved/routed
 - 3 questions in §g annotated: Q1 deferred (acceptable), Q2 DONE (version drift fixed), Q3 routed to TODO_LIST
 
 **22-27 report** (WebSocket removal + core features):
+
 - Added resolution header citing commits `d18dc67`, `97b06ec`
 - 6 design flaws in §d annotated inline with strikethrough + fix commit hashes:
   1. MultiWriter type mismatch → FIXED at `d18dc67`
@@ -113,6 +125,7 @@ Each item carries `_Source:_` citation linking back to the status report that ra
   6. Diff timing-dependent tests → FIXED at `97b06ec`
 
 **23-23 report** (design fixes + quality gates):
+
 - Added resolution header citing next-session status report
 - 4 issues in §d annotated inline:
   1. JSON field collision → FIXED at `c714129`
@@ -122,11 +135,13 @@ Each item carries `_Source:_` citation linking back to the status report that ra
 - 3 questions in §g annotated: Q1 done, Q2 deferred to ROADMAP, Q3 routed to TODO_LIST
 
 **23-56 report** (FailureSummary rename):
+
 - Questions in §g annotated as routed to TODO_LIST
 
 ### 8. AGENTS.md — stale references fixed (bonus, beyond the 4 living docs)
 
 Fixed 10 stale references discovered during cross-file consistency verification:
+
 - go-output v0.31.1 → v0.35.0 (4 deep references in Gotchas section)
 - Test count 510 → 491
 - Coverage 95.3%/95.5% → 95.4%/96.2%
@@ -136,6 +151,7 @@ Fixed 10 stale references discovered during cross-file consistency verification:
 ### 9. Cross-file consistency verified
 
 Ran comprehensive sweep:
+
 - No stale version references in any living doc (all v0.31.1, v0.9.0, v0.3.0, v0.3.2 refs eliminated)
 - No completed items in TODO_LIST
 - No contradictions between FEATURES.md PLANNED and TODO_LIST/ROADMAP

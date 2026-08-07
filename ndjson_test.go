@@ -220,6 +220,7 @@ func TestStreamEvents_AllLinesFailJSON(t *testing.T) {
 	t.Parallel()
 
 	input := "not json at all\n{broken\n  \n"
+
 	err := auditlog.StreamEvents(
 		strings.NewReader(input),
 		nil,

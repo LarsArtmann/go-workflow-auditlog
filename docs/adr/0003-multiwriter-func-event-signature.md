@@ -26,6 +26,7 @@ Use the function-based approach: `MultiWriterCallback = func(Event)`, and
 1. **Direct wiring, zero adapter lambdas.** Because `MultiWriterCallback`
    matches `Config.OnEvent` and `NDJSONStreamer.OnEvent` exactly, sinks
    compose without wrapper functions:
+
    ```go
    mw := NewMultiWriter(streamer.OnEvent, hub.OnEvent)
    auditor, _ := New(Config{OnEvent: mw.OnEvent})

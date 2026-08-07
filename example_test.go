@@ -217,12 +217,16 @@ func ExampleWorkflowReport_TimedOutSteps() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
-			{StepRef: auditlog.StepRef{Name: "slow-api"}, Status: auditlog.StepStatusCanceled,
-				FailureReason: auditlog.FailureReasonTimeout},
+			{
+				StepRef: auditlog.StepRef{Name: "slow-api"}, Status: auditlog.StepStatusCanceled,
+				FailureReason: auditlog.FailureReasonTimeout,
+			},
 		},
 		Events: []auditlog.Event{
-			{EventType: auditlog.EventTypeAttemptEnd, StepRef: auditlog.StepRef{Name: "slow-api"},
-				FailureReason: auditlog.FailureReasonTimeout},
+			{
+				EventType: auditlog.EventTypeAttemptEnd, StepRef: auditlog.StepRef{Name: "slow-api"},
+				FailureReason: auditlog.FailureReasonTimeout,
+			},
 		},
 	}
 

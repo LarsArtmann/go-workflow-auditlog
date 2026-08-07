@@ -284,8 +284,10 @@ func TestTable_FailureReasonColumn(t *testing.T) {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "timed-out"}, Status: auditlog.StepStatusCanceled,
-				FailureReason: auditlog.FailureReasonTimeout},
+			{
+				StepRef: auditlog.StepRef{Name: "timed-out"}, Status: auditlog.StepStatusCanceled,
+				FailureReason: auditlog.FailureReasonTimeout,
+			},
 			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
 		},
 	}

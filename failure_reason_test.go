@@ -10,7 +10,6 @@ import (
 	"time"
 
 	flow "github.com/Azure/go-workflow"
-
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	"github.com/larsartmann/go-workflow-auditlog/testhelpers"
 )
@@ -247,12 +246,16 @@ func TestReplay_FailureReasonOnStepInfo(t *testing.T) {
 	t.Parallel()
 
 	events := []auditlog.Event{
-		{Sequence: 1, EventType: auditlog.EventTypeAttemptStart, Phase: auditlog.PhaseBefore,
-			Timestamp: time.Now(), StepRef: auditlog.StepRef{Name: "fail"}, Attempt: 1},
-		{Sequence: 2, EventType: auditlog.EventTypeAttemptEnd, Phase: auditlog.PhaseAfter,
+		{
+			Sequence: 1, EventType: auditlog.EventTypeAttemptStart, Phase: auditlog.PhaseBefore,
+			Timestamp: time.Now(), StepRef: auditlog.StepRef{Name: "fail"}, Attempt: 1,
+		},
+		{
+			Sequence: 2, EventType: auditlog.EventTypeAttemptEnd, Phase: auditlog.PhaseAfter,
 			Timestamp: time.Now(), StepRef: auditlog.StepRef{Name: "fail"}, Attempt: 1,
 			Status: auditlog.StepStatusFailed, FailureReason: auditlog.FailureReasonTimeout,
-			Error: strPtr("deadline exceeded")},
+			Error: new("deadline exceeded"),
+		},
 	}
 
 	report, err := auditlog.ReplayEvents(events)
@@ -273,8 +276,10 @@ func TestCSV_FailureReasonColumn(t *testing.T) {
 	errMsg := "connection refused"
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "failed-step"}, Status: auditlog.StepStatusFailed,
-				FailureReason: auditlog.FailureReasonUserError, Error: &errMsg},
+			{
+				StepRef: auditlog.StepRef{Name: "failed-step"}, Status: auditlog.StepStatusFailed,
+				FailureReason: auditlog.FailureReasonUserError, Error: &errMsg,
+			},
 			{StepRef: auditlog.StepRef{Name: "ok-step"}, Status: auditlog.StepStatusSucceeded},
 		},
 	}
@@ -338,7 +343,8 @@ func TestFailureReason_Color(t *testing.T) {
 	}
 }
 
-func strPtr(s string) *string { return &s }
+//go:fix inline
+func strPtr(s string) *string { return new(s) }
 
 // TestFailureSummary_GoldenJSON verifies the JSON field placement:
 //   - "failure_summary" appears at the report level (WorkflowReport)
@@ -349,10 +355,12 @@ func TestFailureSummary_GoldenJSON(t *testing.T) {
 
 	// Report with a failure: failure_summary should be present at report level.
 	failedReport := auditlog.WorkflowReport{
-		WorkflowID:      "test-pipeline",
-		Steps:           []auditlog.StepInfo{{StepRef: auditlog.StepRef{Name: "fail"}, Status: auditlog.StepStatusFailed}},
-		FailedCount:     1,
-		FailureSummary:  "1 step(s) failed: fail",
+		WorkflowID: "test-pipeline",
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "fail"}, Status: auditlog.StepStatusFailed},
+		},
+		FailedCount:    1,
+		FailureSummary: "1 step(s) failed: fail",
 	}
 
 	var buf strings.Builder
@@ -375,6 +383,7 @@ func TestFailureSummary_GoldenJSON(t *testing.T) {
 
 	// Successful report: failure_summary should be absent (omitempty).
 	successReport := testhelpers.RunSingleSucceedWithReport(t, "ok-step")
+
 	var buf2 strings.Builder
 	if err := successReport.WriteJSON(&buf2); err != nil {
 		t.Fatalf("WriteJSON: %v", err)

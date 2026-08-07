@@ -237,7 +237,9 @@ func buildWorkflow() *flow.Workflow {
 		}),
 
 		// A slow endpoint that times out (demonstrates FailureReason classification).
-		flow.Step(&SlowEndpointStep{Endpoint: "https://slow.example.com/health"}).DependsOn(fetch).Timeout(100*time.Millisecond),
+		flow.Step(&SlowEndpointStep{Endpoint: "https://slow.example.com/health"}).
+			DependsOn(fetch).
+			Timeout(100*time.Millisecond),
 	)
 
 	return w

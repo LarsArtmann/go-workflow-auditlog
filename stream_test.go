@@ -1090,7 +1090,8 @@ func BenchmarkStreamEvents_1000Lines(b *testing.B) {
 	for i := range 1000 {
 		lines = append(lines, fmt.Sprintf(
 			`{"sequence":%d,"timestamp":"2026-01-01T00:00:00Z","event_type":"attempt_start","phase":"before","step_name":"step-%d"}`,
-			i+1, i%10,
+			i+1,
+			i%10,
 		))
 	}
 

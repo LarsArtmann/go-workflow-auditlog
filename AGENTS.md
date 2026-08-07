@@ -343,7 +343,7 @@ The `BeforeStep` callback signature is `func(ctx, Steper) (context.Context, erro
   `server + ctx + req + rec + ServeHTTP` setup).
 - Test boilerplate (e.g. `t.Parallel()` at the start of every parallel
   test) is accepted idiomatic Go — marked with `//art-dupl:accept
-  idiomatic Go test boilerplate` on the exact flagged line so the tool
+idiomatic Go test boilerplate` on the exact flagged line so the tool
   knows it's intentional. Removing the marker re-surfaces the clone.
 - New duplications introduced in PRs must be either extracted into a
   helper or annotated with an `//art-dupl:accept` directive explaining

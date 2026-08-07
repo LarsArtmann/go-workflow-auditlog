@@ -28,20 +28,20 @@ golangci-lint run ./...                      # 0 issues
 
 ## Commands
 
-| Command                                                                 | Purpose                                      |
-| ----------------------------------------------------------------------- | -------------------------------------------- |
-| `GOEXPERIMENT=jsonv2 go test ./...`                                     | Run core tests                               |
-| `GOEXPERIMENT=jsonv2 go test -race ./...`                               | Core tests with race detector                |
-| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out ./...`       | Core tests with coverage                     |
-| `GOEXPERIMENT=jsonv2 go vet ./...`                                      | Core static analysis                         |
-| `golangci-lint run ./...`                                               | Lint core (config in `.golangci.yml`)        |
-| `cd viz && GOEXPERIMENT=jsonv2 go test ./...`                           | Run viz tests                                |
-| `cd viz && golangci-lint run ./...`                                     | Lint viz                                     |
-| `cd live && GOEXPERIMENT=jsonv2 go test ./...`                           | Run live tests                               |
-| `cd live && golangci-lint run ./...`                                     | Lint live                                    |
-| `go run ./viz/example`                                                  | Run the demo pipeline                        |
-| `cd live && GOEXPERIMENT=jsonv2 go run ./demo`                          | Run live dashboard demo (:18080)             |
-| `nix run .#check`                                                       | All checks: vet+test-race+lint+govulncheck   |
+| Command                                                           | Purpose                                    |
+| ----------------------------------------------------------------- | ------------------------------------------ |
+| `GOEXPERIMENT=jsonv2 go test ./...`                               | Run core tests                             |
+| `GOEXPERIMENT=jsonv2 go test -race ./...`                         | Core tests with race detector              |
+| `GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out ./...` | Core tests with coverage                   |
+| `GOEXPERIMENT=jsonv2 go vet ./...`                                | Core static analysis                       |
+| `golangci-lint run ./...`                                         | Lint core (config in `.golangci.yml`)      |
+| `cd viz && GOEXPERIMENT=jsonv2 go test ./...`                     | Run viz tests                              |
+| `cd viz && golangci-lint run ./...`                               | Lint viz                                   |
+| `cd live && GOEXPERIMENT=jsonv2 go test ./...`                    | Run live tests                             |
+| `cd live && golangci-lint run ./...`                              | Lint live                                  |
+| `go run ./viz/example`                                            | Run the demo pipeline                      |
+| `cd live && GOEXPERIMENT=jsonv2 go run ./demo`                    | Run live dashboard demo (:18080)           |
+| `nix run .#check`                                                 | All checks: vet+test-race+lint+govulncheck |
 
 A pull request is mergeable only when **all** of the above pass cleanly.
 
