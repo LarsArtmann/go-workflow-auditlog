@@ -132,6 +132,13 @@ linters:
       max-complexity: 12
     depguard:
       rules:
+        cmd:
+          allow:
+            - $gostd
+            - github.com/invopop/jsonschema
+            - github.com/larsartmann/go-workflow-auditlog
+          files:
+            - "**/cmd/**"
         main:
           allow:
             - $gostd

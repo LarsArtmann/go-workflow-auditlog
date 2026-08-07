@@ -47,9 +47,11 @@ func main() {
 		err = runValidate(args)
 	case "version", "-v", "--version":
 		fmt.Printf("auditlog %s (schema %s)\n", CLIVersion, auditlog.SchemaVersion)
+
 		return
 	case "-h", "--help", "help":
 		usage(os.Stdout)
+
 		return
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command %q\n\n", cmd)

@@ -24,7 +24,9 @@ func loadFile(path string) (auditlog.WorkflowReport, error) {
 	return detectAndLoad(reader, path)
 }
 
-func openPath(path string) (reader interface{ Read([]byte) (int, error) }, closer interface{ Close() error }, err error) {
+func openPath(
+	path string,
+) (reader interface{ Read([]byte) (int, error) }, closer interface{ Close() error }, err error) {
 	if path == "-" {
 		return os.Stdin, os.Stdin, nil
 	}

@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/larsartmann/go-workflow-auditlog/schema/report.schema.json",
+  "$defs": {
+    "Event": {
+      "properties": {
+        "step_name": {
+          "type": "string"
+        },
+        "step_type": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "sequence": {
+          "type": "integer"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "event_type": {
+          "type": "string"
+        },
+        "phase": {
+          "type": "string"
+        },
+        "attempt": {
+          "type": "integer"
+        },
+        "duration_ms": {
+          "type": "number"
+        },
+        "error": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "failure_reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "step_name",
+        "sequence",
+        "timestamp",
+        "event_type",
+        "phase"
+      ]
+    },
+    "StepInfo": {
+      "properties": {
+        "step_name": {
+          "type": "string"
+        },
+        "step_type": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string"
+        },
+        "attempt_count": {
+          "type": "integer"
+        },
+        "max_attempts": {
+          "type": "integer"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finished_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration_ms": {
+          "type": "number"
+        },
+        "dependencies": {
+          "items": {
+            "$ref": "#/$defs/StepRef"
+          },
+          "type": "array"
+        },
+        "dependents": {
+          "items": {
+            "$ref": "#/$defs/StepRef"
+          },
+          "type": "array"
+        },
+        "error": {
+          "type": "string"
+        },
+        "failure_reason": {
+          "type": "string"
+        },
+        "has_retry": {
+          "type": "boolean"
+        },
+        "has_timeout": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "step_name",
+        "status",
+        "attempt_count",
+        "has_retry",
+        "has_timeout"
+      ]
+    },
+    "StepRef": {
+      "properties": {
+        "step_name": {
+          "type": "string"
+        },
+        "step_type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "step_name"
+      ]
+    }
+  },
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "workflow_id": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event_count": {
+      "type": "integer"
+    },
+    "step_count": {
+      "type": "integer"
+    },
+    "succeeded_count": {
+      "type": "integer"
+    },
+    "failed_count": {
+      "type": "integer"
+    },
+    "skipped_count": {
+      "type": "integer"
+    },
+    "canceled_count": {
+      "type": "integer"
+    },
+    "pending_count": {
+      "type": "integer"
+    },
+    "running_count": {
+      "type": "integer"
+    },
+    "total_duration_ms": {
+      "type": "number"
+    },
+    "wall_clock_duration_ms": {
+      "type": "number"
+    },
+    "workflow_succeeded": {
+      "type": "boolean"
+    },
+    "dropped_event_count": {
+      "type": "integer"
+    },
+    "peak_concurrency": {
+      "type": "integer"
+    },
+    "critical_path_duration_ms": {
+      "type": "number"
+    },
+    "critical_path_steps": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "failure_summary": {
+      "type": "string"
+    },
+    "reconstructed": {
+      "type": "boolean"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/Event"
+      },
+      "type": "array"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/StepInfo"
+      },
+      "type": "array"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "version",
+    "workflow_id",
+    "exported_at",
+    "event_count",
+    "step_count",
+    "succeeded_count",
+    "failed_count",
+    "skipped_count",
+    "canceled_count",
+    "pending_count",
+    "running_count",
+    "total_duration_ms",
+    "wall_clock_duration_ms",
+    "workflow_succeeded",
+    "dropped_event_count",
+    "steps"
+  ],
+  "title": "workflow-auditlog Report",
+  "description": "Report exported by the go-workflow-auditlog auditor."
+}

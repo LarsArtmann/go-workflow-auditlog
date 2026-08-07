@@ -18,6 +18,7 @@ func buildCLI(t *testing.T) string {
 	cmd := exec.Command("go", "build", "-o", binary, ".")
 
 	var stderr bytes.Buffer
+
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
@@ -71,7 +72,9 @@ func TestCLI_Info(t *testing.T) {
 	reportPath := writeTestReport(t)
 
 	cmd := exec.Command(binary, "info", reportPath)
+
 	var stdout bytes.Buffer
+
 	cmd.Stdout = &stdout
 
 	if err := cmd.Run(); err != nil {
@@ -96,7 +99,9 @@ func TestCLI_Validate(t *testing.T) {
 	reportPath := writeTestReport(t)
 
 	cmd := exec.Command(binary, "validate", reportPath)
+
 	var stdout bytes.Buffer
+
 	cmd.Stdout = &stdout
 
 	if err := cmd.Run(); err != nil {
@@ -117,7 +122,9 @@ func TestCLI_Diff_NoChanges(t *testing.T) {
 	reportPath := writeTestReport(t)
 
 	cmd := exec.Command(binary, "diff", reportPath, reportPath)
+
 	var stdout bytes.Buffer
+
 	cmd.Stdout = &stdout
 
 	if err := cmd.Run(); err != nil {
@@ -140,7 +147,9 @@ func TestCLI_Convert_JSON(t *testing.T) {
 	outPath := filepath.Join(t.TempDir(), "output.json")
 
 	cmd := exec.Command(binary, "convert", "-o", outPath, "-f", "json", reportPath)
+
 	var stderr bytes.Buffer
+
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
@@ -167,7 +176,9 @@ func TestCLI_Version(t *testing.T) {
 	binary := buildCLI(t)
 
 	cmd := exec.Command(binary, "version")
+
 	var stdout bytes.Buffer
+
 	cmd.Stdout = &stdout
 
 	if err := cmd.Run(); err != nil {

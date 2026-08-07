@@ -14,7 +14,13 @@ func runValidate(args []string) error {
 		return fmt.Errorf("validate %s: %w", path, err)
 	}
 
-	fmt.Printf("%s: valid (schema %s, %d steps, %d events)\n", path, report.Version, report.StepCount, report.EventCount)
+	fmt.Printf(
+		"%s: valid (schema %s, %d steps, %d events)\n",
+		path,
+		report.Version,
+		report.StepCount,
+		report.EventCount,
+	)
 
 	return nil
 }

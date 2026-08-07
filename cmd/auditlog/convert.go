@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -20,7 +21,7 @@ func runConvert(args []string) error {
 	}
 
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: auditlog convert <input> [-o output] [-f format]")
+		return errors.New("usage: auditlog convert <input> [-o output] [-f format]")
 	}
 
 	report, err := loadFile(fs.Arg(0))
