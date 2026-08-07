@@ -169,6 +169,7 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 	// the Event stream (each attempt_end carries its own Error pointer).
 	rec.finishedAt = &now
 	rec.attemptErr = errStr
+	rec.failureReason = classifyFailure(err)
 
 	// Only overwrite the duration if we measured one; otherwise keep the
 	// previous attempt's duration so a stray AfterStep without a matching

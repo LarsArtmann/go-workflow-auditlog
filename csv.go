@@ -35,6 +35,7 @@ func (r WorkflowReport) writeDelimited(writer io.Writer, comma rune) error {
 		"started_at", "finished_at", "duration_ms",
 		"has_retry", "has_timeout",
 		"error",
+		"failure_reason",
 		"dependencies", "dependents",
 	}
 
@@ -84,6 +85,7 @@ func stepToCSVRow(s StepInfo) []string {
 		strconv.FormatBool(s.HasRetry),
 		strconv.FormatBool(s.HasTimeout),
 		formatStrPtr(s.Error),
+		string(s.FailureReason),
 		formatStepRefs(s.Dependencies),
 		formatStepRefs(s.Dependents),
 	}

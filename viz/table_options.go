@@ -29,6 +29,9 @@ const (
 	ColumnType
 	// ColumnDependencies is a comma-separated list of dependency step names.
 	ColumnDependencies
+	// ColumnFailureReason is the structured failure category (timeout, canceled,
+	// user_error) when the step failed. Empty if the step succeeded.
+	ColumnFailureReason
 )
 
 // DefaultTableColumns is the column set used when WithColumns is not called.
@@ -76,6 +79,7 @@ func AllTableColumns() []TableColumn {
 		ColumnError,
 		ColumnType,
 		ColumnDependencies,
+		ColumnFailureReason,
 	}
 }
 
@@ -130,6 +134,10 @@ var columnDefs = map[TableColumn]columnDefinition{
 	ColumnDependencies: {
 		header:  "Dependencies",
 		extract: extractDependenciesCell,
+	},
+	ColumnFailureReason: {
+		header:  "Failure Reason",
+		extract: func(s StepInfo) string { return string(s.FailureReason) },
 	},
 }
 

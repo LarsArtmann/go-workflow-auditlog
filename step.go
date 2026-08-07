@@ -10,12 +10,13 @@ import "time"
 type stepCore struct {
 	StepRef
 
-	attemptCount int
-	startedAt    *time.Time
-	finishedAt   *time.Time
-	durationMs   *float64
-	attemptErr   *string
-	status       StepStatus
+	attemptCount  int
+	startedAt     *time.Time
+	finishedAt    *time.Time
+	durationMs    *float64
+	attemptErr    *string
+	failureReason FailureReason
+	status        StepStatus
 }
 
 // toStepInfo builds a public StepInfo from the core accumulator fields.
@@ -23,13 +24,14 @@ type stepCore struct {
 // add them after calling this.
 func (c stepCore) toStepInfo() StepInfo {
 	return StepInfo{
-		StepRef:      c.StepRef,
-		Status:       c.status,
-		AttemptCount: c.attemptCount,
-		StartedAt:    c.startedAt,
-		FinishedAt:   c.finishedAt,
-		DurationMs:   c.durationMs,
-		Error:        c.attemptErr,
+		StepRef:       c.StepRef,
+		Status:        c.status,
+		AttemptCount:  c.attemptCount,
+		StartedAt:     c.startedAt,
+		FinishedAt:    c.finishedAt,
+		DurationMs:    c.durationMs,
+		Error:         c.attemptErr,
+		FailureReason: c.failureReason,
 	}
 }
 
@@ -41,18 +43,19 @@ type StepInfo struct {
 	// observed. It disambiguates steps that share the same Name (which can
 	// happen when two step types produce identical String() output). Stable
 	// within a single report/run; not guaranteed stable across runs.
-	StepID       int        `json:"step_id,omitempty"`
-	Status       StepStatus `json:"status"`
-	AttemptCount int        `json:"attempt_count"`
-	MaxAttempts  int        `json:"max_attempts,omitempty"`
-	StartedAt    *time.Time `json:"started_at,omitempty"`
-	FinishedAt   *time.Time `json:"finished_at,omitempty"`
-	DurationMs   *float64   `json:"duration_ms,omitempty"`
-	Dependencies []StepRef  `json:"dependencies,omitempty"`
-	Dependents   []StepRef  `json:"dependents,omitempty"`
-	Error        *string    `json:"error,omitempty"`
-	HasRetry     bool       `json:"has_retry"`
-	HasTimeout   bool       `json:"has_timeout"`
+	StepID        int            `json:"step_id,omitempty"`
+	Status        StepStatus     `json:"status"`
+	AttemptCount  int            `json:"attempt_count"`
+	MaxAttempts   int            `json:"max_attempts,omitempty"`
+	StartedAt     *time.Time     `json:"started_at,omitempty"`
+	FinishedAt    *time.Time     `json:"finished_at,omitempty"`
+	DurationMs    *float64       `json:"duration_ms,omitempty"`
+	Dependencies  []StepRef      `json:"dependencies,omitempty"`
+	Dependents    []StepRef      `json:"dependents,omitempty"`
+	Error         *string        `json:"error,omitempty"`
+	FailureReason FailureReason `json:"failure_reason,omitempty"`
+	HasRetry      bool           `json:"has_retry"`
+	HasTimeout    bool           `json:"has_timeout"`
 }
 
 // HasError returns true if the step recorded an error.

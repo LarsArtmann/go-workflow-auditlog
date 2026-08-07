@@ -86,11 +86,8 @@ func replayApplyEvent(step *stepCore, evt Event) {
 		step.finishedAt = &finished
 		step.durationMs = evt.DurationMs
 		step.status = evt.Status
-
-		if evt.Error != nil {
-			errStr := *evt.Error
-			step.attemptErr = &errStr
-		}
+		step.attemptErr = evt.Error
+		step.failureReason = evt.FailureReason
 	}
 }
 
