@@ -8,5 +8,6 @@ import (
 
 func runSchema(_ []string) error {
 	fmt.Println(auditlog.JSONSchema())
+
 	return nil
 }

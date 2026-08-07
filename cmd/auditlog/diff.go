@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-
-	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 func runDiff(args []string) error {
@@ -99,6 +97,3 @@ func runDiff(args []string) error {
 
 	return nil
 }
-
-// Suppress unused import warning.
-var _ = auditlog.SchemaVersion

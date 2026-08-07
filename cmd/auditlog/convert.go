@@ -6,8 +6,6 @@ import (
 	"io"
 	"os"
 	"strings"
-
-	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 func runConvert(args []string) error {
@@ -90,6 +88,3 @@ func openOutput(path string) (io.Writer, io.Closer, error) {
 type nopCloser struct{}
 
 func (nopCloser) Close() error { return nil }
-
-// Suppress unused import warning for auditlog (used in WriteJSON etc. via method calls).
-var _ = auditlog.SchemaVersion
