@@ -292,3 +292,29 @@ func TestDiff_HasChanges_AggregateOnly(t *testing.T) {
 		t.Errorf("CriticalPathDeltaMs = %f, want 10", diff.CriticalPathDeltaMs)
 	}
 }
+
+func BenchmarkDiff_100Steps(b *testing.B) {
+	dur := func(ms float64) *float64 { return &ms }
+
+	makeReport := func(baseDuration float64) auditlog.WorkflowReport {
+		steps := make([]auditlog.StepInfo, 100)
+		for i := range 100 {
+			steps[i] = auditlog.StepInfo{
+				StepRef:     auditlog.StepRef{Name: fmt.Sprintf("step-%03d", i)},
+				Status:      auditlog.StepStatusSucceeded,
+				DurationMs:  dur(baseDuration + float64(i)),
+				AttemptCount: 1,
+			}
+		}
+		return auditlog.WorkflowReport{Steps: steps}
+	}
+
+	base := makeReport(10)
+	other := makeReport(15)
+
+	b.ResetTimer()
+
+	for range b.N {
+		_ = base.Diff(other)
+	}
+}

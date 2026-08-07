@@ -155,7 +155,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
 - **govulncheck** in CI (golang/govulncheck-action) — all three modules scanned
 - **actionlint** in CI (workflow linting)
-- **Coverage**: core 95.4%, viz 91.7%, live 96.2%
+- **Coverage**: core 95.4%, viz 91.8%, live 96.2%
 - **flake.nix** devShell (Go 1.26.5, golangci-lint, govulncheck, actionlint, `d2` CLI; GOEXPERIMENT=jsonv2)
 - **flake-parts** + **treefmt-nix** for build automation (includes `d2-fmt`, `nixfmt`, `gofmt`)
 - **Pre-commit hook** (vet + lint + test)
@@ -179,7 +179,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
 - **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + NDJSONStreamer throughput (100/1000/10000 events) + godoc examples
-- **491 test functions** across 3 modules (core: 205; viz: 214; live: 72), all passing with `-race`
+- **505 test functions** across 3 modules (core: 218; viz: 215; live: 72), all passing with `-race`
 
 ---
 
@@ -189,6 +189,6 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
 - JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor)
 - `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md` exists)
-- `FailureReason` surfacing in viz dashboard, CSV export, and `StepInfo` denormalization
+- `FailureReason` denormalized onto `StepInfo` with `Label()`/`Color()` display metadata, `ColumnFailureReason` table column, viz `TypeMetadata` integration
 - Synthetic `attempt_end` events for dependency-failed steps (restoring `FailureReasonDependency` as a real value)
 - `Events()` / `CriticalPath()` iterator patterns (Go `iter.Seq`) for lazy evaluation on large reports

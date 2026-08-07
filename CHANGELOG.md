@@ -28,6 +28,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **[`RELEASE.md`](RELEASE.md)** — comprehensive step-by-step release process guide covering tag conventions, goreleaser usage, the multi-module gotchas (`GORELEASER_CURRENT_TAG`, `sh -c` hooks, `go mod tidy -e`), demo binary building, and pkg.go.dev probing. Prevents ad-hoc releases.
 - **Sub-module tagging convention** documented in `AGENTS.md`: core `vX.Y.Z`, viz `viz/vX.Y.Z`, live `live/vX.Y.Z` — all at the same commit.
 - **`govulncheck` for the `live` module in CI** — the GitHub Actions `vulncheck` job previously scanned only core and viz. Now all three modules are scanned, matching `nix run .#check`.
+- **`StepInfo.FailureReason`** — the structured enum (`timeout`/`canceled`/`user_error`) is now denormalized onto `StepInfo` (JSON: `"failure_reason,omitempty"`), so consumers no longer need to scan the event stream to classify a step's failure mode. Reflects the final outcome only (cleared on retry success), matching the existing `StepInfo.Error` semantics.
+- **`ColumnFailureReason`** table column in the viz module — the `failure_reason` column is now available in `viz.WithColumns(viz.ColumnFailureReason)` for table export.
+- **`FailureReason.Label()` / `FailureReason.Color()`** — display metadata methods for visualizations. Colors reference CSS variables (`var(--warning)`, `var(--error)`, etc.) matching the dashboard convention.
+- **`FailureReasonMeta` in viz `TypeMetadata`** — the HTML dashboard metadata now includes `failure_reasons` with display info for each enum value.
+- **Four ADRs** (`docs/adr/0001-sse-only-transport.md` through `0004-failuresummary-rename.md`) — documents the rationale for SSE-only transport, the 3-value FailureReason enum, MultiWriter's `func(Event)` signature, and the FailureSummary rename.
+- **`FuzzStreamEvents`** fuzz target — verifies `StreamEvents` never panics on arbitrary NDJSON input.
+- **Godoc examples**: `ExampleWorkflowReport_TimedOutSteps`, `ExampleWorkflowReport_HasWorkflowRetries` — demonstrate the workflow-level query API.
+- **Benchmarks**: `BenchmarkStreamEvents_1000Lines`, `BenchmarkMultiWriter_1Callback`, `BenchmarkMultiWriter_3Callbacks`, `BenchmarkDiff_100Steps`.
+- **Demo pipeline** (`viz/example`) now includes a `SlowEndpointStep` that demonstrates `FailureReasonTimeout` classification.
+- **Pre-commit hook** gracefully skips when `buildflow` is not in PATH (instead of failing hard).
 
 ### Changed
 
@@ -47,6 +57,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **CRITICAL: Removed local `replace` directives from `viz/go.mod` and `live/go.mod`.** The v0.8.0 module split left `replace github.com/larsartmann/go-workflow-auditlog => ..` (and `=> ../viz`) in the published go.mod files. These local filesystem redirects produce invalid pseudo-version requirements (`v0.0.0-00010101000000-000000000000`) that **completely break consumer `go get`** for the `viz` and `live` sub-modules when fetched in isolation. Core was unaffected. All three modules now carry real version requirements and resolve cleanly from the Go module proxy.
 - **Fixed CI `mod-tidy` job** — `viz` and `live` steps now use `go mod tidy -e` (error-tolerant) to work around the go-output testhelpers replace-directive defect that caused `go mod tidy` to exit 1 on the sub-modules. Added `GOWORK: off` for standalone consistency.
 - **Fixed `.goreleaser.yml` before-hooks** — all hooks wrapped in `sh -c "..."` because goreleaser OSS executes hooks via direct `exec.CommandContext` (not a shell), making inline env vars (`FOO=bar cmd`) and shell builtins (`cd`) silently fail. Sub-module hooks use `go mod tidy -e`. Documented `GORELEASER_CURRENT_TAG` requirement for multi-module monorepos.
+- **Replay path now clears stale error and FailureReason on final success** — `replayApplyEvent` previously only set `attemptErr` when non-nil, so a replayed step that failed then succeeded would retain the stale error from a prior attempt. Now both `attemptErr` and `failureReason` are always overwritten on `attempt_end`, matching the live capture path's "final outcome only" semantics.
 
 ## [0.8.1] - 2026-07-26
 

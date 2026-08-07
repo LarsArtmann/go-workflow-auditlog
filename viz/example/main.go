@@ -128,6 +128,27 @@ func (s *FlakyStep) Do(_ context.Context) error {
 
 func (s *FlakyStep) String() string { return "flaky-api-call" }
 
+// SlowEndpointStep simulates a call to a slow endpoint that exceeds its
+// configured timeout. It demonstrates FailureReason classification: the
+// timeout fires, context.DeadlineExceeded propagates, and classifyFailure
+// tags the event with FailureReasonTimeout.
+type SlowEndpointStep struct {
+	Endpoint string
+}
+
+func (s *SlowEndpointStep) Do(ctx context.Context) error {
+	fmt.Printf("  → calling slow endpoint %s\n", s.Endpoint)
+
+	select {
+	case <-time.After(5 * time.Second):
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (s *SlowEndpointStep) String() string { return "slow-endpoint" }
+
 // newAuditor builds the audit log Auditor used by the demo, wiring an OnEvent
 // callback that pretty-prints each event to stdout.
 func newAuditor() *auditlog.Auditor {
@@ -200,6 +221,9 @@ func buildWorkflow() *flow.Workflow {
 			o.Attempts = 5
 			o.Backoff = backoff.NewExponentialBackOff()
 		}),
+
+		// A slow endpoint that times out (demonstrates FailureReason classification).
+		flow.Step(&SlowEndpointStep{Endpoint: "https://slow.example.com/health"}).DependsOn(fetch).Timeout(100*time.Millisecond),
 	)
 
 	return w
@@ -248,6 +272,10 @@ func printStepDetails(report auditlog.WorkflowReport) {
 
 		if step.Error != nil {
 			fmt.Printf(" error=%s", *step.Error)
+		}
+
+		if step.FailureReason != "" {
+			fmt.Printf(" failure_reason=%s", step.FailureReason)
 		}
 
 		fmt.Println()
