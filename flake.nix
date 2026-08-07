@@ -129,6 +129,21 @@
 
           checks.build = config.packages.default;
           checks.format = config.treefmt.build.check self;
+
+          apps.auditlog = {
+            type = "app";
+
+            program = pkgs.writeShellApplication {
+              name = "auditlog";
+
+              runtimeInputs = [ pkgs.go_1_26 ];
+
+              text = ''
+                export GOEXPERIMENT=jsonv2
+                exec go run ${./.}/cmd/auditlog "$@"
+              '';
+            };
+          };
         };
     };
 }
