@@ -28,6 +28,8 @@ type (
 	EventType = auditlog.EventType
 	// Phase is an alias for the core phase enum.
 	Phase = auditlog.Phase
+	// FailureReason is an alias for the core failure reason enum.
+	FailureReason = auditlog.FailureReason
 )
 
 // Re-export core status constants so viz code can use unqualified names.
@@ -76,4 +78,10 @@ func AllStepStatuses() []StepStatus {
 // Re-exported so viz code can enumerate event types without importing core.
 func AllEventTypes() []EventType {
 	return auditlog.AllEventTypes()
+}
+
+// AllFailureReasons returns every known FailureReason value in canonical order.
+// Re-exported so viz code can enumerate failure reasons without importing core.
+func AllFailureReasons() []FailureReason {
+	return auditlog.AllFailureReasons()
 }

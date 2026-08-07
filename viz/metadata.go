@@ -5,8 +5,9 @@ package viz
 // so that JavaScript reads from a single Go-authoritative source instead of
 // maintaining parallel hardcoded constants.
 type TypeMetadata struct {
-	Statuses map[string]StatusMeta `json:"statuses"`
-	Events   map[string]EventMeta  `json:"events"`
+	Statuses       map[string]StatusMeta       `json:"statuses"`
+	Events         map[string]EventMeta        `json:"events"`
+	FailureReasons map[string]FailureReasonMeta `json:"failure_reasons"`
 }
 
 // StatusMeta holds display info for a StepStatus.
@@ -17,6 +18,12 @@ type StatusMeta struct {
 
 // EventMeta holds display info for an EventType.
 type EventMeta struct {
+	Label string `json:"label"`
+	Color string `json:"color"`
+}
+
+// FailureReasonMeta holds display info for a FailureReason.
+type FailureReasonMeta struct {
 	Label string `json:"label"`
 	Color string `json:"color"`
 }
@@ -41,8 +48,17 @@ func BuildTypeMetadata() TypeMetadata {
 		}
 	}
 
+	failureReasons := make(map[string]FailureReasonMeta, len(AllFailureReasons()))
+	for _, reason := range AllFailureReasons() {
+		failureReasons[string(reason)] = FailureReasonMeta{
+			Label: reason.Label(),
+			Color: reason.Color(),
+		}
+	}
+
 	return TypeMetadata{
-		Statuses: statuses,
-		Events:   events,
+		Statuses:       statuses,
+		Events:         events,
+		FailureReasons: failureReasons,
 	}
 }

@@ -340,6 +340,37 @@ func (r FailureReason) IsKnown() bool {
 // String returns the reason name (or empty for the zero value).
 func (r FailureReason) String() string { return string(r) }
 
+// failureReasonMeta holds display metadata for each [FailureReason] value.
+//
+//nolint:gochecknoglobals // Lookup table, treated as immutable after init.
+var failureReasonMeta = map[FailureReason]struct {
+	Label string
+	Color string
+}{
+	FailureReasonTimeout: {Label: "Timeout", Color: "var(--warning)"},
+	FailureReasonCanceled: {Label: "Canceled", Color: "var(--text-muted)"},
+	FailureReasonUserError: {Label: "User Error", Color: "var(--error)"},
+}
+
+// Label returns the human-readable display label for this failure reason.
+func (r FailureReason) Label() string {
+	if m, ok := failureReasonMeta[r]; ok {
+		return m.Label
+	}
+
+	return ""
+}
+
+// Color returns the CSS color token for this failure reason, used in HTML
+// visualizations. Returns empty for the zero value.
+func (r FailureReason) Color() string {
+	if m, ok := failureReasonMeta[r]; ok {
+		return m.Color
+	}
+
+	return ""
+}
+
 // classifyFailure inspects the error returned by a step attempt and
 // returns the best [FailureReason] classification. err may be nil
 // (returns "") — callers should not classify nil errors.

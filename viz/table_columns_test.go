@@ -274,8 +274,8 @@ func TestTable_AllTableColumnsCount(t *testing.T) {
 	t.Parallel()
 
 	all := viz.AllTableColumns()
-	if len(all) != 10 {
-		t.Errorf("expected 10 total columns, got %d", len(all))
+	if len(all) != 11 {
+		t.Errorf("expected 11 total columns, got %d", len(all))
 	}
 }
 

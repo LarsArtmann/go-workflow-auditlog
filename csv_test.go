@@ -91,8 +91,8 @@ func TestReport_WriteTSV(t *testing.T) {
 	}
 
 	header := strings.Split(lines[0], "\t")
-	if len(header) != 14 {
-		t.Errorf("expected 14 columns in header, got %d", len(header))
+	if len(header) != 15 {
+		t.Errorf("expected 15 columns in header, got %d", len(header))
 	}
 
 	firstRow := strings.Split(lines[1], "\t")
@@ -345,8 +345,8 @@ func ExampleWorkflowReport_WriteCSV() {
 
 	_ = report.WriteCSV(os.Stdout)
 
-	// Output: step_id,step_name,step_type,status,attempt_count,max_attempts,started_at,finished_at,duration_ms,has_retry,has_timeout,error,dependencies,dependents
-	// 1,fetch,,succeeded,0,0,,,,false,false,,,
+	// Output: step_id,step_name,step_type,status,attempt_count,max_attempts,started_at,finished_at,duration_ms,has_retry,has_timeout,error,failure_reason,dependencies,dependents
+	// 1,fetch,,succeeded,0,0,,,,false,false,,,,
 }
 
 func BenchmarkWriteCSV_LargeReport(b *testing.B) {
