@@ -172,3 +172,26 @@ The new `Event.FailureReason` typed enum owns the `"failure_reason"` JSON key
 with a clear semantic contract (three machine-readable values). Reusing the
 same key name for a free-form sentence on a different type created ambiguity
 for consumers parsing both events and reports.
+
+## `StepInfo.FailureReason` additive field (Unreleased)
+
+The `StepInfo` struct now carries a `FailureReason` field (`json:"failure_reason,omitempty"`),
+denormalized from the last `attempt_end` event. This means consumers no longer
+need to scan the event stream to determine why a step failed — the structured
+enum (`timeout`, `canceled`, `user_error`) is available directly on the step.
+
+### What changed
+
+| Scope      | JSON key           | Type                 | Example value | Default (success) |
+| ---------- | ------------------ | -------------------- | ------------- | ----------------- |
+| `StepInfo` | `failure_reason`   | `FailureReason` enum | `"timeout"`   | omitted (`omitempty`) |
+
+### Migration
+
+**No changes required.** The field is additive (`omitempty`), so existing JSON
+parsing continues to work. Consumers that want structured failure classification
+on steps can now read `step.FailureReason` directly instead of scanning events.
+
+The field reflects the **final outcome only** — for a step that fails on
+attempts 1-2 and succeeds on attempt 3, `FailureReason` is empty (the step
+succeeded). Per-attempt failure reasons are preserved in the event stream.

@@ -56,6 +56,8 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - [API Reference](#api-reference)
 - [Config](#config)
 - [Streaming NDJSON](#streaming-ndjson)
+- [MultiWriter & StreamEvents](#multiwriter--streamevents)
+- [Workflow-Level Queries](#workflow-level-queries)
 - [Diagrams](#diagrams)
 - [HTML Dashboard](#html-dashboard)
 - [Screenshots](#screenshots)
@@ -75,6 +77,9 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **Cross-system correlation** — 128-bit `RunID` stamped on every event for trace/log correlation
 - **Real-time streaming NDJSON** — stream events as they happen via `Config.OnEvent`, no need to wait for the workflow to finish
 - **Live real-time dashboard** (`live/` module) — SSE-powered HTTP dashboard that streams step updates as they execute, with configurable CORS, route prefix, export endpoints (NDJSON/HTML), and download buttons in the UI
+- **Structured failure classification** — every `attempt_end` event carries a typed `FailureReason` (`timeout`, `canceled`, `user_error`) for programmatic filtering and alerting; the step-level `FailureReason` is denormalized onto `StepInfo` so consumers don't scan the event stream
+- **MultiWriter** — fan out each event to multiple sinks (NDJSON file + live SSE hub + OTel bridge) with a single `Config.OnEvent` callback
+- **StreamEvents** — memory-bounded streaming NDJSON reader for replaying high-event-count runs without materializing the full slice
 - **Export formats** — JSON report, NDJSON event stream, CSV/TSV step export, Mermaid / PlantUML / Graphviz DOT / D2 diagrams (with configurable layout direction), step summary tables (16 formats, configurable column selection), ASCII + HTML tree views, **interactive HTML dashboard** (5-tab self-contained report with DAG graph engine, timeline, waveform)
 - **Report filtering** — slice reports by step name, status, event type, or time range
 - **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration delta)
@@ -82,7 +87,8 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
 - **Error classification** — auto-registered with [go-error-family](https://github.com/larsartmann/go-error-family) for `Classify()`, `IsRetryable()`, `ExitCode()`
-- **445 tests across 3 modules, ~95% coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
+- **Workflow-level queries** — `RetriedStepCount()`, `TotalRetryAttempts()`, `TimedOutSteps()`, `HasWorkflowRetries()`, `HasWorkflowTimeouts()`, `CriticalPath()`, `PeakConcurrencySteps()`
+- **~500 tests across 3 modules, 95%+ coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
 
 ## Installation
 
@@ -483,10 +489,11 @@ streamer, _ := auditlog.CreateNDJSONStreamer("audit.ndjson", auditlog.WithAutoFl
 
 **Options:**
 
-| Option              | Effect                                                                          |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `WithAutoFlush()`   | Flushes after every event (real-time tailing, lower throughput)                 |
-| `WithBufferSize(n)` | Sets internal buffer size in bytes (default 64 KB; values ≤ 0 keep the default) |
+| Option                    | Effect                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `WithAutoFlush()`         | Flushes after every event (real-time tailing, lower throughput)                 |
+| `WithFlushInterval(d)`    | Flushes at most once per d (bounded latency without per-event syscall cost)     |
+| `WithBufferSize(n)`       | Sets internal buffer size in bytes (default 64 KB; values ≤ 0 keep the default) |
 
 **Error handling:** First-error-wins. If a write fails, `streamer.Err()` returns the error and subsequent events are silently dropped. Errors are wrapped with `ErrExportWriteFailed`.
 
@@ -498,6 +505,74 @@ report, _ := auditlog.ReplayEvents(events)
 ```
 
 **Note on ordering:** Events may arrive out of Sequence order when steps run concurrently. Consumers that need strict ordering should sort by `Event.Sequence` after reading.
+
+## MultiWriter & StreamEvents
+
+### MultiWriter: Composing Multiple Event Sinks
+
+When a single workflow run needs to drive multiple consumers simultaneously — for example, streaming to an NDJSON file AND a live SSE hub AND a metrics collector — use `MultiWriter` to fan each event out to all of them:
+
+```go
+streamer, _ := auditlog.CreateNDJSONStreamer("audit.ndjson")
+mw := auditlog.NewMultiWriter(streamer.OnEvent, metricsCollector)
+
+auditor, _ := auditlog.New(auditlog.Config{
+    Enabled: true,
+    OnEvent: mw.OnEvent, // one callback, N sinks
+})
+```
+
+`MultiWriter.OnEvent` matches the `Config.OnEvent` signature exactly, so no adapter lambda is needed. Callbacks are invoked synchronously in registration order, serialized by an internal mutex so they never see concurrent interleaving. Nil callbacks are skipped.
+
+### StreamEvents: Memory-Bounded NDJSON Reading
+
+`StreamEvents` is the streaming counterpart to `ReadEvents` — designed for workflows that produce more events than fit comfortably in RAM (10k+ events, multi-hour runs). It reads line-delimited JSON events one at a time and invokes a callback for each:
+
+```go
+file, _ := os.Open("audit.ndjson")
+defer file.Close()
+
+err := auditlog.StreamEvents(file, nil, func(lineNum int, evt auditlog.Event) error {
+    // Process one event at a time — no full-slice buffering
+    if evt.IsTimeout() {
+        log.Printf("line %d: step %s timed out", lineNum, evt.Name)
+    }
+    return nil // return non-nil to stop reading
+})
+```
+
+If the callback returns an error, `StreamEvents` stops reading and returns that error. Validation (same semantics as `ReadEvents`) is optional — pass `nil` to skip.
+
+## Workflow-Level Queries
+
+`WorkflowReport` provides workflow-level aggregate methods for common questions:
+
+| Method                         | Returns      | Description                                                                  |
+| ------------------------------ | ------------ | ---------------------------------------------------------------------------- |
+| `RetriedStepCount()`           | `int`        | Number of steps that retried at least once (`AttemptCount > 1`)              |
+| `TotalRetryAttempts()`         | `int`        | Sum of all retry attempts beyond the initial try across all steps            |
+| `HasWorkflowRetries()`         | `bool`       | Quick predicate: did any step retry?                                         |
+| `TimedOutSteps()`              | `[]StepInfo` | Steps whose final attempt failed with `FailureReasonTimeout`                |
+| `TimedOutStepCount()`          | `int`        | Count of steps that timed out                                                |
+| `HasWorkflowTimeouts()`        | `bool`       | Quick predicate: did any step time out?                                      |
+| `CriticalPath()`               | `[]StepInfo` | Ordered step chain (root-to-leaf) of the longest dependency path             |
+| `PeakConcurrencySteps()`       | `[]StepInfo` | Steps in-flight at the moment of peak concurrency                            |
+| `Duration()`                   | `time.Duration` | Wall-clock duration (earliest → latest event)                              |
+
+```go
+report := audit.Report()
+
+if report.HasWorkflowTimeouts() {
+    for _, step := range report.TimedOutSteps() {
+        log.Printf("timeout: %s (%s)", step.Name, step.FailureReason)
+    }
+}
+
+if report.HasWorkflowRetries() {
+    log.Printf("retry pressure: %d steps, %d total retries",
+        report.RetriedStepCount(), report.TotalRetryAttempts())
+}
+```
 
 ## Diagrams
 

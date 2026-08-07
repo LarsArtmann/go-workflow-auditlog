@@ -38,7 +38,14 @@ These surfaces are functional but their exact shape may change:
 | I/O sentinel errors (`ErrReportLoadFailed`, `ErrRenderFailed`, `ErrExportWriteFailed`) | Sentinel set is stable; wrapping messages may evolve.                                     |
 | `go-error-family` dependency (v0.10.0)                                                 | Transitive: classification metadata depends on this external library. Pinned in go.mod.   |
 | `NDJSONStreamer` / `NewNDJSONStreamer` / `CreateNDJSONStreamer`                        | New streaming API; type and method set may grow. Output format (NDJSON) is stable.        |
-| `WithAutoFlush()` / `WithBufferSize(n)` / `NDJSONStreamerOption`                       | Option set may expand; existing options keep their semantics.                             |
+| `WithAutoFlush()` / `WithBufferSize(n)` / `WithFlushInterval(d)` / `NDJSONStreamerOption` | Option set may expand; existing options keep their semantics.                             |
+| `StreamEvents(reader, validate, fn)` / `StreamEventsCallback`                           | New streaming reader API; callback signature is stable.                                   |
+| `NewMultiWriter(fn...)` / `MultiWriter` / `MultiWriterCallback`                         | New fan-out API; `MultiWriterCallback` matches `Config.OnEvent` signature.                |
+| `Event.FailureReason` / `StepInfo.FailureReason` / `FailureReason` enum                 | New typed enum (`timeout`, `canceled`, `user_error`); new values may be added.            |
+| `WorkflowReport.FailureSummary`                                                         | Renamed from `FailureReason` to avoid collision with event-level enum.                    |
+| Workflow-level queries (`RetriedStepCount`, `TimedOutSteps`, `HasWorkflowRetries`, etc.) | New aggregate methods on `WorkflowReport`; method set may grow.                           |
+| `FailureReason.Label()` / `FailureReason.Color()` / `FailureReasonMeta`                 | New display metadata methods for visualizations.                                          |
+| `ColumnFailureReason` table column                                                      | New `TableColumn` value; existing values keep their iota.                                 |
 | Dashboard graph enhancements (critical path, retry badges, search, duration labels)    | JS post-processing layer on daghtml SVG; behavior may evolve with go-output daghtml SDK.  |
 | `live.New(config, serverConfig)` / `live.Config` / `live.Server` / `live.Hub`          | New module; type and method set may change between 0.x releases.                          |
 | `live.Server.SignalComplete()` / `live.Hub.OnEvent` / SSE event protocol               | SSE event payloads (`snapshot`, `event`, `complete`) may gain fields; wire format stable. |
