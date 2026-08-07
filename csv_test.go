@@ -45,6 +45,7 @@ func TestReport_WriteCSV(t *testing.T) {
 		"attempt_count", "max_attempts",
 		"started_at", "finished_at", "duration_ms",
 		"has_retry", "has_timeout", "error",
+		"failure_reason",
 		"dependencies", "dependents",
 	}
 
@@ -190,7 +191,7 @@ func TestReport_WriteCSV_SpecialChars_RoundTrip(t *testing.T) {
 
 	const (
 		nameCol = 1  // step_name
-		depCol  = 12 // dependencies
+		depCol  = 13 // dependencies
 	)
 
 	for i, want := range names {
@@ -300,7 +301,7 @@ func TestReport_WriteCSV_DependencySemicolonCollision(t *testing.T) {
 		t.Fatalf("parse CSV: %v", err)
 	}
 
-	const depCol = 12
+	const depCol = 13
 
 	depCell := records[1][depCol]
 

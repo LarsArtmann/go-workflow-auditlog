@@ -306,7 +306,7 @@ Creates an auditor. When `Config.Enabled` is false, checks the `WORKFLOW_AUDITLO
 
 | Method                                | Description                           |
 | ------------------------------------- | ------------------------------------- |
-| `report.WriteCSV(w io.Writer) error`  | Writes all steps as CSV (14 columns). |
+| `report.WriteCSV(w io.Writer) error`  | Writes all steps as CSV (15 columns). |
 | `report.WriteTSV(w io.Writer) error`  | Writes all steps as TSV.              |
 | `report.ExportCSV(path string) error` | Writes all steps as CSV to file.      |
 | `report.ExportTSV(path string) error` | Writes all steps as TSV to file.      |
@@ -338,7 +338,7 @@ _ = viz.ExportHTML(report, "dashboard.html")
 | `report.Summary() string`                              | One-line human-readable summary.                                     |
 | `report.WriteJSON(w io.Writer) error`                  | Serialize report as JSON.                                            |
 | `report.WriteNDJSON(w io.Writer) error`                | Serialize events as NDJSON.                                          |
-| `report.WriteCSV(w io.Writer) error`                   | Serialize steps as CSV (14 columns).                                 |
+| `report.WriteCSV(w io.Writer) error`                   | Serialize steps as CSV (15 columns).                                 |
 | `report.WriteTSV(w io.Writer) error`                   | Serialize steps as TSV.                                              |
 | `report.ExportJSON(path string) error`                 | Writes JSON report to file.                                          |
 | `report.ExportNDJSON(path string) error`               | Writes NDJSON events to file.                                        |
@@ -571,7 +571,7 @@ _ = viz.ExportHTML(report, "dashboard.html")  // interactive HTML dashboard
 
 ### Configurable Table Columns
 
-The `viz.WriteTable` / `viz.WriteTableString` / `viz.ExportTable` functions accept `viz.WithColumns` to control which columns appear. Ten columns are available:
+The `viz.WriteTable` / `viz.WriteTableString` / `viz.ExportTable` functions accept `viz.WithColumns` to control which columns appear. Eleven columns are available:
 
 | Column       | Constant                 | Default? |
 | ------------ | ------------------------ | -------- |
@@ -584,14 +584,15 @@ The `viz.WriteTable` / `viz.WriteTableString` / `viz.ExportTable` functions acce
 | Has Timeout  | `viz.ColumnTimeout`      | Yes      |
 | Error        | `viz.ColumnError`        | Yes      |
 | Type         | `viz.ColumnType`         |          |
-| Dependencies | `viz.ColumnDependencies` |          |
+| Dependencies    | `viz.ColumnDependencies`    |          |
+| Failure Reason  | `viz.ColumnFailureReason`   |          |
 
 ```go
 // Compact table: just step name, status, and duration
 out, _ := viz.WriteTableString(report, output.FormatMarkdown, output.RenderOptions{},
     viz.WithColumns(viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration))
 
-// Full table: all 10 columns
+// Full table: all 11 columns
 out, _ := viz.WriteTableString(report, output.FormatCSV, output.RenderOptions{},
     viz.WithColumns(viz.AllTableColumns()...)
 ```
