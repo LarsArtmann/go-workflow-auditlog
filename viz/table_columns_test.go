@@ -31,7 +31,7 @@ func TestTable_DefaultColumns(t *testing.T) {
 }
 
 func TestTable_CustomColumnSelection(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "custom-col-step")
 
@@ -88,7 +88,7 @@ func TestTable_NewColumns(t *testing.T) {
 }
 
 func TestTable_ColumnOrderRespected(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "order-step")
 
@@ -122,7 +122,7 @@ func TestTable_ColumnOrderRespected(t *testing.T) {
 }
 
 func TestTable_AllColumns(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "all-cols-step")
 
@@ -161,7 +161,7 @@ func TestTable_MaxAttemptsColumn(t *testing.T) {
 }
 
 func TestTable_ColumnsOnAuditor(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "auditor-col-step")
 

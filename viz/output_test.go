@@ -99,7 +99,7 @@ func TestD2_EmptyReport(t *testing.T) {
 }
 
 func TestWriteD2String(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "d2-string")
 
@@ -143,7 +143,7 @@ func TestWriteTable_Markdown(t *testing.T) {
 }
 
 func TestWriteTable_CSV(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "csv-step")
 
@@ -160,7 +160,7 @@ func TestWriteTable_CSV(t *testing.T) {
 }
 
 func TestWriteTable_JSON(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "json-step")
 
@@ -176,7 +176,7 @@ func TestWriteTable_JSON(t *testing.T) {
 }
 
 func TestWriteTable_JSONL(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "jsonl-step")
 
@@ -206,7 +206,7 @@ func TestWriteTable_EmptyReport(t *testing.T) {
 }
 
 func TestWriteTableString(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "table-string")
 
@@ -270,7 +270,7 @@ func TestWriteTree_EmptyReport(t *testing.T) {
 }
 
 func TestWriteTreeString(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "tree-string")
 
@@ -306,7 +306,7 @@ func TestWriteHTMLTree_BasicDAG(t *testing.T) {
 }
 
 func TestWriteHTMLTreeString(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "html-tree-string")
 
@@ -389,7 +389,7 @@ func TestWorkflowReport_ExportMethods(t *testing.T) {
 // TestAuditor_WriteStringMethods verifies the Auditor.Write*String methods
 // mirror their WorkflowReport counterparts and return non-empty output.
 func TestAuditor_WriteStringMethods(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "str-methods")
 

@@ -138,7 +138,7 @@ func TestIntegration_RoundTrip_NDJSON_Replay_Diagram(t *testing.T) {
 // =============================================================================
 
 func TestCrossFormat_DiagramNodeConsistency(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	// Build a 3-step linear chain report
 	report := minimalReport()

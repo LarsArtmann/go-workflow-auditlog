@@ -400,7 +400,7 @@ func TestEnvEnabledFalse(t *testing.T) {
 }
 
 func TestEventsCount_NoCopy(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "count-step")
 

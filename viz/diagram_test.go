@@ -268,7 +268,7 @@ func TestMermaid_FanOutFanIn(t *testing.T) {
 }
 
 func TestWriteMermaidString(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "string-step")
 
@@ -280,7 +280,7 @@ func TestWriteMermaidString(t *testing.T) {
 }
 
 func TestWriteGraphvizString(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "string-step")
 
@@ -293,7 +293,7 @@ func TestWriteGraphvizString(t *testing.T) {
 }
 
 func TestWritePlantUMLString(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "plantuml-step")
 

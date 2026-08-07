@@ -55,7 +55,7 @@ func TestFiltered_ByEventType(t *testing.T) {
 }
 
 func TestFiltered_ByTimeRange(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "time-step")
 

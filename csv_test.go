@@ -14,7 +14,7 @@ import (
 )
 
 func TestReport_WriteCSV(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "csv-step")
 
@@ -72,7 +72,7 @@ func TestReport_WriteCSV(t *testing.T) {
 }
 
 func TestReport_WriteTSV(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "tsv-step")
 
@@ -103,7 +103,7 @@ func TestReport_WriteTSV(t *testing.T) {
 }
 
 func TestReport_WriteCSV_FailingWriter(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "csv-fail-step")
 

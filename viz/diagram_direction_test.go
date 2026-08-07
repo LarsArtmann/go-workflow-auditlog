@@ -13,7 +13,7 @@ import (
 // --- Mermaid Direction Tests ---
 
 func TestMermaid_DefaultDirectionTD(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "td-step")
 
@@ -43,7 +43,7 @@ func TestMermaid_DirectionLR(t *testing.T) {
 }
 
 func TestMermaid_DirectionBT(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "bt-step")
 
@@ -56,7 +56,7 @@ func TestMermaid_DirectionBT(t *testing.T) {
 }
 
 func TestMermaid_DirectionRL(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "rl-step")
 
@@ -71,7 +71,7 @@ func TestMermaid_DirectionRL(t *testing.T) {
 // --- Graphviz Direction Tests ---
 
 func TestGraphviz_DefaultDirectionTB(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "gv-td-step")
 
@@ -101,7 +101,7 @@ func TestGraphviz_DirectionLR(t *testing.T) {
 }
 
 func TestGraphviz_DirectionBT(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "gv-bt-step")
 
@@ -116,7 +116,7 @@ func TestGraphviz_DirectionBT(t *testing.T) {
 // --- D2 Direction Tests ---
 
 func TestD2_DefaultDirectionNone(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-default-step")
 
@@ -132,7 +132,7 @@ func TestD2_DefaultDirectionNone(t *testing.T) {
 }
 
 func TestD2_DirectionRight(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-right-step")
 
@@ -145,7 +145,7 @@ func TestD2_DirectionRight(t *testing.T) {
 }
 
 func TestD2_DirectionUp(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "d2-up-step")
 
@@ -160,7 +160,7 @@ func TestD2_DirectionUp(t *testing.T) {
 // --- PlantUML Direction Tests ---
 
 func TestPlantUML_DefaultNoDirectionCommand(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-default-step")
 
@@ -175,7 +175,7 @@ func TestPlantUML_DefaultNoDirectionCommand(t *testing.T) {
 }
 
 func TestPlantUML_DirectionRight(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-lr-step")
 
@@ -259,7 +259,7 @@ func TestExportMermaidWithDirection(t *testing.T) {
 // --- DirectionDown explicit tests (cover default branches) ---
 
 func TestMermaid_DirectionDownExplicit(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "td-explicit-step")
 
@@ -272,7 +272,7 @@ func TestMermaid_DirectionDownExplicit(t *testing.T) {
 }
 
 func TestPlantUML_DirectionDownExplicit(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-td-explicit")
 
@@ -288,7 +288,7 @@ func TestPlantUML_DirectionDownExplicit(t *testing.T) {
 }
 
 func TestPlantUML_DirectionLeft(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-left-step")
 
@@ -301,7 +301,7 @@ func TestPlantUML_DirectionLeft(t *testing.T) {
 }
 
 func TestPlantUML_DirectionUp(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "puml-up-step")
 

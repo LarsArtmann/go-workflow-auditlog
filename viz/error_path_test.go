@@ -54,7 +54,7 @@ func minimalReport() auditlog.WorkflowReport {
 // =============================================================================
 
 func TestErrorPath_WriteJSON_FailingWriter_ErrRenderFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := report.WriteJSON(testhelpers.FailingWriter{})
@@ -70,7 +70,7 @@ func TestErrorPath_WriteJSON_FailingWriter_ErrRenderFailed(t *testing.T) {
 // =============================================================================
 
 func TestErrorPath_WriteMermaid_FailingWriter_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.WriteMermaid(report, testhelpers.FailingWriter{})
@@ -81,7 +81,7 @@ func TestErrorPath_WriteMermaid_FailingWriter_ErrExportWriteFailed(t *testing.T)
 }
 
 func TestErrorPath_WriteGraphviz_FailingWriter_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.WriteGraphviz(report, testhelpers.FailingWriter{})
@@ -96,7 +96,7 @@ func TestErrorPath_WriteGraphviz_FailingWriter_ErrExportWriteFailed(t *testing.T
 // =============================================================================
 
 func TestErrorPath_WritePlantUML_FailingWriter_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.WritePlantUML(report, testhelpers.FailingWriter{})
@@ -107,7 +107,7 @@ func TestErrorPath_WritePlantUML_FailingWriter_ErrExportWriteFailed(t *testing.T
 }
 
 func TestErrorPath_WriteD2_FailingWriter_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.WriteD2(report, testhelpers.FailingWriter{})
@@ -122,7 +122,7 @@ func TestErrorPath_WriteD2_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 // =============================================================================
 
 func TestErrorPath_WriteTree_FailingWriter_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.WriteTree(report, testhelpers.FailingWriter{})
@@ -133,7 +133,7 @@ func TestErrorPath_WriteTree_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 }
 
 func TestErrorPath_WriteHTMLTree_FailingWriter_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.WriteHTMLTree(report, testhelpers.FailingWriter{})
@@ -149,7 +149,7 @@ func TestErrorPath_WriteHTMLTree_FailingWriter_ErrExportWriteFailed(t *testing.T
 // =============================================================================
 
 func TestErrorPath_WriteTable_FailingWriter_ErrRenderFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.WriteTable(report, testhelpers.FailingWriter{}, output.FormatMarkdown, output.RenderOptions{})
@@ -165,7 +165,7 @@ func TestErrorPath_WriteTable_FailingWriter_ErrRenderFailed(t *testing.T) {
 // =============================================================================
 
 func TestErrorPath_WriteHTML_FailingWriter_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.WriteHTML(report, testhelpers.FailingWriter{})
@@ -181,7 +181,7 @@ func TestErrorPath_WriteHTML_FailingWriter_ErrExportWriteFailed(t *testing.T) {
 // =============================================================================
 
 func TestErrorPath_WriteNDJSON_FailingWriter_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := report.WriteNDJSON(testhelpers.FailingWriter{})
@@ -196,7 +196,7 @@ func TestErrorPath_WriteNDJSON_FailingWriter_ErrExportWriteFailed(t *testing.T) 
 // =============================================================================
 
 func TestErrorPath_ExportJSON_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := report.ExportJSON("/nonexistent_dir_auditlog_test/output.json")
@@ -207,7 +207,7 @@ func TestErrorPath_ExportJSON_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
 }
 
 func TestErrorPath_ExportMermaid_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.ExportMermaid(report, "/nonexistent_dir_auditlog_test/output.mmd")
@@ -218,7 +218,7 @@ func TestErrorPath_ExportMermaid_UnwritableDir_ErrExportWriteFailed(t *testing.T
 }
 
 func TestErrorPath_ExportHTML_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.ExportHTML(report, "/nonexistent_dir_auditlog_test/output.html")
@@ -229,7 +229,7 @@ func TestErrorPath_ExportHTML_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
 }
 
 func TestErrorPath_ExportD2_UnwritableDir_ErrExportWriteFailed(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	err := viz.ExportD2(report, "/nonexistent_dir_auditlog_test/output.d2")

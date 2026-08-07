@@ -151,7 +151,7 @@ func TestExportHTML_WritesFile(t *testing.T) {
 }
 
 func TestAuditor_WriteHTML_DelegatesToReport(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a, buf := testhelpers.RunSingleSucceedWithBuffer(t, "delegate-step")
 

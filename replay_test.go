@@ -181,7 +181,7 @@ func TestReplayEvents_NoEvents(t *testing.T) {
 }
 
 func TestReplayEvents_PreservesEventCount(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	a := testhelpers.RunSingleSucceed(t, "count-step")
 

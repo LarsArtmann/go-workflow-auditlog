@@ -795,7 +795,7 @@ func absDiff(a, b float64) float64 {
 // WorkflowReport-level method — used by replayed/loaded reports — was never
 // called directly.
 func TestCoverage_Report_ExportTable(t *testing.T) {
-	t.Parallel()
+	t.Parallel() //art-dupl:accept idiomatic Go test boilerplate
 
 	report := minimalReport()
 	path := filepath.Join(t.TempDir(), "table.csv")
