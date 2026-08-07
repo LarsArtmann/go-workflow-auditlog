@@ -25,6 +25,20 @@ import (
 // version is set at build time via -ldflags "-X main.version=..." (goreleaser).
 var version = "dev"
 
+// printSection writes a blank line followed by a Unicode-bracketed section header.
+// Centralizes the visual separator pattern shared by every print* helper below.
+func printSection(label string) {
+	fmt.Println()
+	fmt.Println("━━━ " + label + " ━━━")
+}
+
+// traceStep writes a "  → <action>" line for step Do() implementations.
+// Centralizes the visual indent + arrow used by every demo step so the demo's
+// runtime output reads consistently.
+func traceStep(action string) {
+	fmt.Println("  → " + action)
+}
+
 // --- Domain steps ---
 
 type FetchStep struct {
@@ -49,7 +63,7 @@ type ValidateStep struct {
 }
 
 func (s *ValidateStep) Do(_ context.Context) error {
-	fmt.Println("  → validating data")
+	traceStep("validating data")
 	time.Sleep(5 * time.Millisecond)
 
 	if len(s.Input) == 0 {
@@ -72,7 +86,7 @@ type TransformStep struct {
 }
 
 func (s *TransformStep) Do(_ context.Context) error {
-	fmt.Println("  → transforming data")
+	traceStep("transforming data")
 	time.Sleep(8 * time.Millisecond)
 
 	s.Out = []byte(`transformed:` + string(s.Input))
@@ -231,8 +245,7 @@ func buildWorkflow() *flow.Workflow {
 
 // printReportSummary prints the high-level report counters.
 func printReportSummary(report auditlog.WorkflowReport) {
-	fmt.Println()
-	fmt.Println("━━━ Audit Report ━━━")
+	printSection("Audit Report")
 	fmt.Printf("Workflow:     %s\n", report.WorkflowID)
 	fmt.Printf("Steps:        %d\n", report.StepCount)
 	fmt.Printf("Succeeded:    %d\n", report.SucceededCount)
@@ -246,8 +259,7 @@ func printReportSummary(report auditlog.WorkflowReport) {
 
 // printStepDetails prints per-step information including timing, deps, and errors.
 func printStepDetails(report auditlog.WorkflowReport) {
-	fmt.Println()
-	fmt.Println("━━━ Step Details ━━━")
+	printSection("Step Details")
 
 	for _, step := range report.Steps {
 		icon := step.Status.Icon()
@@ -408,8 +420,7 @@ func printSampleEvent(report auditlog.WorkflowReport) {
 // auditlog sentinel is automatically classified, so consumers get IsRetryable,
 // ExitCode, and Classify without importing go-error-family themselves.
 func printErrorClassification() {
-	fmt.Println()
-	fmt.Println("━━━ Error Classification ━━━")
+	printSection("Error Classification")
 	fmt.Println("(via github.com/larsartmann/go-error-family)")
 
 	demos := []struct {

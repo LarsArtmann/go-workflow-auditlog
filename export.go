@@ -30,16 +30,10 @@ func writeEventsNDJSON(writer io.Writer, events []Event) error {
 	encoder := jsontext.NewEncoder(buf)
 
 	for _, evt := range events {
-		err := encodeEvent(encoder, evt)
-		if err != nil {
+		if err := encodeEvent(encoder, evt); err != nil {
 			return err
 		}
 	}
 
-	err := buf.Flush()
-	if err != nil {
-		return fmt.Errorf("%w: flush ndjson buffer: %w", ErrExportWriteFailed, err)
-	}
-
-	return nil
+	return wrapFlushError("ndjson buffer", buf.Flush())
 }

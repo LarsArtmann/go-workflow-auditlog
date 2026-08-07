@@ -84,3 +84,15 @@ func WriteToFile(path string, fn func(io.Writer) error) error {
 
 	return nil
 }
+
+// wrapFlushError wraps a buffered-writer flush failure with ErrExportWriteFailed
+// and a context-specific label (e.g. "ndjson buffer", "delimited writer"). Used
+// by code paths that buffer writes through bufio.Writer or encoding/csv.Writer
+// and need to surface flush-time errors with the standard sentinel.
+func wrapFlushError(label string, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("%w: flush %s: %w", ErrExportWriteFailed, label, err)
+}

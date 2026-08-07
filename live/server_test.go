@@ -51,17 +51,26 @@ func newTestServerWithCORS(t *testing.T, corsOrigin string) *live.Server {
 	})
 }
 
-func TestServer_DashboardHTML(t *testing.T) {
-	t.Parallel()
+// serveTestRequest runs method path against a freshly-built test server and
+// returns the response recorder. Centralizes the (server + ctx + req + rec +
+// ServeHTTP) boilerplate shared by every endpoint test in this file.
+func serveTestRequest(t *testing.T, method, path string) *httptest.ResponseRecorder {
+	t.Helper()
 
 	server := newTestServer(t)
 
-	ctx := t.Context()
-
-	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), method, path, nil)
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)
+
+	return rec
+}
+
+func TestServer_DashboardHTML(t *testing.T) {
+	t.Parallel()
+
+	rec := serveTestRequest(t, http.MethodGet, "/")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -87,14 +96,7 @@ func TestServer_DashboardHTML(t *testing.T) {
 func TestServer_DashboardHTML_Accessibility(t *testing.T) {
 	t.Parallel()
 
-	server := newTestServer(t)
-
-	ctx := t.Context()
-
-	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-
-	server.ServeHTTP(rec, req)
+	rec := serveTestRequest(t, http.MethodGet, "/")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -125,14 +127,7 @@ func TestServer_DashboardHTML_Accessibility(t *testing.T) {
 func TestServer_HealthEndpoint(t *testing.T) {
 	t.Parallel()
 
-	server := newTestServer(t)
-
-	ctx := t.Context()
-
-	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/health", nil)
-	rec := httptest.NewRecorder()
-
-	server.ServeHTTP(rec, req)
+	rec := serveTestRequest(t, http.MethodGet, "/api/health")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -150,14 +145,7 @@ func TestServer_HealthEndpoint(t *testing.T) {
 func TestServer_ReportEndpoint(t *testing.T) {
 	t.Parallel()
 
-	server := newTestServer(t)
-
-	ctx := t.Context()
-
-	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/report", nil)
-	rec := httptest.NewRecorder()
-
-	server.ServeHTTP(rec, req)
+	rec := serveTestRequest(t, http.MethodGet, "/api/report")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -173,14 +161,7 @@ func TestServer_ReportEndpoint(t *testing.T) {
 func TestServer_NotFound(t *testing.T) {
 	t.Parallel()
 
-	server := newTestServer(t)
-
-	ctx := t.Context()
-
-	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/nonexistent", nil)
-	rec := httptest.NewRecorder()
-
-	server.ServeHTTP(rec, req)
+	rec := serveTestRequest(t, http.MethodGet, "/nonexistent")
 
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("expected 404, got %d", rec.Code)

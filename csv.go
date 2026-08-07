@@ -53,12 +53,7 @@ func (r WorkflowReport) writeDelimited(writer io.Writer, comma rune) error {
 
 	w.Flush()
 
-	err = w.Error()
-	if err != nil {
-		return fmt.Errorf("%w: flush delimited writer: %w", ErrExportWriteFailed, err)
-	}
-
-	return nil
+	return wrapFlushError("delimited writer", w.Error())
 }
 
 // ExportCSV writes all steps as CSV to path.
