@@ -52,7 +52,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-08-06.
 - `WallClockDurationMs` — actual elapsed time (earliest → latest event)
 - `PeakConcurrency` — max in-flight attempts (event-stream scan)
 - `CriticalPathDurationMs` — longest dependency-chain duration (memoized DFS)
-- `FailureReason` — structured enum on Event (`timeout`, `canceled`, `user_error`); zero value = unclassified (success)
+- `FailureReason` — structured enum on Event (`timeout`, `canceled`, `user_error`); zero value = unclassified (success); also denormalized onto `StepInfo` (reflects final outcome only, cleared on retry success); `Label()`/`Color()` display metadata for visualizations; `ColumnFailureReason` table column in viz
 - `FailureSummary` — human-readable report-level summary (e.g., "3 step(s) failed: fetch"); JSON key `failure_summary`
 - `PendingCount` / `RunningCount` — split lifecycle-state counters
 - `TotalDurationMs` — sum of per-step durations (kept for completeness)
@@ -189,6 +189,5 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
 - JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor)
 - `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md` exists)
-- `FailureReason` denormalized onto `StepInfo` with `Label()`/`Color()` display metadata, `ColumnFailureReason` table column, viz `TypeMetadata` integration
 - Synthetic `attempt_end` events for dependency-failed steps (restoring `FailureReasonDependency` as a real value)
 - `Events()` / `CriticalPath()` iterator patterns (Go `iter.Seq`) for lazy evaluation on large reports
