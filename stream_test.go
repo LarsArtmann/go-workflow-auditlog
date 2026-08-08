@@ -1085,7 +1085,7 @@ func BenchmarkNDJSONStreamer_10000Events(b *testing.B) {
 }
 
 func BenchmarkStreamEvents_1000Lines(b *testing.B) {
-	var lines []string
+	lines := make([]string, 0, 1000)
 
 	for i := range 1000 {
 		lines = append(lines, fmt.Sprintf(

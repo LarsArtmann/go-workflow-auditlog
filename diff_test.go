@@ -297,14 +297,14 @@ func BenchmarkDiff_100Steps(b *testing.B) {
 	dur := func(ms float64) *float64 { return &ms }
 
 	makeReport := func(baseDuration float64) auditlog.WorkflowReport {
-		steps := make([]auditlog.StepInfo, 100)
+		steps := make([]auditlog.StepInfo, 0, 100)
 		for i := range 100 {
-			steps[i] = auditlog.StepInfo{
+			steps = append(steps, auditlog.StepInfo{
 				StepRef:      auditlog.StepRef{Name: fmt.Sprintf("step-%03d", i)},
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   dur(baseDuration + float64(i)),
 				AttemptCount: 1,
-			}
+			})
 		}
 
 		return auditlog.WorkflowReport{Steps: steps}

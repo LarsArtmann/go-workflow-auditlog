@@ -343,7 +343,6 @@ func TestFailureReason_Color(t *testing.T) {
 	}
 }
 
-//go:fix inline
 func strPtr(s string) *string { return new(s) }
 
 // TestFailureSummary_GoldenJSON verifies the JSON field placement:
