@@ -51,15 +51,15 @@ func newTestServerWithCORS(t *testing.T, corsOrigin string) *live.Server {
 	})
 }
 
-// serveTestRequest runs method path against a freshly-built test server and
+// serveTestRequest runs a GET path against a freshly-built test server and
 // returns the response recorder. Centralizes the (server + ctx + req + rec +
 // ServeHTTP) boilerplate shared by every endpoint test in this file.
-func serveTestRequest(t *testing.T, method, path string) *httptest.ResponseRecorder {
+func serveTestRequest(t *testing.T, path string) *httptest.ResponseRecorder {
 	t.Helper()
 
 	server := newTestServer(t)
 
-	req := httptest.NewRequestWithContext(t.Context(), method, path, nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil)
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)
@@ -70,7 +70,7 @@ func serveTestRequest(t *testing.T, method, path string) *httptest.ResponseRecor
 func TestServer_DashboardHTML(t *testing.T) {
 	t.Parallel()
 
-	rec := serveTestRequest(t, http.MethodGet, "/")
+	rec := serveTestRequest(t, "/")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -96,7 +96,7 @@ func TestServer_DashboardHTML(t *testing.T) {
 func TestServer_DashboardHTML_Accessibility(t *testing.T) {
 	t.Parallel()
 
-	rec := serveTestRequest(t, http.MethodGet, "/")
+	rec := serveTestRequest(t, "/")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -127,7 +127,7 @@ func TestServer_DashboardHTML_Accessibility(t *testing.T) {
 func TestServer_HealthEndpoint(t *testing.T) {
 	t.Parallel()
 
-	rec := serveTestRequest(t, http.MethodGet, "/api/health")
+	rec := serveTestRequest(t, "/api/health")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -145,7 +145,7 @@ func TestServer_HealthEndpoint(t *testing.T) {
 func TestServer_ReportEndpoint(t *testing.T) {
 	t.Parallel()
 
-	rec := serveTestRequest(t, http.MethodGet, "/api/report")
+	rec := serveTestRequest(t, "/api/report")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -161,7 +161,7 @@ func TestServer_ReportEndpoint(t *testing.T) {
 func TestServer_NotFound(t *testing.T) {
 	t.Parallel()
 
-	rec := serveTestRequest(t, http.MethodGet, "/nonexistent")
+	rec := serveTestRequest(t, "/nonexistent")
 
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("expected 404, got %d", rec.Code)

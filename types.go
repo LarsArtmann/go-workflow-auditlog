@@ -131,7 +131,7 @@ var stepStatusMeta = map[StepStatus]struct {
 		FontColor: fontColorLight,
 	},
 	StepStatusCanceled: {
-		Label:     "Canceled",
+		Label:     "Canceled", //nolint:goconst // Display label intentionally shares vocabulary with FailureReason UI label.
 		Icon:      "\U0001F6AB",
 		FillColor: statusFillCanceled,
 		FontColor: fontColorLight,
