@@ -18,15 +18,15 @@ HTML rendering pipeline.
 
 ## Current State
 
-| Aspect | Detail |
-|--------|--------|
-| File | `viz/html_render.go` (184 lines) |
-| Template | Single `const htmlTemplate` string literal (118 lines) |
-| Dynamic data | 3 JSON blobs injected via `<script type="application/json">` tags |
-| Substitution | 8 `fmt.Sprintf` verbs in the template string |
-| XSS safety | All dynamic data is JSON in script tags (no string-interpolated HTML) |
-| Conditional logic | None — the template is fully static |
-| Loops | None — all iteration happens client-side in dashboard.js |
+| Aspect            | Detail                                                                |
+| ----------------- | --------------------------------------------------------------------- |
+| File              | `viz/html_render.go` (184 lines)                                      |
+| Template          | Single `const htmlTemplate` string literal (118 lines)                |
+| Dynamic data      | 3 JSON blobs injected via `<script type="application/json">` tags     |
+| Substitution      | 8 `fmt.Sprintf` verbs in the template string                          |
+| XSS safety        | All dynamic data is JSON in script tags (no string-interpolated HTML) |
+| Conditional logic | None — the template is fully static                                   |
+| Loops             | None — all iteration happens client-side in dashboard.js              |
 
 ---
 
@@ -67,14 +67,14 @@ templ Dashboard(title string, css string, report json.RawMessage, ...) {
 
 ### Benefit assessment
 
-| Criterion | Current (fmt.Sprintf) | templ | Verdict |
-|-----------|----------------------|-------|---------|
-| Type safety | None (8 untyped `%s`) | Full (typed params) | Marginal — only 8 params |
-| XSS safety | Already safe (JSON in script tags) | Also safe | No improvement |
-| Conditional rendering | Not needed | Available | No current use case |
-| Loops over data | Not needed (client-side) | Available | No current use case |
-| Build step | None | `go tool templ generate` | **Added complexity** |
-| Generated code | None | `html_templ.go` | **Extra maintenance** |
+| Criterion             | Current (fmt.Sprintf)              | templ                    | Verdict                  |
+| --------------------- | ---------------------------------- | ------------------------ | ------------------------ |
+| Type safety           | None (8 untyped `%s`)              | Full (typed params)      | Marginal — only 8 params |
+| XSS safety            | Already safe (JSON in script tags) | Also safe                | No improvement           |
+| Conditional rendering | Not needed                         | Available                | No current use case      |
+| Loops over data       | Not needed (client-side)           | Available                | No current use case      |
+| Build step            | None                               | `go tool templ generate` | **Added complexity**     |
+| Generated code        | None                               | `html_templ.go`          | **Extra maintenance**    |
 
 ### When templ becomes valuable
 

@@ -26,9 +26,9 @@ Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that re
 | `go run ./viz/example`                                                              | Run the demo pipeline                                                                                        |
 | `go run ./example`                                                                  | Run the demo pipeline (legacy path; now `./viz/example`)                                                     |
 | `nix run .#check`                                                                   | Run all checks (vet + test-race + lint + govulncheck for core, viz & live — all three modules fully covered) |
-| `GOEXPERIMENT=jsonv2 go run ./cmd/auditlog help`                                   | CLI: info/convert/diff/validate/schema subcommands for exported reports                                      |
+| `GOEXPERIMENT=jsonv2 go run ./cmd/auditlog help`                                    | CLI: info/convert/diff/validate/schema subcommands for exported reports                                      |
 | `GOEXPERIMENT=jsonv2 go run ./cmd/genschema`                                        | Regenerate JSON Schema (`schema/report.schema.json`)                                                         |
-| `nix run .#auditlog -- help`                                                       | Run the CLI via Nix (no install)                                                                             |
+| `nix run .#auditlog -- help`                                                        | Run the CLI via Nix (no install)                                                                             |
 | `go work sync`                                                                      | Sync `go.work` and `go.work.sum` with module state                                                           |
 
 ---

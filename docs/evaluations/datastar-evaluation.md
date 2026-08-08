@@ -20,16 +20,16 @@ inline keyboard shortcuts and export helpers.
 
 ## Current State
 
-| Aspect | Detail |
-|--------|--------|
-| File size | 1,922 lines (`live/dashboard.js`) |
-| Dependencies | Zero (vanilla JS IIFE) |
-| SSE parsing | Manual `EventSource` + 3 named events + exponential backoff |
-| State management | Mutable `state` object with `report`, `events[]`, `steps{}`, `dag` |
-| Rendering | 10+ functions building HTML via string concatenation with manual `esc()` |
+| Aspect              | Detail                                                                        |
+| ------------------- | ----------------------------------------------------------------------------- |
+| File size           | 1,922 lines (`live/dashboard.js`)                                             |
+| Dependencies        | Zero (vanilla JS IIFE)                                                        |
+| SSE parsing         | Manual `EventSource` + 3 named events + exponential backoff                   |
+| State management    | Mutable `state` object with `report`, `events[]`, `steps{}`, `dag`            |
+| Rendering           | 10+ functions building HTML via string concatenation with manual `esc()`      |
 | Incremental updates | Hand-rolled `stepStateKey()` fingerprinting + `updateStepRow()` cell patching |
-| Graph | Direct SVG manipulation, `MutationObserver` for minimap |
-| Keyboard nav | ~120 lines: roving tabindex, focus traps, arrow-key navigation |
+| Graph               | Direct SVG manipulation, `MutationObserver` for minimap                       |
+| Keyboard nav        | ~120 lines: roving tabindex, focus traps, arrow-key navigation                |
 
 ---
 
@@ -45,6 +45,7 @@ Adopting Datastar would eliminate **~1,500+ lines** of dashboard JS:
 - **Reconnection** — Datastar handles SSE reconnection automatically
 
 **What survives** (~100-200 lines):
+
 - SVG graph enhancement (`enhanceGraph`, critical-path highlighting, retry badges)
 - Minimap viewport tracking via `MutationObserver`
 - Keyboard accessibility (focus traps, roving tabindex)
@@ -55,17 +56,20 @@ Adopting Datastar would eliminate **~1,500+ lines** of dashboard JS:
 ## Migration Path
 
 ### Phase 1: Server-side fragment rendering
+
 1. Add `github.com/a-h/templ` dependency (already available — samber-do uses it)
 2. Create `live/fragments.templ` with reactive components for stats, steps table, events table, timeline, waveform
 3. Create `live/fragments.go` with Go helpers (humanizeMs, status badges, etc.)
 4. Rewrite SSE handler to emit `datastar-patch-elements` events instead of JSON
 
 ### Phase 2: Dashboard skeleton
+
 1. Embed `datastar.js` via `go:embed`
 2. Rewrite `live/dashboard.go` with Datastar directives (`data-signals`, `data-text`, `data-show`, `data-on:click`)
 3. Remove `live/dashboard.js` — replace with ~50 lines of inline JS for keyboard nav and graph enhancement
 
 ### Phase 3: Graph enhancement preservation
+
 1. Port SVG manipulation code into a small inline `<script>` block
 2. Keep keyboard accessibility as inline JS
 
@@ -73,12 +77,12 @@ Adopting Datastar would eliminate **~1,500+ lines** of dashboard JS:
 
 ## Risks
 
-| Risk | Mitigation |
-|------|------------|
-| Datastar bundle size (~56KB) | Acceptable — embedded via `go:embed`, served gzipped |
-| Learning curve for Datastar directives | Reference samber-do's working implementation |
-| SVG graph manipulation doesn't map to Datastar | Keep as inline JS (same pattern as samber-do) |
-| Keyboard accessibility needs custom JS | Already the pattern in samber-do (~50 lines inline) |
+| Risk                                           | Mitigation                                           |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| Datastar bundle size (~56KB)                   | Acceptable — embedded via `go:embed`, served gzipped |
+| Learning curve for Datastar directives         | Reference samber-do's working implementation         |
+| SVG graph manipulation doesn't map to Datastar | Keep as inline JS (same pattern as samber-do)        |
+| Keyboard accessibility needs custom JS         | Already the pattern in samber-do (~50 lines inline)  |
 
 ---
 
