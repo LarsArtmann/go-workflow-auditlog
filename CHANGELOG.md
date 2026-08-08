@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **`cmd/auditlog` CLI tool** — standalone binary with `info`, `convert`, `diff`, `validate`, `schema`, and `version` subcommands. Uses stdlib `flag` (no cobra/urfave dependency). Supports JSON/NDJSON auto-detection, CSV/TSV/JSON/NDJSON output conversion, and report validation. 5 integration tests.
+- **JSON Schema generation** (`cmd/genschema/`, `schema.go`, `schema/report.schema.json`) — programmatic schema generation via `invopop/jsonschema` (depguard-restricted to `cmd/`). `//go:generate go run ./cmd/genschema` regenerates the Draft 2020-12 schema. `JSONSchema()` accessor returns the embedded schema bytes. `schema_test.go` verifies non-empty + valid JSON.
+- **`MigrateReport`** (`migration.go`) — programmatic schema upgrade that re-derives all denormalized fields via `buildReportFromCore`. `RedriveReportStatuses` helper for status normalization. Handles missing version and empty input with sentinel errors. 4 tests.
+- **Nix `auditlog` app** — `nix run .#auditlog` runs the CLI without installation.
+- **CI hardening** — `.github/workflows/ci.yml` and `website.yml` rewritten: all actions SHA-pinned, Go pinned to 1.26.5 with `GOTOOLCHAIN=go1.26.5`, `golangci-lint config verify` step, `stale-generation` job, `npm audit` in website CI, Firebase secret JSON validation via `node -e JSON.parse`.
+
+### Fixed
+
+- **Removed `var _ = auditlog.SchemaVersion` hack** — `cmd/auditlog/convert.go` and `cmd/auditlog/diff.go` no longer import the auditlog package unnecessarily. The methods called (`WriteJSON`, `WriteNDJSON`, etc.) are on values returned by `loadFile`, not direct package references.
+
 - **SSE reconnection replay** — the live dashboard now survives connection drops without missing events. A bounded event ring buffer (default 1000 events) stores SSE events with sequential IDs. When a client reconnects with a `Last-Event-ID` header (sent automatically by the browser's `EventSource` API), missed events are replayed via `sse.Replay` before the snapshot. Configurable via `live.Config.ReplayBufferSize`.
 - **Graceful shutdown drain** — `Server.Shutdown` now drains subscriber channel buffers before closing HTTP connections, preventing event loss during shutdown. The hub's drain state is surfaced in the `/api/health` endpoint as `draining` and `event_buffer_size` fields.
 - **SSE event IDs** — live SSE events now include `id:` fields, enabling the browser's built-in reconnection tracking.

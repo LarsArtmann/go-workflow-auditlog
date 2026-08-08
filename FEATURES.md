@@ -18,6 +18,19 @@ Honest feature inventory by status. Verified against the codebase on 2026-08-06.
 - **`StepInfo.Error` reflects FINAL outcome only** — a succeeded step has `Error == nil` even after transient failures (regression-tested)
 - **Pre-execution DAG capture** — `CaptureDAG(w)` traverses the workflow to pre-populate step records with names, types, dependencies, retry/timeout config, and "pending" status. Makes the full DAG available in `Report()` BEFORE `w.Do(ctx)`, enabling live dashboards to render the step graph immediately. Idempotent, disabled-safe, nil-safe. No events generated.
 
+- **`MigrateReport(data []byte)`** — programmatic schema-version migration. Re-derives all denormalized fields via `buildReportFromCore`, normalizes statuses via `RedriveReportStatuses`. Sentinel errors for empty input (`ErrMigrationEmptyInput`) and missing version (`ErrMigrationMissingVersion`). 4 tests.
+
+### CLI Tool
+
+- **`cmd/auditlog`** — standalone CLI binary with subcommands: `info` (version, workflow, steps, status breakdown, durations, failed/retried steps), `convert` (JSON/NDJSON/CSV/TSV output with format inference), `diff` (added/removed/changed steps, duration/critical-path/peak-concurrency deltas), `validate` (runs `Report.Validate()`), `schema` (prints JSON schema), `version`. Uses stdlib `flag` (no cobra/urfave). 5 integration tests.
+- **`nix run .#auditlog`** — runs the CLI via Nix without installation.
+
+### JSON Schema
+
+- **`schema.go`** — go:embed of `schema/report.schema.json` + `JSONSchema()` accessor + `//go:generate go run ./cmd/genschema` directive
+- **`cmd/genschema/`** — JSON Schema generator using `invopop/jsonschema` reflector (depguard-restricted to `cmd/`)
+- **`schema/report.schema.json`** — generated Draft 2020-12 JSON Schema for `WorkflowReport`
+
 ### Report & Query API
 
 - **`WorkflowReport`** with denormalized aggregates (counts, durations, peak concurrency, critical path)
@@ -155,6 +168,12 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
 - **govulncheck** in CI (golang/govulncheck-action) — all three modules scanned
 - **actionlint** in CI (workflow linting)
+- **SHA-pinned GitHub Actions** — all `uses:` references pinned to commit SHAs with version comments (supply-chain hardening)
+- **`golangci-lint config verify`** — CI validates lint config before running
+- **`stale-generation` CI job** — detects generated-code drift
+- **`npm audit`** in website CI
+- **Firebase secret JSON validation** in website CI via `node -e JSON.parse`
+- **Go pinned to 1.26.5** in CI with `GOTOOLCHAIN=go1.26.5`
 - **Coverage**: core 95.4%, viz 91.8%, live 96.2%
 - **flake.nix** devShell (Go 1.26.5, golangci-lint, govulncheck, actionlint, `d2` CLI; GOEXPERIMENT=jsonv2)
 - **flake-parts** + **treefmt-nix** for build automation (includes `d2-fmt`, `nixfmt`, `gofmt`)
@@ -186,8 +205,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ## PLANNED (see TODO_LIST.md and ROADMAP.md)
 
 - OpenTelemetry span bridge (defer until a consumer has an OTel stack)
-- CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
-- JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor)
-- `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md` exists)
 - Synthetic `attempt_end` events for dependency-failed steps (restoring `FailureReasonDependency` as a real value)
 - `Events()` / `CriticalPath()` iterator patterns (Go `iter.Seq`) for lazy evaluation on large reports
+- CSS design token extraction with sync-enforcement tests (port from samber-do pattern)
+- Datastar/templ evaluation for live dashboard and HTML rendering

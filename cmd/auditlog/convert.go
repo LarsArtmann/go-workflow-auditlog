@@ -77,7 +77,7 @@ func openOutput(path string) (io.Writer, io.Closer, error) {
 		return os.Stdout, nopCloser{}, nil
 	}
 
-	file, err := os.Create(path) //nolint:gosec // path is user-provided by design
+	file, err := os.Create(path)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create output %s: %w", path, err)
 	}

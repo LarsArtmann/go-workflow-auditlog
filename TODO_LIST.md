@@ -1,6 +1,6 @@
 # TODO List — go-workflow-auditlog
 
-Actionable short- and mid-term tasks, verified against the actual code on 2026-08-06.
+Actionable short- and mid-term tasks, verified against the actual code on 2026-08-07.
 Long-term vision and raw ideas live in [ROADMAP.md](./ROADMAP.md).
 Completed items are documented in [CHANGELOG.md](./CHANGELOG.md) — never retained here.
 
@@ -17,6 +17,10 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md) — never retai
 
 - [ ] **Consider Go 1.26.5 → 1.27 upgrade** — eliminates the `GOEXPERIMENT=jsonv2` experimental flag requirement and the 29 gopls `stdversion` warnings across all files using `encoding/json/v2`.
       _Source: `docs/status/2026-08-06_20-14` §f.36-37_
+- [x] **CLI tool** — `cmd/auditlog` with info/convert/diff/validate/schema subcommands (done)
+- [x] **JSON Schema generation** — `cmd/genschema`, `schema.go`, `JSONSchema()` accessor (done)
+- [x] **MigrateReport** — programmatic schema-version migration (done)
+- [x] **CI hardening** — SHA-pinned actions, Go 1.26.5 pin, golangci-lint config verify, stale-generation job, npm audit, Firebase JSON validation (done)
 
 ---
 

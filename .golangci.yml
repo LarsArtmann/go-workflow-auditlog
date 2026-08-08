@@ -165,7 +165,9 @@ linters:
             - github.com/larsartmann/go-workflow-auditlog/live
             - github.com/larsartmann/go-workflow-auditlog/testhelpers
           files:
-            - $all
+            - "!**/cmd/**"
+            - "!**/*_test.go"
+            - "!**/example/**"
           list-mode: strict
     exhaustive:
       default-signifies-exhaustive: true
@@ -267,6 +269,24 @@ linters:
           - gochecknoglobals
           - wrapcheck
           - gosec
+      - path: cmd/
+        linters:
+          - forbidigo
+          - mnd
+          - cyclop
+          - err113
+          - exhaustruct
+          - varnamelen
+          - gochecknoglobals
+          - wrapcheck
+          - gosec
+          - errcheck
+          - inamedparam
+          - nonamedreturns
+          - unparam
+          - noctx
+          - funlen
+          - goconst
       - path: demo/
         linters:
           - forbidigo

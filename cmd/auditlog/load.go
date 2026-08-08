@@ -31,7 +31,7 @@ func openPath(
 		return os.Stdin, os.Stdin, nil
 	}
 
-	file, err := os.Open(path) //nolint:gosec // path is user-provided by design
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, nil, fmt.Errorf("open %s: %w", path, err)
 	}
