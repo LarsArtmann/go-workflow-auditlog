@@ -30,8 +30,8 @@ echo "=== Generating example dashboard ==="
 
 DASHBOARD_HTML="$TMPDIR/dashboard.html"
 if [[ ! -f "$DASHBOARD_HTML" ]]; then
-  echo "ERROR: dashboard.html not found after running example"
-  exit 1
+	echo "ERROR: dashboard.html not found after running example"
+	exit 1
 fi
 
 # --- Step 3: Capture each tab ---
@@ -41,49 +41,49 @@ fi
 # queries). timeout kills chromium after the screenshot is written — it
 # hangs on background networking tasks otherwise.
 capture_tab() {
-  local tab_name="$1"
-  local output_file="$2"
-  local injected_html="$TMPDIR/${tab_name}.html"
+	local tab_name="$1"
+	local output_file="$2"
+	local injected_html="$TMPDIR/${tab_name}.html"
 
-  sed "s|</body>|<script>(function(){var b=document.querySelector('.tab[data-tab=\"${tab_name}\"]');if(b\&\&typeof switchTab==='function')switchTab(b);})()</script></body>|" \
-    "$DASHBOARD_HTML" > "$injected_html"
+	sed "s|</body>|<script>(function(){var b=document.querySelector('.tab[data-tab=\"${tab_name}\"]');if(b\&\&typeof switchTab==='function')switchTab(b);})()</script></body>|" \
+		"$DASHBOARD_HTML" >"$injected_html"
 
-  timeout 30 nix shell nixpkgs#chromium -c chromium \
-    --headless \
-    --no-sandbox \
-    --disable-gpu \
-    --disable-background-networking \
-    --disable-extensions \
-    --disable-sync \
-    --no-first-run \
-    --hide-scrollbars \
-    --force-device-scale-factor=2 \
-    --virtual-time-budget=10000 \
-    --window-size=1280,900 \
-    --screenshot="$TMPDIR/raw-${tab_name}.png" \
-    "file://${injected_html}" 2>/dev/null || true
+	timeout 30 nix shell nixpkgs#chromium -c chromium \
+		--headless \
+		--no-sandbox \
+		--disable-gpu \
+		--disable-background-networking \
+		--disable-extensions \
+		--disable-sync \
+		--no-first-run \
+		--hide-scrollbars \
+		--force-device-scale-factor=2 \
+		--virtual-time-budget=10000 \
+		--window-size=1280,900 \
+		--screenshot="$TMPDIR/raw-${tab_name}.png" \
+		"file://${injected_html}" 2>/dev/null || true
 
-  if [[ ! -f "$TMPDIR/raw-${tab_name}.png" ]]; then
-    echo "ERROR: Screenshot for tab '${tab_name}' was not captured"
-    exit 1
-  fi
+	if [[ ! -f "$TMPDIR/raw-${tab_name}.png" ]]; then
+		echo "ERROR: Screenshot for tab '${tab_name}' was not captured"
+		exit 1
+	fi
 
-  nix shell nixpkgs#imagemagick -c convert \
-    "$TMPDIR/raw-${tab_name}.png" \
-    -resize 1200x \
-    -strip \
-    -quality 85 \
-    "$output_file"
+	nix shell nixpkgs#imagemagick -c convert \
+		"$TMPDIR/raw-${tab_name}.png" \
+		-resize 1200x \
+		-strip \
+		-quality 85 \
+		"$output_file"
 
-  echo "Captured: $output_file ($(wc -c < "$output_file") bytes)"
+	echo "Captured: $output_file ($(wc -c <"$output_file") bytes)"
 }
 
 mkdir -p "$OUTDIR"
 
-capture_tab "steps"     "$OUTDIR/example-steps.png"
-capture_tab "graph"     "$OUTDIR/example-graph.png"
-capture_tab "timeline"  "$OUTDIR/example-timeline.png"
-capture_tab "tree"      "$OUTDIR/example-tree.png"
+capture_tab "steps" "$OUTDIR/example-steps.png"
+capture_tab "graph" "$OUTDIR/example-graph.png"
+capture_tab "timeline" "$OUTDIR/example-timeline.png"
+capture_tab "tree" "$OUTDIR/example-tree.png"
 
 # --- Step 4: Verify uniqueness ---
 echo "=== MD5 checksums (should all differ) ==="

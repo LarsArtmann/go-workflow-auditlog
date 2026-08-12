@@ -16,8 +16,8 @@ echo "Total coverage: ${coverage}%"
 
 threshold=94
 if awk "BEGIN {exit !($coverage < $threshold)}"; then
-  echo "❌ Coverage ${coverage}% is below ${threshold}%" >&2
-  exit 1
+	echo "❌ Coverage ${coverage}% is below ${threshold}%" >&2
+	exit 1
 fi
 
 echo "✓ Coverage ${coverage}% meets the ${threshold}% gate"
