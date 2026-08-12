@@ -7,8 +7,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/larsartmann/go-output/daghtml v0.35.0
 	github.com/larsartmann/go-sse v0.4.0
-	github.com/larsartmann/go-workflow-auditlog v0.8.2
-	github.com/larsartmann/go-workflow-auditlog/viz v0.8.2
+	github.com/larsartmann/go-workflow-auditlog v0.9.0
+	github.com/larsartmann/go-workflow-auditlog/viz v0.9.0
 )
 
 require (
