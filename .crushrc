@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Project-local Crush configuration for go-workflow-auditlog.
+
+# Discover skills from the project's skills/ directory (version-controlled,
+# travels with the repo).
+option skill-path ./skills
