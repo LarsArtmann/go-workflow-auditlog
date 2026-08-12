@@ -32,9 +32,9 @@
 
 1. **Website CI/CD** — no GitHub Actions workflow for building and deploying the website on push. Sibling repos (go-atomic-write, gogenfilter) also lack this, so deployment is currently manual (`nix run .#deploy`)
 2. **OG image generation** — gogenfilter has `src/pages/og/[...slug].ts` using astro-og-canvas for social media preview images. Not implemented for this website
-3. **HTML validation** — `.htmlvalidate.json` config exists but no npm script or CI step runs `html-validate` on the built output
+3. **HTML validation** — `.htmlvalidate.json` config exists but no pnpm script or CI step runs `html-validate` on the built output
 4. **`.node-version` git tracking** — file created but website is not committed
-5. **Website typecheck** — `npm run typecheck` (astro check) exists in package.json but was never run during this session
+5. **Website typecheck** — `pnpm run typecheck` (astro check) exists in package.json but was never run during this session
 6. **Website preview/lighthouse** — no Lighthouse audit was run on the built output for performance/accessibility/SEO scores
 7. **Link checking** — no automated check that all internal links in the website resolve correctly
 8. **Dependents page** — gogenfilter has a `dependents.astro` page showing projects that use the library. Not applicable yet for this alpha library but could be added later
@@ -53,8 +53,8 @@ Nothing. No errors, no broken builds, no data loss. The website builds cleanly o
 
 1. **Website is not committed to git** — the entire `website/` directory is untracked. It needs to be committed and pushed for anyone to see it
 2. **The `auditlog.lars.software` domain doesn't resolve** — README and website both link to it, but there is no DNS record and no Firebase hosting site. Users clicking the link get a 404/error. This is a **broken link in the public README right now**
-3. **No website deployment workflow** — even if committed, there is no automated path from push to live site. Deployment requires manual `nix run .#deploy` or `npm run build && firebase deploy`
-4. **Website `package-lock.json` committed but `node_modules/` in `.gitignore`** — this is correct, but the lockfile was generated with npm and the `.gitignore` mentions "CI uses npm" — need to ensure CI also uses npm not bun
+3. **No website deployment workflow** — even if committed, there is no automated path from push to live site. Deployment requires manual `nix run .#deploy` or `pnpm run build && firebase deploy`
+4. **Website `package-lock.json` committed but `node_modules/` in `.gitignore`** — this is correct, but the lockfile was generated with pnpm and the `.gitignore` mentions "CI uses pnpm" — need to ensure CI also uses pnpm not bun
 5. **README still 527 lines** — the improvement added a "Why?" section and better header, but the README is still extremely long. Some content (detailed API tables, error classification code examples) could be trimmed with "see docs website" links now that the website exists
 6. **Coverage badge says ~94%** — the actual coverage gate in CI checks `>=92%`. The AGENTS.md says ~94%. The old README said 93.2%. The badge now says ~94%. These should all be consistent and ideally dynamically linked (e.g. via Codecov)
 
@@ -87,7 +87,7 @@ Nothing. No errors, no broken builds, no data loss. The website builds cleanly o
 3. **Commit `website/` to git** and push to GitHub
 4. **Deploy the website** via `firebase deploy --only hosting`
 5. **Verify `auditlog.lars.software` loads** in a browser after DNS propagates
-6. **Run `npm run typecheck`** (astro check) and fix any TypeScript errors
+6. **Run `pnpm run typecheck`** (astro check) and fix any TypeScript errors
 7. **Run html-validate** on `dist/` output and fix any HTML validation issues
 
 ### Website improvements

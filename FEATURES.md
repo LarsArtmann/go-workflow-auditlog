@@ -171,7 +171,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **SHA-pinned GitHub Actions** — all `uses:` references pinned to commit SHAs with version comments (supply-chain hardening)
 - **`golangci-lint config verify`** — CI validates lint config before running
 - **`stale-generation` CI job** — detects generated-code drift
-- **`npm audit`** in website CI
+- **`pnpm audit`** in website CI
 - **Firebase secret JSON validation** in website CI via `node -e JSON.parse`
 - **Go pinned to 1.26.5** in CI with `GOTOOLCHAIN=go1.26.5`
 - **Coverage**: core 95.4%, viz 91.8%, live 96.2%

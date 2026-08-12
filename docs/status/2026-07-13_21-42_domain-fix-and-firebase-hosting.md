@@ -34,7 +34,7 @@
 ## c) NOT STARTED
 
 1. **Website CI/CD** — no GitHub Actions workflow for automatic website build + deploy on push. Deployment is currently manual.
-2. **Website typecheck** — `npm run typecheck` (astro check) was never run this session or the prior one.
+2. **Website typecheck** — `pnpm run typecheck` (astro check) was never run this session or the prior one.
 3. **HTML validation** — `.htmlvalidate.json` exists but was never run against the build output.
 4. **OG image generation** — no social media preview images.
 5. **Screenshots/GIFs** — landing page is text + code only, no visual previews of the HTML dashboard.
@@ -61,7 +61,7 @@
 
 ### Structural improvements
 
-5. **No website deploy CI** — every website change requires manual `npm run build && firebase deploy`. A GitHub Actions workflow would auto-deploy on push to master.
+5. **No website deploy CI** — every website change requires manual `pnpm run build && firebase deploy`. A GitHub Actions workflow would auto-deploy on push to master.
 6. **No website build verification in PRs** — a broken website build could be merged without detection.
 7. **Firebase site ID inconsistency** — `auditlog` vs `go-workflow-auditlog` is a minor confusion point. Not worth recreating the site, but worth documenting.
 8. **No custom domain for `go-workflow-auditlog` alias** — only `go-workflow-auditlog.lars.software` is set up. The `go-atomic-write` project has both `atomicwrite.lars.software` and `go-atomic-write.lars.software`. Should we add an `auditlog.lars.software` redirect too? Probably not, since the whole point was disambiguation from `samber-do-auditlog`.
@@ -84,7 +84,7 @@
 
 7. **Add website CI/CD workflow** (`.github/workflows/website.yml`) — build + deploy on push to master
 8. **Add website build check** to PR CI (non-blocking)
-9. **Run `npm run typecheck`** and fix any TypeScript errors
+9. **Run `pnpm run typecheck`** and fix any TypeScript errors
 10. **Run html-validate** on `dist/` output
 11. **Add OG image generation** (`src/pages/og/[...slug].ts`)
 12. **Add a screenshot of the HTML dashboard** to the landing page

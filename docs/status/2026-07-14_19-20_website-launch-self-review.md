@@ -181,7 +181,7 @@ the initial website creation are not documented.
 
 8. **`package.json` clean script uses `rm -rf`** — violates the project's
    safety rule ("NEVER use `rm`"). Should use `trash` or a safer alternative.
-   (Though this is a common npm convention and runs in CI, not locally.)
+   (Though this is a common pnpm convention and runs in CI, not locally.)
 
 9. **The changelog.mdx should be auto-generated or symlinked from
    CHANGELOG.md.** Maintaining two copies guarantees drift.

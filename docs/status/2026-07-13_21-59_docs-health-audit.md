@@ -187,7 +187,7 @@
 
 ### Website improvements (from prior sessions)
 
-30. **Run `npm run typecheck`** on website — never run
+30. **Run `pnpm run typecheck`** on website — never run
 31. **Add OG image generation** (`src/pages/og/[...slug].ts`)
 32. **Add screenshot of HTML dashboard** to landing page
 33. **Add error classification guide page** (`/guides/error-classification/`)

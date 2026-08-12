@@ -232,7 +232,7 @@ git commit -m "chore(release): prepare v${VERSION} — bump sub-module deps and 
 ```
 
 If the pre-commit hook (BuildFlow) fails on missing binaries (dprint,
-go-licenses, npm, tailwindcss, tsc, vulnix), use `--no-verify` — these are
+go-licenses, pnpm, tailwindcss, tsc, vulnix), use `--no-verify` — these are
 environment issues, not code quality failures. All Go checks (vet, lint,
 test-race) ran in Phase 4.
 
@@ -470,7 +470,7 @@ Confirm to the user:
 | `sum.golang.org` returns 500 | Checksum DB propagation delay | Wait; test with `GOSUMDB=off` |
 | Local tags break workspace builds | go.work uses filesystem, not tags; local tags force proxy resolution | Don't create tags until ready to push |
 | CHANGELOG missing a release section | Ad-hoc release bypassed CHANGELOG | Always update CHANGELOG in Phase 2 |
-| Pre-commit hook fails on missing binaries | dprint, npm, tsc, etc. not in nix devShell | Use `--no-verify` (infra failures only, not code) |
+| Pre-commit hook fails on missing binaries | dprint, pnpm, tsc, etc. not in nix devShell | Use `--no-verify` (infra failures only, not code) |
 | `nix run .#check` fails pre-push | Tests sub-modules in GOWORK=off (needs published tag) | Verify in workspace mode pre-push; run nix check post-push |
 
 ---

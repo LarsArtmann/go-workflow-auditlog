@@ -20,7 +20,7 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md) — never retai
 - [x] **CLI tool** — `cmd/auditlog` with info/convert/diff/validate/schema subcommands (done)
 - [x] **JSON Schema generation** — `cmd/genschema`, `schema.go`, `JSONSchema()` accessor (done)
 - [x] **MigrateReport** — programmatic schema-version migration (done)
-- [x] **CI hardening** — SHA-pinned actions, Go 1.26.5 pin, golangci-lint config verify, stale-generation job, npm audit, Firebase JSON validation (done)
+- [x] **CI hardening** — SHA-pinned actions, Go 1.26.5 pin, golangci-lint config verify, stale-generation job, pnpm audit, Firebase JSON validation (done)
 
 ---
 
