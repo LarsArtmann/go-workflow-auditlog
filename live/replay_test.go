@@ -1,7 +1,6 @@
 package live_test
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-sse"
+	"github.com/larsartmann/go-sse/ssetest"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	"github.com/larsartmann/go-workflow-auditlog/live"
 )
@@ -70,21 +70,17 @@ func TestServer_SSE_ReconnectionReplay(t *testing.T) {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	scanner := bufio.NewScanner(resp.Body)
+	sr := ssetest.NewStreamReader(resp.Body)
 
 	var replayedIDs []string
 
-	for scanner.Scan() {
-		line := scanner.Text()
-
-		if id, ok := strings.CutPrefix(line, "id: "); ok {
-			replayedIDs = append(replayedIDs, id)
-		}
-
-		// Stop once we reach the snapshot — replayed events come before it.
-		if strings.HasPrefix(line, "event: snapshot") {
+	for {
+		evt, err := sr.Next()
+		if err != nil || evt.Type == "snapshot" {
 			break
 		}
+
+		replayedIDs = append(replayedIDs, evt.ID)
 	}
 
 	if len(replayedIDs) != 2 {
@@ -136,21 +132,17 @@ func TestServer_SSE_NoReplayOnInitialConnection(t *testing.T) {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	scanner := bufio.NewScanner(resp.Body)
+	sr := ssetest.NewStreamReader(resp.Body)
 
 	idCount := 0
 
-	for scanner.Scan() {
-		line := scanner.Text()
-
-		if strings.HasPrefix(line, "id: ") {
-			idCount++
-		}
-
-		// Once we reach the snapshot, stop — no replay should precede it.
-		if strings.HasPrefix(line, "event: snapshot") {
+	for {
+		evt, err := sr.Next()
+		if err != nil || evt.Type == "snapshot" {
 			break
 		}
+
+		idCount++
 	}
 
 	if idCount != 0 {

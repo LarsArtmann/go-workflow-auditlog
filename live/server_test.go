@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-sse/ssetest"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	"github.com/larsartmann/go-workflow-auditlog/live"
 )
@@ -193,7 +194,7 @@ func TestServer_NewConvenience(t *testing.T) {
 
 // --- SSE Tests (use httptest.NewServer for real HTTP streaming) ---
 
-func sseConnect(t *testing.T, url string) (*bufio.Scanner, func()) {
+func sseConnect(t *testing.T, url string) (*ssetest.StreamReader, func()) {
 	t.Helper()
 
 	ctx, cancel := context.WithCancel(t.Context())
@@ -214,43 +215,37 @@ func sseConnect(t *testing.T, url string) (*bufio.Scanner, func()) {
 		_ = resp.Body.Close()
 	}
 
-	return bufio.NewScanner(resp.Body), cleanup
+	return ssetest.NewStreamReader(resp.Body), cleanup
 }
 
-func skipSnapshot(scanner *bufio.Scanner) {
-	for scanner.Scan() {
-		if scanner.Text() == "" {
-			break
+func skipSnapshot(sr *ssetest.StreamReader) {
+	_, _ = sr.Next()
+}
+
+func readSSEEvent(sr *ssetest.StreamReader, eventName string) (string, bool) {
+	for {
+		evt, err := sr.Next()
+		if err != nil {
+			return "", false
+		}
+
+		if evt.Type == eventName {
+			return evt.Data(), true
 		}
 	}
 }
 
-func readSSEEvent(scanner *bufio.Scanner, eventName string) (string, bool) {
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "event: "+eventName) {
-			scanner.Scan()
-
-			dataLine := scanner.Text()
-			data, found := strings.CutPrefix(dataLine, "data: ")
-
-			if found {
-				return data, true
-			}
+func readUntilStep(sr *ssetest.StreamReader, stepName string) bool {
+	for {
+		evt, err := sr.Next()
+		if err != nil {
+			return false
 		}
-	}
 
-	return "", false
-}
-
-func readUntilStep(scanner *bufio.Scanner, stepName string) bool {
-	for scanner.Scan() {
-		if strings.Contains(scanner.Text(), stepName) {
+		if strings.Contains(evt.Data(), stepName) {
 			return true
 		}
 	}
-
-	return false
 }
 
 func TestServer_SSE_SnapshotOnConnect(t *testing.T) {
@@ -268,10 +263,10 @@ func TestServer_SSE_SnapshotOnConnect(t *testing.T) {
 	ts := httptest.NewServer(server)
 	defer ts.Close()
 
-	scanner, closeSSE := sseConnect(t, ts.URL+"/api/events")
+	sr, closeSSE := sseConnect(t, ts.URL+"/api/events")
 	defer closeSSE()
 
-	data, found := readSSEEvent(scanner, "snapshot")
+	data, found := readSSEEvent(sr, "snapshot")
 	if !found {
 		t.Fatal("did not receive snapshot event")
 	}
@@ -289,10 +284,10 @@ func TestServer_SSE_LiveEventDelivery(t *testing.T) {
 	ts := httptest.NewServer(server)
 	defer ts.Close()
 
-	scanner, closeSSE := sseConnect(t, ts.URL+"/api/events")
+	sr, closeSSE := sseConnect(t, ts.URL+"/api/events")
 	defer closeSSE()
 
-	skipSnapshot(scanner)
+	skipSnapshot(sr)
 
 	server.OnEvent(auditlog.Event{
 		Sequence:  1,
@@ -301,7 +296,7 @@ func TestServer_SSE_LiveEventDelivery(t *testing.T) {
 		Phase:     auditlog.PhaseBefore,
 	})
 
-	data, found := readSSEEvent(scanner, "event")
+	data, found := readSSEEvent(sr, "event")
 	if !found {
 		t.Fatal("did not receive live event")
 	}
@@ -319,14 +314,14 @@ func TestServer_SSE_CompleteEvent(t *testing.T) {
 	ts := httptest.NewServer(server)
 	defer ts.Close()
 
-	scanner, closeSSE := sseConnect(t, ts.URL+"/api/events")
+	sr, closeSSE := sseConnect(t, ts.URL+"/api/events")
 	defer closeSSE()
 
-	skipSnapshot(scanner)
+	skipSnapshot(sr)
 
 	server.SignalComplete()
 
-	_, found := readSSEEvent(scanner, "complete")
+	_, found := readSSEEvent(sr, "complete")
 	if !found {
 		t.Fatal("did not receive complete event")
 	}
@@ -340,14 +335,14 @@ func TestServer_SSE_FanOut(t *testing.T) {
 	ts := httptest.NewServer(server)
 	defer ts.Close()
 
-	scanner1, closeSSE1 := sseConnect(t, ts.URL+"/api/events")
+	sr1, closeSSE1 := sseConnect(t, ts.URL+"/api/events")
 	defer closeSSE1()
 
-	scanner2, closeSSE2 := sseConnect(t, ts.URL+"/api/events")
+	sr2, closeSSE2 := sseConnect(t, ts.URL+"/api/events")
 	defer closeSSE2()
 
-	skipSnapshot(scanner1)
-	skipSnapshot(scanner2)
+	skipSnapshot(sr1)
+	skipSnapshot(sr2)
 
 	server.OnEvent(auditlog.Event{
 		Sequence:  1,
@@ -356,11 +351,11 @@ func TestServer_SSE_FanOut(t *testing.T) {
 		Phase:     auditlog.PhaseBefore,
 	})
 
-	if !readUntilStep(scanner1, "fanout-step") {
+	if !readUntilStep(sr1, "fanout-step") {
 		t.Error("client 1 did not receive fanout event")
 	}
 
-	if !readUntilStep(scanner2, "fanout-step") {
+	if !readUntilStep(sr2, "fanout-step") {
 		t.Error("client 2 did not receive fanout event")
 	}
 }
@@ -639,8 +634,12 @@ func TestServer_SSE_Heartbeat(t *testing.T) {
 
 	scanner := bufio.NewScanner(resp.Body)
 
-	// Skip the initial snapshot
-	skipSnapshot(scanner)
+	// Skip the initial snapshot (read until blank line dispatches the frame)
+	for scanner.Scan() {
+		if scanner.Text() == "" {
+			break
+		}
+	}
 
 	deadline := time.After(2 * time.Second)
 

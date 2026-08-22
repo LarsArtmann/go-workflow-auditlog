@@ -1,7 +1,6 @@
 package live_test
 
 import (
-	"bufio"
 	"context"
 	"encoding/json/v2"
 	"net/http/httptest"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	flow "github.com/Azure/go-workflow"
+	"github.com/larsartmann/go-sse/ssetest"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	"github.com/larsartmann/go-workflow-auditlog/live"
 )
@@ -47,29 +47,23 @@ func (e e2eStepError) Error() string { return string(e) }
 
 // readAllSSEEvents reads all "event" messages until "complete" arrives.
 // Returns the event data payloads and whether complete was received.
-func readAllSSEEvents(scanner *bufio.Scanner) ([]string, bool) {
+func readAllSSEEvents(sr *ssetest.StreamReader) ([]string, bool) {
 	var events []string
 
-	gotComplete := false
+	for {
+		evt, err := sr.Next()
+		if err != nil {
+			return events, false
+		}
 
-	for scanner.Scan() {
-		line := scanner.Text()
+		if evt.Type == "complete" {
+			return events, true
+		}
 
-		if strings.HasPrefix(line, "event: event") {
-			scanner.Scan() // data line
-
-			dataLine := scanner.Text()
-			if data, ok := strings.CutPrefix(dataLine, "data: "); ok {
-				events = append(events, data)
-			}
-		} else if strings.HasPrefix(line, "event: complete") {
-			gotComplete = true
-
-			break
+		if evt.Type == "event" {
+			events = append(events, evt.Data())
 		}
 	}
-
-	return events, gotComplete
 }
 
 // TestServer_SSE_EndToEnd runs a real workflow through the live server,
@@ -109,10 +103,10 @@ func TestServer_SSE_EndToEnd(t *testing.T) {
 	defer ts.Close()
 
 	// Connect SSE client before running the workflow
-	scanner, closeSSE := sseConnect(t, ts.URL+"/api/events")
+	sr, closeSSE := sseConnect(t, ts.URL+"/api/events")
 	defer closeSSE()
 
-	skipSnapshot(scanner)
+	skipSnapshot(sr)
 
 	// Run the workflow synchronously
 	ctx := t.Context()
@@ -130,7 +124,7 @@ func TestServer_SSE_EndToEnd(t *testing.T) {
 
 	server.SignalComplete()
 
-	sseEvents, gotComplete := readAllSSEEvents(scanner)
+	sseEvents, gotComplete := readAllSSEEvents(sr)
 	if !gotComplete {
 		t.Fatal("did not receive complete event")
 	}
@@ -230,10 +224,10 @@ func TestServer_SSE_EndToEnd_FailingWorkflow(t *testing.T) {
 	ts := httptest.NewServer(server)
 	defer ts.Close()
 
-	scanner, closeSSE := sseConnect(t, ts.URL+"/api/events")
+	sr, closeSSE := sseConnect(t, ts.URL+"/api/events")
 	defer closeSSE()
 
-	skipSnapshot(scanner)
+	skipSnapshot(sr)
 
 	ctx := t.Context()
 	_ = w.Do(ctx) // expected to fail
@@ -244,7 +238,7 @@ func TestServer_SSE_EndToEnd_FailingWorkflow(t *testing.T) {
 
 	server.SignalComplete()
 
-	sseEvents, gotComplete := readAllSSEEvents(scanner)
+	sseEvents, gotComplete := readAllSSEEvents(sr)
 	if !gotComplete {
 		t.Fatal("did not receive complete event")
 	}
