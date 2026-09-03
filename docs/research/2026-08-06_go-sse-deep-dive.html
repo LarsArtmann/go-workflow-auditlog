@@ -889,8 +889,8 @@
           <p class="subtitle">
             The <code>live</code> module of go-workflow-auditlog imports go-sse
             for SSE wire-format primitives but reimplements the library's entire
-            connection-management and subscriber-fan-out layer by hand.
-            Only 3 of ~35 exported symbols are used.
+            connection-management and subscriber-fan-out layer by hand. Only 3
+            of ~35 exported symbols are used.
           </p>
           <div class="meta">
             <span class="tag amber">Pinned: v0.3.0</span>
@@ -933,12 +933,13 @@
             <code>sse.WriteEvent</code> (the wire-format writer), and
             <code>sse.Event</code> (the struct literal). Every higher-level
             capability the library offers &mdash; the generic
-            <code>Broadcaster[T]</code> fan-out, the <code>Stream</code>
-            connection manager, the <code>Replay</code>/<code>EventStore</code>
-            reconnection mechanism, graceful <code>Shutdown</code>,
-            <code>Health()</code> reporting &mdash; is reimplemented by hand
-            in <code>live/hub.go</code> and <code>live/server.go</code>.
-            The three symbols that <em>are</em> used are used correctly.
+            <code>Broadcaster[T]</code> fan-out, the
+            <code>Stream</code> connection manager, the
+            <code>Replay</code>/<code>EventStore</code> reconnection mechanism,
+            graceful <code>Shutdown</code>, <code>Health()</code> reporting
+            &mdash; is reimplemented by hand in <code>live/hub.go</code> and
+            <code>live/server.go</code>. The three symbols that
+            <em>are</em> used are used correctly.
           </p>
           <div class="callout callout-amber">
             <strong>The bottom line</strong>
@@ -969,9 +970,11 @@
                 <strong>WriteEvent used correctly (3 call sites)</strong>
                 <span
                   ><code>live/server.go:463,491,511</code> &mdash;
-                  <code>sse.WriteEvent(w, sse.Event{Event: "...", Data:
-                  ...})</code> is called correctly for snapshot, event, and
-                  complete SSE messages. The wire format is right.</span
+                  <code
+                    >sse.WriteEvent(w, sse.Event{Event: "...", Data: ...})</code
+                  >
+                  is called correctly for snapshot, event, and complete SSE
+                  messages. The wire format is right.</span
                 >
               </div>
             </div>
@@ -993,8 +996,8 @@
                 <strong>WebSocket fallback is transport-appropriate</strong>
                 <span
                   ><code>live/websocket.go</code> &mdash; the WebSocket handler
-                  correctly does NOT use go-sse (go-sse is SSE-only by
-                  design). The WS path uses its own JSON envelope and gorilla/websocket.
+                  correctly does NOT use go-sse (go-sse is SSE-only by design).
+                  The WS path uses its own JSON envelope and gorilla/websocket.
                   This is the right separation.</span
                 >
               </div>
@@ -1007,40 +1010,41 @@
             provides vs. what the project reimplements:
           </p>
 
-          <div class="dep-tree"><span class="root">go-workflow-auditlog/live</span>
-├── <span class="ok">sse.WriteEvent</span>          ✅ USED (wire format)
-├── <span class="ok">sse.ContentType</span>          ✅ USED (string const)
-├── <span class="ok">sse.Event{...}</span>           ✅ USED (struct literal)
-├── <span class="unwanted">Hub (hub.go)</span>           ❌ REIMPLEMENTS sse.Broadcaster[T]
-│     ├── subscriber map + channels
-│     ├── non-blocking broadcast (drop-on-full)
-│     ├── Subscribe / Unsubscribe
-│     └── ClientCount
-├── <span class="unwanted">handleSSE (server.go)</span>  ❌ REIMPLEMENTS sse.Stream
-│     ├── manual header setup (vs. sse.SetHeaders)
-│     ├── manual flusher check + Flush loop
-│     ├── manual heartbeat ticker (vs. sse.WriteHeartbeat)
-│     └── manual select loop (vs. Stream.Send)
-├── sse.Stream                  ❌ NOT USED
-├── sse.Broadcaster             ❌ NOT USED
-├── sse.Replay / EventStore     ❌ NOT USED
-├── sse.Shutdown(ctx)           ❌ NOT USED
-├── sse.Health()                ❌ NOT USED
-├── sse.WriteHeartbeat          ❌ NOT USED
-├── sse.SetHeaders              ❌ NOT USED
-└── sse.SendJSON                ❌ NOT USED</div>
+          <div class="dep-tree">
+            <span class="root">go-workflow-auditlog/live</span> ├──
+            <span class="ok">sse.WriteEvent</span> ✅ USED (wire format) ├──
+            <span class="ok">sse.ContentType</span> ✅ USED (string const) ├──
+            <span class="ok">sse.Event{...}</span> ✅ USED (struct literal) ├──
+            <span class="unwanted">Hub (hub.go)</span> ❌ REIMPLEMENTS
+            sse.Broadcaster[T] │ ├── subscriber map + channels │ ├──
+            non-blocking broadcast (drop-on-full) │ ├── Subscribe / Unsubscribe
+            │ └── ClientCount ├──
+            <span class="unwanted">handleSSE (server.go)</span> ❌ REIMPLEMENTS
+            sse.Stream │ ├── manual header setup (vs. sse.SetHeaders) │ ├──
+            manual flusher check + Flush loop │ ├── manual heartbeat ticker (vs.
+            sse.WriteHeartbeat) │ └── manual select loop (vs. Stream.Send) ├──
+            sse.Stream ❌ NOT USED ├── sse.Broadcaster ❌ NOT USED ├──
+            sse.Replay / EventStore ❌ NOT USED ├── sse.Shutdown(ctx) ❌ NOT
+            USED ├── sse.Health() ❌ NOT USED ├── sse.WriteHeartbeat ❌ NOT USED
+            ├── sse.SetHeaders ❌ NOT USED └── sse.SendJSON ❌ NOT USED
+          </div>
         </section>
 
         <!-- Findings -->
         <section id="broadcaster">
-          <h2><span class="num">01</span>Findings &mdash; capability by capability</h2>
+          <h2>
+            <span class="num">01</span>Findings &mdash; capability by capability
+          </h2>
 
           <!-- Finding 1: Broadcaster -->
           <div class="issue issue-critical" id="broadcaster-card">
-            <span class="severity severity-critical">Missed Opportunity &middot; Critical impact</span>
+            <span class="severity severity-critical"
+              >Missed Opportunity &middot; Critical impact</span
+            >
             <h3>Hand-rolled Hub reimplements Broadcaster[T] entirely</h3>
             <div class="where">
-              live/hub.go:1-141 (entire file) &middot; reimplements sse.Broadcaster from fanout.go
+              live/hub.go:1-141 (entire file) &middot; reimplements
+              sse.Broadcaster from fanout.go
             </div>
             <p>
               go-sse ships <code>Broadcaster[T]</code> &mdash; a generic,
@@ -1050,13 +1054,14 @@
               <code>BroadcastMany</code> (batch fan-out in a single lock pass),
               <code>SubscriberCount</code>, <code>OnSubscribe</code>/
               <code>OnUnsubscribe</code> hooks, configurable buffer size
-              (<code>WithBufferSize</code>), graceful <code>Shutdown(ctx)</code>,
-              instant <code>Close()</code>, and structured <code>Health()</code>.
-              Available since v0.1.0; lifecycle features added in v0.4.0.
+              (<code>WithBufferSize</code>), graceful
+              <code>Shutdown(ctx)</code>, instant <code>Close()</code>, and
+              structured <code>Health()</code>. Available since v0.1.0;
+              lifecycle features added in v0.4.0.
             </p>
             <p>
-              The project's <code>Hub</code> (live/hub.go) reimplements the
-              core of this: a <code>map[uint64]*Subscriber</code>, non-blocking
+              The project's <code>Hub</code> (live/hub.go) reimplements the core
+              of this: a <code>map[uint64]*Subscriber</code>, non-blocking
               <code>broadcast()</code> with a <code>select/default</code> drop
               pattern, <code>Subscribe</code>/<code>Unsubscribe</code>, and
               <code>ClientCount</code>. What it <em>doesn't</em> have that
@@ -1066,13 +1071,14 @@
             </p>
             <div class="callout callout-teal">
               <strong>Recommendation</strong>
-              Replace <code>Hub</code> with <code>sse.Broadcaster[jsontext.Value]</code>.
-              The Hub broadcasts pre-marshaled <code>jsontext.Value</code> (not
+              Replace <code>Hub</code> with
+              <code>sse.Broadcaster[jsontext.Value]</code>. The Hub broadcasts
+              pre-marshaled <code>jsontext.Value</code> (not
               <code>sse.Event</code>), but Broadcaster is generic &mdash;
               <code>Broadcaster[jsontext.Value]</code> works directly. The
               domain-specific <code>SignalComplete</code> lifecycle (closing a
-              <code>done</code> channel) can remain as a thin wrapper around
-              the broadcaster or as a separate completion signal.
+              <code>done</code> channel) can remain as a thin wrapper around the
+              broadcaster or as a separate completion signal.
             </div>
             <div class="compare-header">
               <div class="compare-before">Before (hub.go, 141 lines)</div>
@@ -1121,10 +1127,13 @@
 
           <!-- Finding 2: Stream -->
           <div class="issue issue-critical" id="stream-card">
-            <span class="severity severity-critical">Missed Opportunity &middot; Critical impact</span>
+            <span class="severity severity-critical"
+              >Missed Opportunity &middot; Critical impact</span
+            >
             <h3>Hand-rolled SSE handler reimplements Stream</h3>
             <div class="where">
-              live/server.go:426-479 (handleSSE) &middot; reimplements sse.Stream from stream.go
+              live/server.go:426-479 (handleSSE) &middot; reimplements
+              sse.Stream from stream.go
             </div>
             <p>
               go-sse's <code>Stream</code> manages a single SSE connection:
@@ -1152,9 +1161,9 @@
               extra headers (<code>X-Accel-Buffering: no</code>,
               <code>no-transform</code>) can be added after
               <code>SetHeaders</code> or before <code>NewStream</code>. The
-              heartbeat becomes <code>go stream.Heartbeat(ctx,
-              interval)</code> &mdash; one line replacing the entire ticker
-              case.
+              heartbeat becomes
+              <code>go stream.Heartbeat(ctx, interval)</code> &mdash; one line
+              replacing the entire ticker case.
             </div>
             <div class="compare-header">
               <div class="compare-before">Before (server.go:426-479)</div>
@@ -1236,52 +1245,60 @@
 
           <!-- Finding 3: Heartbeat -->
           <div class="issue issue-important" id="heartbeat-card">
-            <span class="severity severity-important">Missed Opportunity &middot; Medium impact</span>
+            <span class="severity severity-important"
+              >Missed Opportunity &middot; Medium impact</span
+            >
             <h3>Heartbeat frame hardcoded instead of WriteHeartbeat</h3>
             <div class="where">
               live/server.go:471 &middot; w.Write([]byte(": heartbeat\n\n"))
             </div>
             <p>
               go-sse exports <code>WriteHeartbeat(w)</code> which writes the
-              exact same SSE comment frame (<code>: heartbeat\n\n</code>) from
-              a shared <code>heartbeatFrame</code> constant. More importantly,
+              exact same SSE comment frame (<code>: heartbeat\n\n</code>) from a
+              shared <code>heartbeatFrame</code> constant. More importantly,
               <code>Stream.Heartbeat(ctx, interval)</code> runs the entire
               heartbeat goroutine (ticker + context cancellation + mutex-guarded
               write + flush) in one call.
             </p>
             <p>
-              The project duplicates the frame bytes as a string literal
-              (<code>[]byte(": heartbeat\n\n")</code>) and the entire ticker
-              loop inline in the <code>handleSSE</code> select statement. This
-              is a line-for-line duplicate of go-sse's implementation.
+              The project duplicates the frame bytes as a string literal (<code
+                >[]byte(": heartbeat\n\n")</code
+              >) and the entire ticker loop inline in the
+              <code>handleSSE</code> select statement. This is a line-for-line
+              duplicate of go-sse's implementation.
             </p>
             <div class="callout callout-teal">
               <strong>Recommendation</strong>
               If adopting <code>Stream</code> (finding #2), the heartbeat case
-              disappears entirely &mdash; <code>go stream.Heartbeat(ctx,
-              interval)</code> replaces it. If keeping the manual handler,
-              at minimum replace the hardcoded bytes with
-              <code>sse.WriteHeartbeat(w)</code>.
+              disappears entirely &mdash;
+              <code>go stream.Heartbeat(ctx, interval)</code> replaces it. If
+              keeping the manual handler, at minimum replace the hardcoded bytes
+              with <code>sse.WriteHeartbeat(w)</code>.
             </div>
           </div>
 
           <!-- Finding 4: Reconnection Replay -->
           <div class="issue issue-critical" id="replay-card">
-            <span class="severity severity-critical">Missed Opportunity &middot; High impact</span>
+            <span class="severity severity-critical"
+              >Missed Opportunity &middot; High impact</span
+            >
             <h3>No reconnection replay — disconnected clients miss events</h3>
             <div class="where">
-              Not implemented anywhere &middot; go-sse Replay/EventStore/LastEventID all unused
+              Not implemented anywhere &middot; go-sse
+              Replay/EventStore/LastEventID all unused
             </div>
             <p>
               go-sse provides a complete reconnection replay mechanism:
               <code>EventID</code> (branded type with validation),
-              <code>Stream.LastEventID()</code> / <code>LastEventIDFromRequest(r)</code>
+              <code>Stream.LastEventID()</code> /
+              <code>LastEventIDFromRequest(r)</code>
               to read the browser's reconnection header,
-              <code>EventStore</code> interface for storing/retrieving events
-              by ID, and <code>Replay(stream, store, lastID)</code> /
+              <code>EventStore</code> interface for storing/retrieving events by
+              ID, and <code>Replay(stream, store, lastID)</code> /
               <code>ReplayFiltered(stream, store, lastID, pred)</code> to send
-              missed events on reconnect. The browser's <code>EventSource</code>
-              sends <code>Last-Event-ID</code> automatically on reconnection.
+              missed events on reconnect. The browser's
+              <code>EventSource</code> sends
+              <code>Last-Event-ID</code> automatically on reconnection.
             </p>
             <p>
               The project has <strong>no reconnection support at all</strong>.
@@ -1303,18 +1320,21 @@
               <code>Recorder.events</code>). Assign <code>EventID</code>s to
               broadcast events. On SSE handler entry, check
               <code>stream.LastEventID()</code> and call
-              <code>sse.Replay(stream, store, lastID)</code> before entering
-              the event loop. The auditlog already stores events by sequence
-              number &mdash; mapping sequence to EventID is straightforward.
+              <code>sse.Replay(stream, store, lastID)</code> before entering the
+              event loop. The auditlog already stores events by sequence number
+              &mdash; mapping sequence to EventID is straightforward.
             </div>
           </div>
 
           <!-- Finding 5: Graceful Shutdown -->
           <div class="issue issue-important" id="shutdown-card">
-            <span class="severity severity-important">Missed Opportunity &middot; Medium impact</span>
+            <span class="severity severity-important"
+              >Missed Opportunity &middot; Medium impact</span
+            >
             <h3>No graceful SSE subscriber drain on server shutdown</h3>
             <div class="where">
-              live/server.go:281-296 (Shutdown) &middot; calls http.Server.Shutdown but not hub drain
+              live/server.go:281-296 (Shutdown) &middot; calls
+              http.Server.Shutdown but not hub drain
             </div>
             <p>
               go-sse's <code>Broadcaster.Shutdown(ctx)</code> (v0.4.0) stops
@@ -1346,10 +1366,13 @@
 
           <!-- Finding 6: Health -->
           <div class="issue issue-important" id="health-card">
-            <span class="severity severity-important">Missed Opportunity &middot; Low-medium impact</span>
+            <span class="severity severity-important"
+              >Missed Opportunity &middot; Low-medium impact</span
+            >
             <h3>Custom health endpoint misses Broadcaster.Health()</h3>
             <div class="where">
-              live/server.go:391-424 (handleHealth) &middot; constructs healthResponse manually
+              live/server.go:391-424 (handleHealth) &middot; constructs
+              healthResponse manually
             </div>
             <p>
               go-sse's <code>Broadcaster.Health()</code> returns a
@@ -1363,9 +1386,8 @@
               <code>healthResponse</code> with <code>Clients</code> (from
               <code>hub.ClientCount()</code>), <code>Events</code>, and
               <code>Dropped</code>. It doesn't report lifecycle state
-              (draining/closed) because the Hub doesn't track it. If
-              Broadcaster were adopted, <code>Health()</code> would provide
-              this for free.
+              (draining/closed) because the Hub doesn't track it. If Broadcaster
+              were adopted, <code>Health()</code> would provide this for free.
             </p>
             <div class="callout callout-teal">
               <strong>Recommendation</strong>
@@ -1378,7 +1400,9 @@
 
           <!-- Finding 7: Wire Format (Fully Leveraged) -->
           <div class="issue issue-nice" id="wire-card">
-            <span class="severity severity-nice">Fully Leveraged &middot; Used correctly</span>
+            <span class="severity severity-nice"
+              >Fully Leveraged &middot; Used correctly</span
+            >
             <h3>WriteEvent + ContentType + Event &mdash; the 3 used symbols</h3>
             <div class="where">
               live/server.go:434,463,491,511 &middot; 4 call sites total
@@ -1401,7 +1425,10 @@
 
         <!-- Not Applicable -->
         <section id="not-applicable">
-          <h2><span class="num">&#9670;</span>Capabilities considered but not applicable</h2>
+          <h2>
+            <span class="num">&#9670;</span>Capabilities considered but not
+            applicable
+          </h2>
           <table class="compare">
             <thead>
               <tr>
@@ -1412,19 +1439,37 @@
             <tbody>
               <tr>
                 <td><code>SubscribeFilter</code> (predicate subscriptions)</td>
-                <td>Project broadcasts one event type to all subscribers. No per-subscriber filtering needed.</td>
+                <td>
+                  Project broadcasts one event type to all subscribers. No
+                  per-subscriber filtering needed.
+                </td>
               </tr>
               <tr>
-                <td><code>KeyedLines</code> / <code>SendLines</code> / <code>SendKeyed</code> / <code>WriteKeyedLines</code></td>
-                <td>DataStar keyed-data-line protocol. Project uses standard SSE with JSON payloads.</td>
+                <td>
+                  <code>KeyedLines</code> / <code>SendLines</code> /
+                  <code>SendKeyed</code> / <code>WriteKeyedLines</code>
+                </td>
+                <td>
+                  DataStar keyed-data-line protocol. Project uses standard SSE
+                  with JSON payloads.
+                </td>
               </tr>
               <tr>
-                <td><code>EventConnected</code> / <code>EventHeartbeat</code> constants</td>
-                <td>Project uses custom event names ("snapshot", "event", "complete").</td>
+                <td>
+                  <code>EventConnected</code> /
+                  <code>EventHeartbeat</code> constants
+                </td>
+                <td>
+                  Project uses custom event names ("snapshot", "event",
+                  "complete").
+                </td>
               </tr>
               <tr>
                 <td><code>WriteRetry</code></td>
-                <td>SSE retry directive for browser reconnection timing. Marginal value without full replay support.</td>
+                <td>
+                  SSE retry directive for browser reconnection timing. Marginal
+                  value without full replay support.
+                </td>
               </tr>
             </tbody>
           </table>
@@ -1453,14 +1498,26 @@
               <tr>
                 <td>v0.4.0</td>
                 <td>Feature</td>
-                <td><code>Shutdown(ctx)</code> graceful drain, <code>Health()</code> structured status, <code>WithBufferSize</code>, <code>SubscribeFilter</code>, <code>ReplayFiltered</code></td>
-                <td class="yes">High — lifecycle and health features directly applicable</td>
+                <td>
+                  <code>Shutdown(ctx)</code> graceful drain,
+                  <code>Health()</code> structured status,
+                  <code>WithBufferSize</code>, <code>SubscribeFilter</code>,
+                  <code>ReplayFiltered</code>
+                </td>
+                <td class="yes">
+                  High — lifecycle and health features directly applicable
+                </td>
               </tr>
               <tr>
                 <td>v0.4.0</td>
                 <td>Feature</td>
-                <td><code>KeyedLines</code> / <code>SendKeyed</code> (DataStar wire format)</td>
-                <td class="no">Not applicable — project uses JSON payloads, not DataStar</td>
+                <td>
+                  <code>KeyedLines</code> / <code>SendKeyed</code> (DataStar
+                  wire format)
+                </td>
+                <td class="no">
+                  Not applicable — project uses JSON payloads, not DataStar
+                </td>
               </tr>
               <tr>
                 <td>v0.4.0</td>
@@ -1489,7 +1546,9 @@
 
         <!-- Top Opportunities -->
         <section id="opportunities">
-          <h2><span class="num">03</span>Top opportunities (impact &times; ease)</h2>
+          <h2>
+            <span class="num">03</span>Top opportunities (impact &times; ease)
+          </h2>
           <table class="compare">
             <thead>
               <tr>
@@ -1503,70 +1562,100 @@
             <tbody>
               <tr>
                 <td>1</td>
-                <td>Replace Hub with <code>Broadcaster[jsontext.Value]</code> &mdash; eliminate 141 lines of duplicated fan-out code</td>
+                <td>
+                  Replace Hub with
+                  <code>Broadcaster[jsontext.Value]</code> &mdash; eliminate 141
+                  lines of duplicated fan-out code
+                </td>
                 <td class="yes">5</td>
                 <td>3</td>
                 <td><strong>15</strong></td>
               </tr>
               <tr>
                 <td>2</td>
-                <td>Upgrade to v0.4.0 (unlocks Shutdown, Health, WithBufferSize)</td>
+                <td>
+                  Upgrade to v0.4.0 (unlocks Shutdown, Health, WithBufferSize)
+                </td>
                 <td class="yes">3</td>
                 <td class="yes">5</td>
                 <td><strong>15</strong></td>
               </tr>
               <tr>
                 <td>3</td>
-                <td>Replace handleSSE with <code>Stream</code> &mdash; eliminate manual headers, flusher, heartbeat loop</td>
+                <td>
+                  Replace handleSSE with <code>Stream</code> &mdash; eliminate
+                  manual headers, flusher, heartbeat loop
+                </td>
                 <td class="yes">4</td>
                 <td>3</td>
                 <td><strong>12</strong></td>
               </tr>
               <tr>
                 <td>4</td>
-                <td>Use <code>Stream.Send</code> instead of WriteEvent + manual Flush</td>
+                <td>
+                  Use <code>Stream.Send</code> instead of WriteEvent + manual
+                  Flush
+                </td>
                 <td>3</td>
                 <td>4</td>
                 <td><strong>12</strong></td>
               </tr>
               <tr>
                 <td>5</td>
-                <td>Add <code>Broadcaster.Shutdown(ctx)</code> to Server.Shutdown for graceful drain</td>
+                <td>
+                  Add <code>Broadcaster.Shutdown(ctx)</code> to Server.Shutdown
+                  for graceful drain
+                </td>
                 <td>3</td>
                 <td>4</td>
                 <td><strong>12</strong></td>
               </tr>
               <tr>
                 <td>6</td>
-                <td>Replace hardcoded heartbeat with <code>sse.WriteHeartbeat</code> or <code>Stream.Heartbeat</code></td>
+                <td>
+                  Replace hardcoded heartbeat with
+                  <code>sse.WriteHeartbeat</code> or
+                  <code>Stream.Heartbeat</code>
+                </td>
                 <td>2</td>
                 <td class="yes">5</td>
                 <td><strong>10</strong></td>
               </tr>
               <tr>
                 <td>7</td>
-                <td>Implement <code>EventStore</code> + <code>Replay</code> for reconnection support</td>
+                <td>
+                  Implement <code>EventStore</code> + <code>Replay</code> for
+                  reconnection support
+                </td>
                 <td class="yes">5</td>
                 <td>2</td>
                 <td><strong>10</strong></td>
               </tr>
               <tr>
                 <td>8</td>
-                <td>Use <code>Stream.Heartbeat(ctx, interval)</code> goroutine instead of manual ticker</td>
+                <td>
+                  Use <code>Stream.Heartbeat(ctx, interval)</code> goroutine
+                  instead of manual ticker
+                </td>
                 <td>3</td>
                 <td>3</td>
                 <td><strong>9</strong></td>
               </tr>
               <tr>
                 <td>9</td>
-                <td>Wire <code>Broadcaster.Health()</code> into health endpoint</td>
+                <td>
+                  Wire <code>Broadcaster.Health()</code> into health endpoint
+                </td>
                 <td>2</td>
                 <td>4</td>
                 <td><strong>8</strong></td>
               </tr>
               <tr>
                 <td>10</td>
-                <td>Use <code>sse.SetHeaders</code> for core headers (add 2 extras after)</td>
+                <td>
+                  Use <code>sse.SetHeaders</code> for core headers (add 2 extras
+                  after)
+                </td>
                 <td>2</td>
                 <td class="yes">5</td>
                 <td><strong>10</strong></td>
@@ -1582,11 +1671,12 @@
             go-workflow-auditlog uses go-sse as a wire-format constant library,
             not as the SSE infrastructure framework it is. The three imported
             symbols (<code>ContentType</code>, <code>WriteEvent</code>,
-            <code>Event</code>) are used correctly, but ~195 lines of hand-rolled
-            code in <code>hub.go</code> and <code>server.go</code> duplicate the
-            <code>Broadcaster</code>, <code>Stream</code>, heartbeat, and header
-            management that go-sse already provides &mdash; tested, race-tested,
-            and benchmarked at scales up to 10,000 subscribers.
+            <code>Event</code>) are used correctly, but ~195 lines of
+            hand-rolled code in <code>hub.go</code> and
+            <code>server.go</code> duplicate the <code>Broadcaster</code>,
+            <code>Stream</code>, heartbeat, and header management that go-sse
+            already provides &mdash; tested, race-tested, and benchmarked at
+            scales up to 10,000 subscribers.
           </p>
           <p>
             The single highest-leverage action is replacing the hand-rolled Hub
@@ -1594,8 +1684,8 @@
             priority 15). This eliminates the most duplication and unlocks
             Shutdown, Health, and configurable buffer size for free. The second
             highest-leverage action is implementing reconnection replay
-            (opportunity #7) &mdash; the only finding that affects
-            user-visible behavior, not just code quality.
+            (opportunity #7) &mdash; the only finding that affects user-visible
+            behavior, not just code quality.
           </p>
           <div class="callout callout-teal">
             <strong>Adoption score: 28/100 (Surface-level)</strong>
@@ -1611,9 +1701,10 @@
         <!-- Footer -->
         <footer class="footer">
           <p>
-            Generated 2026-08-06 &middot; Reviewed against go-sse v0.4.0 (latest)
-            and v0.3.0 (pinned in live/go.mod) &middot; All claims verified
-            against source code in go-workflow-auditlog/live/ and go-sse/
+            Generated 2026-08-06 &middot; Reviewed against go-sse v0.4.0
+            (latest) and v0.3.0 (pinned in live/go.mod) &middot; All claims
+            verified against source code in go-workflow-auditlog/live/ and
+            go-sse/
           </p>
         </footer>
       </main>

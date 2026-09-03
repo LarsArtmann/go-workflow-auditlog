@@ -1,12 +1,13 @@
 module github.com/larsartmann/go-workflow-auditlog/live
 
-go 1.26.6
+go 1.26.7
 
 require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/larsartmann/go-output/daghtml v0.35.0
 	github.com/larsartmann/go-sse v0.5.1
+	github.com/larsartmann/go-sse/ssetest v0.2.0
 	github.com/larsartmann/go-workflow-auditlog v0.9.0
 	github.com/larsartmann/go-workflow-auditlog/viz v0.9.0
 )
@@ -42,7 +43,6 @@ require (
 	github.com/larsartmann/go-output/serialization v0.35.0 // indirect
 	github.com/larsartmann/go-output/table v0.35.0 // indirect
 	github.com/larsartmann/go-output/tree v0.35.0 // indirect
-	github.com/larsartmann/go-sse/ssetest v0.2.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-runewidth v0.0.27 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect

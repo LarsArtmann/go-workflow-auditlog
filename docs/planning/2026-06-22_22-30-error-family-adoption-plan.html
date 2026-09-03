@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pareto Plan — Adopting go-error-family in go-workflow-auditlog</title>
+    <title>
+      Pareto Plan — Adopting go-error-family in go-workflow-auditlog
+    </title>
     <style>
       /* =========================================================================
          BAUHAUS DARK — Dashboard template
@@ -33,14 +35,14 @@
         --warning: var(--color-yellow);
         --radius: 0px;
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
       * {
         box-sizing: border-box;
@@ -230,15 +232,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .stat-grid,
       .scorecard {
@@ -557,9 +571,9 @@
           <div class="hero-badge">Pareto Execution Plan</div>
           <h1>Adopting go-error-family in go-workflow-auditlog</h1>
           <p class="hero-subtitle">
-            41 tasks across 5 Pareto tiers. From 1% effort delivering 51% value (core registration)
-            through full I/O error classification and polish. Each task &le; 12 minutes. Total ~3.7
-            hours.
+            41 tasks across 5 Pareto tiers. From 1% effort delivering 51% value
+            (core registration) through full I/O error classification and
+            polish. Each task &le; 12 minutes. Total ~3.7 hours.
           </p>
         </div>
 
@@ -606,9 +620,11 @@
           <h4>Strategy: Registration (Zero-Breakage)</h4>
           <p>
             Keep all 9 public sentinels + 2 private sentinels unchanged. Add
-            <code>classify.go</code> with <code>RegisterClassifications</code> mapping each to a
-            behavioral <code>Family</code>. Consumers immediately inherit <code>Classify()</code>,
-            <code>IsRetryable()</code>, <code>ExitCode()</code> on every auditlog error. No breaking
+            <code>classify.go</code> with
+            <code>RegisterClassifications</code> mapping each to a behavioral
+            <code>Family</code>. Consumers immediately inherit
+            <code>Classify()</code>, <code>IsRetryable()</code>,
+            <code>ExitCode()</code> on every auditlog error. No breaking
             changes. Reversible by deleting one file.
           </p>
         </div>
@@ -632,8 +648,8 @@
               <td>1% (~16 min)</td>
               <td>51%</td>
               <td>
-                Dependency + classify.go + build check. Core registration delivers all
-                classification capability.
+                Dependency + classify.go + build check. Core registration
+                delivers all classification capability.
               </td>
             </tr>
             <tr>
@@ -641,7 +657,8 @@
               <td>4% (~33 min)</td>
               <td>64%</td>
               <td>
-                Test suite proving every sentinel maps to the correct Family. Prevents regressions.
+                Test suite proving every sentinel maps to the correct Family.
+                Prevents regressions.
               </td>
             </tr>
             <tr>
@@ -649,8 +666,8 @@
               <td>20% (~62 min)</td>
               <td>80%</td>
               <td>
-                AGENTS.md documentation + quality gates (lint, vet, coverage). Ship-ready Strategy
-                A.
+                AGENTS.md documentation + quality gates (lint, vet, coverage).
+                Ship-ready Strategy A.
               </td>
             </tr>
             <tr>
@@ -658,36 +675,42 @@
               <td>50% (~105 min)</td>
               <td>90%</td>
               <td>
-                I/O error classification: loader, export, diagram, table, tree, HTML errors get
-                sentinels + Family.
+                I/O error classification: loader, export, diagram, table, tree,
+                HTML errors get sentinels + Family.
               </td>
             </tr>
             <tr>
               <td><span class="badge badge-low">Tier 5</span></td>
               <td>25% (~54 min)</td>
               <td>100%</td>
-              <td>FEATURES.md, example demo, adoption report update, final quality gates.</td>
+              <td>
+                FEATURES.md, example demo, adoption report update, final quality
+                gates.
+              </td>
             </tr>
           </tbody>
         </table>
 
         <div class="callout callout-solution">
           <strong>The 1% insight:</strong>
-          Tasks 1-4 alone (16 minutes) deliver more value than the remaining 37 tasks combined. The
-          <code>init()</code> registration in <code>classify.go</code> is the single
-          highest-leverage change in the entire plan. Everything else is verification,
-          documentation, and incremental value.
+          Tasks 1-4 alone (16 minutes) deliver more value than the remaining 37
+          tasks combined. The
+          <code>init()</code> registration in <code>classify.go</code> is the
+          single highest-leverage change in the entire plan. Everything else is
+          verification, documentation, and incremental value.
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <h2 id="tier1"><span class="num">02</span>Tier 1 — Critical Path (1% → 51%)</h2>
+        <h2 id="tier1">
+          <span class="num">02</span>Tier 1 — Critical Path (1% → 51%)
+        </h2>
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <div class="card card-problem">
           <h4>These 4 tasks block everything else</h4>
           <p>
-            Without the dependency and classify.go, no other task can start. Without a clean build,
-            no test can pass.
+            Without the dependency and classify.go, no other task can start.
+            Without a clean build, no test can pass.
           </p>
         </div>
 
@@ -706,7 +729,11 @@
             <tr>
               <td>1</td>
               <td><span class="badge badge-p0">P0</span></td>
-              <td><code>go get github.com/larsartmann/go-error-family@v0.5.0</code></td>
+              <td>
+                <code
+                  >go get github.com/larsartmann/go-error-family@v0.5.0</code
+                >
+              </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>2 min</td>
               <td><code>go.mod</code>, <code>go.sum</code></td>
@@ -715,9 +742,11 @@
               <td>2</td>
               <td><span class="badge badge-p0">P0</span></td>
               <td>
-                Create <code>classify.go</code>: package doc + <code>init()</code> with
-                <code>RegisterClassifications</code> for all 9 public + 2 private sentinels
-                (4→Corruption, 5→Rejection, 2→Rejection private)
+                Create <code>classify.go</code>: package doc +
+                <code>init()</code> with
+                <code>RegisterClassifications</code> for all 9 public + 2
+                private sentinels (4→Corruption, 5→Rejection, 2→Rejection
+                private)
               </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>10 min</td>
@@ -727,7 +756,8 @@
               <td>3</td>
               <td><span class="badge badge-p0">P0</span></td>
               <td>
-                <code>go mod tidy</code> to resolve dependency tree + verify <code>go.sum</code>
+                <code>go mod tidy</code> to resolve dependency tree + verify
+                <code>go.sum</code>
               </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>2 min</td>
@@ -766,7 +796,9 @@
 }</code></pre>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <h2 id="tier2"><span class="num">03</span>Tier 2 — Verification (4% → 64%)</h2>
+        <h2 id="tier2">
+          <span class="num">03</span>Tier 2 — Verification (4% → 64%)
+        </h2>
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <table>
@@ -785,8 +817,9 @@
               <td>5</td>
               <td><span class="badge badge-p1">P1</span></td>
               <td>
-                Create <code>classify_test.go</code>: table-driven <code>Classify()</code> test for
-                all 9 public sentinels (4 Corruption + 5 Rejection)
+                Create <code>classify_test.go</code>: table-driven
+                <code>Classify()</code> test for all 9 public sentinels (4
+                Corruption + 5 Rejection)
               </td>
               <td><span class="badge badge-high">High</span></td>
               <td>10 min</td>
@@ -796,8 +829,8 @@
               <td>6</td>
               <td><span class="badge badge-p1">P1</span></td>
               <td>
-                Test <code>IsRetryable()</code> returns <code>false</code> for all
-                Corruption/Rejection sentinels (non-retryable by design)
+                Test <code>IsRetryable()</code> returns <code>false</code> for
+                all Corruption/Rejection sentinels (non-retryable by design)
               </td>
               <td><span class="badge badge-high">High</span></td>
               <td>5 min</td>
@@ -807,8 +840,8 @@
               <td>7</td>
               <td><span class="badge badge-p2">P2</span></td>
               <td>
-                Test <code>ExitCode()</code> returns correct BSD sysexits code per Family
-                (Corruption=70, Rejection=64)
+                Test <code>ExitCode()</code> returns correct BSD sysexits code
+                per Family (Corruption=70, Rejection=64)
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
@@ -818,8 +851,9 @@
               <td>8</td>
               <td><span class="badge badge-p1">P1</span></td>
               <td>
-                Test <code>Classify()</code> traverses <code>fmt.Errorf("%w")</code> wrapping chains
-                (proves auditlog's existing wrapped errors classify correctly)
+                Test <code>Classify()</code> traverses
+                <code>fmt.Errorf("%w")</code> wrapping chains (proves auditlog's
+                existing wrapped errors classify correctly)
               </td>
               <td><span class="badge badge-high">High</span></td>
               <td>8 min</td>
@@ -828,7 +862,9 @@
             <tr>
               <td>9</td>
               <td><span class="badge badge-p0">P0</span></td>
-              <td>Run <code>go test -race ./...</code> — all 196+ tests green</td>
+              <td>
+                Run <code>go test -race ./...</code> — all 196+ tests green
+              </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>5 min</td>
               <td>—</td>
@@ -837,7 +873,9 @@
         </table>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <h2 id="tier3"><span class="num">04</span>Tier 3 — Ship-Ready (20% → 80%)</h2>
+        <h2 id="tier3">
+          <span class="num">04</span>Tier 3 — Ship-Ready (20% → 80%)
+        </h2>
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <table>
@@ -855,7 +893,10 @@
             <tr>
               <td>10</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Update AGENTS.md: add <code>classify.go</code> to architecture file table</td>
+              <td>
+                Update AGENTS.md: add <code>classify.go</code> to architecture
+                file table
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>4 min</td>
               <td><code>AGENTS.md</code></td>
@@ -864,8 +905,8 @@
               <td>11</td>
               <td><span class="badge badge-p1">P1</span></td>
               <td>
-                Update AGENTS.md: add "Error Classification" subsection to Gotchas with full
-                sentinel→Family mapping table
+                Update AGENTS.md: add "Error Classification" subsection to
+                Gotchas with full sentinel→Family mapping table
               </td>
               <td><span class="badge badge-high">High</span></td>
               <td>8 min</td>
@@ -875,8 +916,8 @@
               <td>12</td>
               <td><span class="badge badge-p3">P3</span></td>
               <td>
-                Update AGENTS.md: add <code>init()</code> side-effect note (global
-                <code>DefaultRegistry</code> mutation on import)
+                Update AGENTS.md: add <code>init()</code> side-effect note
+                (global <code>DefaultRegistry</code> mutation on import)
               </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>3 min</td>
@@ -902,8 +943,9 @@
               <td>15</td>
               <td><span class="badge badge-p2">P2</span></td>
               <td>
-                Check coverage: <code>go test -race -coverprofile=cover.out ./...</code> — confirm
-                &ge;93% maintained
+                Check coverage:
+                <code>go test -race -coverprofile=cover.out ./...</code> —
+                confirm &ge;93% maintained
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
@@ -914,21 +956,24 @@
 
         <div class="callout callout-solution">
           <strong>Milestone:</strong>
-          After task 15, Strategy A (registration) is ship-ready. The library now exports
-          classifiable errors, the documentation reflects it, and all quality gates pass. Tiers 4-5
-          are incremental value.
+          After task 15, Strategy A (registration) is ship-ready. The library
+          now exports classifiable errors, the documentation reflects it, and
+          all quality gates pass. Tiers 4-5 are incremental value.
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <h2 id="tier4"><span class="num">05</span>Tier 4 — I/O Error Classification</h2>
+        <h2 id="tier4">
+          <span class="num">05</span>Tier 4 — I/O Error Classification
+        </h2>
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <div class="card card-warning">
           <h4>Follow-up: highest incremental value</h4>
           <p>
-            The biggest gap in current error handling: ~20+ I/O/export errors have no sentinels.
-            Adding Family classification here enables <strong>retry decisions</strong> — the single
-            most actionable piece of error metadata for consumers.
+            The biggest gap in current error handling: ~20+ I/O/export errors
+            have no sentinels. Adding Family classification here enables
+            <strong>retry decisions</strong> — the single most actionable piece
+            of error metadata for consumers.
           </p>
         </div>
 
@@ -980,7 +1025,10 @@
             <tr>
               <td>16</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Add sentinel <code>ErrReportLoadFailed</code> to <code>loader.go</code></td>
+              <td>
+                Add sentinel <code>ErrReportLoadFailed</code> to
+                <code>loader.go</code>
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>3 min</td>
               <td><code>loader.go</code></td>
@@ -989,8 +1037,10 @@
               <td>17</td>
               <td><span class="badge badge-p1">P1</span></td>
               <td>
-                Wrap <code>LoadReport</code> / <code>LoadReportFromReader</code> /
-                <code>LoadReportFromBytes</code> errors with <code>ErrReportLoadFailed</code>
+                Wrap <code>LoadReport</code> /
+                <code>LoadReportFromReader</code> /
+                <code>LoadReportFromBytes</code> errors with
+                <code>ErrReportLoadFailed</code>
               </td>
               <td><span class="badge badge-high">High</span></td>
               <td>8 min</td>
@@ -999,7 +1049,10 @@
             <tr>
               <td>18</td>
               <td><span class="badge badge-p2">P2</span></td>
-              <td>Add sentinel <code>ErrExportWriteFailed</code> to <code>plugin.go</code></td>
+              <td>
+                Add sentinel <code>ErrExportWriteFailed</code> to
+                <code>plugin.go</code>
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>3 min</td>
               <td><code>plugin.go</code></td>
@@ -1008,7 +1061,8 @@
               <td>19</td>
               <td><span class="badge badge-p1">P1</span></td>
               <td>
-                Wrap <code>writeToFile</code> errors (create/flush/close/rename) with
+                Wrap <code>writeToFile</code> errors (create/flush/close/rename)
+                with
                 <code>ErrExportWriteFailed</code>
               </td>
               <td><span class="badge badge-high">High</span></td>
@@ -1019,8 +1073,8 @@
               <td>20</td>
               <td><span class="badge badge-p2">P2</span></td>
               <td>
-                Add sentinel <code>ErrRenderFailed</code> for diagram/table/tree/HTML exports
-                (define in a shared location)
+                Add sentinel <code>ErrRenderFailed</code> for
+                diagram/table/tree/HTML exports (define in a shared location)
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>3 min</td>
@@ -1030,7 +1084,8 @@
               <td>21</td>
               <td><span class="badge badge-p3">P3</span></td>
               <td>
-                Wrap <code>mermaid.go</code> render+write errors with <code>ErrRenderFailed</code>
+                Wrap <code>mermaid.go</code> render+write errors with
+                <code>ErrRenderFailed</code>
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
@@ -1040,7 +1095,8 @@
               <td>22</td>
               <td><span class="badge badge-p3">P3</span></td>
               <td>
-                Wrap <code>plantuml.go</code> render+write errors with <code>ErrRenderFailed</code>
+                Wrap <code>plantuml.go</code> render+write errors with
+                <code>ErrRenderFailed</code>
               </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
@@ -1050,7 +1106,8 @@
               <td>23</td>
               <td><span class="badge badge-p3">P3</span></td>
               <td>
-                Wrap <code>graphviz.go</code> render+write errors with <code>ErrRenderFailed</code>
+                Wrap <code>graphviz.go</code> render+write errors with
+                <code>ErrRenderFailed</code>
               </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
@@ -1059,7 +1116,10 @@
             <tr>
               <td>24</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap <code>d2.go</code> render+write errors with <code>ErrRenderFailed</code></td>
+              <td>
+                Wrap <code>d2.go</code> render+write errors with
+                <code>ErrRenderFailed</code>
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
               <td><code>d2.go</code></td>
@@ -1068,7 +1128,8 @@
               <td>25</td>
               <td><span class="badge badge-p3">P3</span></td>
               <td>
-                Wrap <code>table.go</code> render+write errors with <code>ErrRenderFailed</code>
+                Wrap <code>table.go</code> render+write errors with
+                <code>ErrRenderFailed</code>
               </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
@@ -1078,7 +1139,8 @@
               <td>26</td>
               <td><span class="badge badge-p3">P3</span></td>
               <td>
-                Wrap <code>tree.go</code> render+write errors with <code>ErrRenderFailed</code>
+                Wrap <code>tree.go</code> render+write errors with
+                <code>ErrRenderFailed</code>
               </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>5 min</td>
@@ -1112,7 +1174,8 @@
               <td>29</td>
               <td><span class="badge badge-p1">P1</span></td>
               <td>
-                Test: <code>Classify(ErrReportLoadFailed)</code> returns <code>Transient</code>
+                Test: <code>Classify(ErrReportLoadFailed)</code> returns
+                <code>Transient</code>
               </td>
               <td><span class="badge badge-high">High</span></td>
               <td>5 min</td>
@@ -1133,8 +1196,8 @@
               <td>31</td>
               <td><span class="badge badge-p1">P1</span></td>
               <td>
-                Test: <code>IsRetryable(ErrReportLoadFailed)</code> returns <code>true</code> —
-                proves retry hint works
+                Test: <code>IsRetryable(ErrReportLoadFailed)</code> returns
+                <code>true</code> — proves retry hint works
               </td>
               <td><span class="badge badge-high">High</span></td>
               <td>3 min</td>
@@ -1144,7 +1207,8 @@
               <td>32</td>
               <td><span class="badge badge-p2">P2</span></td>
               <td>
-                Test: <code>IsRetryable(ErrExportWriteFailed)</code> returns <code>false</code>
+                Test: <code>IsRetryable(ErrExportWriteFailed)</code> returns
+                <code>false</code>
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>3 min</td>
@@ -1153,7 +1217,10 @@
             <tr>
               <td>33</td>
               <td><span class="badge badge-p0">P0</span></td>
-              <td>Run <code>go test -race ./...</code> — all green after I/O classification</td>
+              <td>
+                Run <code>go test -race ./...</code> — all green after I/O
+                classification
+              </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td>5 min</td>
               <td>—</td>
@@ -1162,7 +1229,9 @@
         </table>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <h2 id="tier5"><span class="num">06</span>Tier 5 — Polish &amp; Documentation</h2>
+        <h2 id="tier5">
+          <span class="num">06</span>Tier 5 — Polish &amp; Documentation
+        </h2>
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <table>
@@ -1181,8 +1250,8 @@
               <td>34</td>
               <td><span class="badge badge-p2">P2</span></td>
               <td>
-                Update AGENTS.md: add I/O sentinel inventory + classification mapping (extend the
-                table from task 11)
+                Update AGENTS.md: add I/O sentinel inventory + classification
+                mapping (extend the table from task 11)
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>8 min</td>
@@ -1192,8 +1261,8 @@
               <td>35</td>
               <td><span class="badge badge-p2">P2</span></td>
               <td>
-                Update <code>FEATURES.md</code>: add "Error Classification" feature row with DONE
-                status
+                Update <code>FEATURES.md</code>: add "Error Classification"
+                feature row with DONE status
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
@@ -1202,7 +1271,10 @@
             <tr>
               <td>36</td>
               <td><span class="badge badge-p4">P4</span></td>
-              <td>Update adoption report: mark Strategy A as DONE, note implementation details</td>
+              <td>
+                Update adoption report: mark Strategy A as DONE, note
+                implementation details
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>3 min</td>
               <td><code>docs/reviews/</code></td>
@@ -1212,7 +1284,8 @@
               <td><span class="badge badge-p3">P3</span></td>
               <td>
                 Update <code>example/main.go</code>: demonstrate
-                <code>errorfamily.Classify</code> on a workflow error (shows consumer value)
+                <code>errorfamily.Classify</code> on a workflow error (shows
+                consumer value)
               </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>10 min</td>
@@ -1221,7 +1294,9 @@
             <tr>
               <td>38</td>
               <td><span class="badge badge-p1">P1</span></td>
-              <td>Run <code>golangci-lint run ./...</code> — final check, 0 issues</td>
+              <td>
+                Run <code>golangci-lint run ./...</code> — final check, 0 issues
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td>5 min</td>
               <td>—</td>
@@ -1230,7 +1305,8 @@
               <td>39</td>
               <td><span class="badge badge-p2">P2</span></td>
               <td>
-                Run coverage: <code>go test -race -coverprofile=cover.out ./...</code> — final
+                Run coverage:
+                <code>go test -race -coverprofile=cover.out ./...</code> — final
                 report
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
@@ -1241,7 +1317,9 @@
               <td>40</td>
               <td><span class="badge badge-p2">P2</span></td>
               <td>
-                Run <code>art-dupl --semantic --sort total-tokens -t 15</code> on all changed files
+                Run
+                <code>art-dupl --semantic --sort total-tokens -t 15</code> on
+                all changed files
               </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td>5 min</td>
@@ -1250,7 +1328,10 @@
             <tr>
               <td>41</td>
               <td><span class="badge badge-p3">P3</span></td>
-              <td>Final <code>go mod tidy</code> + verify <code>go.sum</code> clean</td>
+              <td>
+                Final <code>go mod tidy</code> + verify
+                <code>go.sum</code> clean
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td>3 min</td>
               <td><code>go.mod</code>, <code>go.sum</code></td>
@@ -1536,7 +1617,9 @@
                   style="text-anchor: middle; font-size: 16px"
                 >
                   <tspan x="154.000000" dy="0.000000">Create classify.go</tspan>
-                  <tspan x="154.000000" dy="18.500000">(11 sentinel registrations)</tspan>
+                  <tspan x="154.000000" dy="18.500000">
+                    (11 sentinel registrations)
+                  </tspan>
                 </text>
               </g>
               <g class="dDEudDFfMw==">
@@ -1605,8 +1688,12 @@
                   class="text-bold fill-N1"
                   style="text-anchor: middle; font-size: 16px"
                 >
-                  <tspan x="154.000000" dy="0.000000">Classify() table test</tspan>
-                  <tspan x="154.000000" dy="18.500000">(9 public sentinels)</tspan>
+                  <tspan x="154.000000" dy="0.000000">
+                    Classify() table test
+                  </tspan>
+                  <tspan x="154.000000" dy="18.500000">
+                    (9 public sentinels)
+                  </tspan>
                 </text>
               </g>
               <g class="dDIudDJfMg==">
@@ -1722,7 +1809,9 @@
                   style="text-anchor: middle; font-size: 16px"
                 >
                   <tspan x="425.500000" dy="0.000000">AGENTS.md update</tspan>
-                  <tspan x="425.500000" dy="18.500000">(architecture + gotchas)</tspan>
+                  <tspan x="425.500000" dy="18.500000">
+                    (architecture + gotchas)
+                  </tspan>
                 </text>
               </g>
               <g class="dDMudDNfMg==">
@@ -1792,7 +1881,9 @@
                   style="text-anchor: middle; font-size: 16px"
                 >
                   <tspan x="425.000000" dy="0.000000">Loader sentinels</tspan>
-                  <tspan x="425.000000" dy="18.500000">+ Transient registration</tspan>
+                  <tspan x="425.000000" dy="18.500000">
+                    + Transient registration
+                  </tspan>
                 </text>
               </g>
               <g class="dDQudDRfMg==">
@@ -1816,7 +1907,9 @@
                   style="text-anchor: middle; font-size: 16px"
                 >
                   <tspan x="713.500000" dy="0.000000">Export sentinels</tspan>
-                  <tspan x="713.500000" dy="18.500000">+ Infrastructure registration</tspan>
+                  <tspan x="713.500000" dy="18.500000">
+                    + Infrastructure registration
+                  </tspan>
                 </text>
               </g>
               <g class="dDQudDRfMw==">
@@ -1840,7 +1933,9 @@
                   style="text-anchor: middle; font-size: 16px"
                 >
                   <tspan x="1011.000000" dy="0.000000">Render sentinels</tspan>
-                  <tspan x="1011.000000" dy="18.500000">(diagram/table/tree/html)</tspan>
+                  <tspan x="1011.000000" dy="18.500000">
+                    (diagram/table/tree/html)
+                  </tspan>
                 </text>
               </g>
               <g class="dDQudDRfNA==">
@@ -1955,8 +2050,12 @@
                   class="text-bold fill-N1"
                   style="text-anchor: middle; font-size: 16px"
                 >
-                  <tspan x="787.000000" dy="0.000000">Final quality gates</tspan>
-                  <tspan x="787.000000" dy="18.500000">(lint + coverage + dupl)</tspan>
+                  <tspan x="787.000000" dy="0.000000">
+                    Final quality gates
+                  </tspan>
+                  <tspan x="787.000000" dy="18.500000">
+                    (lint + coverage + dupl)
+                  </tspan>
                 </text>
               </g>
               <g class="dDEuKHQxXzEgLSZndDsgdDFfMilbMF0=">
@@ -2281,18 +2380,50 @@
                 width="1401"
                 height="3312"
               >
-                <rect x="-134" y="-141" width="1401" height="3312" fill="white"></rect>
-                <rect x="131.000000" y="730.000000" width="47" height="21" fill="black"></rect>
-                <rect x="402.000000" y="1179.000000" width="47" height="21" fill="black"></rect>
-                <rect x="363.000000" y="1834.000000" width="125" height="37" fill="black"></rect>
-                <rect x="755.000000" y="2465.000000" width="64" height="21" fill="black"></rect>
+                <rect
+                  x="-134"
+                  y="-141"
+                  width="1401"
+                  height="3312"
+                  fill="white"
+                ></rect>
+                <rect
+                  x="131.000000"
+                  y="730.000000"
+                  width="47"
+                  height="21"
+                  fill="black"
+                ></rect>
+                <rect
+                  x="402.000000"
+                  y="1179.000000"
+                  width="47"
+                  height="21"
+                  fill="black"
+                ></rect>
+                <rect
+                  x="363.000000"
+                  y="1834.000000"
+                  width="125"
+                  height="37"
+                  fill="black"
+                ></rect>
+                <rect
+                  x="755.000000"
+                  y="2465.000000"
+                  width="64"
+                  height="21"
+                  fill="black"
+                ></rect>
               </mask>
             </svg>
           </svg>
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <h2 id="fulltable"><span class="num">08</span>Complete Task Table (Sorted by Priority)</h2>
+        <h2 id="fulltable">
+          <span class="num">08</span>Complete Task Table (Sorted by Priority)
+        </h2>
         <!-- ═══════════════════════════════════════════════════════════════ -->
 
         <table>
@@ -2738,8 +2869,8 @@
         </div>
 
         <footer class="footer">
-          Generated 2026-06-22 &middot; Pareto plan for go-error-family adoption in
-          go-workflow-auditlog v0.4.0
+          Generated 2026-06-22 &middot; Pareto plan for go-error-family adoption
+          in go-workflow-auditlog v0.4.0
         </footer>
       </main>
     </div>

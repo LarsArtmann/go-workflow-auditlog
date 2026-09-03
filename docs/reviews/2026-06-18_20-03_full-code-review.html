@@ -65,14 +65,14 @@
 
         /* --- Type stacks (system only — zero external fonts) --- */
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -280,15 +280,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
 
       /* --- Issue cards --- */
@@ -301,15 +313,27 @@
       }
       .issue-critical {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-important {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-nice {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .issue h3 {
         margin-bottom: 0.3rem;
@@ -815,9 +839,9 @@
           <div class="hero-badge">Full Code Review</div>
           <h1>go-workflow-auditlog</h1>
           <p class="hero-subtitle">
-            Senior-architect pass over every source, test, config, and doc file. Bugs fixed on the
-            spot; configuration drift corrected; regression tests added; docs realigned with the
-            actual API surface.
+            Senior-architect pass over every source, test, config, and doc file.
+            Bugs fixed on the spot; configuration drift corrected; regression
+            tests added; docs realigned with the actual API surface.
           </p>
         </div>
 
@@ -843,9 +867,10 @@
         </div>
 
         <p style="margin: 1.5rem 0; color: var(--text-muted)">
-          Linter issues reduced from <strong>145 → 0</strong>. All tests pass with the race
-          detector. Coverage is <strong>94.6%</strong> on the auditlog package. CI is now internally
-          consistent (Go 1.26 + golangci-lint v2.4.0).
+          Linter issues reduced from <strong>145 → 0</strong>. All tests pass
+          with the race detector. Coverage is <strong>94.6%</strong> on the
+          auditlog package. CI is now internally consistent (Go 1.26 +
+          golangci-lint v2.4.0).
         </p>
 
         <!-- Critical Bugs -->
@@ -857,16 +882,20 @@
           <div class="where">report.go:50-56</div>
           <p>
             The condition
-            <code>step.Status != derived &amp;&amp; step.Status.IsTerminal()</code> could never
-            fail: when status is terminal, <code>DeriveStatus()</code> returns the same value, so
-            the left side of the <code>&amp;&amp;</code> is always false. The stated intent — detect
-            drift between stored status and error pointer — was unreachable. No test exercised the
-            drift path, so the bug went unnoticed.
+            <code
+              >step.Status != derived &amp;&amp; step.Status.IsTerminal()</code
+            >
+            could never fail: when status is terminal,
+            <code>DeriveStatus()</code> returns the same value, so the left side
+            of the <code>&amp;&amp;</code> is always false. The stated intent —
+            detect drift between stored status and error pointer — was
+            unreachable. No test exercised the drift path, so the bug went
+            unnoticed.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Removed the <code>&amp;&amp; step.Status.IsTerminal()</code> guard. Now fires whenever
-            stored status disagrees with derived. Added
+            Removed the <code>&amp;&amp; step.Status.IsTerminal()</code> guard.
+            Now fires whenever stored status disagrees with derived. Added
             <code>TestReport_Validate_StatusDrift</code>.
           </div>
         </div>
@@ -876,16 +905,18 @@
           <h3>Diff() output was non-deterministic</h3>
           <div class="where">diff.go:48-63</div>
           <p>
-            Iterating <code>theirs</code> / <code>ours</code> maps produced randomized
-            <code>AddedSteps</code> / <code>RemovedSteps</code> / <code>StatusChanged</code>
-            ordering. Two diffs over identical inputs could yield different slice orders — a
-            regression test's worst enemy.
+            Iterating <code>theirs</code> / <code>ours</code> maps produced
+            randomized <code>AddedSteps</code> / <code>RemovedSteps</code> /
+            <code>StatusChanged</code>
+            ordering. Two diffs over identical inputs could yield different
+            slice orders — a regression test's worst enemy.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Collect names into slices and <code>slices.Sort</code> them before emitting StepDiff
-            entries. <code>StepDiff</code> also gained an <code>OldStatus</code> field so callers
-            can see from→to transitions. Added <code>TestDiff_DeterministicOrdering</code>.
+            Collect names into slices and <code>slices.Sort</code> them before
+            emitting StepDiff entries. <code>StepDiff</code> also gained an
+            <code>OldStatus</code> field so callers can see from→to transitions.
+            Added <code>TestDiff_DeterministicOrdering</code>.
           </div>
         </div>
 
@@ -894,14 +925,19 @@
           <h3>WorkflowSucceeded lied during mid-execution</h3>
           <div class="where">report_builder.go:143-144</div>
           <p>
-            <code>WorkflowSucceeded = FailedCount == 0 &amp;&amp; CanceledCount == 0</code>
-            returned <code>true</code> if no step had failed, even when steps were still pending or
-            running. A report built mid-flight would have reported success.
+            <code
+              >WorkflowSucceeded = FailedCount == 0 &amp;&amp; CanceledCount ==
+              0</code
+            >
+            returned <code>true</code> if no step had failed, even when steps
+            were still pending or running. A report built mid-flight would have
+            reported success.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Added a <code>pendingOrRunning</code> counter to the aggregate builder; the flag is now
-            false unless every step has reached a successful terminal state. Added
+            Added a <code>pendingOrRunning</code> counter to the aggregate
+            builder; the flag is now false unless every step has reached a
+            successful terminal state. Added
             <code>TestWorkflowSucceeded_PendingStepsIsFalse</code>.
           </div>
         </div>
@@ -911,14 +947,15 @@
           <h3>NDJSON error line number counted events, not lines</h3>
           <div class="where">ndjson.go:45</div>
           <p>
-            <code>fmt.Errorf("ndjson line %d", len(events)+1)</code> reported the event count rather
-            than the actual file line. A malformed line following blank lines would have pointed at
-            the wrong place.
+            <code>fmt.Errorf("ndjson line %d", len(events)+1)</code> reported
+            the event count rather than the actual file line. A malformed line
+            following blank lines would have pointed at the wrong place.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Track a real <code>lineNum</code> counter (incremented per <code>Scan</code>, including
-            blank lines). Added <code>TestReadEvents_LineNumberInError</code>.
+            Track a real <code>lineNum</code> counter (incremented per
+            <code>Scan</code>, including blank lines). Added
+            <code>TestReadEvents_LineNumberInError</code>.
           </div>
         </div>
 
@@ -927,55 +964,66 @@
           <h3>recorder.durationMs clobbered by stray AfterStep</h3>
           <div class="where">recorder.go:156</div>
           <p>
-            <code>rec.durationMs = durationMs</code> unconditionally overwrote the prior attempt's
-            measured duration. If a step's <code>AfterStep</code> fired without a matching
+            <code>rec.durationMs = durationMs</code> unconditionally overwrote
+            the prior attempt's measured duration. If a step's
+            <code>AfterStep</code> fired without a matching
             <code>BeforeStep</code> (which go-workflow can do for edge cases),
-            <code>durationMs</code> would become <code>nil</code>, silently erasing a previously
-            valid duration.
+            <code>durationMs</code> would become <code>nil</code>, silently
+            erasing a previously valid duration.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Only overwrite when <code>durationMs != nil</code>. The previous value is preserved.
+            Only overwrite when <code>durationMs != nil</code>. The previous
+            value is preserved.
           </div>
         </div>
 
         <div class="issue issue-critical">
           <span class="severity severity-critical">Fixed</span>
           <h3>CI was broken: Go 1.23 vs go.mod 1.26.3, lint v1 vs config v2</h3>
-          <div class="where">.github/workflows/ci.yml + go.mod + .golangci.yml</div>
+          <div class="where">
+            .github/workflows/ci.yml + go.mod + .golangci.yml
+          </div>
           <p>
-            go.mod requires Go 1.26.3 but CI installed 1.23 — the test job would have failed at
-            <code>go build</code>. The lint job installed golangci-lint v1.62 while the config is v2
-            format. Worse: depguard's allow list used the unsupported <code>$module</code> variable,
-            so every import of <code>github.com/Azure/go-workflow</code> and even the project's own
+            go.mod requires Go 1.26.3 but CI installed 1.23 — the test job would
+            have failed at
+            <code>go build</code>. The lint job installed golangci-lint v1.62
+            while the config is v2 format. Worse: depguard's allow list used the
+            unsupported <code>$module</code> variable, so every import of
+            <code>github.com/Azure/go-workflow</code> and even the project's own
             package was flagged.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Bumped CI to <code>go-version: "1.26"</code> and <code>golangci-lint v2.4.0</code>.
-            Rewrote <code>.golangci.yml</code>: explicit depguard allow list, snake_case
+            Bumped CI to <code>go-version: "1.26"</code> and
+            <code>golangci-lint v2.4.0</code>. Rewrote
+            <code>.golangci.yml</code>: explicit depguard allow list, snake_case
             tagliatelle, scoped exhaustruct, narrowed varnamelen, etc.
           </div>
         </div>
 
         <!-- Split Brains -->
-        <h2 id="splitbrains"><span class="num">02</span>Split Brains (Fixed)</h2>
+        <h2 id="splitbrains">
+          <span class="num">02</span>Split Brains (Fixed)
+        </h2>
 
         <div class="card card-problem">
           <h4>depguard forbade the library's own dependencies</h4>
           <p>
-            The config used <code>$module</code>, which depuard v2 does not support. Result: 22
-            linter errors flagging the project's central purpose (wrapping
-            <code>go-workflow</code>). Replaced with an explicit allow list.
+            The config used <code>$module</code>, which depuard v2 does not
+            support. Result: 22 linter errors flagging the project's central
+            purpose (wrapping <code>go-workflow</code>). Replaced with an
+            explicit allow list.
           </p>
         </div>
 
         <div class="card card-problem">
           <h4>tagliatelle wanted camelCase, code uses snake_case</h4>
           <p>
-            JSON tags throughout the public API are snake_case (<code>workflow_id</code>,
-            <code>event_count</code>, …). The linter was running with its camelCase default,
-            producing 27 spurious warnings. Now configured
+            JSON tags throughout the public API are snake_case
+            (<code>workflow_id</code>,
+            <code>event_count</code>, …). The linter was running with its
+            camelCase default, producing 27 spurious warnings. Now configured
             <code>tagliatelle.case.rules.json: snake</code>.
           </p>
         </div>
@@ -983,13 +1031,16 @@
         <div class="card card-problem">
           <h4>README &lt;&gt; code drift</h4>
           <p>
-            README claimed <code>Requires Go 1.23+</code> while go.mod requires 1.26.3. The Auditor
-            methods table omitted <code>ReportFiltered</code>, <code>WriteMermaid</code>,
-            <code>WritePlantUML</code>, <code>ExportMermaid</code>, <code>ExportPlantUML</code>; the
-            report methods table omitted <code>Diff</code>, <code>Filtered</code>,
-            <code>Duration</code>, <code>Summary</code>, <code>WriteJSON</code>,
-            <code>WriteNDJSON</code>, <code>WriteMermaid</code>, <code>WritePlantUML</code>; and the
-            package-level <code>LoadReport*</code> / <code>ReadEvents</code> /
+            README claimed <code>Requires Go 1.23+</code> while go.mod requires
+            1.26.3. The Auditor methods table omitted
+            <code>ReportFiltered</code>, <code>WriteMermaid</code>,
+            <code>WritePlantUML</code>, <code>ExportMermaid</code>,
+            <code>ExportPlantUML</code>; the report methods table omitted
+            <code>Diff</code>, <code>Filtered</code>, <code>Duration</code>,
+            <code>Summary</code>, <code>WriteJSON</code>,
+            <code>WriteNDJSON</code>, <code>WriteMermaid</code>,
+            <code>WritePlantUML</code>; and the package-level
+            <code>LoadReport*</code> / <code>ReadEvents</code> /
             <code>ReplayEvents</code>
             were entirely missing. All added.
           </p>
@@ -998,38 +1049,45 @@
         <div class="card card-problem">
           <h4>AGENTS.md listed wrong file inventory and coverage</h4>
           <p>
-            Listed <code>interceptor.go</code> (since renamed <code>attach.go</code>), missed
-            <code>diff.go</code>, <code>filter.go</code>, <code>loader.go</code>,
-            <code>diagram.go</code>, <code>mermaid.go</code>, <code>plantuml.go</code>,
-            <code>replay.go</code>. Coverage claimed 96.2% but actual is 94.6%. Go version claimed
-            1.23+. All corrected.
+            Listed <code>interceptor.go</code> (since renamed
+            <code>attach.go</code>), missed <code>diff.go</code>,
+            <code>filter.go</code>, <code>loader.go</code>,
+            <code>diagram.go</code>, <code>mermaid.go</code>,
+            <code>plantuml.go</code>, <code>replay.go</code>. Coverage claimed
+            96.2% but actual is 94.6%. Go version claimed 1.23+. All corrected.
           </p>
         </div>
 
         <div class="card card-problem">
           <h4>DOMAIN_LANGUAGE.md was the unfilled template</h4>
           <p>
-            Literally <code>.</code> as the project name and "Example Term" placeholders. Now filled
-            with the real ubiquitous language (Workflow, Auditor, Step, Attempt, Event, Report,
-            Snapshot, etc.) plus bounded contexts (Capture, Reporting, Export, Replay, Diff).
+            Literally <code>.</code> as the project name and "Example Term"
+            placeholders. Now filled with the real ubiquitous language
+            (Workflow, Auditor, Step, Attempt, Event, Report, Snapshot, etc.)
+            plus bounded contexts (Capture, Reporting, Export, Replay, Diff).
           </p>
         </div>
 
         <div class="card card-problem">
           <h4>Orphan doc comments in plugin.go</h4>
           <p>
-            Two doc comments stacked with no code between them — leftovers from when
-            <code>Attach</code> / <code>Snapshot</code> lived in <code>plugin.go</code>. They had no
-            symbol to attach to and were confusing godoc. Removed.
+            Two doc comments stacked with no code between them — leftovers from
+            when
+            <code>Attach</code> / <code>Snapshot</code> lived in
+            <code>plugin.go</code>. They had no symbol to attach to and were
+            confusing godoc. Removed.
           </p>
         </div>
 
         <div class="card card-problem">
-          <h4>WriteMermaidString / WritePlantUMLString double-wrapped errors</h4>
+          <h4>
+            WriteMermaidString / WritePlantUMLString double-wrapped errors
+          </h4>
           <p>
-            <code>WriteMermaid</code> already wraps with <code>"write diagram: %w"</code>; the
-            String variants wrapped again with <code>"write mermaid:"</code>, producing nested error
-            messages. Removed the redundant outer wrap.
+            <code>WriteMermaid</code> already wraps with
+            <code>"write diagram: %w"</code>; the String variants wrapped again
+            with <code>"write mermaid:"</code>, producing nested error messages.
+            Removed the redundant outer wrap.
           </p>
         </div>
 
@@ -1037,8 +1095,8 @@
           <h4>Experimental Go build tags that nothing uses</h4>
           <p>
             <code>goexperiment.arenas</code>, <code>goexperiment.jsonv2</code>,
-            <code>goexperiment.goroutineleakprofile</code>, etc. were set on the linter run, but no
-            file uses any experimental feature. Removed.
+            <code>goexperiment.goroutineleakprofile</code>, etc. were set on the
+            linter run, but no file uses any experimental feature. Removed.
           </p>
         </div>
 
@@ -1048,24 +1106,27 @@
         <div class="card card-solution">
           <h4>errcheck on defer Close()</h4>
           <p>
-            <code>defer f.Close()</code> in <code>loader.go</code> ignored the error. Wrapped in
-            <code>defer func() { _ = f.Close() }</code>.
+            <code>defer f.Close()</code> in <code>loader.go</code> ignored the
+            error. Wrapped in <code>defer func() { _ = f.Close() }</code>.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>errchkjson: MarshalIndent error ignored</h4>
           <p>
-            <code>example/main.go</code> did <code>sample, _ := json.MarshalIndent(...)</code> on a
-            value containing <code>time.Time</code>. Now checked; failure logged.
+            <code>example/main.go</code> did
+            <code>sample, _ := json.MarshalIndent(...)</code> on a value
+            containing <code>time.Time</code>. Now checked; failure logged.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>wrapcheck: unwrapped external errors</h4>
           <p>
-            <code>os.Create</code>, <code>os.File.Close</code>, <code>json.Encoder.Encode</code>,
-            <code>bufio.Writer.Flush</code> all returned unwrapped errors. Now wrapped with
+            <code>os.Create</code>, <code>os.File.Close</code>,
+            <code>json.Encoder.Encode</code>,
+            <code>bufio.Writer.Flush</code> all returned unwrapped errors. Now
+            wrapped with
             <code>fmt.Errorf("...: %w", err)</code>
             for actionable error chains.
           </p>
@@ -1082,26 +1143,29 @@
         <div class="card card-solution">
           <h4>exhaustive: missing Pending/Running cases</h4>
           <p>
-            <code>finalizeDenormalized</code> switch omitted <code>StepStatusPending</code> and
-            <code>StepStatusRunning</code>. The default branch handled them, but the explicit cases
-            now also feed the new <code>pendingOrRunning</code> counter.
+            <code>finalizeDenormalized</code> switch omitted
+            <code>StepStatusPending</code> and <code>StepStatusRunning</code>.
+            The default branch handled them, but the explicit cases now also
+            feed the new <code>pendingOrRunning</code> counter.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>funlen / cyclop: example main() was too complex (17 &gt; 12)</h4>
           <p>
-            Refactored <code>example/main.go</code> into <code>newAuditor</code>,
-            <code>buildWorkflow</code>, <code>printReportSummary</code>,
-            <code>printStepDetails</code>, <code>maybeExport</code>, <code>printSampleEvent</code>.
-            Main is now ~10 statements.
+            Refactored <code>example/main.go</code> into
+            <code>newAuditor</code>, <code>buildWorkflow</code>,
+            <code>printReportSummary</code>, <code>printStepDetails</code>,
+            <code>maybeExport</code>, <code>printSampleEvent</code>. Main is now
+            ~10 statements.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>ineffassign / unparam: addSucceedSteps unused return</h4>
           <p>
-            Benchmark helper returned a slice that no caller used. Simplified the signature to
+            Benchmark helper returned a slice that no caller used. Simplified
+            the signature to
             <code>addSucceedSteps(w, n)</code>.
           </p>
         </div>
@@ -1284,8 +1348,9 @@
             <div class="text">
               <strong>Single-lock concurrency model</strong>
               <span
-                >One <code>sync.RWMutex</code> guards all mutable state; <code>onEvent</code> fires
-                outside the lock. Simple, correct, easy to reason about.</span
+                >One <code>sync.RWMutex</code> guards all mutable state;
+                <code>onEvent</code> fires outside the lock. Simple, correct,
+                easy to reason about.</span
               >
             </div>
           </div>
@@ -1294,9 +1359,10 @@
             <div class="text">
               <strong>Single Report construction path</strong>
               <span
-                ><code>buildReportFromCore()</code> is the only place denormalized aggregates are
-                derived. <code>BuildReport</code>, <code>Filtered</code>, and
-                <code>ReplayEvents</code> all route through it — no drift between paths.</span
+                ><code>buildReportFromCore()</code> is the only place
+                denormalized aggregates are derived. <code>BuildReport</code>,
+                <code>Filtered</code>, and <code>ReplayEvents</code> all route
+                through it — no drift between paths.</span
               >
             </div>
           </div>
@@ -1305,8 +1371,9 @@
             <div class="text">
               <strong>Strong type-safe enums</strong>
               <span
-                ><code>EventType</code>, <code>Phase</code>, <code>StepStatus</code> are typed
-                strings with display metadata tables. Impossible-to-misuse API.</span
+                ><code>EventType</code>, <code>Phase</code>,
+                <code>StepStatus</code> are typed strings with display metadata
+                tables. Impossible-to-misuse API.</span
               >
             </div>
           </div>
@@ -1315,8 +1382,9 @@
             <div class="text">
               <strong>Round-trip NDJSON / JSON / Replay contracts</strong>
               <span
-                >Events serialize to NDJSON, deserialize via <code>ReadEvents</code>, and
-                reconstruct via <code>ReplayEvents</code>. Reports serialize to JSON, load via
+                >Events serialize to NDJSON, deserialize via
+                <code>ReadEvents</code>, and reconstruct via
+                <code>ReplayEvents</code>. Reports serialize to JSON, load via
                 <code>LoadReport*</code>. Tested both ways.</span
               >
             </div>
@@ -1326,8 +1394,9 @@
             <div class="text">
               <strong>External test package</strong>
               <span
-                >Tests live in <code>package auditlog_test</code> — guarantees tests exercise the
-                public API only, catching accidental reliance on internals.</span
+                >Tests live in <code>package auditlog_test</code> — guarantees
+                tests exercise the public API only, catching accidental reliance
+                on internals.</span
               >
             </div>
           </div>
@@ -1336,9 +1405,10 @@
             <div class="text">
               <strong>Functional-option filtering</strong>
               <span
-                ><code>ReportOption</code> pattern (<code>WithStepsByName</code>,
-                <code>WithStepsByStatus</code>, <code>WithEventsByType</code>,
-                <code>WithTimeRange</code>) is composable and idiomatic Go.</span
+                ><code>ReportOption</code> pattern
+                (<code>WithStepsByName</code>, <code>WithStepsByStatus</code>,
+                <code>WithEventsByType</code>, <code>WithTimeRange</code>) is
+                composable and idiomatic Go.</span
               >
             </div>
           </div>
@@ -1347,9 +1417,9 @@
             <div class="text">
               <strong>Diagram engine is properly factored</strong>
               <span
-                ><code>diagramFormatter</code> interface + shared <code>writeDiagram</code> means
-                Mermaid and PlantUML are thin adapters. Adding DOT/D2 would be a 30-line
-                change.</span
+                ><code>diagramFormatter</code> interface + shared
+                <code>writeDiagram</code> means Mermaid and PlantUML are thin
+                adapters. Adding DOT/D2 would be a 30-line change.</span
               >
             </div>
           </div>
@@ -1406,56 +1476,63 @@
         <div class="card card-warning">
           <h4>WorkflowReport has no RunID</h4>
           <p>
-            Only <code>WorkflowID</code> is present. Two runs of the same workflow cannot be
-            distinguished in storage. Consider adding a <code>RunID</code> (UUID) populated at
-            <code>New()</code> time and serialized in the report.
+            Only <code>WorkflowID</code> is present. Two runs of the same
+            workflow cannot be distinguished in storage. Consider adding a
+            <code>RunID</code> (UUID) populated at <code>New()</code> time and
+            serialized in the report.
           </p>
         </div>
         <div class="card card-warning">
           <h4>Recorder.sequence uses *atomic.Int64 unnecessarily</h4>
           <p>
-            <code>Recorder</code> is always passed by pointer. The indirection through
-            <code>*atomic.Int64</code> + <code>newSequenceCounter()</code> helper is historical; a
-            value field would work and remove one allocation.
+            <code>Recorder</code> is always passed by pointer. The indirection
+            through <code>*atomic.Int64</code> +
+            <code>newSequenceCounter()</code> helper is historical; a value
+            field would work and remove one allocation.
           </p>
         </div>
         <div class="card card-warning">
           <h4>Sentinel errors are unexported</h4>
           <p>
-            <code>errReportEventCountMismatch</code>, <code>errReportStepCountMismatch</code>,
-            <code>errReportStatusDrift</code>, <code>errWorkflowIDPathSep</code> are
-            package-private. Callers cannot use <code>errors.Is</code> to branch on them. Consider
+            <code>errReportEventCountMismatch</code>,
+            <code>errReportStepCountMismatch</code>,
+            <code>errReportStatusDrift</code>,
+            <code>errWorkflowIDPathSep</code> are package-private. Callers
+            cannot use <code>errors.Is</code> to branch on them. Consider
             exporting them as <code>Err…</code> for a 1.0 release.
           </p>
         </div>
         <div class="card card-warning">
           <h4>Event.Phase is redundant with EventType</h4>
           <p>
-            Every <code>AttemptStart</code> event has <code>Phase=Before</code>; every
-            <code>AttemptEnd</code> has <code>Phase=After</code>. <code>Phase</code>
-            exists in the JSON schema for clarity but carries no information. Worth documenting or
-            dropping in a future schema bump.
+            Every <code>AttemptStart</code> event has <code>Phase=Before</code>;
+            every <code>AttemptEnd</code> has <code>Phase=After</code>.
+            <code>Phase</code>
+            exists in the JSON schema for clarity but carries no information.
+            Worth documenting or dropping in a future schema bump.
           </p>
         </div>
         <div class="card card-warning">
           <h4>EventsByStep / EventsByType are O(N) per query</h4>
           <p>
-            Acceptable for typical sizes, but a <code>BuildReport</code>-time index (map from
-            name/type → []int) would make repeated queries O(1).
+            Acceptable for typical sizes, but a <code>BuildReport</code>-time
+            index (map from name/type → []int) would make repeated queries O(1).
           </p>
         </div>
         <div class="card card-warning">
           <h4>Step name collisions still possible</h4>
           <p>
-            Two steps with the same <code>String()</code> produce the same <code>step_name</code> in
-            JSON. Internal tracking uses the <code>flow.Steper</code> pointer so it's correct, but
-            the JSON output is ambiguous. Consider a doc note + optional <code>StepID</code> field.
+            Two steps with the same <code>String()</code> produce the same
+            <code>step_name</code> in JSON. Internal tracking uses the
+            <code>flow.Steper</code> pointer so it's correct, but the JSON
+            output is ambiguous. Consider a doc note + optional
+            <code>StepID</code> field.
           </p>
         </div>
 
         <footer class="footer">
-          Generated 2026-06-18 &middot; Reviewed against HEAD after fixes &middot; 28 files visited
-          &middot; tests + lint verified green
+          Generated 2026-06-18 &middot; Reviewed against HEAD after fixes
+          &middot; 28 files visited &middot; tests + lint verified green
         </footer>
       </main>
     </div>

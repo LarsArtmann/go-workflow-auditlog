@@ -18,7 +18,7 @@ var ErrReportLoadFailed = errors.New("report load failed")
 // LoadReport reads a JSON WorkflowReport from a file path.
 // This is the inverse of ExportJSON.
 func LoadReport(path string) (WorkflowReport, error) {
-	f, err := os.Open(path) //nolint:gosec // path is user-provided by design.
+	f, err := os.Open(path)
 	if err != nil {
 		return WorkflowReport{}, fmt.Errorf("%w: open %q: %w", ErrReportLoadFailed, path, err)
 	}

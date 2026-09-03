@@ -16,11 +16,11 @@
         --solution: #6eb5ff;
         --warning: #f4d35e;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
       * {
         box-sizing: border-box;
@@ -123,32 +123,44 @@
         <h2>Executive Summary</h2>
         <p>
           Split the single-package library into a <strong>core</strong> module
-          (<code>auditlog</code>) that owns the workflow event capture, report model, JSON/NDJSON
-          serialization, and replay; and a <strong>visualization</strong> sub-module
-          (<code>viz</code>) that owns diagram, table, tree, and HTML dashboard rendering. This
-          removes the heavy <code>go-output</code> dependency from the core module, gives consumers
-          a smaller import surface, and makes the dependency graph acyclic.
+          (<code>auditlog</code>) that owns the workflow event capture, report
+          model, JSON/NDJSON serialization, and replay; and a
+          <strong>visualization</strong> sub-module (<code>viz</code>) that owns
+          diagram, table, tree, and HTML dashboard rendering. This removes the
+          heavy <code>go-output</code> dependency from the core module, gives
+          consumers a smaller import surface, and makes the dependency graph
+          acyclic.
         </p>
       </section>
 
       <h2>Current State</h2>
       <ul>
-        <li>Single module: <code>github.com/larsartmann/go-workflow-auditlog</code></li>
-        <li>Go 1.26.4, no <code>go.work</code></li>
-        <li>Package <code>auditlog</code> contains ~38 production Go files plus tests</li>
-        <li>Core domain and visualization code share one package and one <code>go.mod</code></li>
         <li>
-          <code>go-output</code> and its sub-modules are required by the core module because
-          rendering methods live on <code>Auditor</code> and <code>WorkflowReport</code>
+          Single module:
+          <code>github.com/larsartmann/go-workflow-auditlog</code>
+        </li>
+        <li>Go 1.26.4, no <code>go.work</code></li>
+        <li>
+          Package <code>auditlog</code> contains ~38 production Go files plus
+          tests
+        </li>
+        <li>
+          Core domain and visualization code share one package and one
+          <code>go.mod</code>
+        </li>
+        <li>
+          <code>go-output</code> and its sub-modules are required by the core
+          module because rendering methods live on <code>Auditor</code> and
+          <code>WorkflowReport</code>
         </li>
       </ul>
 
-      <div class="summary" style="border-left-color: var(--solution);">
+      <div class="summary" style="border-left-color: var(--solution)">
         <strong>Update 2026-07-24:</strong> This proposal was fully implemented
         and merged to master. The codebase now has <strong>three</strong> Go
         modules (core, viz, live), not two — a <code>live/</code> real-time SSE
-        dashboard module was added later. The "Current State" above describes the
-        pre-split reality and is kept as historical record. Core
+        dashboard module was added later. The "Current State" above describes
+        the pre-split reality and is kept as historical record. Core
         <code>go.mod</code> has zero <code>go-output</code> dependencies.
         <code>go.work</code> exists. See the full resolution at the bottom of
         this document.
@@ -166,7 +178,10 @@
         <tr>
           <td><strong>core</strong></td>
           <td><code>github.com/larsartmann/go-workflow-auditlog</code></td>
-          <td>Event capture, report model, validation, JSON/NDJSON, replay, diff, filter, index</td>
+          <td>
+            Event capture, report model, validation, JSON/NDJSON, replay, diff,
+            filter, index
+          </td>
           <td>none</td>
           <td>go-workflow, backoff/v4, go-error-family, json/v2</td>
         </tr>
@@ -205,33 +220,36 @@ example ──depends on──&gt; core, viz</pre>
       <p>Use the dual strategy recommended for multi-module Go repositories:</p>
       <ul>
         <li>
-          <code>go.work</code> at the repo root lists <code>.</code> and <code>./viz</code> for
-          development.
+          <code>go.work</code> at the repo root lists <code>.</code> and
+          <code>./viz</code> for development.
         </li>
         <li>
           <code>viz/go.mod</code> contains
-          <code>replace github.com/larsartmann/go-workflow-auditlog =&gt; ..</code> so it builds
-          standalone with <code>GOWORK=off</code>.
+          <code
+            >replace github.com/larsartmann/go-workflow-auditlog =&gt; ..</code
+          >
+          so it builds standalone with <code>GOWORK=off</code>.
         </li>
         <li>
-          Internal module references are pinned to <code>v0.0.0</code> to avoid pseudo-version
-          churn.
+          Internal module references are pinned to <code>v0.0.0</code> to avoid
+          pseudo-version churn.
         </li>
       </ul>
 
       <h2>Test Dependency Isolation</h2>
       <p>
-        Shared workflow fixtures currently live in <code>auditlog_test.go</code> (external test
-        package). After the split, both core and viz tests need them. They will be extracted into a
-        <code>testhelpers</code> package inside the core module. The core module still does not
-        depend on viz.
+        Shared workflow fixtures currently live in
+        <code>auditlog_test.go</code> (external test package). After the split,
+        both core and viz tests need them. They will be extracted into a
+        <code>testhelpers</code> package inside the core module. The core module
+        still does not depend on viz.
       </p>
 
       <h2>API Changes</h2>
       <p>
         Visualization methods currently on <code>Auditor</code> and
-        <code>WorkflowReport</code> become package-level functions in <code>viz</code> that accept a
-        <code>WorkflowReport</code>:
+        <code>WorkflowReport</code> become package-level functions in
+        <code>viz</code> that accept a <code>WorkflowReport</code>:
       </p>
       <pre>
 // Before
@@ -249,62 +267,83 @@ viz.ExportHTML(report, "report.html")</pre>
       <h2>Error Type Placement</h2>
       <ul>
         <li>
-          <code>ErrRenderFailed</code> stays in core: it is used by both JSON marshaling and
-          visualization, and core is the lower layer.
+          <code>ErrRenderFailed</code> stays in core: it is used by both JSON
+          marshaling and visualization, and core is the lower layer.
         </li>
         <li>
-          <code>ErrExportWriteFailed</code> stays in core: used by all file exports including core
-          JSON/NDJSON.
+          <code>ErrExportWriteFailed</code> stays in core: used by all file
+          exports including core JSON/NDJSON.
         </li>
         <li>
-          Visualization code wraps renderer errors with <code>ErrRenderFailed</code> from core.
+          Visualization code wraps renderer errors with
+          <code>ErrRenderFailed</code> from core.
         </li>
       </ul>
 
       <h2>Versioning Strategy</h2>
       <p>
-        Shared version tags. The project is pre-1.0 and alpha; both modules will ship together under
-        a single <code>v0.x.x</code> git tag. The sub-module path is <code>.../viz</code>, not a
-        <code>/v2</code> major-version suffix.
+        Shared version tags. The project is pre-1.0 and alpha; both modules will
+        ship together under a single <code>v0.x.x</code> git tag. The sub-module
+        path is <code>.../viz</code>, not a <code>/v2</code> major-version
+        suffix.
       </p>
 
       <h2>Breaking Change Analysis</h2>
-      <p>This is a breaking change for consumers using diagram/table/tree/HTML exports:</p>
+      <p>
+        This is a breaking change for consumers using diagram/table/tree/HTML
+        exports:
+      </p>
       <ul>
         <li>
           Remove <code>Auditor.WriteMermaid</code>, <code>WritePlantUML</code>,
-          <code>WriteGraphviz</code>, <code>WriteD2</code>, <code>WriteTable</code>,
-          <code>WriteTree</code>, <code>WriteHTML</code>, and their <code>Export*</code> and
+          <code>WriteGraphviz</code>, <code>WriteD2</code>,
+          <code>WriteTable</code>, <code>WriteTree</code>,
+          <code>WriteHTML</code>, and their <code>Export*</code> and
           <code>Write*String</code> variants.
         </li>
         <li>Remove <code>WorkflowReport</code> methods of the same names.</li>
         <li>
-          Move <code>WithDirection</code>, <code>WithColumns</code>, column constants, and
-          <code>TableColumn</code> to the <code>viz</code> package.
+          Move <code>WithDirection</code>, <code>WithColumns</code>, column
+          constants, and <code>TableColumn</code> to the
+          <code>viz</code> package.
         </li>
       </ul>
-      <p>Consumers that only capture events and export JSON/NDJSON are unaffected.</p>
+      <p>
+        Consumers that only capture events and export JSON/NDJSON are
+        unaffected.
+      </p>
 
       <h2>Migration Strategy</h2>
       <ol>
         <li>
-          Create <code>testhelpers</code> package and move shared fixtures; update core tests.
+          Create <code>testhelpers</code> package and move shared fixtures;
+          update core tests.
         </li>
         <li>
           Create <code>viz</code> directory, <code>viz/go.mod</code>, and public
           <code>viz</code> API.
         </li>
         <li>
-          Move rendering files and their tests into <code>viz</code>; convert methods to functions.
+          Move rendering files and their tests into <code>viz</code>; convert
+          methods to functions.
         </li>
         <li>
           Remove visualization methods from core <code>Auditor</code> and
-          <code>WorkflowReport</code>; remove go-output from core <code>go.mod</code>.
+          <code>WorkflowReport</code>; remove go-output from core
+          <code>go.mod</code>.
         </li>
-        <li>Move <code>example</code> to <code>viz/example</code> and update imports.</li>
-        <li>Create <code>go.work</code> and update <code>go.work.sum</code>.</li>
+        <li>
+          Move <code>example</code> to <code>viz/example</code> and update
+          imports.
+        </li>
+        <li>
+          Create <code>go.work</code> and update <code>go.work.sum</code>.
+        </li>
         <li>Update CI, goreleaser, README, and AGENTS.md.</li>
-        <li>Run full test suite and <code>GOWORK=off</code> per-module verification.</li>
+        <li>
+          Run full test suite and <code>GOWORK=off</code> per-module
+          verification.
+        </li>
       </ol>
 
       <h2>Risk Assessment</h2>
@@ -317,7 +356,9 @@ viz.ExportHTML(report, "report.html")</pre>
         <tr>
           <td>Breaking consumer code</td>
           <td class="risk-high">High</td>
-          <td>Project is alpha; document migration in README; update example.</td>
+          <td>
+            Project is alpha; document migration in README; update example.
+          </td>
         </tr>
         <tr>
           <td>Test helpers across modules</td>
@@ -332,32 +373,43 @@ viz.ExportHTML(report, "report.html")</pre>
         <tr>
           <td>CI coverage gate drops</td>
           <td class="risk-medium">Medium</td>
-          <td>Run combined coverage across both modules; adjust gate if needed.</td>
+          <td>
+            Run combined coverage across both modules; adjust gate if needed.
+          </td>
         </tr>
         <tr>
           <td>goreleaser example path</td>
           <td class="risk-low">Low</td>
-          <td>Update <code>main: ./viz/example</code> in <code>.goreleaser.yml</code>.</td>
+          <td>
+            Update <code>main: ./viz/example</code> in
+            <code>.goreleaser.yml</code>.
+          </td>
         </tr>
       </table>
 
       <h2>Build System Impact</h2>
       <ul>
         <li>
-          <strong>CI</strong>: switch to workspace-based commands or run per-module builds and tests
-          with <code>GOEXPERIMENT=jsonv2</code>.
+          <strong>CI</strong>: switch to workspace-based commands or run
+          per-module builds and tests with <code>GOEXPERIMENT=jsonv2</code>.
         </li>
         <li>
-          <strong>goreleaser</strong>: update example path and ensure <code>go mod tidy</code> runs
-          in the correct module.
+          <strong>goreleaser</strong>: update example path and ensure
+          <code>go mod tidy</code> runs in the correct module.
         </li>
         <li>
-          <strong>flake.nix</strong>: no immediate change; dev shell already sets
-          <code>GOEXPERIMENT=jsonv2</code>.
+          <strong>flake.nix</strong>: no immediate change; dev shell already
+          sets <code>GOEXPERIMENT=jsonv2</code>.
         </li>
       </ul>
 
-      <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;" />
+      <hr
+        style="
+          border: none;
+          border-top: 1px solid var(--border);
+          margin: 2rem 0;
+        "
+      />
 
       <h2>Resolution (2026-07-24)</h2>
       <p>
@@ -365,12 +417,32 @@ viz.ExportHTML(report, "report.html")</pre>
         decision above was realized:
       </p>
       <ul>
-        <li><strong>Module split:</strong> core (<code>auditlog</code> package, zero go-output deps) and viz (<code>viz</code> package, go-output deps) are separate Go modules.</li>
-        <li><strong>API conversion:</strong> viz methods converted to standalone functions (<code>viz.WriteMermaid(report, w)</code> pattern).</li>
-        <li><strong>testhelpers:</strong> extracted to core, shared by both modules.</li>
-        <li><strong>go.work:</strong> workspace links all modules for local development.</li>
-        <li><strong>Third module:</strong> <code>live/</code> (real-time SSE dashboard) was added later as a third module, depending on both core and viz.</li>
-        <li><strong>CI:</strong> per-module vet/build/test/lint + <code>GOWORK=off</code> standalone verification.</li>
+        <li>
+          <strong>Module split:</strong> core (<code>auditlog</code> package,
+          zero go-output deps) and viz (<code>viz</code> package, go-output
+          deps) are separate Go modules.
+        </li>
+        <li>
+          <strong>API conversion:</strong> viz methods converted to standalone
+          functions (<code>viz.WriteMermaid(report, w)</code> pattern).
+        </li>
+        <li>
+          <strong>testhelpers:</strong> extracted to core, shared by both
+          modules.
+        </li>
+        <li>
+          <strong>go.work:</strong> workspace links all modules for local
+          development.
+        </li>
+        <li>
+          <strong>Third module:</strong> <code>live/</code> (real-time SSE
+          dashboard) was added later as a third module, depending on both core
+          and viz.
+        </li>
+        <li>
+          <strong>CI:</strong> per-module vet/build/test/lint +
+          <code>GOWORK=off</code> standalone verification.
+        </li>
       </ul>
       <p>
         The "Current State" section above describes the pre-split reality and is

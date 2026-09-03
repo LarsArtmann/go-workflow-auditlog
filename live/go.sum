@@ -74,8 +74,6 @@ github.com/larsartmann/go-output/testhelpers/graphtest v0.34.0 h1:Aa8x/8ik+VM4Qx
 github.com/larsartmann/go-output/testhelpers/graphtest v0.34.0/go.mod h1:u8gCtwVTjsJInrulwuDXl4JJttxcJTKdzz6RsVIL7jc=
 github.com/larsartmann/go-output/tree v0.35.0 h1:iCXUM4IDlEH5VKwRVUjqahJGjPXk7zzmcZA+/2Y0tCE=
 github.com/larsartmann/go-output/tree v0.35.0/go.mod h1:9uYXXrmMeImVyHPGadE53EmVVtArPM2AsNypbVMDo7g=
-github.com/larsartmann/go-sse v0.4.0 h1:cHeOMbVGcIqeetic8bdZIITo4xsPSpWiPhtvQTxNd+4=
-github.com/larsartmann/go-sse v0.4.0/go.mod h1:B9mLj83rwtrnbqSqBcRuMV8vnOvAaPlJtH+9U/fMeRQ=
 github.com/larsartmann/go-sse v0.5.1 h1:WxTNZp+DfShA2yXPne4+Jp5sFKTDlng+VMOniCiFVu8=
 github.com/larsartmann/go-sse v0.5.1/go.mod h1:TJl45pMXjwZTdhGgyu6RZWmmXyr28XwpnNJ7rVyyUxU=
 github.com/larsartmann/go-sse/ssetest v0.2.0 h1:xnze3rcrYrTyssums3SWZmZeCt1prJ2J6CBttovOzRM=

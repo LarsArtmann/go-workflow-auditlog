@@ -1,6 +1,6 @@
 module github.com/larsartmann/go-workflow-auditlog/viz
 
-go 1.26.5
+go 1.26.7
 
 require (
 	github.com/Azure/go-workflow v0.1.13

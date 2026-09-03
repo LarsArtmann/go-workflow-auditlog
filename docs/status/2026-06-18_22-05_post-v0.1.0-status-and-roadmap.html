@@ -34,14 +34,14 @@
         --radius-sm: 0px;
 
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -241,15 +241,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
 
       .issue {
@@ -261,15 +273,27 @@
       }
       .issue-critical {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-important {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-nice {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .issue h3 {
         margin-bottom: 0.3rem;
@@ -653,9 +677,10 @@
           <div class="hero-badge">PROJECT STATUS · ALPHA</div>
           <h1>go-workflow-auditlog</h1>
           <p class="hero-subtitle">
-            v0.1.0 release prep is done. Post-release focus: harden the audit semantics, expand the
-            query surface, and push coverage from 94.7% → 99%. Library is feature-complete for its
-            stated ALPHA surface; what's left is depth, not breadth.
+            v0.1.0 release prep is done. Post-release focus: harden the audit
+            semantics, expand the query surface, and push coverage from 94.7% →
+            99%. Library is feature-complete for its stated ALPHA surface;
+            what's left is depth, not breadth.
           </p>
         </div>
 
@@ -669,7 +694,11 @@
             <li><a href="#fucked">d) Totally Fucked Up</a></li>
             <li><a href="#improve">e) What We Should Improve</a></li>
             <li><a href="#next">f) Top #25 next</a></li>
-            <li><a href="#open-question">g) Open question I can't answer myself</a></li>
+            <li>
+              <a href="#open-question"
+                >g) Open question I can't answer myself</a
+              >
+            </li>
           </ul>
         </nav>
 
@@ -703,11 +732,14 @@
         </div>
 
         <p>
-          <strong>One-liner:</strong> The library is in good shape. v0.1.0 was released two days ago
-          with full documentation refresh, security disclosure process, and changelog. Today we
-          shipped one bug fix (<code>StepInfo.Error</code> now reflects the final outcome only, not
-          the last attempt's error). The next major push is API ergonomics, observability hooks, and
-          one structural refactor (split the package).
+          <strong>One-liner:</strong> The library is in good shape. v0.1.0 was
+          released two days ago with full documentation refresh, security
+          disclosure process, and changelog. Today we shipped one bug fix (<code
+            >StepInfo.Error</code
+          >
+          now reflects the final outcome only, not the last attempt's error).
+          The next major push is API ergonomics, observability hooks, and one
+          structural refactor (split the package).
         </p>
 
         <div class="grid-2">
@@ -719,8 +751,9 @@
                 <div class="text">
                   <strong>Zero external runtime deps</strong>
                   <span
-                    >Single Go module, depends only on Azure/go-workflow and cenkalti/backoff/v4. No
-                    transitive risk surface to audit.</span
+                    >Single Go module, depends only on Azure/go-workflow and
+                    cenkalti/backoff/v4. No transitive risk surface to
+                    audit.</span
                   >
                 </div>
               </div>
@@ -729,8 +762,9 @@
                 <div class="text">
                   <strong>Single construction path</strong>
                   <span
-                    ><code>buildReportFromCore</code> is the only way a WorkflowReport is built — no
-                    risk of denormalized fields drifting from core data.</span
+                    ><code>buildReportFromCore</code> is the only way a
+                    WorkflowReport is built — no risk of denormalized fields
+                    drifting from core data.</span
                   >
                 </div>
               </div>
@@ -739,8 +773,9 @@
                 <div class="text">
                   <strong>Honest schema + validation</strong>
                   <span
-                    ><code>WorkflowSucceeded</code> requires zero pending/running steps.
-                    <code>Validate()</code> catches status/error drift. Comments don't lie.</span
+                    ><code>WorkflowSucceeded</code> requires zero
+                    pending/running steps. <code>Validate()</code> catches
+                    status/error drift. Comments don't lie.</span
                   >
                 </div>
               </div>
@@ -749,8 +784,9 @@
                 <div class="text">
                   <strong>Comprehensive export surface</strong>
                   <span
-                    >JSON, NDJSON, Mermaid, PlantUML, Graphviz DOT, replay, diff, index, filter,
-                    load. 6 ways to consume the same data, all round-trippable.</span
+                    >JSON, NDJSON, Mermaid, PlantUML, Graphviz DOT, replay,
+                    diff, index, filter, load. 6 ways to consume the same data,
+                    all round-trippable.</span
                   >
                 </div>
               </div>
@@ -764,8 +800,9 @@
                 <div class="text">
                   <strong>Single package, 17 source files</strong>
                   <span
-                    >Long compile times when editing. Boundary between <em>core</em>,
-                    <em>serialization</em>, and <em>exporters</em> is invisible. Hard to depend on a
+                    >Long compile times when editing. Boundary between
+                    <em>core</em>, <em>serialization</em>, and
+                    <em>exporters</em> is invisible. Hard to depend on a
                     subset.</span
                   >
                 </div>
@@ -775,8 +812,9 @@
                 <div class="text">
                   <strong>Coverage has a ceiling around 95%</strong>
                   <span
-                    >Defensive nil checks and a couple of error-formatting branches in
-                    <code>recordAfterStep</code> and <code>attach.go</code> remain untested.</span
+                    >Defensive nil checks and a couple of error-formatting
+                    branches in <code>recordAfterStep</code> and
+                    <code>attach.go</code> remain untested.</span
                   >
                 </div>
               </div>
@@ -785,8 +823,9 @@
                 <div class="text">
                   <strong>No public benchmarks in CI</strong>
                   <span
-                    >Benchmarks exist (<code>benchmarks_test.go</code>) but aren't run on PRs. We
-                    have no performance regression safety net.</span
+                    >Benchmarks exist (<code>benchmarks_test.go</code>) but
+                    aren't run on PRs. We have no performance regression safety
+                    net.</span
                   >
                 </div>
               </div>
@@ -801,51 +840,57 @@
           <h4>Core event capture</h4>
           <p>
             Before/After callbacks captured per attempt via
-            <code>State.MergeConfig</code> injection. Single mutex guards all mutable state;
-            <code>onEvent</code> callback always fires outside the lock.
+            <code>State.MergeConfig</code> injection. Single mutex guards all
+            mutable state; <code>onEvent</code> callback always fires outside
+            the lock.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>DAG-aware Snapshot</h4>
           <p>
-            Snapshot reads <code>StateOf</code>/<code>UpstreamOf</code> post-run, including
-            sub-workflow inner steps via <code>flow.Traverse</code>. Captures skipped/canceled steps
-            that bypass callbacks.
+            Snapshot reads <code>StateOf</code>/<code>UpstreamOf</code>
+            post-run, including sub-workflow inner steps via
+            <code>flow.Traverse</code>. Captures skipped/canceled steps that
+            bypass callbacks.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>Export: JSON, NDJSON, Mermaid, PlantUML, Graphviz DOT</h4>
           <p>
-            5 distinct export formats, all using the shared <code>writeDiagram</code> engine for
-            graph output. NDJSON reader handles malformed lines with line-numbered errors.
+            5 distinct export formats, all using the shared
+            <code>writeDiagram</code> engine for graph output. NDJSON reader
+            handles malformed lines with line-numbered errors.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>Query surface: Filter, Index, Diff</h4>
           <p>
-            <code>Filtered</code> with <code>ReportOption</code>s (steps-by-status, time range,
-            drop). <code>ReportIndex</code> for O(1) name/ID lookup. <code>Diff</code> for
-            run-over-run comparison with wall-clock <code>Duration</code> + <code>Summary</code>.
+            <code>Filtered</code> with <code>ReportOption</code>s
+            (steps-by-status, time range, drop). <code>ReportIndex</code> for
+            O(1) name/ID lookup. <code>Diff</code> for run-over-run comparison
+            with wall-clock <code>Duration</code> + <code>Summary</code>.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>Replay &amp; Load</h4>
           <p>
-            <code>ReplayEvents</code> reconstructs a <code>Report</code> from an event stream,
-            preserving RunID and assigning StepIDs. <code>LoadReport</code> /
-            <code>LoadReportFromReader</code> / <code>LoadReportFromBytes</code> for round-trip.
+            <code>ReplayEvents</code> reconstructs a <code>Report</code> from an
+            event stream, preserving RunID and assigning StepIDs.
+            <code>LoadReport</code> / <code>LoadReportFromReader</code> /
+            <code>LoadReportFromBytes</code> for round-trip.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>Validation &amp; status drift detection</h4>
           <p>
-            <code>WorkflowReport.Validate()</code> catches event/step count mismatches and status
-            drift (stored Status != derived Status). Sentinel errors for programmatic handling.
+            <code>WorkflowReport.Validate()</code> catches event/step count
+            mismatches and status drift (stored Status != derived Status).
+            Sentinel errors for programmatic handling.
           </p>
         </div>
 
@@ -853,24 +898,26 @@
           <h4>Example pipeline + goreleaser</h4>
           <p>
             Demo binary shows fetch → validate → transform → save with retry.
-            <code>.goreleaser.yml</code> automates GitHub releases with grouped changelog + demo
-            artifact.
+            <code>.goreleaser.yml</code> automates GitHub releases with grouped
+            changelog + demo artifact.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>v0.1.0 documentation + security policy</h4>
           <p>
-            README, CHANGELOG, FEATURES, TODO_LIST, ROADMAP, AGENTS.md all current. SECURITY.md with
-            private vulnerability reporting. Status reports for the release prep.
+            README, CHANGELOG, FEATURES, TODO_LIST, ROADMAP, AGENTS.md all
+            current. SECURITY.md with private vulnerability reporting. Status
+            reports for the release prep.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>StepInfo.Error = final outcome (fixed today)</h4>
           <p>
-            Regression test: succeeded-after-retry step now has nil Error. Per-attempt errors remain
-            in the Event stream. Invariant documented in AGENTS.md gotchas.
+            Regression test: succeeded-after-retry step now has nil Error.
+            Per-attempt errors remain in the Event stream. Invariant documented
+            in AGENTS.md gotchas.
           </p>
         </div>
 
@@ -880,44 +927,49 @@
         <div class="card card-warning">
           <h4>Test coverage at 94.7% (target 99%)</h4>
           <p>
-            Gap concentrated in: <code>recordAfterStep</code> defensive nil branch (4.2% uncovered),
-            <code>attach.go</code> wrapper-step nil path, <code>fromFlowStatus</code> default branch
-            for unknown statuses, and <code>export.go</code> write-error paths. Each is a few lines;
-            total uncovered statements: ~70 across 11 files. None are critical paths.
+            Gap concentrated in: <code>recordAfterStep</code> defensive nil
+            branch (4.2% uncovered), <code>attach.go</code> wrapper-step nil
+            path, <code>fromFlowStatus</code> default branch for unknown
+            statuses, and <code>export.go</code> write-error paths. Each is a
+            few lines; total uncovered statements: ~70 across 11 files. None are
+            critical paths.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Race detector coverage</h4>
           <p>
-            All tests pass under <code>-race</code>, but only a handful exercise real concurrency.
-            <code>TestConcurrent_Steps</code> covers fan-out, but no stress test with high goroutine
-            count or long-running workflows.
+            All tests pass under <code>-race</code>, but only a handful exercise
+            real concurrency. <code>TestConcurrent_Steps</code> covers fan-out,
+            but no stress test with high goroutine count or long-running
+            workflows.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Diagram export polish</h4>
           <p>
-            Mermaid + PlantUML + DOT all work. Mermaid has CSS class assignment + retry indicator.
-            PlantUML/DOT are functional but don't differentiate retry/timeout visually. Shared
-            engine is solid; per-formatter decoration is uneven.
+            Mermaid + PlantUML + DOT all work. Mermaid has CSS class assignment
+            + retry indicator. PlantUML/DOT are functional but don't
+            differentiate retry/timeout visually. Shared engine is solid;
+            per-formatter decoration is uneven.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>ROADMAP.md</h4>
           <p>
-            Exists with future direction but mixes "soon" tasks (v0.2) with raw ideas (v0.5+). No
-            owner / no acceptance criteria. Hard to act on.
+            Exists with future direction but mixes "soon" tasks (v0.2) with raw
+            ideas (v0.5+). No owner / no acceptance criteria. Hard to act on.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Example demo</h4>
           <p>
-            Prints events, summary, step details. Doesn't show: NDJSON export, Mermaid export, diff,
-            replay, filter, or load. A user reading the demo can't see the full feature surface.
+            Prints events, summary, step details. Doesn't show: NDJSON export,
+            Mermaid export, diff, replay, filter, or load. A user reading the
+            demo can't see the full feature surface.
           </p>
         </div>
 
@@ -927,42 +979,49 @@
         <div class="card">
           <h4>Structured logging (slog) integration</h4>
           <p>
-            The Auditor accepts a generic <code>onEvent func(Event)</code> callback but doesn't
-            integrate with <code>log/slog</code>. A <code>SlogHandler</code> adapter that emits one
-            structured log record per event would unlock native observability pipelines.
+            The Auditor accepts a generic
+            <code>onEvent func(Event)</code> callback but doesn't integrate with
+            <code>log/slog</code>. A <code>SlogHandler</code> adapter that emits
+            one structured log record per event would unlock native
+            observability pipelines.
           </p>
         </div>
 
         <div class="card">
           <h4>OpenTelemetry trace correlation</h4>
           <p>
-            RunID is a 128-bit random hex. No built-in way to map it to a trace ID. The recorder
-            already has the right shape — would need a small adapter that injects
-            <code>trace.SpanFromContext</code> into the RunID at Attach time, and emits OTel events.
+            RunID is a 128-bit random hex. No built-in way to map it to a trace
+            ID. The recorder already has the right shape — would need a small
+            adapter that injects
+            <code>trace.SpanFromContext</code> into the RunID at Attach time,
+            and emits OTel events.
           </p>
         </div>
 
         <div class="card">
           <h4>Prometheus / OpenMetrics exporter</h4>
           <p>
-            Per-step histograms for duration, counters for status transitions, gauges for in-flight
-            attempts. ~150 lines plus a <code>Collect</code> method. No design exists yet.
+            Per-step histograms for duration, counters for status transitions,
+            gauges for in-flight attempts. ~150 lines plus a
+            <code>Collect</code> method. No design exists yet.
           </p>
         </div>
 
         <div class="card">
           <h4>HTML report exporter</h4>
           <p>
-            Mermaid is great for DAGs but a self-contained HTML report (timeline + DAG + step detail
-            table) would be a strong differentiator. We have the template skill already.
+            Mermaid is great for DAGs but a self-contained HTML report (timeline
+            + DAG + step detail table) would be a strong differentiator. We have
+            the template skill already.
           </p>
         </div>
 
         <div class="card">
           <h4>Sub-workflow composition tests</h4>
           <p>
-            <code>subworkflow_test.go</code> exists but covers only one pattern. No test for: deeply
-            nested sub-workflows, sub-workflow with its own retries, sub-workflow error propagation.
+            <code>subworkflow_test.go</code> exists but covers only one pattern.
+            No test for: deeply nested sub-workflows, sub-workflow with its own
+            retries, sub-workflow error propagation.
           </p>
         </div>
 
@@ -970,17 +1029,18 @@
           <h4>Property-based tests</h4>
           <p>
             All tests are example-based. <code>testing/quick</code> or
-            <code>pgregory.net/rapid</code> could generate random workflow topologies + step result
-            sequences and assert report invariants (event count == 2×attempt count, error/status
-            coherence, etc.).
+            <code>pgregory.net/rapid</code> could generate random workflow
+            topologies + step result sequences and assert report invariants
+            (event count == 2×attempt count, error/status coherence, etc.).
           </p>
         </div>
 
         <div class="card">
           <h4>Performance regression CI</h4>
           <p>
-            Benchmarks exist in <code>benchmarks_test.go</code> but aren't gated in CI. Need a
-            GitHub Action that runs <code>go test -bench=. -benchmem</code> and posts a comparison
+            Benchmarks exist in <code>benchmarks_test.go</code> but aren't gated
+            in CI. Need a GitHub Action that runs
+            <code>go test -bench=. -benchmem</code> and posts a comparison
             comment on PRs.
           </p>
         </div>
@@ -990,25 +1050,29 @@
           <p>
             17 files in <code>auditlog</code> is too many. Natural split:
             <code>auditlog</code> (core types, recorder, report) +
-            <code>auditlog/export</code> (JSON, NDJSON) + <code>auditlog/diagram</code> (Mermaid,
-            PlantUML, DOT). Would need to update all imports; mechanical but verbose.
+            <code>auditlog/export</code> (JSON, NDJSON) +
+            <code>auditlog/diagram</code> (Mermaid, PlantUML, DOT). Would need
+            to update all imports; mechanical but verbose.
           </p>
         </div>
 
         <div class="card">
           <h4>v0.2.0 API stabilization</h4>
           <p>
-            Once we have external users, we need a v0.2.0 with breaking-change budget. Currently the
-            API can still evolve freely (good for ALPHA), but several types will need to firm up:
-            <code>Config</code> fields, <code>ReportOption</code> semantics, error types.
+            Once we have external users, we need a v0.2.0 with breaking-change
+            budget. Currently the API can still evolve freely (good for ALPHA),
+            but several types will need to firm up:
+            <code>Config</code> fields, <code>ReportOption</code> semantics,
+            error types.
           </p>
         </div>
 
         <div class="card">
           <h4>WorkflowReport → proto / flatbuffers</h4>
           <p>
-            JSON is fine for files, expensive for IPC. If we ever want to ship reports over gRPC or
-            share them between processes, a binary schema would help. Not urgent.
+            JSON is fine for files, expensive for IPC. If we ever want to ship
+            reports over gRPC or share them between processes, a binary schema
+            would help. Not urgent.
           </p>
         </div>
 
@@ -1021,39 +1085,47 @@
           <div class="where">upstream: github.com/Azure/go-workflow</div>
           <p>
             Workaround in place: every test creates
-            <code>o.Backoff = backoff.NewExponentialBackOff()</code> (fresh instance). Without this
-            workaround, <code>-race</code> explodes on any concurrent retry. We can't fix it in our
-            library; we're at the mercy of upstream. Mitigation: pin go-workflow and document the
-            trap. Risk: every contributor must remember to use <code>retryOpts()</code> in tests,
-            not the bare <code>RetryOption</code>.
+            <code>o.Backoff = backoff.NewExponentialBackOff()</code> (fresh
+            instance). Without this workaround, <code>-race</code> explodes on
+            any concurrent retry. We can't fix it in our library; we're at the
+            mercy of upstream. Mitigation: pin go-workflow and document the
+            trap. Risk: every contributor must remember to use
+            <code>retryOpts()</code> in tests, not the bare
+            <code>RetryOption</code>.
           </p>
           <div class="callout callout-warning">
             <strong>Watch out</strong>
-            New contributors will hit this within their first retry test. AGENTS.md documents it but
-            it's still a foot-gun. Consider adding a CI test that runs the example under -race and
-            fails if the backoff is shared.
+            New contributors will hit this within their first retry test.
+            AGENTS.md documents it but it's still a foot-gun. Consider adding a
+            CI test that runs the example under -race and fails if the backoff
+            is shared.
           </div>
         </div>
 
         <div class="issue issue-critical">
           <span class="severity severity-critical">Critical</span>
           <h3>Step name collisions are silently ambiguous</h3>
-          <div class="where">recorder.go:stepKey / report_builder.go:buildDependentsMapLocked</div>
+          <div class="where">
+            recorder.go:stepKey / report_builder.go:buildDependentsMapLocked
+          </div>
           <p>
-            Internal step identity uses the <code>flow.Steper</code> pointer (correct, unique). But
-            the JSON <code>step_name</code> field uses <code>flow.String(step)</code>, which is
-            non-deterministic for steps that don't implement <code>String()</code> (yields
-            <code>*TypeName(0xpointer)</code>). Two steps with identical types and no
-            <code>String()</code> produce non-matching <code>step_name</code> strings across runs,
-            but matching ones with the same pointer can produce identical-but-unrelated names within
-            one report. <code>buildDependentsMapLocked</code> uses name → pointer mapping for
-            reverse deps, so a name collision breaks the dependent graph.
+            Internal step identity uses the <code>flow.Steper</code> pointer
+            (correct, unique). But the JSON <code>step_name</code> field uses
+            <code>flow.String(step)</code>, which is non-deterministic for steps
+            that don't implement <code>String()</code> (yields
+            <code>*TypeName(0xpointer)</code>). Two steps with identical types
+            and no <code>String()</code> produce non-matching
+            <code>step_name</code> strings across runs, but matching ones with
+            the same pointer can produce identical-but-unrelated names within
+            one report. <code>buildDependentsMapLocked</code> uses name →
+            pointer mapping for reverse deps, so a name collision breaks the
+            dependent graph.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Use pointer identity (or StepID) as the canonical key everywhere internally; emit the
-            human name only in the JSON output. We've documented this as a known limitation but
-            haven't refactored.
+            Use pointer identity (or StepID) as the canonical key everywhere
+            internally; emit the human name only in the JSON output. We've
+            documented this as a known limitation but haven't refactored.
           </div>
         </div>
 
@@ -1062,16 +1134,18 @@
           <h3>flow.StatusFromError semantics are undocumented &amp; fragile</h3>
           <div class="where">recorder.go:fromErrorToStatus</div>
           <p>
-            We use <code>flow.StatusFromError(err)</code> which returns capitalized strings
-            ("Succeeded", "Failed", "Canceled", "Skipped") that we then lowercase. If upstream
-            changes the mapping or the casing, our status enum breaks silently. The conversion lives
-            in <code>types.go:fromFlowStatus</code> as a switch with a
+            We use <code>flow.StatusFromError(err)</code> which returns
+            capitalized strings ("Succeeded", "Failed", "Canceled", "Skipped")
+            that we then lowercase. If upstream changes the mapping or the
+            casing, our status enum breaks silently. The conversion lives in
+            <code>types.go:fromFlowStatus</code> as a switch with a
             <code>default → Pending</code> that hides breakage.
           </p>
           <div class="callout callout-warning">
             <strong>Watch out</strong>
-            No test asserts that <code>flow.StatusFromError</code> returns the specific strings we
-            expect. A name change in upstream would break without any test failure.
+            No test asserts that <code>flow.StatusFromError</code> returns the
+            specific strings we expect. A name change in upstream would break
+            without any test failure.
           </div>
         </div>
 
@@ -1080,55 +1154,67 @@
           <h3>No upper bound on RunID / no RunID validation</h3>
           <div class="where">plugin.go / runid.go</div>
           <p>
-            <code>newRunID()</code> returns 32-char hex from crypto/rand. If a user passes their own
-            RunID via <code>Config.RunID</code>, we never validate it. Empty string is silently
-            accepted. Empty RunID propagates to every Event's <code>run_id</code> field, breaking
+            <code>newRunID()</code> returns 32-char hex from crypto/rand. If a
+            user passes their own RunID via <code>Config.RunID</code>, we never
+            validate it. Empty string is silently accepted. Empty RunID
+            propagates to every Event's <code>run_id</code> field, breaking
             correlation.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            In <code>NewRecorder</code>: if RunID is provided, validate non-empty and warn (or
-            error) on values that look like they will collide (e.g. all zeros). Empty →
-            auto-generate.
+            In <code>NewRecorder</code>: if RunID is provided, validate
+            non-empty and warn (or error) on values that look like they will
+            collide (e.g. all zeros). Empty → auto-generate.
           </div>
         </div>
 
         <div class="issue issue-important">
           <span class="severity severity-important">Important</span>
-          <h3>Sequence counter is atomic but events can be observed out of order</h3>
+          <h3>
+            Sequence counter is atomic but events can be observed out of order
+          </h3>
           <div class="where">recorder.go:onEvent / AGENTS.md line 65-69</div>
           <p>
-            AGENTS.md says "delivery order is not guaranteed to match event Sequence (sort if
-            needed)" — but the only way to sort is <code>Sequence</code> itself, and Sequence is
-            assigned in lock-step with the event creation, not with the goroutine ordering. The
-            OnEvent callback fires from parallel step goroutines; if the recorder is busy when
-            goroutine A finishes (e.g. holding the lock for goroutine B), goroutine A's
-            <code>onEvent</code> call is delayed. The Sequence is still monotonic in the recorder,
-            but a consumer that sorts by Sequence and then processes in goroutine-launch order will
-            see inversion. AGENTS.md is honest about this but the field name "Sequence" is
-            misleading.
+            AGENTS.md says "delivery order is not guaranteed to match event
+            Sequence (sort if needed)" — but the only way to sort is
+            <code>Sequence</code> itself, and Sequence is assigned in lock-step
+            with the event creation, not with the goroutine ordering. The
+            OnEvent callback fires from parallel step goroutines; if the
+            recorder is busy when goroutine A finishes (e.g. holding the lock
+            for goroutine B), goroutine A's <code>onEvent</code> call is
+            delayed. The Sequence is still monotonic in the recorder, but a
+            consumer that sorts by Sequence and then processes in
+            goroutine-launch order will see inversion. AGENTS.md is honest about
+            this but the field name "Sequence" is misleading.
           </p>
           <div class="callout callout-warning">
             <strong>Watch out</strong>
-            Don't rename "Sequence" — it's load-bearing in the JSON schema. But consider adding
-            <code>RecordedAt time.Time</code> alongside (already present) and clearly document that
-            <em>wall-clock timestamp</em>, not Sequence, is the source of truth for ordering.
+            Don't rename "Sequence" — it's load-bearing in the JSON schema. But
+            consider adding
+            <code>RecordedAt time.Time</code> alongside (already present) and
+            clearly document that <em>wall-clock timestamp</em>, not Sequence,
+            is the source of truth for ordering.
           </div>
         </div>
 
         <div class="issue issue-important">
           <span class="severity severity-important">Important</span>
-          <h3>BenchmarkRetryWithAudit is 1.5 SECONDS (likely test bleed, not real perf)</h3>
+          <h3>
+            BenchmarkRetryWithAudit is 1.5 SECONDS (likely test bleed, not real
+            perf)
+          </h3>
           <div class="where">benchmarks_test.go</div>
           <p>
             All other benchmarks are sub-millisecond.
-            <code>BenchmarkRetryWithAudit-32 = 1,507,983,375 ns/op</code> (1.5s per iteration). The
-            retry test uses real backoff with sleeps, so the benchmark is measuring wall-clock
-            sleep, not the audit overhead. It is useless as a perf signal.
+            <code>BenchmarkRetryWithAudit-32 = 1,507,983,375 ns/op</code> (1.5s
+            per iteration). The retry test uses real backoff with sleeps, so the
+            benchmark is measuring wall-clock sleep, not the audit overhead. It
+            is useless as a perf signal.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Either use a no-op backoff (constant 0 duration) for the benchmark, or split it into
+            Either use a no-op backoff (constant 0 duration) for the benchmark,
+            or split it into
             <code>BenchmarkRetryOverhead</code> (no real backoff) and
             <code>BenchmarkRetryEndToEnd</code>
             (real backoff, not for regression comparison).
@@ -1142,49 +1228,54 @@
           <div class="card">
             <h4>Domain language document</h4>
             <p>
-              <code>docs/DOMAIN_LANGUAGE.md</code> doesn't exist. Project language is in AGENTS.md
-              but mixed with implementation notes. A standalone glossary (Step, Attempt, Event,
-              Recorder, Snapshot, Replay, Report) would make onboarding faster and force naming
+              <code>docs/DOMAIN_LANGUAGE.md</code> doesn't exist. Project
+              language is in AGENTS.md but mixed with implementation notes. A
+              standalone glossary (Step, Attempt, Event, Recorder, Snapshot,
+              Replay, Report) would make onboarding faster and force naming
               consistency.
             </p>
           </div>
           <div class="card">
             <h4>Failure modes doc</h4>
             <p>
-              No central list of "things that can go wrong" (RunID collision, name collision,
-              dropped events, snapshot after Do, Attach after Do). Adding
-              <code>docs/FAILURE_MODES.md</code> would be a 5% effort for 50% fewer support
-              questions.
+              No central list of "things that can go wrong" (RunID collision,
+              name collision, dropped events, snapshot after Do, Attach after
+              Do). Adding
+              <code>docs/FAILURE_MODES.md</code> would be a 5% effort for 50%
+              fewer support questions.
             </p>
           </div>
           <div class="card">
             <h4>Co-locate tests with code owners</h4>
             <p>
-              All 13 test files in the root. As we add a separate <code>export</code> subpackage,
-              consider moving <code>export_test.go</code> alongside. Improves discoverability.
+              All 13 test files in the root. As we add a separate
+              <code>export</code> subpackage, consider moving
+              <code>export_test.go</code> alongside. Improves discoverability.
             </p>
           </div>
           <div class="card">
             <h4>Comment policy: <em>why</em>, not <em>what</em></h4>
             <p>
-              Mostly honored. A few places in <code>recorder.go</code> restate the code in English
-              ("Pop the most recent pending attempt (LIFO)"). Could be tightened, but not a blocker.
+              Mostly honored. A few places in <code>recorder.go</code> restate
+              the code in English ("Pop the most recent pending attempt
+              (LIFO)"). Could be tightened, but not a blocker.
             </p>
           </div>
           <div class="card">
             <h4>Example: actually use the exports</h4>
             <p>
-              The demo should call <code>ExportJSON</code>, <code>ExportMermaid</code>, and
-              <code>Diff</code> against a previously-saved report to show the full surface
-              end-to-end.
+              The demo should call <code>ExportJSON</code>,
+              <code>ExportMermaid</code>, and <code>Diff</code> against a
+              previously-saved report to show the full surface end-to-end.
             </p>
           </div>
           <div class="card">
             <h4>Makefile / Taskfile</h4>
             <p>
-              AGENTS.md lists commands but they're copy-paste. A <code>Taskfile.yml</code> (or
-              <code>justfile</code>, per LarsArtmann convention actually <code>flake.nix</code>)
-              would unify <code>test</code>, <code>lint</code>, <code>cover</code>,
+              AGENTS.md lists commands but they're copy-paste. A
+              <code>Taskfile.yml</code> (or <code>justfile</code>, per
+              LarsArtmann convention actually <code>flake.nix</code>) would
+              unify <code>test</code>, <code>lint</code>, <code>cover</code>,
               <code>bench</code>, <code>demo</code>.
             </p>
           </div>
@@ -1192,16 +1283,17 @@
             <h4>Type-driven errors</h4>
             <p>
               We use sentinel errors (<code>ErrStatusDrift</code>,
-              <code>ErrEventCountMismatch</code>). For v0.2 consider typed error structs with
-              attempt number, step name, and inner cause. Costs ~30 lines, dramatically improves
-              debugging.
+              <code>ErrEventCountMismatch</code>). For v0.2 consider typed error
+              structs with attempt number, step name, and inner cause. Costs ~30
+              lines, dramatically improves debugging.
             </p>
           </div>
           <div class="card">
             <h4>Public API docs on pkg.go.dev</h4>
             <p>
-              Not generated. Run <code>gomarkdoc</code> or write hand-curated doc.go. Currently only
-              <code>doc.go</code> + comments surface on godoc.
+              Not generated. Run <code>gomarkdoc</code> or write hand-curated
+              doc.go. Currently only <code>doc.go</code> + comments surface on
+              godoc.
             </p>
           </div>
         </div>
@@ -1210,8 +1302,8 @@
         <h2 id="next"><span class="num">f</span>Top #25 Next</h2>
 
         <p>
-          Sorted by impact (Pareto). 80% of value comes from the first 8 items; the remaining 17 are
-          depth, polish, and future-proofing.
+          Sorted by impact (Pareto). 80% of value comes from the first 8 items;
+          the remaining 17 are depth, polish, and future-proofing.
         </p>
 
         <table>
@@ -1229,8 +1321,9 @@
               <td><span class="badge badge-critical">Critical</span></td>
               <td>Correctness</td>
               <td>
-                Refactor <code>buildDependentsMapLocked</code> to use pointer identity (not name)
-                for the reverse-dependency graph. Closes the silent name-collision bug.
+                Refactor <code>buildDependentsMapLocked</code> to use pointer
+                identity (not name) for the reverse-dependency graph. Closes the
+                silent name-collision bug.
               </td>
             </tr>
             <tr>
@@ -1238,8 +1331,9 @@
               <td><span class="badge badge-critical">Critical</span></td>
               <td>Hardening</td>
               <td>
-                Add an integration test that runs the example binary under <code>-race</code> with
-                concurrent retries. Guards against the go-workflow backoff race regression.
+                Add an integration test that runs the example binary under
+                <code>-race</code> with concurrent retries. Guards against the
+                go-workflow backoff race regression.
               </td>
             </tr>
             <tr>
@@ -1247,8 +1341,9 @@
               <td><span class="badge badge-high">High</span></td>
               <td>UX</td>
               <td>
-                Validate <code>Config.RunID</code> in <code>New()</code>: auto-generate when empty,
-                warn on malformed input. Prevents silent correlation breakage.
+                Validate <code>Config.RunID</code> in <code>New()</code>:
+                auto-generate when empty, warn on malformed input. Prevents
+                silent correlation breakage.
               </td>
             </tr>
             <tr>
@@ -1256,9 +1351,12 @@
               <td><span class="badge badge-high">High</span></td>
               <td>Testing</td>
               <td>
-                Push coverage 94.7% → 99% by targeting the ~70 uncovered statements. Highest-impact:
-                <code>recordAfterStep</code> nil branch, <code>attach.go</code> wrapper nil path,
-                <code>fromFlowStatus</code> default, <code>export.go</code> write-error paths.
+                Push coverage 94.7% → 99% by targeting the ~70 uncovered
+                statements. Highest-impact:
+                <code>recordAfterStep</code> nil branch,
+                <code>attach.go</code> wrapper nil path,
+                <code>fromFlowStatus</code> default,
+                <code>export.go</code> write-error paths.
               </td>
             </tr>
             <tr>
@@ -1266,8 +1364,9 @@
               <td><span class="badge badge-high">High</span></td>
               <td>Observability</td>
               <td>
-                <code>SlogHandler</code> adapter: emit one <code>slog.Record</code> per event with
-                step name, attempt, duration, status, error. Unlocks native observability pipelines.
+                <code>SlogHandler</code> adapter: emit one
+                <code>slog.Record</code> per event with step name, attempt,
+                duration, status, error. Unlocks native observability pipelines.
               </td>
             </tr>
             <tr>
@@ -1275,9 +1374,9 @@
               <td><span class="badge badge-high">High</span></td>
               <td>Documentation</td>
               <td>
-                Create <code>docs/DOMAIN_LANGUAGE.md</code>. Glossary for Step, Attempt, Event,
-                Recorder, Snapshot, Replay, Report, RunID. One of the highest-leverage doc
-                investments.
+                Create <code>docs/DOMAIN_LANGUAGE.md</code>. Glossary for Step,
+                Attempt, Event, Recorder, Snapshot, Replay, Report, RunID. One
+                of the highest-leverage doc investments.
               </td>
             </tr>
             <tr>
@@ -1285,9 +1384,10 @@
               <td><span class="badge badge-high">High</span></td>
               <td>Testing</td>
               <td>
-                Add a property-based test (rapid or quick) that generates random workflow topologies
-                + attempt result sequences and asserts report invariants: event count = 2×attempt
-                count, error/status coherence, no orphaned steps.
+                Add a property-based test (rapid or quick) that generates random
+                workflow topologies + attempt result sequences and asserts
+                report invariants: event count = 2×attempt count, error/status
+                coherence, no orphaned steps.
               </td>
             </tr>
             <tr>
@@ -1295,9 +1395,10 @@
               <td><span class="badge badge-high">High</span></td>
               <td>CI</td>
               <td>
-                GitHub Action that runs <code>go test -bench=. -benchmem</code> on PRs and posts a
-                perf delta comment. Catches regressions like the broken retry benchmark before
-                merge.
+                GitHub Action that runs
+                <code>go test -bench=. -benchmem</code> on PRs and posts a perf
+                delta comment. Catches regressions like the broken retry
+                benchmark before merge.
               </td>
             </tr>
             <tr>
@@ -1305,8 +1406,9 @@
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Correctness</td>
               <td>
-                Add a test asserting <code>flow.StatusFromError</code> returns the specific strings
-                <code>fromFlowStatus</code> expects. Catches upstream rename breakage.
+                Add a test asserting <code>flow.StatusFromError</code> returns
+                the specific strings <code>fromFlowStatus</code> expects.
+                Catches upstream rename breakage.
               </td>
             </tr>
             <tr>
@@ -1315,8 +1417,8 @@
               <td>Observability</td>
               <td>
                 OpenTelemetry trace correlation: helper to derive RunID from
-                <code>trace.SpanContextFromContext(ctx).TraceID()</code>. Emits OTel events for each
-                attempt boundary.
+                <code>trace.SpanContextFromContext(ctx).TraceID()</code>. Emits
+                OTel events for each attempt boundary.
               </td>
             </tr>
             <tr>
@@ -1324,8 +1426,9 @@
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Benchmarks</td>
               <td>
-                Fix <code>BenchmarkRetryWithAudit</code> to use zero-duration backoff. Currently
-                measures sleep, not overhead. The 1.5s number is a lie.
+                Fix <code>BenchmarkRetryWithAudit</code> to use zero-duration
+                backoff. Currently measures sleep, not overhead. The 1.5s number
+                is a lie.
               </td>
             </tr>
             <tr>
@@ -1333,8 +1436,9 @@
               <td><span class="badge badge-medium">Medium</span></td>
               <td>UX</td>
               <td>
-                Enrich the example to call <code>ExportJSON</code>, <code>ExportMermaid</code>,
-                <code>Diff</code>. Show the full feature surface, not just the report struct.
+                Enrich the example to call <code>ExportJSON</code>,
+                <code>ExportMermaid</code>, <code>Diff</code>. Show the full
+                feature surface, not just the report struct.
               </td>
             </tr>
             <tr>
@@ -1344,8 +1448,8 @@
               <td>
                 Split single package into <code>auditlog</code> (core) +
                 <code>auditlog/export</code> (JSON, NDJSON) +
-                <code>auditlog/diagram</code> (Mermaid, PlantUML, DOT). Mechanical refactor, big
-                readability win.
+                <code>auditlog/diagram</code> (Mermaid, PlantUML, DOT).
+                Mechanical refactor, big readability win.
               </td>
             </tr>
             <tr>
@@ -1353,8 +1457,9 @@
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Metrics</td>
               <td>
-                Prometheus exporter: per-step duration histograms, status transition counters,
-                in-flight attempt gauges. <code>Collect()</code> method on a new type.
+                Prometheus exporter: per-step duration histograms, status
+                transition counters, in-flight attempt gauges.
+                <code>Collect()</code> method on a new type.
               </td>
             </tr>
             <tr>
@@ -1362,10 +1467,11 @@
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Error model</td>
               <td>
-                Replace sentinel errors with typed error structs carrying attempt #, step name, and
-                inner cause.
+                Replace sentinel errors with typed error structs carrying
+                attempt #, step name, and inner cause.
                 <code
-                  >type StepFailedError struct { StepName string; Attempt int; Cause error }</code
+                  >type StepFailedError struct { StepName string; Attempt int;
+                  Cause error }</code
                 >. ~30 lines, dramatic debuggability win.
               </td>
             </tr>
@@ -1374,9 +1480,9 @@
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Documentation</td>
               <td>
-                <code>docs/FAILURE_MODES.md</code>: central list of "things that can go wrong"
-                (RunID collision, name collision, dropped events, snapshot after Do, Attach after
-                Do).
+                <code>docs/FAILURE_MODES.md</code>: central list of "things that
+                can go wrong" (RunID collision, name collision, dropped events,
+                snapshot after Do, Attach after Do).
               </td>
             </tr>
             <tr>
@@ -1384,8 +1490,8 @@
               <td><span class="badge badge-medium">Medium</span></td>
               <td>Testing</td>
               <td>
-                Stress test: 1000-step workflow with all steps retrying under -race. Establish a
-                baseline for "no flake under load."
+                Stress test: 1000-step workflow with all steps retrying under
+                -race. Establish a baseline for "no flake under load."
               </td>
             </tr>
             <tr>
@@ -1393,9 +1499,9 @@
               <td><span class="badge badge-low">Low</span></td>
               <td>UX</td>
               <td>
-                Better <code>go doc</code> output: run <code>gomarkdoc</code> on the package and
-                commit the result, or write hand-curated examples in
-                <code>Example*</code> functions.
+                Better <code>go doc</code> output: run <code>gomarkdoc</code> on
+                the package and commit the result, or write hand-curated
+                examples in <code>Example*</code> functions.
               </td>
             </tr>
             <tr>
@@ -1403,8 +1509,9 @@
               <td><span class="badge badge-low">Low</span></td>
               <td>UX</td>
               <td>
-                PlantUML/DOT visual differentiation for retry/timeout (Mermaid already has it).
-                Shared engine makes this a one-formatter-at-a-time task.
+                PlantUML/DOT visual differentiation for retry/timeout (Mermaid
+                already has it). Shared engine makes this a
+                one-formatter-at-a-time task.
               </td>
             </tr>
             <tr>
@@ -1412,8 +1519,9 @@
               <td><span class="badge badge-low">Low</span></td>
               <td>Documentation</td>
               <td>
-                Move <code>export_test.go</code> into the new <code>auditlog/export</code> package
-                when we split. Co-located tests discover better.
+                Move <code>export_test.go</code> into the new
+                <code>auditlog/export</code> package when we split. Co-located
+                tests discover better.
               </td>
             </tr>
             <tr>
@@ -1421,9 +1529,10 @@
               <td><span class="badge badge-low">Low</span></td>
               <td>Tooling</td>
               <td>
-                Taskfile / flake.nix / justfile for unified <code>test</code>, <code>lint</code>,
-                <code>cover</code>, <code>bench</code>, <code>demo</code> entrypoints. Replaces the
-                copy-paste in AGENTS.md.
+                Taskfile / flake.nix / justfile for unified <code>test</code>,
+                <code>lint</code>, <code>cover</code>, <code>bench</code>,
+                <code>demo</code> entrypoints. Replaces the copy-paste in
+                AGENTS.md.
               </td>
             </tr>
             <tr>
@@ -1431,8 +1540,8 @@
               <td><span class="badge badge-low">Low</span></td>
               <td>Export</td>
               <td>
-                Self-contained HTML report exporter: timeline + DAG + step detail table. We have the
-                template skill; this is a glue job.
+                Self-contained HTML report exporter: timeline + DAG + step
+                detail table. We have the template skill; this is a glue job.
               </td>
             </tr>
             <tr>
@@ -1440,7 +1549,8 @@
               <td><span class="badge badge-low">Low</span></td>
               <td>Export</td>
               <td>
-                WorkflowReport → protobuf or flatbuffers for IPC / gRPC use cases. Not urgent.
+                WorkflowReport → protobuf or flatbuffers for IPC / gRPC use
+                cases. Not urgent.
               </td>
             </tr>
             <tr>
@@ -1448,8 +1558,8 @@
               <td><span class="badge badge-low">Low</span></td>
               <td>Testing</td>
               <td>
-                Sub-workflow composition: deeply nested, sub-workflow with its own retries, error
-                propagation. One test each.
+                Sub-workflow composition: deeply nested, sub-workflow with its
+                own retries, error propagation. One test each.
               </td>
             </tr>
             <tr>
@@ -1457,70 +1567,85 @@
               <td><span class="badge badge-low">Low</span></td>
               <td>Comment hygiene</td>
               <td>
-                Review every comment in <code>recorder.go</code> for "what vs why." A few restate
-                the code. Quick polish, not a blocker.
+                Review every comment in <code>recorder.go</code> for "what vs
+                why." A few restate the code. Quick polish, not a blocker.
               </td>
             </tr>
           </tbody>
         </table>
 
         <!-- g) OPEN QUESTION -->
-        <h2 id="open-question"><span class="num">g</span>My #1 Open Question</h2>
+        <h2 id="open-question">
+          <span class="num">g</span>My #1 Open Question
+        </h2>
 
         <div class="card card-warning">
           <h4>
-            Should we add a <code>LastError</code> (or <code>TransientErrors</code>) field to
-            <code>StepInfo</code> for the forensic use case, or stay minimal?
+            Should we add a <code>LastError</code> (or
+            <code>TransientErrors</code>) field to <code>StepInfo</code> for the
+            forensic use case, or stay minimal?
           </h4>
 
           <p>
-            Today's fix (Error = final outcome only) is the right call for the default semantic. But
-            it <em>does</em> lose information: a user looking at a succeeded step has no fast way to
-            see "this step transiently failed twice before succeeding" without scanning the event
-            stream and filtering for <code>IsAttemptEnd() &amp;&amp; HasError()</code>.
+            Today's fix (Error = final outcome only) is the right call for the
+            default semantic. But it <em>does</em> lose information: a user
+            looking at a succeeded step has no fast way to see "this step
+            transiently failed twice before succeeding" without scanning the
+            event stream and filtering for
+            <code>IsAttemptEnd() &amp;&amp; HasError()</code>.
           </p>
 
-          <p>I see three options and I don't know which is best for this project's audience:</p>
+          <p>
+            I see three options and I don't know which is best for this
+            project's audience:
+          </p>
 
           <ol style="margin: 0.5rem 0 1rem 1.5rem">
             <li>
-              <strong>Stay minimal.</strong> Error = final outcome. Users who want per-attempt
-              history go to the Event stream. Clean, single source of truth. But: extra work for the
-              common "did this step ever fail?" question.
+              <strong>Stay minimal.</strong> Error = final outcome. Users who
+              want per-attempt history go to the Event stream. Clean, single
+              source of truth. But: extra work for the common "did this step
+              ever fail?" question.
             </li>
             <li>
-              <strong>Add <code>TransientErrors []string</code>.</strong> All non-final attempt
-              error messages, in order. Final outcome is still <code>Error</code>. Preserves
-              forensics, doesn't conflate with final error. Cost: ~5 lines, one extra test, one
-              extra JSON field. Slight schema bump (additive only — v0.2.0 is fine).
+              <strong>Add <code>TransientErrors []string</code>.</strong> All
+              non-final attempt error messages, in order. Final outcome is still
+              <code>Error</code>. Preserves forensics, doesn't conflate with
+              final error. Cost: ~5 lines, one extra test, one extra JSON field.
+              Slight schema bump (additive only — v0.2.0 is fine).
             </li>
             <li>
               <strong
-                >Add <code>LastAttempt int</code> + reuse <code>Error</code> for final,
-                <code>AttemptErrors map[int]string</code> for the rest.</strong
+                >Add <code>LastAttempt int</code> + reuse <code>Error</code> for
+                final, <code>AttemptErrors map[int]string</code> for the
+                rest.</strong
               >
-              Most expressive, most schema surface, most complexity. Probably overkill for v0.x.
+              Most expressive, most schema surface, most complexity. Probably
+              overkill for v0.x.
             </li>
           </ol>
 
           <p>
-            What's the right call depends on: who the target users are, whether this library is
-            meant for human-readability (the example) or machine-aggregation (a metrics pipeline),
-            and whether we expect StepInfo to be queried with SQL-like filters. I can't decide this
+            What's the right call depends on: who the target users are, whether
+            this library is meant for human-readability (the example) or
+            machine-aggregation (a metrics pipeline), and whether we expect
+            StepInfo to be queried with SQL-like filters. I can't decide this
             alone — it requires product judgment about audience.
           </p>
 
           <div class="callout callout-warning">
             <strong>My gut</strong>
-            Option 2. <code>TransientErrors []string</code> is additive, cheap, and answers the "did
-            this step ever fail?" question in O(1) JSON lookups. But I'd want to hear from a real
-            user first.
+            Option 2. <code>TransientErrors []string</code> is additive, cheap,
+            and answers the "did this step ever fail?" question in O(1) JSON
+            lookups. But I'd want to hear from a real user first.
           </div>
         </div>
 
         <footer class="footer">
-          Generated 2026-06-18 22:05 · go-workflow-auditlog v0.1.0 · all metrics verified by
-          <code>go test -race -count=1 -coverprofile</code>, <code>go vet ./...</code>, and
+          Generated 2026-06-18 22:05 · go-workflow-auditlog v0.1.0 · all metrics
+          verified by
+          <code>go test -race -count=1 -coverprofile</code>,
+          <code>go vet ./...</code>, and
           <code>golangci-lint run ./...</code>
         </footer>
       </main>
