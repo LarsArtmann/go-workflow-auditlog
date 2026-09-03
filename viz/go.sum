@@ -50,8 +50,8 @@ github.com/larsartmann/go-output v0.35.0 h1:82Oo5GeXIgmh+Ik0apYYmLegC867ZMy9NxEv
 github.com/larsartmann/go-output v0.35.0/go.mod h1:LXQxCRNtrIIWWk2T41zlFQZNuxhKtFENFTIYLPqkX7o=
 github.com/larsartmann/go-output/d2 v0.35.0 h1:3cid8H9y3SZpXzSt7RR9aypZ+g0ig1Y3hKaYHqfr094=
 github.com/larsartmann/go-output/d2 v0.35.0/go.mod h1:1Q9Y3wv1J1nGtEumeyOx1DB3ciyhIyBOEI5VRFDIEaY=
-github.com/larsartmann/go-output/daghtml v0.35.0 h1:tdVR56Da1adXbhq1oZi0qtw+RXHtsyufa0Zj+S69d68=
-github.com/larsartmann/go-output/daghtml v0.35.0/go.mod h1:PMlfYzKRSnRkohhr1RNh8LsbebNE61JKjDx3Vd1uYGM=
+github.com/larsartmann/go-output/daghtml v0.37.0 h1:rXhtSIa5BQbiWIQXyioONUcCD8zX655/JB3ClURTLis=
+github.com/larsartmann/go-output/daghtml v0.37.0/go.mod h1:PMlfYzKRSnRkohhr1RNh8LsbebNE61JKjDx3Vd1uYGM=
 github.com/larsartmann/go-output/delimited v0.35.0 h1:dm84YfKY/P5kjsjL4hPfRY0RSUsk/ehGuKiyLuBcqew=
 github.com/larsartmann/go-output/delimited v0.35.0/go.mod h1:5JboehslW8N68CVEYNsx9eIKT++Lb3kmacKSKypihkE=
 github.com/larsartmann/go-output/escape v0.35.0 h1:LxVlW7aNTq3ljvjjRx38Olj42UP99iwxzBQcejBOxyw=
