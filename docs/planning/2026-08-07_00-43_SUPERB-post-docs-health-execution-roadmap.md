@@ -24,10 +24,10 @@ The project is in ALPHA with 491 tests, 95%+ coverage across 3 modules, and zero
 | Coverage gap closures | None (internal)                                             | Medium            | **None** — test-only                            | ✅ DO       |
 | ADRs                  | Low — documents decisions                                   | Low               | **None** — docs only                            | ✅ DO       |
 | STABILITY.md          | Medium — consumer confidence                                | None              | **None** — docs only                            | ✅ DO       |
-| CLI tool              | Medium — standalone inspection                              | High              | **Medium** — new package, new surface area      | ⚠️ SCOPE    |
-| OTel bridge           | Medium — tracing integration                                | High              | **Medium** — new dependency, new module         | ⚠️ DEFER    |
-| Go 1.27 upgrade       | Low — eliminates experimental flag                          | Low               | **HIGH** — toolchain change, could break CI/nix | ⚠️ DEFER    |
-| Iterator patterns     | Low — ergonomic API                                         | Medium            | **Medium** — API change, breaks consumers       | ⚠️ DEFER    |
+| CLI tool              | Medium — standalone inspection                              | High              | **Medium** — new package, new surface area      | ⚠️ SCOPE     |
+| OTel bridge           | Medium — tracing integration                                | High              | **Medium** — new dependency, new module         | ⚠️ DEFER     |
+| Go 1.27 upgrade       | Low — eliminates experimental flag                          | Low               | **HIGH** — toolchain change, could break CI/nix | ⚠️ DEFER     |
+| Iterator patterns     | Low — ergonomic API                                         | Medium            | **Medium** — API change, breaks consumers       | ⚠️ DEFER     |
 
 ---
 

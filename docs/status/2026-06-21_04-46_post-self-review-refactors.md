@@ -196,33 +196,33 @@ The library went from 2 direct dependencies (go-workflow + backoff) to 12 direct
 
 Sorted by impact/effort ratio (highest first).
 
-| #   | Task                                                                                      | Impact   | Effort | Category |
-| --- | ----------------------------------------------------------------------------------------- | -------- | ------ | -------- |
-| 1   | **Tag v0.2.0 release** — new public fields, API expansion, RunID type, edge-direction fix | Critical | Low    | Release  |
-| 2   | **Add error-path tests for all Write\* methods** — inject failing writers                 | High     | Medium | Testing  |
-| 3   | **Add `WritePlantUMLString` coverage test** — currently 0%                                | High     | Low    | Testing  |
-| 4   | **Add `StepInfo.Type()` method** — expose StepType via method                             | Medium   | Low    | API      |
-| 5   | **Add retry/timeout columns to table** — HasRetry/HasTimeout exist but not in table       | Medium   | Low    | Feature  |
-| 6   | **Push coverage 93.2% → 95%+** — target validateStatusCounts branches                     | Medium   | Medium | Testing  |
-| 7   | **Make table columns configurable** — column selection options                            | Medium   | Medium | Feature  |
-| 8   | **Add diagram layout direction option** — TD vs LR                                        | Low      | Low    | Feature  |
-| 9   | **Add `writeToFile` overwrite protection** — O_EXCL flag                                  | Low      | Low    | Safety   |
-| 10  | **Add integration/round-trip tests** — report → JSON → load → diagram → verify            | Medium   | Medium | Testing  |
-| 11  | **Add cross-format consistency tests** — same report → all diagrams same graph            | Low      | Medium | Testing  |
-| 12  | **Surface name collisions in diagrams** — warn when seen map merges                       | Low      | Medium | UX       |
-| 13  | **Offer `Name(step)` fallback helper** — type name when String() is pointer               | Medium   | Low    | API      |
-| 14  | **Add benchmarks for render paths** — WriteD2, WriteTable, WriteTree on 100+ steps        | Low      | Medium | Perf     |
-| 15  | **Add fuzz tests for diagram ID sanitization**                                            | Low      | Medium | Testing  |
-| 16  | **Add `flake.nix`** — migrate from deprecated justfile                                    | Medium   | Medium | Infra    |
-| 17  | **Add `govulncheck` + `gosec` to CI**                                                     | High     | Low    | Security |
-| 18  | **Document table module `init()` pattern** in AGENTS.md gotchas                           | Low      | Low    | Docs     |
-| 19  | **Add godoc `ExampleX` funcs** for WallClockDurationMs, PeakConcurrency, etc.             | Low      | Low    | Docs     |
-| 20  | **Consider sub-module split** — core (auditlog) + visualization                           | Medium   | High   | Arch     |
-| 21  | **Consider streaming NDJSON export** — write events as captured                           | Low      | High   | Arch     |
-| 22  | **Consider OpenTelemetry span bridge**                                                    | Low      | High   | Feature  |
-| 23  | **Consider HTML dashboard report**                                                        | Medium   | High   | Feature  |
-| 24  | **Consider `go-error-family` adoption**                                                   | Low      | Medium | Arch     |
-| 25  | **Consider branded `StepID` type**                                                        | Low      | Low    | Type     |
+| #  | Task                                                                                      | Impact   | Effort | Category |
+| -- | ----------------------------------------------------------------------------------------- | -------- | ------ | -------- |
+| 1  | **Tag v0.2.0 release** — new public fields, API expansion, RunID type, edge-direction fix | Critical | Low    | Release  |
+| 2  | **Add error-path tests for all Write\* methods** — inject failing writers                 | High     | Medium | Testing  |
+| 3  | **Add `WritePlantUMLString` coverage test** — currently 0%                                | High     | Low    | Testing  |
+| 4  | **Add `StepInfo.Type()` method** — expose StepType via method                             | Medium   | Low    | API      |
+| 5  | **Add retry/timeout columns to table** — HasRetry/HasTimeout exist but not in table       | Medium   | Low    | Feature  |
+| 6  | **Push coverage 93.2% → 95%+** — target validateStatusCounts branches                     | Medium   | Medium | Testing  |
+| 7  | **Make table columns configurable** — column selection options                            | Medium   | Medium | Feature  |
+| 8  | **Add diagram layout direction option** — TD vs LR                                        | Low      | Low    | Feature  |
+| 9  | **Add `writeToFile` overwrite protection** — O_EXCL flag                                  | Low      | Low    | Safety   |
+| 10 | **Add integration/round-trip tests** — report → JSON → load → diagram → verify            | Medium   | Medium | Testing  |
+| 11 | **Add cross-format consistency tests** — same report → all diagrams same graph            | Low      | Medium | Testing  |
+| 12 | **Surface name collisions in diagrams** — warn when seen map merges                       | Low      | Medium | UX       |
+| 13 | **Offer `Name(step)` fallback helper** — type name when String() is pointer               | Medium   | Low    | API      |
+| 14 | **Add benchmarks for render paths** — WriteD2, WriteTable, WriteTree on 100+ steps        | Low      | Medium | Perf     |
+| 15 | **Add fuzz tests for diagram ID sanitization**                                            | Low      | Medium | Testing  |
+| 16 | **Add `flake.nix`** — migrate from deprecated justfile                                    | Medium   | Medium | Infra    |
+| 17 | **Add `govulncheck` + `gosec` to CI**                                                     | High     | Low    | Security |
+| 18 | **Document table module `init()` pattern** in AGENTS.md gotchas                           | Low      | Low    | Docs     |
+| 19 | **Add godoc `ExampleX` funcs** for WallClockDurationMs, PeakConcurrency, etc.             | Low      | Low    | Docs     |
+| 20 | **Consider sub-module split** — core (auditlog) + visualization                           | Medium   | High   | Arch     |
+| 21 | **Consider streaming NDJSON export** — write events as captured                           | Low      | High   | Arch     |
+| 22 | **Consider OpenTelemetry span bridge**                                                    | Low      | High   | Feature  |
+| 23 | **Consider HTML dashboard report**                                                        | Medium   | High   | Feature  |
+| 24 | **Consider `go-error-family` adoption**                                                   | Low      | Medium | Arch     |
+| 25 | **Consider branded `StepID` type**                                                        | Low      | Low    | Type     |
 
 ---
 

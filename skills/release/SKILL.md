@@ -21,11 +21,11 @@ broken sub-module go.mod files. Follow it precisely.
 
 ## Project context
 
-| Module | Import path | Tag format | go.mod file |
-|--------|-------------|------------|-------------|
-| Core | `github.com/larsartmann/go-workflow-auditlog` | `vX.Y.Z` | `./go.mod` |
-| Visualization | `github.com/larsartmann/go-workflow-auditlog/viz` | `viz/vX.Y.Z` | `./viz/go.mod` |
-| Live | `github.com/larsartmann/go-workflow-auditlog/live` | `live/vX.Y.Z` | `./live/go.mod` |
+| Module        | Import path                                        | Tag format    | go.mod file     |
+| ------------- | -------------------------------------------------- | ------------- | --------------- |
+| Core          | `github.com/larsartmann/go-workflow-auditlog`      | `vX.Y.Z`      | `./go.mod`      |
+| Visualization | `github.com/larsartmann/go-workflow-auditlog/viz`  | `viz/vX.Y.Z`  | `./viz/go.mod`  |
+| Live          | `github.com/larsartmann/go-workflow-auditlog/live` | `live/vX.Y.Z` | `./live/go.mod` |
 
 - **Go**: 1.26.5+ (requires `GOEXPERIMENT=jsonv2` for all Go commands)
 - **Stability**: ALPHA (pre-1.0) — breaking changes permitted in minor releases per `STABILITY.md`
@@ -63,11 +63,11 @@ exist, tell the user it's not worth a release yet.
 
 Read `STABILITY.md` to classify the changes, then apply SemVer:
 
-| Bump | When | Example |
-|------|------|---------|
+| Bump                 | When                                                                          | Example         |
+| -------------------- | ----------------------------------------------------------------------------- | --------------- |
 | **PATCH** (`v0.8.2`) | Bug fixes, dep bumps, toolchain/security fixes, additive Evolving API changes | v0.8.1 → v0.8.2 |
-| **MINOR** (`v0.9.0`) | New features, new API additions, breaking changes (permitted in 0.x) | v0.8.2 → v0.9.0 |
-| **MAJOR** (`v1.0.0`) | Post-1.0 breaking changes (not applicable yet) | — |
+| **MINOR** (`v0.9.0`) | New features, new API additions, breaking changes (permitted in 0.x)          | v0.8.2 → v0.9.0 |
+| **MAJOR** (`v1.0.0`) | Post-1.0 breaking changes (not applicable yet)                                | —               |
 
 **Breaking changes in 0.x are MINOR bumps.** The project is ALPHA — breaking
 changes are permitted between minor releases. See `STABILITY.md` for which
@@ -449,6 +449,7 @@ Check whether these need updating for the new release:
 ### 10.3 Release verification summary
 
 Confirm to the user:
+
 - GitHub Release URL
 - All three pkg.go.dev pages render
 - `go get` works for all three modules
@@ -459,19 +460,19 @@ Confirm to the user:
 
 ## Quick Reference: Gotchas
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| `go mod tidy` strips all require blocks | Tags not pushed yet; proxy can't resolve version | Never run tidy before push. Bump versions with `sed`. |
-| Consumer `go get` fails with `unknown revision 000000000000` | Sub-module go.mod has `replace` directive | Remove `replace`. Use real version in `require`. |
-| `go mod tidy` fails on viz/live | go-output's go.mod has broken `replace => ./testhelpers` | Use `go mod tidy -e` (error-tolerant) |
-| goreleaser picks wrong tag | Three tags at same commit; `git describe` returns `live/v*` | Set `GORELEASER_CURRENT_TAG=vX.Y.Z` |
-| goreleaser hooks fail silently | OSS hooks use direct exec, not shell | Wrap hooks in `sh -c "..."` |
-| goreleaser "dirty state" | Auto-commit daemon hasn't committed | Wait for daemon, or use `gh release create` |
-| `sum.golang.org` returns 500 | Checksum DB propagation delay | Wait; test with `GOSUMDB=off` |
-| Local tags break workspace builds | go.work uses filesystem, not tags; local tags force proxy resolution | Don't create tags until ready to push |
-| CHANGELOG missing a release section | Ad-hoc release bypassed CHANGELOG | Always update CHANGELOG in Phase 2 |
-| Pre-commit hook fails on missing binaries | dprint, pnpm, tsc, etc. not in nix devShell | Use `--no-verify` (infra failures only, not code) |
-| `nix run .#check` fails pre-push | Tests sub-modules in GOWORK=off (needs published tag) | Verify in workspace mode pre-push; run nix check post-push |
+| Issue                                                        | Cause                                                                | Fix                                                        |
+| ------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `go mod tidy` strips all require blocks                      | Tags not pushed yet; proxy can't resolve version                     | Never run tidy before push. Bump versions with `sed`.      |
+| Consumer `go get` fails with `unknown revision 000000000000` | Sub-module go.mod has `replace` directive                            | Remove `replace`. Use real version in `require`.           |
+| `go mod tidy` fails on viz/live                              | go-output's go.mod has broken `replace => ./testhelpers`             | Use `go mod tidy -e` (error-tolerant)                      |
+| goreleaser picks wrong tag                                   | Three tags at same commit; `git describe` returns `live/v*`          | Set `GORELEASER_CURRENT_TAG=vX.Y.Z`                        |
+| goreleaser hooks fail silently                               | OSS hooks use direct exec, not shell                                 | Wrap hooks in `sh -c "..."`                                |
+| goreleaser "dirty state"                                     | Auto-commit daemon hasn't committed                                  | Wait for daemon, or use `gh release create`                |
+| `sum.golang.org` returns 500                                 | Checksum DB propagation delay                                        | Wait; test with `GOSUMDB=off`                              |
+| Local tags break workspace builds                            | go.work uses filesystem, not tags; local tags force proxy resolution | Don't create tags until ready to push                      |
+| CHANGELOG missing a release section                          | Ad-hoc release bypassed CHANGELOG                                    | Always update CHANGELOG in Phase 2                         |
+| Pre-commit hook fails on missing binaries                    | dprint, pnpm, tsc, etc. not in nix devShell                          | Use `--no-verify` (infra failures only, not code)          |
+| `nix run .#check` fails pre-push                             | Tests sub-modules in GOWORK=off (needs published tag)                | Verify in workspace mode pre-push; run nix check post-push |
 
 ---
 

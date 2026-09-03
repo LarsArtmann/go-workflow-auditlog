@@ -1,8 +1,8 @@
 # Status Report — go-workflow-auditlog Modularization
 
-**Date:** 2026-07-22 11:12 CEST  
-**Branch:** `modularize/core-viz-split`  
-**Snapshot:** Manual verification run after core-viz module split.  
+**Date:** 2026-07-22 11:12 CEST\
+**Branch:** `modularize/core-viz-split`\
+**Snapshot:** Manual verification run after core-viz module split.\
 **Prepared by:** Crush (automated assistant)
 
 > **Update 2026-07-24:** the module split was merged to master. The release

@@ -6,13 +6,13 @@
 
 ## Build & Quality Gates
 
-| Gate        | Status        | Detail                                         |
-| ----------- | ------------- | ---------------------------------------------- |
-| Build       | ✅ PASS       | `go build ./...` exits 0                       |
-| Tests       | ✅ PASS       | 164 pass, 0 fail (`-race`)                     |
-| Coverage    | ✅ 93.1%      | auditlog package                               |
-| Lint        | ✅ 0 issues   | `golangci-lint run ./...`                      |
-| Vet         | ✅ PASS       | `go vet ./...` exits 0                         |
+| Gate        | Status       | Detail                                         |
+| ----------- | ------------ | ---------------------------------------------- |
+| Build       | ✅ PASS      | `go build ./...` exits 0                       |
+| Tests       | ✅ PASS      | 164 pass, 0 fail (`-race`)                     |
+| Coverage    | ✅ 93.1%     | auditlog package                               |
+| Lint        | ✅ 0 issues  | `golangci-lint run ./...`                      |
+| Vet         | ✅ PASS      | `go vet ./...` exits 0                         |
 | LSP Warning | ⚠️ PERSISTENT | `d2.go:9` typecheck warning (see Fucked Up #2) |
 
 **Codebase**: 38 source files, 14 test files, ~7,032 LOC total.
@@ -188,33 +188,33 @@ The project **builds and tests fine** (the MVS resolution works), but `gopls`/th
 
 Ranked by impact/effort ratio (highest first):
 
-| #   | Task                                                                                                                                                                               | Impact | Effort | Category  |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | --------- |
-| 1   | **Fix edge direction in diagrams** — reverse to match execution flow (dependency → step) so all visual representations agree                                                       | HIGH   | LOW    | Bug fix   |
-| 2   | **Add edge-direction test assertions** — prevent regression of #1                                                                                                                  | HIGH   | LOW    | Testing   |
-| 3   | **Fill CHANGELOG [Unreleased]** — document D2/table/tree additions, color consolidation, refactors                                                                                 | HIGH   | LOW    | Docs      |
-| 4   | **Make D2 title configurable or remove it** — either let caller set title or drop the hardcoded `"Workflow DAG"` for consistency with other diagrams                               | MED    | LOW    | Polish    |
-| 5   | **Add `Export*` methods to `WorkflowReport`** — so reports from `ReplayEvents` can write to files without an `Auditor`                                                             | HIGH   | LOW    | API       |
-| 6   | **Rename JSON/NDJSON methods for consistency** — `WriteReportJSON` → `WriteJSON`, `ExportToFile` → `ExportJSON`, `ExportEventsToNDJSON` → `ExportNDJSON` (keep deprecated aliases) | MED    | LOW    | API       |
-| 7   | **Add `Write*String` methods to `Auditor`** — mirror the 7 `WorkflowReport.Write*String` methods                                                                                   | MED    | LOW    | API       |
-| 8   | **Resolve go-output version skew** — pin all sub-modules to compatible version, eliminate LSP warning                                                                              | HIGH   | MED    | Infra     |
-| 9   | **Create `FEATURES.md`** — honest feature inventory by status (DONE/PARTIALLY/PLANNED)                                                                                             | MED    | LOW    | Docs      |
-| 10  | **Create `TODO_LIST.md`** — actionable short/mid-term tasks from this report                                                                                                       | MED    | LOW    | Docs      |
-| 11  | **Add diagram direction option** — let caller choose TD vs LR for Mermaid/D2/Graphviz                                                                                              | LOW    | LOW    | Feature   |
-| 12  | **Make table columns configurable** — `WriteTable` currently hardcodes 5 columns                                                                                                   | MED    | MED    | Feature   |
-| 13  | **Add `WriteHTMLTable` dedicated method** — currently accessible only via `WriteTable(w, FormatHTML, opts)` but not as a dedicated method                                          | LOW    | LOW    | API       |
-| 14  | **Split `tree.go` into `tree.go` + `htmltree.go`** — HTMLTree breaks the one-format-per-file convention                                                                            | LOW    | LOW    | Structure |
-| 15  | **Add `flake.nix`** — migrate from deprecated justfile to nix flake build automation                                                                                               | MED    | MED    | Infra     |
-| 16  | **Add `docs/DOMAIN_LANGUAGE.md`** — DDD glossary for audit/log/workflow vocabulary                                                                                                 | LOW    | LOW    | Docs      |
-| 17  | **Consider `go-error-family` adoption** — structured, classified errors per linter recommendation                                                                                  | LOW    | MED    | Arch      |
-| 18  | **Add `writeToFile` overwrite protection** — `O_EXCL` flag or "file exists" error                                                                                                  | LOW    | LOW    | Safety    |
-| 19  | **Surface name collisions in diagrams** — when two steps share `String()`, the `seen` map silently merges them; should warn                                                        | LOW    | MED    | UX        |
-| 20  | **Add retry/timeout columns to table export** — `HasRetry` and `HasTimeout` are in `StepInfo` but not in the table                                                                 | LOW    | LOW    | Feature   |
-| 21  | **Add `StepInfo.Type()` method** — expose `StepType` via a method for consistency with `Status.Label()` / `Icon()` / `Color()`                                                     | LOW    | LOW    | API       |
-| 22  | **Consider HTML report generation** — a self-contained HTML dashboard combining table + diagram + tree                                                                             | MED    | HIGH   | Feature   |
-| 23  | **Add benchmark for large workflows** — 100+ steps, measure report build + export latency                                                                                          | LOW    | MED    | Perf      |
-| 24  | **Add ` ROADMAP.md`** — long-term direction (HTML reports, CLI tool, OpenTelemetry integration)                                                                                    | LOW    | LOW    | Docs      |
-| 25  | **Consider streaming export** — for very large event streams, write events as they're captured rather than buffering all in memory                                                 | LOW    | HIGH   | Arch      |
+| #  | Task                                                                                                                                                                               | Impact | Effort | Category  |
+| -- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | --------- |
+| 1  | **Fix edge direction in diagrams** — reverse to match execution flow (dependency → step) so all visual representations agree                                                       | HIGH   | LOW    | Bug fix   |
+| 2  | **Add edge-direction test assertions** — prevent regression of #1                                                                                                                  | HIGH   | LOW    | Testing   |
+| 3  | **Fill CHANGELOG [Unreleased]** — document D2/table/tree additions, color consolidation, refactors                                                                                 | HIGH   | LOW    | Docs      |
+| 4  | **Make D2 title configurable or remove it** — either let caller set title or drop the hardcoded `"Workflow DAG"` for consistency with other diagrams                               | MED    | LOW    | Polish    |
+| 5  | **Add `Export*` methods to `WorkflowReport`** — so reports from `ReplayEvents` can write to files without an `Auditor`                                                             | HIGH   | LOW    | API       |
+| 6  | **Rename JSON/NDJSON methods for consistency** — `WriteReportJSON` → `WriteJSON`, `ExportToFile` → `ExportJSON`, `ExportEventsToNDJSON` → `ExportNDJSON` (keep deprecated aliases) | MED    | LOW    | API       |
+| 7  | **Add `Write*String` methods to `Auditor`** — mirror the 7 `WorkflowReport.Write*String` methods                                                                                   | MED    | LOW    | API       |
+| 8  | **Resolve go-output version skew** — pin all sub-modules to compatible version, eliminate LSP warning                                                                              | HIGH   | MED    | Infra     |
+| 9  | **Create `FEATURES.md`** — honest feature inventory by status (DONE/PARTIALLY/PLANNED)                                                                                             | MED    | LOW    | Docs      |
+| 10 | **Create `TODO_LIST.md`** — actionable short/mid-term tasks from this report                                                                                                       | MED    | LOW    | Docs      |
+| 11 | **Add diagram direction option** — let caller choose TD vs LR for Mermaid/D2/Graphviz                                                                                              | LOW    | LOW    | Feature   |
+| 12 | **Make table columns configurable** — `WriteTable` currently hardcodes 5 columns                                                                                                   | MED    | MED    | Feature   |
+| 13 | **Add `WriteHTMLTable` dedicated method** — currently accessible only via `WriteTable(w, FormatHTML, opts)` but not as a dedicated method                                          | LOW    | LOW    | API       |
+| 14 | **Split `tree.go` into `tree.go` + `htmltree.go`** — HTMLTree breaks the one-format-per-file convention                                                                            | LOW    | LOW    | Structure |
+| 15 | **Add `flake.nix`** — migrate from deprecated justfile to nix flake build automation                                                                                               | MED    | MED    | Infra     |
+| 16 | **Add `docs/DOMAIN_LANGUAGE.md`** — DDD glossary for audit/log/workflow vocabulary                                                                                                 | LOW    | LOW    | Docs      |
+| 17 | **Consider `go-error-family` adoption** — structured, classified errors per linter recommendation                                                                                  | LOW    | MED    | Arch      |
+| 18 | **Add `writeToFile` overwrite protection** — `O_EXCL` flag or "file exists" error                                                                                                  | LOW    | LOW    | Safety    |
+| 19 | **Surface name collisions in diagrams** — when two steps share `String()`, the `seen` map silently merges them; should warn                                                        | LOW    | MED    | UX        |
+| 20 | **Add retry/timeout columns to table export** — `HasRetry` and `HasTimeout` are in `StepInfo` but not in the table                                                                 | LOW    | LOW    | Feature   |
+| 21 | **Add `StepInfo.Type()` method** — expose `StepType` via a method for consistency with `Status.Label()` / `Icon()` / `Color()`                                                     | LOW    | LOW    | API       |
+| 22 | **Consider HTML report generation** — a self-contained HTML dashboard combining table + diagram + tree                                                                             | MED    | HIGH   | Feature   |
+| 23 | **Add benchmark for large workflows** — 100+ steps, measure report build + export latency                                                                                          | LOW    | MED    | Perf      |
+| 24 | **Add `ROADMAP.md`** — long-term direction (HTML reports, CLI tool, OpenTelemetry integration)                                                                                     | LOW    | LOW    | Docs      |
+| 25 | **Consider streaming export** — for very large event streams, write events as they're captured rather than buffering all in memory                                                 | LOW    | HIGH   | Arch      |
 
 ---
 

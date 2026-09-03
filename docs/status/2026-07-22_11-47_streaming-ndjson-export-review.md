@@ -1,7 +1,7 @@
 # Status Report: Streaming NDJSON Export Option
 
-**Date:** 2026-07-22 11:47  
-**Session Scope:** Implement streaming NDJSON export (`NDJSONStreamer`) in core module  
+**Date:** 2026-07-22 11:47\
+**Session Scope:** Implement streaming NDJSON export (`NDJSONStreamer`) in core module\
 **Status:** FUNCTIONAL BUT INCOMPLETE — ships working code, misses tests/docs/features
 
 > **Update 2026-07-24:** the "INCOMPLETE" status was resolved later the same

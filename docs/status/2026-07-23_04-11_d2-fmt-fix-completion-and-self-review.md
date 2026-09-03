@@ -1,6 +1,6 @@
 # Status: D2-Fmt Fix Completion & Brutal Self-Review
 
-**Date:** 2026-07-23 04:11  
+**Date:** 2026-07-23 04:11\
 **Session goal:** Fix `d2-fmt` buildflow failures on `dag.d2`, audit all renderers, tag go-output, wire into auditlog.
 
 > **Update 2026-07-24:** the v0.31.1 tags mentioned in §a-5 below **were

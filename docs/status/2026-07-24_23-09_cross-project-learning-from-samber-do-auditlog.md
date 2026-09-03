@@ -1,7 +1,7 @@
 # Status Report: Cross-Project Learning from samber-do-auditlog
 
-**Date**: 2026-07-24 23:09  
-**Session goal**: Learn from `samber-do-auditlog` and apply improvements to `go-workflow-auditlog`  
+**Date**: 2026-07-24 23:09\
+**Session goal**: Learn from `samber-do-auditlog` and apply improvements to `go-workflow-auditlog`\
 **Outcome**: 5 features ported, all tests green, but significant gaps remain
 
 > **Update 2026-07-25:** the §E "Immediate" action items shipped in the
@@ -158,58 +158,58 @@ Nothing is broken — all tests pass, vet is clean. But these are mistakes/regre
 
 ## F) Up to 50 Things to Get Done Next
 
-| #   | Task                                                                      | Priority | Effort |
-| --- | ------------------------------------------------------------------------- | -------- | ------ |
-| 1   | Run `golangci-lint run` on all 3 modules and fix issues                   | P0       | S      |
-| 2   | Add export buttons (JSON/NDJSON/HTML) to live dashboard UI                | P0       | M      |
-| 3   | Update FEATURES.md with CSV/TSV, CORS, prefix, export endpoints           | P0       | S      |
-| 4   | Update README.md export format table + live dashboard features            | P0       | S      |
-| 5   | Add CHANGELOG.md entry for this session                                   | P0       | S      |
-| 6   | Fix CORS API: empty = disabled, remove "off" hack                         | P1       | S      |
-| 7   | Fix empty Example function to be real runnable example                    | P1       | S      |
-| 8   | Remove dead `dashboardProvider` field from Server struct                  | P1       | S      |
-| 9   | Add `BenchmarkWriteCSV_LargeReport` benchmark                             | P1       | S      |
-| 10  | Add viz-side CSV test (verify type alias exposes methods)                 | P1       | S      |
-| 11  | Update AGENTS.md Live Data Flow section to mention export endpoints       | P1       | S      |
-| 12  | Add integration test: real workflow → live server → export endpoint       | P1       | M      |
-| 13  | Re-run benchmarks with count=3 for proper baseline                        | P1       | M      |
-| 14  | Add JSON Schema generation (`schema.go` + `cmd/genschema`)                | P1       | L      |
-| 15  | Add `MigrateReport()` programmatic migration                              | P1       | L      |
-| 16  | Build CLI tool (`cmd/auditlog`)                                           | P2       | L      |
-| 17  | Extract design tokens to shared constant                                  | P2       | S      |
-| 18  | Add `docs/examples/` directory (OTel, Prometheus, WebSocket)              | P2       | M      |
-| 19  | Add schema-drift test (Go types vs JSON Schema)                           | P2       | M      |
-| 20  | Fix `normalizePrefix` double-slash edge case                              | P2       | S      |
-| 21  | Add CORS test for non-API routes (dashboard should NOT have CORS)         | P2       | S      |
-| 22  | Add OPTIONS test for export endpoints specifically                        | P2       | S      |
-| 23  | Document `CORSAllowedOrigins` in README quick-start                       | P2       | S      |
-| 24  | Add `ExportFilteredToFile` convenience method                             | P2       | S      |
-| 25  | Consider `WriteCSVColumns` option for column selection (like table)       | P3       | M      |
-| 26  | Add prefix-aware health/export URL generation helper                      | P3       | S      |
-| 27  | Add live demo `--prefix` flag                                             | P3       | S      |
-| 28  | Add CSV with dependencies as full StepRef (not just Name)                 | P3       | S      |
-| 29  | Add TSV content-type negotiation test                                     | P3       | S      |
-| 30  | Add `live.Server.URL()` helper method (returns full base URL)             | P3       | S      |
-| 31  | Add websocket streaming example doc                                       | P3       | M      |
-| 32  | Add Prometheus metrics bridge example                                     | P3       | M      |
-| 33  | Add OTel trace bridge example                                             | P3       | M      |
-| 34  | Consider rate-limiting on export endpoints                                | P3       | M      |
-| 35  | Add max-step-count guard for CSV (avoid OOM on huge reports)              | P3       | S      |
-| 36  | Add `Report.Stats()` method for quick summary (like CLI stats command)    | P3       | S      |
-| 37  | Add `WorkflowReport.Diff` CLI documentation                               | P3       | S      |
-| 38  | Add `cmd/genschema` to `flake.nix` devShell                               | P3       | S      |
-| 39  | Add pre-commit hook check for schema drift                                | P3       | S      |
-| 40  | Add `nix run .#auditlog` flake app for CLI                                | P3       | S      |
-| 41  | Add coverage gate to CI workflow                                          | P3       | S      |
-| 42  | Add `STABILITY.md` JSON Schema Versioning section                         | P3       | S      |
-| 43  | Add `docs/DOMAIN_LANGUAGE.md` update for new terms (CORS, prefix, export) | P3       | S      |
-| 44  | Add `CONTRIBUTING.md` mention of CSV export                               | P3       | S      |
-| 45  | Consider CSV escaping tests for step names with commas/quotes             | P3       | S      |
-| 46  | Add fuzz test for CSV injection (formula injection via step names)        | P3       | M      |
-| 47  | Add `live.Config.Addr()` validation (reject invalid addresses early)      | P3       | S      |
-| 48  | Add graceful SSE disconnect on server shutdown                            | P3       | M      |
-| 49  | Add request logging middleware for live server                            | P3       | S      |
-| 50  | Add `docs/status/INDEX.md` entry for this report                          | P3       | S      |
+| #  | Task                                                                      | Priority | Effort |
+| -- | ------------------------------------------------------------------------- | -------- | ------ |
+| 1  | Run `golangci-lint run` on all 3 modules and fix issues                   | P0       | S      |
+| 2  | Add export buttons (JSON/NDJSON/HTML) to live dashboard UI                | P0       | M      |
+| 3  | Update FEATURES.md with CSV/TSV, CORS, prefix, export endpoints           | P0       | S      |
+| 4  | Update README.md export format table + live dashboard features            | P0       | S      |
+| 5  | Add CHANGELOG.md entry for this session                                   | P0       | S      |
+| 6  | Fix CORS API: empty = disabled, remove "off" hack                         | P1       | S      |
+| 7  | Fix empty Example function to be real runnable example                    | P1       | S      |
+| 8  | Remove dead `dashboardProvider` field from Server struct                  | P1       | S      |
+| 9  | Add `BenchmarkWriteCSV_LargeReport` benchmark                             | P1       | S      |
+| 10 | Add viz-side CSV test (verify type alias exposes methods)                 | P1       | S      |
+| 11 | Update AGENTS.md Live Data Flow section to mention export endpoints       | P1       | S      |
+| 12 | Add integration test: real workflow → live server → export endpoint       | P1       | M      |
+| 13 | Re-run benchmarks with count=3 for proper baseline                        | P1       | M      |
+| 14 | Add JSON Schema generation (`schema.go` + `cmd/genschema`)                | P1       | L      |
+| 15 | Add `MigrateReport()` programmatic migration                              | P1       | L      |
+| 16 | Build CLI tool (`cmd/auditlog`)                                           | P2       | L      |
+| 17 | Extract design tokens to shared constant                                  | P2       | S      |
+| 18 | Add `docs/examples/` directory (OTel, Prometheus, WebSocket)              | P2       | M      |
+| 19 | Add schema-drift test (Go types vs JSON Schema)                           | P2       | M      |
+| 20 | Fix `normalizePrefix` double-slash edge case                              | P2       | S      |
+| 21 | Add CORS test for non-API routes (dashboard should NOT have CORS)         | P2       | S      |
+| 22 | Add OPTIONS test for export endpoints specifically                        | P2       | S      |
+| 23 | Document `CORSAllowedOrigins` in README quick-start                       | P2       | S      |
+| 24 | Add `ExportFilteredToFile` convenience method                             | P2       | S      |
+| 25 | Consider `WriteCSVColumns` option for column selection (like table)       | P3       | M      |
+| 26 | Add prefix-aware health/export URL generation helper                      | P3       | S      |
+| 27 | Add live demo `--prefix` flag                                             | P3       | S      |
+| 28 | Add CSV with dependencies as full StepRef (not just Name)                 | P3       | S      |
+| 29 | Add TSV content-type negotiation test                                     | P3       | S      |
+| 30 | Add `live.Server.URL()` helper method (returns full base URL)             | P3       | S      |
+| 31 | Add websocket streaming example doc                                       | P3       | M      |
+| 32 | Add Prometheus metrics bridge example                                     | P3       | M      |
+| 33 | Add OTel trace bridge example                                             | P3       | M      |
+| 34 | Consider rate-limiting on export endpoints                                | P3       | M      |
+| 35 | Add max-step-count guard for CSV (avoid OOM on huge reports)              | P3       | S      |
+| 36 | Add `Report.Stats()` method for quick summary (like CLI stats command)    | P3       | S      |
+| 37 | Add `WorkflowReport.Diff` CLI documentation                               | P3       | S      |
+| 38 | Add `cmd/genschema` to `flake.nix` devShell                               | P3       | S      |
+| 39 | Add pre-commit hook check for schema drift                                | P3       | S      |
+| 40 | Add `nix run .#auditlog` flake app for CLI                                | P3       | S      |
+| 41 | Add coverage gate to CI workflow                                          | P3       | S      |
+| 42 | Add `STABILITY.md` JSON Schema Versioning section                         | P3       | S      |
+| 43 | Add `docs/DOMAIN_LANGUAGE.md` update for new terms (CORS, prefix, export) | P3       | S      |
+| 44 | Add `CONTRIBUTING.md` mention of CSV export                               | P3       | S      |
+| 45 | Consider CSV escaping tests for step names with commas/quotes             | P3       | S      |
+| 46 | Add fuzz test for CSV injection (formula injection via step names)        | P3       | M      |
+| 47 | Add `live.Config.Addr()` validation (reject invalid addresses early)      | P3       | S      |
+| 48 | Add graceful SSE disconnect on server shutdown                            | P3       | M      |
+| 49 | Add request logging middleware for live server                            | P3       | S      |
+| 50 | Add `docs/status/INDEX.md` entry for this report                          | P3       | S      |
 
 ---
 

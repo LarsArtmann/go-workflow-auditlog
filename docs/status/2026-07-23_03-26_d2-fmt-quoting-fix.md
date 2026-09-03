@@ -1,7 +1,7 @@
 # Status: D2 Diagram Syntax Quoting Fix
 
-**Date:** 2026-07-23 03:26  
-**Session Scope:** Fix `d2-fmt` failures caused by invalid D2 output from go-output's D2 renderer  
+**Date:** 2026-07-23 03:26\
+**Session Scope:** Fix `d2-fmt` failures caused by invalid D2 output from go-output's D2 renderer\
 **Overall Status:** FIX COMPLETE, locally verified — **BLOCKED on go-output publish + version bump**
 
 > **Update 2026-07-24:** the go-output fix was committed (`d91cc22`)

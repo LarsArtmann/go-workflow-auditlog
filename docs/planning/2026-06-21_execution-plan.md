@@ -20,30 +20,30 @@ Reports made claims that are **already resolved** as of HEAD `4849d34`:
 
 ## Confirmed open issues (this plan addresses these)
 
-| #   | Issue                                           | Severity        | Verified location              |
-| --- | ----------------------------------------------- | --------------- | ------------------------------ |
-| 1   | CHANGELOG [Unreleased] empty                    | Critical        | CHANGELOG.md:8-16              |
-| 2   | Edge direction diagrams ≠ tree                  | High bug        | diagram.go:67 vs tree.go:56    |
-| 3   | No edge-direction test assertions               | High            | tests only check "edge exists" |
-| 4   | Duration() in diff.go not report.go             | Medium cohesion | diff.go:110                    |
-| 5   | D2 title hardcoded, others none                 | Medium polish   | d2.go:50                       |
-| 6   | No Write\*String on Auditor                     | Medium API      | plugin.go                      |
-| 7   | No Export\* on WorkflowReport                   | Medium API      | report.go                      |
-| 8   | FEATURES.md / TODO_LIST.md / ROADMAP.md missing | Critical docs   | repo root                      |
-| 9   | README missing 3-duration explainer             | Low docs        | README.md                      |
+| # | Issue                                           | Severity        | Verified location              |
+| - | ----------------------------------------------- | --------------- | ------------------------------ |
+| 1 | CHANGELOG [Unreleased] empty                    | Critical        | CHANGELOG.md:8-16              |
+| 2 | Edge direction diagrams ≠ tree                  | High bug        | diagram.go:67 vs tree.go:56    |
+| 3 | No edge-direction test assertions               | High            | tests only check "edge exists" |
+| 4 | Duration() in diff.go not report.go             | Medium cohesion | diff.go:110                    |
+| 5 | D2 title hardcoded, others none                 | Medium polish   | d2.go:50                       |
+| 6 | No Write\*String on Auditor                     | Medium API      | plugin.go                      |
+| 7 | No Export\* on WorkflowReport                   | Medium API      | report.go                      |
+| 8 | FEATURES.md / TODO_LIST.md / ROADMAP.md missing | Critical docs   | repo root                      |
+| 9 | README missing 3-duration explainer             | Low docs        | README.md                      |
 
 ## Tasks — sorted by impact/effort/customer-value
 
 ### Tier P0 — Critical (execute now)
 
-| ID  | Task                                        | Impact   | Effort | Est |
-| --- | ------------------------------------------- | -------- | ------ | --- |
-| T1  | Populate CHANGELOG [Unreleased]             | Critical | Low    | 10m |
-| T2  | Fix diagram edge direction → execution flow | High     | Low    | 6m  |
-| T3  | Add edge-direction regression tests         | High     | Low    | 12m |
-| T4  | Create FEATURES.md                          | High     | Low    | 12m |
-| T5  | Create TODO_LIST.md                         | High     | Low    | 10m |
-| T6  | Create ROADMAP.md                           | Medium   | Low    | 8m  |
+| ID | Task                                        | Impact   | Effort | Est |
+| -- | ------------------------------------------- | -------- | ------ | --- |
+| T1 | Populate CHANGELOG [Unreleased]             | Critical | Low    | 10m |
+| T2 | Fix diagram edge direction → execution flow | High     | Low    | 6m  |
+| T3 | Add edge-direction regression tests         | High     | Low    | 12m |
+| T4 | Create FEATURES.md                          | High     | Low    | 12m |
+| T5 | Create TODO_LIST.md                         | High     | Low    | 10m |
+| T6 | Create ROADMAP.md                           | Medium   | Low    | 8m  |
 
 ### Tier P1 — High value (execute now)
 

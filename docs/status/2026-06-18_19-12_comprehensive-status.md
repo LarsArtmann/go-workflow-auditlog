@@ -100,7 +100,7 @@ Built over 3 sessions from scratch. 5,233 LOC (16 source files + 11 test files),
 - **Fuzz tests** — sibling has 3 fuzz targets (HTML XSS, migration, diagram escaping). None here.
 - **OpenTelemetry bridge** — `contrib/otel` exists in go-workflow; no integration.
 - **Migration/schema versioning** — sibling has `MigrateReport` for v0.1→v0.2. No schema migration path here (schema is v0.1.0, no prior versions to migrate from).
-- **` FEATURES.md` / `TODO_LIST.md` / `CHANGELOG.md` / `STABILITY.md`** — not written.
+- **`FEATURES.md` / `TODO_LIST.md` / `CHANGELOG.md` / `STABILITY.md`** — not written.
 - **`flake.nix` devShell** — sibling has Nix flake; this project has none.
 - **Coverage gate at 95%** — CI gate is at 90%, sibling is at 95%.
 
@@ -149,33 +149,33 @@ Built over 3 sessions from scratch. 5,233 LOC (16 source files + 11 test files),
 
 ## f) Top #25 Things to Get Done Next
 
-| #   | Task                                                               | Impact | Effort | Priority |
-| --- | ------------------------------------------------------------------ | ------ | ------ | -------- |
-| 1   | Fix `go.mod` go directive to `1.23`                                | High   | 1min   | P0       |
-| 2   | Add `WritePlantUMLString` test (0% coverage)                       | Medium | 5min   | P0       |
-| 3   | Write `CHANGELOG.md` for v0.1.0                                    | High   | 15min  | P0       |
-| 4   | Cut v0.1.0 git tag + release                                       | High   | 5min   | P0       |
-| 5   | Add `FEATURES.md` inventory                                        | Medium | 15min  | P1       |
-| 6   | Add `TODO_LIST.md` from this report                                | Medium | 10min  | P1       |
-| 7   | Add fuzz test for Mermaid XSS                                      | Medium | 30min  | P1       |
-| 8   | Add fuzz test for replay integrity                                 | Medium | 30min  | P1       |
-| 9   | Cache `stepTypeName` reflection results                            | Medium | 15min  | P1       |
-| 10  | Add full lifecycle integration test                                | Medium | 30min  | P1       |
-| 11  | Consolidate `sortByName` usage (remove duplication)                | Low    | 10min  | P1       |
-| 12  | Fix `statusClass` to cover `StepStatusRunning`                     | Low    | 5min   | P1       |
-| 13  | Add `go mod verify` to CI                                          | Low    | 5min   | P2       |
-| 14  | Raise coverage gate from 90% to 95%                                | Low    | 30min  | P2       |
-| 15  | Add error-path tests (`ReadEvents` oversized, `writeToFile` close) | Low    | 20min  | P2       |
-| 16  | Add `STABILITY.md`                                                 | Low    | 10min  | P2       |
-| 17  | Port HTML visualization from samber-do                             | High   | 2-4h   | P2       |
-| 18  | Add `flake.nix` devShell                                           | Medium | 30min  | P2       |
-| 19  | Split `ClassAssign` out of `diagramFormatter` interface            | Low    | 20min  | P2       |
-| 20  | Add `go generate` support if templ is added                        | Low    | 15min  | P3       |
-| 21  | Add OTel bridge example                                            | Medium | 1h     | P3       |
-| 22  | Add Mermaid edge labels ("depends on")                             | Low    | 15min  | P3       |
-| 23  | Add conditional branch (`If`/`Switch`) visualization               | Low    | 30min  | P3       |
-| 24  | Add `Contributing.md`                                              | Low    | 10min  | P3       |
-| 25  | Add `Code of Conduct`                                              | Low    | 5min   | P3       |
+| #  | Task                                                               | Impact | Effort | Priority |
+| -- | ------------------------------------------------------------------ | ------ | ------ | -------- |
+| 1  | Fix `go.mod` go directive to `1.23`                                | High   | 1min   | P0       |
+| 2  | Add `WritePlantUMLString` test (0% coverage)                       | Medium | 5min   | P0       |
+| 3  | Write `CHANGELOG.md` for v0.1.0                                    | High   | 15min  | P0       |
+| 4  | Cut v0.1.0 git tag + release                                       | High   | 5min   | P0       |
+| 5  | Add `FEATURES.md` inventory                                        | Medium | 15min  | P1       |
+| 6  | Add `TODO_LIST.md` from this report                                | Medium | 10min  | P1       |
+| 7  | Add fuzz test for Mermaid XSS                                      | Medium | 30min  | P1       |
+| 8  | Add fuzz test for replay integrity                                 | Medium | 30min  | P1       |
+| 9  | Cache `stepTypeName` reflection results                            | Medium | 15min  | P1       |
+| 10 | Add full lifecycle integration test                                | Medium | 30min  | P1       |
+| 11 | Consolidate `sortByName` usage (remove duplication)                | Low    | 10min  | P1       |
+| 12 | Fix `statusClass` to cover `StepStatusRunning`                     | Low    | 5min   | P1       |
+| 13 | Add `go mod verify` to CI                                          | Low    | 5min   | P2       |
+| 14 | Raise coverage gate from 90% to 95%                                | Low    | 30min  | P2       |
+| 15 | Add error-path tests (`ReadEvents` oversized, `writeToFile` close) | Low    | 20min  | P2       |
+| 16 | Add `STABILITY.md`                                                 | Low    | 10min  | P2       |
+| 17 | Port HTML visualization from samber-do                             | High   | 2-4h   | P2       |
+| 18 | Add `flake.nix` devShell                                           | Medium | 30min  | P2       |
+| 19 | Split `ClassAssign` out of `diagramFormatter` interface            | Low    | 20min  | P2       |
+| 20 | Add `go generate` support if templ is added                        | Low    | 15min  | P3       |
+| 21 | Add OTel bridge example                                            | Medium | 1h     | P3       |
+| 22 | Add Mermaid edge labels ("depends on")                             | Low    | 15min  | P3       |
+| 23 | Add conditional branch (`If`/`Switch`) visualization               | Low    | 30min  | P3       |
+| 24 | Add `Contributing.md`                                              | Low    | 10min  | P3       |
+| 25 | Add `Code of Conduct`                                              | Low    | 5min   | P3       |
 
 ---
 

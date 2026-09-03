@@ -56,7 +56,7 @@ Ran `FuzzDiagramSanitization_MultiStep` for 15 seconds (261K executions, 3 new i
 
 - `bracket-quote-injection` — `0]0["` / `0"0"0`
 - `brace-injection` — `aaa}}}}}}}}aaaaa` / `aaaaaa`
-- `paren-in-name` — ` ` / `(`
+- `paren-in-name` — `` / `(`
 - `newline-injection` — `\n` / `\n`
 - `length-extreme` — `0` / `0000000000000000000`
 

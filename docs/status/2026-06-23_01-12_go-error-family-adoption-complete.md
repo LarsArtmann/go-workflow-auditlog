@@ -147,53 +147,53 @@ The entire go-error-family adoption plan was executed end-to-end: Strategy A (Re
 
 ### Immediate (this session's loose ends)
 
-| #   | Task                                                                                           | Impact | Effort |
-| --- | ---------------------------------------------------------------------------------------------- | ------ | ------ |
-| 1   | Add CHANGELOG `[Unreleased]` entry for go-error-family adoption                                | Medium | 5 min  |
-| 2   | Mark `TODO_LIST.md` go-error-family item as `[DONE]`                                           | Low    | 2 min  |
-| 3   | Update `STABILITY.md` with 3 new sentinels + dependency note                                   | Medium | 5 min  |
-| 4   | Fix PRO/CONTRA report exit codes (Rejection=1, Corruption=65, Infrastructure=69, Transient=75) | Low    | 5 min  |
+| # | Task                                                                                           | Impact | Effort |
+| - | ---------------------------------------------------------------------------------------------- | ------ | ------ |
+| 1 | Add CHANGELOG `[Unreleased]` entry for go-error-family adoption                                | Medium | 5 min  |
+| 2 | Mark `TODO_LIST.md` go-error-family item as `[DONE]`                                           | Low    | 2 min  |
+| 3 | Update `STABILITY.md` with 3 new sentinels + dependency note                                   | Medium | 5 min  |
+| 4 | Fix PRO/CONTRA report exit codes (Rejection=1, Corruption=65, Infrastructure=69, Transient=75) | Low    | 5 min  |
 
 ### Error handling deepening
 
-| #   | Task                                                                                                                                 | Impact | Effort |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------ | ------ | ------ |
-| 5   | Add error-path tests: inject failing `io.Writer` into all `Write*` methods, verify `ErrRenderFailed`/`ErrExportWriteFailed` wrapping | High   | 45 min |
-| 6   | Add `LoadReport("nonexistent.json")` test verifying `ErrReportLoadFailed` + `errors.Is`                                              | High   | 10 min |
-| 7   | Add fuzz test for `Classify()` — adversarial wrapped error chains, deeply nested `fmt.Errorf("%w")`                                  | Medium | 20 min |
-| 8   | Add property test: "wrapping preserves family through arbitrary depth"                                                               | Medium | 15 min |
+| # | Task                                                                                                                                 | Impact | Effort |
+| - | ------------------------------------------------------------------------------------------------------------------------------------ | ------ | ------ |
+| 5 | Add error-path tests: inject failing `io.Writer` into all `Write*` methods, verify `ErrRenderFailed`/`ErrExportWriteFailed` wrapping | High   | 45 min |
+| 6 | Add `LoadReport("nonexistent.json")` test verifying `ErrReportLoadFailed` + `errors.Is`                                              | High   | 10 min |
+| 7 | Add fuzz test for `Classify()` — adversarial wrapped error chains, deeply nested `fmt.Errorf("%w")`                                  | Medium | 20 min |
+| 8 | Add property test: "wrapping preserves family through arbitrary depth"                                                               | Medium | 15 min |
 
 ### Pre-release polish
 
-| #   | Task                                                                               | Impact | Effort |
-| --- | ---------------------------------------------------------------------------------- | ------ | ------ |
-| 9   | Push coverage 92.9% → 95%+ (target: error-path branches in Write\* methods)        | High   | 60 min |
-| 10  | Tag v0.5.0 release (go-error-family adoption + I/O sentinels warrant a minor bump) | High   | 10 min |
-| 11  | Add `StepInfo.Type()` method for API consistency with `Status.Label()`             | Low    | 10 min |
-| 12  | Add retry/timeout columns to table export                                          | Medium | 20 min |
+| #  | Task                                                                               | Impact | Effort |
+| -- | ---------------------------------------------------------------------------------- | ------ | ------ |
+| 9  | Push coverage 92.9% → 95%+ (target: error-path branches in Write\* methods)        | High   | 60 min |
+| 10 | Tag v0.5.0 release (go-error-family adoption + I/O sentinels warrant a minor bump) | High   | 10 min |
+| 11 | Add `StepInfo.Type()` method for API consistency with `Status.Label()`             | Low    | 10 min |
+| 12 | Add retry/timeout columns to table export                                          | Medium | 20 min |
 
 ### Feature work (from TODO_LIST.md)
 
-| #   | Task                                                                       | Impact | Effort |
-| --- | -------------------------------------------------------------------------- | ------ | ------ |
-| 13  | Make table columns configurable (column-selection options)                 | Medium | 45 min |
-| 14  | Add diagram layout direction option (TD vs LR)                             | Medium | 30 min |
-| 15  | Add `writeToFile` overwrite protection (`O_EXCL` / "file exists" error)    | Low    | 15 min |
-| 16  | Add benchmarks for WriteD2, WriteTable, WriteTree                          | Medium | 30 min |
-| 17  | Add fuzz tests for diagram ID sanitization                                 | Medium | 25 min |
-| 18  | Add integration/round-trip tests (report → JSON → Load → diagram → verify) | High   | 45 min |
-| 19  | Surface name collisions in diagrams (warn when `String()` collides)        | Low    | 20 min |
-| 20  | Offer `Name(step)` fallback helper                                         | Low    | 15 min |
+| #  | Task                                                                       | Impact | Effort |
+| -- | -------------------------------------------------------------------------- | ------ | ------ |
+| 13 | Make table columns configurable (column-selection options)                 | Medium | 45 min |
+| 14 | Add diagram layout direction option (TD vs LR)                             | Medium | 30 min |
+| 15 | Add `writeToFile` overwrite protection (`O_EXCL` / "file exists" error)    | Low    | 15 min |
+| 16 | Add benchmarks for WriteD2, WriteTable, WriteTree                          | Medium | 30 min |
+| 17 | Add fuzz tests for diagram ID sanitization                                 | Medium | 25 min |
+| 18 | Add integration/round-trip tests (report → JSON → Load → diagram → verify) | High   | 45 min |
+| 19 | Surface name collisions in diagrams (warn when `String()` collides)        | Low    | 20 min |
+| 20 | Offer `Name(step)` fallback helper                                         | Low    | 15 min |
 
 ### Strategic (from ROADMAP.md)
 
-| #   | Task                                                | Impact | Effort    |
-| --- | --------------------------------------------------- | ------ | --------- |
-| 21  | Migrate `justfile` → `flake.nix`                    | Medium | 60 min    |
-| 22  | Split library into core + visualization sub-modules | High   | 2-4 hours |
-| 23  | Streaming NDJSON export option                      | High   | 2 hours   |
-| 24  | OpenTelemetry span bridge                           | High   | 3 hours   |
-| 25  | `encoding/json/v2` migration                        | Medium | 1 hour    |
+| #  | Task                                                | Impact | Effort    |
+| -- | --------------------------------------------------- | ------ | --------- |
+| 21 | Migrate `justfile` → `flake.nix`                    | Medium | 60 min    |
+| 22 | Split library into core + visualization sub-modules | High   | 2-4 hours |
+| 23 | Streaming NDJSON export option                      | High   | 2 hours   |
+| 24 | OpenTelemetry span bridge                           | High   | 3 hours   |
+| 25 | `encoding/json/v2` migration                        | Medium | 1 hour    |
 
 ---
 

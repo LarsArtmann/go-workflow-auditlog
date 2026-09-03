@@ -1,7 +1,7 @@
 # Status Report: Code Quality Cleanup — Self-Review
 
-**Date**: 2026-07-25 07:19  
-**Session scope**: 3 code-quality items from paste_1.txt (honest-problems list)  
+**Date**: 2026-07-25 07:19\
+**Session scope**: 3 code-quality items from paste_1.txt (honest-problems list)\
 **Verdict**: All 3 items shipped and verified. One documentation miss caught during self-review. One untestable defensive path honestly disclosed.
 
 ---

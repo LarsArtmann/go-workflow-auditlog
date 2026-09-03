@@ -1,7 +1,7 @@
 # Status Report — Website Launch Maintenance (Self-Review)
 
-**Date:** 2026-07-14 19:20  
-**Session:** Website-launch skill, maintenance pass on existing go-workflow-auditlog.lars.software  
+**Date:** 2026-07-14 19:20\
+**Session:** Website-launch skill, maintenance pass on existing go-workflow-auditlog.lars.software\
 **Reporter:** Crush (automated self-review)
 
 ---

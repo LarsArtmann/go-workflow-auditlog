@@ -18,13 +18,13 @@ The [deep-dive audit](../research/2026-08-06_go-sse-deep-dive.html) found that `
 
 The `live` module is the **most well-tested module** in the project: 68 test functions, 95.5% coverage, race-tested. The SSE transport works today. Every change must be justified against the risk of breaking working, tested code.
 
-| Opportunity                  | Customer value                              | Code quality gain                      | Verschlimmbessern risk                                           | Verdict  |
-| ---------------------------- | ------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------- | -------- |
-| v0.4.0 upgrade               | Low (enables features)                      | Low                                    | **None** — no breaking changes, same deps                        | ✅ DO    |
-| Stream adoption in handleSSE | None (same behavior)                        | Medium (~40 lines eliminated)          | **Low** — mechanical replacement, same semantics                 | ✅ DO    |
-| Reconnection replay          | **HIGH** — clients miss events on reconnect | N/A (new feature)                      | **Low** — additive, doesn't change existing paths                | ✅ DO    |
-| Graceful shutdown drain      | Medium — prevents event loss on shutdown    | N/A (new feature)                      | **Low** — additive                                               | ✅ DO    |
-| Health() integration         | Low — marginal observability                | Low                                    | **Low** — additive                                               | ✅ DO    |
+| Opportunity                  | Customer value                              | Code quality gain                      | Verschlimmbessern risk                                           | Verdict |
+| ---------------------------- | ------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------- | ------- |
+| v0.4.0 upgrade               | Low (enables features)                      | Low                                    | **None** — no breaking changes, same deps                        | ✅ DO   |
+| Stream adoption in handleSSE | None (same behavior)                        | Medium (~40 lines eliminated)          | **Low** — mechanical replacement, same semantics                 | ✅ DO   |
+| Reconnection replay          | **HIGH** — clients miss events on reconnect | N/A (new feature)                      | **Low** — additive, doesn't change existing paths                | ✅ DO   |
+| Graceful shutdown drain      | Medium — prevents event loss on shutdown    | N/A (new feature)                      | **Low** — additive                                               | ✅ DO   |
+| Health() integration         | Low — marginal observability                | Low                                    | **Low** — additive                                               | ✅ DO   |
 | Hub → Broadcaster refactor   | **None**                                    | Low (~15-30 real lines saved, NOT 141) | **HIGH** — 18 call sites, 12 test references, API shape mismatch | ⚠️ DEFER |
 
 **Critical finding about Hub refactor:** The deep-dive report claimed 141 lines of duplication. After careful analysis, the Hub has ~60 lines of domain-specific code (SignalComplete, done channels, subscriber IDs) that Broadcaster does NOT provide. The actual eliminable duplication is ~15-30 lines (the `broadcast()` method body and `ClientCount()`). The API shapes are incompatible: Hub.Unsubscribe takes `uint64`, Broadcaster.Unsubscribe takes `<-chan T`. Refactoring would touch 18 call sites across 3 files and risk breaking 68 tests for ~20 lines of savings. **Not recommended.**

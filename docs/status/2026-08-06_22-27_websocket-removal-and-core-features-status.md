@@ -49,7 +49,7 @@ Every trace of WebSocket transport has been removed from the `live` module, alig
 | C.24 | `WithFlushInterval(d)` — time-based auto-flush for NDJSONStreamer                                 | `stream.go`       | 3 tests in `stream_test.go`                             | ✅ Implemented, tested, lint clean |
 | C.25 | `StreamEvents(reader, validate, fn)` — streaming NDJSON reader with callback (no materialization) | `ndjson.go`       | 6 tests in `ndjson_test.go`                             | ✅ Implemented, tested, lint clean |
 | C.26 | `MultiWriter` — fan-out events to N callbacks                                                     | `multi_writer.go` | 8 tests in `multi_writer_test.go`                       | ✅ Implemented, tested, lint clean |
-| C.27 | Streaming JSON report format                                                                      | —                 | ✅ Already shipped via NDJSON + ReplayEvents round-trip |
+| C.27 | Streaming JSON report format                                                                      | —                 | ✅ Already shipped via NDJSON + ReplayEvents round-trip |                                    |
 
 ### Phase D — Core Ergonomics (new features implemented, tests pass)
 
