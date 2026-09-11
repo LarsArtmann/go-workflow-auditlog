@@ -23,6 +23,9 @@ func allPublicSentinels() []error {
 		auditlog.ErrOversizedLine,
 		auditlog.ErrWorkflowIDPathSep,
 		auditlog.ErrReplayNoEvents,
+		auditlog.ErrMigrationEmptyInput,
+		auditlog.ErrMigrationMissingVersion,
+		auditlog.ErrFileExists,
 		auditlog.ErrReportLoadFailed,
 		auditlog.ErrRenderFailed,
 		auditlog.ErrExportWriteFailed,
@@ -100,6 +103,27 @@ func TestClassify_PublicSentinels(t *testing.T) {
 		{
 			name:      "ErrReplayNoEvents is Rejection",
 			err:       auditlog.ErrReplayNoEvents,
+			family:    errorfamily.Rejection,
+			exitCode:  1,
+			retryable: false,
+		},
+		{
+			name:      "ErrMigrationEmptyInput is Rejection",
+			err:       auditlog.ErrMigrationEmptyInput,
+			family:    errorfamily.Rejection,
+			exitCode:  1,
+			retryable: false,
+		},
+		{
+			name:      "ErrMigrationMissingVersion is Rejection",
+			err:       auditlog.ErrMigrationMissingVersion,
+			family:    errorfamily.Rejection,
+			exitCode:  1,
+			retryable: false,
+		},
+		{
+			name:      "ErrFileExists is Rejection",
+			err:       auditlog.ErrFileExists,
 			family:    errorfamily.Rejection,
 			exitCode:  1,
 			retryable: false,
@@ -286,5 +310,142 @@ func TestErrorClassifications_ContainsAllPublicSentinels(t *testing.T) {
 		if !family.IsValid() {
 			t.Errorf("ErrorClassifications()[%v] = %v, want a valid Family", sentinel, family)
 		}
+	}
+}
+
+func TestClassify_IntrinsicClassificationWithoutRegistry(t *testing.T) {
+	t.Parallel()
+
+	// Owned sentinels are *errorfamily.Error values carrying their family
+	// intrinsically: a registry with NO registrations must classify them via
+	// the Classified interface alone. The re-exported go-ndjson sentinels are
+	// third-party errors — on an empty registry they fall through to the
+	// Transient default, which is exactly why init() registers them.
+	reg := errorfamily.NewRegistry()
+
+	unregistered := 0
+
+	for sentinel, want := range auditlog.ErrorClassifications() {
+		typed, owned := errors.AsType[*errorfamily.Error](sentinel)
+		if !owned {
+			unregistered++
+
+			continue
+		}
+
+		t.Run(typed.Code(), func(t *testing.T) {
+			t.Parallel()
+
+			if got := reg.Classify(sentinel); got != want {
+				t.Errorf("intrinsic Classify(%s) = %v, want %v", typed.Code(), got, want)
+			}
+		})
+	}
+
+	// Exactly the three go-ndjson re-exports rely on the registry channel.
+	if unregistered != 3 {
+		t.Errorf("ErrorClassifications() has %d non-intrinsic sentinels, want 3 (ErrEmpty, ErrNoEvents, ErrOversizedLine)", unregistered)
+	}
+
+	if got := reg.Classify(auditlog.ErrEmpty); got != errorfamily.Transient {
+		t.Errorf("Classify(ErrEmpty) on empty registry = %v, want Transient (unregistered default)", got)
+	}
+}
+
+func TestErrorClassifications_CodesUniquePerFamily(t *testing.T) {
+	t.Parallel()
+
+	// *errorfamily.Error.Is matches on code+family, so two owned sentinels
+	// sharing both would be indistinguishable via errors.Is. Pin uniqueness.
+	type identity struct {
+		family errorfamily.Family
+		code   string
+	}
+
+	seen := make(map[identity]error)
+
+	for sentinel := range auditlog.ErrorClassifications() {
+		typed, ok := errors.AsType[*errorfamily.Error](sentinel)
+		if !ok {
+			continue
+		}
+
+		combo := identity{typed.Family(), typed.Code()}
+
+		if prev, dup := seen[combo]; dup {
+			t.Errorf("duplicate identity %v claimed by both %v and %v", combo, prev, sentinel)
+		}
+
+		seen[combo] = sentinel
+	}
+}
+
+func TestClassify_ErrFileExistsIsRejectionWithWriteChain(t *testing.T) {
+	t.Parallel()
+
+	// ErrFileExists carries Rejection intrinsically (the caller asked for an
+	// impossible no-clobber write). Before intrinsic classification it fell
+	// through its cause chain to ErrExportWriteFailed (Infrastructure), so
+	// no-clobber rejections were misreported as retryable=false but with
+	// Infrastructure exit code 69 instead of Rejection exit code 1.
+	if got := errorfamily.Classify(auditlog.ErrFileExists); got != errorfamily.Rejection {
+		t.Errorf("Classify(ErrFileExists) = %v, want Rejection", got)
+	}
+
+	if got := errorfamily.ExitCode(auditlog.ErrFileExists); got != 1 {
+		t.Errorf("ExitCode(ErrFileExists) = %d, want 1", got)
+	}
+
+	// The cause chain still contains ErrExportWriteFailed so broad matching
+	// on the write-failure parent keeps working.
+	if !errors.Is(auditlog.ErrFileExists, auditlog.ErrExportWriteFailed) {
+		t.Error("errors.Is(ErrFileExists, ErrExportWriteFailed) = false, want true (cause chain preserved)")
+	}
+
+	wrapped := fmt.Errorf("%w: %q", auditlog.ErrFileExists, "out.json")
+
+	if !errors.Is(wrapped, auditlog.ErrFileExists) {
+		t.Error("errors.Is(wrapped, ErrFileExists) = false, want true")
+	}
+
+	if got := errorfamily.Classify(wrapped); got != errorfamily.Rejection {
+		t.Errorf("Classify(wrapped ErrFileExists) = %v, want Rejection", got)
+	}
+}
+
+func TestClassify_MigrationSentinelsAreRejection(t *testing.T) {
+	t.Parallel()
+
+	// Both migration sentinels are bad-caller-input errors. They were
+	// previously unclassified (falling through to the Transient fail-open
+	// default), misreporting caller mistakes as retryable.
+	tests := []struct {
+		name string
+		err  error
+	}{
+		{name: "ErrMigrationEmptyInput", err: auditlog.ErrMigrationEmptyInput},
+		{name: "ErrMigrationMissingVersion", err: auditlog.ErrMigrationMissingVersion},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := errorfamily.Classify(tt.err); got != errorfamily.Rejection {
+				t.Errorf("Classify(%s) = %v, want Rejection", tt.name, got)
+			}
+
+			if got := errorfamily.ExitCode(tt.err); got != 1 {
+				t.Errorf("ExitCode(%s) = %d, want 1", tt.name, got)
+			}
+
+			if errorfamily.IsRetryable(tt.err) {
+				t.Errorf("IsRetryable(%s) = true, want false (bad input is not retryable)", tt.name)
+			}
+
+			if !errors.Is(tt.err, tt.err) {
+				t.Errorf("errors.Is(%s, itself) = false, want true", tt.name)
+			}
+		})
 	}
 }

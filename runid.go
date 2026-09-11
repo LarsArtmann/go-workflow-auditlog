@@ -19,8 +19,9 @@ const runIDBytes = 16
 func newRunID() RunID {
 	b := make([]byte, runIDBytes) //nolint:makezero // crypto/rand.Read fills the buffer; zero-init is required
 	// crypto/rand.Read is documented to always succeed with a nil error when
-	// the slice is non-empty; a failure would indicate a broken entropy source.
-	_, _ = rand.Read(b)
+	// the slice is non-empty (infallible since Go 1.24); there is nothing
+	// sensible to do with an error return that can never be non-nil.
+	_, _ = rand.Read(b) //nolint:erraudit // infallible since Go 1.24; see comment above
 
 	return RunID(hex.EncodeToString(b))
 }

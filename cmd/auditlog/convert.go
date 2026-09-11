@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func runConvert(args []string) error {
+func runConvert(args []string) (err error) {
 	fs := newFlagSet("convert")
 
 	output := fs.String("o", "", "output file (default: stdout)")
@@ -41,7 +41,13 @@ func runConvert(args []string) error {
 		return err
 	}
 
-	defer func() { _ = closer.Close() }()
+	// Surface output-file close failures (deferred close runs after the
+	// write returns; a close error must not silently drop flushed data).
+	defer func() {
+		if cerr := closer.Close(); cerr != nil {
+			err = errors.Join(err, cerr)
+		}
+	}()
 
 	switch fmtValue {
 	case "json":

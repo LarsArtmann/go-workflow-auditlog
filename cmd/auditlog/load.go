@@ -19,7 +19,7 @@ func loadFile(path string) (auditlog.WorkflowReport, error) {
 		return auditlog.WorkflowReport{}, err
 	}
 
-	defer func() { _ = closer.Close() }()
+	defer closer.Close()
 
 	return detectAndLoad(reader, path)
 }
