@@ -309,7 +309,10 @@ function configBadges(s) {
       '<span class="config-badge retry" title="Max attempts: ' +
       (s.max_attempts || 0) +
       '">\u{1F501} retry</span> ';
-  if (s.has_timeout) badges += '<span class="config-badge timeout">\u23F2 timeout</span>';
+  if (s.has_timeout) badges += '<span class="config-badge timeout">\u23F2 timeout</span> ';
+  if (s.cached)
+    badges +=
+      '<span class="config-badge cached" title="Result served from a cache \u2014 the step did not re-execute its work">\u26A1 cached</span>';
   return badges;
 }
 
@@ -326,6 +329,16 @@ var allSteps = report.steps.map(function (s) {
     })
     .join(", ");
   var errMsg = s.error ? esc(s.error) : "";
+  var searchStr = (
+    s.step_name +
+    " " +
+    (s.step_type || "") +
+    " " +
+    s.status +
+    " " +
+    (s.error || "")
+  ).toLowerCase();
+  if (s.cached) searchStr += " cached";
   var statusBadge =
     '<span class="status-badge ' +
     esc(s.status) +
@@ -341,17 +354,7 @@ var allSteps = report.steps.map(function (s) {
     s.status === "failed" ? " row-failed" : s.status === "canceled" ? " row-canceled" : "";
   return (
     '<tr data-search="' +
-    esc(
-      (
-        s.step_name +
-        " " +
-        (s.step_type || "") +
-        " " +
-        s.status +
-        " " +
-        (s.error || "")
-      ).toLowerCase(),
-    ) +
+    esc(searchStr) +
     '"' +
     ' class="' +
     rowCls.trim() +
@@ -556,6 +559,7 @@ var allEvents = report.events.map(function (e) {
     "</span>";
   var dur = e.duration_ms != null ? humanizeDuration(e.duration_ms) : "";
   var errTip = e.error ? ' data-error="' + esc(e.error) + '"' : "";
+  var cachedChip = e.cached ? '<span class="cached-chip">\u26A1 cached</span>' : "";
   return (
     '<tr data-type="' +
     esc(e.event_type) +
@@ -591,6 +595,7 @@ var allEvents = report.events.map(function (e) {
     (e.error
       ? '<span class="inline-error" data-error="' + esc(e.error) + '">' + esc(e.error) + "</span>"
       : "") +
+    cachedChip +
     "</td>" +
     "</tr>"
   );

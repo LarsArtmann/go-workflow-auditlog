@@ -32,6 +32,9 @@ const (
 	// ColumnFailureReason is the structured failure category (timeout, canceled,
 	// user_error) when the step failed. Empty if the step succeeded.
 	ColumnFailureReason
+	// ColumnCached indicates whether the step's result was served from a
+	// cache instead of executing the step's work (see auditlog.MarkCached).
+	ColumnCached
 )
 
 // DefaultTableColumns is the column set used when WithColumns is not called.
@@ -80,6 +83,7 @@ func AllTableColumns() []TableColumn {
 		ColumnType,
 		ColumnDependencies,
 		ColumnFailureReason,
+		ColumnCached,
 	}
 }
 
@@ -138,6 +142,10 @@ var columnDefs = map[TableColumn]columnDefinition{
 	ColumnFailureReason: {
 		header:  "Failure Reason",
 		extract: func(s StepInfo) string { return string(s.FailureReason) },
+	},
+	ColumnCached: {
+		header:  "Cached",
+		extract: func(s StepInfo) string { return strconv.FormatBool(s.Cached) },
 	},
 }
 
