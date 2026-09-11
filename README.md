@@ -50,6 +50,7 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Cache-Hit Attribution](#cache-hit-attribution)
 - [Example Output](#example-output)
 - [How It Works](#how-it-works)
 - [Report Structure](#report-structure)
@@ -78,11 +79,12 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **Real-time streaming NDJSON** — stream events as they happen via `Config.OnEvent`, no need to wait for the workflow to finish
 - **Live real-time dashboard** (`live/` module) — SSE-powered HTTP dashboard that streams step updates as they execute, with configurable CORS, route prefix, export endpoints (NDJSON/HTML), and download buttons in the UI
 - **Structured failure classification** — every `attempt_end` event carries a typed `FailureReason` (`timeout`, `canceled`, `user_error`) for programmatic filtering and alerting; the step-level `FailureReason` is denormalized onto `StepInfo` so consumers don't scan the event stream
+- **Honest cache-hit attribution** — steps served from a cache call `auditlog.MarkCached(ctx)` and are marked `⚡cached` everywhere: event stream, step records, `CachedStepCount` aggregate, CSV/TSV column, CLI `info`, diagram + tree labels, table column, dashboard badges/stat card/filter chip — so a reused result never masquerades as freshly verified work. `Diff()` surfaces cache-rate regressions (`CachedStepCountDelta`, `CachedStepsAdded`/`Removed`)
 - **MultiWriter** — fan out each event to multiple sinks (NDJSON file + live SSE hub + OTel bridge) with a single `Config.OnEvent` callback
 - **StreamEvents** — memory-bounded streaming NDJSON reader for replaying high-event-count runs without materializing the full slice
 - **Export formats** — JSON report, NDJSON event stream, CSV/TSV step export, Mermaid / PlantUML / Graphviz DOT / D2 diagrams (with configurable layout direction), step summary tables (16 formats, configurable column selection), ASCII + HTML tree views, **interactive HTML dashboard** (5-tab self-contained report with DAG graph engine, timeline, waveform)
 - **Report filtering** — slice reports by step name, status, event type, or time range
-- **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration delta)
+- **Report diffing** — compare two runs for regression detection (added/removed/changed steps + duration, critical-path, peak-concurrency, and cached-rate deltas)
 - **Event replay** — reconstruct a report from a flat NDJSON event stream
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
@@ -169,6 +171,38 @@ The three-step lifecycle is **always** `Attach` → `Do` → `Snapshot`:
 | `Attach`   | Before `Do` | Injects audit callbacks into every step         |
 | `Do`       | Execution   | Callbacks fire per-attempt, recording events    |
 | `Snapshot` | After `Do`  | Reads DAG structure + skipped/canceled statuses |
+
+## Cache-Hit Attribution
+
+If your workflow uses a result cache, a cache hit normally looks identical to
+fresh execution — both are just `succeeded`. `MarkCached` fixes that lie:
+
+```go
+type DetectStep struct{ cache *ResultCache }
+
+func (s *DetectStep) Do(ctx context.Context) error {
+    if report, ok := s.cache.Get(key); ok {
+        // Result reused — say so in the audit trail.
+        return auditlog.MarkCached(ctx)
+    }
+    // ... execute fresh ...
+}
+```
+
+The step still succeeds on its own merits (cached is attribution, **not** a
+status), but every surface now tells the truth: the `attempt_end` event and
+`StepInfo` carry `"cached":true`, the report gains a `cached_step_count`
+aggregate, CSV/TSV gain a `cached` column, the CLI `info` command prints a
+cached breakdown with `⚡cached` step markers, diagrams and trees label the
+node `⚡cached`, and both dashboards show a `⚡ cached` badge, a `Cached`
+stat card, and a `Cached only` filter. `report.Filtered(auditlog.WithCachedSteps())`
+answers "what did we NOT re-verify this run?", and `Diff()` reports
+`CachedStepsAdded`/`CachedStepsRemoved` between runs so a silently-warming or
+silently-invalidating cache is detectable.
+
+When auditing is disabled (or the call runs outside a step body),
+`MarkCached` returns `ErrMarkCachedNoStepContext` — a non-fatal signal, not a
+workflow failure.
 
 ## Example Output
 

@@ -269,3 +269,50 @@ Rejection (exit 1); `auditlog.report_load_failed` → Transient (exit 75);
 `ErrOversizedLine`, all Rejection) carry **no codes** — they are plain
 stdlib errors owned by go-ndjson and classified via the registry, not
 intrinsically.
+
+## Cache-hit attribution fields + `Diff()` cached deltas (v0.11.0)
+
+Steps whose result was served from a cache can now report that honestly via
+`auditlog.MarkCached(ctx)` (called from inside a step body; the context is
+injected by `Attach`). Cached is **orthogonal to status**: a cache hit still
+succeeds on its own merits — the new flag records WHERE the result came from.
+
+### What changed (all additive, `omitempty`)
+
+| Scope             | JSON key              | Type     | Example           | Default (not cached)  |
+| ----------------- | --------------------- | -------- | ----------------- | --------------------- |
+| `Event`           | `cached`              | `bool`   | `true`            | omitted               |
+| `StepInfo`        | `cached`              | `bool`   | `true`            | omitted               |
+| `WorkflowReport`  | `cached_step_count`   | `int`    | `3`               | omitted               |
+| `DiffResult`      | `cached_step_count_delta` | `int` | `+2` (always emitted) | `0` (present)     |
+| `DiffResult`      | `cached_steps_added` / `cached_steps_removed` | `[]string` | `["detect"]` | omitted |
+| `StepDiff`        | `cached`              | `bool`   | `true`            | omitted               |
+
+The JSON Schema (`schema/report.schema.json`) was regenerated to include the
+report-level additions. NDJSON replay round-trips the `cached` event flag.
+
+### Migration
+
+**No changes required.** Existing JSON/NDJSON parses unchanged; `Validate()`
+only newly checks that `cached_step_count` matches the steps (hand-built
+reports with cached steps must set the count — or run the report through
+`MigrateReport`/`BuildReport`, which derive it).
+
+Consumers with a result cache (the intended use): call
+`auditlog.MarkCached(ctx)` on the cache-hit path and return its error
+unchanged. When auditing is disabled (or the call happens outside a step
+body) it returns `ErrMarkCachedNoStepContext` (Rejection) — treat it as
+non-fatal:
+
+```go
+func (s *DetectStep) Do(ctx context.Context) error {
+    if report, ok := s.resultCache.Get(s.key); ok {
+        return auditlog.MarkCached(ctx) // no-op error when auditing is disabled
+    }
+    // ... execute fresh ...
+}
+```
+
+Filtering: `report.Filtered(auditlog.WithCachedSteps())` answers "what did we
+NOT re-verify this run?"; `WithUncachedSteps()` answers "what ran fresh?".
+

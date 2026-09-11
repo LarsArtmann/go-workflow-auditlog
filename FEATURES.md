@@ -22,7 +22,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-08-06.
 
 ### CLI Tool
 
-- **`cmd/auditlog`** — standalone CLI binary with subcommands: `info` (version, workflow, steps, status breakdown, durations, failed/retried steps), `convert` (JSON/NDJSON/CSV/TSV output with format inference), `diff` (added/removed/changed steps, duration/critical-path/peak-concurrency deltas), `validate` (runs `Report.Validate()`), `schema` (prints JSON schema), `version`. Uses stdlib `flag` (no cobra/urfave). 5 integration tests.
+- **`cmd/auditlog`** — standalone CLI binary with subcommands: `info` (version, workflow, steps, status breakdown, durations, cached breakdown + `⚡cached` markers, failed/retried steps), `convert` (JSON/NDJSON/CSV/TSV output with format inference), `diff` (added/removed/changed steps, duration/critical-path/peak-concurrency/cached-rate deltas), `validate` (runs `Report.Validate()`), `schema` (prints JSON schema), `version`. Uses stdlib `flag` (no cobra/urfave). 8 integration tests.
 - **`nix run .#auditlog`** — runs the CLI via Nix without installation.
 
 ### JSON Schema
@@ -37,7 +37,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-08-06.
 - **Branded `RunID` type** (`type RunID string`) — compile-time safety against confusing `RunID` with `WorkflowID`, serializes as a plain JSON string
 - **`Validate()`** — checks count consistency (event, step, 6 status-count fields) + status drift via sentinel errors
 - **`Filtered(opts...)`** — filter by step name, status, event type, time range
-- **`Diff(other)`** — compare two runs (added/removed/changed steps + wall-clock duration delta + critical-path duration delta + peak-concurrency delta + critical-path step membership changes)
+- **`Diff(other)`** — compare two runs (added/removed/changed steps + wall-clock duration delta + critical-path duration delta + peak-concurrency delta + critical-path step membership changes + cached-rate deltas: `CachedStepCountDelta`, `CachedStepsAdded`/`Removed`, `StepDiff.Cached`)
 - **`Summary()`** — one-line human-readable summary (uses wall-clock + failure reason)
 - **`Duration()`** — wall-clock duration as `time.Duration`
 - **`CriticalPath()`** — returns the ordered step chain (root-to-leaf) of the bottleneck dependency path
@@ -66,7 +66,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-08-06.
 - `PeakConcurrency` — max in-flight attempts (event-stream scan)
 - `CriticalPathDurationMs` — longest dependency-chain duration (memoized DFS)
 - `FailureReason` — structured enum on Event (`timeout`, `canceled`, `user_error`); zero value = unclassified (success); also denormalized onto `StepInfo` (reflects final outcome only, cleared on retry success); `Label()`/`Color()` display metadata for visualizations; `ColumnFailureReason` table column in viz
-- `Cached` — cache-hit attribution: `MarkCached(ctx)` from inside a step body flags the attempt as served from a cache (Event `"cached":true` on attempt_end, `StepInfo.Cached`, `CachedStepCount` aggregate); orthogonal to status — records where the result came from, not whether it was good; `WithCachedSteps`/`WithUncachedSteps` filters; `ColumnCached` table column; `⚡ cached` badges in both dashboards; CSV `cached` column; CLI info breakdown
+- `Cached` — cache-hit attribution: `MarkCached(ctx)` from inside a step body flags the attempt as served from a cache (Event `"cached":true` on attempt_end, `StepInfo.Cached`, `CachedStepCount` aggregate); orthogonal to status — records where the result came from, not whether it was good; `WithCachedSteps`/`WithUncachedSteps` filters; `ColumnCached` table column; `⚡cached` markers in all diagram + tree exports; `⚡ cached` badges + `Cached` stat card + `Cached only` filter chip in both dashboards; CSV `cached` column; CLI info breakdown; NDJSON replay round-trip; Diff cached deltas for cache-rate regression detection
 - `FailureSummary` — human-readable report-level summary (e.g., "3 step(s) failed: fetch"); JSON key `failure_summary`
 - `PendingCount` / `RunningCount` — split lifecycle-state counters
 - `TotalDurationMs` — sum of per-step durations (kept for completeness)
@@ -195,7 +195,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - **`encoding/json/v2` migration** — migrated to Go 1.26 `encoding/json/v2` + `jsontext` (GOEXPERIMENT=jsonv2), full XSS hardening, deterministic output
 - **Fuzz tests**: `FuzzDiagramSpecialChars` (diagram injection), `FuzzDiagramSanitization_MultiStep` (multi-step edge sanitization, 17 seed pairs across 4 formats), `FuzzHTMLSpecialChars` (HTML XSS, 12 seed payloads), `FuzzReadEvents` (NDJSON resilience), `FuzzClassify` (adversarial error chains)
-- **Property-based tests**: 8 Diff algebra properties (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output, critical-path anti-symmetry, peak-concurrency anti-symmetry, critical-path steps duality) — 200 iterations each, deterministic seeds; Classify wrapping-preserves-family + identity matches map
+- **Property-based tests**: 9 Diff algebra properties (identity, added/removed duality, duration anti-symmetry, status-change symmetry, sorted output, critical-path anti-symmetry, peak-concurrency anti-symmetry, critical-path steps duality, cached anti-symmetry + count/membership consistency) — 200 iterations each, deterministic seeds; Classify wrapping-preserves-family + identity matches map
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
 - **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + NDJSONStreamer throughput (100/1000/10000 events) + godoc examples
