@@ -6,6 +6,14 @@ documents.
 
 ---
 
+## 2026-09
+
+| Date  | Report                                                                                 | Summary                                      |
+| ----- | -------------------------------------------------------------------------------------- | -------------------------------------------- |
+| 09-11 | [graph-container-svg-height-fix](./2026-09-11_10-38_graph-container-svg-height-fix.md) | Graph container SVG height fix + self-review |
+
+---
+
 ## 2026-07
 
 | Date  | Report                                                                                                         | Summary                                              |
