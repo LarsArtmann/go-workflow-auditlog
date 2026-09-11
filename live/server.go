@@ -293,12 +293,18 @@ func (srv *Server) Shutdown(ctx context.Context) error {
 	}
 
 	// Drain subscriber buffers before closing HTTP connections.
-	// This gives SSE clients time to consume buffered events.
-	_ = srv.hub.Drain(ctx)
+	// This gives SSE clients time to consume buffered events. A drain failure
+	// (context expired with events still buffered) means shutdown was not
+	// fully graceful, so it is surfaced to the caller.
+	drainErr := srv.hub.Drain(ctx)
 
 	err := server.Shutdown(ctx)
 	if err != nil {
 		return fmt.Errorf("shutdown: %w", err)
+	}
+
+	if drainErr != nil {
+		return fmt.Errorf("drain subscriber buffers: %w", drainErr)
 	}
 
 	return nil
@@ -336,7 +342,7 @@ func (srv *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-cache")
-	_, _ = w.Write([]byte(srv.dashboardHTML))
+	_, _ = w.Write([]byte(srv.dashboardHTML)) //nolint:erraudit // client-disconnect write failure is non-actionable
 }
 
 func (srv *Server) handleReport(w http.ResponseWriter, _ *http.Request) {
@@ -356,7 +362,7 @@ func (srv *Server) handleReport(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	_, _ = w.Write(data)
+	_, _ = w.Write(data) //nolint:erraudit // client-disconnect write failure is non-actionable
 }
 
 func (srv *Server) handleExportNDJSON(w http.ResponseWriter, _ *http.Request) {
@@ -433,7 +439,7 @@ func (srv *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	_, _ = w.Write(payload)
+	_, _ = w.Write(payload) //nolint:erraudit // client-disconnect write failure is non-actionable
 }
 
 func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
@@ -453,7 +459,7 @@ func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Accel-Buffering", "no")
 
 	stream := sse.NewStream(w, r)
-	defer func() { _ = stream.Close() }()
+	defer stream.Close()
 
 	sub := srv.hub.Subscribe()
 	defer srv.hub.Unsubscribe(sub.id)
@@ -513,7 +519,7 @@ func (srv *Server) sendComplete(stream *sse.Stream) {
 		return
 	}
 
-	_ = stream.Send(sse.Event{Event: "complete", Data: string(data)})
+	_ = stream.Send(sse.Event{Event: "complete", Data: string(data)}) //nolint:erraudit // client-disconnect send failure is non-actionable
 }
 
 // --- Provider Factories ---

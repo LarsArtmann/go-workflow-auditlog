@@ -70,7 +70,7 @@ func (rb *eventRingBuffer) EventsAfter(lastID sse.EventID) ([]sse.Event, error) 
 	for _, evt := range rb.events {
 		seq, err := strconv.ParseUint(evt.ID.Get(), 10, 64)
 		if err != nil {
-			continue
+			continue //nolint:erraudit // hub-assigned IDs are always numeric; defensive skip only
 		}
 
 		if seq > lastSeq {

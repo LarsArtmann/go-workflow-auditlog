@@ -410,9 +410,7 @@ func printSampleEvent(report auditlog.WorkflowReport) {
 		jsontext.EscapeForJS(true),
 	)
 	if err != nil {
-		log.Printf("marshal sample event: %v", err)
-
-		return
+		log.Fatalf("marshal sample event: %v", err)
 	}
 
 	fmt.Printf("\nSample event:\n%s\n", sample)
