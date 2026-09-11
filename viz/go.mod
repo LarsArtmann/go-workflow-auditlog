@@ -17,7 +17,7 @@ require (
 	github.com/larsartmann/go-output/serialization v0.38.0
 	github.com/larsartmann/go-output/table v0.38.0
 	github.com/larsartmann/go-output/tree v0.38.0
-	github.com/larsartmann/go-workflow-auditlog v0.11.0
+	github.com/larsartmann/go-workflow-auditlog v0.10.0
 )
 
 require (
