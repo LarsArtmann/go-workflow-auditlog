@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/larsartmann/go-ndjson"
 	errorfamily "github.com/larsartmann/go-error-family"
+	"github.com/larsartmann/go-ndjson"
 )
 
 // Sentinel errors for NDJSON reading. Re-exported from go-ndjson

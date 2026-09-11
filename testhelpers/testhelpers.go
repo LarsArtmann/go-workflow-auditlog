@@ -409,6 +409,6 @@ func RunWorkflow(tb testing.TB, a *auditlog.Auditor, w *flow.Workflow) {
 	tb.Helper()
 
 	a.Attach(w)
-	_ = w.Do(context.Background()) //nolint:erraudit // fixture workflows may fail by design (FailStep/FlakyStep); the audit record is the result
+	_ = w.Do(context.Background()) //nolint:erraudit // fixture may fail by design; the audit record is the result
 	a.Snapshot(w)
 }

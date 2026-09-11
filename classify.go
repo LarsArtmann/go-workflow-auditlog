@@ -42,14 +42,14 @@ func ErrorClassifications() map[error]errorfamily.Family {
 		// input, invalid config, or asked for an impossible operation.
 		// ErrEmpty/ErrNoEvents/ErrOversizedLine are go-ndjson's errors (not
 		// owned here) — the registry is their only classification channel.
-		ErrEmpty:                 errorfamily.Rejection,
-		ErrNoEvents:              errorfamily.Rejection,
-		ErrOversizedLine:         errorfamily.Rejection,
-		ErrWorkflowIDPathSep:     errorfamily.Rejection,
-		ErrReplayNoEvents:        errorfamily.Rejection,
-		ErrMigrationEmptyInput:   errorfamily.Rejection,
+		ErrEmpty:                   errorfamily.Rejection,
+		ErrNoEvents:                errorfamily.Rejection,
+		ErrOversizedLine:           errorfamily.Rejection,
+		ErrWorkflowIDPathSep:       errorfamily.Rejection,
+		ErrReplayNoEvents:          errorfamily.Rejection,
+		ErrMigrationEmptyInput:     errorfamily.Rejection,
 		ErrMigrationMissingVersion: errorfamily.Rejection,
-		ErrFileExists:            errorfamily.Rejection,
+		ErrFileExists:              errorfamily.Rejection,
 
 		// Transient — temporary failure, worth retrying.
 		ErrReportLoadFailed: errorfamily.Transient,

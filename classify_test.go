@@ -344,7 +344,10 @@ func TestClassify_IntrinsicClassificationWithoutRegistry(t *testing.T) {
 
 	// Exactly the three go-ndjson re-exports rely on the registry channel.
 	if unregistered != 3 {
-		t.Errorf("ErrorClassifications() has %d non-intrinsic sentinels, want 3 (ErrEmpty, ErrNoEvents, ErrOversizedLine)", unregistered)
+		t.Errorf(
+			"ErrorClassifications() has %d non-intrinsic sentinels, want 3 (ErrEmpty, ErrNoEvents, ErrOversizedLine)",
+			unregistered,
+		)
 	}
 
 	if got := reg.Classify(auditlog.ErrEmpty); got != errorfamily.Transient {
