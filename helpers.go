@@ -7,13 +7,22 @@ import (
 	"regexp"
 
 	atomicwrite "github.com/larsartmann/go-atomic-write"
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 // ErrFileExists is returned when a file already exists at the target path
-// and the caller requested no-clobber behavior. Classified as Rejection —
-// the caller asked for an impossible operation (writing to an existing file
-// without overwrite). Consumers can match on it with [errors.Is].
-var ErrFileExists = fmt.Errorf("%w: file already exists", ErrExportWriteFailed)
+// and the caller requested no-clobber behavior. It carries its classification
+// intrinsically: [errorfamily.Rejection] — the caller asked for an impossible
+// operation (writing to an existing file without overwrite) — code
+// "auditlog.file_exists". Its cause chain still contains
+// [ErrExportWriteFailed], so consumers matching either sentinel via
+// [errors.Is] keep working.
+var ErrFileExists = errorfamily.Wrap(
+	ErrExportWriteFailed,
+	errorfamily.Rejection,
+	"auditlog.file_exists",
+	"file already exists",
+)
 
 // CheckNoClobber returns ErrFileExists if a file already exists at path.
 // Call this before Export* methods to prevent accidental overwrites:

@@ -2,14 +2,26 @@ package auditlog
 
 import (
 	"encoding/json/v2"
-	"errors"
 	"fmt"
 	"time"
+
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
-var ErrMigrationEmptyInput = errors.New("migration input is empty")
+// ErrMigrationEmptyInput is returned by [MigrateReport] when data is empty.
+// Rejection: bad caller input, code "auditlog.migration_empty_input".
+var ErrMigrationEmptyInput = errorfamily.NewRejection(
+	"auditlog.migration_empty_input",
+	"migration input is empty",
+)
 
-var ErrMigrationMissingVersion = errors.New("migration input has no version field")
+// ErrMigrationMissingVersion is returned by [MigrateReport] when the input
+// has no version field. Rejection: bad caller input, code
+// "auditlog.migration_missing_version".
+var ErrMigrationMissingVersion = errorfamily.NewRejection(
+	"auditlog.migration_missing_version",
+	"migration input has no version field",
+)
 
 // RedriveReportStatuses calls DeriveStatus on every step in the report and
 // updates the Status field to match. Used by MigrateReport (repair) and

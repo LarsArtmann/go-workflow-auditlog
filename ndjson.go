@@ -9,6 +9,7 @@ import (
 	"io"
 
 	"github.com/larsartmann/go-ndjson"
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 // Sentinel errors for NDJSON reading. Re-exported from go-ndjson
@@ -19,10 +20,18 @@ var (
 	ErrOversizedLine = ndjson.ErrOversizedLine
 )
 
-// Domain-specific validation errors.
+// Domain-specific validation errors. Both carry their classification
+// intrinsically: [errorfamily.Rejection] (malformed input), so wrapped
+// validation failures classify without needing a registry entry.
 var (
-	errUnknownEventType = errors.New("unknown event_type")
-	errUnknownPhase     = errors.New("unknown phase")
+	errUnknownEventType = errorfamily.NewRejection(
+		"auditlog.unknown_event_type",
+		"unknown event_type",
+	)
+	errUnknownPhase = errorfamily.NewRejection(
+		"auditlog.unknown_phase",
+		"unknown phase",
+	)
 )
 
 // ReadEvents reads line-delimited JSON events from reader.
@@ -54,7 +63,12 @@ func validateEvent(lineNum int, evt Event) error {
 }
 
 // errNilStreamCallback is returned by [StreamEvents] when fn is nil.
-var errNilStreamCallback = errors.New("auditlog: StreamEvents callback is nil")
+// Rejection: programming error in the caller, code
+// "auditlog.nil_stream_callback".
+var errNilStreamCallback = errorfamily.NewRejection(
+	"auditlog.nil_stream_callback",
+	"auditlog: StreamEvents callback is nil",
+)
 
 // StreamEventsCallback is the per-event callback signature for [StreamEvents].
 // lineNum is the 1-based line number from which the event was parsed (useful

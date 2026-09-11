@@ -3,17 +3,22 @@ package auditlog
 import (
 	"encoding/json/jsontext"
 	"encoding/json/v2"
-	"errors"
 	"fmt"
 	"io"
 	"os"
+
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 // ErrReportLoadFailed wraps errors encountered while loading or decoding a
-// report from a file, reader, or byte slice. Classified as Transient — the
-// caller may retry (e.g. the file might be temporarily locked or mid-write).
-// Consumers can match on it with [errors.Is].
-var ErrReportLoadFailed = errors.New("report load failed")
+// report from a file, reader, or byte slice. It carries its classification
+// intrinsically: [errorfamily.Transient] — the caller may retry (e.g. the
+// file might be temporarily locked or mid-write) — code
+// "auditlog.report_load_failed". Consumers can match on it with [errors.Is].
+var ErrReportLoadFailed = errorfamily.NewTransient(
+	"auditlog.report_load_failed",
+	"report load failed",
+)
 
 // LoadReport reads a JSON WorkflowReport from a file path.
 // This is the inverse of ExportJSON.
@@ -22,9 +27,7 @@ func LoadReport(path string) (WorkflowReport, error) {
 	if err != nil {
 		return WorkflowReport{}, fmt.Errorf("%w: open %q: %w", ErrReportLoadFailed, path, err)
 	}
-	defer func() {
-		_ = f.Close()
-	}()
+	defer f.Close()
 
 	return LoadReportFromReader(f)
 }

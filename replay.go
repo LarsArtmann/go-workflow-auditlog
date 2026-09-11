@@ -1,13 +1,18 @@
 package auditlog
 
 import (
-	"errors"
 	"fmt"
 	"time"
+
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 // ErrReplayNoEvents is returned when ReplayEvents receives zero events.
-var ErrReplayNoEvents = errors.New("no events to replay")
+// Rejection: bad caller input, code "auditlog.replay_no_events".
+var ErrReplayNoEvents = errorfamily.NewRejection(
+	"auditlog.replay_no_events",
+	"no events to replay",
+)
 
 // ReplayEvents reconstructs a WorkflowReport from a flat event stream.
 //

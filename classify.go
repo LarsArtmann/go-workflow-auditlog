@@ -5,9 +5,11 @@ import errorfamily "github.com/larsartmann/go-error-family"
 // RegisterClassifications registers all auditlog sentinel errors into the
 // provided registry with their behavioral [errorfamily.Family] classification.
 //
-// Consumers using a custom [errorfamily.Registry] (rather than the package-level
-// [errorfamily.DefaultRegistry]) must call this to receive classification
-// metadata. For the common case, auditlog's [init] already registers into
+// Errors owned by auditlog carry their family intrinsically (they implement
+// the [errorfamily.Classified] interface), so registration is only required
+// for the re-exported go-ndjson sentinels ([ErrEmpty], [ErrNoEvents],
+// [ErrOversizedLine]) — third-party errors that auditlog does not own. For
+// the common case, auditlog's [init] already registers into
 // [errorfamily.DefaultRegistry], so most consumers never need to call this.
 func RegisterClassifications(reg *errorfamily.Registry) {
 	reg.RegisterClassifications(ErrorClassifications())
@@ -21,6 +23,12 @@ func RegisterClassifications(reg *errorfamily.Registry) {
 // a data-integrity violation ([errorfamily.Corruption] — structurally invalid
 // report), a transient failure ([errorfamily.Transient] — retryable), or a
 // system-level failure ([errorfamily.Infrastructure] — not retryable).
+//
+// Owned sentinels carry the same family intrinsically — the registry is a
+// belt-and-braces back-compat layer, consulted only for errors that do not
+// implement [errorfamily.Classified] themselves (e.g. the re-exported
+// go-ndjson sentinels). A sync test pins the map and the intrinsic families
+// together.
 func ErrorClassifications() map[error]errorfamily.Family {
 	return map[error]errorfamily.Family{
 		// Corruption — internal data integrity violations. The report is
@@ -32,11 +40,16 @@ func ErrorClassifications() map[error]errorfamily.Family {
 
 		// Rejection — bad caller input. The caller sent empty data, oversized
 		// input, invalid config, or asked for an impossible operation.
-		ErrEmpty:             errorfamily.Rejection,
-		ErrNoEvents:          errorfamily.Rejection,
-		ErrOversizedLine:     errorfamily.Rejection,
-		ErrWorkflowIDPathSep: errorfamily.Rejection,
-		ErrReplayNoEvents:    errorfamily.Rejection,
+		// ErrEmpty/ErrNoEvents/ErrOversizedLine are go-ndjson's errors (not
+		// owned here) — the registry is their only classification channel.
+		ErrEmpty:                 errorfamily.Rejection,
+		ErrNoEvents:              errorfamily.Rejection,
+		ErrOversizedLine:         errorfamily.Rejection,
+		ErrWorkflowIDPathSep:     errorfamily.Rejection,
+		ErrReplayNoEvents:        errorfamily.Rejection,
+		ErrMigrationEmptyInput:   errorfamily.Rejection,
+		ErrMigrationMissingVersion: errorfamily.Rejection,
+		ErrFileExists:            errorfamily.Rejection,
 
 		// Transient — temporary failure, worth retrying.
 		ErrReportLoadFailed: errorfamily.Transient,
@@ -47,8 +60,9 @@ func ErrorClassifications() map[error]errorfamily.Family {
 
 		// Private sentinels — classified for completeness so that wrapped
 		// errors carrying these through fmt.Errorf("%w") are classified.
-		errUnknownEventType: errorfamily.Rejection,
-		errUnknownPhase:     errorfamily.Rejection,
+		errUnknownEventType:  errorfamily.Rejection,
+		errUnknownPhase:      errorfamily.Rejection,
+		errNilStreamCallback: errorfamily.Rejection,
 	}
 }
 
