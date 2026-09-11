@@ -459,7 +459,7 @@ func (srv *Server) handleSSE(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Accel-Buffering", "no")
 
 	stream := sse.NewStream(w, r)
-	defer stream.Close()
+	defer func() { _ = stream.Close() }() //nolint:erraudit // client-disconnect close failure is non-actionable
 
 	sub := srv.hub.Subscribe()
 	defer srv.hub.Unsubscribe(sub.id)
@@ -519,7 +519,9 @@ func (srv *Server) sendComplete(stream *sse.Stream) {
 		return
 	}
 
-	_ = stream.Send(sse.Event{Event: "complete", Data: string(data)}) //nolint:erraudit // client-disconnect send failure is non-actionable
+	_ = stream.Send(
+		sse.Event{Event: "complete", Data: string(data)},
+	) //nolint:erraudit // client-disconnect send failure is non-actionable
 }
 
 // --- Provider Factories ---
