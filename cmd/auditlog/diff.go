@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+
+	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
 func runDiff(args []string) error {
@@ -60,42 +62,37 @@ func runDiff(args []string) error {
 		fmt.Println()
 	}
 
-	if diff.DurationDelta != 0 {
-		sign := "+"
-		if diff.DurationDelta < 0 {
-			sign = ""
-		}
+	printDeltaLines(diff)
+	printMembershipLines(diff)
 
-		fmt.Printf("total duration delta: %s%.2f ms\n", sign, diff.DurationDelta)
+	return nil
+}
+
+// printDeltaLines prints the signed aggregate delta lines (duration, critical
+// path, peak concurrency, cached steps). Positive deltas carry an explicit +
+// prefix so direction is always visible.
+func printDeltaLines(diff auditlog.DiffResult) {
+	if diff.DurationDelta != 0 {
+		fmt.Printf("total duration delta: %s%.2f ms\n", deltaSign(diff.DurationDelta), diff.DurationDelta)
 	}
 
 	if diff.CriticalPathDeltaMs != 0 {
-		sign := "+"
-		if diff.CriticalPathDeltaMs < 0 {
-			sign = ""
-		}
-
-		fmt.Printf("critical path delta:  %s%.2f ms\n", sign, diff.CriticalPathDeltaMs)
+		fmt.Printf("critical path delta:  %s%.2f ms\n", deltaSign(diff.CriticalPathDeltaMs), diff.CriticalPathDeltaMs)
 	}
 
 	if diff.PeakConcurrencyDelta != 0 {
-		sign := "+"
-		if diff.PeakConcurrencyDelta < 0 {
-			sign = ""
-		}
-
-		fmt.Printf("peak concurrency delta: %s%d\n", sign, diff.PeakConcurrencyDelta)
+		fmt.Printf("peak concurrency delta: %s%d\n", deltaSign(diff.PeakConcurrencyDelta), diff.PeakConcurrencyDelta)
 	}
 
 	if diff.CachedStepCountDelta != 0 {
-		sign := "+"
-		if diff.CachedStepCountDelta < 0 {
-			sign = ""
-		}
-
-		fmt.Printf("cached steps delta:    %s%d (results reused, not re-verified)\n", sign, diff.CachedStepCountDelta)
+		fmt.Printf("cached steps delta:    %s%d (results reused, not re-verified)\n",
+			deltaSign(diff.CachedStepCountDelta), diff.CachedStepCountDelta)
 	}
+}
 
+// printMembershipLines prints name-list membership changes (critical path and
+// cached attribution) between the two runs.
+func printMembershipLines(diff auditlog.DiffResult) {
 	if len(diff.CriticalPathStepsAdded) > 0 {
 		fmt.Printf("critical path steps added: %v\n", diff.CriticalPathStepsAdded)
 	}
@@ -111,6 +108,14 @@ func runDiff(args []string) error {
 	if len(diff.CachedStepsRemoved) > 0 {
 		fmt.Printf("no longer cached steps: %v\n", diff.CachedStepsRemoved)
 	}
+}
 
-	return nil
+// deltaSign returns the sign prefix for a delta value: "+" for zero and
+// positive values (negatives carry their own "-").
+func deltaSign[T int | float64](v T) string {
+	if v < 0 {
+		return ""
+	}
+
+	return "+"
 }

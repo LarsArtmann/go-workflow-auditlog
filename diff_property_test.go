@@ -277,7 +277,9 @@ func TestDiff_CachedAntiSymmetry(t *testing.T) {
 
 		// With counts derived from steps (as BuildReport does), the count delta
 		// always equals the membership imbalance: len(added) - len(removed).
-		if want := len(forward.CachedStepsAdded) - len(forward.CachedStepsRemoved); forward.CachedStepCountDelta != want {
+		want := len(forward.CachedStepsAdded) - len(forward.CachedStepsRemoved)
+
+		if forward.CachedStepCountDelta != want {
 			t.Errorf("CachedStepCountDelta=%d should equal len(added)-len(removed)=%d",
 				forward.CachedStepCountDelta, want)
 		}

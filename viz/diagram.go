@@ -20,7 +20,7 @@ func stepLabel(step StepInfo) string {
 	}
 
 	if step.Cached {
-		label = fmt.Sprintf("%s ⚡cached", label)
+		label += " ⚡cached"
 	}
 
 	if step.AttemptCount > 1 {

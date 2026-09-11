@@ -193,6 +193,7 @@ func cachedStepNames(steps []StepInfo) []string {
 			names = append(names, s.Name)
 		}
 	}
+
 	return names
 }
 

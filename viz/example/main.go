@@ -173,6 +173,7 @@ type CachedDetectStep struct {
 
 func (s *CachedDetectStep) Do(ctx context.Context) error {
 	traceStep("detect: result cache hit, reusing stored report")
+
 	s.Hit = true
 
 	return auditlog.MarkCached(ctx)
@@ -276,9 +277,11 @@ func printReportSummary(report auditlog.WorkflowReport) {
 	fmt.Printf("Failed:       %d\n", report.FailedCount)
 	fmt.Printf("Skipped:      %d\n", report.SkippedCount)
 	fmt.Printf("Canceled:     %d\n", report.CanceledCount)
+
 	if report.CachedStepCount > 0 {
 		fmt.Printf("Cached:       %d (results reused, not re-verified)\n", report.CachedStepCount)
 	}
+
 	fmt.Printf("Events:       %d\n", report.EventCount)
 	fmt.Printf("Total time:   %.2fms\n", report.TotalDurationMs)
 	fmt.Printf("Succeeded:    %v\n", report.WorkflowSucceeded)

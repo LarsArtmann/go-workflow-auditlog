@@ -148,6 +148,7 @@ func writeCachedDiffReports(t *testing.T) (string, string) {
 	report := func(cached bool) string {
 		cachedCount := ""
 		cachedFlag := ""
+
 		if cached {
 			cachedCount = `,"cached_step_count":1`
 			cachedFlag = `,"cached":true`

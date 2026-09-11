@@ -319,7 +319,8 @@ func TestDiff_CachedDeltas(t *testing.T) {
 		t.Errorf("reversed CachedStepsAdded = %v, want [a]", reverse.CachedStepsAdded)
 	}
 
-	if len(reverse.CachedStepsRemoved) != 2 || reverse.CachedStepsRemoved[0] != "b" || reverse.CachedStepsRemoved[1] != "c" {
+	if len(reverse.CachedStepsRemoved) != 2 ||
+		reverse.CachedStepsRemoved[0] != "b" || reverse.CachedStepsRemoved[1] != "c" {
 		t.Errorf("reversed CachedStepsRemoved = %v, want [b c]", reverse.CachedStepsRemoved)
 	}
 }
