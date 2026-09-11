@@ -158,7 +158,16 @@ func TestReport_WriteHTML_GoldenContent(t *testing.T) {
 
 	html := buf.String()
 
-	// --- Structural integrity ---
+	assertGoldenStructure(t, html)
+	assertGoldenPanelsAndData(t, html)
+	assertGoldenSemantics(t, html)
+}
+
+// assertGoldenStructure checks the document skeleton: doctype, top-level
+// tags, strict CSP header, and exactly five script blocks.
+func assertGoldenStructure(t *testing.T, html string) {
+	t.Helper()
+
 	if !strings.HasPrefix(html, "<!DOCTYPE html>") {
 		t.Error("expected output to start with <!DOCTYPE html>")
 	}
@@ -177,6 +186,18 @@ func TestReport_WriteHTML_GoldenContent(t *testing.T) {
 		t.Errorf("expected exactly 5 </script> tags, got %d", closeScripts)
 	}
 
+	// --- CSP policy is strict ---
+	csp := "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
+	if !strings.Contains(html, csp) {
+		t.Errorf("expected strict CSP policy %q in HTML output", csp)
+	}
+}
+
+// assertGoldenPanelsAndData checks that all JSON data blocks and all five
+// dashboard tab panels are present.
+func assertGoldenPanelsAndData(t *testing.T, html string) {
+	t.Helper()
+
 	// --- JSON data blocks present ---
 	for _, id := range []string{`id="report-data"`, `id="type-metadata"`, `id="dag-data"`} {
 		if !strings.Contains(html, id) {
@@ -190,6 +211,13 @@ func TestReport_WriteHTML_GoldenContent(t *testing.T) {
 			t.Errorf("expected tab panel %q in HTML output", tabID)
 		}
 	}
+}
+
+// assertGoldenSemantics checks that the golden report's content (step names,
+// IDs, embedded CSS/JS, graph enhancement markers, duration labels) made it
+// into the rendered output.
+func assertGoldenSemantics(t *testing.T, html string) {
+	t.Helper()
 
 	// --- Golden report content injected ---
 	for _, stepName := range []string{"fetch", "transform", "save"} {
@@ -223,12 +251,6 @@ func TestReport_WriteHTML_GoldenContent(t *testing.T) {
 	// Check for a known JS function/variable to confirm dashboard.js is embedded
 	if !strings.Contains(html, "addEventListener") {
 		t.Error("expected dashboard JS in embedded <script> block")
-	}
-
-	// --- CSP policy is strict ---
-	csp := "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
-	if !strings.Contains(html, csp) {
-		t.Errorf("expected strict CSP policy %q in HTML output", csp)
 	}
 
 	// --- Graph visualization enhancements present ---
