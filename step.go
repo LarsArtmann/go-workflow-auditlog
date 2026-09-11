@@ -63,9 +63,9 @@ type StepInfo struct {
 	// records WHERE the result came from, so reports never present a reused
 	// answer as freshly verified work. Per-attempt cache hits are preserved in
 	// the Event stream (each attempt_end carries its own Cached flag).
-	Cached        bool          `json:"cached,omitempty"`
-	HasRetry      bool          `json:"has_retry"`
-	HasTimeout    bool          `json:"has_timeout"`
+	Cached     bool `json:"cached,omitempty"`
+	HasRetry   bool `json:"has_retry"`
+	HasTimeout bool `json:"has_timeout"`
 }
 
 // HasError returns true if the step recorded an error.

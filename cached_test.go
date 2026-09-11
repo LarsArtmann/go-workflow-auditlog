@@ -70,7 +70,7 @@ func TestMarkCached_DisabledAuditorInjectsNothing(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 
-	w := &flow.Workflow{} //nolint:exhaustruct
+	w := &flow.Workflow{}
 	step := testhelpers.NewCached("no-audit")
 	w.Add(flow.Step(step))
 	a.Attach(w)

@@ -123,6 +123,7 @@ func (r WorkflowReport) Validate() error {
 // instead of freshly verified.
 func validateCachedStepCount(r WorkflowReport) error {
 	cached := 0
+
 	for _, step := range r.Steps {
 		if step.Cached {
 			cached++

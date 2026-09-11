@@ -66,6 +66,7 @@ func WithTimeRange(from, to time.Time) ReportOption {
 // re-verify this run?".
 func WithCachedSteps() ReportOption {
 	cached := true
+
 	return func(f *reportFilter) { f.cached = &cached }
 }
 
@@ -74,6 +75,7 @@ func WithCachedSteps() ReportOption {
 // Applying both WithCachedSteps and WithUncachedSteps keeps the last one.
 func WithUncachedSteps() ReportOption {
 	cached := false
+
 	return func(f *reportFilter) { f.cached = &cached }
 }
 

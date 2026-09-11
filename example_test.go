@@ -73,6 +73,32 @@ func ExampleReplayEvents() {
 	// Output: reconstructed: 1 steps, 2 events
 }
 
+// ExampleMarkCached demonstrates honest attribution of cache hits: a step
+// whose result was served from a cache reports both WHERE the result came
+// from (Cached) and that it still succeeded on its own merits (Status).
+// WithCachedSteps / WithUncachedSteps answer "what did we NOT re-verify
+// this run?".
+func ExampleMarkCached() {
+	report := auditlog.WorkflowReport{
+		WorkflowID: "detect-pipeline",
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "gofmt:detect"}, Status: auditlog.StepStatusSucceeded, Cached: true},
+			{StepRef: auditlog.StepRef{Name: "erraudit:detect"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	finalizeForExample(&report)
+
+	fresh := report.Filtered(auditlog.WithUncachedSteps())
+
+	fmt.Printf("%d of %d steps served from cache\n", report.CachedStepCount, report.StepCount)
+	fmt.Println("executed fresh:", fresh.Steps[0].Name)
+
+	// Output:
+	// 1 of 2 steps served from cache
+	// executed fresh: erraudit:detect
+}
+
 // ExampleWorkflowReport_Summary demonstrates the one-line summary of a report,
 // which uses wall-clock duration and includes the failure reason when the
 // workflow did not succeed.
