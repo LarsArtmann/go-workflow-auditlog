@@ -86,6 +86,27 @@ func (s *SlowStep) Do(ctx context.Context) error {
 // String returns the step name.
 func (s *SlowStep) String() string { return s.Name }
 
+// CachedStep is a test step that succeeds by reusing a stored result and
+// reports that honestly via auditlog.MarkCached. It models a cache-hit
+// detector: the step body runs (Before/AfterStep fire) but the "work" is a
+// cache lookup, so the audit trail distinguishes it from fresh execution.
+type CachedStep struct {
+	Name string
+	Ran  bool
+}
+
+// Do implements flow.Steper. The returned error is the MarkCached result:
+// nil when the auditor injected the step context, ErrMarkCachedNoStepContext
+// otherwise.
+func (s *CachedStep) Do(ctx context.Context) error {
+	s.Ran = true
+
+	return auditlog.MarkCached(ctx)
+}
+
+// String returns the step name.
+func (s *CachedStep) String() string { return s.Name }
+
 // TestError is a simple error type used by test steps.
 type TestError string
 
@@ -107,6 +128,9 @@ func NewFlaky(name string, failUntil int) *FlakyStep {
 
 // NewSlow returns a new SlowStep with the given name and duration.
 func NewSlow(name string, d time.Duration) *SlowStep { return &SlowStep{Name: name, D: d} }
+
+// NewCached returns a new CachedStep with the given name.
+func NewCached(name string) *CachedStep { return &CachedStep{Name: name} }
 
 // StepFixture builds a StepInfo with just a name and status.
 func StepFixture(name string, status auditlog.StepStatus) auditlog.StepInfo {

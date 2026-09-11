@@ -44,7 +44,7 @@ func TestReport_WriteCSV(t *testing.T) {
 		"step_id", "step_name", "step_type", "status",
 		"attempt_count", "max_attempts",
 		"started_at", "finished_at", "duration_ms",
-		"has_retry", "has_timeout", "error",
+		"has_retry", "has_timeout", "cached", "error",
 		"failure_reason",
 		"dependencies", "dependents",
 	}
@@ -92,8 +92,8 @@ func TestReport_WriteTSV(t *testing.T) {
 	}
 
 	header := strings.Split(lines[0], "\t")
-	if len(header) != 15 {
-		t.Errorf("expected 15 columns in header, got %d", len(header))
+	if len(header) != 16 {
+		t.Errorf("expected 16 columns in header, got %d", len(header))
 	}
 
 	firstRow := strings.Split(lines[1], "\t")
@@ -191,7 +191,7 @@ func TestReport_WriteCSV_SpecialChars_RoundTrip(t *testing.T) {
 
 	const (
 		nameCol = 1  // step_name
-		depCol  = 13 // dependencies
+		depCol  = 14 // dependencies
 	)
 
 	for i, want := range names {
@@ -301,7 +301,7 @@ func TestReport_WriteCSV_DependencySemicolonCollision(t *testing.T) {
 		t.Fatalf("parse CSV: %v", err)
 	}
 
-	const depCol = 13
+	const depCol = 14
 
 	depCell := records[1][depCol]
 
@@ -346,7 +346,7 @@ func ExampleWorkflowReport_WriteCSV() {
 
 	_ = report.WriteCSV(os.Stdout)
 
-	// Output: step_id,step_name,step_type,status,attempt_count,max_attempts,started_at,finished_at,duration_ms,has_retry,has_timeout,error,failure_reason,dependencies,dependents
+	// Output: step_id,step_name,step_type,status,attempt_count,max_attempts,started_at,finished_at,duration_ms,has_retry,has_timeout,cached,error,failure_reason,dependencies,dependents
 	// 1,fetch,,succeeded,0,0,,,,false,false,,,,
 }
 

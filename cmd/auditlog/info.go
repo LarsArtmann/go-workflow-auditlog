@@ -54,6 +54,10 @@ func runInfo(args []string) error {
 		fmt.Printf("  running:     %d\n", report.RunningCount)
 	}
 
+	if report.CachedStepCount > 0 {
+		fmt.Printf("  cached:      %d (results reused, not re-verified)\n", report.CachedStepCount)
+	}
+
 	fmt.Printf("\ntotal duration:   %.2f ms\n", report.TotalDurationMs)
 	fmt.Printf("wall clock:       %.2f ms\n", report.WallClockDurationMs)
 
@@ -106,6 +110,11 @@ func printSteps(report auditlog.WorkflowReport) {
 			dur = fmt.Sprintf("%.2fms", *step.DurationMs)
 		}
 
-		fmt.Printf("  - %-20s [%s] %s\n", step.Name, step.Status, dur)
+		cached := ""
+		if step.Cached {
+			cached = " \u26a1cached"
+		}
+
+		fmt.Printf("  - %-20s [%s]%s %s\n", step.Name, step.Status, cached, dur)
 	}
 }

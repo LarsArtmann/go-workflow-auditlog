@@ -50,6 +50,7 @@ func ErrorClassifications() map[error]errorfamily.Family {
 		ErrMigrationEmptyInput:     errorfamily.Rejection,
 		ErrMigrationMissingVersion: errorfamily.Rejection,
 		ErrFileExists:              errorfamily.Rejection,
+		ErrMarkCachedNoStepContext: errorfamily.Rejection,
 
 		// Transient — temporary failure, worth retrying.
 		ErrReportLoadFailed: errorfamily.Transient,

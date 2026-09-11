@@ -40,6 +40,9 @@
         },
         "failure_reason": {
           "type": "string"
+        },
+        "cached": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -100,6 +103,9 @@
         },
         "failure_reason": {
           "type": "string"
+        },
+        "cached": {
+          "type": "boolean"
         },
         "has_retry": {
           "type": "boolean"
@@ -170,6 +176,9 @@
       "type": "integer"
     },
     "running_count": {
+      "type": "integer"
+    },
+    "cached_step_count": {
       "type": "integer"
     },
     "total_duration_ms": {

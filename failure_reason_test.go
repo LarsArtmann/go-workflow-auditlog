@@ -295,10 +295,10 @@ func TestCSV_FailureReasonColumn(t *testing.T) {
 		t.Fatalf("parse CSV: %v", err)
 	}
 
-	const failureReasonCol = 12
+	const failureReasonCol = 13
 
 	if records[0][failureReasonCol] != "failure_reason" {
-		t.Fatalf("expected header[12]=failure_reason, got %q", records[0][failureReasonCol])
+		t.Fatalf("expected header[13]=failure_reason, got %q", records[0][failureReasonCol])
 	}
 
 	if got := records[1][failureReasonCol]; got != "user_error" {
