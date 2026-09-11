@@ -72,8 +72,8 @@ github.com/larsartmann/go-output/testhelpers/graphtest v0.37.0 h1:nG8o0DeTKVCRgC
 github.com/larsartmann/go-output/testhelpers/graphtest v0.37.0/go.mod h1:6/wyVNbz5sGg02mBqQlWx8TX74X6Pcq6SW2xigOyfkU=
 github.com/larsartmann/go-output/tree v0.38.0 h1:w2WJplQv6yHf3T8NqSS/+7pT9pV/BBxLFDoA0UYBWSY=
 github.com/larsartmann/go-output/tree v0.38.0/go.mod h1:5C3IFA5bUV22Lu5Rwl47Rt77Mqv3wSBtrpGrGaOTZGo=
-github.com/larsartmann/go-workflow-auditlog v0.10.0 h1:K6vhYtaaavLCj53nwtB9BScUzjlkM+vXHn4GdLIOGi8=
-github.com/larsartmann/go-workflow-auditlog v0.10.0/go.mod h1:nH8gNp5WSEAIfI/iK7jLvQb6MPLejbwebuNuqxdvx+Q=
+github.com/larsartmann/go-workflow-auditlog v0.11.0 h1:L4N1j3gldL/DDBPuK/F0eWu5Gg+HeklsHuUR95b4neM=
+github.com/larsartmann/go-workflow-auditlog v0.11.0/go.mod h1:nH8gNp5WSEAIfI/iK7jLvQb6MPLejbwebuNuqxdvx+Q=
 github.com/lucasb-eyer/go-colorful v1.4.1 h1:1EO+WB73+EH8EVbzlrG3KLAfEypQWVHIBqlTf+2hNss=
 github.com/lucasb-eyer/go-colorful v1.4.1/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/mattn/go-runewidth v0.0.30 h1:+KUuiDA4fF0R1p5FeueHefjDm+GIM+kWfFnDjybOPgk=
