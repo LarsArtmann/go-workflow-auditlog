@@ -31,8 +31,8 @@ func writeSingleStepHTML(t *testing.T, step flow.Steper) string {
 // TestWriteHTML_CachedStepHonesty pins the full data flow for cache-hit
 // attribution: the cached flag must reach the embedded report JSON, and the
 // embedded dashboard JS must know how to surface it (step badge, events chip,
-// graph node badge). Without all three, a reused result could masquerade as
-// freshly executed work.
+// graph node badge, "Cached only" filter chip, and the summary stat card).
+// Without these, a reused result could masquerade as freshly executed work.
 func TestWriteHTML_CachedStepHonesty(t *testing.T) {
 	t.Parallel()
 
@@ -42,6 +42,12 @@ func TestWriteHTML_CachedStepHonesty(t *testing.T) {
 	testhelpers.AssertContains(t, out, "config-badge cached", "dashboard JS must render the step cached badge")
 	testhelpers.AssertContains(t, out, "cached-chip", "dashboard JS must render the events cached chip")
 	testhelpers.AssertContains(t, out, "cached-badge", "dashboard JS must render the graph cached badge")
+	testhelpers.AssertContains(t, out, `id="step-cached-only"`, "dashboard must offer the Cached-only filter chip")
+	testhelpers.AssertContains(t, out, "toggleCachedOnly", "dashboard JS must wire the Cached-only filter chip")
+	testhelpers.AssertContains(t, out, "setupCachedOnlyBadge", "dashboard JS must badge the Cached-only chip with the count")
+	testhelpers.AssertContains(t, out, `data-cached=`, "step rows must carry the cached dataset flag for filtering")
+	testhelpers.AssertContains(t, out, `cls: "cache"`, "stats row must include the Cached summary card")
+	testhelpers.AssertContains(t, out, ".stat-card.cache", "stats CSS must style the Cached summary card")
 }
 
 func TestWriteHTML_BasicReport(t *testing.T) {

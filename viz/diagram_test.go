@@ -26,14 +26,14 @@ func TestDiagram_CachedMarker(t *testing.T) {
 
 	writers := []struct {
 		name  string
-		write func(viz.WorkflowReport, io.Writer) error
+		write func(io.Writer) error
 	}{
-		{"mermaid", viz.WriteMermaid},
-		{"plantuml", viz.WritePlantUML},
-		{"dot", viz.WriteGraphviz},
-		{"d2", viz.WriteD2},
-		{"tree", viz.WriteTree},
-		{"html-tree", viz.WriteHTMLTree},
+		{"mermaid", func(wr io.Writer) error { return viz.WriteMermaid(report, wr) }},
+		{"plantuml", func(wr io.Writer) error { return viz.WritePlantUML(report, wr) }},
+		{"dot", func(wr io.Writer) error { return viz.WriteGraphviz(report, wr) }},
+		{"d2", func(wr io.Writer) error { return viz.WriteD2(report, wr) }},
+		{"tree", func(wr io.Writer) error { return viz.WriteTree(report, wr) }},
+		{"html-tree", func(wr io.Writer) error { return viz.WriteHTMLTree(report, wr) }},
 	}
 
 	for _, tc := range writers {
@@ -42,7 +42,7 @@ func TestDiagram_CachedMarker(t *testing.T) {
 
 			var buf strings.Builder
 
-			if err := tc.write(report, &buf); err != nil {
+			if err := tc.write(&buf); err != nil {
 				t.Fatalf("write %s: %v", tc.name, err)
 			}
 

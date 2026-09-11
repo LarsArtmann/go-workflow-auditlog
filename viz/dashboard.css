@@ -198,6 +198,12 @@ header {
 .stat-card.success::before {
   background: var(--success);
 }
+.stat-card.cache .value {
+  color: var(--cache);
+}
+.stat-card.cache::before {
+  background: var(--cache);
+}
 
 .tab-bar {
   display: flex;

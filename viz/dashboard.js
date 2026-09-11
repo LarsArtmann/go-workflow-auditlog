@@ -182,6 +182,9 @@ document.getElementById("stats").innerHTML = [
   { label: "Events", value: report.event_count },
   { label: "Succeeded", value: report.succeeded_count, cls: "success" },
   { label: "Failed", value: errorCount, cls: errorCount > 0 ? "error" : "success" },
+  report.cached_step_count
+    ? { label: "Cached", value: report.cached_step_count, cls: "cache" }
+    : null,
   { label: "Wall Clock", value: humanizeDuration(report.wall_clock_duration_ms) },
   report.peak_concurrency ? { label: "Peak Concurrency", value: report.peak_concurrency } : null,
   report.critical_path_duration_ms
@@ -350,6 +353,7 @@ var allSteps = report.steps.map(function (s) {
     esc(s.status) +
     "</span>";
   var hasError = s.status === "failed" || s.status === "canceled" ? "1" : "0";
+  var cachedFlag = s.cached ? "1" : "0";
   var rowCls =
     s.status === "failed" ? " row-failed" : s.status === "canceled" ? " row-canceled" : "";
   return (
@@ -376,6 +380,9 @@ var allSteps = report.steps.map(function (s) {
     '"' +
     ' data-has-error="' +
     hasError +
+    '"' +
+    ' data-cached="' +
+    cachedFlag +
     '">' +
     '<td class="mono" title="' +
     (s.started_at ? "Started: " + esc(s.started_at) : "") +
@@ -483,12 +490,15 @@ function applyStepView() {
   var q = document.getElementById("step-search").value.toLowerCase();
   var errorsOnly =
     document.getElementById("step-errors-only").getAttribute("aria-pressed") === "true";
+  var cachedOnly =
+    document.getElementById("step-cached-only").getAttribute("aria-pressed") === "true";
   var searching = q.length > 0;
   var visible = 0;
   stepRows.forEach(function (tr) {
     var show = true;
     if (searching && tr.dataset.search.indexOf(q) < 0) show = false;
     if (errorsOnly && tr.dataset.hasError !== "1") show = false;
+    if (cachedOnly && tr.dataset.cached !== "1") show = false;
     if (show && !stepExpanded && visible >= STEP_PAGE_SIZE) show = false;
     tr.style.display = show ? "" : "none";
     if (show) visible++;
@@ -498,10 +508,12 @@ function applyStepView() {
     var match = true;
     if (searching && tr.dataset.search.indexOf(q) < 0) match = false;
     if (errorsOnly && tr.dataset.hasError !== "1") match = false;
+    if (cachedOnly && tr.dataset.cached !== "1") match = false;
     return match;
   }).length;
   var countEl = document.getElementById("step-result-count");
-  countEl.textContent = searching || errorsOnly ? filtered + " / " + total + " steps" : "";
+  countEl.textContent =
+    searching || errorsOnly || cachedOnly ? filtered + " / " + total + " steps" : "";
   syncStepMoreBar(visible);
 }
 
@@ -519,6 +531,7 @@ document.querySelectorAll("#tab-steps th.sortable").forEach(function (th) {
 });
 
 document.getElementById("step-errors-only").addEventListener("click", toggleErrorsOnly);
+document.getElementById("step-cached-only").addEventListener("click", toggleCachedOnly);
 
 (function setupErrorsOnlyBadge() {
   var errorSteps = report.steps.filter(function (s) {
@@ -532,8 +545,25 @@ document.getElementById("step-errors-only").addEventListener("click", toggleErro
   }
 })();
 
+(function setupCachedOnlyBadge() {
+  if (report.cached_step_count > 0) {
+    var btn = document.getElementById("step-cached-only");
+    btn.innerHTML = "Cached only <strong>(" + report.cached_step_count + ")</strong>";
+    btn.style.borderColor = "var(--cache)";
+    btn.style.color = "var(--cache)";
+  }
+})();
+
 function toggleErrorsOnly() {
   var btn = document.getElementById("step-errors-only");
+  var pressed = btn.getAttribute("aria-pressed") === "true";
+  btn.setAttribute("aria-pressed", !pressed);
+  btn.classList.toggle("active", !pressed);
+  applyStepView();
+}
+
+function toggleCachedOnly() {
+  var btn = document.getElementById("step-cached-only");
   var pressed = btn.getAttribute("aria-pressed") === "true";
   btn.setAttribute("aria-pressed", !pressed);
   btn.classList.toggle("active", !pressed);
