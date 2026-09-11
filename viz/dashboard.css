@@ -498,7 +498,7 @@ tr:hover td {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  min-height: 500px;
+  height: 500px;
   position: relative;
   overflow: hidden;
   cursor: grab;

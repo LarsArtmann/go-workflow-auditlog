@@ -258,9 +258,6 @@
 }
 
 /* === Graph Container === */
-#graph-container {
-  min-height: 500px;
-}
 .graph-placeholder {
   display: flex;
   align-items: center;
