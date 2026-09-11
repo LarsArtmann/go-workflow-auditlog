@@ -92,6 +92,7 @@
     stepsEmpty: document.getElementById("steps-empty"),
     stepSearch: document.getElementById("step-search"),
     stepErrorsOnly: document.getElementById("step-errors-only"),
+    stepCachedOnly: document.getElementById("step-cached-only"),
     stepResultCount: document.getElementById("step-result-count"),
     eventsTbody: document.getElementById("events-tbody"),
     eventsEmpty: document.getElementById("events-empty"),
@@ -395,6 +396,19 @@
       stats.push({ label: "Peak Concurrency", value: r.peak_concurrency });
     }
 
+    // cached_step_count arrives with snapshot/complete reports; the fallback
+    // count keeps the stat live during mid-run renders.
+    var cachedCount = r.cached_step_count;
+    if (!cachedCount) {
+      cachedCount = state.steps.filter(function (s) {
+        return s.cached;
+      }).length;
+    }
+
+    if (cachedCount) {
+      stats.push({ label: "Cached", value: cachedCount, cls: "cache" });
+    }
+
     if (r.critical_path_duration_ms) {
       stats.push({ label: "Critical Path", value: humanizeDuration(r.critical_path_duration_ms) });
     }
@@ -674,6 +688,7 @@
     tr.classList.toggle("row-failed", s.status === "failed");
     tr.classList.toggle("row-canceled", s.status === "canceled");
     tr.setAttribute("data-has-error", s.status === "failed" || s.status === "canceled" ? "1" : "0");
+    tr.setAttribute("data-cached", s.cached ? "1" : "0");
 
     // Cell 2: status badge
     var errMsg = s.error ? esc(s.error) : "";
@@ -726,10 +741,12 @@
 
     var q = (els.stepSearch.value || "").toLowerCase();
     var errorsOnly = els.stepErrorsOnly.getAttribute("aria-pressed") === "true";
-    var filtering = q.length > 0 || errorsOnly;
+    var cachedOnly = els.stepCachedOnly.getAttribute("aria-pressed") === "true";
+    var filtering = q.length > 0 || errorsOnly || cachedOnly;
 
     var visibleSteps = sortedSteps.filter(function (s) {
       if (errorsOnly && s.status !== "failed" && s.status !== "canceled") return false;
+      if (cachedOnly && !s.cached) return false;
       if (q.length > 0) {
         var searchText = (
           s.step_name +
@@ -780,6 +797,7 @@
           "data-has-error",
           step.status === "failed" || step.status === "canceled" ? "1" : "0",
         );
+        tr.setAttribute("data-cached", step.cached ? "1" : "0");
         tr.setAttribute("tabindex", "-1");
         tr.setAttribute("data-step-name", step.step_name);
         tr.setAttribute(
@@ -1921,6 +1939,13 @@
     var pressed = els.stepErrorsOnly.getAttribute("aria-pressed") === "true";
     els.stepErrorsOnly.setAttribute("aria-pressed", !pressed);
     els.stepErrorsOnly.classList.toggle("active", !pressed);
+    renderStepsTable();
+  });
+
+  els.stepCachedOnly.addEventListener("click", function () {
+    var pressed = els.stepCachedOnly.getAttribute("aria-pressed") === "true";
+    els.stepCachedOnly.setAttribute("aria-pressed", !pressed);
+    els.stepCachedOnly.classList.toggle("active", !pressed);
     renderStepsTable();
   });
 

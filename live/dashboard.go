@@ -88,6 +88,7 @@ const liveTemplate = `<!DOCTYPE html>
     <label for="step-search" class="sr-only">Filter steps by name</label>
     <input type="text" id="step-search" placeholder="Filter steps..." aria-label="Filter steps by name">
     <button class="chip" id="step-errors-only" aria-pressed="false" title="Show only steps with errors">Errors only</button>
+    <button class="chip" id="step-cached-only" aria-pressed="false" title="Show only steps served from a cache">Cached only</button>
     <span id="step-result-count" style="font-size:0.75rem;color:var(--text-dim);font-family:var(--font-mono)" aria-live="polite"></span>
   </div>
   <div class="table-wrap">

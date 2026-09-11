@@ -163,6 +163,23 @@ func (s *SlowEndpointStep) Do(ctx context.Context) error {
 
 func (s *SlowEndpointStep) String() string { return "slow-endpoint" }
 
+// CachedDetectStep models a warm result cache: a previous run already produced
+// the detection result, so this attempt reuses it instead of re-executing.
+// MarkCached attributes the hit in the audit trail — the step still succeeds,
+// but reports honestly that its result came from cache.
+type CachedDetectStep struct {
+	Hit bool
+}
+
+func (s *CachedDetectStep) Do(ctx context.Context) error {
+	traceStep("detect: result cache hit, reusing stored report")
+	s.Hit = true
+
+	return auditlog.MarkCached(ctx)
+}
+
+func (s *CachedDetectStep) String() string { return "detect" }
+
 // newAuditor builds the audit log Auditor used by the demo, wiring an OnEvent
 // callback that pretty-prints each event to stdout.
 func newAuditor() *auditlog.Auditor {
@@ -204,11 +221,16 @@ func buildWorkflow() *flow.Workflow {
 	save := &SaveStep{Path: "/tmp/output.json"}
 	notify := &NotifyStep{Msg: "pipeline complete"}
 	flaky := &FlakyStep{}
+	detect := &CachedDetectStep{}
 
 	w := &flow.Workflow{}
 	w.Add(
 		// Linear pipeline: fetch → validate → transform → save.
 		flow.Step(fetch),
+
+		// A detect step served from a warm result cache (demonstrates
+		// cache-hit attribution: succeeded AND honestly marked as cached).
+		flow.Step(detect).DependsOn(fetch),
 		flow.Step(validate).DependsOn(fetch).Input(func(_ context.Context, v *ValidateStep) error {
 			v.Input = fetch.Data
 
@@ -254,6 +276,9 @@ func printReportSummary(report auditlog.WorkflowReport) {
 	fmt.Printf("Failed:       %d\n", report.FailedCount)
 	fmt.Printf("Skipped:      %d\n", report.SkippedCount)
 	fmt.Printf("Canceled:     %d\n", report.CanceledCount)
+	if report.CachedStepCount > 0 {
+		fmt.Printf("Cached:       %d (results reused, not re-verified)\n", report.CachedStepCount)
+	}
 	fmt.Printf("Events:       %d\n", report.EventCount)
 	fmt.Printf("Total time:   %.2fms\n", report.TotalDurationMs)
 	fmt.Printf("Succeeded:    %v\n", report.WorkflowSucceeded)
@@ -270,6 +295,10 @@ func printStepDetails(report auditlog.WorkflowReport) {
 
 		if step.DurationMs != nil {
 			fmt.Printf(" (%.2fms)", *step.DurationMs)
+		}
+
+		if step.Cached {
+			fmt.Print(" ⚡cached")
 		}
 
 		if len(step.Dependencies) > 0 {

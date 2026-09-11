@@ -84,8 +84,9 @@ func TestDashboardJS_StructuralIntegrity(t *testing.T) {
 
 // TestDashboardJS_CachedAttribution validates that cache-hit attribution is
 // surfaced on every live surface: step-state ingestion, row config badges,
-// event chips, and graph node badges. A reused result must never render as
-// freshly executed work.
+// event chips, graph node badges, the "Cached only" filter chip, and the
+// summary stat card. A reused result must never render as freshly executed
+// work.
 func TestDashboardJS_CachedAttribution(t *testing.T) {
 	t.Parallel()
 
@@ -104,6 +105,11 @@ func TestDashboardJS_CachedAttribution(t *testing.T) {
 		"config-badge cached",
 		"cached-chip",
 		"cached-badge",
+		"stepCachedOnly",
+		"cachedOnly && !s.cached",
+		`"data-cached"`,
+		`cls: "cache"`,
+		"r.cached_step_count",
 	}
 
 	for _, pat := range requiredPatterns {

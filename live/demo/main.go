@@ -2,7 +2,7 @@
 //
 // It runs a multi-step data pipeline with intentional delays so you can
 // watch the dashboard update in real time as steps start, succeed, fail,
-// and retry.
+// retry, and reuse cached results.
 //
 // Run with:
 //
@@ -85,6 +85,19 @@ func (s *notifyStep) Do(_ context.Context) error {
 	return nil
 }
 
+// cachedDetectStep models a warm result cache: a previous run already did the
+// detect work, so this attempt reuses the stored result instead of
+// re-executing it. MarkCached attributes the cache hit in the audit trail —
+// the step still shows as succeeded, but honestly marked as cached.
+type cachedDetectStep struct{}
+
+func (s *cachedDetectStep) String() string { return "detect" }
+func (s *cachedDetectStep) Do(ctx context.Context) error {
+	time.Sleep(50 * time.Millisecond)
+
+	return auditlog.MarkCached(ctx)
+}
+
 func main() {
 	server, auditor, err := live.New(auditlog.Config{
 		WorkflowID: "data-pipeline-demo",
@@ -104,9 +117,11 @@ func main() {
 	enrich := &enrichStep{}
 	save := &flakySaveStep{}
 	notify := &notifyStep{}
+	detect := &cachedDetectStep{}
 
 	w.Add(
-		flow.Step(fetch),
+		flow.Step(detect),
+		flow.Step(fetch).DependsOn(detect),
 		flow.Step(validate).DependsOn(fetch),
 		flow.Step(transform).DependsOn(validate),
 		flow.Step(enrich).DependsOn(validate),
@@ -144,8 +159,8 @@ func main() {
 	server.SignalComplete()
 
 	report := auditor.Report()
-	fmt.Printf("\nFinal: %d steps, %d events, succeeded=%v\n",
-		report.StepCount, report.EventCount, report.WorkflowSucceeded)
+	fmt.Printf("\nFinal: %d steps, %d events, succeeded=%v, cached=%d\n",
+		report.StepCount, report.EventCount, report.WorkflowSucceeded, report.CachedStepCount)
 	fmt.Println("\nDashboard is live. Press Ctrl+C to exit.")
 
 	select {}
