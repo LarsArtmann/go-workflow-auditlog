@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"cmp"
+
 	flow "github.com/Azure/go-workflow"
 )
 
@@ -175,7 +177,7 @@ func sortEventsByTime(events []Event) []Event {
 			return cmp
 		}
 
-		return a.Sequence - b.Sequence
+		return cmp.Compare(a.Sequence, b.Sequence)
 	})
 
 	return sorted

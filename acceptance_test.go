@@ -6,6 +6,8 @@ import (
 	"sync"
 	"testing"
 
+	"cmp"
+
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
@@ -105,7 +107,7 @@ func TestAcceptance_OnEventStreamIsOrderedAndTagged(t *testing.T) {
 	// OnEvent delivery order is NOT guaranteed — concurrent steps fire it from
 	// their own goroutines. Sort by Sequence before checking monotonicity.
 	slices.SortFunc(collected, func(a, b auditlog.Event) int {
-		return a.Sequence - b.Sequence
+		return cmp.Compare(a.Sequence, b.Sequence)
 	})
 
 	// Sequences are strictly increasing once ordered.
