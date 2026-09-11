@@ -69,6 +69,7 @@ type WorkflowReport struct {
 	CanceledCount          int       `json:"canceled_count"`
 	PendingCount           int       `json:"pending_count"`
 	RunningCount           int       `json:"running_count"`
+	CachedStepCount        int       `json:"cached_step_count,omitempty"`
 	TotalDurationMs        float64   `json:"total_duration_ms"`
 	WallClockDurationMs    float64   `json:"wall_clock_duration_ms"`
 	WorkflowSucceeded      bool      `json:"workflow_succeeded"`
@@ -109,8 +110,31 @@ func (r WorkflowReport) Validate() error {
 	}
 
 	err := validateStatusCounts(r)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return validateCachedStepCount(r)
+}
+
+// validateCachedStepCount verifies the denormalized CachedStepCount field
+// matches the actual number of steps with Cached=true. Without this check a
+// report could silently understate how many results were reused from cache
+// instead of freshly verified.
+func validateCachedStepCount(r WorkflowReport) error {
+	cached := 0
+	for _, step := range r.Steps {
+		if step.Cached {
+			cached++
+		}
+	}
+
+	if r.CachedStepCount != cached {
+		return fmt.Errorf("%w: cached_step_count expected %d, got %d",
+			ErrCountMismatch, r.CachedStepCount, cached)
+	}
+
+	return nil
 }
 
 // validateStatusCounts verifies the denormalized status-count fields match

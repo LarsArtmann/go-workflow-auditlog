@@ -11,6 +11,7 @@ type reportFilter struct {
 	stepNames  map[string]struct{}
 	statuses   map[StepStatus]struct{}
 	eventTypes map[EventType]struct{}
+	cached     *bool
 	timeFrom   *time.Time
 	timeTo     *time.Time
 }
@@ -60,6 +61,22 @@ func WithTimeRange(from, to time.Time) ReportOption {
 	}
 }
 
+// WithCachedSteps filters to only steps that were served (at least in part)
+// from a result cache (see [MarkCached]). Use it to answer "what did we NOT
+// re-verify this run?".
+func WithCachedSteps() ReportOption {
+	cached := true
+	return func(f *reportFilter) { f.cached = &cached }
+}
+
+// WithUncachedSteps filters to only steps whose work actually executed on
+// this run (never marked cached). Use it to answer "what ran fresh?".
+// Applying both WithCachedSteps and WithUncachedSteps keeps the last one.
+func WithUncachedSteps() ReportOption {
+	cached := false
+	return func(f *reportFilter) { f.cached = &cached }
+}
+
 // Filtered returns a new report containing only the steps and events that
 // match all of the given filter options. Aggregate counts are recomputed.
 //
@@ -92,7 +109,7 @@ func (r WorkflowReport) Filtered(opts ...ReportOption) WorkflowReport {
 	}
 
 	// Also filter events to only those referencing filtered steps.
-	if len(filter.stepNames) > 0 || len(filter.statuses) > 0 {
+	if len(filter.stepNames) > 0 || len(filter.statuses) > 0 || filter.cached != nil {
 		filteredEvents = filterEventsToSteps(filteredEvents, filteredSteps)
 	}
 
@@ -123,6 +140,10 @@ func (f *reportFilter) matchStep(step StepInfo) bool {
 		if _, ok := f.statuses[step.Status]; !ok {
 			return false
 		}
+	}
+
+	if f.cached != nil && step.Cached != *f.cached {
+		return false
 	}
 
 	return true

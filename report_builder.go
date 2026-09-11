@@ -127,6 +127,7 @@ func finalizeDenormalized(report *WorkflowReport) {
 	report.CanceledCount = 0
 	report.PendingCount = 0
 	report.RunningCount = 0
+	report.CachedStepCount = 0
 	report.TotalDurationMs = 0
 
 	for _, step := range report.Steps {
@@ -143,6 +144,10 @@ func finalizeDenormalized(report *WorkflowReport) {
 			report.PendingCount++
 		case StepStatusRunning:
 			report.RunningCount++
+		}
+
+		if step.Cached {
+			report.CachedStepCount++
 		}
 
 		report.TotalDurationMs += step.Duration()

@@ -93,6 +93,10 @@ func replayApplyEvent(step *stepCore, evt Event) {
 		step.status = evt.Status
 		step.attemptErr = evt.Error
 		step.failureReason = evt.FailureReason
+
+		if evt.Cached {
+			step.cached = true
+		}
 	}
 }
 
