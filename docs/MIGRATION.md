@@ -127,7 +127,7 @@ The sibling [`samber-do-auditlog/live`](https://github.com/larsartmann/samber-do
 module has always been SSE-only; this aligns the two siblings on the same
 architecture.
 
-## Report `failure_reason` → `failure_summary` (Unreleased)
+## Report `failure_reason` → `failure_summary` (v0.9.0)
 
 The `WorkflowReport` JSON field `"failure_reason"` has been renamed to
 `"failure_summary"`. This resolves a naming collision with the new
@@ -173,7 +173,7 @@ with a clear semantic contract (three machine-readable values). Reusing the
 same key name for a free-form sentence on a different type created ambiguity
 for consumers parsing both events and reports.
 
-## `StepInfo.FailureReason` additive field (Unreleased)
+## `StepInfo.FailureReason` additive field (v0.9.0)
 
 The `StepInfo` struct now carries a `FailureReason` field (`json:"failure_reason,omitempty"`),
 denormalized from the last `attempt_end` event. This means consumers no longer
@@ -195,3 +195,77 @@ on steps can now read `step.FailureReason` directly instead of scanning events.
 The field reflects the **final outcome only** — for a step that fails on
 attempts 1-2 and succeeds on attempt 3, `FailureReason` is empty (the step
 succeeded). Per-attempt failure reasons are preserved in the event stream.
+
+## Intrinsically classified sentinel errors + family-based CLI exit codes (v0.10.0)
+
+Every sentinel error owned by auditlog is now constructed via a
+[go-error-family](https://github.com/larsartmann/go-error-family) family
+constructor and therefore carries its behavioral classification (Family +
+stable `auditlog.*` code) **intrinsically**. Three sentinels are now
+classified correctly where they previously were not: `ErrFileExists`
+(Rejection — was misclassified Infrastructure via its cause chain),
+`ErrMigrationEmptyInput` and `ErrMigrationMissingVersion` (Rejection — were
+unclassified and fell through to the retryable Transient fail-open default).
+
+### What stayed the same
+
+- **`errors.Is` matching is fully preserved.** Sentinel identity, `%w` wrap
+  chains, and the `ErrFileExists → ErrExportWriteFailed` cause chain all
+  behave exactly as before. Code that matches library errors with
+  `errors.Is` needs no changes.
+- `ErrorClassifications()` / `RegisterClassifications(reg)` keep their
+  signatures and remain the canonical map (now including the three
+  reclassified sentinels).
+
+### What changed
+
+1. **Sentinel message text gained a `[family:code] ` prefix.**
+   `ErrExportWriteFailed.Error()` was `"export write failed"` and is now
+   `"[Infrastructure:auditlog.export_write_failed] export write failed"`.
+   Wrap-site text (`"export write failed: open %q: …"`) becomes
+   `"[Infrastructure:auditlog.export_write_failed] export write failed: open …"`.
+   Code that parses or exact-matches error **strings** must switch to
+   `errors.Is` or code matching (`errorfamily.Code(err)`).
+2. **Sentinel concrete type is `*errorfamily.Error`.**
+   `errors.AsType[*errorfamily.Error](err)` now succeeds on any library
+   error and exposes `Family()`, `Code()`, `Message()`. Code that asserted
+   sentinels were plain `*errors.errorString`/`*fmt.wrapError` (rare,
+   fragile) will observe the new type.
+3. **Reclassification changes `errorfamily.Classify` / `ExitCode` /
+   `IsRetryable` results** for `ErrFileExists` (Infrastructure → Rejection)
+   and the two migration sentinels (Transient → Rejection). Both moves are
+   bug fixes: no-clobber rejections and bad migration input are caller
+   errors, not retryable failures.
+4. **The `auditlog` CLI exits by family** instead of always `1`: Rejection /
+   usage errors `1`, Corruption `65`, Infrastructure `69`, Transient
+   (retryable decode failures) `75`, `-h` help `0`. Scripts distinguishing
+   only "zero vs non-zero" are unaffected.
+
+### Migrating
+
+```go
+// Before / after — matching (unchanged):
+if errors.Is(err, auditlog.ErrExportWriteFailed) { ... }
+
+// NEW — structured handling without string parsing:
+if fe, ok := errors.AsType[*errorfamily.Error](err); ok {
+    log.Printf("%s failed (%s): %s", fe.Code(), fe.Family(), fe.Message())
+}
+
+// NEW — process exit code by family:
+os.Exit(errorfamily.ExitCode(err))
+```
+
+Code-to-family reference: `auditlog.event_count_mismatch`,
+`auditlog.step_count_mismatch`, `auditlog.status_drift`,
+`auditlog.status_count_mismatch` → Corruption (exit 65);
+`auditlog.workflow_id_path_sep`, `auditlog.replay_no_events`,
+`auditlog.migration_empty_input`, `auditlog.migration_missing_version`,
+`auditlog.file_exists`, `auditlog.unknown_event_type`,
+`auditlog.unknown_phase`, `auditlog.nil_stream_callback` →
+Rejection (exit 1); `auditlog.report_load_failed` → Transient (exit 75);
+`auditlog.render_failed`, `auditlog.export_write_failed` → Infrastructure
+(exit 69). The re-exported go-ndjson sentinels (`ErrEmpty`, `ErrNoEvents`,
+`ErrOversizedLine`, all Rejection) carry **no codes** — they are plain
+stdlib errors owned by go-ndjson and classified via the registry, not
+intrinsically.

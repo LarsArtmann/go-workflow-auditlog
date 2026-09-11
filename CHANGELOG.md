@@ -14,6 +14,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Nothing yet.
 
+## [0.10.0] - 2026-09-11
+
+> **Breaking (permitted in 0.x minor releases — see
+> [STABILITY.md](STABILITY.md)).** Sentinel error values are now
+> `*errorfamily.Error` (intrinsic classification) and their messages gained a
+> `[family:code] ` prefix. `errors.Is` matching is fully preserved. The CLI's
+> exit codes are now family-based. See
+> [`docs/MIGRATION.md`](docs/MIGRATION.md) for details.
+
+### Added
+
+- **Intrinsic error classification** — every sentinel owned by auditlog is now constructed via a go-error-family family constructor and carries its behavioral `Family` plus a stable `"auditlog.*"` code intrinsically (`errors.AsType[*errorfamily.Error]` / `errorfamily.Classify` / `errorfamily.Code` / `errorfamily.ExitCode` work on any library error without registry setup). `errors.Is` semantics are unchanged; `ErrFileExists` still unwraps to `ErrExportWriteFailed`.
+- **New classification tests** — intrinsic classification proven on an empty registry, sentinel code uniqueness per family (guards `Is` code+family matching), `ErrFileExists` Rejection-with-write-chain, migration-sentinel classification, extended public-sentinel table.
+- **`erraudit` CI gate** — new required `Error audit` job runs `erraudit ./...` (default flags) on core, viz, and live; zero-violation policy is now enforced on every push.
+- **CLI family-based exit codes** — `auditlog` subcommands now exit with the error family's code: Rejection/bad input/usage errors `1`, Corruption `65`, Infrastructure `69`, Transient/retryable `75`; `-h`/`flag.ErrHelp` exits `0`. Stdlib errors (missing files, canceled contexts) are classified via `errorfamily.RegisterStdlibDefaults`.
+
+### Changed
+
+- **`ErrFileExists` classified as Rejection** (was misclassified Infrastructure via its cause chain; exit code 69 → 1). Its doc comment always claimed Rejection — behavior now matches.
+- **`ErrMigrationEmptyInput` / `ErrMigrationMissingVersion` classified as Rejection** (were unclassified, falling through to the retryable Transient fail-open default — wrong advice for caller input errors).
+- **`errNilStreamCallback` classified as Rejection** (programmer error, was unclassified).
+
+### Fixed
+
+- **CLI `convert`: swallowed output-file Close errors** — a Close failure after writing (buffered flush loss) now propagates via `errors.Join` instead of being discarded.
+- **`live.Server.Shutdown`: failed subscriber-buffer drain ignored** — a drain that times out with events still buffered is now surfaced to the caller instead of silently discarded.
+- **viz design-token drift** — `dashboard.css` font stacks re-synced with `DesignTokensCSS`; `TestDesignTokensInSync` passes again.
+- **viz example demo** — a sample-event marshal failure now exits non-zero (`log.Fatalf`) instead of logging and continuing.
+- **Website deploy pipeline** — corepack ordering fix and HTML cache-rule alignment for `cleanUrls` pages.
+
 ## [0.9.0] - 2026-08-12
 
 > **Breaking (permitted in 0.x minor releases — see
