@@ -1,12 +1,11 @@
 package auditlog
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"strings"
 	"time"
-
-	"cmp"
 
 	flow "github.com/Azure/go-workflow"
 )

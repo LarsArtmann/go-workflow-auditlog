@@ -241,7 +241,6 @@ func TestCLI_ExitCodes(t *testing.T) {
 				return
 			}
 
-
 			exitErr, ok := errors.AsType[*exec.ExitError](err)
 			if !ok {
 				t.Fatalf("expected non-zero exit, got nil error")
@@ -270,7 +269,6 @@ func TestCLI_ExitCodeTransientLoad(t *testing.T) {
 	}
 
 	err := exec.Command(binary, "validate", path).Run()
-
 
 	exitErr, ok := errors.AsType[*exec.ExitError](err)
 	if !ok {

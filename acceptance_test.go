@@ -2,11 +2,10 @@ package auditlog_test
 
 import (
 	"bytes"
+	"cmp"
 	"slices"
 	"sync"
 	"testing"
-
-	"cmp"
 
 	flow "github.com/Azure/go-workflow"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
