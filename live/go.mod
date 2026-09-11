@@ -8,8 +8,8 @@ require (
 	github.com/larsartmann/go-output/daghtml v0.38.0
 	github.com/larsartmann/go-sse v0.6.0
 	github.com/larsartmann/go-sse/ssetest v0.2.0
-	github.com/larsartmann/go-workflow-auditlog v0.10.0
-	github.com/larsartmann/go-workflow-auditlog/viz v0.10.0
+	github.com/larsartmann/go-workflow-auditlog v0.11.0
+	github.com/larsartmann/go-workflow-auditlog/viz v0.11.0
 )
 
 require (
