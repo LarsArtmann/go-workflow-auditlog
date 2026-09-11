@@ -3,36 +3,56 @@ package auditlog
 import (
 	"encoding/json/jsontext"
 	"encoding/json/v2"
-	"errors"
 	"fmt"
 	"io"
 	"time"
+
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
-// Sentinel errors returned by [WorkflowReport.Validate]. Consumers can match
-// on these with [errors.Is] to distinguish validation failure modes without
-// parsing error text.
+// Sentinel errors returned by [WorkflowReport.Validate]. Each carries its
+// behavioral classification intrinsically (family + stable "auditlog.*" code),
+// so [errorfamily.Classify] works on any error wrapping them. Consumers can
+// match on these with [errors.Is] to distinguish validation failure modes
+// without parsing error text.
 var (
 	// ErrEventCountMismatch indicates the report's EventCount field does not
-	// match the length of its Events slice.
-	ErrEventCountMismatch = errors.New("event_count does not match len(events)")
+	// match the length of its Events slice. Corruption: the report is
+	// structurally invalid; no caller action can fix it.
+	ErrEventCountMismatch = errorfamily.NewCorruption(
+		"auditlog.event_count_mismatch",
+		"event_count does not match len(events)",
+	)
 	// ErrStepCountMismatch indicates the report's StepCount field does not
-	// match the length of its Steps slice.
-	ErrStepCountMismatch = errors.New("step_count does not match len(steps)")
+	// match the length of its Steps slice. Corruption.
+	ErrStepCountMismatch = errorfamily.NewCorruption(
+		"auditlog.step_count_mismatch",
+		"step_count does not match len(steps)",
+	)
 	// ErrStatusDrift indicates a step's stored Status disagrees with the
 	// status implied by its Error pointer (see [StepInfo.DeriveStatus]).
-	ErrStatusDrift = errors.New("step status does not match derived status")
+	// Corruption.
+	ErrStatusDrift = errorfamily.NewCorruption(
+		"auditlog.status_drift",
+		"step status does not match derived status",
+	)
 	// ErrCountMismatch indicates a denormalized status-count field
 	// (SucceededCount, FailedCount, etc.) disagrees with the actual count
-	// derived from the Steps slice.
-	ErrCountMismatch = errors.New("status count does not match steps")
+	// derived from the Steps slice. Corruption.
+	ErrCountMismatch = errorfamily.NewCorruption(
+		"auditlog.status_count_mismatch",
+		"status count does not match steps",
+	)
 
 	// ErrRenderFailed wraps errors encountered while rendering or marshaling a
 	// report for output (JSON encoding, diagram rendering, HTML generation,
-	// table/tree rendering). Classified as Infrastructure — these failures are
-	// not retryable (programming error or resource exhaustion).
-	// Consumers can match on it with [errors.Is].
-	ErrRenderFailed = errors.New("render failed")
+	// table/tree rendering). Infrastructure: these failures are not retryable
+	// (programming error or resource exhaustion). Consumers can match on it
+	// with [errors.Is].
+	ErrRenderFailed = errorfamily.NewInfrastructure(
+		"auditlog.render_failed",
+		"render failed",
+	)
 )
 
 // WorkflowReport is a consolidated, machine-readable snapshot of the audit log.

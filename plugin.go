@@ -1,13 +1,13 @@
 package auditlog
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
 	flow "github.com/Azure/go-workflow"
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 // EnvKeyEnabled is the environment variable that controls audit logging.
@@ -43,14 +43,24 @@ type Config struct {
 
 // ErrWorkflowIDPathSep is returned by [Config.Validate] (and thus [New]) when
 // Config.WorkflowID contains a path separator, which would break file-based
-// export paths. Consumers can match on it with [errors.Is].
-var ErrWorkflowIDPathSep = errors.New("config.WorkflowID must not contain path separators")
+// export paths. It carries its classification intrinsically:
+// [errorfamily.Rejection] (bad caller input), code "auditlog.workflow_id_path_sep".
+// Consumers can match on it with [errors.Is].
+var ErrWorkflowIDPathSep = errorfamily.NewRejection(
+	"auditlog.workflow_id_path_sep",
+	"config.WorkflowID must not contain path separators",
+)
 
 // ErrExportWriteFailed wraps errors encountered while writing exported output
 // to a file or io.Writer (file creation, buffer flush, atomic rename, direct
-// writes). Classified as Infrastructure — these are system-level failures not
-// retryable by the caller. Consumers can match on it with [errors.Is].
-var ErrExportWriteFailed = errors.New("export write failed")
+// writes). It carries its classification intrinsically:
+// [errorfamily.Infrastructure] (system-level failure, not retryable by the
+// caller), code "auditlog.export_write_failed". Consumers can match on it
+// with [errors.Is].
+var ErrExportWriteFailed = errorfamily.NewInfrastructure(
+	"auditlog.export_write_failed",
+	"export write failed",
+)
 
 // Validate returns an error if the config is invalid.
 func (c Config) Validate() error {
