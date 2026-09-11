@@ -199,3 +199,20 @@ Individual gates all ran green (`go test -race`, `go vet`, `golangci-lint` per m
 - Schema regenerated; tree clean (daemon-committed @ `7745fc6`)
 
 _Arte in Aeternum_
+
+---
+
+## Update 2026-09-11 (follow-up session): CLOSED OUT
+
+All P0 items and the three open questions are resolved; **v0.11.0 is released**.
+
+- **Q1 (diagrams): YES** — `stepLabel()` appends `⚡cached` on all diagram formats + both trees (label-only; status colors unchanged; cached is not a status). Pinned by `TestDiagram_CachedMarker` across 6 formats.
+- **Q3 (Diff scope): YES** — `Diff()` gained `CachedStepCountDelta`, `CachedStepsAdded`/`Removed`, `StepDiff.Cached`; CLI `diff` prints cached-delta lines; new property test `TestDiff_CachedAntiSymmetry` (+ membership/count consistency, seed 9). Generator extended + counts derived from steps.
+- **Q2 (release): cut immediately after both** — v0.11.0 released per RELEASE.md: three tags at b35eff2, pushed, `go mod tidy -e` ×2, standalone + `nix run .#check` green post-push, GitHub Release with notes + 4 demo binaries + checksums, `go get` verified for all three modules in clean dirs, CI green on master (d82407e), core pkg.go.dev page rendered with the new API (viz/live pages follow crawler propagation).
+- **Dashboards**: `Cached` stat card (`--cache` token), `Cached only` filter chip (aria-pressed pattern, `data-cached` row flag), live fallback count from `state.steps` — in BOTH viz and live; pinned by extended honesty tests (10 assertions viz, 12 patterns live).
+- **Docs**: AGENTS.md (cached.go file-map entry, Cached gotcha, nlreturn contradiction FIXED — commit fcddcaf re-enabled it, the old note was the lie, columns 10→12, tests recounted 570 = core 262 / viz 234 / live 74 with the rg method, coverage 95.3/93.4/95.9), MIGRATION.md v0.11.0 section, README Cache-Hit Attribution section + TOC, CHANGELOG 0.11.0 section, FEATURES.md updates.
+- **Demos**: viz example + live demo both gained a cached detect step (`MarkCached` from the step body, honest summary lines).
+- **BuildFlow wired**: deps v0.10.0→v0.11.0 (+ `go work vendor` + `update-vendor-hash`), `MarkCached(ctx)` in `detectWithCache`'s cache-hit branch (check + `slog.Debug`, no nolint — BuildFlow's erraudit gate runs `--no-suppress`, see BuildFlow gotcha #162), e2e `TestResultCache_CachedAttribution` (cold run: 0 cached; warm run: count>0, all cached steps succeeded, JSON round-trip consistent). Full execution suite -race green; erraudit gate 0 violations ×32 modules.
+- **Gates**: erraudit 0 ×3 modules; art-dupl 0 clone groups at -t 3..30; workspace + standalone vet/test/lint/govulncheck all green.
+- **Lesson learned (release process)**: Go 1.26.7 resolves the required core version from the proxy even in workspace mode — an unpublished require in viz/live go.mod breaks ALL local builds, so the release-skill Phase 4 "workspace verification after bump" no longer works; verify first, bump, then tag+push fast. (The skill's own gotcha table hinted at this but the Phase 4 text is now stale.)
+- Not done (deliberately, P2): timeline/Gantt striped cached bars, `ReportIndex` cached lookup, website/ refresh, OTel span attribute, BuildFlow run-summary surfacing next to CacheStats. Found but not fixed (pre-existing, out of scope): BuildFlow `live_shell.go:89` stale `//nolint:exhaustruct` (linter is now `exhaustruct_v5`).
