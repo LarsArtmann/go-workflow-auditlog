@@ -195,3 +195,86 @@ func TestCLI_Version(t *testing.T) {
 		t.Errorf("expected schema version in output, got: %s", output)
 	}
 }
+
+// TestCLI_ExitCodes pins the family-based exit-code contract: usage errors
+// and bad input exit 1 (Rejection), retryable load failures exit 75
+// (Transient), help exits 0.
+func TestCLI_ExitCodes(t *testing.T) {
+	t.Parallel()
+
+	binary := buildCLI(t)
+
+	tests := []struct {
+		name string
+		args []string
+		want int
+	}{
+		{
+			name: "wrong argument count is Rejection (1)",
+			args: []string{"convert"},
+			want: 1,
+		},
+		{
+			name: "missing input file is Rejection (1)",
+			args: []string{"info", filepath.Join(t.TempDir(), "does-not-exist.json")},
+			want: 1,
+		},
+		{
+			name: "help exits 0",
+			args: []string{"convert", "-h"},
+			want: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := exec.Command(binary, tt.args...).Run()
+
+			exitErr, ok := err.(*exec.ExitError)
+			if tt.want == 0 {
+				if err != nil {
+					t.Fatalf("expected exit 0, got error: %v", err)
+				}
+
+				return
+			}
+
+			if !ok {
+				t.Fatalf("expected non-zero exit, got nil error")
+
+				return
+			}
+
+			if got := exitErr.ExitCode(); got != tt.want {
+				t.Errorf("exit code = %d, want %d", got, tt.want)
+			}
+		})
+	}
+}
+
+// TestCLI_ExitCodeTransientLoad pins the Transient (75) path: a report that
+// exists but cannot be decoded is classified as retryable.
+func TestCLI_ExitCodeTransientLoad(t *testing.T) {
+	t.Parallel()
+
+	binary := buildCLI(t)
+
+	path := filepath.Join(t.TempDir(), "broken.json")
+
+	if err := os.WriteFile(path, []byte("{not json"), 0o600); err != nil {
+		t.Fatalf("write broken report: %v", err)
+	}
+
+	err := exec.Command(binary, "validate", path).Run()
+
+	exitErr, ok := err.(*exec.ExitError)
+	if !ok {
+		t.Fatalf("expected non-zero exit, got nil error")
+	}
+
+	if got := exitErr.ExitCode(); got != 75 {
+		t.Errorf("exit code = %d, want 75 (Transient: decode failures may succeed on retry)", got)
+	}
+}

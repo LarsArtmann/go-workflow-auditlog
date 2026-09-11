@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -15,12 +16,16 @@ func runConvert(args []string) (err error) {
 	format := fs.String("f", "", "output format: json, ndjson, csv (default: inferred from -o)")
 
 	if err := fs.Parse(args); err != nil {
-		return err
-	}
+			if errors.Is(err, flag.ErrHelp) {
+				return err
+			}
 
-	if fs.NArg() != 1 {
-		return errors.New("usage: auditlog convert <input> [-o output] [-f format]")
-	}
+			return usageError("invalid flags: %v", err)
+		}
+
+		if fs.NArg() != 1 {
+			return usageError("usage: auditlog convert <input> [-o output] [-f format]")
+		}
 
 	report, err := loadFile(fs.Arg(0))
 	if err != nil {
@@ -59,7 +64,7 @@ func runConvert(args []string) (err error) {
 	case "tsv":
 		return report.WriteTSV(writer)
 	default:
-		return fmt.Errorf("unsupported format %q (use: json, ndjson, csv, tsv)", fmtValue)
+		return usageError("unsupported format %q (use: json, ndjson, csv, tsv)", fmtValue)
 	}
 }
 

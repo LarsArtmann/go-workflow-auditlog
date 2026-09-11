@@ -10,11 +10,13 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
 
+	errorfamily "github.com/larsartmann/go-error-family"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
 )
 
@@ -22,6 +24,18 @@ import (
 //
 //	go build -ldflags "-X main.CLIVersion=v0.1.0" ./cmd/auditlog
 var CLIVersion = "0.1.0"
+
+//nolint:gochecknoinits // Application-level stdlib classification: missing files and canceled contexts must map to the right exit-code family.
+func init() {
+	errorfamily.RegisterStdlibDefaults(errorfamily.DefaultRegistry)
+}
+
+// usageError builds a Rejection-classified CLI usage error so bad
+// invocations exit with the usage status (1) instead of the Transient
+// fail-open default (75) that unclassified errors would receive.
+func usageError(format string, args ...any) error {
+	return errorfamily.NewRejection("auditlog.cli.usage", fmt.Sprintf(format, args...))
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -60,9 +74,20 @@ func main() {
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "auditlog %s: %v\n", cmd, err)
-		os.Exit(1)
-	}
+			fmt.Fprintf(os.Stderr, "auditlog %s: %v\n", cmd, err)
+
+			if errors.Is(err, flag.ErrHelp) {
+				usage(os.Stdout)
+
+				os.Exit(0)
+			}
+
+			// Errors from the auditlog library carry their family intrinsically;
+			// stdlib errors are classified via RegisterStdlibDefaults above. The
+			// exit code reflects the failure family (Rejection 1, Corruption 65,
+			// Infrastructure 69, Transient 75).
+			os.Exit(errorfamily.ExitCode(err))
+		}
 }
 
 func usage(w io.Writer) {
