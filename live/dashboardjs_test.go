@@ -82,6 +82,37 @@ func TestDashboardJS_StructuralIntegrity(t *testing.T) {
 	}
 }
 
+// TestDashboardJS_CachedAttribution validates that cache-hit attribution is
+// surfaced on every live surface: step-state ingestion, row config badges,
+// event chips, and graph node badges. A reused result must never render as
+// freshly executed work.
+func TestDashboardJS_CachedAttribution(t *testing.T) {
+	t.Parallel()
+
+	jsBytes, err := os.ReadFile("dashboard.js")
+	if err != nil {
+		t.Fatalf("read dashboard.js: %v", err)
+	}
+
+	js := string(jsBytes)
+
+	requiredPatterns := []string{
+		"evt.cached",
+		"step.cached = true",
+		"cached: false",
+		"s.cached ? 1 : 0",
+		"config-badge cached",
+		"cached-chip",
+		"cached-badge",
+	}
+
+	for _, pat := range requiredPatterns {
+		if !strings.Contains(js, pat) {
+			t.Errorf("dashboard.js missing cached-attribution pattern: %s", pat)
+		}
+	}
+}
+
 // TestDashboardJS_NoDeadCode verifies that previously-removed dead code
 // functions are not present. These were identified during self-audit and
 // removed: focusTabPanel, getGraphSvgNodes.

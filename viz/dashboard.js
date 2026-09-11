@@ -1006,6 +1006,49 @@ function enhanceGraph() {
     g.appendChild(badge);
   });
 
+  // Add cached badges (⚡, top-left) to nodes served from a result cache.
+  // Top-left avoids colliding with the retry badge (top-right).
+  nodeEls.forEach(function (g) {
+    var idx = parseInt(g.dataset.id);
+    var stepName = nameMap[idx];
+    if (!stepName) return;
+    var step = stepByName[stepName];
+    if (!step || !step.cached) return;
+
+    var ns = "http://www.w3.org/2000/svg";
+    var rect = g.querySelector("rect");
+    if (!rect) return;
+
+    var badge = document.createElementNS(ns, "g");
+    badge.classList.add("cached-badge");
+    badge.setAttribute("transform", "translate(-10, -6)");
+    badge.setAttribute("role", "img");
+    badge.setAttribute("aria-label", stepName + ": result served from cache");
+
+    var circle = document.createElementNS(ns, "circle");
+    circle.setAttribute("cx", 8);
+    circle.setAttribute("cy", 8);
+    circle.setAttribute("r", 8);
+    circle.setAttribute("fill", "var(--cache)");
+    circle.setAttribute("stroke", "var(--bg-elevated)");
+    circle.setAttribute("stroke-width", 1.5);
+    badge.appendChild(circle);
+
+    var text = document.createElementNS(ns, "text");
+    text.setAttribute("x", 8);
+    text.setAttribute("y", 8);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "central");
+    text.setAttribute("fill", "var(--bg)");
+    text.setAttribute("font-size", "10");
+    text.setAttribute("font-weight", "bold");
+    text.setAttribute("font-family", "var(--font-mono)");
+    text.textContent = "\u26a1";
+    badge.appendChild(text);
+
+    g.appendChild(badge);
+  });
+
   // Node click → navigate to step details in the Steps tab
   nodeEls.forEach(function (g) {
     g.style.cursor = "pointer";

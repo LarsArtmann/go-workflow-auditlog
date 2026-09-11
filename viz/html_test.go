@@ -28,6 +28,22 @@ func writeSingleStepHTML(t *testing.T, step flow.Steper) string {
 	return out
 }
 
+// TestWriteHTML_CachedStepHonesty pins the full data flow for cache-hit
+// attribution: the cached flag must reach the embedded report JSON, and the
+// embedded dashboard JS must know how to surface it (step badge, events chip,
+// graph node badge). Without all three, a reused result could masquerade as
+// freshly executed work.
+func TestWriteHTML_CachedStepHonesty(t *testing.T) {
+	t.Parallel()
+
+	out := writeSingleStepHTML(t, testhelpers.NewCached("warm-detect"))
+
+	testhelpers.AssertContains(t, out, `"cached":true`, "cached flag must reach the embedded report data")
+	testhelpers.AssertContains(t, out, "config-badge cached", "dashboard JS must render the step cached badge")
+	testhelpers.AssertContains(t, out, "cached-chip", "dashboard JS must render the events cached chip")
+	testhelpers.AssertContains(t, out, "cached-badge", "dashboard JS must render the graph cached badge")
+}
+
 func TestWriteHTML_BasicReport(t *testing.T) {
 	t.Parallel()
 

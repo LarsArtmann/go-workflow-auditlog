@@ -295,6 +295,7 @@
         error: null,
         has_retry: false,
         has_timeout: false,
+        cached: false,
       };
       state.newStepNames[name] = true;
     }
@@ -309,6 +310,8 @@
       step.finished_at = evt.timestamp;
       if (evt.duration_ms != null) step.duration_ms = evt.duration_ms;
       step.attempt_count = Math.max(step.attempt_count, evt.attempt || 1);
+
+      if (evt.cached) step.cached = true;
 
       if (evt.status) {
         var oldStatus = step.status;
@@ -597,14 +600,7 @@
       esc(s.status) +
       "</span>";
 
-    var cfgBadges = "";
-    if (s.has_retry) {
-      cfgBadges +=
-        '<span class="config-badge retry" title="Max attempts: ' +
-        (s.max_attempts || 0) +
-        '">\u{1F501} retry</span> ';
-    }
-    if (s.has_timeout) cfgBadges += '<span class="config-badge timeout">\u23F2 timeout</span>';
+    var cfgBadges = configBadgesHTML(s);
 
     return (
       '<td class="mono">' +
@@ -642,6 +638,22 @@
     );
   }
 
+  // Shared config-badge renderer for row creation and live updates.
+  function configBadgesHTML(s) {
+    var badges = "";
+    if (s.has_retry) {
+      badges +=
+        '<span class="config-badge retry" title="Max attempts: ' +
+        (s.max_attempts || 0) +
+        '">\u{1F501} retry</span> ';
+    }
+    if (s.has_timeout) badges += '<span class="config-badge timeout">\u23F2 timeout</span> ';
+    if (s.cached)
+      badges +=
+        '<span class="config-badge cached" title="Result served from a cache \u2014 the step did not re-execute its work">\u26A1 cached</span>';
+    return badges;
+  }
+
   // Compact state key for change detection — only volatile fields.
   function stepStateKey(s) {
     return [
@@ -651,6 +663,7 @@
       s.error || "",
       s.has_retry ? 1 : 0,
       s.max_attempts || 0,
+      s.cached ? 1 : 0,
     ].join("|");
   }
 
@@ -680,6 +693,9 @@
 
     // Cell 4: duration
     tr.children[4].textContent = s.duration_ms ? humanizeDuration(s.duration_ms) : "\u2014";
+
+    // Cell 7: config badges (cached arrives mid-run, so this cell is volatile too)
+    tr.children[7].innerHTML = configBadgesHTML(s);
 
     // Cell 8: error
     tr.children[8].className = "error-cell" + (errMsg ? "" : " empty");
@@ -933,6 +949,7 @@
           "</span>";
         var dur = e.duration_ms != null ? humanizeDuration(e.duration_ms) : "";
         var errTip = e.error ? ' data-error="' + esc(e.error) + '"' : "";
+        var cachedChip = e.cached ? '<span class="cached-chip">\u26A1 cached</span>' : "";
         return (
           '<tr data-type="' +
           esc(e.event_type) +
@@ -966,6 +983,7 @@
           errTip +
           ">" +
           (e.error ? '<span class="inline-error">' + esc(e.error) + "</span>" : "") +
+          cachedChip +
           "</td>" +
           "</tr>"
         );
@@ -1322,6 +1340,47 @@
       g.appendChild(badge);
     });
 
+    // Cached badges (⚡, top-left) on nodes served from a result cache.
+    // Top-left avoids colliding with the retry badge (top-right).
+    nodeEls.forEach(function (g) {
+      var idx = parseInt(g.getAttribute("data-id"));
+      var stepName = nameMap[idx];
+      if (!stepName) return;
+
+      var step = stepByName[stepName] || state.steps[stepName];
+      if (!step || !step.cached) return;
+
+      var rect = g.querySelector("rect");
+      if (!rect) return;
+
+      var badge = document.createElementNS(ns, "g");
+      badge.classList.add("cached-badge");
+      badge.setAttribute("transform", "translate(-10, -6)");
+
+      var circle = document.createElementNS(ns, "circle");
+      circle.setAttribute("cx", 8);
+      circle.setAttribute("cy", 8);
+      circle.setAttribute("r", 8);
+      circle.setAttribute("fill", "var(--cache)");
+      circle.setAttribute("stroke", "var(--bg-elevated)");
+      circle.setAttribute("stroke-width", 1.5);
+      badge.appendChild(circle);
+
+      var text = document.createElementNS(ns, "text");
+      text.setAttribute("x", 8);
+      text.setAttribute("y", 8);
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("dominant-baseline", "central");
+      text.setAttribute("fill", "var(--bg)");
+      text.setAttribute("font-size", "10");
+      text.setAttribute("font-weight", "bold");
+      text.setAttribute("font-family", "var(--font-mono)");
+      text.textContent = "\u26a1";
+      badge.appendChild(text);
+
+      g.appendChild(badge);
+    });
+
     // Node click / keyboard navigation setup
     buildGraphAdjacency();
     nodeEls.forEach(function (g) {
@@ -1332,6 +1391,7 @@
       g.setAttribute("tabindex", "0");
       g.setAttribute("role", "button");
       var label = (stepName || "node") + " " + (step ? step.status : "pending");
+      if (step && step.cached) label += " (result from cache)";
       if (step && step.duration_ms && step.duration_ms > 0) {
         label += " " + humanizeMs(step.duration_ms);
       }

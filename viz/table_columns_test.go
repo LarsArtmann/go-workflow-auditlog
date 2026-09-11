@@ -274,8 +274,42 @@ func TestTable_AllTableColumnsCount(t *testing.T) {
 	t.Parallel()
 
 	all := viz.AllTableColumns()
-	if len(all) != 11 {
-		t.Errorf("expected 11 total columns, got %d", len(all))
+	if len(all) != 12 {
+		t.Errorf("expected 12 total columns, got %d", len(all))
+	}
+}
+
+func TestTable_CachedColumn(t *testing.T) {
+	t.Parallel()
+
+	report := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{
+			{StepRef: auditlog.StepRef{Name: "served-from-cache"}, Status: auditlog.StepStatusSucceeded, Cached: true},
+			{StepRef: auditlog.StepRef{Name: "executed-fresh"}, Status: auditlog.StepStatusSucceeded},
+		},
+	}
+
+	out, err := viz.WriteTableString(report, output.FormatCSV, output.RenderOptions{},
+		viz.WithColumns(viz.ColumnStep, viz.ColumnStatus, viz.ColumnCached))
+	if err != nil {
+		t.Fatalf("WriteTableString: %v", err)
+	}
+
+	lines := strings.Split(strings.TrimSpace(out), "\n")
+	if len(lines) != 3 {
+		t.Fatalf("expected header + 2 rows, got %d lines", len(lines))
+	}
+
+	if !strings.Contains(lines[0], "Cached") {
+		t.Errorf("header should contain Cached column: %q", lines[0])
+	}
+
+	if !strings.Contains(lines[1], "true") {
+		t.Errorf("cached step row should render true: %q", lines[1])
+	}
+
+	if !strings.Contains(lines[2], "false") {
+		t.Errorf("fresh step row should render false: %q", lines[2])
 	}
 }
 

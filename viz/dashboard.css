@@ -18,6 +18,8 @@
   --error-dim: rgba(224, 112, 96, 0.12);
   --info: #8ec5d4;
   --info-dim: rgba(142, 197, 212, 0.12);
+  --cache: #b8a8e8;
+  --cache-dim: rgba(184, 168, 232, 0.14);
   --transient: #d49060;
   --transient-dim: rgba(212, 144, 96, 0.12);
   --radius: 8px;
@@ -409,6 +411,24 @@ tr:hover td {
 .config-badge.timeout {
   background: var(--info-dim);
   color: var(--info);
+}
+.config-badge.cached {
+  background: var(--cache-dim);
+  color: var(--cache);
+}
+
+.cached-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  background: var(--cache-dim);
+  color: var(--cache);
+  margin-left: 0.35rem;
 }
 
 .table-wrap {

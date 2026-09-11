@@ -306,6 +306,38 @@ func TestServer_SSE_LiveEventDelivery(t *testing.T) {
 	}
 }
 
+func TestServer_SSE_CachedEventFlag(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	sr, closeSSE := sseConnect(t, ts.URL+"/api/events")
+	defer closeSSE()
+
+	skipSnapshot(sr)
+
+	server.OnEvent(auditlog.Event{
+		Sequence:  1,
+		StepRef:   auditlog.StepRef{Name: "cache-hit-detect"},
+		EventType: auditlog.EventTypeAttemptEnd,
+		Phase:     auditlog.PhaseAfter,
+		Status:    auditlog.StepStatusSucceeded,
+		Cached:    true,
+	})
+
+	data, found := readSSEEvent(sr, "event")
+	if !found {
+		t.Fatal("did not receive live event")
+	}
+
+	if !strings.Contains(data, `"cached":true`) {
+		t.Errorf("SSE event payload should carry the cached flag: %s", data)
+	}
+}
+
 func TestServer_SSE_CompleteEvent(t *testing.T) {
 	t.Parallel()
 
