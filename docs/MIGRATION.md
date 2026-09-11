@@ -219,7 +219,7 @@ unclassified and fell through to the retryable Transient fail-open default).
 
 ### What changed
 
-1. **Sentinel message text gained a `[family:code] ` prefix.**
+1. **Sentinel message text gained a `[family:code]` prefix.**
    `ErrExportWriteFailed.Error()` was `"export write failed"` and is now
    `"[Infrastructure:auditlog.export_write_failed] export write failed"`.
    Wrap-site text (`"export write failed: open %q: …"`) becomes
