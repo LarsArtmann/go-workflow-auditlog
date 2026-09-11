@@ -16,6 +16,7 @@ type Event struct {
 	Error         *string       `json:"error,omitempty"`
 	Status        StepStatus    `json:"status,omitempty"`
 	FailureReason FailureReason `json:"failure_reason,omitempty"`
+	Cached        bool          `json:"cached,omitempty"`
 }
 
 // IsAttemptStart returns true if the event is an attempt-start event.
@@ -42,6 +43,12 @@ func (e Event) IsCanceled() bool { return e.FailureReason == FailureReasonCancel
 // IsUserError returns true if the event's FailureReason is FailureReasonUserError
 // (the step's own Do() returned a non-nil error).
 func (e Event) IsUserError() bool { return e.FailureReason == FailureReasonUserError }
+
+// WasCached returns true if the attempt's result was served from a result
+// cache instead of executing the step's work (see [MarkCached]). Only
+// attempt_end events can carry this flag; it never changes the event's
+// Status — a cached attempt still succeeds or fails on its own merits.
+func (e Event) WasCached() bool { return e.Cached }
 
 // Duration returns the event duration in milliseconds, or 0 if unavailable.
 func (e Event) Duration() float64 {

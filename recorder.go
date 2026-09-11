@@ -192,6 +192,7 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 		Error:         errStr,
 		Status:        status,
 		FailureReason: classifyFailure(err),
+		Cached:        rec.cached,
 	}
 	r.appendEventLocked(evt)
 

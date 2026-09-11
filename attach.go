@@ -73,7 +73,7 @@ func (r *Recorder) makeCallbacks() (flow.BeforeStep, flow.AfterStep) {
 	before := func(ctx context.Context, step flow.Steper) (context.Context, error) {
 		r.recordBeforeStep(step)
 
-		return ctx, nil
+		return withStepContext(ctx, r, step), nil
 	}
 	after := func(_ context.Context, step flow.Steper, err error) error {
 		r.recordAfterStep(step, err)

@@ -16,6 +16,7 @@ type stepCore struct {
 	durationMs    *float64
 	attemptErr    *string
 	failureReason FailureReason
+	cached        bool
 	status        StepStatus
 }
 
@@ -32,6 +33,7 @@ func (c stepCore) toStepInfo() StepInfo {
 		DurationMs:    c.durationMs,
 		Error:         c.attemptErr,
 		FailureReason: c.failureReason,
+		Cached:        c.cached,
 	}
 }
 
@@ -54,6 +56,14 @@ type StepInfo struct {
 	Dependents    []StepRef     `json:"dependents,omitempty"`
 	Error         *string       `json:"error,omitempty"`
 	FailureReason FailureReason `json:"failure_reason,omitempty"`
+	// Cached is true when at least one attempt of this step returned a result
+	// served from a cache instead of executing the step's work (marked via
+	// [MarkCached] from inside the step body). Cached is orthogonal to Status:
+	// a cached step still succeeded or failed on its own merits — this field
+	// records WHERE the result came from, so reports never present a reused
+	// answer as freshly verified work. Per-attempt cache hits are preserved in
+	// the Event stream (each attempt_end carries its own Cached flag).
+	Cached        bool          `json:"cached,omitempty"`
 	HasRetry      bool          `json:"has_retry"`
 	HasTimeout    bool          `json:"has_timeout"`
 }
