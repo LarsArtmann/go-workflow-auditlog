@@ -999,51 +999,60 @@ func TestNDJSONStreamer_PropertyRoundTrip(t *testing.T) {
 		t.Run(fmt.Sprintf("n=%d", n), func(t *testing.T) {
 			t.Parallel()
 
-			var buf bytes.Buffer
-
-			streamer := auditlog.NewNDJSONStreamer(&buf)
-
-			original := make([]auditlog.Event, 0, n)
-			for i := range n {
-				original = append(original, auditlog.Event{
-					Sequence:  i + 1,
-					EventType: auditlog.EventTypeAttemptStart,
-					Phase:     auditlog.PhaseBefore,
-					StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", i)},
-				})
-			}
-
-			for _, evt := range original {
-				streamer.OnEvent(evt)
-			}
-
-			err := streamer.Flush()
-			if err != nil {
-				t.Fatalf("Flush: %v", err)
-			}
-
-			read, err := auditlog.ReadEvents(&buf)
-			if err != nil {
-				t.Fatalf("ReadEvents: %v", err)
-			}
-
-			if len(read) != n {
-				t.Fatalf("expected %d events, got %d", n, len(read))
-			}
-
-			// Verify each event's sequence and name survived the round-trip.
-			for i, evt := range read {
-				if evt.Sequence != original[i].Sequence {
-					t.Errorf("event %d: seq mismatch: got %d, want %d",
-						i, evt.Sequence, original[i].Sequence)
-				}
-
-				if evt.Name != original[i].Name {
-					t.Errorf("event %d: name mismatch: got %q, want %q",
-						i, evt.Name, original[i].Name)
-				}
-			}
+			assertStreamerRoundTrip(t, n)
 		})
+	}
+}
+
+// assertStreamerRoundTrip writes n synthetic events through an
+// NDJSONStreamer, reads them back, and asserts sequence and step name
+// survived the round-trip.
+func assertStreamerRoundTrip(t *testing.T, n int) {
+	t.Helper()
+
+	var buf bytes.Buffer
+
+	streamer := auditlog.NewNDJSONStreamer(&buf)
+
+	original := make([]auditlog.Event, 0, n)
+	for i := range n {
+		original = append(original, auditlog.Event{
+			Sequence:  i + 1,
+			EventType: auditlog.EventTypeAttemptStart,
+			Phase:     auditlog.PhaseBefore,
+			StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", i)},
+		})
+	}
+
+	for _, evt := range original {
+		streamer.OnEvent(evt)
+	}
+
+	err := streamer.Flush()
+	if err != nil {
+		t.Fatalf("Flush: %v", err)
+	}
+
+	read, err := auditlog.ReadEvents(&buf)
+	if err != nil {
+		t.Fatalf("ReadEvents: %v", err)
+	}
+
+	if len(read) != n {
+		t.Fatalf("expected %d events, got %d", n, len(read))
+	}
+
+	// Verify each event's sequence and name survived the round-trip.
+	for i, evt := range read {
+		if evt.Sequence != original[i].Sequence {
+			t.Errorf("event %d: seq mismatch: got %d, want %d",
+				i, evt.Sequence, original[i].Sequence)
+		}
+
+		if evt.Name != original[i].Name {
+			t.Errorf("event %d: name mismatch: got %q, want %q",
+				i, evt.Name, original[i].Name)
+		}
 	}
 }
 

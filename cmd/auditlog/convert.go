@@ -16,16 +16,16 @@ func runConvert(args []string) (err error) {
 	format := fs.String("f", "", "output format: json, ndjson, csv (default: inferred from -o)")
 
 	if err := fs.Parse(args); err != nil {
-			if errors.Is(err, flag.ErrHelp) {
-				return err
-			}
-
-			return usageError("invalid flags: %v", err)
+		if errors.Is(err, flag.ErrHelp) {
+			return err
 		}
 
-		if fs.NArg() != 1 {
-			return usageError("usage: auditlog convert <input> [-o output] [-f format]")
-		}
+		return usageError("invalid flags: %v", err)
+	}
+
+	if fs.NArg() != 1 {
+		return usageError("usage: auditlog convert <input> [-o output] [-f format]")
+	}
 
 	report, err := loadFile(fs.Arg(0))
 	if err != nil {

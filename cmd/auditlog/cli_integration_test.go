@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -232,7 +233,6 @@ func TestCLI_ExitCodes(t *testing.T) {
 
 			err := exec.Command(binary, tt.args...).Run()
 
-			exitErr, ok := err.(*exec.ExitError)
 			if tt.want == 0 {
 				if err != nil {
 					t.Fatalf("expected exit 0, got error: %v", err)
@@ -241,7 +241,9 @@ func TestCLI_ExitCodes(t *testing.T) {
 				return
 			}
 
-			if !ok {
+			var exitErr *exec.ExitError
+
+			if !errors.As(err, &exitErr) {
 				t.Fatalf("expected non-zero exit, got nil error")
 
 				return
@@ -269,8 +271,9 @@ func TestCLI_ExitCodeTransientLoad(t *testing.T) {
 
 	err := exec.Command(binary, "validate", path).Run()
 
-	exitErr, ok := err.(*exec.ExitError)
-	if !ok {
+	var exitErr *exec.ExitError
+
+	if !errors.As(err, &exitErr) {
 		t.Fatalf("expected non-zero exit, got nil error")
 	}
 

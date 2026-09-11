@@ -70,16 +70,16 @@ func parseFlagSet(name string, args []string, expectedNArg int, usage string) (*
 	fs := newFlagSet(name)
 
 	if err := fs.Parse(args); err != nil {
-			if errors.Is(err, flag.ErrHelp) {
-				return nil, err
-			}
-
-			return nil, usageError("invalid flags: %v", err)
+		if errors.Is(err, flag.ErrHelp) {
+			return nil, err
 		}
 
-		if fs.NArg() != expectedNArg {
-			return nil, usageError("%s", usage)
-		}
+		return nil, usageError("invalid flags: %v", err)
+	}
+
+	if fs.NArg() != expectedNArg {
+		return nil, usageError("%s", usage)
+	}
 
 	return fs, nil
 }

@@ -74,20 +74,20 @@ func main() {
 	}
 
 	if err != nil {
-			fmt.Fprintf(os.Stderr, "auditlog %s: %v\n", cmd, err)
+		fmt.Fprintf(os.Stderr, "auditlog %s: %v\n", cmd, err)
 
-			if errors.Is(err, flag.ErrHelp) {
-				usage(os.Stdout)
+		if errors.Is(err, flag.ErrHelp) {
+			usage(os.Stdout)
 
-				os.Exit(0)
-			}
-
-			// Errors from the auditlog library carry their family intrinsically;
-			// stdlib errors are classified via RegisterStdlibDefaults above. The
-			// exit code reflects the failure family (Rejection 1, Corruption 65,
-			// Infrastructure 69, Transient 75).
-			os.Exit(errorfamily.ExitCode(err))
+			os.Exit(0)
 		}
+
+		// Errors from the auditlog library carry their family intrinsically;
+		// stdlib errors are classified via RegisterStdlibDefaults above. The
+		// exit code reflects the failure family (Rejection 1, Corruption 65,
+		// Infrastructure 69, Transient 75).
+		os.Exit(errorfamily.ExitCode(err))
+	}
 }
 
 func usage(w io.Writer) {

@@ -19,7 +19,9 @@ func parseCSSTokens(t *testing.T, css string) map[string]string {
 
 	for _, m := range matches {
 		name := strings.TrimSpace(m[1])
-		value := strings.TrimSpace(m[2])
+		// Normalize internal whitespace so token comparison is independent
+		// of CSS line-wrapping style (multi-line font stacks vs single-line).
+		value := strings.Join(strings.Fields(m[2]), " ")
 		result[name] = value
 	}
 
