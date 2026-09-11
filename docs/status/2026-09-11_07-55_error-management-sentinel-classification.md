@@ -11,20 +11,22 @@
 
 ## The one-paragraph truth
 
-The pasted report's premise — "project enforces samber/oops" — was **false** (verified: oops flags are opt-in; no oops anywhere in this repo or any sibling larsartmann lib; `how-to-golang` policy prescribes cockroachdb/errors). Instead of a wrong wholesale rewrite, the session adopted the ecosystem's *actual* intended design: every sentinel **owned** by auditlog now carries its go-error-family classification **intrinsically** (`*errorfamily.Error`, stable `auditlog.*` codes), `errors.Is` contracts fully preserved and tested, the registry demoted to an honest back-compat shim, three genuinely misclassified sentinels fixed, real swallowed close errors surfaced, and every remaining discard explicitly suppressed with a reason. All rejected findings are documented with rationale in AGENTS.md.
+The pasted report's premise — "project enforces samber/oops" — was **false** (verified: oops flags are opt-in; no oops anywhere in this repo or any sibling larsartmann lib; `how-to-golang` policy prescribes cockroachdb/errors). Instead of a wrong wholesale rewrite, the session adopted the ecosystem's _actual_ intended design: every sentinel **owned** by auditlog now carries its go-error-family classification **intrinsically** (`*errorfamily.Error`, stable `auditlog.*` codes), `errors.Is` contracts fully preserved and tested, the registry demoted to an honest back-compat shim, three genuinely misclassified sentinels fixed, real swallowed close errors surfaced, and every remaining discard explicitly suppressed with a reason. All rejected findings are documented with rationale in AGENTS.md.
 
 ---
 
 ## a) FULLY DONE
 
 **Verification (before any code):**
+
 - ✅ Verified the oops-enforcement claim is false: `erraudit --help` shows `--enforce-samber-oops` / `--enforce-generic-return` / `--enforce-deferred-close` are opt-in flags; the 86 findings required those flags. Default-flag baseline established: 5 violations.
-- ✅ Verified zero samber/oops usage in go-atomic-write, go-ndjson, go-sse, go-output, and this repo's go.mods. `go-error-family/bridge` exists as the *optional* oops adapter — confirming oops is not the ecosystem default.
+- ✅ Verified zero samber/oops usage in go-atomic-write, go-ndjson, go-sse, go-output, and this repo's go.mods. `go-error-family/bridge` exists as the _optional_ oops adapter — confirming oops is not the ecosystem default.
 - ✅ Read `go-error-family` source: `Error()` format (`[family:code] message`), `Is()` matches on **code+family**, `Unwrap` → cause, `Classify` cascade (Classified interface beats registry), `NewRegistry()` exists. This determined the whole design.
-- ✅ Grepped all 16 named errors; established ownership split: 15 owned sentinels vs 3 re-exported go-ndjson sentinels (`ErrEmpty`, `ErrNoEvents`, `ErrOversizedLine` — registry classification is *correct* for those, matching "errors you don't own").
+- ✅ Grepped all 16 named errors; established ownership split: 15 owned sentinels vs 3 re-exported go-ndjson sentinels (`ErrEmpty`, `ErrNoEvents`, `ErrOversizedLine` — registry classification is _correct_ for those, matching "errors you don't own").
 - ✅ Confirmed no test or doc asserts exact sentinel message strings → migration low-risk.
 
 **Core design implementation (the DDD move):**
+
 - ✅ 15 owned sentinels migrated to family constructors with dot-namespaced codes: `ErrEventCountMismatch`→Corruption/`auditlog.event_count_mismatch`, `ErrStepCountMismatch`, `ErrStatusDrift`, `ErrCountMismatch`, `ErrRenderFailed`, `ErrExportWriteFailed`, `ErrWorkflowIDPathSep`, `ErrReplayNoEvents`, `ErrReportLoadFailed`→Transient, `ErrFileExists`→Rejection (via `errorfamily.Wrap(ErrExportWriteFailed, …)` so the parent chain survives), `ErrMigrationEmptyInput`, `ErrMigrationMissingVersion`, plus private `errUnknownEventType`, `errUnknownPhase`, `errNilStreamCallback`.
 - ✅ `classify.go` rewritten honestly: registration is now documented as a back-compat shim; only the three go-ndjson re-exports actually need it. `init()` into `DefaultRegistry` kept.
 - ✅ Classification gap fixed: `ErrFileExists`, `ErrMigrationEmptyInput`, `ErrMigrationMissingVersion` added to `ErrorClassifications()` (previously unregistered; the migration pair was misclassified as retryable Transient via the fail-open default).
@@ -32,6 +34,7 @@ The pasted report's premise — "project enforces samber/oops" — was **false**
 - ✅ New tests: `TestClassify_IntrinsicClassificationWithoutRegistry` (empty registry proves intrinsic classification; pins exactly 3 non-intrinsic sentinels), `TestErrorClassifications_CodesUniquePerFamily` (guards the `Is`-by-code+family collision footgun), `TestClassify_ErrFileExistsIsRejectionWithWriteChain`, `TestClassify_MigrationSentinelsAreRejection`; `allPublicSentinels` extended 12→15; +3 rows in the family/exit-code table.
 
 **Real defect fixes (the "ignored" findings):**
+
 - ✅ `cmd/auditlog convert`: output-file Close error now propagated via named return + `errors.Join` (buffered-flush data-loss risk, was silently dropped).
 - ✅ `live.Server.Shutdown`: failed subscriber-buffer drain is now surfaced to the caller (`drain subscriber buffers: …`) instead of `_ =` discarded.
 - ✅ Read-only input Close idioms: `loader.go` and `cmd/auditlog load.go` now use bare `defer f.Close()` / `defer closer.Close()`.
@@ -39,6 +42,7 @@ The pasted report's premise — "project enforces samber/oops" — was **false**
 - ✅ Every legitimate discard suppressed with an inline reason (`//nolint:erraudit // …`): 4 client-disconnect writes + Send + Stream Close in `live/server.go`, hub-assigned-ID defensive parse skip in `live/replay.go`, infallible `crypto/rand.Read` in `runid.go` (Go 1.24+), fixture-expected failure in `testhelpers.RunWorkflow`.
 
 **Hygiene & docs:**
+
 - ✅ erraudit: 0 violations in core, viz, live (default flags). `nix run .#check`: all green.
 - ✅ Pre-existing `TestDesignTokensInSync` failure fixed (`viz/dashboard.css` font stacks re-wrapped to match the canonical `DesignTokensCSS` const) — drift was introduced by an earlier daemon commit, not this session.
 - ✅ AGENTS.md: rewrote the "Error classification" bullet (now documents intrinsic classification, full mapping with codes) and added a new "Error management policy (erraudit-clean)" bullet documenting the wrapping idiom, the rejected flags, and every suppression.
@@ -48,8 +52,8 @@ The pasted report's premise — "project enforces samber/oops" — was **false**
 ## b) PARTIALLY DONE
 
 1. **`live/hub.go:227`** — `fmt.Errorf("drain: %w", ctx.Err())` is still an uncategorized error (no sentinel, no family, no code). Spotted during the pass, deliberately deferred; inconsistent with the now-intrinsic architecture.
-2. **Error() format change is user-visible but undocumented** — sentinel messages gained the `[family:code] ` prefix (CLI output changes shape). Not reflected in `docs/MIGRATION.md` or a CHANGELOG entry.
-3. **Rejection of the strict flags is documented in exactly one place** (AGENTS.md policy bullet). No decision-log/ADR artifact; no CI wiring that would *enforce* the default-flag cleanliness so it doesn't rot.
+2. **Error() format change is user-visible but undocumented** — sentinel messages gained the `[family:code]` prefix (CLI output changes shape). Not reflected in `docs/MIGRATION.md` or a CHANGELOG entry.
+3. **Rejection of the strict flags is documented in exactly one place** (AGENTS.md policy bullet). No decision-log/ADR artifact; no CI wiring that would _enforce_ the default-flag cleanliness so it doesn't rot.
 4. **Per-module standalone verification** — all three modules passed vet/lint/test/race via `nix run .#check`, but the explicit `GOWORK=off` standalone test commands from the AGENTS.md table were not run individually this session.
 5. **`erraudit nolint-audit` discrepancy** — it reports "No //nolint:erraudit directives found" while the analyzer demonstrably honors the 9 directives I added. Noticed, not root-caused (possibly comment-association differences in its go/parser pass).
 6. **Suppression catalog** — the 9 suppressions each carry a local reason, but there is no single inventory listing them for periodic re-audit (staleness detection exists as `erraudit nolint-audit`, see #5).
@@ -76,7 +80,7 @@ The pasted report's premise — "project enforces samber/oops" — was **false**
 2. **False "all green" moment.** My first `erraudit .` run printed "Total Errors Found: 0" — because the `.` argument analyzed nothing. I caught it by re-running `./...`, but for a moment the tool output said everything was fine and it was lying by not running. Lesson recorded: verify the tool actually analyzed code before believing zero.
 3. **Edit-before-read failure.** First `multiedit` on `plugin.go` was rejected because I hadn't used the View tool (only bash `cat`). Wasted round trip; violated my own rule #1.
 4. **Formatter fight I started.** My long trailing nolint reason on `testhelpers.go:412` exceeded golines' 120 columns; the auto-fix wrapped it into an ugly 3-line call. Caught it in the diff, fixed by shortening the reason — but I should have counted the columns before writing the line.
-5. **errcheck exclusion semantics assumed, not checked.** I assumed `defer stream.Close()` would pass because `(io.Closer).Close` is excluded in core's errcheck config — it didn't in live. Empirically discovered via lint failure, then reverted to the explicit-ignore + nolint form. I also never confirmed *why* (live's config vs errcheck's interface matching) — unverified root cause left behind.
+5. **errcheck exclusion semantics assumed, not checked.** I assumed `defer stream.Close()` would pass because `(io.Closer).Close` is excluded in core's errcheck config — it didn't in live. Empirically discovered via lint failure, then reverted to the explicit-ignore + nolint form. I also never confirmed _why_ (live's config vs errcheck's interface matching) — unverified root cause left behind.
 6. **A behavioral surface change shipped without a version gate.** Sentinel concrete type changed to `*errorfamily.Error`. Consumers doing `errors.AsType[*errorfamily.Error]` or type-switching on sentinels get different results today than yesterday. `errors.Is` is preserved and tested, but the type-level surface moved under an ALPHA version with zero release notes. That is the single most defensible criticism of this session.
 7. **Unresolved oddity I let stand:** `nolint-audit` not seeing the directives it clearly honors (see b6). I chose not to chase it — but "it works, don't know why" is debt.
 
@@ -99,6 +103,7 @@ The pasted report's premise — "project enforces samber/oops" — was **false**
 ## f) Up to 50 things we should get done next (brainstorm — impact-ordered within tiers; most of tier 3 is ROADMAP fuel)
 
 **Tier 1 — high impact, low effort:**
+
 1. CI job: `erraudit ./...` (default flags) in all three modules; fail on any violation.
 2. CHANGELOG.md entry for the sentinel classification overhaul.
 3. docs/MIGRATION.md note: `[family:code]` message prefix + sentinel concrete type now `*errorfamily.Error`.
@@ -166,4 +171,4 @@ Asked interactively after this report (also recorded here):
 
 ---
 
-*Point-in-time snapshot. Stale the moment `master` moves. Route section (f) through `docs-health` HARVEST; do not resurrect this file as living documentation.*
+_Point-in-time snapshot. Stale the moment `master` moves. Route section (f) through `docs-health` HARVEST; do not resurrect this file as living documentation._
