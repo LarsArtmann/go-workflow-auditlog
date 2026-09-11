@@ -2,6 +2,7 @@ package viz_test
 
 import (
 	"context"
+	"io"
 	"strings"
 	"testing"
 	"time"
@@ -11,6 +12,52 @@ import (
 	testhelpers "github.com/larsartmann/go-workflow-auditlog/testhelpers"
 	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
+
+func TestDiagram_CachedMarker(t *testing.T) {
+	t.Parallel()
+
+	a, w := testhelpers.NewAuditAndWorkflow(t)
+	fresh := testhelpers.NewSucceed("fresh")
+	fromCache := testhelpers.NewCached("from-cache")
+	testhelpers.AddParallelSteps(w, fresh, fromCache)
+	testhelpers.RunWorkflow(t, a, w)
+
+	report := a.Report()
+
+	writers := []struct {
+		name  string
+		write func(viz.WorkflowReport, io.Writer) error
+	}{
+		{"mermaid", viz.WriteMermaid},
+		{"plantuml", viz.WritePlantUML},
+		{"dot", viz.WriteGraphviz},
+		{"d2", viz.WriteD2},
+		{"tree", viz.WriteTree},
+		{"html-tree", viz.WriteHTMLTree},
+	}
+
+	for _, tc := range writers {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			var buf strings.Builder
+
+			if err := tc.write(report, &buf); err != nil {
+				t.Fatalf("write %s: %v", tc.name, err)
+			}
+
+			output := buf.String()
+
+			testhelpers.AssertContains(t, output, "⚡cached", "expected ⚡cached marker on cached node in "+tc.name)
+			testhelpers.AssertContains(t, output, "from-cache", "expected cached step name in "+tc.name)
+
+			// Exactly one marker: the fresh step must not be marked.
+			if n := strings.Count(output, "⚡cached"); n != 1 {
+				t.Errorf("expected exactly 1 ⚡cached marker in %s, got %d", tc.name, n)
+			}
+		})
+	}
+}
 
 func TestMermaid_BasicDAG(t *testing.T) {
 	t.Parallel()

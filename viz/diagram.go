@@ -6,14 +6,21 @@ import (
 	"github.com/larsartmann/go-output"
 )
 
-// stepLabel builds a display label for a step, including status label and
-// retry indicator. Used by all diagram and tree renderers for consistency.
+// stepLabel builds a display label for a step, including status label, cached
+// attribution, and retry indicator. Used by all diagram and tree renderers for
+// consistency. The ⚡cached marker keeps cache hits distinguishable from fresh
+// executions in every text surface — cached is attribution, not a status, so
+// it never changes the node color.
 func stepLabel(step StepInfo) string {
 	label := step.Name
 
 	statusLabel := step.Status.Label()
 	if statusLabel != "" {
 		label = fmt.Sprintf("%s [%s]", label, statusLabel)
+	}
+
+	if step.Cached {
+		label = fmt.Sprintf("%s ⚡cached", label)
 	}
 
 	if step.AttemptCount > 1 {

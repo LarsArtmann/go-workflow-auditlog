@@ -266,6 +266,114 @@ func TestDiff_PeakConcurrencyDelta(t *testing.T) {
 	}
 }
 
+func TestDiff_CachedDeltas(t *testing.T) {
+	t.Parallel()
+
+	// Diff() computes cached membership from StepInfo.Cached and the count
+	// delta from the precomputed CachedStepCount field. Synthetic reports
+	// make both deterministic.
+	step := func(name string, cached bool) auditlog.StepInfo {
+		return auditlog.StepInfo{
+			StepRef: auditlog.StepRef{Name: name},
+			Status:  auditlog.StepStatusSucceeded,
+			Cached:  cached,
+		}
+	}
+
+	r1 := auditlog.WorkflowReport{
+		Steps:           []auditlog.StepInfo{step("a", true), step("b", false)},
+		CachedStepCount: 1,
+	}
+
+	r2 := auditlog.WorkflowReport{
+		Steps:           []auditlog.StepInfo{step("a", false), step("b", true), step("c", true)},
+		CachedStepCount: 2,
+	}
+
+	diff := r1.Diff(r2)
+
+	if diff.CachedStepCountDelta != 1 {
+		t.Errorf("CachedStepCountDelta = %d, want 1", diff.CachedStepCountDelta)
+	}
+
+	if len(diff.CachedStepsAdded) != 2 || diff.CachedStepsAdded[0] != "b" || diff.CachedStepsAdded[1] != "c" {
+		t.Errorf("CachedStepsAdded = %v, want [b c]", diff.CachedStepsAdded)
+	}
+
+	if len(diff.CachedStepsRemoved) != 1 || diff.CachedStepsRemoved[0] != "a" {
+		t.Errorf("CachedStepsRemoved = %v, want [a]", diff.CachedStepsRemoved)
+	}
+
+	if !diff.HasChanges() {
+		t.Error("diff with cached-rate change should report changes")
+	}
+
+	// Symmetry: reversing operands negates the delta and swaps membership.
+	reverse := r2.Diff(r1)
+
+	if reverse.CachedStepCountDelta != -1 {
+		t.Errorf("reversed CachedStepCountDelta = %d, want -1", reverse.CachedStepCountDelta)
+	}
+
+	if len(reverse.CachedStepsAdded) != 1 || reverse.CachedStepsAdded[0] != "a" {
+		t.Errorf("reversed CachedStepsAdded = %v, want [a]", reverse.CachedStepsAdded)
+	}
+
+	if len(reverse.CachedStepsRemoved) != 2 || reverse.CachedStepsRemoved[0] != "b" || reverse.CachedStepsRemoved[1] != "c" {
+		t.Errorf("reversed CachedStepsRemoved = %v, want [b c]", reverse.CachedStepsRemoved)
+	}
+}
+
+func TestDiff_CachedOnlyChangeReportsHasChanges(t *testing.T) {
+	t.Parallel()
+
+	// Identical steps except cached attribution — an aggregate-only change,
+	// like TestDiff_HasChanges_AggregateOnly but for the cached axis.
+	step := func(name string, cached bool) auditlog.StepInfo {
+		return auditlog.StepInfo{
+			StepRef: auditlog.StepRef{Name: name},
+			Status:  auditlog.StepStatusSucceeded,
+			Cached:  cached,
+		}
+	}
+
+	r1 := auditlog.WorkflowReport{Steps: []auditlog.StepInfo{step("a", false)}, CachedStepCount: 0}
+	r2 := auditlog.WorkflowReport{Steps: []auditlog.StepInfo{step("a", true)}, CachedStepCount: 1}
+
+	diff := r1.Diff(r2)
+	if !diff.HasChanges() {
+		t.Error("diff with only cached-attribution change should still report HasChanges")
+	}
+
+	if len(diff.CachedStepsAdded) != 1 || diff.CachedStepsAdded[0] != "a" {
+		t.Errorf("CachedStepsAdded = %v, want [a]", diff.CachedStepsAdded)
+	}
+}
+
+func TestDiff_StepDiffCachedField(t *testing.T) {
+	t.Parallel()
+
+	// Added steps carry the cached attribution of the step in "other".
+	r1 := auditlog.WorkflowReport{}
+	r2 := auditlog.WorkflowReport{
+		Steps: []auditlog.StepInfo{{
+			StepRef: auditlog.StepRef{Name: "fetch"},
+			Status:  auditlog.StepStatusSucceeded,
+			Cached:  true,
+		}},
+	}
+
+	diff := r1.Diff(r2)
+	if len(diff.AddedSteps) != 1 || !diff.AddedSteps[0].Cached {
+		t.Fatalf("expected added step with Cached=true, got %+v", diff.AddedSteps)
+	}
+
+	// The cached membership lists name it too.
+	if len(diff.CachedStepsAdded) != 1 || diff.CachedStepsAdded[0] != "fetch" {
+		t.Errorf("CachedStepsAdded = %v, want [fetch]", diff.CachedStepsAdded)
+	}
+}
+
 func TestDiff_HasChanges_AggregateOnly(t *testing.T) {
 	t.Parallel()
 

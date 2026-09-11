@@ -139,6 +139,81 @@ func TestCLI_Diff_NoChanges(t *testing.T) {
 	}
 }
 
+// writeCachedDiffReports writes two valid single-step reports where the
+// current run's step was served from a cache and the baseline's was not.
+func writeCachedDiffReports(t *testing.T) (string, string) {
+	t.Helper()
+
+	dir := t.TempDir()
+	report := func(cached bool) string {
+		cachedCount := ""
+		cachedFlag := ""
+		if cached {
+			cachedCount = `,"cached_step_count":1`
+			cachedFlag = `,"cached":true`
+		}
+
+		return `{
+			"version": "0.1.0",
+			"workflow_id": "test-workflow",
+			"exported_at": "2026-01-01T00:00:00Z",
+			"event_count": 2,
+			"step_count": 1,
+			"succeeded_count": 1` + cachedCount + `,
+			"total_duration_ms": 50.0,
+			"wall_clock_duration_ms": 50.0,
+			"workflow_succeeded": true,
+			"events": [
+				{"step_name":"fetch","sequence":1,"timestamp":"2026-01-01T00:00:00Z","event_type":"attempt_start","phase":"before","attempt":1},
+				{"step_name":"fetch","sequence":2,"timestamp":"2026-01-01T00:00:00.05Z","event_type":"attempt_end","phase":"after","attempt":1,"duration_ms":50,"status":"succeeded"` + cachedFlag + `}
+			],
+			"steps": [
+				{"step_name":"fetch","status":"succeeded","attempt_count":1,"started_at":"2026-01-01T00:00:00Z","finished_at":"2026-01-01T00:00:00.05Z","duration_ms":50,"has_retry":false,"has_timeout":false` + cachedFlag + `}
+			]
+		}`
+	}
+
+	baseline := filepath.Join(dir, "baseline.json")
+	current := filepath.Join(dir, "current.json")
+
+	if err := os.WriteFile(baseline, []byte(report(false)), 0o600); err != nil {
+		t.Fatalf("write baseline: %v", err)
+	}
+
+	if err := os.WriteFile(current, []byte(report(true)), 0o600); err != nil {
+		t.Fatalf("write current: %v", err)
+	}
+
+	return baseline, current
+}
+
+func TestCLI_Diff_CachedDeltas(t *testing.T) {
+	t.Parallel()
+
+	binary := buildCLI(t)
+	baseline, current := writeCachedDiffReports(t)
+
+	cmd := exec.Command(binary, "diff", baseline, current)
+
+	var stdout bytes.Buffer
+
+	cmd.Stdout = &stdout
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+
+	output := stdout.String()
+
+	if !strings.Contains(output, "cached steps delta:    +1") {
+		t.Errorf("expected cached steps delta in output, got: %s", output)
+	}
+
+	if !strings.Contains(output, "newly cached steps: [fetch]") {
+		t.Errorf("expected newly cached steps in output, got: %s", output)
+	}
+}
+
 func TestCLI_Convert_JSON(t *testing.T) {
 	t.Parallel()
 

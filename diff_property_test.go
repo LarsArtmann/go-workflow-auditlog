@@ -24,8 +24,10 @@ var diffStepStatuses = []auditlog.StepStatus{
 var diffStepNames = []string{"fetch", "validate", "transform", "save", "notify", "cleanup", "retry", "deploy"}
 
 // randWorkflowReport builds a pseudo-random WorkflowReport from a deterministic
-// RNG. Only the fields Diff inspects are populated: Steps, WallClockDurationMs,
-// CriticalPathDurationMs, PeakConcurrency, and CriticalPathSteps.
+// RNG. Only the fields Diff inspects are populated: Steps (status + cached
+// attribution), WallClockDurationMs, CriticalPathDurationMs, PeakConcurrency,
+// CriticalPathSteps, and CachedStepCount (derived from the steps, mirroring
+// how BuildReport denormalizes it).
 func randWorkflowReport(rng *rand.Rand) auditlog.WorkflowReport {
 	n := rng.IntN(len(diffStepNames) + 1)
 	namePool := slices.Clone(diffStepNames)
@@ -36,10 +38,18 @@ func randWorkflowReport(rng *rand.Rand) auditlog.WorkflowReport {
 	}
 
 	steps := make([]auditlog.StepInfo, 0, n)
+	cachedCount := 0
+
 	for i := range n {
+		cached := rng.IntN(2) == 0
+		if cached {
+			cachedCount++
+		}
+
 		steps = append(steps, auditlog.StepInfo{
 			StepRef: auditlog.StepRef{Name: namePool[i]},
 			Status:  diffStepStatuses[rng.IntN(len(diffStepStatuses))],
+			Cached:  cached,
 		})
 	}
 
@@ -57,6 +67,7 @@ func randWorkflowReport(rng *rand.Rand) auditlog.WorkflowReport {
 		CriticalPathDurationMs: float64(rng.IntN(50000)),
 		PeakConcurrency:        rng.IntN(16),
 		CriticalPathSteps:      criticalPath,
+		CachedStepCount:        cachedCount,
 	}
 }
 
@@ -176,6 +187,14 @@ func TestDiff_OutputSorted(t *testing.T) {
 		if !slices.IsSortedFunc(d.CriticalPathStepsRemoved, cmp.Compare) {
 			t.Error("CriticalPathStepsRemoved not sorted by name")
 		}
+
+		if !slices.IsSortedFunc(d.CachedStepsAdded, cmp.Compare) {
+			t.Error("CachedStepsAdded not sorted by name")
+		}
+
+		if !slices.IsSortedFunc(d.CachedStepsRemoved, cmp.Compare) {
+			t.Error("CachedStepsRemoved not sorted by name")
+		}
 	}
 }
 
@@ -228,6 +247,39 @@ func TestDiff_CriticalPathStepsDuality(t *testing.T) {
 		if !stringSetEqual(forward.CriticalPathStepsRemoved, reverse.CriticalPathStepsAdded) {
 			t.Errorf("CriticalPathStepsRemoved(a→b) != Added(b→a)\n  removed: %v\n  added: %v",
 				forward.CriticalPathStepsRemoved, reverse.CriticalPathStepsAdded)
+		}
+	}
+}
+
+func TestDiff_CachedAntiSymmetry(t *testing.T) {
+	t.Parallel()
+
+	rng := rand.New(rand.NewPCG(9, 9))
+
+	for range 200 {
+		a, b := randWorkflowReport(rng), randWorkflowReport(rng)
+		forward, reverse := a.Diff(b), b.Diff(a)
+
+		if forward.CachedStepCountDelta != -reverse.CachedStepCountDelta {
+			t.Errorf("CachedStepCountDelta(a→b)=%d should equal -Δ(b→a)=%d",
+				forward.CachedStepCountDelta, -reverse.CachedStepCountDelta)
+		}
+
+		if !stringSetEqual(forward.CachedStepsAdded, reverse.CachedStepsRemoved) {
+			t.Errorf("CachedStepsAdded(a→b) != Removed(b→a)\n  added: %v\n  removed: %v",
+				forward.CachedStepsAdded, reverse.CachedStepsRemoved)
+		}
+
+		if !stringSetEqual(forward.CachedStepsRemoved, reverse.CachedStepsAdded) {
+			t.Errorf("CachedStepsRemoved(a→b) != Added(b→a)\n  removed: %v\n  added: %v",
+				forward.CachedStepsRemoved, reverse.CachedStepsAdded)
+		}
+
+		// With counts derived from steps (as BuildReport does), the count delta
+		// always equals the membership imbalance: len(added) - len(removed).
+		if want := len(forward.CachedStepsAdded) - len(forward.CachedStepsRemoved); forward.CachedStepCountDelta != want {
+			t.Errorf("CachedStepCountDelta=%d should equal len(added)-len(removed)=%d",
+				forward.CachedStepCountDelta, want)
 		}
 	}
 }
