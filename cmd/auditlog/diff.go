@@ -87,12 +87,29 @@ func runDiff(args []string) error {
 		fmt.Printf("peak concurrency delta: %s%d\n", sign, diff.PeakConcurrencyDelta)
 	}
 
+	if diff.CachedStepCountDelta != 0 {
+		sign := "+"
+		if diff.CachedStepCountDelta < 0 {
+			sign = ""
+		}
+
+		fmt.Printf("cached steps delta:    %s%d (results reused, not re-verified)\n", sign, diff.CachedStepCountDelta)
+	}
+
 	if len(diff.CriticalPathStepsAdded) > 0 {
 		fmt.Printf("critical path steps added: %v\n", diff.CriticalPathStepsAdded)
 	}
 
 	if len(diff.CriticalPathStepsRemoved) > 0 {
 		fmt.Printf("critical path steps removed: %v\n", diff.CriticalPathStepsRemoved)
+	}
+
+	if len(diff.CachedStepsAdded) > 0 {
+		fmt.Printf("newly cached steps: %v\n", diff.CachedStepsAdded)
+	}
+
+	if len(diff.CachedStepsRemoved) > 0 {
+		fmt.Printf("no longer cached steps: %v\n", diff.CachedStepsRemoved)
 	}
 
 	return nil

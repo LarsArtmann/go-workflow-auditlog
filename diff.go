@@ -12,18 +12,26 @@ type DiffResult struct {
 	DurationDelta            float64    `json:"duration_delta_ms"`
 	CriticalPathDeltaMs      float64    `json:"critical_path_delta_ms"`
 	PeakConcurrencyDelta     int        `json:"peak_concurrency_delta"`
+	CachedStepCountDelta     int        `json:"cached_step_count_delta"`
 	CriticalPathStepsAdded   []string   `json:"critical_path_steps_added,omitempty"`
 	CriticalPathStepsRemoved []string   `json:"critical_path_steps_removed,omitempty"`
+	CachedStepsAdded         []string   `json:"cached_steps_added,omitempty"`
+	CachedStepsRemoved       []string   `json:"cached_steps_removed,omitempty"`
 }
 
 // StepDiff captures a single step's state in a diff context.
 // For status changes, Status holds the new value and OldStatus the previous one
 // (OldStatus is empty for added steps).
+//
+// Cached reports whether the step was served from a cache in the report the
+// diff points TO ("other"). Cached-state transitions between runs are listed
+// in DiffResult.CachedStepsAdded and DiffResult.CachedStepsRemoved.
 type StepDiff struct {
 	Name      string     `json:"name"`
 	Status    StepStatus `json:"status"`
 	OldStatus StepStatus `json:"old_status,omitempty"`
 	Duration  float64    `json:"duration_ms,omitempty"`
+	Cached    bool       `json:"cached,omitempty"`
 }
 
 // HasChanges returns true if the diff found any differences.
@@ -31,7 +39,9 @@ func (d DiffResult) HasChanges() bool {
 	return len(d.AddedSteps) > 0 || len(d.RemovedSteps) > 0 ||
 		len(d.StatusChanged) > 0 || d.DurationDelta != 0 ||
 		d.CriticalPathDeltaMs != 0 || d.PeakConcurrencyDelta != 0 ||
-		len(d.CriticalPathStepsAdded) > 0 || len(d.CriticalPathStepsRemoved) > 0
+		d.CachedStepCountDelta != 0 ||
+		len(d.CriticalPathStepsAdded) > 0 || len(d.CriticalPathStepsRemoved) > 0 ||
+		len(d.CachedStepsAdded) > 0 || len(d.CachedStepsRemoved) > 0
 }
 
 // IsEmpty returns true when no differences were found.
@@ -53,19 +63,32 @@ func (d DiffResult) IsEmpty() bool {
 //     Positive = "other" run reached higher parallelism.
 //   - CriticalPathStepsAdded/Removed: step names that appear on "other"'s
 //     critical path but not on this one's (and vice versa).
+//   - CachedStepCountDelta: difference in cached-step count (results reused
+//     from cache instead of re-executed). Positive = "other" run reused more
+//     cached results. A shrinking negative delta is the cache-invalidation
+//     signal; a growing positive delta is the cache-warming signal.
+//   - CachedStepsAdded/Removed: step names whose cached attribution differs
+//     between runs — cached in "other" but not here (added), or vice versa
+//     (removed). This is the cache-rate regression detector: it names exactly
+//     which steps stopped or started reusing cached results.
 func (r WorkflowReport) Diff(other WorkflowReport) DiffResult {
 	result := DiffResult{
 		DurationDelta:        other.WallClockDurationMs - r.WallClockDurationMs,
 		CriticalPathDeltaMs:  other.CriticalPathDurationMs - r.CriticalPathDurationMs,
 		PeakConcurrencyDelta: other.PeakConcurrency - r.PeakConcurrency,
+		CachedStepCountDelta: other.CachedStepCount - r.CachedStepCount,
 	}
 
 	result.AddedSteps, result.RemovedSteps, result.StatusChanged = diffSteps(
 		r.Steps, other.Steps,
 	)
 
-	result.CriticalPathStepsAdded, result.CriticalPathStepsRemoved = diffCriticalPathMembership(
+	result.CriticalPathStepsAdded, result.CriticalPathStepsRemoved = diffNameMembership(
 		r.CriticalPathSteps, other.CriticalPathSteps,
+	)
+
+	result.CachedStepsAdded, result.CachedStepsRemoved = diffNameMembership(
+		cachedStepNames(r.Steps), cachedStepNames(other.Steps),
 	)
 
 	return result
@@ -126,10 +149,10 @@ func diffSteps(ours, theirs []StepInfo) ([]StepDiff, []StepDiff, []StepDiff) {
 	return added, removed, changed
 }
 
-// diffCriticalPathMembership returns names that are on the second report's
-// critical path but not the first's (added), and vice versa (removed).
-// Output slices are sorted by name.
-func diffCriticalPathMembership(ours, theirs []string) ([]string, []string) {
+// diffNameMembership returns names that are in the second list but not the
+// first (added), and vice versa (removed). Both output slices are sorted.
+// Used for critical-path membership and cached-attribution membership.
+func diffNameMembership(ours, theirs []string) ([]string, []string) {
 	ourSet := make(map[string]struct{}, len(ours))
 	for _, n := range ours {
 		ourSet[n] = struct{}{}
@@ -161,6 +184,18 @@ func diffCriticalPathMembership(ours, theirs []string) ([]string, []string) {
 	return added, removed
 }
 
+// cachedStepNames returns the names of steps served from a cache,
+// in report order.
+func cachedStepNames(steps []StepInfo) []string {
+	names := make([]string, 0, len(steps))
+	for _, s := range steps {
+		if s.Cached {
+			names = append(names, s.Name)
+		}
+	}
+	return names
+}
+
 // diffStep builds a StepDiff entry from a step name and StepInfo.
 // oldStatus is the previous status (empty for added/removed entries).
 func diffStep(name string, step StepInfo, oldStatus StepStatus) StepDiff {
@@ -169,5 +204,6 @@ func diffStep(name string, step StepInfo, oldStatus StepStatus) StepDiff {
 		Status:    step.Status,
 		OldStatus: oldStatus,
 		Duration:  step.Duration(),
+		Cached:    step.Cached,
 	}
 }
