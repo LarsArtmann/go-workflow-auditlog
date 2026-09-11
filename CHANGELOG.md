@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Nothing yet.
+- **Cache-hit attribution (`Cached` concept)** — steps whose result was served from a cache instead of executing their work can now report that honestly. New public API `auditlog.MarkCached(ctx)` (callable from inside a step body; the context is injected by `Attach`) sets: `Event.Cached` on the attempt_end event (`"cached":true`), `StepInfo.Cached` on the step, and the `WorkflowReport.CachedStepCount` aggregate. Cached is orthogonal to `Status` — a cached step still succeeds/fails on its own merits; the flag records WHERE the result came from, so a reused answer never masquerades as freshly verified work. New `ErrMarkCachedNoStepContext` sentinel (Rejection) when the context was not injected by an attached Auditor (e.g. auditing disabled — treat as non-fatal). New filter options `WithCachedSteps()` / `WithUncachedSteps()` answer "what did we NOT re-verify this run?". `Validate()` now detects `CachedStepCount` drift (`ErrCountMismatch`); `MigrateReport` re-derives the count. CSV/TSV export gained a `cached` column; the CLI `info` subcommand prints a cached breakdown and per-step `⚡cached` markers; the viz table gained `ColumnCached`; both the static and live dashboards render `⚡ cached` badges on step rows, graph nodes, and events chips (new `--cache` color token), and searching "cached" finds cache-hit steps. NDJSON replay round-trips the flag. `testhelpers.NewCached` models a cache-hit step for tests.
 
 ### Fixed
 

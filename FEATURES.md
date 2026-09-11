@@ -66,6 +66,7 @@ Honest feature inventory by status. Verified against the codebase on 2026-08-06.
 - `PeakConcurrency` — max in-flight attempts (event-stream scan)
 - `CriticalPathDurationMs` — longest dependency-chain duration (memoized DFS)
 - `FailureReason` — structured enum on Event (`timeout`, `canceled`, `user_error`); zero value = unclassified (success); also denormalized onto `StepInfo` (reflects final outcome only, cleared on retry success); `Label()`/`Color()` display metadata for visualizations; `ColumnFailureReason` table column in viz
+- `Cached` — cache-hit attribution: `MarkCached(ctx)` from inside a step body flags the attempt as served from a cache (Event `"cached":true` on attempt_end, `StepInfo.Cached`, `CachedStepCount` aggregate); orthogonal to status — records where the result came from, not whether it was good; `WithCachedSteps`/`WithUncachedSteps` filters; `ColumnCached` table column; `⚡ cached` badges in both dashboards; CSV `cached` column; CLI info breakdown
 - `FailureSummary` — human-readable report-level summary (e.g., "3 step(s) failed: fetch"); JSON key `failure_summary`
 - `PendingCount` / `RunningCount` — split lifecycle-state counters
 - `TotalDurationMs` — sum of per-step durations (kept for completeness)

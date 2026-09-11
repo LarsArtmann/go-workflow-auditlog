@@ -291,6 +291,10 @@ func finalizeForExample(r *auditlog.WorkflowReport) {
 		if s.Status == auditlog.StepStatusSucceeded {
 			r.SucceededCount++
 		}
+
+		if s.Cached {
+			r.CachedStepCount++
+		}
 	}
 
 	r.WorkflowSucceeded = r.FailedCount == 0 && r.PendingCount == 0 && r.RunningCount == 0
