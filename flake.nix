@@ -133,7 +133,7 @@
           apps.auditlog = {
             type = "app";
 
-            program = pkgs.writeShellApplication {
+            program = pkgs.lib.getExe (pkgs.writeShellApplication {
               name = "auditlog";
 
               runtimeInputs = [ pkgs.go_1_26 ];
@@ -142,7 +142,7 @@
                 export GOEXPERIMENT=jsonv2
                 exec go run ${./.}/cmd/auditlog "$@"
               '';
-            };
+            });
           };
         };
     };
