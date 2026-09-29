@@ -48,19 +48,25 @@
             GOEXPERIMENT = "jsonv2";
           };
 
-          packages.default =
-            pkgs.runCommand "go-workflow-auditlog"
-              {
-                meta = with lib; {
-                  description = "Audit logging library for Azure/go-workflow";
-                  homepage = "https://github.com/larsartmann/go-workflow-auditlog";
-                  license = licenses.mit;
-                  platforms = platforms.unix;
-                };
-              }
-              ''
-                mkdir -p $out
-              '';
+          # Real package: the auditlog CLI (cmd/auditlog). Replaces a former
+          # `mkdir -p $out` marker whose checks.build asserted nothing.
+          packages.default = pkgs.buildGo126Module {
+            pname = "auditlog";
+            version = self.shortRev or self.dirtyShortRev or "dev";
+            src = lib.fileset.toSource {
+              root = ./.;
+              fileset = lib.fileset.gitTracked ./.;
+            };
+            subPackages = [ "cmd/auditlog" ];
+            vendorHash = "sha256-X54/+f3DN8ue8EzHjmKVQnwKD/mb/T1gX2CFPdXN6QU=";
+            meta = with lib; {
+              description = "Audit logging CLI for Azure/go-workflow";
+              homepage = "https://github.com/larsartmann/go-workflow-auditlog";
+              license = licenses.mit;
+              platforms = platforms.unix;
+              mainProgram = "auditlog";
+            };
+          };
 
           packages.check = pkgs.writeShellApplication {
             name = "check";
@@ -133,16 +139,18 @@
           apps.auditlog = {
             type = "app";
 
-            program = pkgs.lib.getExe (pkgs.writeShellApplication {
-              name = "auditlog";
+            program = pkgs.lib.getExe (
+              pkgs.writeShellApplication {
+                name = "auditlog";
 
-              runtimeInputs = [ pkgs.go_1_26 ];
+                runtimeInputs = [ pkgs.go_1_26 ];
 
-              text = ''
-                export GOEXPERIMENT=jsonv2
-                exec go run ${./.}/cmd/auditlog "$@"
-              '';
-            });
+                text = ''
+                  export GOEXPERIMENT=jsonv2
+                  exec go run ${./.}/cmd/auditlog "$@"
+                '';
+              }
+            );
           };
         };
     };
