@@ -7,7 +7,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/invopop/jsonschema v0.14.0
 	github.com/larsartmann/go-atomic-write v0.5.1
-	github.com/larsartmann/go-error-family v0.10.0
+	github.com/larsartmann/go-error-family v0.10.2
 	github.com/larsartmann/go-ndjson v0.0.1
 )
 
