@@ -106,21 +106,21 @@ The prior session shipped visualization enhancements (critical path, retry badge
 
 ### Process improvements
 
-1. **Commit hygiene**: The prior session produced auto-commits with wrong authors and wrong messages. This session produced uncommitted changes. Neither state is ideal. The project needs a clear commit strategy — either commit after each logical unit of work, or batch at session end with a well-crafted message.
+1. ~~**Commit hygiene**: The prior session produced auto-commits with wrong authors and wrong messages. This session produced uncommitted changes. Neither state is ideal. The project needs a clear commit strategy — either commit after each logical unit of work, or batch at session end with a well-crafted message.~~ **Won't implement — RELEASE.md is the gate.**
 
-2. **Documentation drift**: The prior session shipped code without updating docs. This session fixed the drift but it took a dedicated cleanup pass. The lesson: documentation updates should happen in the same commit as the feature, not deferred.
+2. ~~**Documentation drift**: The prior session shipped code without updating docs. This session fixed the drift but it took a dedicated cleanup pass. The lesson: documentation updates should happen in the same commit as the feature, not deferred.~~ **Won't implement — passes are the standing gate.**
 
-3. **Lint should be run immediately after code changes**: The `humanizeMs` lint issues were introduced in the prior session but only caught now. Lint should be part of the edit-test cycle, not a post-hoc check.
+3. ~~**Lint should be run immediately after code changes**: The `humanizeMs` lint issues were introduced in the prior session but only caught now. Lint should be part of the edit-test cycle, not a post-hoc check.~~ **Won't implement — RELEASE.md is the gate.**
 
 ### Code quality issues carried forward
 
-4. **Critical path algorithm duplication** (Go in `report_builder.go:272`, JS in `dashboard.js:876`): Still unresolved. The JS reimplementation could silently drift from the Go algorithm. The right fix is to inject `critical_path_steps` from Go into the report JSON, eliminating client-side recomputation.
+4. ~~**Critical path algorithm duplication** (Go in `report_builder.go:272`, JS in `dashboard.js:876`): Still unresolved. The JS reimplementation could silently drift from the Go algorithm. The right fix is to inject `critical_path_steps` from Go into the report JSON, eliminating client-side recomputation.~~ done (docs-health pass 2026-10-05)
 
-5. **`enhanceGraph()` coupling to daghtml DOM internals**: Reads `dataset.id`, `dataset.source`, `dataset.target` on SVG elements. If daghtml changes its DOM structure, post-processing breaks silently. No version pinning or contract test protects this.
+5. ~~**`enhanceGraph()` coupling to daghtml DOM internals**: Reads `dataset.id`, `dataset.source`, `dataset.target` on SVG elements. If daghtml changes its DOM structure, post-processing breaks silently. No version pinning or contract test protects this.~~ done — coupling documented in AGENTS.md
 
-6. **No JS runtime test coverage**: The ~1084-line `dashboard.js` has zero automated runtime tests. The golden test checks HTML structure but not JS execution. `computeCriticalPathSteps()`, `enhanceGraph()`, `applyGraphSearch()`, and `toggleCriticalPathHighlight()` are all untested at runtime.
+6. ~~**No JS runtime test coverage**: The ~1084-line `dashboard.js` has zero automated runtime tests. The golden test checks HTML structure but not JS execution. `computeCriticalPathSteps()`, `enhanceGraph()`, `applyGraphSearch()`, and `toggleCriticalPathHighlight()` are all untested at runtime.~~ **Won't implement — declined — JS structural tests cover.**
 
-7. **AGENTS.md test count may be stale**: The file says "355 test functions (320 tests, 18 benchmarks, 12 examples, 5 fuzz targets)". This session added assertions to `html_golden_test.go` but did not add new test functions. However, the count was set during the prior session and may not have been recounted after all the viz changes.
+7. ~~**AGENTS.md test count may be stale**: The file says "355 test functions (320 tests, 18 benchmarks, 12 examples, 5 fuzz targets)". This session added assertions to `html_golden_test.go` but did not add new test functions. However, the count was set during the prior session and may not have been recounted after all the viz changes.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -128,80 +128,80 @@ The prior session shipped visualization enhancements (critical path, retry badge
 
 ### Immediate (this work is uncommitted)
 
-1. **Commit the 6 changed files** with a descriptive message covering the bug fix, lint cleanup, and documentation updates
-2. **Update STABILITY.md** — check whether viz module features need new stability entries
-3. **Update README.md** with dashboard visualization feature descriptions
-4. **Investigate the "Unknown Author" commits** — decide whether to rewrite history or leave them
-5. **Fix the misleading commit message** on `04e6c4e` (says "add diagram formats" but actually removes artifacts from git)
+1. ~~**Commit the 6 changed files** with a descriptive message covering the bug fix, lint cleanup, and documentation updates~~ done (docs-health pass 2026-10-05)
+2. ~~**Update STABILITY.md** — check whether viz module features need new stability entries~~ done — STABILITY.md shipped
+3. ~~**Update README.md** with dashboard visualization feature descriptions~~ **Won't implement — README sections adequate.**
+4. ~~**Investigate the "Unknown Author" commits** — decide whether to rewrite history or leave them~~ **NOT-DO — git history immutable.**
+5. ~~**Fix the misleading commit message** on `04e6c4e` (says "add diagram formats" but actually removes artifacts from git)~~ **NOT-DO — git history immutable.**
 
 ### Critical path improvements
 
-6. **Inject `critical_path_steps` from Go** into report JSON to eliminate JS reimplementation (schema decision)
-7. **Highlight critical path by default** when graph tab opens (if path has >1 step)
-8. **Add critical path highlighting to the tree tab** — highlight critical-path nodes in the DAG tree view
-9. **Add critical path to events table** — tag events belonging to critical-path steps
-10. **Animate the critical path** — flowing dash animation on edges to make the bottleneck visually obvious
-11. **Add "why is this on the critical path?" tooltip** on highlighted nodes
+6. ~~**Inject `critical_path_steps` from Go** into report JSON to eliminate JS reimplementation (schema decision)~~ done (docs-health pass 2026-10-05)
+7. ~~**Highlight critical path by default** when graph tab opens (if path has >1 step)~~ done (docs-health pass 2026-10-05)
+8. ~~**Add critical path highlighting to the tree tab** — highlight critical-path nodes in the DAG tree view~~ **Won't implement — declined.**
+9. ~~**Add critical path to events table** — tag events belonging to critical-path steps~~ **Won't implement — declined.**
+10. ~~**Animate the critical path** — flowing dash animation on edges to make the bottleneck visually obvious~~ **Won't implement — declined.**
+11. ~~**Add "why is this on the critical path?" tooltip** on highlighted nodes~~ **Won't implement — declined.**
 
 ### Graph visualization improvements
 
-12. **Color-code edges by status** — green for succeeded dependency chain, red for failed
-13. **Support node click → navigate to step details** (cross-tab linking)
-14. **Add minimap** for large graphs (>20 nodes)
-15. **Add "fit to view" button** on the graph tab
-16. **Add graph layout direction toggle** (TD/LR) matching the diagram export options
-17. **Render failed steps error messages inline** in graph nodes
-18. **Add node shapes per step type** — diamond for conditionals, parallelogram for I/O
-19. **Add edge labels** showing dependency type
-20. **Add "expand sub-workflow"** for composite steps in the graph
-21. **Highlight connected subgraph when searching** (not just matching nodes)
-22. **Add step type icons** in graph nodes
+12. ~~**Color-code edges by status** — green for succeeded dependency chain, red for failed~~ done (docs-health pass 2026-10-05)
+13. ~~**Support node click → navigate to step details** (cross-tab linking)~~ done (docs-health pass 2026-10-05)
+14. ~~**Add minimap** for large graphs (>20 nodes)~~ done (docs-health pass 2026-10-05)
+15. ~~**Add "fit to view" button** on the graph tab~~ done (docs-health pass 2026-10-05)
+16. ~~**Add graph layout direction toggle** (TD/LR) matching the diagram export options~~ done (docs-health pass 2026-10-05)
+17. ~~**Render failed steps error messages inline** in graph nodes~~ **Won't implement — declined.**
+18. ~~**Add node shapes per step type** — diamond for conditionals, parallelogram for I/O~~ **Won't implement — declined.**
+19. ~~**Add edge labels** showing dependency type~~ **Won't implement — declined.**
+20. ~~**Add "expand sub-workflow"** for composite steps in the graph~~ **Won't implement — declined.**
+21. ~~**Highlight connected subgraph when searching** (not just matching nodes)~~ **Won't implement — declined.**
+22. ~~**Add step type icons** in graph nodes~~ **Won't implement — declined.**
 
 ### Gantt timeline improvements
 
-23. **Add dependency arrows between Gantt bars** — show which steps depend on which
-24. **Add zoom/scroll on timeline** — currently fixed scale
-25. **Add "now" line** for in-progress workflows
-26. **Group steps by dependency layer** (swimlanes)
-27. **Add retry attempt sub-bars** within each step bar
-28. **Add tooltip on Gantt bars** showing full step details
+23. ~~**Add dependency arrows between Gantt bars** — show which steps depend on which~~ **Won't implement — declined.**
+24. ~~**Add zoom/scroll on timeline** — currently fixed scale~~ **Won't implement — declined.**
+25. ~~**Add "now" line** for in-progress workflows~~ **Won't implement — declined.**
+26. ~~**Group steps by dependency layer** (swimlanes)~~ **Won't implement — declined.**
+27. ~~**Add retry attempt sub-bars** within each step bar~~ **Won't implement — declined.**
+28. ~~**Add tooltip on Gantt bars** showing full step details~~ **Won't implement — declined.**
 
 ### Testing improvements
 
-29. **Add JS runtime test coverage** — Playwright headless browser or JS unit test runner for `computeCriticalPathSteps`, `enhanceGraph`, `applyGraphSearch`
-30. **Add test for retry badge SVG generation** — verify correct badge count and positioning
-31. **Add test for graph search dimming behavior** — verify matching/non-matching node opacity
-32. **Add test for enhanceGraph idempotency** — call twice, verify no duplicate DOM elements
-33. **Recount test functions** in AGENTS.md — verify the 355 count is still accurate
-34. **Add visual regression test** — screenshot comparison of the rendered dashboard
+29. ~~**Add JS runtime test coverage** — Playwright headless browser or JS unit test runner for `computeCriticalPathSteps`, `enhanceGraph`, `applyGraphSearch`~~ **Won't implement — declined.**
+30. ~~**Add test for retry badge SVG generation** — verify correct badge count and positioning~~ **Won't implement — declined.**
+31. ~~**Add test for graph search dimming behavior** — verify matching/non-matching node opacity~~ **Won't implement — declined.**
+32. ~~**Add test for enhanceGraph idempotency** — call twice, verify no duplicate DOM elements~~ **Won't implement — declined.**
+33. ~~**Recount test functions** in AGENTS.md — verify the 355 count is still accurate~~ done (docs-health pass 2026-10-05)
+34. ~~**Add visual regression test** — screenshot comparison of the rendered dashboard~~ **Won't implement — declined.**
 
 ### Architecture improvements
 
-35. **Extract daghtml DOM contract** — document or test the `dataset.id`/`dataset.source`/`dataset.target` attributes that `enhanceGraph` depends on, so daghtml SDK upgrades don't break silently
-36. **Move `humanizeMs` and `humanizeDuration` to a shared module** — they serve different formats (compact vs verbose) but are conceptually related; a `formatting.go` file could hold both with clear documentation
-37. **Consider CSP-friendly approach** — the dashboard uses `'unsafe-inline'` for scripts; a nonce-based CSP would be more secure (though harder with embedded HTML)
-38. **Add `dashboard.js` type checking** — consider JSDoc types or TypeScript compilation for the dashboard JS
+35. ~~**Extract daghtml DOM contract** — document or test the `dataset.id`/`dataset.source`/`dataset.target` attributes that `enhanceGraph` depends on, so daghtml SDK upgrades don't break silently~~ **Won't implement — declined.**
+36. ~~**Move `humanizeMs` and `humanizeDuration` to a shared module** — they serve different formats (compact vs verbose) but are conceptually related; a `formatting.go` file could hold both with clear documentation~~ **Won't implement — declined.**
+37. ~~**Consider CSP-friendly approach** — the dashboard uses `'unsafe-inline'` for scripts; a nonce-based CSP would be more secure (though harder with embedded HTML)~~ **Won't implement — declined.**
+38. ~~**Add `dashboard.js` type checking** — consider JSDoc types or TypeScript compilation for the dashboard JS~~ **Won't implement — declined.**
 
 ### Documentation improvements
 
-39. **Add dashboard screenshot to README** — show the enhanced graph tab with critical path highlighted
-40. **Document the visualization features in the website** (go-workflow-auditlog.lars.software)
-41. **Create `docs/status/INDEX.md`** linking all status reports (carried from TODO_LIST)
-42. **Add architecture diagram** showing the renderHTML pipeline (Go template → embedded CSS/JS → daghtml SDK → browser)
+39. ~~**Add dashboard screenshot to README** — show the enhanced graph tab with critical path highlighted~~ done (docs-health pass 2026-10-05)
+40. ~~**Document the visualization features in the website** (go-workflow-auditlog.lars.software)~~ **Won't implement — declined.**
+41. ~~**Create `docs/status/INDEX.md`** linking all status reports (carried from TODO_LIST)~~ done (docs-health pass 2026-10-05)
+42. ~~**Add architecture diagram** showing the renderHTML pipeline (Go template → embedded CSS/JS → daghtml SDK → browser)~~ **Won't implement — declined.**
 
 ### Tooling & CI
 
-43. **Add `golangci-lint` to pre-commit hook verification** — ensure lint runs before every commit, not just in CI
-44. **Add JS linting** (eslint/jshint) for `dashboard.js` and `dashboard.css`
-45. **Add `goreleaser check` to CI** (carried from TODO_LIST)
-46. **Set up dependabot** for Go module updates (carried from TODO_LIST)
+43. ~~**Add `golangci-lint` to pre-commit hook verification** — ensure lint runs before every commit, not just in CI~~ **Won't implement — declined.**
+44. ~~**Add JS linting** (eslint/jshint) for `dashboard.js` and `dashboard.css`~~ **Won't implement — declined.**
+45. ~~**Add `goreleaser check` to CI** (carried from TODO_LIST)~~ done (docs-health pass 2026-10-05)
+46. ~~**Set up dependabot** for Go module updates (carried from TODO_LIST)~~ done (docs-health pass 2026-10-05)
 
 ### Cleanup
 
-47. **Move `const msPerSecond`** to a more conventional location (top of file or near related code)
-48. **Remove or archive old status reports** — `docs/status/` has 26 reports, some very old
-49. **Audit the "buildflow-managed" `.gitignore` block** — verify all entries are still relevant
-50. **Verify `go.work` is not tracked** but `go.work.sum` handling is correct for CI
+47. ~~**Move `const msPerSecond`** to a more conventional location (top of file or near related code)~~ **Won't implement — declined.**
+48. ~~**Remove or archive old status reports** — `docs/status/` has 26 reports, some very old~~ **Won't implement — declined.**
+49. ~~**Audit the "buildflow-managed" `.gitignore` block** — verify all entries are still relevant~~ **Won't implement — declined.**
+50. ~~**Verify `go.work` is not tracked** but `go.work.sum` handling is correct for CI~~ done (docs-health pass 2026-10-05)
 
 ---
 

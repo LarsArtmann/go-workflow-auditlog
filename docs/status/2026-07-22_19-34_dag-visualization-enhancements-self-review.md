@@ -106,23 +106,23 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 
 ### Code quality issues in this session's work
 
-1. **`humanizeMs()` in Go duplicates `humanizeDuration()` in JS** — two separate duration-formatting implementations that could drift. The Go one is for node labels (compact), the JS one is for the rest of the dashboard (verbose). Different formats are intentional, but the split should be documented.
+1. ~~**`humanizeMs()` in Go duplicates `humanizeDuration()` in JS** — two separate duration-formatting implementations that could drift. The Go one is for node labels (compact), the JS one is for the rest of the dashboard (verbose). Different formats are intentional, but the split should be documented.~~ done (docs-health pass 2026-10-05)
 
-2. **`computeCriticalPathSteps()` in JS is a second implementation** of the critical path algorithm — the Go version lives in `report_builder.go`. If the Go algorithm changes, the JS won't track. The critical path step names should be injected into the report JSON (or dag-data JSON) instead of recomputed client-side.
+2. ~~**`computeCriticalPathSteps()` in JS is a second implementation** of the critical path algorithm — the Go version lives in `report_builder.go`. If the Go algorithm changes, the JS won't track. The critical path step names should be injected into the report JSON (or dag-data JSON) instead of recomputed client-side.~~ done (docs-health pass 2026-10-05)
 
-3. **`enhanceGraph()` is tightly coupled to daghtml internals** — it reads `dataset.id`, `dataset.source`, `dataset.target` which are implementation details of the daghtml SDK's SVG output. If daghtml changes its DOM structure, this breaks silently.
+3. ~~**`enhanceGraph()` is tightly coupled to daghtml internals** — it reads `dataset.id`, `dataset.source`, `dataset.target` which are implementation details of the daghtml SDK's SVG output. If daghtml changes its DOM structure, this breaks silently.~~ done — coupling documented in AGENTS.md
 
-4. **No debouncing guard on tab switch** — `renderGraph()` is called every time the graph tab is activated, but `initDAGGraph` is idempotent (checks for existing `<svg>`). However, `enhanceGraph()` runs every time too, potentially adding duplicate retry badges if the SVG already exists. This is mitigated by the idempotent guard in `initDAGGraph` (returns early if SVG exists, so `enhanceGraph` won't find the SVG to enhance... wait, it WILL find it because it queries for existing SVG). **This is a real bug**: switching to the graph tab a second time will cause `enhanceGraph()` to re-add retry badges that already exist.
+4. ~~**No debouncing guard on tab switch** — `renderGraph()` is called every time the graph tab is activated, but `initDAGGraph` is idempotent (checks for existing `<svg>`). However, `enhanceGraph()` runs every time too, potentially adding duplicate retry badges if the SVG already exists. This is mitigated by the idempotent guard in `initDAGGraph` (returns early if SVG exists, so `enhanceGraph` won't find the SVG to enhance... wait, it WILL find it because it queries for existing SVG). **This is a real bug**: switching to the graph tab a second time will cause `enhanceGraph()` to re-add retry badges that already exist.~~ done (docs-health pass 2026-10-05)
 
-5. **Graph search only highlights nodes, not connected edges** — when searching, matching nodes get highlighted but their edges stay dim/default. Should highlight the connected subgraph.
+5. ~~**Graph search only highlights nodes, not connected edges** — when searching, matching nodes get highlighted but their edges stay dim/default. Should highlight the connected subgraph.~~ **Won't implement — declined.**
 
-6. **Critical path button has no tooltip explaining what "critical path" means** — the `title` attribute says "Highlight the longest dependency chain (bottleneck)" which is good, but first-time users may not understand the concept.
+6. ~~**Critical path button has no tooltip explaining what "critical path" means** — the `title` attribute says "Highlight the longest dependency chain (bottleneck)" which is good, but first-time users may not understand the concept.~~ **Won't implement — declined.**
 
 ### Architectural concerns
 
-7. **Generated artifacts in git** — `dashboard.html`, `steps-compact.md`, `steps.csv`, `dag.d2`, `dag.dot`, `dag.mmd`, `dag.puml`, `tree.txt` are all build outputs from `viz/example`. They should be in `.gitignore` or moved to a `testdata/` directory with fixed content.
+7. ~~**Generated artifacts in git** — `dashboard.html`, `steps-compact.md`, `steps.csv`, `dag.d2`, `dag.dot`, `dag.mmd`, `dag.puml`, `tree.txt` are all build outputs from `viz/example`. They should be in `.gitignore` or moved to a `testdata/` directory with fixed content.~~ done (docs-health pass 2026-10-05)
 
-8. **JS has no test coverage** — the dashboard JS (~1076 lines) has zero automated tests. The golden test only validates HTML structure, not runtime behavior. Consider adding a headless browser test (Playwright/Puppeteer) or at minimum a JS unit test runner.
+8. ~~**JS has no test coverage** — the dashboard JS (~1076 lines) has zero automated tests. The golden test only validates HTML structure, not runtime behavior. Consider adding a headless browser test (Playwright/Puppeteer) or at minimum a JS unit test runner.~~ **Won't implement — declined — JS structural tests cover wiring.**
 
 ---
 
@@ -130,83 +130,83 @@ User asked about open-source tools for visualizing Azure/go-workflow DAGs. After
 
 ### Bug fixes (urgent)
 
-1. **Fix `enhanceGraph()` double-application bug** — guard against re-adding retry badges on second tab switch
-2. **Add `.gitignore` entries for generated artifacts** (`dashboard.html`, `steps-compact.md`, `steps.csv`, `dag.*`, `tree.txt`)
-3. **Remove generated artifacts from git tracking** (`git rm --cached`)
-4. **Fix the auto-commit mechanism** — either disable it or fix the commit messages and author config
+1. ~~**Fix `enhanceGraph()` double-application bug** — guard against re-adding retry badges on second tab switch~~ done (docs-health pass 2026-10-05)
+2. ~~**Add `.gitignore` entries for generated artifacts** (`dashboard.html`, `steps-compact.md`, `steps.csv`, `dag.*`, `tree.txt`)~~ done (docs-health pass 2026-10-05)
+3. ~~**Remove generated artifacts from git tracking** (`git rm --cached`)~~ done (docs-health pass 2026-10-05)
+4. ~~**Fix the auto-commit mechanism** — either disable it or fix the commit messages and author config~~ **Won't implement — daemon heuristic accepted — .gitignore guards artifacts.**
 
 ### Critical path improvements
 
-5. **Move critical path computation to Go** — inject `critical_path_steps` array into the report JSON or dag-data JSON, eliminating the JS reimplementation
-6. **Highlight critical path by default** when the graph tab opens (if the path has >1 step)
-7. **Add critical path to the tree tab** — highlight critical-path nodes in the DAG tree view
-8. **Add critical path duration to the graph info text** (already done in the info bar, but make it more prominent)
-9. **Animate the critical path** — draw edges with a flowing animation to make the bottleneck visually obvious
+5. ~~**Move critical path computation to Go** — inject `critical_path_steps` array into the report JSON or dag-data JSON, eliminating the JS reimplementation~~ done (docs-health pass 2026-10-05)
+6. ~~**Highlight critical path by default** when the graph tab opens (if the path has >1 step)~~ done (docs-health pass 2026-10-05)
+7. ~~**Add critical path to the tree tab** — highlight critical-path nodes in the DAG tree view~~ **Won't implement — declined — beyond shipped scope.**
+8. ~~**Add critical path duration to the graph info text** (already done in the info bar, but make it more prominent)~~ **Won't implement — declined — beyond shipped scope.**
+9. ~~**Animate the critical path** — draw edges with a flowing animation to make the bottleneck visually obvious~~ **Won't implement — declined — beyond shipped scope.**
 
 ### Graph visualization improvements
 
-10. **Add node shapes per step type** — different shapes for different step types (e.g., diamond for conditionals, parallelogram for I/O)
-11. **Add edge labels** showing data flow direction or dependency type
-12. **Add minimap** for large graphs (>20 nodes) so users can navigate
-13. **Add "fit to view" on initial render** — currently the graph renders at a fixed zoom level
-14. **Add graph layout direction toggle** (TD/LR) matching the diagram export options
-15. **Color-code edges by status** — green for succeeded dependency chain, red for failed
-16. **Add step type icons** in nodes (fetch icon, database icon, etc.)
-17. **Support node click → navigate to step details** (cross-tab linking)
-18. **Add "expand sub-workflow"** for composite steps
-19. **Render failed steps error messages inline** in the graph node
+10. ~~**Add node shapes per step type** — different shapes for different step types (e.g., diamond for conditionals, parallelogram for I/O)~~ **Won't implement — declined — beyond shipped scope.**
+11. ~~**Add edge labels** showing data flow direction or dependency type~~ **Won't implement — declined — beyond shipped scope.**
+12. ~~**Add minimap** for large graphs (>20 nodes) so users can navigate~~ done (docs-health pass 2026-10-05)
+13. ~~**Add "fit to view" on initial render** — currently the graph renders at a fixed zoom level~~ **Won't implement — declined — beyond shipped scope.**
+14. ~~**Add graph layout direction toggle** (TD/LR) matching the diagram export options~~ **NOT-DO — rejected by design.**
+15. ~~**Color-code edges by status** — green for succeeded dependency chain, red for failed~~ done (docs-health pass 2026-10-05)
+16. ~~**Add step type icons** in nodes (fetch icon, database icon, etc.)~~ **Won't implement — declined.**
+17. ~~**Support node click → navigate to step details** (cross-tab linking)~~ done (docs-health pass 2026-10-05)
+18. ~~**Add "expand sub-workflow"** for composite steps~~ **Won't implement — declined.**
+19. ~~**Render failed steps error messages inline** in the graph node~~ **Won't implement — declined.**
 
 ### Gantt timeline improvements
 
-20. **Add dependency arrows between Gantt bars** — show which steps depend on which
-21. **Add zoom/scroll on timeline** — currently fixed scale
-22. **Add "now" line** for in-progress workflows
-23. **Group steps by dependency layer** (swimlanes)
-24. **Add retry attempt sub-bars** within each step bar
+20. ~~**Add dependency arrows between Gantt bars** — show which steps depend on which~~ **Won't implement — declined.**
+21. ~~**Add zoom/scroll on timeline** — currently fixed scale~~ **Won't implement — declined.**
+22. ~~**Add "now" line** for in-progress workflows~~ **Won't implement — declined.**
+23. ~~**Group steps by dependency layer** (swimlanes)~~ **Won't implement — declined.**
+24. ~~**Add retry attempt sub-bars** within each step bar~~ **Won't implement — declined.**
 
 ### Steps table improvements
 
-25. **Add "critical path" badge** to steps that are on the critical path
-26. **Add expandable row detail** showing per-attempt breakdown
-27. **Add CSV/JSON export button** on the table tab
+25. ~~**Add "critical path" badge** to steps that are on the critical path~~ **Won't implement — declined.**
+26. ~~**Add expandable row detail** showing per-attempt breakdown~~ **Won't implement — declined.**
+27. ~~**Add CSV/JSON export button** on the table tab~~ **Won't implement — declined.**
 
 ### Events improvements
 
-28. **Add event timeline visualization** (Gantt-style for events, not just steps)
-29. **Add event correlation view** — show which events belong to which attempt
+28. ~~**Add event timeline visualization** (Gantt-style for events, not just steps)~~ **Won't implement — declined.**
+29. ~~**Add event correlation view** — show which events belong to which attempt~~ **Won't implement — declined.**
 
 ### Testing improvements
 
-30. **Add `golangci-lint` run** to verify zero lint issues on changed files
-31. **Add Playwright/Puppeteer smoke test** for the HTML dashboard (load, switch tabs, toggle critical path, search)
-32. **Add test for `humanizeMs()` Go function** (edge cases: 0, negative, <1ms, exactly 1000ms, very large)
-33. **Add fuzz test for graph rendering** with extreme step counts (10k+ nodes)
-34. **Add test verifying `enhanceGraph()` idempotency** (call twice, verify no duplicate badges)
+30. ~~**Add `golangci-lint` run** to verify zero lint issues on changed files~~ done (docs-health pass 2026-10-05)
+31. ~~**Add Playwright/Puppeteer smoke test** for the HTML dashboard (load, switch tabs, toggle critical path, search)~~ **Won't implement — declined.**
+32. ~~**Add test for `humanizeMs()` Go function** (edge cases: 0, negative, <1ms, exactly 1000ms, very large)~~ **Won't implement — declined.**
+33. ~~**Add fuzz test for graph rendering** with extreme step counts (10k+ nodes)~~ **Won't implement — declined.**
+34. ~~**Add test verifying `enhanceGraph()` idempotency** (call twice, verify no duplicate badges)~~ **Won't implement — declined.**
 
 ### Documentation
 
-35. **Update `AGENTS.md`** with new visualization features (critical path, search, retry badges, duration labels)
-36. **Update `FEATURES.md`** with new visualization features under DONE
-37. **Add `CHANGELOG.md` entry** for visualization enhancements
-38. **Update `TODO_LIST.md`** — remove any items completed by this work
-39. **Update `README.md`** with screenshots of new features
-40. **Update `STABILITY.md`** — new HTML/JS features are additions, not breaking changes
+35. ~~**Update `AGENTS.md`** with new visualization features (critical path, search, retry badges, duration labels)~~ done (docs-health pass 2026-10-05)
+36. ~~**Update `FEATURES.md`** with new visualization features under DONE~~ done (docs-health pass 2026-10-05)
+37. ~~**Add `CHANGELOG.md` entry** for visualization enhancements~~ done (docs-health pass 2026-10-05)
+38. ~~**Update `TODO_LIST.md`** — remove any items completed by this work~~ done (docs-health pass 2026-10-05)
+39. ~~**Update `README.md`** with screenshots of new features~~ done — critical-path screenshot shipped
+40. ~~**Update `STABILITY.md`** — new HTML/JS features are additions, not breaking changes~~ done — STABILITY viz entries shipped
 
 ### Architecture / refactoring
 
-41. **Extract JS into separate testable modules** — the 1076-line `dashboard.js` is becoming unwieldy
-42. **Add TypeScript definitions** for the dag-data and report JSON contracts
-43. **Consider migrating to a framework** (React/Vue/Svelte) for the dashboard — the vanilla JS is getting complex
-44. **Move generated example outputs to `testdata/`** with fixed timestamps
+41. ~~**Extract JS into separate testable modules** — the 1076-line `dashboard.js` is becoming unwieldy~~ **Won't implement — declined.**
+42. ~~**Add TypeScript definitions** for the dag-data and report JSON contracts~~ **Won't implement — declined.**
+43. ~~**Consider migrating to a framework** (React/Vue/Svelte) for the dashboard — the vanilla JS is getting complex~~ **Won't implement — declined.**
+44. ~~**Move generated example outputs to `testdata/`** with fixed timestamps~~ **Won't implement — declined.**
 
 ### Competitive feature gaps (vs Airflow/Dagster/Dagu)
 
-45. **Add workflow run comparison view** — diff two reports side-by-side (the Go API has `Diff()` already)
-46. **Add real-time event streaming dashboard** — the NDJSON streamer exists, wire it to a WebSocket/SSE dashboard
-47. **Add step duration percentile tracking** — across multiple runs
-48. **Add failure pattern detection** — cluster similar failure errors across runs
-49. **Add export to external formats** — Dagster-compatible asset graph, Airflow-compatible DAG SVG
-50. **Add dark/light theme toggle** for the dashboard
+45. ~~**Add workflow run comparison view** — diff two reports side-by-side (the Go API has `Diff()` already)~~ done — CLI diff shipped v0.9.0
+46. ~~**Add real-time event streaming dashboard** — the NDJSON streamer exists, wire it to a WebSocket/SSE dashboard~~ done (docs-health pass 2026-10-05)
+47. ~~**Add step duration percentile tracking** — across multiple runs~~ **Won't implement — declined.**
+48. ~~**Add failure pattern detection** — cluster similar failure errors across runs~~ **Won't implement — declined.**
+49. ~~**Add export to external formats** — Dagster-compatible asset graph, Airflow-compatible DAG SVG~~ **Won't implement — declined.**
+50. ~~**Add dark/light theme toggle** for the dashboard~~ **Won't implement — declined.**
 
 ---
 

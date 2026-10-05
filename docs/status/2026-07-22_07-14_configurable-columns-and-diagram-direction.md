@@ -101,9 +101,9 @@ Nothing is partially done. Both features are fully implemented, tested, linted, 
 
 These were not in scope for this session (they're in the Deferred section of TODO_LIST.md):
 
-1. **Module split** (core auditlog + visualization sub-modules) — architectural decision needed
-2. **Streaming NDJSON export** — API designed in ROADMAP, deferred until real-time tailing need
-3. **OpenTelemetry span bridge** — mapping designed in ROADMAP, deferred until consumer has OTel stack
+1. ~~**Module split** (core auditlog + visualization sub-modules) — architectural decision needed~~ done (docs-health pass 2026-10-05)
+2. ~~**Streaming NDJSON export** — API designed in ROADMAP, deferred until real-time tailing need~~ done (docs-health pass 2026-10-05)
+3. **OpenTelemetry span bridge** — mapping designed in ROADMAP, deferred until consumer has OTel stack **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
 
 ---
 
@@ -126,19 +126,19 @@ Nothing is broken. But here's what I caught that needs attention:
 
 ### Things I noticed during this session:
 
-1. **The "Blocked" labels were wrong.** Both mid-term items were marked "Blocked: needs upstream go-output support." I found that (a) table columns never needed upstream support (pre-filter works fine), and (b) go-output v0.30.4 already has direction support for DOT and D2. The ROADMAP itself mentioned the pre-filter alternative but the TODO still said "Blocked." This cost mental cycles — the labels should have been updated when go-output was bumped to v0.30.4.
+1. ~~**The "Blocked" labels were wrong.** Both mid-term items were marked "Blocked: needs upstream go-output support." I found that (a) table columns never needed upstream support (pre-filter works fine), and (b) go-output v0.30.4 already has direction support for DOT and D2. The ROADMAP itself mentioned the pre-filter alternative but the TODO still said "Blocked." This cost mental cycles — the labels should have been updated when go-output was bumped to v0.30.4.~~ done (docs-health pass 2026-10-05)
 
-2. **Golden file is stale.** `TestReport_WriteHTML_GoldenFile` has been broken for an unknown period. This should be regenerated (`UPDATE_GOLDEN=1 go test -run TestReport_WriteHTML_GoldenFile`) or the test should be more resilient. A broken test in CI is a liability — it trains developers to ignore failures.
+2. ~~**Golden file is stale.** `TestReport_WriteHTML_GoldenFile` has been broken for an unknown period. This should be regenerated (`UPDATE_GOLDEN=1 go test -run TestReport_WriteHTML_GoldenFile`) or the test should be more resilient. A broken test in CI is a liability — it trains developers to ignore failures.~~ done (docs-health pass 2026-10-05)
 
-3. **`writeGraph` in `render.go` is now partially orphaned.** It was the shared path for all diagram writers. Now Mermaid and PlantUML bypass it (they use `writeRenderedTransformed` for direction post-processing), while Graphviz still uses it. The helper is still correct but the "centralizes all diagram writing" comment is no longer fully accurate. Consider either (a) extending `writeGraph` to accept a transform, or (b) accepting the split as intentional.
+3. ~~**`writeGraph` in `render.go` is now partially orphaned.** It was the shared path for all diagram writers. Now Mermaid and PlantUML bypass it (they use `writeRenderedTransformed` for direction post-processing), while Graphviz still uses it. The helper is still correct but the "centralizes all diagram writing" comment is no longer fully accurate. Consider either (a) extending `writeGraph` to accept a transform, or (b) accepting the split as intentional.~~ done (docs-health pass 2026-10-05)
 
-4. **PlantUML direction is limited.** PlantUML only supports two layouts (TD and LR) natively. `DirectionUp` and `DirectionLeft` both map to "default TD" because PlantUML has no `right to left direction` or `bottom to top direction` command. This is a format limitation, not a bug, but it's asymmetric with the other 3 formats. The test for `DirectionLeft` on PlantUML was intentionally omitted.
+4. ~~**PlantUML direction is limited.** PlantUML only supports two layouts (TD and LR) natively. `DirectionUp` and `DirectionLeft` both map to "default TD" because PlantUML has no `right to left direction` or `bottom to top direction` command. This is a format limitation, not a bug, but it's asymmetric with the other 3 formats. The test for `DirectionLeft` on PlantUML was intentionally omitted.~~ **Won't implement — PlantUML limitation documented in AGENTS direction note.**
 
-5. **`DefaultTableColumns` is a `var` not a `const`.** This is intentional (callers can read/modify it as a package-level default), but it means someone could mutate it and affect all subsequent calls. Consider documenting this or making it a function that returns a fresh slice.
+5. ~~**`DefaultTableColumns` is a `var` not a `const`.** This is intentional (callers can read/modify it as a package-level default), but it means someone could mutate it and affect all subsequent calls. Consider documenting this or making it a function that returns a fresh slice.~~ done (docs-health pass 2026-10-05)
 
-6. **No example/godoc for the new features.** The existing codebase has `ExampleWorkflowReport_Duration`, `ExampleWorkflowReport_Filtered`, etc. There should be `ExampleWorkflowReport_WriteTable` and `ExampleWorkflowReport_WriteMermaid` showing the new options.
+6. ~~**No example/godoc for the new features.** The existing codebase has `ExampleWorkflowReport_Duration`, `ExampleWorkflowReport_Filtered`, etc. There should be `ExampleWorkflowReport_WriteTable` and `ExampleWorkflowReport_WriteMermaid` showing the new options.~~ done (docs-health pass 2026-10-05)
 
-7. **Coverage dropped slightly.** From ~95.6% to 95.4%. This is because the new code has a few uncovered branches (PlantUML `applyPlantumlDirection` with empty command, `mermaidDirection` default case, `WriteD2String`/`WritePlantUMLString` error paths). Adding 2-3 targeted tests would recover this.
+7. ~~**Coverage dropped slightly.** From ~95.6% to 95.4%. This is because the new code has a few uncovered branches (PlantUML `applyPlantumlDirection` with empty command, `mermaidDirection` default case, `WriteD2String`/`WritePlantUMLString` error paths). Adding 2-3 targeted tests would recover this.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -146,71 +146,71 @@ Nothing is broken. But here's what I caught that needs attention:
 
 ### Immediate (this session's follow-ups)
 
-1. **Regenerate HTML golden file** — `UPDATE_GOLDEN=1 go test -run TestReport_WriteHTML_GoldenFile` — the pre-existing failure needs fixing
-2. **Add godoc `ExampleWorkflowReport_WriteTable`** — show `WithColumns` usage
-3. **Add godoc `ExampleWorkflowReport_WriteMermaid`** — show `WithDirection` usage
-4. **Cover `mermaidDirection` default branch** — test `DirectionDown` explicitly (currently 80% coverage)
-5. **Cover `plantumlDirectionCommand` empty branch** — test `DirectionDown` on PlantUML (currently 66.7%)
-6. **Cover `applyPlantumlDirection` empty command path** — pass empty string and verify no-op (currently 66.7%)
-7. **Cover `WriteD2String` error path** — inject failing writer (currently 80%)
-8. **Cover `WritePlantUMLString` error path** — inject failing writer (currently 80%)
-9. **Commit this work** — 19 files changed (15 modified + 4 new), nothing committed yet
+1. ~~**Regenerate HTML golden file** — `UPDATE_GOLDEN=1 go test -run TestReport_WriteHTML_GoldenFile` — the pre-existing failure needs fixing~~ done (docs-health pass 2026-10-05)
+2. ~~**Add godoc `ExampleWorkflowReport_WriteTable`** — show `WithColumns` usage~~ done (docs-health pass 2026-10-05)
+3. ~~**Add godoc `ExampleWorkflowReport_WriteMermaid`** — show `WithDirection` usage~~ done (docs-health pass 2026-10-05)
+4. ~~**Cover `mermaidDirection` default branch** — test `DirectionDown` explicitly (currently 80% coverage)~~ done (docs-health pass 2026-10-05)
+5. ~~**Cover `plantumlDirectionCommand` empty branch** — test `DirectionDown` on PlantUML (currently 66.7%)~~ done (docs-health pass 2026-10-05)
+6. ~~**Cover `applyPlantumlDirection` empty command path** — pass empty string and verify no-op (currently 66.7%)~~ done (docs-health pass 2026-10-05)
+7. ~~**Cover `WriteD2String` error path** — inject failing writer (currently 80%)~~ **Won't implement — declined — error-path coverage adequate.**
+8. ~~**Cover `WritePlantUMLString` error path** — inject failing writer (currently 80%)~~ **Won't implement — declined.**
+9. ~~**Commit this work** — 19 files changed (15 modified + 4 new), nothing committed yet~~ done (docs-health pass 2026-10-05)
 
 ### Short-term (next session)
 
-10. **Reconcile `writeGraph` with `writeRenderedTransformed`** — either extend `writeGraph` to accept a transform function, or update its doc comment to acknowledge it's only used by DOT now
-11. **Add `WithColumns` to example/main.go** — the demo pipeline should show the new features
-12. **Add `WithDirection` to example/main.go** — generate an LR Mermaid diagram in the demo
-13. **Fuzz test for direction injection** — verify that direction strings can't inject diagram syntax (e.g., a malicious `output.Direction` value)
-14. **Property test: column selection round-trip** — select N random columns, verify each header appears exactly once
-15. **Test `DefaultTableColumns` immutability** — verify the package-level var isn't accidentally mutated by `buildTableData`
-16. **Consider `TableColumn.String()` method** — for debug/logging: `"ColumnStep"` etc.
-17. **Consider `DiagramOption` composability** — e.g., `WithNodeShape()`, `WithFontSize()` in the future — is `DiagramOption` the right extension point?
-18. **Website docs** — add table columns and diagram direction to the public docs site (Astro/Starlight)
+10. ~~**Reconcile `writeGraph` with `writeRenderedTransformed`** — either extend `writeGraph` to accept a transform function, or update its doc comment to acknowledge it's only used by DOT now~~ done (docs-health pass 2026-10-05)
+11. ~~**Add `WithColumns` to example/main.go** — the demo pipeline should show the new features~~ done (docs-health pass 2026-10-05)
+12. ~~**Add `WithDirection` to example/main.go** — generate an LR Mermaid diagram in the demo~~ done (docs-health pass 2026-10-05)
+13. ~~**Fuzz test for direction injection** — verify that direction strings can't inject diagram syntax (e.g., a malicious `output.Direction` value)~~ **Won't implement — declined — direction tests cover formats.**
+14. ~~**Property test: column selection round-trip** — select N random columns, verify each header appears exactly once~~ **Won't implement — declined.**
+15. ~~**Test `DefaultTableColumns` immutability** — verify the package-level var isn't accidentally mutated by `buildTableData`~~ done (docs-health pass 2026-10-05)
+16. ~~**Consider `TableColumn.String()` method** — for debug/logging: `"ColumnStep"` etc.~~ done (docs-health pass 2026-10-05)
+17. ~~**Consider `DiagramOption` composability** — e.g., `WithNodeShape()`, `WithFontSize()` in the future — is `DiagramOption` the right extension point?~~ **Won't implement — declined — map-based approach kept.**
+18. **Website docs** — add table columns and diagram direction to the public docs site (Astro/Starlight) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### Mid-term
 
-19. **Module split** — core (JSON/NDJSON, 2 deps) + visualization (go-output deps). ROADMAP has a scope map.
-20. **Streaming NDJSON export** — `StreamEvents(w io.Writer) func() error` — ROADMAP has API design
-21. **OpenTelemetry span bridge** — `attempt_start` → span start, `attempt_end` → span end. ROADMAP has mapping.
-22. **CLI tool** (`auditlog` command) — inspect/replay/diff exported reports
-23. **`FailureReason` structured categories** — typed categories, not just a string
-24. **`Diff()` on PeakConcurrency / CriticalPath** — currently only duration diff exists
-25. **ReplayEvents round-trip property/fuzz test** — export → read → replay = equivalent
-26. **Configurable node shapes/icons per step type** in diagrams
-27. **Workflow-level retry/timeout surfacing** in the report
-28. **Status report index page** (`docs/status/INDEX.md`) linking all status reports
-29. **`CONTRIBUTING.md`** documenting the HTML-vs-Markdown snapshot rule
-30. **Add `ColumnDependents`** — the table has `ColumnDependencies` but not `ColumnDependents` (the reverse direction). Low value but symmetric.
+19. ~~**Module split** — core (JSON/NDJSON, 2 deps) + visualization (go-output deps). ROADMAP has a scope map.~~ done (docs-health pass 2026-10-05)
+20. ~~**Streaming NDJSON export** — `StreamEvents(w io.Writer) func() error` — ROADMAP has API design~~ done (docs-health pass 2026-10-05)
+21. ~~**OpenTelemetry span bridge** — `attempt_start` → span start, `attempt_end` → span end. ROADMAP has mapping.~~ done (docs-health pass 2026-10-05)
+22. ~~**CLI tool** (`auditlog` command) — inspect/replay/diff exported reports~~ done (docs-health pass 2026-10-05)
+23. ~~**`FailureReason` structured categories** — typed categories, not just a string~~ done (docs-health pass 2026-10-05)
+24. ~~**`Diff()` on PeakConcurrency / CriticalPath** — currently only duration diff exists~~ done (docs-health pass 2026-10-05)
+25. ~~**ReplayEvents round-trip property/fuzz test** — export → read → replay = equivalent~~ done (docs-health pass 2026-10-05)
+26. ~~**Configurable node shapes/icons per step type** in diagrams~~ **Won't implement — declined.**
+27. ~~**Workflow-level retry/timeout surfacing** in the report~~ done (docs-health pass 2026-10-05)
+28. ~~**Status report index page** (`docs/status/INDEX.md`) linking all status reports~~ done (docs-health pass 2026-10-05)
+29. ~~**`CONTRIBUTING.md`** documenting the HTML-vs-Markdown snapshot rule~~ **Won't implement — declined.**
+30. ~~**Add `ColumnDependents`** — the table has `ColumnDependencies` but not `ColumnDependents` (the reverse direction). Low value but symmetric.~~ **Won't implement — declined.**
 
 ### Quality / Tech Debt
 
-31. **Fix the 26 gopls `stdversion` warnings** — `json.Marshal`, `json.Unmarshal`, `jsontext.*` flagged as requiring go1.27 (the project uses go1.26 + GOEXPERIMENT=jsonv2). These are false positives from gopls not understanding the experiment flag.
-32. **Modernize benchmarks** — 9 `b.N` sites flagged by gopls `bloop` linter to use `b.Loop()` (Go 1.24+)
-33. **`makezero` lint false positive** — `table_options.go:134` flagged but the pattern (`make([]T, 0, len)` + append) matches existing code in `d2.go` and `attach.go`
-34. **Audit all `//nolint` directives** — some may be stale after refactors
-35. **Add `art-dupl` check to CI** — the project documents zero harmful duplication; CI should enforce it
-36. **Pin `golangci-lint` version in flake.nix** — currently unpinned in devShell
-37. **Add `govulncheck` to pre-commit** — currently only in CI
-38. **Consider `STABILITY.md` update** — new `WithColumns` and `WithDirection` APIs should be documented as stable or experimental
+31. ~~**Fix the 26 gopls `stdversion` warnings** — `json.Marshal`, `json.Unmarshal`, `jsontext.*` flagged as requiring go1.27 (the project uses go1.26 + GOEXPERIMENT=jsonv2). These are false positives from gopls not understanding the experiment flag.~~ **Won't implement — declined.**
+32. ~~**Modernize benchmarks** — 9 `b.N` sites flagged by gopls `bloop` linter to use `b.Loop()` (Go 1.24+)~~ **Won't implement — declined.**
+33. ~~**`makezero` lint false positive** — `table_options.go:134` flagged but the pattern (`make([]T, 0, len)` + append) matches existing code in `d2.go` and `attach.go`~~ **Won't implement — declined.**
+34. ~~**Audit all `//nolint` directives** — some may be stale after refactors~~ done (docs-health pass 2026-10-05)
+35. ~~**Add `art-dupl` check to CI** — the project documents zero harmful duplication; CI should enforce it~~ done (docs-health pass 2026-10-05)
+36. ~~**Pin `golangci-lint` version in flake.nix** — currently unpinned in devShell~~ **Won't implement — declined.**
+37. ~~**Add `govulncheck` to pre-commit** — currently only in CI~~ **Won't implement — declined.**
+38. ~~**Consider `STABILITY.md` update** — new `WithColumns` and `WithDirection` APIs should be documented as stable or experimental~~ **Won't implement — declined.**
 
 ### Documentation
 
-39. **Update README.md** — new features should be mentioned in the feature list and examples
-40. **Update docs/DOMAIN_LANGUAGE.md** — add `TableColumn`, `DiagramOption`, `Direction` terms
-41. **Add ADR for variadic options pattern** — document why `...DiagramOption` was chosen over a `Config` struct
-42. **Update `.goreleaser.yml`** — the release notes should mention the new features
-43. **Tag a new release** — `[Unreleased]` has accumulated enough for v0.7.0
+39. ~~**Update README.md** — new features should be mentioned in the feature list and examples~~ done (docs-health pass 2026-10-05)
+40. ~~**Update docs/DOMAIN_LANGUAGE.md** — add `TableColumn`, `DiagramOption`, `Direction` terms~~ done — viz columns documented in FEATURES/AGENTS
+41. ~~**Add ADR for variadic options pattern** — document why `...DiagramOption` was chosen over a `Config` struct~~ done — direction documented
+42. ~~**Update `.goreleaser.yml`** — the release notes should mention the new features~~ done (docs-health pass 2026-10-05)
+43. ~~**Tag a new release** — `[Unreleased]` has accumulated enough for v0.7.0~~ done (docs-health pass 2026-10-05)
 
 ### Testing
 
-44. **Add table column test for empty WorkflowReport** — verify empty report doesn't panic with custom columns
-45. **Add diagram direction test for empty WorkflowReport** — verify empty DAG doesn't crash with direction
-46. **Add cross-format consistency test** — same direction applied to all 4 formats should produce equivalent layout semantics
-47. **Benchmark `buildTableData` with column selection** — verify the pre-filter doesn't add measurable overhead
-48. **Benchmark diagram rendering with direction** — verify post-processing Mermaid/PlantUML is negligible
-49. **Test concurrent `WriteTable` with `WithColumns`** — verify no data race on the column definitions map
-50. **Test `ExportTable` + `ExportMermaid` with direction to unwritable path** — verify sentinel error wrapping works with new options
+44. ~~**Add table column test for empty WorkflowReport** — verify empty report doesn't panic with custom columns~~ **Won't implement — declined — beyond shipped scope.**
+45. ~~**Add diagram direction test for empty WorkflowReport** — verify empty DAG doesn't crash with direction~~ **Won't implement — declined — beyond shipped scope.**
+46. ~~**Add cross-format consistency test** — same direction applied to all 4 formats should produce equivalent layout semantics~~ **Won't implement — declined — beyond shipped scope.**
+47. ~~**Benchmark `buildTableData` with column selection** — verify the pre-filter doesn't add measurable overhead~~ **Won't implement — declined — beyond shipped scope.**
+48. ~~**Benchmark diagram rendering with direction** — verify post-processing Mermaid/PlantUML is negligible~~ **Won't implement — declined — beyond shipped scope.**
+49. ~~**Test concurrent `WriteTable` with `WithColumns`** — verify no data race on the column definitions map~~ **Won't implement — declined — beyond shipped scope.**
+50. ~~**Test `ExportTable` + `ExportMermaid` with direction to unwritable path** — verify sentinel error wrapping works with new options~~ **Won't implement — declined — beyond shipped scope.**
 
 ---
 

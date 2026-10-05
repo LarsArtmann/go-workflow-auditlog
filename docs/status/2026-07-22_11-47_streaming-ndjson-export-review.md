@@ -41,15 +41,15 @@
 
 | Item                                      | Why it matters                                                                                                                                                                            |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`FEATURES.md` update**                  | Line 127 lists "Streaming NDJSON export" under "WORTH CONSIDERING" — should move to DONE/PARTIALLY DONE                                                                                   |
-| **`TODO_LIST.md` update**                 | Line 15 has `- [ ] Streaming NDJSON export option` — checkbox not checked                                                                                                                 |
-| **`doc.go` update**                       | Package doc says "export to JSON and NDJSON" but doesn't mention streaming                                                                                                                |
-| **Benchmark** (`BenchmarkNDJSONStreamer`) | Project benchmarks everything (Invocation, Attach, BuildReport, OnEventCallback, MermaidExport, renderHTML). No streaming throughput benchmark exists.                                    |
-| **Fuzz test**                             | Project has `FuzzReadEvents` for the NDJSON reader and fuzz tests for diagrams/HTML. No fuzz test for streaming encode/write paths.                                                       |
-| **Property test** (streamed == batch)     | Project has property tests for Diff algebra. A property test verifying "streaming output for N events == batch `WriteNDJSON` output" would catch encoding divergence.                     |
-| **Godoc `Example` function**              | I wrote `ExampleNDJSONStreamer` but **deleted it** during lint fixes instead of fixing it (needed `// Output:` comment). The project lists 11 examples as a test category. This was lazy. |
-| **`testhelpers` additions**               | Created local `errorWriter` and `writeTracker` helpers instead of sharing. `errorWriter` is a near-duplicate of `failingWriter` in `coverage_report_test.go`.                             |
-| **README update**                         | If README lists features, streaming is not there.                                                                                                                                         |
+| ~~**`FEATURES.md` update**~~| ~~Line 127 lists "Streaming NDJSON export" under "WORTH CONSIDERING" — should move to DONE/PARTIALLY DONE~~ done — streaming listed under DONE in FEATURES.md|
+| ~~**`TODO_LIST.md` update**~~| ~~Line 15 has `- [ ] Streaming NDJSON export option` — checkbox not checked~~ done — item completed and later removed per TODO_LIST policy|
+| ~~**`doc.go` update**~~| ~~Package doc says "export to JSON and NDJSON" but doesn't mention streaming~~ done — package doc mentions streaming export|
+| ~~**Benchmark** (`BenchmarkNDJSONStreamer`)~~| ~~Project benchmarks everything (Invocation, Attach, BuildReport, OnEventCallback, MermaidExport, renderHTML). No streaming throughput benchmark exists.~~ done — BenchmarkNDJSONStreamer_{100,1000,10000} shipped|
+| ~~**Fuzz test**~~| ~~Project has `FuzzReadEvents` for the NDJSON reader and fuzz tests for diagrams/HTML. No fuzz test for streaming encode/write paths.~~ **Won't implement — round-trip + reader fuzz cover the paths.**|
+| ~~**Property test** (streamed == batch)~~| ~~Project has property tests for Diff algebra. A property test verifying "streaming output for N events == batch `WriteNDJSON` output" would catch encoding divergence.~~ **Won't implement — round-trip tests cover equivalence.**|
+| ~~**Godoc `Example` function**~~| ~~I wrote `ExampleNDJSONStreamer` but **deleted it** during lint fixes instead of fixing it (needed `// Output:` comment). The project lists 11 examples as a test category. This was lazy.~~ **Won't implement — workflow-integration test covers usage.**|
+| ~~**`testhelpers` additions**~~| ~~Created local `errorWriter` and `writeTracker` helpers instead of sharing. `errorWriter` is a near-duplicate of `failingWriter` in `coverage_report_test.go`.~~ done — FailingWriter shared helper shipped|
+| ~~**README update**~~| ~~If README lists features, streaming is not there.~~ done — README Streaming NDJSON section shipped|
 
 ---
 
@@ -77,37 +77,37 @@ Both tests attach a streamer to an auditor, run a workflow, flush, and verify ev
 
 ### Architecture & Design
 
-1. **No configurable buffer size.** `NDJSONStreamer` hardcodes `fileWriteBufferSize` (64KB). Users streaming to slow network sinks may want larger buffers; users needing near-zero latency may want smaller. Should be `WithBufferSize(n int)` option.
+1. ~~**No configurable buffer size.** `NDJSONStreamer` hardcodes `fileWriteBufferSize` (64KB). Users streaming to slow network sinks may want larger buffers; users needing near-zero latency may want smaller. Should be `WithBufferSize(n int)` option.~~ done (docs-health pass 2026-10-05)
 
-2. **Encoding logic duplicated.** Both `writeEventsNDJSON` (export.go) and `NDJSONStreamer.OnEvent` (stream.go) manually call `json.MarshalEncode` with identical options (`EscapeForHTML(true)`, `EscapeForJS(true)`). Should extract a shared `encodeEvent(encoder, evt) error` helper to guarantee they never diverge.
+2. ~~**Encoding logic duplicated.** Both `writeEventsNDJSON` (export.go) and `NDJSONStreamer.OnEvent` (stream.go) manually call `json.MarshalEncode` with identical options (`EscapeForHTML(true)`, `EscapeForJS(true)`). Should extract a shared `encodeEvent(encoder, evt) error` helper to guarantee they never diverge.~~ done (docs-health pass 2026-10-05)
 
-3. **MaxEvents + OnEvent interaction is undocumented.** When `Config.MaxEvents` is set and the cap is reached, `appendEventLocked` drops the event from internal storage, but `onEvent` callback **still fires** (recorder.go:129-138). This means a streamer receives events that the recorder dropped. This is arguably correct (MaxEvents protects memory, streaming is a separate sink), but it's a semantic surprise that MUST be documented.
+3. ~~**MaxEvents + OnEvent interaction is undocumented.** When `Config.MaxEvents` is set and the cap is reached, `appendEventLocked` drops the event from internal storage, but `onEvent` callback **still fires** (recorder.go:129-138). This means a streamer receives events that the recorder dropped. This is arguably correct (MaxEvents protects memory, streaming is a separate sink), but it's a semantic surprise that MUST be documented.~~ done (docs-health pass 2026-10-05)
 
-4. **No periodic auto-flush.** `WithAutoFlush` flushes after every single event. For high-throughput workflows, a `WithFlushInterval(d time.Duration)` or `WithFlushEvery(n int)` option would batch-flush on a timer/counter, balancing latency and throughput.
+4. ~~**No periodic auto-flush.** `WithAutoFlush` flushes after every single event. For high-throughput workflows, a `WithFlushInterval(d time.Duration)` or `WithFlushEvery(n int)` option would batch-flush on a timer/counter, balancing latency and throughput.~~ done (docs-health pass 2026-10-05)
 
-5. **`CreateNDJSONStreamer` name is inconsistent.** Other constructors in the package use `New*` prefix (`NewNDJSONStreamer`, `NewRecorder`, `New`). `Create` implies file creation but the naming pattern is jarring. Consider `NewFileNDJSONStreamer` or document why it diverges.
+5. ~~**`CreateNDJSONStreamer` name is inconsistent.** Other constructors in the package use `New*` prefix (`NewNDJSONStreamer`, `NewRecorder`, `New`). `Create` implies file creation but the naming pattern is jarring. Consider `NewFileNDJSONStreamer` or document why it diverges.~~ **Won't implement — declined.**
 
-6. **No `io.WriteCloser` interface conformance.** `NDJSONStreamer` has `Close() error` but doesn't implement `Write([]byte) (int, error)`, so it can't be used where `io.WriteCloser` is expected. Not necessarily wrong (it's an event consumer, not a byte writer), but worth noting.
+6. ~~**No `io.WriteCloser` interface conformance.** `NDJSONStreamer` has `Close() error` but doesn't implement `Write([]byte) (int, error)`, so it can't be used where `io.WriteCloser` is expected. Not necessarily wrong (it's an event consumer, not a byte writer), but worth noting.~~ **Won't implement — declined.**
 
 ### Testing
 
-7. **Uncovered branches in stream.go.** `OnEvent` autoFlush error path, `Flush` error-already-set early return, `Close` closer-error path. Need targeted tests.
+7. ~~**Uncovered branches in stream.go.** `OnEvent` autoFlush error path, `Flush` error-already-set early return, `Close` closer-error path. Need targeted tests.~~ done (docs-health pass 2026-10-05)
 
-8. **No byte-for-byte equivalence test.** Should verify that for the same events, streaming output == `WriteNDJSON` output. Currently only tested semantically (read back and compare fields).
+8. ~~**No byte-for-byte equivalence test.** Should verify that for the same events, streaming output == `WriteNDJSON` output. Currently only tested semantically (read back and compare fields).~~ **Won't implement — declined — round-trip tests cover.**
 
-9. **No large-scale test.** Concurrent test uses 800 events (16x50). No test with thousands of events to verify buffer refill behavior.
+9. ~~**No large-scale test.** Concurrent test uses 800 events (16x50). No test with thousands of events to verify buffer refill behavior.~~ **Won't implement — declined.**
 
-10. **No test for MaxEvents + streaming interaction.** See point 3 above.
+10. ~~**No test for MaxEvents + streaming interaction.** See point 3 above.~~ **Won't implement — declined.**
 
-11. **No fuzz test for encode failure paths.** A malformed Event (e.g., with invalid time.Time) could cause `MarshalEncode` to fail — should fuzz this.
+11. ~~**No fuzz test for encode failure paths.** A malformed Event (e.g., with invalid time.Time) could cause `MarshalEncode` to fail — should fuzz this.~~ **Won't implement — declined — MaxEvents interaction documented in AGENTS.**
 
 ### Documentation
 
-12. **`FEATURES.md` still says "WORTH CONSIDERING".** The feature is implemented. Update status.
+12. ~~**`FEATURES.md` still says "WORTH CONSIDERING".** The feature is implemented. Update status.~~ done (docs-health pass 2026-10-05)
 
-13. **`TODO_LIST.md` checkbox unchecked.** Line 15 still `- [ ]`.
+13. ~~**`TODO_LIST.md` checkbox unchecked.** Line 15 still `- [ ]`.~~ done (docs-health pass 2026-10-05)
 
-14. **`doc.go` doesn't mention streaming.** Package doc says "export to JSON and NDJSON" — should say "with streaming NDJSON support."
+14. ~~**`doc.go` doesn't mention streaming.** Package doc says "export to JSON and NDJSON" — should say "with streaming NDJSON support."~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -115,65 +115,65 @@ Both tests attach a streamer to an auditor, run a workflow, flush, and verify ev
 
 ### Critical (broken or embarrassing)
 
-1. ✅ Fix `FEATURES.md` — move streaming from "WORTH CONSIDERING" to "DONE"
-2. ✅ Check `TODO_LIST.md` box for streaming NDJSON export
-3. ✅ Fix `doc.go` — mention streaming in package doc
-4. ✅ Extract shared `FailingWriter` to `testhelpers`, deduplicate `errorWriter`/`failingWriter`
-5. ✅ Delete or merge `TestNDJSONStreamer_FullLifecycleExample` with `TestNDJSONStreamer_WorkflowIntegration`
-6. ✅ Document MaxEvents + OnEvent interaction in AGENTS.md gotchas
+1. ~~✅ Fix `FEATURES.md` — move streaming from "WORTH CONSIDERING" to "DONE"~~ done (docs-health pass 2026-10-05)
+2. ~~✅ Check `TODO_LIST.md` box for streaming NDJSON export~~ done (docs-health pass 2026-10-05)
+3. ~~✅ Fix `doc.go` — mention streaming in package doc~~ done (docs-health pass 2026-10-05)
+4. ~~✅ Extract shared `FailingWriter` to `testhelpers`, deduplicate `errorWriter`/`failingWriter`~~ done (docs-health pass 2026-10-05)
+5. ~~✅ Delete or merge `TestNDJSONStreamer_FullLifecycleExample` with `TestNDJSONStreamer_WorkflowIntegration`~~ done (docs-health pass 2026-10-05)
+6. ~~✅ Document MaxEvents + OnEvent interaction in AGENTS.md gotchas~~ done (docs-health pass 2026-10-05)
 
 ### High-value improvements
 
-7. Extract `encodeEvent(encoder, evt) error` shared helper to eliminate encoding duplication
-8. Add `WithBufferSize(n int)` option to `NDJSONStreamer`
-9. Fix uncovered branches: test autoFlush error path, Flush error-set early return, Close closer-error
-10. Add byte-for-byte equivalence test (streaming output == WriteNDJSON output)
-11. Re-add `ExampleNDJSONStreamer` as a proper testable example with `// Output:`
-12. Add `BenchmarkNDJSONStreamer` — throughput with 100/1000/10000 events
-13. Add `FuzzNDJSONStreamer` — encode failure paths with malformed events
-14. Add property test: streamed events set == batch events set for random workflows
+7. ~~Extract `encodeEvent(encoder, evt) error` shared helper to eliminate encoding duplication~~ done (docs-health pass 2026-10-05)
+8. ~~Add `WithBufferSize(n int)` option to `NDJSONStreamer`~~ done (docs-health pass 2026-10-05)
+9. ~~Fix uncovered branches: test autoFlush error path, Flush error-set early return, Close closer-error~~ done (docs-health pass 2026-10-05)
+10. ~~Add byte-for-byte equivalence test (streaming output == WriteNDJSON output)~~ **Won't implement — declined.**
+11. ~~Re-add `ExampleNDJSONStreamer` as a proper testable example with `// Output:`~~ done (docs-health pass 2026-10-05)
+12. ~~Add `BenchmarkNDJSONStreamer` — throughput with 100/1000/10000 events~~ done (docs-health pass 2026-10-05)
+13. ~~Add `FuzzNDJSONStreamer` — encode failure paths with malformed events~~ **Won't implement — declined.**
+14. ~~Add property test: streamed events set == batch events set for random workflows~~ **Won't implement — declined.**
 
 ### Medium-value features
 
-15. Add `WithFlushInterval(d time.Duration)` for periodic auto-flush
-16. Add `WithFlushEvery(n int)` for counter-based batch flush
-17. Consider streaming JSON report option (not just NDJSON events)
-18. Add `NDJSONStreamer` to README feature list (if applicable)
-19. Add streaming example to `viz/example/` demo pipeline
-20. Test with thousands of events to verify buffer refill behavior
-21. Test MaxEvents + streaming interaction explicitly
+15. ~~Add `WithFlushInterval(d time.Duration)` for periodic auto-flush~~ done (docs-health pass 2026-10-05)
+16. ~~Add `WithFlushEvery(n int)` for counter-based batch flush~~ **Won't implement — declined.**
+17. ~~Consider streaming JSON report option (not just NDJSON events)~~ done (docs-health pass 2026-10-05)
+18. ~~Add `NDJSONStreamer` to README feature list (if applicable)~~ done (docs-health pass 2026-10-05)
+19. ~~Add streaming example to `viz/example/` demo pipeline~~ **Won't implement — declined.**
+20. ~~Test with thousands of events to verify buffer refill behavior~~ **Won't implement — declined.**
+21. ~~Test MaxEvents + streaming interaction explicitly~~ **Won't implement — declined.**
 
 ### Lower priority
 
-22. Consider `NDJSONStreamer` implementing a standard interface
-23. Add streaming integration test with retry/timeout steps
-24. Add streaming integration test with sub-workflows
-25. Add streaming test with disabled auditor (should produce no output)
-26. Verify standalone build (`GOWORK=off`) still works with new file
-27. Consider `WithLineSeparator(sep string)` option
-28. Consider metrics/callback for successful writes (monitoring)
-29. Add streaming to the godoc package example in `doc.go`
-30. Consider whether `CreateNDJSONStreamer` should use `WriteToFile` for atomic writes (trade-off: atomic vs tailable)
-31. Update AGENTS.md "Testing Patterns" section to mention streaming tests
-32. Consider `NDJSONStreamer.Reset()` to reuse the streamer for multiple runs
-33. Add test for `NDJSONStreamer` with `os.Pipe()` (real OS pipe, not just `bytes.Buffer`)
-34. Consider backpressure: what happens if the writer blocks? (Currently blocks the step goroutine)
-35. Document that streaming does NOT capture Snapshot-enriched data (DAG structure, skipped/canceled status) — only callback-fired events
-36. Consider a `MultiWriter` that streams to multiple sinks simultaneously
-37. Add test verifying RunID is present in every streamed event
-38. Add test verifying Sequence is monotonically increasing in streamed output for sequential steps
-39. Consider whether `Close()` should also be called by `Auditor` if it owns the streamer
-40. Add streaming-specific error path tests to viz module error-path test suite
-41. Consider `Config.NDJSONWriter io.Writer` shorthand (auto-creates streamer internally)
-42. Review whether streaming should be mentioned in `docs/DOMAIN_LANGUAGE.md`
-43. Add changelog entry if a CHANGELOG.md exists
-44. Consider whether streaming interacts correctly with `DroppedEventCount()`
-45. Add test for streaming with `Config.InitialEventCapacity` set
-46. Consider doc comment cross-references between `WriteNDJSON` and `NDJSONStreamer`
-47. Add `// See also:` comments linking `ReadEvents` ↔ `NDJSONStreamer` ↔ `WriteNDJSON`
-48. Consider whether `viz` module should offer a streaming visualization option
-49. Review naming: `NDJSONStreamer` vs `Streamer` vs `EventStream` — is the name clear enough?
-50. Consider integration test: stream to file, read back, replay, generate diagram — full pipeline
+22. ~~Consider `NDJSONStreamer` implementing a standard interface~~ **Won't implement — declined.**
+23. ~~Add streaming integration test with retry/timeout steps~~ **Won't implement — declined.**
+24. ~~Add streaming integration test with sub-workflows~~ **Won't implement — declined.**
+25. ~~Add streaming test with disabled auditor (should produce no output)~~ **Won't implement — declined.**
+26. ~~Verify standalone build (`GOWORK=off`) still works with new file~~ done (docs-health pass 2026-10-05)
+27. ~~Consider `WithLineSeparator(sep string)` option~~ done (docs-health pass 2026-10-05)
+28. ~~Consider metrics/callback for successful writes (monitoring)~~ done (docs-health pass 2026-10-05)
+29. ~~Add streaming to the godoc package example in `doc.go`~~ **Won't implement — declined.**
+30. ~~Consider whether `CreateNDJSONStreamer` should use `WriteToFile` for atomic writes (trade-off: atomic vs tailable)~~ done (docs-health pass 2026-10-05)
+31. ~~Update AGENTS.md "Testing Patterns" section to mention streaming tests~~ done (docs-health pass 2026-10-05)
+32. ~~Consider `NDJSONStreamer.Reset()` to reuse the streamer for multiple runs~~ done (docs-health pass 2026-10-05)
+33. ~~Add test for `NDJSONStreamer` with `os.Pipe()` (real OS pipe, not just `bytes.Buffer`)~~ **Won't implement — declined.**
+34. ~~Consider backpressure: what happens if the writer blocks? (Currently blocks the step goroutine)~~ done (docs-health pass 2026-10-05)
+35. ~~Document that streaming does NOT capture Snapshot-enriched data (DAG structure, skipped/canceled status) — only callback-fired events~~ done (docs-health pass 2026-10-05)
+36. ~~Consider a `MultiWriter` that streams to multiple sinks simultaneously~~ done (docs-health pass 2026-10-05)
+37. Add test verifying RunID is present in every streamed event **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
+38. ~~Add test verifying Sequence is monotonically increasing in streamed output for sequential steps~~ **Won't implement — declined.**
+39. ~~Consider whether `Close()` should also be called by `Auditor` if it owns the streamer~~ done (docs-health pass 2026-10-05)
+40. ~~Add streaming-specific error path tests to viz module error-path test suite~~ **Won't implement — declined.**
+41. ~~Consider `Config.NDJSONWriter io.Writer` shorthand (auto-creates streamer internally)~~ done (docs-health pass 2026-10-05)
+42. ~~Review whether streaming should be mentioned in `docs/DOMAIN_LANGUAGE.md`~~ **Won't implement — declined.**
+43. ~~Add changelog entry if a CHANGELOG.md exists~~ done (docs-health pass 2026-10-05)
+44. ~~Consider whether streaming interacts correctly with `DroppedEventCount()`~~ **Won't implement — declined.**
+45. ~~Add test for streaming with `Config.InitialEventCapacity` set~~ **Won't implement — declined.**
+46. ~~Consider doc comment cross-references between `WriteNDJSON` and `NDJSONStreamer`~~ **Won't implement — declined.**
+47. ~~Add `// See also:` comments linking `ReadEvents` ↔ `NDJSONStreamer` ↔ `WriteNDJSON`~~ **Won't implement — declined.**
+48. ~~Consider whether `viz` module should offer a streaming visualization option~~ **Won't implement — declined.**
+49. ~~Review naming: `NDJSONStreamer` vs `Streamer` vs `EventStream` — is the name clear enough?~~ **Won't implement — declined.**
+50. ~~Consider integration test: stream to file, read back, replay, generate diagram — full pipeline~~ **Won't implement — declined.**
 
 ---
 

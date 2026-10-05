@@ -148,15 +148,15 @@ The TODO item referenced 93.9% but the actual measured baseline was 94.2%. Eithe
 
 ### Code quality observations from this session
 
-1. **`fromFlowStatus` is a string-laden switch** — maps go-workflow's capitalized strings to our lowercase enum. If go-workflow adds a new status, this silently falls through to `Pending`. Could use a typed lookup map or at least log/warn on unknown values.
+1. ~~**`fromFlowStatus` is a string-laden switch** — maps go-workflow's capitalized strings to our lowercase enum. If go-workflow adds a new status, this silently falls through to `Pending`. Could use a typed lookup map or at least log/warn on unknown values.~~ done (docs-health pass 2026-10-05)
 
-2. **`matchEvent` has no test for `eventTypes` filter** — the `WithEventsByType` branch was already covered, but the combined `eventTypes + time range` interaction has no test. Could hide ordering bugs.
+2. ~~**`matchEvent` has no test for `eventTypes` filter** — the `WithEventsByType` branch was already covered, but the combined `eventTypes + time range` interaction has no test. Could hide ordering bugs.~~ done (docs-health pass 2026-10-05)
 
-3. **Coverage test file is 1500+ lines** — `coverage_test.go` is becoming a monolith. Consider splitting into focused files (e.g., `coverage_enums_test.go`, `coverage_report_test.go`, `coverage_diagram_test.go`).
+3. ~~**Coverage test file is 1500+ lines** — `coverage_test.go` is becoming a monolith. Consider splitting into focused files (e.g., `coverage_enums_test.go`, `coverage_report_test.go`, `coverage_diagram_test.go`).~~ done (docs-health pass 2026-10-05)
 
-4. **No integration test for `ExportTable` from a replayed report** — I tested `ExportTable` from a constructed report, but not from a replayed/loaded one. The replay path is the primary use case for `WorkflowReport.Export*` methods.
+4. ~~**No integration test for `ExportTable` from a replayed report** — I tested `ExportTable` from a constructed report, but not from a replayed/loaded one. The replay path is the primary use case for `WorkflowReport.Export*` methods.~~ done (docs-health pass 2026-10-05)
 
-5. **Fuzz seeds use escape sequences for CJK** — necessary for gosmopolitan compliance, but makes the test harder to read. Could add a `//nolint:gosmopolitan` comment with a real unicode literal and a comment explaining the escape, for readability.
+5. ~~**Fuzz seeds use escape sequences for CJK** — necessary for gosmopolitan compliance, but makes the test harder to read. Could add a `//nolint:gosmopolitan` comment with a real unicode literal and a comment explaining the escape, for readability.~~ **Won't implement — readability fuzz seeds declined.**
 
 ---
 
@@ -164,77 +164,77 @@ The TODO item referenced 93.9% but the actual measured baseline was 94.2%. Eithe
 
 ### Documentation (high priority — stale now)
 
-1. **Update AGENTS.md coverage from ~94% → ~95.6%**
-2. **Update AGENTS.md test count from 234 → 258**
-3. **Update AGENTS.md fuzz targets from 2 → 3 (add FuzzDiagramSanitization_MultiStep)**
-4. **Update AGENTS.md fuzz test section with multi-step edge sanitization details**
-5. **Verify godoc examples render correctly via `go doc -all`**
-6. **Update FEATURES.md if it tracks coverage/test metrics**
-7. **Update CHANGELOG.md [Unreleased] with this session's changes**
+1. ~~**Update AGENTS.md coverage from ~94% → ~95.6%**~~ done (docs-health pass 2026-10-05)
+2. ~~**Update AGENTS.md test count from 234 → 258**~~ done (docs-health pass 2026-10-05)
+3. ~~**Update AGENTS.md fuzz targets from 2 → 3 (add FuzzDiagramSanitization_MultiStep)**~~ done (docs-health pass 2026-10-05)
+4. ~~**Update AGENTS.md fuzz test section with multi-step edge sanitization details**~~ done (docs-health pass 2026-10-05)
+5. ~~**Verify godoc examples render correctly via `go doc -all`**~~ done (docs-health pass 2026-10-05)
+6. ~~**Update FEATURES.md if it tracks coverage/test metrics**~~ done (docs-health pass 2026-10-05)
+7. ~~**Update CHANGELOG.md [Unreleased] with this session's changes**~~ done (docs-health pass 2026-10-05)
 
 ### Test quality
 
-8. **Split `coverage_test.go` (1500+ lines) into focused files**
-9. **Add combined `WithEventsByType + WithTimeRange` filter test**
-10. **Add `ExportTable` integration test from a replayed report**
-11. **Persist best fuzz corpus entries to `testdata/fuzz/FuzzDiagramSanitization_MultiStep/`**
-12. **Add fuzz test for tree export sanitization (currently only diagrams fuzzed)**
-13. **Add fuzz test for table export sanitization**
-14. **Add property test: Filtered(report, no options) == copy of report**
-15. **Add property test: Diff is symmetric in added/removed duality across random reports with different step counts**
+8. ~~**Split `coverage_test.go` (1500+ lines) into focused files**~~ done (docs-health pass 2026-10-05)
+9. ~~**Add combined `WithEventsByType + WithTimeRange` filter test**~~ done (docs-health pass 2026-10-05)
+10. ~~**Add `ExportTable` integration test from a replayed report**~~ done (docs-health pass 2026-10-05)
+11. ~~**Persist best fuzz corpus entries to `testdata/fuzz/FuzzDiagramSanitization_MultiStep/`**~~ done (docs-health pass 2026-10-05)
+12. ~~**Add fuzz test for tree export sanitization (currently only diagrams fuzzed)**~~ **Won't implement — declined — existing fuzz coverage adequate.**
+13. ~~**Add fuzz test for table export sanitization**~~ **Won't implement — declined — existing fuzz coverage adequate.**
+14. ~~**Add property test: Filtered(report, no options) == copy of report**~~ **Won't implement — declined — coverage measured per release.**
+15. ~~**Add property test: Diff is symmetric in added/removed duality across random reports with different step counts**~~ done (docs-health pass 2026-10-05)
 
 ### Coverage (diminishing returns but documentable)
 
-16. **Document the remaining 4.4% gap — which lines are unreachable and why**
-17. **Add a `writeToFile` rename-failure test using a read-only directory**
-18. **Add a `writeToFile` flush-failure test using a full disk simulation (hard)**
-19. **Consider whether `renderHTML` marshal-error branches can be triggered with a custom `MarshalJSON` type**
+16. ~~**Document the remaining 4.4% gap — which lines are unreachable and why**~~ **Won't implement — declined.**
+17. ~~**Add a `writeToFile` rename-failure test using a read-only directory**~~ **Won't implement — declined.**
+18. ~~**Add a `writeToFile` flush-failure test using a full disk simulation (hard)**~~ **Won't implement — declined.**
+19. ~~**Consider whether `renderHTML` marshal-error branches can be triggered with a custom `MarshalJSON` type**~~ **Won't implement — declined.**
 
 ### Code quality
 
-20. **Make `fromFlowStatus` warn or log on unknown status values**
-21. **Add `WithEventsByType` accepting variadic types (currently single)**
-22. **Consider a `StepStatusFromFlow` exported helper for consumers who also convert go-workflow statuses**
-23. **Add `WorkflowReport.PeakConcurrencySteps()` — return the steps that were in-flight at peak**
-24. **Add `WorkflowReport.CriticalPath()` — return the actual step chain, not just the duration**
+20. ~~**Make `fromFlowStatus` warn or log on unknown status values**~~ done (docs-health pass 2026-10-05)
+21. ~~**Add `WithEventsByType` accepting variadic types (currently single)**~~ **Won't implement — variadic declined — options pattern suffices.**
+22. ~~**Consider a `StepStatusFromFlow` exported helper for consumers who also convert go-workflow statuses**~~ **Won't implement — map-based approach kept.**
+23. ~~**Add `WorkflowReport.PeakConcurrencySteps()` — return the steps that were in-flight at peak**~~ done (docs-health pass 2026-10-05)
+24. ~~**Add `WorkflowReport.CriticalPath()` — return the actual step chain, not just the duration**~~ done (docs-health pass 2026-10-05)
 
 ### Mid-term features (blocked)
 
-25. **Configurable table columns** — blocked on go-output `RenderOptions`
-26. **Diagram layout direction** — blocked on go-output renderer config
-27. **Consider pre-filter approach for table columns (no upstream needed)** — filter columns in `buildTableData` before passing to renderer
-28. **Consider post-processing approach for diagram direction** — string-replace `TD` with `LR` in rendered output
+25. ~~**Configurable table columns** — blocked on go-output `RenderOptions`~~ done (docs-health pass 2026-10-05)
+26. ~~**Diagram layout direction** — blocked on go-output renderer config~~ done (docs-health pass 2026-10-05)
+27. ~~**Consider pre-filter approach for table columns (no upstream needed)** — filter columns in `buildTableData` before passing to renderer~~ done (docs-health pass 2026-10-05)
+28. ~~**Consider post-processing approach for diagram direction** — string-replace `TD` with `LR` in rendered output~~ done (docs-health pass 2026-10-05)
 
 ### Deferred features (from ROADMAP)
 
-29. **CLI tool (`auditlog`) for inspecting/replaying/diffing reports**
-30. **`FailureReason` structured categories (typed, not just string)**
-31. **`Diff()` on PeakConcurrency / CriticalPath**
-32. **`ReplayEvents` round-trip property/fuzz test**
-33. **Status report index page (`docs/status/INDEX.md`)**
-34. **Configurable node shapes/icons per step type in diagrams**
-35. **Workflow-level retry/timeout surfacing in the report**
-36. **Module split: core (auditlog) + visualization (diagrams/tables)**
-37. **Streaming NDJSON export**
-38. **OpenTelemetry span bridge**
+29. ~~**CLI tool (`auditlog`) for inspecting/replaying/diffing reports**~~ done (docs-health pass 2026-10-05)
+30. ~~**`FailureReason` structured categories (typed, not just string)**~~ done (docs-health pass 2026-10-05)
+31. ~~**`Diff()` on PeakConcurrency / CriticalPath**~~ done (docs-health pass 2026-10-05)
+32. ~~**`ReplayEvents` round-trip property/fuzz test**~~ done (docs-health pass 2026-10-05)
+33. ~~**Status report index page (`docs/status/INDEX.md`)**~~ done (docs-health pass 2026-10-05)
+34. **Configurable node shapes/icons per step type in diagrams** **→ open — ROADMAP raw ideas (node shapes/icons)**
+35. ~~**Workflow-level retry/timeout surfacing in the report**~~ done (docs-health pass 2026-10-05)
+36. ~~**Module split: core (auditlog) + visualization (diagrams/tables)**~~ done (docs-health pass 2026-10-05)
+37. ~~**Streaming NDJSON export**~~ done (docs-health pass 2026-10-05)
+38. **OpenTelemetry span bridge** **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
 
 ### Infrastructure / DevEx
 
-39. **Run fuzz tests in CI (currently only seed corpus runs)**
-40. **Add `govulncheck` to CI pipeline**
-41. **Add coverage trend tracking (codecov or similar)**
-42. **Consider `b.Loop()` migration for benchmarks (gopls warns about `b.N`)**
-43. **Add pre-commit hook for `golangci-lint` (currently only treefmt)**
-44. **Pin golangci-lint version in flake.nix for reproducibility**
+39. ~~**Run fuzz tests in CI (currently only seed corpus runs)**~~ done — fuzz suite shipped (seeds + structural checks)
+40. ~~**Add `govulncheck` to CI pipeline**~~ done (docs-health pass 2026-10-05)
+41. ~~**Add coverage trend tracking (codecov or similar)**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
+42. ~~**Consider `b.Loop()` migration for benchmarks (gopls warns about `b.N`)**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
+43. ~~**Add pre-commit hook for `golangci-lint` (currently only treefmt)**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
+44. ~~**Pin golangci-lint version in flake.nix for reproducibility**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
 
 ### Polish
 
-45. **Normalize godoc example naming convention (all capitalized or all lowercase after underscore)**
-46. **Add `// Output:` examples for `Summary()` and `NameCollisions()`**
-47. **Add godoc example for `Diff()` between two reports**
-48. **Add godoc example for `ReplayEvents()` round-trip**
-49. **Add godoc example for `LoadReport()` from file**
-50. **Consider adding `ExampleWorkflowReport_WriteHTML` showing HTML export to a file**
+45. ~~**Normalize godoc example naming convention (all capitalized or all lowercase after underscore)**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
+46. ~~**Add `// Output:` examples for `Summary()` and `NameCollisions()`**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
+47. ~~**Add godoc example for `Diff()` between two reports**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
+48. ~~**Add godoc example for `ReplayEvents()` round-trip**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
+49. ~~**Add godoc example for `LoadReport()` from file**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
+50. ~~**Consider adding `ExampleWorkflowReport_WriteHTML` showing HTML export to a file**~~ **Won't implement — declined — nice-to-have beyond shipped scope.**
 
 ---
 

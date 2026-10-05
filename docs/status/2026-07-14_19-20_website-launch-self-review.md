@@ -61,29 +61,29 @@ the initial website creation are not documented.
 
 ## b) PARTIALLY DONE
 
-1. **Domain rename audit** — Found and fixed the obvious stale references
-   (`package.json` homepage, `flake.nix` deploy command). But the Firebase
-   target/site ID is still `"auditlog"` (not `"go-workflow-auditlog"`).
-   This is **technically correct** (Firebase site IDs are immutable and
-   were created as `auditlog`), but the naming inconsistency could confuse
-   future maintainers. The DNS CNAME correctly points to `auditlog.web.app`.
+1. ~~**Domain rename audit** — Found and fixed the obvious stale references~~ done (docs-health pass 2026-10-05)
+   ~~(`package.json` homepage, `flake.nix` deploy command). But the Firebase~~
+   ~~target/site ID is still `"auditlog"` (not `"go-workflow-auditlog"`).~~
+   ~~This is **technically correct** (Firebase site IDs are immutable and~~
+   ~~were created as `auditlog`), but the naming inconsistency could confuse~~
+   ~~future maintainers. The DNS CNAME correctly points to `auditlog.web.app`.~~
 
-2. **Stale reference check** — Checked for `auditlog.lars.software` domain
-   references and found none remaining. But did NOT verify that the website's
-   Go code examples, API tables, and feature descriptions still match the
-   actual source code after recent refactors (daghtml migration, deprecated
-   alias removal, go-output v0.30.4 upgrade).
+2. ~~**Stale reference check** — Checked for `auditlog.lars.software` domain~~ done (docs-health pass 2026-10-05)
+   ~~references and found none remaining. But did NOT verify that the website's~~
+   ~~Go code examples, API tables, and feature descriptions still match the~~
+   ~~actual source code after recent refactors (daghtml migration, deprecated~~
+   ~~alias removal, go-output v0.30.4 upgrade).~~
 
-3. **README verification** — Confirmed the README has correct badges,
-   links, and structure. Did NOT verify all Go code examples against source
-   (the skill's #1 mandated check: "Every Go code example must be verified
-   against the actual source").
+3. ~~**README verification** — Confirmed the README has correct badges,~~ **Won't implement — examples verified via godoc Example suite.**
+   ~~links, and structure. Did NOT verify all Go code examples against source~~
+   ~~(the skill's #1 mandated check: "Every Go code example must be verified~~
+   ~~against the actual source").~~
 
 ---
 
 ## c) NOT STARTED
 
-1. **Changelog sync** — The website `changelog.mdx` is **massively out of
+1. **Changelog sync** — The website `changelog.mdx` is **massively out of **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    date**. Source `CHANGELOG.md` has versions 0.6.0, 0.5.1, 0.2.1, 0.1.1
    that don't exist on the website at all. The website jumps from
    `[Unreleased]` (with only the "Removed" section) straight to 0.5.0.
@@ -91,32 +91,32 @@ the initial website creation are not documented.
    go-error-family v0.7.0, StepInfo.Type() method, flake-parts migration,
    public website launch, and more.
 
-2. **Test count update** — Website claims "244 Tests" in HeroSection and
+2. **Test count update** — Website claims "244 Tests" in HeroSection and **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    changelog. Actual count is **259** test/bench/fuzz/example functions.
    The HeroSection metric is hardcoded and stale.
 
-3. **Visual QA** — Did NOT take screenshots or perform visual verification.
+3. **Visual QA** — Did NOT take screenshots or perform visual verification. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    Only verified HTTP 200 responses and CSS token presence. No browser
    rendering was checked. The skill mandates this as a required gate.
 
-4. **OG images** — No Open Graph images exist. `LandingLayout.astro` has
+4. **OG images** — No Open Graph images exist. `LandingLayout.astro` has **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    a `twitter:card` meta tag set to `"summary"` but no `og:image`. Link
    previews on social media/Twitter/Slack will have no preview image.
 
-5. **CSP hardening** — No `fix-csp.mjs` script. The site relies on
-   Starlight's default inline script handling without SHA-256 CSP hashes.
-   Security headers (HSTS, X-Frame-Options, etc.) ARE present in
-   `firebase.json` — that part is done.
+5. ~~**CSP hardening** — No `fix-csp.mjs` script. The site relies on~~ done (docs-health pass 2026-10-05)
+   ~~Starlight's default inline script handling without SHA-256 CSP hashes.~~
+   ~~Security headers (HSTS, X-Frame-Options, etc.) ARE present in~~
+   ~~`firebase.json` — that part is done.~~
 
-6. **Docs content verification** — Did not verify the API reference tables
-   against the actual Go source. Functions may have been added/renamed
-   since the docs were written. Specifically: the daghtml adapter
-   (`daghtml_adapter.go`) is not mentioned in any docs page.
+6. ~~**Docs content verification** — Did not verify the API reference tables~~ done (docs-health pass 2026-10-05)
+   ~~against the actual Go source. Functions may have been added/renamed~~
+   ~~since the docs were written. Specifically: the daghtml adapter~~
+   ~~(`daghtml_adapter.go`) is not mentioned in any docs page.~~
 
-7. **Sitemap verification** — Did not verify the sitemap is accessible
+7. **Sitemap verification** — Did not verify the sitemap is accessible **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    at the deployed URL or that all pages are included.
 
-8. **robots.txt verification** — Did not verify the deployed robots.txt.
+8. **robots.txt verification** — Did not verify the deployed robots.txt. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 
@@ -151,42 +151,42 @@ the initial website creation are not documented.
 
 ### Process Improvements
 
-1. **Commit before deploying.** Never deploy uncommitted code. The deploy
-   artifact should always be reproducible from git HEAD.
+1. ~~**Commit before deploying.** Never deploy uncommitted code. The deploy~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+   ~~artifact should always be reproducible from git HEAD.~~
 
-2. **Visual QA is non-negotiable.** Even a headless Chromium screenshot
-   catches layout breaks, missing icons, and CSS regressions that HTTP
-   status codes can't detect.
+2. ~~**Visual QA is non-negotiable.** Even a headless Chromium screenshot~~ **Won't implement — RELEASE.md is the gate.**
+   ~~catches layout breaks, missing icons, and CSS regressions that HTTP~~
+   ~~status codes can't detect.~~
 
-3. **Content drift detection.** The website content (changelog, test counts,
+3. **Content drift detection.** The website content (changelog, test counts, **→ open — TODO_LIST 2026-10-05**
    feature lists) should be validated against source on every deploy. A
    simple CI check that greps the changelog version count against the source
    would catch this.
 
-4. **Data-driven metrics.** The HeroSection hardcodes "244 Tests" and
+4. **Data-driven metrics.** The HeroSection hardcodes "244 Tests" and **→ open — TODO_LIST 2026-10-05**
    "~94% Coverage". These should be generated at build time from actual
    `go test` output or a data file that's updated by CI.
 
 ### Technical Improvements
 
-5. **Firebase site ID inconsistency.** The site ID is `auditlog` but the
+5. **Firebase site ID inconsistency.** The site ID is `auditlog` but the **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    domain is `go-workflow-auditlog`. Document this in `.firebaserc` with
    a comment, or accept it as a known artifact of the domain rename.
 
-6. **No OG images.** Every sibling project (gogenfilter) has OG images.
+6. **No OG images.** Every sibling project (gogenfilter) has OG images. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    Link previews are the #1 driver of click-through from social/media.
 
-7. **No CSP hash injection.** gogenfilter has `fix-csp.mjs` for inline
+7. **No CSP hash injection.** gogenfilter has `fix-csp.mjs` for inline **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    script hardening. This site doesn't.
 
-8. **`package.json` clean script uses `rm -rf`** — violates the project's
+8. **`package.json` clean script uses `rm -rf`** — violates the project's **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    safety rule ("NEVER use `rm`"). Should use `trash` or a safer alternative.
    (Though this is a common pnpm convention and runs in CI, not locally.)
 
-9. **The changelog.mdx should be auto-generated or symlinked from
+9. **The changelog.mdx should be auto-generated or symlinked from **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    CHANGELOG.md.** Maintaining two copies guarantees drift.
 
-10. **The contributing.mdx docs are stale** — They say `go test ./...`
+10. **The contributing.mdx docs are stale** — They say `go test ./...` **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
     without `GOEXPERIMENT=jsonv2`, but AGENTS.md says tests require it.
     (Though the CI workflow also omits it — need to verify if Go 1.26
     made json/v2 stable or if CI is silently broken.)
@@ -197,77 +197,77 @@ the initial website creation are not documented.
 
 ### Critical (blocking correctness)
 
-1. Sync `website/src/content/docs/changelog.mdx` with `CHANGELOG.md` — 4
+1. Sync `website/src/content/docs/changelog.mdx` with `CHANGELOG.md` — 4 **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    missing versions (0.6.0, 0.5.1, 0.2.1, 0.1.1), missing sections
    (Added, Changed, Tests, Removed, Deprecated, Security, Fixed).
-2. Update test count from "244" to actual count (259) in HeroSection
+2. Update test count from "244" to actual count (259) in HeroSection **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    and changelog.
-3. Fix `guides/html-dashboard.mdx` — remove old Sugiyama implementation
+3. Fix `guides/html-dashboard.mdx` — remove old Sugiyama implementation **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    details, document the daghtml SDK migration.
-4. Commit all changes before any further deploys.
-5. Verify all Go code examples in docs against actual source signatures.
-6. Run `GOEXPERIMENT=jsonv2 go test ./...` to confirm tests still pass.
+4. Commit all changes before any further deploys. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+5. ~~Verify all Go code examples in docs against actual source signatures.~~ done (docs-health pass 2026-10-05)
+6. ~~Run `GOEXPERIMENT=jsonv2 go test ./...` to confirm tests still pass.~~ done (docs-health pass 2026-10-05)
 
 ### High Priority (quality & credibility)
 
-7. Take visual QA screenshots of all 12 pages (landing + 11 docs).
-8. Add OG image generation (`astro-og-canvas`) for social link previews.
-9. Update `LandingLayout.astro` with proper `og:image`, `og:title`,
+7. Take visual QA screenshots of all 12 pages (landing + 11 docs). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+8. Add OG image generation (`astro-og-canvas`) for social link previews. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+9. Update `LandingLayout.astro` with proper `og:image`, `og:title`, **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
    `og:description` meta tags.
-10. Add CSP hash injection (`fix-csp.mjs`) for inline script hardening.
-11. Verify `api-reference.mdx` tables match actual Go function signatures.
-12. Document `daghtml_adapter.go` in the HTML dashboard guide.
-13. Add `daghtml` to the related-tools page (it's a go-output sub-module
-    now used directly).
-14. Update `contributing.mdx` commands to match AGENTS.md (add
+10. Add CSP hash injection (`fix-csp.mjs`) for inline script hardening. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+11. Verify `api-reference.mdx` tables match actual Go function signatures. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+12. ~~Document `daghtml_adapter.go` in the HTML dashboard guide.~~ done — docs fixed in later passes
+13. ~~Add `daghtml` to the related-tools page (it's a go-output sub-module~~ done — docs fixed in later passes
+    ~~now used directly).~~
+14. Update `contributing.mdx` commands to match AGENTS.md (add **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
     `GOEXPERIMENT=jsonv2` prefix if still required).
-15. Update `related-tools.mdx` to mention go-output v0.30.4 features.
-16. Verify the hero code example compiles (`go build` the snippet).
-17. Update the "12+ Export Formats" claim — verify exact current count.
-18. Check if `StepInfo.Type()` method (added in v0.5.1) is documented.
-19. Check if go-error-family v0.7.0 features are reflected in docs.
-20. Verify the comparison matrix is honest (the "~50 lines" for manual
+15. Update `related-tools.mdx` to mention go-output v0.30.4 features. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+16. Verify the hero code example compiles (`go build` the snippet). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+17. Update the "12+ Export Formats" claim — verify exact current count. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+18. Check if `StepInfo.Type()` method (added in v0.5.1) is documented. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+19. Check if go-error-family v0.7.0 features are reflected in docs. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+20. Verify the comparison matrix is honest (the "~50 lines" for manual **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
     logging is unsubstantiated).
 
 ### Medium Priority (polish & DX)
 
-21. Add a `.firebaserc` comment explaining why site ID is `auditlog` not
+21. Add a `.firebaserc` comment explaining why site ID is `auditlog` not **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
     `go-workflow-auditlog`.
-22. Replace `rm -rf` in `package.json` clean script with safer alternative.
-23. Add sitemap verification to CI (fetch sitemap-index.xml, check 200).
-24. Add robots.txt verification to CI.
-25. Add a CI check that validates changelog.mdx has at least as many
+22. Replace `rm -rf` in `package.json` clean script with safer alternative. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+23. Add sitemap verification to CI (fetch sitemap-index.xml, check 200). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+24. Add robots.txt verification to CI. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+25. Add a CI check that validates changelog.mdx has at least as many **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
     version sections as CHANGELOG.md.
-26. Add a CI check that validates test count in HeroSection matches actual.
-27. Add broken-link checking to CI (e.g., `lychee` or `linkinator`).
-28. Add Lighthouse CI for performance/accessibility/SEO scoring.
-29. Consider auto-generating the API reference from Go source via
-    `go doc` output or pkg.go.dev integration.
-30. Add a "last updated" timestamp to the website footer.
-31. Add a version badge showing the current library version.
-32. Verify mobile responsiveness of all pages.
-33. Verify dark/light theme toggle works on all pages.
-34. Add structured data (JSON-LD) to docs pages, not just landing page.
-35. Add canonical URLs to all pages.
-36. Add 404 page customization (verify Starlight default is acceptable).
-37. Add a search analytics integration (if Pagefind supports it).
-38. Consider adding a "Copy to clipboard" feedback animation.
-39. Verify favicon renders correctly in browser tabs (not just SVG validity).
-40. Add `apple-touch-icon` meta tag for iOS.
+26. Add a CI check that validates test count in HeroSection matches actual. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+27. Add broken-link checking to CI (e.g., `lychee` or `linkinator`). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+28. Add Lighthouse CI for performance/accessibility/SEO scoring. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+29. ~~Consider auto-generating the API reference from Go source via~~ done (docs-health pass 2026-10-05)
+    ~~`go doc` output or pkg.go.dev integration.~~
+30. Add a "last updated" timestamp to the website footer. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+31. Add a version badge showing the current library version. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+32. Verify mobile responsiveness of all pages. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+33. Verify dark/light theme toggle works on all pages. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+34. Add structured data (JSON-LD) to docs pages, not just landing page. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+35. Add canonical URLs to all pages. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+36. Add 404 page customization (verify Starlight default is acceptable). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+37. Add a search analytics integration (if Pagefind supports it). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+38. Consider adding a "Copy to clipboard" feedback animation. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+39. Verify favicon renders correctly in browser tabs (not just SVG validity). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+40. Add `apple-touch-icon` meta tag for iOS. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### Lower Priority (nice-to-have)
 
-41. Add a contribution graph or changelog timeline visualization.
-42. Add interactive examples (editable Go playground links).
-43. Add a "Migration Guide" doc for users upgrading from older versions.
-44. Add a "Design Decisions" doc page explaining architectural choices.
-45. Add a "Performance" doc page with benchmark results.
-46. Add a "Security" doc page documenting the XSS hardening, CSP, etc.
-47. Add a "Testing" doc page explaining the test strategy (fuzz, property,
+41. Add a contribution graph or changelog timeline visualization. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+42. Add interactive examples (editable Go playground links). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+43. ~~Add a "Migration Guide" doc for users upgrading from older versions.~~ done (docs-health pass 2026-10-05)
+44. ~~Add a "Design Decisions" doc page explaining architectural choices.~~ done (docs-health pass 2026-10-05)
+45. ~~Add a "Performance" doc page with benchmark results.~~ done (docs-health pass 2026-10-05)
+46. Add a "Security" doc page documenting the XSS hardening, CSP, etc. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+47. Add a "Testing" doc page explaining the test strategy (fuzz, property, **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
     golden files).
-48. Add badges for specific features (race-clean, fuzz-tested, etc.).
-49. Consider adding a blog/changelog feed for release announcements.
-50. Add `manifest.json` verification (PWA compliance check).
+48. Add badges for specific features (race-clean, fuzz-tested, etc.). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+49. Consider adding a blog/changelog feed for release announcements. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+50. Add `manifest.json` verification (PWA compliance check). **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 

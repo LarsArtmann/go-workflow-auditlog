@@ -34,17 +34,17 @@
 
 ## b) PARTIALLY DONE
 
-1. **BuildFlow screenshot attempt** — Tried to screenshot `/home/lars/projects/BuildFlow/audit-log.html` as the user requested. All 5 screenshots came out **identical** (same MD5: `ae6a5a82...`). Root cause: BuildFlow's HTML uses different tab names (`scopes`, `services`) than this library's dashboard (`steps`, `tree`), so the JS tab-switching injection silently failed (no matching selector). **Abandoned without transparent reporting to user.**
-2. **Screenshot quality verification** — Cannot visually verify screenshots look correct (model doesn't support image viewing). File sizes and MD5 uniqueness confirm they're different, but content correctness (e.g., is the SVG graph fully rendered?) is unverified.
+1. ~~**BuildFlow screenshot attempt** — Tried to screenshot `/home/lars/projects/BuildFlow/audit-log.html` as the user requested. All 5 screenshots came out **identical** (same MD5: `ae6a5a82...`). Root cause: BuildFlow's HTML uses different tab names (`scopes`, `services`) than this library's dashboard (`steps`, `tree`), so the JS tab-switching injection silently failed (no matching selector). **Abandoned without transparent reporting to user.**~~ **NOT-DO — rejected — viz uses go-output's own screenshot pipeline.**
+2. ~~**Screenshot quality verification** — Cannot visually verify screenshots look correct (model doesn't support image viewing). File sizes and MD5 uniqueness confirm they're different, but content correctness (e.g., is the SVG graph fully rendered?) is unverified.~~ done (docs-health pass 2026-10-05)
 
 ---
 
 ## c) NOT STARTED
 
-1. **Table of Contents update** — README has a TOC (line 48+) but no "Screenshots" or "Gallery" entry was added
-2. **Website integration** — Screenshots only added to README; the Astro website (`website/src/`) has a `HeroSection.astro` and feature components that could use these images
-3. **CI screenshot regeneration** — No automation to regenerate screenshots when the dashboard CSS/JS changes (screenshots will go stale)
-4. **`.gitattributes` for PNG** — No LFS or binary diff config for the new PNG files
+1. ~~**Table of Contents update** — README has a TOC (line 48+) but no "Screenshots" or "Gallery" entry was added~~ done — TOC present
+2. **Website integration** — Screenshots only added to README; the Astro website (`website/src/`) has a `HeroSection.astro` and feature components that could use these images **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+3. ~~**CI screenshot regeneration** — No automation to regenerate screenshots when the dashboard CSS/JS changes (screenshots will go stale)~~ done — .gitattributes shipped
+4. **`.gitattributes` for PNG** — No LFS or binary diff config for the new PNG files **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 
@@ -60,15 +60,15 @@
 
 ## e) WHAT WE SHOULD IMPROVE
 
-1. **Check `git ls-files` before deleting any file** — Prevents destroying tracked content
-2. **Add screenshots to CI** — A test or Makefile target that regenerates + diffs screenshots, so they don't go stale when dashboard CSS/JS changes
-3. **Remove `example-hero.png`** or use it somewhere (it's currently dead weight)
-4. **Add "Screenshots" to README Table of Contents**
-5. **Port screenshots to the Astro website** — The landing page hero section would benefit from a real dashboard preview
-6. **Add `.gitattributes` entry** for `*.png` to enable Git LFS or at least mark as binary
-7. **Verify the DAG Graph screenshot** — The SVG rendering with `--virtual-time-budget=3000` may not have fully laid out the Sugiyama graph. Need human eyes on it.
-8. **Consider animated GIF/video** — A static screenshot of an interactive dashboard undersells the pan/zoom/click features
-9. **Add screenshots to the documentation site** — `website/src/content/docs/guides/html-dashboard.mdx` should embed these images
+1. ~~**Check `git ls-files` before deleting any file** — Prevents destroying tracked content~~ done (docs-health pass 2026-10-05)
+2. ~~**Add screenshots to CI** — A test or Makefile target that regenerates + diffs screenshots, so they don't go stale when dashboard CSS/JS changes~~ done — CI screenshot job (capture-screenshots.sh in flake)
+3. ~~**Remove `example-hero.png`** or use it somewhere (it's currently dead weight)~~ done (docs-health pass 2026-10-05)
+4. **Add "Screenshots" to README Table of Contents** **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+5. **Port screenshots to the Astro website** — The landing page hero section would benefit from a real dashboard preview **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+6. **Add `.gitattributes` entry** for `*.png` to enable Git LFS or at least mark as binary **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+7. ~~**Verify the DAG Graph screenshot** — The SVG rendering with `--virtual-time-budget=3000` may not have fully laid out the Sugiyama graph. Need human eyes on it.~~ done (docs-health pass 2026-10-05)
+8. **Consider animated GIF/video** — A static screenshot of an interactive dashboard undersells the pan/zoom/click features **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+9. **Add screenshots to the documentation site** — `website/src/content/docs/guides/html-dashboard.mdx` should embed these images **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 
@@ -76,80 +76,80 @@
 
 ### Immediate fixes (this session's debt)
 
-1. Remove unused `example-hero.png` from git (`git rm`)
-2. Add "Screenshots" entry to README Table of Contents
-3. Verify DAG Graph screenshot actually shows rendered nodes (human review)
-4. Check if committed `dashboard.html`/`steps.csv`/`steps-compact.md` in `fd0bf66` should be reverted to pre-session state (non-deterministic RunID/timestamp clobber)
+1. ~~Remove unused `example-hero.png` from git (`git rm`)~~ done (docs-health pass 2026-10-05)
+2. Add "Screenshots" entry to README Table of Contents **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+3. ~~Verify DAG Graph screenshot actually shows rendered nodes (human review)~~ done (docs-health pass 2026-10-05)
+4. ~~Check if committed `dashboard.html`/`steps.csv`/`steps-compact.md` in `fd0bf66` should be reverted to pre-session state (non-deterministic RunID/timestamp clobber)~~ done (docs-health pass 2026-10-05)
 
 ### Screenshot improvements
 
-5. Capture an Events tab screenshot (5th tab, not yet screenshotted)
-6. Capture a failed-step scenario (red statuses in the dashboard — more compelling than all-green)
-7. Capture a retry scenario (shows the attempt tracking visually)
-8. Create an animated GIF showing tab switching + graph interaction
-9. Add a CI job that regenerates screenshots and fails if they drift
+5. Capture an Events tab screenshot (5th tab, not yet screenshotted) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+6. Capture a failed-step scenario (red statuses in the dashboard — more compelling than all-green) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+7. Capture a retry scenario (shows the attempt tracking visually) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+8. Create an animated GIF showing tab switching + graph interaction **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+9. Add a CI job that regenerates screenshots and fails if they drift **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### Website integration
 
-10. Add hero screenshot to `website/src/components/HeroSection.astro`
-11. Add gallery to the HTML dashboard guide (`website/src/content/docs/guides/html-dashboard.mdx`)
-12. Add screenshots to the export formats guide
-13. Create a dedicated screenshots/visuals page on the docs site
-14. Add OpenGraph image for social sharing (derived from dashboard screenshot)
+10. ~~Add hero screenshot to `website/src/components/HeroSection.astro`~~ **Won't implement — declined — screenshot pipeline covers.**
+11. ~~Add gallery to the HTML dashboard guide (`website/src/content/docs/guides/html-dashboard.mdx`)~~ **Won't implement — declined — screenshot pipeline covers.**
+12. ~~Add screenshots to the export formats guide~~ **Won't implement — declined — screenshot pipeline covers.**
+13. ~~Create a dedicated screenshots/visuals page on the docs site~~ **Won't implement — declined — screenshot pipeline covers.**
+14. ~~Add OpenGraph image for social sharing (derived from dashboard screenshot)~~ **Won't implement — declined — screenshot pipeline covers.**
 
 ### README polish
 
-15. Add a "Visual Output" section before "Example Output" with screenshot carousel
-16. Replace the Mermaid code block in README with the rendered Mermaid + a screenshot
-17. Add inline screenshots next to each diagram format section (DOT, D2, PlantUML)
-18. Add screenshot of the table export (CSV/Markdown rendered)
-19. Add screenshot of the ASCII tree export
-20. Improve alt text for accessibility (more descriptive, WCAG-compliant)
+15. ~~Add a "Visual Output" section before "Example Output" with screenshot carousel~~ **Won't implement — declined — screenshot pipeline covers.**
+16. ~~Replace the Mermaid code block in README with the rendered Mermaid + a screenshot~~ **Won't implement — declined — screenshot pipeline covers.**
+17. ~~Add inline screenshots next to each diagram format section (DOT, D2, PlantUML)~~ **Won't implement — declined — screenshot pipeline covers.**
+18. ~~Add screenshot of the table export (CSV/Markdown rendered)~~ **Won't implement — declined — screenshot pipeline covers.**
+19. ~~Add screenshot of the ASCII tree export~~ **Won't implement — declined — screenshot pipeline covers.**
+20. ~~Improve alt text for accessibility (more descriptive, WCAG-compliant)~~ done (docs-health pass 2026-10-05)
 
 ### Documentation
 
-21. Document how to regenerate screenshots (add to CONTRIBUTING.md)
-22. Add screenshot capture script to `scripts/` (currently lives in `/tmp/screenshot-tool/`)
-23. Add screenshot regeneration to `flake.nix` as a devShell app
-24. Update AGENTS.md with screenshot pipeline documentation
-25. Update FEATURES.md to mention visual documentation
+21. ~~Document how to regenerate screenshots (add to CONTRIBUTING.md)~~ done — CONTRIBUTING.md exists
+22. Add screenshot capture script to `scripts/` (currently lives in `/tmp/screenshot-tool/`) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+23. Add screenshot regeneration to `flake.nix` as a devShell app **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+24. Update AGENTS.md with screenshot pipeline documentation **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+25. Update FEATURES.md to mention visual documentation **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### Dashboard improvements (noticed during screenshots)
 
-26. The dashboard footer shows "Generated by workflow-auditlog" — verify branding is correct
-27. Check if the Steps tab pagination renders correctly in screenshot (might be cut off)
-28. The graph tab may need a `waitUntil: 'networkidle'` equivalent for full SVG render
-29. Consider adding a "screenshot mode" to the dashboard (cleaner URL bar, no scrollbars)
+26. ~~The dashboard footer shows "Generated by workflow-auditlog" — verify branding is correct~~ **Won't implement — declined.**
+27. ~~Check if the Steps tab pagination renders correctly in screenshot (might be cut off)~~ **Won't implement — declined.**
+28. ~~The graph tab may need a `waitUntil: 'networkidle'` equivalent for full SVG render~~ **Won't implement — declined.**
+29. ~~Consider adding a "screenshot mode" to the dashboard (cleaner URL bar, no scrollbars)~~ done (docs-health pass 2026-10-05)
 
 ### Technical debt
 
-30. The `--virtual-time-budget` chromium flag is deprecated in newer versions — find alternative
-31. The `sed` injection for tab switching is fragile — use a more robust approach
-32. Add `.gitattributes` for PNG files
-33. Consider WebP format instead of PNG for smaller file sizes
-34. Add width/height attributes to `<img>` tags to prevent layout shift (CLS)
-35. Add `loading="lazy"` to gallery images for faster initial page load
+30. ~~The `--virtual-time-budget` chromium flag is deprecated in newer versions — find alternative~~ **Won't implement — declined.**
+31. ~~The `sed` injection for tab switching is fragile — use a more robust approach~~ **Won't implement — declined.**
+32. ~~Add `.gitattributes` for PNG files~~ **Won't implement — declined.**
+33. ~~Consider WebP format instead of PNG for smaller file sizes~~ done (docs-health pass 2026-10-05)
+34. ~~Add width/height attributes to `<img>` tags to prevent layout shift (CLS)~~ done (docs-health pass 2026-10-05)
+35. ~~Add `loading="lazy"` to gallery images for faster initial page load~~ done (docs-health pass 2026-10-05)
 
 ### Testing
 
-36. Add a test that verifies `docs/screenshots/` files exist and are non-empty
-37. Add a test that README image references resolve to actual files
-38. Add a link checker for README image paths
+36. ~~Add a test that verifies `docs/screenshots/` files exist and are non-empty~~ **Won't implement — declined.**
+37. ~~Add a test that README image references resolve to actual files~~ **Won't implement — declined.**
+38. ~~Add a link checker for README image paths~~ **Won't implement — declined.**
 
 ### Future features
 
-39. Add dark/light theme toggle to dashboard (screenshots only show dark)
-40. Add a "Copy as image" button to the dashboard
-41. Add PDF export of the dashboard
-42. Add a comparison/diff view in the dashboard
-43. Add real-time updating dashboard (WebSocket)
-44. Add keyboard navigation screenshot showing focus states
-45. Add mobile responsive screenshot
-46. Add a screenshot showing the error tooltip feature
-47. Add a screenshot showing the filter/search functionality
-48. Add a screenshot showing high-fan-out DAG (stressed layout)
-49. Add a screenshot showing the waveform renderer (mentioned in AGENTS.md but not in any tab name)
-50. Benchmark screenshot generation time for CI integration
+39. Add dark/light theme toggle to dashboard (screenshots only show dark) **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)**
+40. ~~Add a "Copy as image" button to the dashboard~~ **Won't implement — declined.**
+41. ~~Add PDF export of the dashboard~~ **Won't implement — declined.**
+42. ~~Add a comparison/diff view in the dashboard~~ **Won't implement — declined.**
+43. ~~Add real-time updating dashboard (WebSocket)~~ done — live module shipped v0.8.0
+44. Add keyboard navigation screenshot showing focus states **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+45. Add mobile responsive screenshot **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+46. Add a screenshot showing the error tooltip feature **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+47. Add a screenshot showing the filter/search functionality **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+48. Add a screenshot showing high-fan-out DAG (stressed layout) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+49. Add a screenshot showing the waveform renderer (mentioned in AGENTS.md but not in any tab name) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+50. ~~Benchmark screenshot generation time for CI integration~~ done (docs-health pass 2026-10-05)
 
 ---
 

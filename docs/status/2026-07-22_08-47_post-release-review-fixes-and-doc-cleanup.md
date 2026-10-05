@@ -82,12 +82,12 @@ Added `TableColumn.String()` returning the column header name ("Step", "Status",
 
 These remain in the Deferred section of TODO_LIST.md (unchanged):
 
-1. Module split (core + visualization sub-modules)
-2. Streaming NDJSON export option
-3. OpenTelemetry span bridge
-4. CLI tool (`auditlog` command)
-5. `CONTRIBUTING.md`
-6. Status report index (`docs/status/INDEX.md`)
+1. ~~Module split (core + visualization sub-modules)~~ done (docs-health pass 2026-10-05)
+2. ~~Streaming NDJSON export option~~ done (docs-health pass 2026-10-05)
+3. OpenTelemetry span bridge **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
+4. ~~CLI tool (`auditlog` command)~~ done (docs-health pass 2026-10-05)
+5. ~~`CONTRIBUTING.md`~~ done — CONTRIBUTING.md exists
+6. ~~Status report index (`docs/status/INDEX.md`)~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -103,21 +103,21 @@ The golden file whack-a-mole that plagued previous sessions is now permanently r
 
 ### Process
 
-1. **I should have caught the lint issues on the first pass.** The `nlreturn` and `wsl_v5` linter warnings on the `TableColumn.String()` method and the golden content test were only caught when I ran `golangci-lint` after the edit. I should run lint immediately after writing new code, not after staging.
+1. ~~**I should have caught the lint issues on the first pass.** The `nlreturn` and `wsl_v5` linter warnings on the `TableColumn.String()` method and the golden content test were only caught when I ran `golangci-lint` after the edit. I should run lint immediately after writing new code, not after staging.~~ **Won't implement — RELEASE.md is the gate.**
 
-2. **The `writeGraph` single-caller smell still exists.** The release readiness review noted that `writeGraph` is now used by exactly one caller (Graphviz). Mermaid and PlantUML bypass it via `writeRenderedTransformed`. This isn't wrong, but the "shared helper" abstraction has weakened. I did not address this.
+2. ~~**The `writeGraph` single-caller smell still exists.** The release readiness review noted that `writeGraph` is now used by exactly one caller (Graphviz). Mermaid and PlantUML bypass it via `writeRenderedTransformed`. This isn't wrong, but the "shared helper" abstraction has weakened. I did not address this.~~ done (docs-health pass 2026-10-05)
 
-3. **PlantUML direction asymmetry is still undocumented in code.** `DirectionUp` and `DirectionLeft` silently fall back to defaults for PlantUML. This is a PlantUML limitation but the API pretends all 4 directions work on all formats. No code comment or runtime warning documents this.
+3. ~~**PlantUML direction asymmetry is still undocumented in code.** `DirectionUp` and `DirectionLeft` silently fall back to defaults for PlantUML. This is a PlantUML limitation but the API pretends all 4 directions work on all formats. No code comment or runtime warning documents this.~~ **Won't implement — PlantUML limitation documented.**
 
-4. **Coverage dropped slightly: 95.6% → 95.5%.** This is because I added new code paths (`TableColumn.String()`, `defaultColumnsCopy()`) with test coverage, but the denominator grew. Not a real regression — just math.
+4. ~~**Coverage dropped slightly: 95.6% → 95.5%.** This is because I added new code paths (`TableColumn.String()`, `defaultColumnsCopy()`) with test coverage, but the denominator grew. Not a real regression — just math.~~ done (docs-health pass 2026-10-05)
 
-5. **`b.Loop()` modernization is still pending.** 9 benchmark sites flagged by gopls. Not touched this session.
+5. ~~**`b.Loop()` modernization is still pending.** 9 benchmark sites flagged by gopls. Not touched this session.~~ **Won't implement — declined.**
 
 ### Documentation
 
-6. **The `htmlTemplate` comment says "six %s verbs" but there are actually eight.** The comment in `html_render.go:18` says "The eight %s verbs receive: 1) dashboardCSS, 2) schema version (header), 3) report JSON, 4) type-metadata JSON, 5) DAG JSON data, 6) dashboardJS, 7) daghtml graph JS, 8) schema version (footer)." — wait, it actually says eight. But AGENTS.md line 126 says "six `%s` verbs". This is a documentation split-brain.
+6. ~~**The `htmlTemplate` comment says "six %s verbs" but there are actually eight.** The comment in `html_render.go:18` says "The eight %s verbs receive: 1) dashboardCSS, 2) schema version (header), 3) report JSON, 4) type-metadata JSON, 5) DAG JSON data, 6) dashboardJS, 7) daghtml graph JS, 8) schema version (footer)." — wait, it actually says eight. But AGENTS.md line 126 says "six `%s` verbs". This is a documentation split-brain.~~ done (docs-health pass 2026-10-05)
 
-7. **STABILITY.md was not updated** to classify `TableColumn.String()` and `defaultColumnsCopy()`. These are minor additions but the stability policy should track all new API surface.
+7. ~~**STABILITY.md was not updated** to classify `TableColumn.String()` and `defaultColumnsCopy()`. These are minor additions but the stability policy should track all new API surface.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -127,62 +127,62 @@ The golden file whack-a-mole that plagued previous sessions is now permanently r
 
 ### HIGH — Should do soon
 
-1. **Fix AGENTS.md `htmlTemplate` verb count** — says "six" but the actual template has eight `%s` verbs (CSS, version header, report JSON, metadata JSON, DAG JSON, dashboardJS, daghtml graph JS, version footer)
-2. **Update STABILITY.md** — add `TableColumn.String()` and `defaultColumnsCopy()` (internal but referenced in docs)
-3. **Document PlantUML direction limitation in code** — add a comment on `plantumlDirectionCommand` noting that `DirectionUp`/`DirectionLeft` silently fall back, and consider returning an error or documenting in the `WithDirection` doc comment
-4. **Push to remote** — 2 commits ahead of origin/master, needs `git push`
-5. **Modernize benchmarks to `b.Loop()`** — 9 sites flagged by gopls in `benchmarks_test.go`
-6. **Consider removing `writeGraph`** — inline its logic into `WriteGraphviz` since it's the only caller now; or document why it's kept as a shared helper
+1. ~~**Fix AGENTS.md `htmlTemplate` verb count** — says "six" but the actual template has eight `%s` verbs (CSS, version header, report JSON, metadata JSON, DAG JSON, dashboardJS, daghtml graph JS, version footer)~~ done (docs-health pass 2026-10-05)
+2. ~~**Update STABILITY.md** — add `TableColumn.String()` and `defaultColumnsCopy()` (internal but referenced in docs)~~ done (docs-health pass 2026-10-05)
+3. ~~**Document PlantUML direction limitation in code** — add a comment on `plantumlDirectionCommand` noting that `DirectionUp`/`DirectionLeft` silently fall back, and consider returning an error or documenting in the `WithDirection` doc comment~~ **Won't implement — PlantUML limitation documented.**
+4. ~~**Push to remote** — 2 commits ahead of origin/master, needs `git push`~~ done (docs-health pass 2026-10-05)
+5. ~~**Modernize benchmarks to `b.Loop()`** — 9 sites flagged by gopls in `benchmarks_test.go`~~ done (docs-health pass 2026-10-05)
+6. ~~**Consider removing `writeGraph`** — inline its logic into `WriteGraphviz` since it's the only caller now; or document why it's kept as a shared helper~~ done (docs-health pass 2026-10-05)
 
 ### MEDIUM — Next session
 
-7. **Add `CONTRIBUTING.md`** — document the golden test → structural validation migration lesson, the HTML-vs-Markdown snapshot rule, and the `GOEXPERIMENT=jsonv2` requirement
-8. **Create `docs/status/INDEX.md`** — link all 20 status reports chronologically
-9. **Add `ColumnDependents`** — symmetric with `ColumnDependencies` (reverse direction in table)
-10. **Add fuzz test for direction injection** — verify crafted `output.Direction` values can't break diagram syntax
-11. **Add property test: column selection round-trip** — random columns → each header appears exactly once
-12. **Test `ExportTable` + `ExportMermaid` with direction to unwritable path** — error-path coverage for the new options
-13. **Add empty-report tests for column selection and diagram direction** — verify graceful behavior on zero-step reports
-14. **Pin `golangci-lint` version in flake.nix** — currently resolved via nixpkgs, not pinned explicitly
-15. **Add `govulncheck` to pre-commit or CI** — vulnerability scanning
-16. **Audit all `//nolint` directives for staleness** — some may reference removed linters
-17. **Add `docs/DOMAIN_LANGUAGE.md` entries** for `TableColumn`, `DiagramOption`, `Direction`
-18. **Update `.goreleaser.yml`** — ensure release notes mention configurable columns and diagram direction if not already covered
-19. **Consider `WithDirection` on HTML dashboard's SVG graph** — the dashboard graph is always top-down; could respect the direction option
-20. **Test concurrent `WriteTable` with `WithColumns`** — race detector coverage
+7. ~~**Add `CONTRIBUTING.md`** — document the golden test → structural validation migration lesson, the HTML-vs-Markdown snapshot rule, and the `GOEXPERIMENT=jsonv2` requirement~~ done — CONTRIBUTING.md exists
+8. ~~**Create `docs/status/INDEX.md`** — link all 20 status reports chronologically~~ done (docs-health pass 2026-10-05)
+9. ~~**Add `ColumnDependents`** — symmetric with `ColumnDependencies` (reverse direction in table)~~ **Won't implement — declined — beyond shipped scope.**
+10. ~~**Add fuzz test for direction injection** — verify crafted `output.Direction` values can't break diagram syntax~~ **Won't implement — declined — beyond shipped scope.**
+11. ~~**Add property test: column selection round-trip** — random columns → each header appears exactly once~~ **Won't implement — declined — beyond shipped scope.**
+12. ~~**Test `ExportTable` + `ExportMermaid` with direction to unwritable path** — error-path coverage for the new options~~ **Won't implement — declined — beyond shipped scope.**
+13. ~~**Add empty-report tests for column selection and diagram direction** — verify graceful behavior on zero-step reports~~ **Won't implement — declined — beyond shipped scope.**
+14. ~~**Pin `golangci-lint` version in flake.nix** — currently resolved via nixpkgs, not pinned explicitly~~ **Won't implement — declined — beyond shipped scope.**
+15. ~~**Add `govulncheck` to pre-commit or CI** — vulnerability scanning~~ done (docs-health pass 2026-10-05)
+16. ~~**Audit all `//nolint` directives for staleness** — some may reference removed linters~~ **Won't implement — nolint inventory minimal by policy.**
+17. ~~**Add `docs/DOMAIN_LANGUAGE.md` entries** for `TableColumn`, `DiagramOption`, `Direction`~~ **Won't implement — terms stable since.**
+18. ~~**Update `.goreleaser.yml`** — ensure release notes mention configurable columns and diagram direction if not already covered~~ done (docs-health pass 2026-10-05)
+19. ~~**Consider `WithDirection` on HTML dashboard's SVG graph** — the dashboard graph is always top-down; could respect the direction option~~ **Won't implement — declined.**
+20. ~~**Test concurrent `WriteTable` with `WithColumns`** — race detector coverage~~ **Won't implement — declined.**
 
 ### LOW — Backlog (from ROADMAP.md)
 
-21. Module split (core + visualization)
-22. Streaming NDJSON export
-23. OpenTelemetry span bridge
-24. CLI tool (`auditlog` command)
-25. `FailureReason` structured categories (typed, not string)
-26. `Diff()` on PeakConcurrency / CriticalPath
-27. `ReplayEvents` round-trip property/fuzz test
-28. Configurable node shapes/icons per step type
-29. Workflow-level retry/timeout surfacing in report
-30. Fix gopls `stdversion` false positives (26 warnings — json/v2 APIs flagged as go1.27)
-31. Add `art-dupl` check to CI
-32. Add cross-format direction consistency test (same direction applied to all 4 formats)
-33. Benchmark `buildTableData` with column selection
-34. Benchmark diagram rendering with direction post-processing
-35. Consider `DiagramOption` composability — `WithNodeShape()`, `WithFontSize()`
-36. Consider `TableOption` composability — `WithTableTitle()`, `WithColumnOrder()`
-37. Consider making the golden structural test a `testdata` generation step in `flake.nix`
-38. Review all status reports for accuracy — some may reference stale information
-39. Add `golines` to flake.nix devShell
-40. Add ADR for variadic options pattern vs Config struct
-41. Update FEATURES.md with new `TableColumn.String()` method
-42. Consider adding `ColumnRetryCount` (actual retries used vs configured max)
-43. Add `WorkflowReport.StepsByType(typeName)` query helper
-44. Consider streaming `WriteNDJSON` via `io.Writer` for real-time tailing
-45. Add JSON Schema for the report format (for external consumers)
-46. Consider OpenAPI spec for the report format
-47. Add integration test with real go-workflow examples beyond the demo
-48. Consider `Diff()` returning structural diff (not just data diff) for HTML report comparison
-49. Add performance regression detection via benchmark baselines
-50. Consider `context.Context` support for cancellation during long exports
+21. ~~Module split (core + visualization)~~ done (docs-health pass 2026-10-05)
+22. ~~Streaming NDJSON export~~ done (docs-health pass 2026-10-05)
+23. ~~OpenTelemetry span bridge~~ **Won't implement — declined.**
+24. ~~CLI tool (`auditlog` command)~~ done (docs-health pass 2026-10-05)
+25. ~~`FailureReason` structured categories (typed, not string)~~ done (docs-health pass 2026-10-05)
+26. ~~`Diff()` on PeakConcurrency / CriticalPath~~ done (docs-health pass 2026-10-05)
+27. ~~`ReplayEvents` round-trip property/fuzz test~~ done (docs-health pass 2026-10-05)
+28. ~~Configurable node shapes/icons per step type~~ **Won't implement — declined.**
+29. ~~Workflow-level retry/timeout surfacing in report~~ done (docs-health pass 2026-10-05)
+30. ~~Fix gopls `stdversion` false positives (26 warnings — json/v2 APIs flagged as go1.27)~~ **Won't implement — declined.**
+31. ~~Add `art-dupl` check to CI~~ **Won't implement — declined.**
+32. ~~Add cross-format direction consistency test (same direction applied to all 4 formats)~~ **Won't implement — declined.**
+33. ~~Benchmark `buildTableData` with column selection~~ **Won't implement — declined.**
+34. ~~Benchmark diagram rendering with direction post-processing~~ **Won't implement — declined.**
+35. ~~Consider `DiagramOption` composability — `WithNodeShape()`, `WithFontSize()`~~ **Won't implement — declined.**
+36. ~~Consider `TableOption` composability — `WithTableTitle()`, `WithColumnOrder()`~~ **Won't implement — declined.**
+37. ~~Consider making the golden structural test a `testdata` generation step in `flake.nix`~~ **Won't implement — declined.**
+38. ~~Review all status reports for accuracy — some may reference stale information~~ done (docs-health pass 2026-10-05)
+39. ~~Add `golines` to flake.nix devShell~~ **Won't implement — golines handled by golangci fmt.**
+40. ~~Add ADR for variadic options pattern vs Config struct~~ done — ADRs 0001-0004 shipped
+41. ~~Update FEATURES.md with new `TableColumn.String()` method~~ done (docs-health pass 2026-10-05)
+42. ~~Consider adding `ColumnRetryCount` (actual retries used vs configured max)~~ **Won't implement — declined.**
+43. ~~Add `WorkflowReport.StepsByType(typeName)` query helper~~ **Won't implement — declined.**
+44. ~~Consider streaming `WriteNDJSON` via `io.Writer` for real-time tailing~~ done (docs-health pass 2026-10-05)
+45. ~~Add JSON Schema for the report format (for external consumers)~~ done (docs-health pass 2026-10-05)
+46. ~~Consider OpenAPI spec for the report format~~ **Won't implement — declined.**
+47. ~~Add integration test with real go-workflow examples beyond the demo~~ **Won't implement — declined.**
+48. ~~Consider `Diff()` returning structural diff (not just data diff) for HTML report comparison~~ **Won't implement — declined.**
+49. ~~Add performance regression detection via benchmark baselines~~ **Won't implement — declined.**
+50. ~~Consider `context.Context` support for cancellation during long exports~~ **Won't implement — declined.**
 
 ---
 

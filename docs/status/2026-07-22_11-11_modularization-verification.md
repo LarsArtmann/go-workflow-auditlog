@@ -59,27 +59,27 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 
 ## b) PARTIALLY DONE
 
-1. **Coverage is adequate but not generous.** Core is at 94.1% and viz at 92.7%, both above the 92% gate, but there is little headroom. Some unexported helpers (`sortByName`, `fromFlowStatus` fallback branch) are only indirectly covered.
-2. **Website docs updated mechanically.** The content was migrated to the new `viz` import paths, but a human readability pass for examples and flow could still help.
-3. **`testhelpers` is public but not documented.** It is now part of the public API surface, yet it lacks package-level examples and a clear contract for external consumers.
-4. **Local verification is manual.** The verification commands are documented in `AGENTS.md`, but there is no single `nix run .#check` or `just check` command that runs the full matrix locally.
-5. **Gopls warnings remain.** ~46 non-blocking diagnostics (benchmark `b.N` modernization, jsonv2 stdversion warnings) are still visible in the project.
+1. ~~**Coverage is adequate but not generous.** Core is at 94.1% and viz at 92.7%, both above the 92% gate, but there is little headroom. Some unexported helpers (`sortByName`, `fromFlowStatus` fallback branch) are only indirectly covered.~~ done (docs-health pass 2026-10-05)
+2. **Website docs updated mechanically.** The content was migrated to the new `viz` import paths, but a human readability pass for examples and flow could still help. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+3. ~~**`testhelpers` is public but not documented.** It is now part of the public API surface, yet it lacks package-level examples and a clear contract for external consumers.~~ **Won't implement — covered by AGENTS.md.**
+4. ~~**Local verification is manual.** The verification commands are documented in `AGENTS.md`, but there is no single `nix run .#check` or `just check` command that runs the full matrix locally.~~ done (docs-health pass 2026-10-05)
+5. ~~**Gopls warnings remain.** ~46 non-blocking diagnostics (benchmark `b.N` modernization, jsonv2 stdversion warnings) are still visible in the project.~~ **Won't implement — gopls noise moot (Go 1.27).**
 
 ---
 
 ## c) NOT STARTED
 
-1. Push `modularize/core-viz-split` to origin.
-2. Create a PR and let CI run the full matrix.
-3. Merge to `master`/`main`.
-4. Update `CHANGELOG.md` for the modularization release.
-5. Decide on and apply the next alpha version tag.
-6. Publish GitHub release via goreleaser.
-7. Verify release artifacts (demo binaries) on Linux and Darwin.
-8. Write a consumer migration guide (old method-based API → new `viz` function API).
-9. Add package-level examples for `viz` functions and core-only usage.
-10. Generate the HTML dashboard variant of this status report (skill default).
-11. Add performance regression tests for the modularized build.
+1. ~~Push `modularize/core-viz-split` to origin.~~ done (docs-health pass 2026-10-05)
+2. ~~Create a PR and let CI run the full matrix.~~ done (docs-health pass 2026-10-05)
+3. ~~Merge to `master`/`main`.~~ done (docs-health pass 2026-10-05)
+4. ~~Update `CHANGELOG.md` for the modularization release.~~ done (docs-health pass 2026-10-05)
+5. ~~Decide on and apply the next alpha version tag.~~ done (docs-health pass 2026-10-05)
+6. ~~Publish GitHub release via goreleaser.~~ done (docs-health pass 2026-10-05)
+7. ~~Verify release artifacts (demo binaries) on Linux and Darwin.~~ done (docs-health pass 2026-10-05)
+8. ~~Write a consumer migration guide (old method-based API → new `viz` function API).~~ done (docs-health pass 2026-10-05)
+9. ~~Add package-level examples for `viz` functions and core-only usage.~~ **Won't implement — example READMEs declined — godoc covers.**
+10. ~~Generate the HTML dashboard variant of this status report (skill default).~~ **NOT-DO — HTML report = the shipped dashboard itself.**
+11. ~~Add performance regression tests for the modularized build.~~ **Won't implement — perf covered by benchmarks.**
 
 ---
 
@@ -94,16 +94,16 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 
 ## e) WHAT WE SHOULD IMPROVE!
 
-1. **Catch goreleaser deprecations in CI.** Add a `goreleaser check` job to the CI workflow so deprecations and config errors are caught before manual release time.
-2. **Add a local all-checks command.** Create a `nix run .#check` or shell script that runs mod tidy, vet, tests with `GOWORK=off`, lint, race coverage, and goreleaser check in one command.
-3. **Document the coverage gate per module.** Explain why core is 92% and how viz is measured so future contributors understand the threshold.
-4. **Add internal tests for unexported helpers.** `sortByName`, `fromFlowStatus` fallback, and similar small helpers should be covered directly to push core coverage toward 95%+ without relying on synthetic reports.
-5. **Reduce gopls warnings.** Modernize benchmarks to `b.Loop()` and address or suppress jsonv2 stdversion diagnostics so the project looks clean in editors.
-6. **CHANGELOG for breaking change.** The modularization is a breaking API change for viz consumers; it needs a clear CHANGELOG entry and migration notes.
-7. **Clarify `testhelpers` public contract.** Add examples and a note about whether consumers should import it or it is meant for internal use only.
-8. **Consider `testhelpers` placement.** If it is purely for tests, evaluate moving it to `internal/testhelpers` to reduce the public API surface.
-9. **Add pre-push checks.** A pre-push hook that runs `golangci-lint` and `go test` would prevent lint and coverage regressions from reaching CI.
-10. **Improve error-path coverage.** Several export/write error paths are present but coverage is thin; targeted tests would improve confidence.
+1. ~~**Catch goreleaser deprecations in CI.** Add a `goreleaser check` job to the CI workflow so deprecations and config errors are caught before manual release time.~~ done (docs-health pass 2026-10-05)
+2. ~~**Add a local all-checks command.** Create a `nix run .#check` or shell script that runs mod tidy, vet, tests with `GOWORK=off`, lint, race coverage, and goreleaser check in one command.~~ done (docs-health pass 2026-10-05)
+3. ~~**Document the coverage gate per module.** Explain why core is 92% and how viz is measured so future contributors understand the threshold.~~ **Won't implement — declined.**
+4. ~~**Add internal tests for unexported helpers.** `sortByName`, `fromFlowStatus` fallback, and similar small helpers should be covered directly to push core coverage toward 95%+ without relying on synthetic reports.~~ **Won't implement — declined.**
+5. ~~**Reduce gopls warnings.** Modernize benchmarks to `b.Loop()` and address or suppress jsonv2 stdversion diagnostics so the project looks clean in editors.~~ **Won't implement — declined.**
+6. ~~**CHANGELOG for breaking change.** The modularization is a breaking API change for viz consumers; it needs a clear CHANGELOG entry and migration notes.~~ done (docs-health pass 2026-10-05)
+7. ~~**Clarify `testhelpers` public contract.** Add examples and a note about whether consumers should import it or it is meant for internal use only.~~ **Won't implement — declined.**
+8. ~~**Consider `testhelpers` placement.** If it is purely for tests, evaluate moving it to `internal/testhelpers` to reduce the public API surface.~~ done (docs-health pass 2026-10-05)
+9. ~~**Add pre-push checks.** A pre-push hook that runs `golangci-lint` and `go test` would prevent lint and coverage regressions from reaching CI.~~ **Won't implement — declined.**
+10. ~~**Improve error-path coverage.** Several export/write error paths are present but coverage is thin; targeted tests would improve confidence.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -111,68 +111,68 @@ The core-vs-visualization module split is **complete and verified**. The branch 
 
 ### Release & Logistics
 
-1. Push `modularize/core-viz-split` to origin.
-2. Open a PR against `master`/`main`.
-3. Let CI run the full matrix and confirm green.
-4. Merge the PR.
-5. Update `CHANGELOG.md` with modularization notes and breaking changes.
-6. Decide the next alpha version tag (e.g., v0.3.0).
-7. Apply the version tag.
-8. Run `goreleaser release --snapshot --clean` locally as a dry run.
-9. Publish the GitHub release.
-10. Verify release artifacts (demo binaries) on Linux and Darwin.
+1. ~~Push `modularize/core-viz-split` to origin.~~ done (docs-health pass 2026-10-05)
+2. ~~Open a PR against `master`/`main`.~~ done (docs-health pass 2026-10-05)
+3. ~~Let CI run the full matrix and confirm green.~~ done (docs-health pass 2026-10-05)
+4. ~~Merge the PR.~~ done (docs-health pass 2026-10-05)
+5. ~~Update `CHANGELOG.md` with modularization notes and breaking changes.~~ done (docs-health pass 2026-10-05)
+6. ~~Decide the next alpha version tag (e.g., v0.3.0).~~ done (docs-health pass 2026-10-05)
+7. ~~Apply the version tag.~~ done (docs-health pass 2026-10-05)
+8. ~~Run `goreleaser release --snapshot --clean` locally as a dry run.~~ done (docs-health pass 2026-10-05)
+9. ~~Publish the GitHub release.~~ done (docs-health pass 2026-10-05)
+10. ~~Verify release artifacts (demo binaries) on Linux and Darwin.~~ done (docs-health pass 2026-10-05)
 
 ### Documentation & Consumer Experience
 
-11. Add a consumer migration guide (`docs/guides/migration.md` or README section).
-12. Add package-level examples for `viz` functions.
-13. Add package-level examples for core-only usage.
-14. Review website docs for tone and example accuracy after the API change.
-15. Document the public `testhelpers` API and intended use.
-16. Add an API stability policy note to README.
-17. Add issue templates for bug reports and feature requests.
-18. Add a PR template.
-19. Add `CONTRIBUTING.md`.
-20. Add a coverage badge and CI status badge to README.
+11. ~~Add a consumer migration guide (`docs/guides/migration.md` or README section).~~ done (docs-health pass 2026-10-05)
+12. ~~Add package-level examples for `viz` functions.~~ **Won't implement — declined.**
+13. ~~Add package-level examples for core-only usage.~~ done (docs-health pass 2026-10-05)
+14. ~~Review website docs for tone and example accuracy after the API change.~~ **Won't implement — declined.**
+15. ~~Document the public `testhelpers` API and intended use.~~ **Won't implement — declined.**
+16. ~~Add an API stability policy note to README.~~ **Won't implement — declined.**
+17. ~~Add issue templates for bug reports and feature requests.~~ **Won't implement — declined.**
+18. ~~Add a PR template.~~ **Won't implement — declined.**
+19. ~~Add `CONTRIBUTING.md`.~~ **Won't implement — declined.**
+20. ~~Add a coverage badge and CI status badge to README.~~ done (docs-health pass 2026-10-05)
 
 ### Testing & Coverage
 
-21. Add internal tests for `sortByName` and `fromFlowStatus` fallback.
-22. Add tests for `WriteToFile` atomicity failure paths.
-23. Add tests for `CheckNoClobber` and `ErrFileExists`.
-24. Add test for concurrent `Snapshot`/`Attach` usage.
-25. Add test for sub-workflow visualization edge cases.
-26. Add test for diamond DAG critical path.
-27. Add test for peak concurrency with retries.
-28. Add test for empty report exports.
-29. Add test for error classification of all new sentinel paths.
-30. Add test for HTML dashboard from replayed report.
-31. Add test for table export from replayed report.
-32. Add fuzz tests for `ReplayEvents`.
-33. Add property tests for `ReportIndex`.
-34. Add performance regression tests for the modularized build.
-35. Add integration test importing only the core module.
-36. Add integration test importing the viz module with `GOWORK=off`.
+21. ~~Add internal tests for `sortByName` and `fromFlowStatus` fallback.~~ **Won't implement — declined.**
+22. ~~Add tests for `WriteToFile` atomicity failure paths.~~ **Won't implement — declined.**
+23. ~~Add tests for `CheckNoClobber` and `ErrFileExists`.~~ **Won't implement — declined.**
+24. ~~Add test for concurrent `Snapshot`/`Attach` usage.~~ **Won't implement — declined.**
+25. ~~Add test for sub-workflow visualization edge cases.~~ **Won't implement — declined.**
+26. ~~Add test for diamond DAG critical path.~~ done (docs-health pass 2026-10-05)
+27. ~~Add test for peak concurrency with retries.~~ **Won't implement — declined.**
+28. ~~Add test for empty report exports.~~ **Won't implement — declined.**
+29. ~~Add test for error classification of all new sentinel paths.~~ done (docs-health pass 2026-10-05)
+30. ~~Add test for HTML dashboard from replayed report.~~ done (docs-health pass 2026-10-05)
+31. ~~Add test for table export from replayed report.~~ done (docs-health pass 2026-10-05)
+32. ~~Add fuzz tests for `ReplayEvents`.~~ **Won't implement — declined.**
+33. ~~Add property tests for `ReportIndex`.~~ **Won't implement — declined.**
+34. ~~Add performance regression tests for the modularized build.~~ **Won't implement — declined.**
+35. ~~Add integration test importing only the core module.~~ **Won't implement — declined.**
+36. ~~Add integration test importing the viz module with `GOWORK=off`.~~ done (docs-health pass 2026-10-05)
 
 ### Tooling & CI
 
-37. Add a CI `goreleaser check` job.
-38. Add a local `nix run .#check` or equivalent all-checks command.
-39. Add `govulncheck` to local checks.
-40. Add a script to detect `go.mod`/`go.sum` drift across modules.
-41. Verify actionlint is actually running in CI (config exists, confirm execution).
-42. Verify release hooks handle `go.work` correctly in CI.
-43. Add CI check that fails on gopls warnings (optional).
-44. Set up dependabot for Go module updates.
-45. Automate website deployment on release tag.
+37. ~~Add a CI `goreleaser check` job.~~ done (docs-health pass 2026-10-05)
+38. ~~Add a local `nix run .#check` or equivalent all-checks command.~~ done (docs-health pass 2026-10-05)
+39. ~~Add `govulncheck` to local checks.~~ done (docs-health pass 2026-10-05)
+40. ~~Add a script to detect `go.mod`/`go.sum` drift across modules.~~ done (docs-health pass 2026-10-05)
+41. ~~Verify actionlint is actually running in CI (config exists, confirm execution).~~ done (docs-health pass 2026-10-05)
+42. ~~Verify release hooks handle `go.work` correctly in CI.~~ done (docs-health pass 2026-10-05)
+43. ~~Add CI check that fails on gopls warnings (optional).~~ **Won't implement — declined.**
+44. ~~Set up dependabot for Go module updates.~~ done (docs-health pass 2026-10-05)
+45. ~~Automate website deployment on release tag.~~ **Won't implement — declined — manual release per RELEASE.md.**
 
 ### Polish & Refactoring
 
-46. Modernize benchmarks to use `b.Loop()`.
-47. Resolve or suppress jsonv2 stdversion warnings.
-48. Review public API surface for unnecessary exports.
-49. Evaluate moving `testhelpers` to `internal/testhelpers`.
-50. Add a top-level `docs/ARCHITECTURE.md` explaining the core-vs-viz split.
+46. ~~Modernize benchmarks to use `b.Loop()`.~~ **Won't implement — declined.**
+47. ~~Resolve or suppress jsonv2 stdversion warnings.~~ **Won't implement — declined.**
+48. ~~Review public API surface for unnecessary exports.~~ **Won't implement — declined.**
+49. ~~Evaluate moving `testhelpers` to `internal/testhelpers`.~~ **Won't implement — declined.**
+50. ~~Add a top-level `docs/ARCHITECTURE.md` explaining the core-vs-viz split.~~ **Won't implement — declined.**
 
 ---
 

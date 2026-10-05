@@ -190,19 +190,19 @@ The split was supposed to make things more manageable, but `coverage_report_test
 
 ### Code quality observations
 
-1. **`computeCriticalPath` and `computeCriticalPathDuration` are now a delegation chain** — `computeCriticalPathDuration` just calls `computeCriticalPath` and discards the path. This is clean but means two function calls for the hot path. The `finalizeDenormalized` function calls `computeCriticalPathDuration`, which calls `computeCriticalPath`, which calls `buildCriticalPathDFS`. Three levels of indirection for what used to be one function.
+1. ~~**`computeCriticalPath` and `computeCriticalPathDuration` are now a delegation chain** — `computeCriticalPathDuration` just calls `computeCriticalPath` and discards the path. This is clean but means two function calls for the hot path. The `finalizeDenormalized` function calls `computeCriticalPathDuration`, which calls `computeCriticalPath`, which calls `buildCriticalPathDFS`. Three levels of indirection for what used to be one function.~~ done (docs-health pass 2026-10-05)
 
-2. **`PeakConcurrencySteps()` does a second pass over events** — the report already computed `PeakConcurrency` during `finalizeDenormalized`. The new `PeakConcurrencySteps()` re-scans the event stream from scratch. For large reports this is O(n) wasted work. Could cache the peak step set during the initial computation.
+2. ~~**`PeakConcurrencySteps()` does a second pass over events** — the report already computed `PeakConcurrency` during `finalizeDenormalized`. The new `PeakConcurrencySteps()` re-scans the event stream from scratch. For large reports this is O(n) wasted work. Could cache the peak step set during the initial computation.~~ done (docs-health pass 2026-10-05)
 
-3. **`CriticalPath()` calls `StepByName` for each step name** — `StepByName` does a linear scan. For the critical path (typically 5-20 steps), this is O(n*k). Could build a name→index map once.
+3. ~~**`CriticalPath()` calls `StepByName` for each step name** — `StepByName` does a linear scan. For the critical path (typically 5-20 steps), this is O(n*k). Could build a name→index map once.~~ done (docs-health pass 2026-10-05)
 
-4. **No godoc example for `CriticalPath()` or `PeakConcurrencySteps()`** — the existing examples demonstrate field access (`peakConcurrency`, `criticalPathDurationMs`) but not the new methods that return step lists. These are the more interesting API surface.
+4. ~~**No godoc example for `CriticalPath()` or `PeakConcurrencySteps()`** — the existing examples demonstrate field access (`peakConcurrency`, `criticalPathDurationMs`) but not the new methods that return step lists. These are the more interesting API surface.~~ **Won't implement — declined — Go-side CP computed once, injected.**
 
-5. **`buildCriticalPathDFS` is an unusual pattern** — returning a closure from a function just to satisfy `funlen` is a code smell. An iterative topological-sort approach would be both shorter and more idiomatic Go, and wouldn't need the closure trick.
+5. ~~**`buildCriticalPathDFS` is an unusual pattern** — returning a closure from a function just to satisfy `funlen` is a code smell. An iterative topological-sort approach would be both shorter and more idiomatic Go, and wouldn't need the closure trick.~~ done — godoc examples shipped
 
-6. **Fuzz corpus entries have descriptive names but no documentation** — the 5 persisted entries (`bracket-quote-injection`, etc.) have no README or comment explaining what each entry tests. Future contributors won't know why these specific inputs were chosen.
+6. ~~**Fuzz corpus entries have descriptive names but no documentation** — the 5 persisted entries (`bracket-quote-injection`, etc.) have no README or comment explaining what each entry tests. Future contributors won't know why these specific inputs were chosen.~~ **Won't implement — declined.**
 
-7. **The split test files have overlapping import lists** — `coverage_report_test.go` and `coverage_plugin_test.go` both import `json`, `bytes`, `flow`, `auditlog`, etc. This is fine in Go (each file compiles independently) but could share a `helpers_test.go` for common setup.
+7. ~~**The split test files have overlapping import lists** — `coverage_report_test.go` and `coverage_plugin_test.go` both import `json`, `bytes`, `flow`, `auditlog`, etc. This is fine in Go (each file compiles independently) but could share a `helpers_test.go` for common setup.~~ **Won't implement — declined.**
 
 ---
 
@@ -210,74 +210,74 @@ The split was supposed to make things more manageable, but `coverage_report_test
 
 ### Documentation (high priority — stale or incomplete)
 
-1. **Update FEATURES.md coverage gate from 92% → actual CI threshold**
-2. **Update TODO_LIST.md to mark completed items from prior session**
-3. **Add godoc example for `CriticalPath()` showing the returned step chain**
-4. **Add godoc example for `PeakConcurrencySteps()` showing the returned steps**
-5. **Document the remaining 4.3% coverage gap (which lines, why unreachable)**
-6. **Update ROADMAP.md — `Diff() on PeakConcurrency/CriticalPath` is now partially unblocked**
-7. **Add README for `testdata/fuzz/` explaining what the corpus entries test**
-8. **Verify FEATURES.md "Coverage gate at 92%" matches actual CI config**
+1. ~~**Update FEATURES.md coverage gate from 92% → actual CI threshold**~~ done (docs-health pass 2026-10-05)
+2. ~~**Update TODO_LIST.md to mark completed items from prior session**~~ done (docs-health pass 2026-10-05)
+3. ~~**Add godoc example for `CriticalPath()` showing the returned step chain**~~ done — AGENTS refreshed across releases
+4. ~~**Add godoc example for `PeakConcurrencySteps()` showing the returned steps**~~ **Won't implement — declined.**
+5. ~~**Document the remaining 4.3% coverage gap (which lines, why unreachable)**~~ **Won't implement — declined.**
+6. ~~**Update ROADMAP.md — `Diff() on PeakConcurrency/CriticalPath` is now partially unblocked**~~ done (docs-health pass 2026-10-05)
+7. ~~**Add README for `testdata/fuzz/` explaining what the corpus entries test**~~ **Won't implement — declined — beyond shipped scope.**
+8. ~~**Verify FEATURES.md "Coverage gate at 92%" matches actual CI config**~~ **Won't implement — declined — beyond shipped scope.**
 
 ### Test quality
 
-9. **Split `coverage_report_test.go` (1014 lines) further** — extract `coverage_metrics_test.go` for peak/critical/wall-clock tests
-10. **Add property test: `Filtered(report, no options)` produces equivalent report**
-11. **Add `ReplayEvents` round-trip property/fuzz test** — round-trip preserves step count, event count, RunID
-12. **Add fuzz test for tree export sanitization** (currently only diagrams fuzzed)
-13. **Add fuzz test for table export sanitization**
-14. **Add `CriticalPath()` test from a replayed report** (verify works on reconstructed data)
-15. **Add `PeakConcurrencySteps()` test with retried steps** (verify ref-counting handles overlapping attempts)
-16. **Add `ExportTable` from loaded report test** (currently only from replayed)
-17. **Add test verifying `CriticalPath()` returns steps in root-to-leaf order** (not just correct names)
+9. ~~**Split `coverage_report_test.go` (1014 lines) further** — extract `coverage_metrics_test.go` for peak/critical/wall-clock tests~~ **Won't implement — declined — beyond shipped scope.**
+10. ~~**Add property test: `Filtered(report, no options)` produces equivalent report**~~ **Won't implement — declined — beyond shipped scope.**
+11. ~~**Add `ReplayEvents` round-trip property/fuzz test** — round-trip preserves step count, event count, RunID~~ done (docs-health pass 2026-10-05)
+12. ~~**Add fuzz test for tree export sanitization** (currently only diagrams fuzzed)~~ **Won't implement — declined — beyond shipped scope.**
+13. ~~**Add fuzz test for table export sanitization**~~ **Won't implement — declined — beyond shipped scope.**
+14. ~~**Add `CriticalPath()` test from a replayed report** (verify works on reconstructed data)~~ **Won't implement — declined — beyond shipped scope.**
+15. ~~**Add `PeakConcurrencySteps()` test with retried steps** (verify ref-counting handles overlapping attempts)~~ **Won't implement — declined — beyond shipped scope.**
+16. ~~**Add `ExportTable` from loaded report test** (currently only from replayed)~~ **Won't implement — declined — beyond shipped scope.**
+17. ~~**Add test verifying `CriticalPath()` returns steps in root-to-leaf order** (not just correct names)~~ **Won't implement — declined — beyond shipped scope.**
 
 ### Code quality
 
-18. **Cache peak concurrency step set during `finalizeDenormalized`** — avoid re-scanning events in `PeakConcurrencySteps()`
-19. **Use iterative topological sort for critical path** — eliminate the closure trick, simplify to under `funlen` naturally
-20. **Build name→index map in `CriticalPath()`** — avoid repeated `StepByName` linear scans
-21. **Add `WithEventsByType` variadic** — accept multiple types instead of single
-22. **Export `StepStatusFromFlow` helper** — for consumers who also convert go-workflow statuses
-23. **Add `WorkflowReport.FailureReasons() []FailureReason`** — structured typed categories, not just string
-24. **Consider pre-filter approach for table columns** — no upstream go-output change needed
-25. **Consider post-processing for diagram direction** — string-replace `TD` with `LR`
+18. ~~**Cache peak concurrency step set during `finalizeDenormalized`** — avoid re-scanning events in `PeakConcurrencySteps()`~~ **Won't implement — accepted risk — documented.**
+19. ~~**Use iterative topological sort for critical path** — eliminate the closure trick, simplify to under `funlen` naturally~~ **Won't implement — declined.**
+20. ~~**Build name→index map in `CriticalPath()`** — avoid repeated `StepByName` linear scans~~ done (docs-health pass 2026-10-05)
+21. ~~**Add `WithEventsByType` variadic** — accept multiple types instead of single~~ **Won't implement — declined.**
+22. ~~**Export `StepStatusFromFlow` helper** — for consumers who also convert go-workflow statuses~~ **Won't implement — declined.**
+23. ~~**Add `WorkflowReport.FailureReasons() []FailureReason`** — structured typed categories, not just string~~ done (docs-health pass 2026-10-05)
+24. ~~**Consider pre-filter approach for table columns** — no upstream go-output change needed~~ done (docs-health pass 2026-10-05)
+25. ~~**Consider post-processing for diagram direction** — string-replace `TD` with `LR`~~ done (docs-health pass 2026-10-05)
 
 ### Performance
 
-26. **Migrate `b.N` → `b.Loop()` in all 11 benchmarks** — gopls still warns
-27. **Benchmark `CriticalPath()` and `PeakConcurrencySteps()` on large reports** — no perf data yet
-28. **Profile `computeCriticalPath` on 1000-step diamond DAG** — the DFS memoization should be efficient but no data
+26. ~~**Migrate `b.N` → `b.Loop()` in all 11 benchmarks** — gopls still warns~~ **Won't implement — declined — beyond shipped scope.**
+27. ~~**Benchmark `CriticalPath()` and `PeakConcurrencySteps()` on large reports** — no perf data yet~~ **Won't implement — declined — beyond shipped scope.**
+28. ~~**Profile `computeCriticalPath` on 1000-step diamond DAG** — the DFS memoization should be efficient but no data~~ **Won't implement — declined — beyond shipped scope.**
 
 ### CI / Infrastructure
 
-29. **Run fuzz tests in CI** — currently only seed corpus runs
-30. **Pin golangci-lint version in flake.nix** — reproducibility
-31. **Add coverage trend tracking** — codecov or similar
-32. **Add pre-commit hook for golangci-lint** — currently only treefmt
-33. **Add `cover.out` to `.gitignore`** — prevent accidental commit
+29. ~~**Run fuzz tests in CI** — currently only seed corpus runs~~ **Won't implement — declined — beyond shipped scope.**
+30. ~~**Pin golangci-lint version in flake.nix** — reproducibility~~ **Won't implement — declined — beyond shipped scope.**
+31. ~~**Add coverage trend tracking** — codecov or similar~~ **Won't implement — declined — beyond shipped scope.**
+32. ~~**Add pre-commit hook for golangci-lint** — currently only treefmt~~ **Won't implement — declined — beyond shipped scope.**
+33. ~~**Add `cover.out` to `.gitignore`** — prevent accidental commit~~ **Won't implement — declined — beyond shipped scope.**
 
 ### Features (from ROADMAP)
 
-34. **CLI tool (`auditlog`) for inspecting/replaying/diffing reports**
-35. **`Diff()` on PeakConcurrency / CriticalPath** — compare bottleneck paths across runs
-36. **Configurable node shapes/icons per step type in diagrams**
-37. **Workflow-level retry/timeout surfacing in the report**
-38. **Module split: core (auditlog) + visualization (diagrams/tables)**
-39. **Streaming NDJSON export** — write events as captured, not buffered
-40. **OpenTelemetry span bridge**
-41. **Status report index page (`docs/status/INDEX.md`)**
+34. ~~**CLI tool (`auditlog`) for inspecting/replaying/diffing reports**~~ done (docs-health pass 2026-10-05)
+35. ~~**`Diff()` on PeakConcurrency / CriticalPath** — compare bottleneck paths across runs~~ done (docs-health pass 2026-10-05)
+36. ~~**Configurable node shapes/icons per step type in diagrams**~~ **Won't implement — declined.**
+37. ~~**Workflow-level retry/timeout surfacing in the report**~~ done (docs-health pass 2026-10-05)
+38. ~~**Module split: core (auditlog) + visualization (diagrams/tables)**~~ done (docs-health pass 2026-10-05)
+39. ~~**Streaming NDJSON export** — write events as captured, not buffered~~ done (docs-health pass 2026-10-05)
+40. **OpenTelemetry span bridge** **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
+41. ~~**Status report index page (`docs/status/INDEX.md`)**~~ **Won't implement — declined.**
 
 ### Polish
 
-42. **Add `// Output:` examples for `Summary()` and `NameCollisions()`**
-43. **Add godoc example for `Diff()` between two reports**
-44. **Add godoc example for `ReplayEvents()` round-trip**
-45. **Add godoc example for `LoadReport()` from file**
-46. **Add `ExampleWorkflowReport_WriteHTML` showing HTML export to a file**
-47. **Add `ExampleWorkflowReport_criticalPath` showing the step chain output**
-48. **Normalize all godoc example names to lowercase suffix** (or all capitalized — pick one)
-49. **Add `//nolint:gosmopolitan` with real unicode literals in fuzz seeds** — readability over escape sequences
-50. **Clean up `cover.out` from working directory**
+42. ~~**Add `// Output:` examples for `Summary()` and `NameCollisions()`**~~ **Won't implement — declined.**
+43. ~~**Add godoc example for `Diff()` between two reports**~~ **Won't implement — declined.**
+44. ~~**Add godoc example for `ReplayEvents()` round-trip**~~ **Won't implement — declined.**
+45. ~~**Add godoc example for `LoadReport()` from file**~~ **Won't implement — declined.**
+46. ~~**Add `ExampleWorkflowReport_WriteHTML` showing HTML export to a file**~~ **Won't implement — declined.**
+47. ~~**Add `ExampleWorkflowReport_criticalPath` showing the step chain output**~~ **Won't implement — declined.**
+48. ~~**Normalize all godoc example names to lowercase suffix** (or all capitalized — pick one)~~ **Won't implement — declined.**
+49. ~~**Add `//nolint:gosmopolitan` with real unicode literals in fuzz seeds** — readability over escape sequences~~ **Won't implement — declined.**
+50. ~~**Clean up `cover.out` from working directory**~~ **Won't implement — declined.**
 
 ---
 
