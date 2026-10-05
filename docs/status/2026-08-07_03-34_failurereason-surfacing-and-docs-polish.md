@@ -145,23 +145,23 @@ No regressions introduced. All 505 tests pass with race detector. Build and vet 
 
 ### Process improvements
 
-1. **Grep for all hardcoded indices before changing column counts.** When adding/removing a CSV or table column, grep for ALL hardcoded column index constants in tests, not just the one that fails first. This would have saved 2 round trips.
+1. ~~**Grep for all hardcoded indices before changing column counts.** When adding/removing a CSV or table column, grep for ALL hardcoded column index constants in tests, not just the one that fails first. This would have saved 2 round trips.~~ **NOT-DO — process lesson — no action item.**
 
-2. **Read testhelper signatures before writing tests.** The `NewFlaky`, `NewFail`, `AddRetryStep` signatures are stable and well-documented in AGENTS.md. I should have checked the helper table before guessing.
+2. ~~**Read testhelper signatures before writing tests.** The `NewFlaky`, `NewFail`, `AddRetryStep` signatures are stable and well-documented in AGENTS.md. I should have checked the helper table before guessing.~~ **NOT-DO — process lesson.**
 
-3. **The dashboard JS gap should have been called out earlier.** I built all the Go-side infrastructure for FailureReason visualization (metadata, table column, CSV) but didn't touch the JS. The plan had F27-F28 for this. I should have either done them or explicitly flagged them as deferred at the time, not left them for the status report to discover.
+3. ~~**The dashboard JS gap should have been called out earlier.** I built all the Go-side infrastructure for FailureReason visualization (metadata, table column, CSV) but didn't touch the JS. The plan had F27-F28 for this. I should have either done them or explicitly flagged them as deferred at the time, not left them for the status report to discover.~~ **NOT-DO — process lesson.**
 
-4. **Consider adding a lint check for column count consistency.** The CSV header, viz `AllTableColumns()`, README column count, and FEATURES.md column count are all manually synchronized. A test or lint rule that verifies they match would prevent drift.
+4. ~~**Consider adding a lint check for column count consistency.** The CSV header, viz `AllTableColumns()`, README column count, and FEATURES.md column count are all manually synchronized. A test or lint rule that verifies they match would prevent drift.~~ **Won't implement — docs-health passes are the standing gate.**
 
 ### Code improvements
 
-5. **`stepCore.failureReason` should arguably be in the `toStepInfo()` method.** Currently `toStepInfo()` copies `c.failureReason` to `StepInfo.FailureReason`. This is correct, but the field is populated in `recordAfterStep` (on `stepRecord`, which embeds `stepCore`). The flow works, but a reader has to trace through 3 files to understand it.
+5. ~~**`stepCore.failureReason` should arguably be in the `toStepInfo()` method.** Currently `toStepInfo()` copies `c.failureReason` to `StepInfo.FailureReason`. This is correct, but the field is populated in `recordAfterStep` (on `stepRecord`, which embeds `stepCore`). The flow works, but a reader has to trace through 3 files to understand it.~~ **NOT-DO — correct as-is — documented.**
 
-6. **`failureReasonMeta` duplicates color semantics.** The `Color()` method returns CSS variable references (`var(--warning)`), but the diagram exports in `types.go` use hex values (`#8b2d2d`). This is intentional (CSS vars for HTML, hex for diagram formats) but the two color systems are separate and could drift.
+6. ~~**`failureReasonMeta` duplicates color semantics.** The `Color()` method returns CSS variable references (`var(--warning)`), but the diagram exports in `types.go` use hex values (`#8b2d2d`). This is intentional (CSS vars for HTML, hex for diagram formats) but the two color systems are separate and could drift.~~ **NOT-DO — intentional — documented in AGENTS.**
 
-7. **`ColumnFailureReason` is NOT in `DefaultTableColumns`.** This is intentional (opt-in column), but consumers who want it have to explicitly pass `viz.WithColumns(..., viz.ColumnFailureReason)`. This is the right default, but worth documenting more prominently.
+7. ~~**`ColumnFailureReason` is NOT in `DefaultTableColumns`.** This is intentional (opt-in column), but consumers who want it have to explicitly pass `viz.WithColumns(..., viz.ColumnFailureReason)`. This is the right default, but worth documenting more prominently.~~ **Won't implement — documented in FEATURES column list.**
 
-8. **The replay fix (always overwrite attemptErr + failureReason) changes behavior.** Previously, a replayed step that failed on attempt 1 and succeeded on attempt 2 would retain the error from attempt 1 (a bug). Now it correctly reflects the final outcome. This is a behavior change that should be called out in the CHANGELOG (it IS called out in the Fixed section).
+8. ~~**The replay fix (always overwrite attemptErr + failureReason) changes behavior.** Previously, a replayed step that failed on attempt 1 and succeeded on attempt 2 would retain the error from attempt 1 (a bug). Now it correctly reflects the final outcome. This is a behavior change that should be called out in the CHANGELOG (it IS called out in the Fixed section).~~ done — CHANGELOG documents the behavior change
 
 ---
 
@@ -169,77 +169,77 @@ No regressions introduced. All 505 tests pass with race detector. Build and vet 
 
 ### Release (blocking — publish everything)
 
-1. **Cut v0.9.0 release** — read RELEASE.md, verify clean tree, grep for `^replace` in sub-module go.mod files, tag 3 modules, push tags, goreleaser or `gh release create`, verify pkg.go.dev
-2. **Verify `nix run .#check` passes standalone** after v0.9.0 is published (the core FailureSummary rename should resolve the viz standalone build failure)
+1. ~~**Cut v0.9.0 release** — read RELEASE.md, verify clean tree, grep for `^replace` in sub-module go.mod files, tag 3 modules, push tags, goreleaser or `gh release create`, verify pkg.go.dev~~ done — v0.9.0 released
+2. ~~**Verify `nix run .#check` passes standalone** after v0.9.0 is published (the core FailureSummary rename should resolve the viz standalone build failure)~~ done — nix check green post-release
 
 ### Dashboard JS (finish FailureReason visualization)
 
-3. **Add FailureReason column to dashboard steps table** in `dashboard.js` — read from step data, display label from `metadata.failure_reasons`
-4. **Add FailureReason badge/icon to graph nodes** — small colored indicator on failed nodes showing the reason
-5. **Add FailureReason to timeline tab** — color-code bars by failure reason
-6. **Add FailureReason filter to events tab** — filter by timeout/canceled/user_error
-7. **Add FailureReason to live dashboard** (`live/dashboard.js`) — same as static dashboard but for real-time view
+3. ~~**Add FailureReason column to dashboard steps table** in `dashboard.js` — read from step data, display label from `metadata.failure_reasons`~~ done — shipped v0.9.0
+4. ~~**Add FailureReason badge/icon to graph nodes** — small colored indicator on failed nodes showing the reason~~ **Won't implement — node badges limited to retry/cached — reason on row/tooltip.**
+5. ~~**Add FailureReason to timeline tab** — color-code bars by failure reason~~ **Won't implement — declined.**
+6. ~~**Add FailureReason filter to events tab** — filter by timeout/canceled/user_error~~ **Won't implement — search covers filtering.**
+7. ~~**Add FailureReason to live dashboard** (`live/dashboard.js`) — same as static dashboard but for real-time view~~ done — live reuses viz rendering + chips
 
 ### Testing
 
-8. **Add JS structural test for FailureReason rendering** — verify the steps table includes a failure reason cell when the data is present
-9. **Close remaining coverage gaps** — check if `classifyFailure` is now at 100% after the new tests (was 85.7%)
-10. **Add property test: StepInfo.FailureReason matches last attempt_end event's FailureReason** — 200 iterations with random failure scenarios
-11. **Add test: FailureReason in viz `TypeMetadata` JSON output** — verify `failure_reasons` key is present and has all 3 values
-12. **Add integration test: demo pipeline produces a step with FailureReasonTimeout** — run the demo and verify the slow-endpoint step
-13. **Add fuzz target: `FuzzClassifyFailure`** — fuzz the classifyFailure function with arbitrary error chains
+8. ~~**Add JS structural test for FailureReason rendering** — verify the steps table includes a failure reason cell when the data is present~~ done — structural tests shipped
+9. ~~**Close remaining coverage gaps** — check if `classifyFailure` is now at 100% after the new tests (was 85.7%)~~ done — classify coverage complete
+10. ~~**Add property test: StepInfo.FailureReason matches last attempt_end event's FailureReason** — 200 iterations with random failure scenarios~~ **Won't implement — unit tests cover.**
+11. ~~**Add test: FailureReason in viz `TypeMetadata` JSON output** — verify `failure_reasons` key is present and has all 3 values~~ done — FailureReasonMeta tests shipped
+12. ~~**Add integration test: demo pipeline produces a step with FailureReasonTimeout** — run the demo and verify the slow-endpoint step~~ done — demo SlowEndpointStep shipped
+13. ~~**Add fuzz target: `FuzzClassifyFailure`** — fuzz the classifyFailure function with arbitrary error chains~~ **Won't implement — FuzzClassify covers.**
 
 ### Features
 
-14. **Emit synthetic attempt_end events for dependency-failed steps** — steps skipped due to upstream failure currently bypass AfterStep; emit a synthetic event with the dependency failure reason
-15. **Add `EventsByFailureReason(reason)` query method** on WorkflowReport — filter events by structured reason
-16. **Add `FailureReason` to `StepDiff`** — show failure reason changes in diff output
-17. **Add `FilterByFailureReason` report option** — filter reports to only steps with a specific failure reason
-18. **CLI tool** (`cmd/auditlog`) — inspect, replay, diff subcommands for exported reports
-19. **OpenTelemetry span bridge** — map auditlog events to OTel spans
-20. **Iterator patterns** — `iter.Seq` for Events, CriticalPath, Filtered (Go 1.23+)
-21. **JSON Schema generation** — `schema.go` + `cmd/genschema` for machine-readable schema
-22. **`MigrateReport([]byte)`** — programmatic schema-version migration
+14. **Emit synthetic attempt_end events for dependency-failed steps** — steps skipped due to upstream failure currently bypass AfterStep; emit a synthetic event with the dependency failure reason **→ open — synthetic dependency-failed events (ROADMAP raw ideas)**
+15. ~~**Add `EventsByFailureReason(reason)` query method** on WorkflowReport — filter events by structured reason~~ **Won't implement — declined.**
+16. ~~**Add `FailureReason` to `StepDiff`** — show failure reason changes in diff output~~ **Won't implement — declined.**
+17. ~~**Add `FilterByFailureReason` report option** — filter reports to only steps with a specific failure reason~~ **Won't implement — declined.**
+18. ~~**CLI tool** (`cmd/auditlog`) — inspect, replay, diff subcommands for exported reports~~ done — CLI shipped v0.9.0
+19. **OpenTelemetry span bridge** — map auditlog events to OTel spans **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
+20. **Iterator patterns** — `iter.Seq` for Events, CriticalPath, Filtered (Go 1.23+) **→ open — iter.Seq patterns (ROADMAP raw ideas)**
+21. ~~**JSON Schema generation** — `schema.go` + `cmd/genschema` for machine-readable schema~~ done — JSON Schema shipped v0.9.0
+22. ~~**`MigrateReport([]byte)`** — programmatic schema-version migration~~ done — MigrateReport shipped v0.9.0
 
 ### Documentation
 
-23. **Website check** — verify `website/` directory content is current (F45, not done)
-24. **Normalize 22-27 historical report** annotation style (F44, not done)
-25. **Add FailureReason to docs/DOMAIN_LANGUAGE.md Value Objects table** — it's there as a Value Object but doesn't mention the StepInfo denormalization
-26. **Update ROADMAP.md** — move FailureReason surfacing from "raw ideas" to "shipped"
-27. **Add AGENTS.md entry for FailureReason denormalization** — document the stepCore.toStepInfo() flow
-28. **Document the `ColumnFailureReason` opt-in nature** in README table section
-29. **Add STABILITY.md entry for `FailureReason.Label()`/`Color()` display metadata** — actually this WAS done, verify it's complete
+23. **Website check** — verify `website/` directory content is current (F45, not done) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+24. ~~**Normalize 22-27 historical report** annotation style (F44, not done)~~ done — annotated 2026-10-05
+25. ~~**Add FailureReason to docs/DOMAIN_LANGUAGE.md Value Objects table** — it's there as a Value Object but doesn't mention the StepInfo denormalization~~ done — documented
+26. ~~**Update ROADMAP.md** — move FailureReason surfacing from "raw ideas" to "shipped"~~ done — ROADMAP updated
+27. ~~**Add AGENTS.md entry for FailureReason denormalization** — document the stepCore.toStepInfo() flow~~ done — AGENTS documents the flow
+28. ~~**Document the `ColumnFailureReason` opt-in nature** in README table section~~ **Won't implement — documented in FEATURES.**
+29. ~~**Add STABILITY.md entry for `FailureReason.Label()`/`Color()` display metadata** — actually this WAS done, verify it's complete~~ done — verified complete
 
 ### Infrastructure
 
-30. **Go 1.27 upgrade research** — when is json/v2 stable without GOEXPERIMENT? Does 1.27 change any test behavior?
-31. **Go 1.27 upgrade execution** — eliminate GOEXPERIMENT flag, eliminate 29 gopls warnings
-32. **Add `buildflow` to flake.nix devShell** — so the pre-commit hook runs fully in nix shells (currently it gracefully skips)
-33. **CI improvement: add `go test -race` to the GitHub Actions matrix** for all 3 modules
-34. **CI improvement: add coverage threshold check** — fail CI if coverage drops below 90%
-35. **Add `art-dupl` to CI** — run duplicate-code detection on every PR
-36. **Update `.goreleaser.yml`** — verify the demo binary builds with the new SlowEndpointStep
+30. ~~**Go 1.27 upgrade research** — when is json/v2 stable without GOEXPERIMENT? Does 1.27 change any test behavior?~~ done — Go 1.27 shipped; json/v2 GA
+31. ~~**Go 1.27 upgrade execution** — eliminate GOEXPERIMENT flag, eliminate 29 gopls warnings~~ done — flag removed 2026-10-05
+32. ~~**Add `buildflow` to flake.nix devShell** — so the pre-commit hook runs fully in nix shells (currently it gracefully skips)~~ **Won't implement — hook skips gracefully by design.**
+33. ~~**CI improvement: add `go test -race` to the GitHub Actions matrix** for all 3 modules~~ done — CI race matrix ships all 3 modules
+34. ~~**CI improvement: add coverage threshold check** — fail CI if coverage drops below 90%~~ done — coverage gate ≥94%
+35. ~~**Add `art-dupl` to CI** — run duplicate-code detection on every PR~~ **Won't implement — declined — manual policy.**
+36. ~~**Update `.goreleaser.yml`** — verify the demo binary builds with the new SlowEndpointStep~~ done — demo binary builds
 
 ### Polish
 
-37. **Add more godoc examples** — `Example_FailureReason` (standalone), `ExampleMultiWriter` (expand existing), `ExampleStreamEvents` (expand existing)
-38. **Add `BenchmarkBuildReport_WithFailureReason`** — measure overhead of the denormalization
-39. **Add `BenchmarkRenderHTML_WithFailureReasons`** — measure metadata JSON size impact
-40. **Update `viz/example` screenshots** — the demo now produces 7 steps (was 6); screenshots are stale
-41. **Add FailureReason to the demo's `printReportSummary`** — show count of timeouts/cancellations
-42. **Consider adding `FailureReasonCount()` method** — count steps by failure reason
-43. **Add FailureReason to the HTML dashboard's stats bar** — "2 timeouts, 1 canceled"
-44. **Review all test files for consistency** — ensure FailureReason tests follow the same patterns as existing tests
+37. ~~**Add more godoc examples** — `Example_FailureReason` (standalone), `ExampleMultiWriter` (expand existing), `ExampleStreamEvents` (expand existing)~~ done — godoc examples shipped
+38. ~~**Add `BenchmarkBuildReport_WithFailureReason`** — measure overhead of the denormalization~~ **Won't implement — declined.**
+39. ~~**Add `BenchmarkRenderHTML_WithFailureReasons`** — measure metadata JSON size impact~~ **Won't implement — declined.**
+40. ~~**Update `viz/example` screenshots** — the demo now produces 7 steps (was 6); screenshots are stale~~ done — screenshot pipeline refreshes
+41. ~~**Add FailureReason to the demo's `printReportSummary`** — show count of timeouts/cancellations~~ done — demo prints failure_reason
+42. ~~**Consider adding `FailureReasonCount()` method** — count steps by failure reason~~ **Won't implement — declined.**
+43. ~~**Add FailureReason to the HTML dashboard's stats bar** — "2 timeouts, 1 canceled"~~ **Won't implement — declined.**
+44. ~~**Review all test files for consistency** — ensure FailureReason tests follow the same patterns as existing tests~~ **Won't implement — declined.**
 
 ### Architecture
 
-45. **Review whether `stepCore` is the right place for `failureReason`** — or should it be a live-only field on `stepRecord`? Currently shared between live and replay, which is correct.
-46. **Consider extracting `FailureReasonMeta` to a shared location** — viz and core both need display metadata; currently core owns the Label/Color methods and viz wraps them
-47. **Review the `failureReasonMeta` color choices** — `var(--text-muted)` for Canceled is deliberately dim; should it be more prominent?
-48. **Consider adding `FailureReasonUnknown`** — for forward-compatibility when new reasons are added by a newer version and consumed by an older version
-49. **Review the `classifyFailure` priority order** — currently timeout > canceled > user_error; should canceled take priority over timeout? (A step that times out AND is canceled is ambiguous.)
-50. **Consider adding `FailureReason.IsRetryable()`** — convenience method: timeout and user_error are often retryable, canceled usually isn't
+45. ~~**Review whether `stepCore` is the right place for `failureReason`** — or should it be a live-only field on `stepRecord`? Currently shared between live and replay, which is correct.~~ **NOT-DO — resolved — shared stepCore placement is correct.**
+46. ~~**Consider extracting `FailureReasonMeta` to a shared location** — viz and core both need display metadata; currently core owns the Label/Color methods and viz wraps them~~ **Won't implement — declined — core owns metadata, viz wraps.**
+47. ~~**Review the `failureReasonMeta` color choices** — `var(--text-muted)` for Canceled is deliberately dim; should it be more prominent?~~ **Won't implement — declined.**
+48. ~~**Consider adding `FailureReasonUnknown`** — for forward-compatibility when new reasons are added by a newer version and consumed by an older version~~ **Won't implement — declined.**
+49. ~~**Review the `classifyFailure` priority order** — currently timeout > canceled > user_error; should canceled take priority over timeout? (A step that times out AND is canceled is ambiguous.)~~ **Won't implement — declined — priority documented.**
+50. ~~**Consider adding `FailureReason.IsRetryable()`** — convenience method: timeout and user_error are often retryable, canceled usually isn't~~ **Won't implement — declined.**
 
 ---
 

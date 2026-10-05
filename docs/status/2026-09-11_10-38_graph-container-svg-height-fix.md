@@ -36,23 +36,23 @@
 
 ## b) PARTIALLY DONE
 
-| Item                              | What works                                                                                                                       | What remains                                                                                                                                                                                         | Blocker             | Effort |
+| ~~Item~~ done — verified by the 2026-10-05 docs-health pass| ~~What works~~| ~~What remains~~| ~~Blocker~~| ~~Effort~~|
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------ |
-| Verification of the fix           | Go tests + vet + lint pass; CSS state grep-verified                                                                              | NO browser-level visual verification was performed. The reasoning is solid but unrendered. No screenshot of short/wide DAG, tall DAG, live demo placeholder->graph transition                        | none, just not done | S      |
-| Sibling-container bug-class audit | Verified `#graph-container` children are safe                                                                                    | Did NOT audit `#timeline-container` (`min-height: 300px` + flex) or `.graph-minimap` for the same percentage-height bug class. If the Gantt timeline renders an SVG, it likely has the identical bug | none                | S      |
-| AGENTS.md knowledge capture       | Session learned a non-obvious gotcha (daghtml inline `height:100%` + percentage resolution + live/viz CSS load-order dependency) | NOT yet written into AGENTS.md Gotchas section (violates the aggressive update protocol)                                                                                                             | none                | S      |
+| ~~Verification of the fix~~ Won't implement — manual demo runs accepted| ~~Go tests + vet + lint pass; CSS state grep-verified~~| ~~NO browser-level visual verification was performed. The reasoning is solid but unrendered. No screenshot of short/wide DAG, tall DAG, live demo placeholder->graph transition~~| ~~none, just not done~~| ~~S~~|
+| ~~Sibling-container bug-class audit~~ → open — TODO_LIST 2026-10-05 (percentage-height audit)| ~~Verified `#graph-container` children are safe~~| ~~Did NOT audit `#timeline-container` (`min-height: 300px` + flex) or `.graph-minimap` for the same percentage-height bug class. If the Gantt timeline renders an SVG, it likely has the identical bug~~| ~~none~~| ~~S~~|
+| ~~AGENTS.md knowledge capture~~ done — gotcha added to AGENTS (2026-10-05)| ~~Session learned a non-obvious gotcha (daghtml inline `height:100%` + percentage resolution + live/viz CSS load-order dependency)~~| ~~NOT yet written into AGENTS.md Gotchas section (violates the aggressive update protocol)~~| ~~none~~| ~~S~~|
 
 ---
 
 ## c) NOT STARTED
 
-| Item                                                                                                                              | Why not started                                                                 | Still wanted?        |
+| ~~Item~~ done — verified by the 2026-10-05 docs-health pass| ~~Why not started~~| ~~Still wanted?~~|
 | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------- |
-| Responsive graph canvas height option (e.g. `clamp(400px, 60vh, 700px)`)                                                          | Design decision only the user can make; fixed 500px was the conservative choice | Yes, needs Q1 answer |
-| CSS regression test (assert `DashboardCSS()` output has definite graph-container height, so a min-height regression fails a test) | CSS was previously untested; no precedent for asserting CSS content in Go tests | Yes                  |
-| Browser-based visual regression testing for both dashboards                                                                       | Larger tooling decision (Playwright etc.), out of scope for a one-line CSS fix  | Yes, roadmap         |
-| Fate of the exported dashboard HTML snapshot at repo root                                                                         | Discovered only at report time (see d2)                                         | Yes, needs Q2 answer |
-| Extend `TestReport_WriteHTML_GoldenContent` / live golden test to assert graph-container sizing survived embedding                | Nice-to-have hardening; not required for the fix                                | Medium               |
+| ~~Responsive graph canvas height option (e.g. `clamp(400px, 60vh, 700px)`)~~ → open — dashboard niceties (ROADMAP raw ideas)| ~~Design decision only the user can make; fixed 500px was the conservative choice~~| ~~Yes, needs Q1 answer~~|
+| ~~CSS regression test (assert `DashboardCSS()` output has definite graph-container height, so a min-height regression fails a test)~~ → open — TODO_LIST 2026-10-05| ~~CSS was previously untested; no precedent for asserting CSS content in Go tests~~| ~~Yes~~|
+| ~~Browser-based visual regression testing for both dashboards~~ → open — browser E2E behind //go:build tag (ROADMAP, deferred)| ~~Larger tooling decision (Playwright etc.), out of scope for a one-line CSS fix~~| ~~Yes, roadmap~~|
+| ~~Fate of the exported dashboard HTML snapshot at repo root~~ → open — TODO_LIST 2026-10-05 (untrack strays)| ~~Discovered only at report time (see d2)~~| ~~Yes, needs Q2 answer~~|
+| ~~Extend `TestReport_WriteHTML_GoldenContent` / live golden test to assert graph-container sizing survived embedding~~ Won't implement — declined| ~~Nice-to-have hardening; not required for the fix~~| ~~Medium~~|
 
 ---
 
@@ -86,11 +86,11 @@ Severity: low. I ran targeted checks (viz + live test/vet/lint). I did not run `
 
 ## e) WHAT WE SHOULD IMPROVE
 
-1. **Visual fixes need visual verification.** Go tests cannot catch layout bugs. A minimal habit change: after any dashboard CSS/JS change, run one of the demos and actually look. Better: automated screenshots (see f11). Impact: prevents silently shipping broken layout, which is exactly what happened historically with the 6-times-broken byte-for-byte golden test.
-2. **CSS is a ghost system.** Two dashboards, two CSS files, one loaded on top of the other with load-order semantics that live only in my head and one line of AGENTS.md ("reuses viz CSS"). The live duplicate rule I deleted is proof: nobody could tell from live/dashboard.css alone that sizing came from viz. Improvement: a short "CSS layering" section in AGENTS.md (viz CSS = base layer, live CSS = overlay, order is viz-then-live, never add sizing rules for viz-owned IDs in live) or eventually a shared CSS build step.
-3. **`min-height` on canvas-like containers is a footgun.** The bug class is "percentage-height child + auto-height parent". A grep for `min-height:` in dashboard CSS found 3 more instances (`#timeline-container`, `.graph-placeholder`, `.graph-minimap` region). Each deserves a 2-minute "does anything percentage-size against this?" check.
-4. **Generated dashboard snapshots should never land in the working tree root.** The auto-commit daemon cannot distinguish artifacts from work. Export commands should default to `t.TempDir()`-style locations or the repo needs a root-level `.gitignore` for `*.html` snapshots (excluding intended files).
-5. **Knowledge capture lag.** The gotcha from this session (percentage-height resolution + daghtml inline styles) will be re-discovered by the next agent that touches dashboard CSS unless it is in AGENTS.md within the same session. Rule exists, was not followed, cost: one report section instead of 5 lines in the right file.
+1. ~~**Visual fixes need visual verification.** Go tests cannot catch layout bugs. A minimal habit change: after any dashboard CSS/JS change, run one of the demos and actually look. Better: automated screenshots (see f11). Impact: prevents silently shipping broken layout, which is exactly what happened historically with the 6-times-broken byte-for-byte golden test.~~ **Won't implement — manual demo runs accepted.**
+2. ~~**CSS is a ghost system.** Two dashboards, two CSS files, one loaded on top of the other with load-order semantics that live only in my head and one line of AGENTS.md ("reuses viz CSS"). The live duplicate rule I deleted is proof: nobody could tell from live/dashboard.css alone that sizing came from viz. Improvement: a short "CSS layering" section in AGENTS.md (viz CSS = base layer, live CSS = overlay, order is viz-then-live, never add sizing rules for viz-owned IDs in live) or eventually a shared CSS build step.~~ done — CSS layering gotcha added 2026-10-05
+3. **`min-height` on canvas-like containers is a footgun.** The bug class is "percentage-height child + auto-height parent". A grep for `min-height:` in dashboard CSS found 3 more instances (`#timeline-container`, `.graph-placeholder`, `.graph-minimap` region). Each deserves a 2-minute "does anything percentage-size against this?" check. **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)**
+4. **Generated dashboard snapshots should never land in the working tree root.** The auto-commit daemon cannot distinguish artifacts from work. Export commands should default to `t.TempDir()`-style locations or the repo needs a root-level `.gitignore` for `*.html` snapshots (excluding intended files). **→ open — TODO_LIST 2026-10-05**
+5. ~~**Knowledge capture lag.** The gotcha from this session (percentage-height resolution + daghtml inline styles) will be re-discovered by the next agent that touches dashboard CSS unless it is in AGENTS.md within the same session. Rule exists, was not followed, cost: one report section instead of 5 lines in the right file.~~ done — this pass
 
 ---
 
@@ -100,56 +100,56 @@ Session-derived first, then known backlog noticed from project context. Impact /
 
 | #  | Task                                                                                                                                                        | Impact | Effort | Category      |
 | -- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ------------- |
-| 1  | Visually verify the fix: run `cd live && GOEXPERIMENT=jsonv2 go run ./demo`, check placeholder -> graph transition and node heights                         | High   | S      | Quality       |
-| 2  | Visually verify static dashboard: `go run ./viz/example` (or generated HTML), check short/wide and tall DAG letterboxing                                    | High   | S      | Quality       |
-| 3  | Add Go regression test asserting `viz.DashboardCSS()` contains definite `#graph-container` height (guards min-height regression)                            | High   | S      | Quality       |
-| 4  | Write the graph-container/daghtml percentage-height gotcha into AGENTS.md Gotchas                                                                           | High   | S      | Documentation |
-| 5  | Run full `nix run .#check` to confirm all-modules gate after the CSS change                                                                                 | High   | S      | Quality       |
-| 6  | Decide fate of tracked repo-root snapshot `workflow-audit-log-20260911-080328-e614c0a7.html` (gitignore + `git rm --cached` vs keep)                        | Medium | S      | Cleanup       |
-| 7  | Audit `#timeline-container` (`min-height: 300px` + flex) for the same percentage-height bug class (check whether Gantt renders an SVG)                      | Medium | S      | Bug           |
-| 8  | Review auto-commit 71b5f5c (`example_test.go`, CHANGELOG.md, FEATURES.md) to confirm the pre-session changes were intentional                               | Medium | S      | Cleanup       |
-| 9  | Audit `.graph-minimap` (fixed 160x120) for viewport-fit correctness on narrow screens                                                                       | Low    | S      | Quality       |
-| 10 | Verify graph `f` (fit) shortcut and zoom limits still behave correctly with the definite 500px box + letterboxing                                           | Medium | S      | Bug           |
-| 11 | Introduce browser-based visual regression tests (Playwright screenshot diff) for viz + live dashboards                                                      | High   | L      | Quality       |
-| 12 | Document live/viz CSS load-order dependency (viz CSS is the base layer) in AGENTS.md                                                                        | Medium | S      | Documentation |
-| 13 | Decide fixed 500px vs responsive graph canvas height (blocked on Q1)                                                                                        | Medium | S      | Feature       |
-| 14 | Consider exposing graph canvas height as a `live.Config` / viz option for embedders                                                                         | Low    | M      | Feature       |
-| 15 | Grep all `min-height` uses in dashboard CSS and confirm none has percentage-sized children (close the bug class)                                            | Medium | S      | Bug           |
-| 16 | Extend live dashboard golden/structural test to assert `#graph-container` sizing survives template assembly                                                 | Low    | S      | Quality       |
-| 17 | Document that DAGs letterbox (`xMidYMid meet`), never stretch, in viz docs/FEATURES.md                                                                      | Low    | S      | Documentation |
-| 18 | Consider `preserveAspectRatio` explicitness in daghtml (upstream go-output) instead of relying on the default                                               | Low    | S      | Cleanup       |
-| 19 | Add PRIVATE_REPO_PAT secret to CI so the erraudit job stops skipping (needs credential owner action)                                                        | High   | S      | Cleanup       |
-| 20 | Upstream fix: go-output v0.35.0+ still ships `replace => ./testhelpers` in published go.mod, forcing `go mod tidy -e` for viz/live                          | High   | L      | Bug           |
-| 21 | Pre-release check habit: `grep -r '^replace' viz/go.mod live/go.mod` before any release (RELEASE.md already documents)                                      | Medium | S      | Quality       |
-| 22 | Sweep exported-artifact hygiene: add `.gitignore` rule for root-level `workflow-audit-log-*.html` exports                                                   | Medium | S      | Cleanup       |
-| 23 | Consider extracting the 500px canvas height into a CSS custom property (`--graph-canvas-height`) so JS fit math and CSS stay in sync                        | Low    | S      | Quality       |
-| 24 | Check `dashboard.js` `fit` math for hardcoded 500 assumptions after the height change                                                                       | Medium | S      | Bug           |
-| 25 | Mobile/responsive audit of both dashboards (graph canvas 500px fixed on small viewports)                                                                    | Medium | M      | Quality       |
-| 26 | Light/dark theme support for the dashboards (CSS variables already exist; verify contrast of letterbox background)                                          | Low    | M      | Feature       |
-| 27 | Print styles for the static HTML export                                                                                                                     | Low    | S      | Feature       |
-| 28 | Verify the live demo's flaky-step retry path still animates correctly after height change (regression theater check)                                        | Low    | S      | Quality       |
-| 29 | Add a `docs/status/INDEX.md` entry for this report (existing convention)                                                                                    | Medium | S      | Documentation |
-| 30 | HARVEST this report: move f1-f10 into `TODO_LIST.md`, f11-f28 into `ROADMAP.md` per docs-health routing                                                     | High   | S      | Documentation |
-| 31 | Add CSS smoke assertions to CI (grep-level: definite height present, no `min-height` on canvas containers)                                                  | Medium | S      | Quality       |
-| 32 | Investigate whether daghtml SDK should accept an explicit height config instead of inline `100%` (upstream go-output issue candidate; verify before filing) | Low    | M      | Feature       |
-| 33 | Re-check the stale exported snapshot after fix: regenerate and diff to confirm the height rule now renders                                                  | Low    | S      | Quality       |
-| 34 | Consider a `verify-external-claims`-style check for vendored JS claims (daghtml version pinned in AGENTS.md vs go.mod v0.37.0 drift)                        | Low    | S      | Documentation |
-| 35 | Confirm AGENTS.md "go-output v0.35.0" pins are current (module cache shows daghtml v0.37.0 in use)                                                          | Medium | S      | Documentation |
-| 36 | Evaluate `height: 100dvh`-style options for the live dashboard full-screen mode                                                                             | Low    | S      | Feature       |
-| 37 | Add keyboard `f` fit-to-view behavioral test in the live JS test strategy (currently untested client-side behavior)                                         | Low    | M      | Quality       |
-| 38 | Document the SVG-in-container debugging technique (getBoundingClientRect vs viewBox) in docs for future contributors                                        | Low    | S      | Documentation |
-| 39 | Review `.graph-info` z-index/overlap with the minimap at 500px height (both absolute, bottom-anchored)                                                      | Low    | S      | Quality       |
-| 40 | Sweep the repo for other generated files committed by the daemon heuristic (root-level exports, cover.out, etc.)                                            | Medium | S      | Cleanup       |
-| 41 | Consider renaming "graph-container" IDs consistently across viz/live (they match today; keep it that way, add a test)                                       | Low    | S      | Quality       |
-| 42 | Verify the fix against a real wide DAG (fan-out 10+) and a deep chain (10+ ranks) fixture                                                                   | Medium | S      | Quality       |
-| 43 | Check the timeline tab placeholder ("Timeline will appear here...") centering after container sizing decisions                                              | Low    | S      | Quality       |
-| 44 | Decide whether `#timeline-container` should also become definite-height for consistency                                                                     | Low    | S      | Feature       |
-| 45 | Add release-notes entry for the CSS fix in the next release cycle (user-facing visual bug)                                                                  | Medium | S      | Documentation |
-| 46 | Consider vendoring or hashing dashboard JS/CSS so exported HTML snapshots can be validated as self-contained                                                | Low    | M      | Quality       |
-| 47 | Explore making the graph canvas height match the steps-table height in the live dashboard (visual alignment)                                                | Low    | M      | Feature       |
-| 48 | Audit `escape`/`overflow` interplay: 500px container + long step names in node labels (horizontal clip)                                                     | Low    | S      | Bug           |
-| 49 | Confirm no JS reads `getComputedStyle` height of graph-container at init (would now differ by exactly the min-height delta)                                 | Medium | S      | Bug           |
-| 50 | Schedule the next brutal self-review after items 1-5 land to close the verification gap honestly                                                            | Medium | S      | Quality       |
+| ~~1~~  | ~~Visually verify the fix: run `cd live && GOEXPERIMENT=jsonv2 go run ./demo`, check placeholder -> graph transition and node heights~~ **Won't implement — declined — manual demo runs.** | ~~High~~ | ~~S~~ | ~~Quality~~ |
+| ~~2~~  | ~~Visually verify static dashboard: `go run ./viz/example` (or generated HTML), check short/wide and tall DAG letterboxing~~ **Won't implement — declined — manual demo runs.** | ~~High~~ | ~~S~~ | ~~Quality~~ |
+| 3  | Add Go regression test asserting `viz.DashboardCSS()` contains definite `#graph-container` height (guards min-height regression) **→ open — TODO_LIST 2026-10-05** | High   | S      | Quality       |
+| ~~4~~  | ~~Write the graph-container/daghtml percentage-height gotcha into AGENTS.md Gotchas~~ done — gotcha added to AGENTS (2026-10-05) | ~~High~~ | ~~S~~ | ~~Documentation~~ |
+| ~~5~~  | ~~Run full `nix run .#check` to confirm all-modules gate after the CSS change~~ done — run green 2026-10-05 | ~~High~~ | ~~S~~ | ~~Quality~~ |
+| 6  | Decide fate of tracked repo-root snapshot `workflow-audit-log-20260911-080328-e614c0a7.html` (gitignore + `git rm --cached` vs keep) **→ open — TODO_LIST 2026-10-05** | Medium | S      | Cleanup       |
+| 7  | Audit `#timeline-container` (`min-height: 300px` + flex) for the same percentage-height bug class (check whether Gantt renders an SVG) **→ open — TODO_LIST 2026-10-05** | Medium | S      | Bug           |
+| ~~8~~  | ~~Review auto-commit 71b5f5c (`example_test.go`, CHANGELOG.md, FEATURES.md) to confirm the pre-session changes were intentional~~ **Won't implement — history accepted.** | ~~Medium~~ | ~~S~~ | ~~Cleanup~~ |
+| 9  | Audit `.graph-minimap` (fixed 160x120) for viewport-fit correctness on narrow screens **→ open — TODO_LIST 2026-10-05** | Low    | S      | Quality       |
+| ~~10~~ | ~~Verify graph `f` (fit) shortcut and zoom limits still behave correctly with the definite 500px box + letterboxing~~ **Won't implement — declined.** | ~~Medium~~ | ~~S~~ | ~~Bug~~ |
+| 11 | Introduce browser-based visual regression tests (Playwright screenshot diff) for viz + live dashboards **→ open — browser E2E behind //go:build tag (ROADMAP, deferred by design)** | High   | L      | Quality       |
+| ~~12~~ | ~~Document live/viz CSS load-order dependency (viz CSS is the base layer) in AGENTS.md~~ done — CSS layering documented 2026-10-05 | ~~Medium~~ | ~~S~~ | ~~Documentation~~ |
+| 13 | Decide fixed 500px vs responsive graph canvas height (blocked on Q1) **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Medium | S      | Feature       |
+| ~~14~~ | ~~Consider exposing graph canvas height as a `live.Config` / viz option for embedders~~ **Won't implement — declined.** | ~~Low~~ | ~~M~~ | ~~Feature~~ |
+| 15 | Grep all `min-height` uses in dashboard CSS and confirm none has percentage-sized children (close the bug class) **→ open — TODO_LIST 2026-10-05** | Medium | S      | Bug           |
+| ~~16~~ | ~~Extend live dashboard golden/structural test to assert `#graph-container` sizing survives template assembly~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| ~~17~~ | ~~Document that DAGs letterbox (`xMidYMid meet`), never stretch, in viz docs/FEATURES.md~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Documentation~~ |
+| ~~18~~ | ~~Consider `preserveAspectRatio` explicitness in daghtml (upstream go-output) instead of relying on the default~~ **Won't implement — upstream — declined to file.** | ~~Low~~ | ~~S~~ | ~~Cleanup~~ |
+| 19 | Add PRIVATE_REPO_PAT secret to CI so the erraudit job stops skipping (needs credential owner action) **→ open — TODO_LIST 2026-10-05** | High   | S      | Cleanup       |
+| ~~20~~ | ~~Upstream fix: go-output v0.35.0+ still ships `replace => ./testhelpers` in published go.mod, forcing `go mod tidy -e` for viz/live~~ **Won't implement — upstream go-output defect documented; tidy -e workaround in CI.** | ~~High~~ | ~~L~~ | ~~Bug~~ |
+| ~~21~~ | ~~Pre-release check habit: `grep -r '^replace' viz/go.mod live/go.mod` before any release (RELEASE.md already documents)~~ done — RELEASE.md documents the grep | ~~Medium~~ | ~~S~~ | ~~Quality~~ |
+| ~~22~~ | ~~Sweep exported-artifact hygiene: add `.gitignore` rule for root-level `workflow-audit-log-*.html` exports~~ done — pattern exists; untracking = TODO_LIST 2026-10-05 | ~~Medium~~ | ~~S~~ | ~~Cleanup~~ |
+| ~~23~~ | ~~Consider extracting the 500px canvas height into a CSS custom property (`--graph-canvas-height`) so JS fit math and CSS stay in sync~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| ~~24~~ | ~~Check `dashboard.js` `fit` math for hardcoded 500 assumptions after the height change~~ **Won't implement — fit math uses container box — fine.** | ~~Medium~~ | ~~S~~ | ~~Bug~~ |
+| 25 | Mobile/responsive audit of both dashboards (graph canvas 500px fixed on small viewports) **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Medium | M      | Quality       |
+| 26 | Light/dark theme support for the dashboards (CSS variables already exist; verify contrast of letterbox background) **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Low    | M      | Feature       |
+| 27 | Print styles for the static HTML export **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Low    | S      | Feature       |
+| ~~28~~ | ~~Verify the live demo's flaky-step retry path still animates correctly after height change (regression theater check)~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| ~~29~~ | ~~Add a `docs/status/INDEX.md` entry for this report (existing convention)~~ done — INDEX rebuilt 2026-10-05 | ~~Medium~~ | ~~S~~ | ~~Documentation~~ |
+| ~~30~~ | ~~HARVEST this report: move f1-f10 into `TODO_LIST.md`, f11-f28 into `ROADMAP.md` per docs-health routing~~ done — routed — this pass | ~~High~~ | ~~S~~ | ~~Documentation~~ |
+| ~~31~~ | ~~Add CSS smoke assertions to CI (grep-level: definite height present, no `min-height` on canvas containers)~~ **Won't implement — declined.** | ~~Medium~~ | ~~S~~ | ~~Quality~~ |
+| ~~32~~ | ~~Investigate whether daghtml SDK should accept an explicit height config instead of inline `100%` (upstream go-output issue candidate; verify before filing)~~ **Won't implement — upstream — declined to file.** | ~~Low~~ | ~~M~~ | ~~Feature~~ |
+| ~~33~~ | ~~Re-check the stale exported snapshot after fix: regenerate and diff to confirm the height rule now renders~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| ~~34~~ | ~~Consider a `verify-external-claims`-style check for vendored JS claims (daghtml version pinned in AGENTS.md vs go.mod v0.37.0 drift)~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Documentation~~ |
+| ~~35~~ | ~~Confirm AGENTS.md "go-output v0.35.0" pins are current (module cache shows daghtml v0.37.0 in use)~~ done — AGENTS pins refreshed 2026-10-05 (v0.38.3) | ~~Medium~~ | ~~S~~ | ~~Documentation~~ |
+| 36 | Evaluate `height: 100dvh`-style options for the live dashboard full-screen mode **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Low    | S      | Feature       |
+| ~~37~~ | ~~Add keyboard `f` fit-to-view behavioral test in the live JS test strategy (currently untested client-side behavior)~~ **Won't implement — declined.** | ~~Low~~ | ~~M~~ | ~~Quality~~ |
+| ~~38~~ | ~~Document the SVG-in-container debugging technique (getBoundingClientRect vs viewBox) in docs for future contributors~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Documentation~~ |
+| ~~39~~ | ~~Review `.graph-info` z-index/overlap with the minimap at 500px height (both absolute, bottom-anchored)~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| 40 | Sweep the repo for other generated files committed by the daemon heuristic (root-level exports, cover.out, etc.) **→ open — TODO_LIST 2026-10-05** | Medium | S      | Cleanup       |
+| ~~41~~ | ~~Consider renaming "graph-container" IDs consistently across viz/live (they match today; keep it that way, add a test)~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| ~~42~~ | ~~Verify the fix against a real wide DAG (fan-out 10+) and a deep chain (10+ ranks) fixture~~ **Won't implement — declined.** | ~~Medium~~ | ~~S~~ | ~~Quality~~ |
+| ~~43~~ | ~~Check the timeline tab placeholder ("Timeline will appear here...") centering after container sizing decisions~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| 44 | Decide whether `#timeline-container` should also become definite-height for consistency **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Low    | S      | Feature       |
+| ~~45~~ | ~~Add release-notes entry for the CSS fix in the next release cycle (user-facing visual bug)~~ **Won't implement — minor visual fix — folded into v0.11.0.** | ~~Medium~~ | ~~S~~ | ~~Documentation~~ |
+| ~~46~~ | ~~Consider vendoring or hashing dashboard JS/CSS so exported HTML snapshots can be validated as self-contained~~ **Won't implement — declined.** | ~~Low~~ | ~~M~~ | ~~Quality~~ |
+| 47 | Explore making the graph canvas height match the steps-table height in the live dashboard (visual alignment) **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Low    | M      | Feature       |
+| ~~48~~ | ~~Audit `escape`/`overflow` interplay: 500px container + long step names in node labels (horizontal clip)~~ **Won't implement — declined.** | ~~Low~~ | ~~S~~ | ~~Bug~~ |
+| ~~49~~ | ~~Confirm no JS reads `getComputedStyle` height of graph-container at init (would now differ by exactly the min-height delta)~~ **Won't implement — declined.** | ~~Medium~~ | ~~S~~ | ~~Bug~~ |
+| ~~50~~ | ~~Schedule the next brutal self-review after items 1-5 land to close the verification gap honestly~~ **Won't implement — declined.** | ~~Medium~~ | ~~S~~ | ~~Quality~~ |
 
 ---
 

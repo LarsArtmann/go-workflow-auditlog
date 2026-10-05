@@ -144,16 +144,16 @@ Original report: `TestDiff_CriticalPathDelta` and `TestDiff_PeakConcurrencyDelta
 
 ## e) WHAT WE SHOULD IMPROVE
 
-1. **Fix MultiWriter type mismatch** — the #1 priority. The feature is unusable as designed.
-2. **Wire `FailureReasonDependency` into the recorder** — detect when `flow.StateOf(step)` returns Failed/Canceled but the step's own error is nil (meaning the failure propagated from upstream).
-3. **Add panic detection** — wrap the `AfterStep` callback's error recovery to set `FailureReasonPanic` when `recover()` fires.
-4. **Add SSE provider-error test** — replace the deleted WS provider-error test with an SSE equivalent.
-5. **Make Diff timing-independent** — construct synthetic `WorkflowReport` values with hardcoded durations instead of running real workflows.
-6. **Add fuzz tests** for `StreamEvents` (parallel to `FuzzReadEvents`).
-7. **Add benchmarks** for `StreamEvents`, `MultiWriter`, `WithFlushInterval`.
-8. **Update all living docs** (CHANGELOG, FEATURES, AGENTS, ROADMAP, TODO_LIST) to reflect Phase C/D features.
-9. **Commit Phase C/D work** — currently uncommitted (may be partially caught by auto-commit daemon).
-10. **Run `nix run .#check`** for the final end-to-end gate.
+1. ~~**Fix MultiWriter type mismatch** — the #1 priority. The feature is unusable as designed.~~ done (docs-health pass 2026-10-05)
+2. ~~**Wire `FailureReasonDependency` into the recorder** — detect when `flow.StateOf(step)` returns Failed/Canceled but the step's own error is nil (meaning the failure propagated from upstream).~~ done (docs-health pass 2026-10-05)
+3. ~~**Add panic detection** — wrap the `AfterStep` callback's error recovery to set `FailureReasonPanic` when `recover()` fires.~~ done (docs-health pass 2026-10-05)
+4. ~~**Add SSE provider-error test** — replace the deleted WS provider-error test with an SSE equivalent.~~ done (docs-health pass 2026-10-05)
+5. ~~**Make Diff timing-independent** — construct synthetic `WorkflowReport` values with hardcoded durations instead of running real workflows.~~ done (docs-health pass 2026-10-05)
+6. ~~**Add fuzz tests** for `StreamEvents` (parallel to `FuzzReadEvents`).~~ done (docs-health pass 2026-10-05)
+7. ~~**Add benchmarks** for `StreamEvents`, `MultiWriter`, `WithFlushInterval`.~~ done (docs-health pass 2026-10-05)
+8. ~~**Update all living docs** (CHANGELOG, FEATURES, AGENTS, ROADMAP, TODO_LIST) to reflect Phase C/D features.~~ done (docs-health pass 2026-10-05)
+9. ~~**Commit Phase C/D work** — currently uncommitted (may be partially caught by auto-commit daemon).~~ done (docs-health pass 2026-10-05)
+10. ~~**Run `nix run .#check`** for the final end-to-end gate.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -161,74 +161,74 @@ Original report: `TestDiff_CriticalPathDelta` and `TestDiff_PeakConcurrencyDelta
 
 ### Immediate (fix the fuck-ups)
 
-1. Fix `MultiWriter.OnEvent` signature to match `func(Event)` (or add adapter)
-2. Wire `FailureReasonDependency` into recorder for cascading failures
-3. Add panic detection for `FailureReasonPanic` in recorder's AfterStep
-4. Add SSE provider-error test to replace deleted WS test
-5. Make Diff aggregate tests timing-independent (synthetic reports)
+1. ~~Fix `MultiWriter.OnEvent` signature to match `func(Event)` (or add adapter)~~ done (docs-health pass 2026-10-05)
+2. ~~Wire `FailureReasonDependency` into recorder for cascading failures~~ done (docs-health pass 2026-10-05)
+3. ~~Add panic detection for `FailureReasonPanic` in recorder's AfterStep~~ done (docs-health pass 2026-10-05)
+4. ~~Add SSE provider-error test to replace deleted WS test~~ done (docs-health pass 2026-10-05)
+5. ~~Make Diff aggregate tests timing-independent (synthetic reports)~~ done (docs-health pass 2026-10-05)
 
 ### Documentation
 
-6. Update CHANGELOG.md [Unreleased] with all Phase C/D features
-7. Update FEATURES.md with new features
-8. Update AGENTS.md with new source files and helpers
-9. Update ROADMAP.md — remove completed raw ideas
-10. Update TODO_LIST.md
-11. Update docs/DOMAIN_LANGUAGE.md with FailureReason, StreamEvents, MultiWriter
-12. Update website API reference (api-reference.mdx)
-13. Update website guides (event-stream.mdx, streaming.mdx)
-14. Add godoc examples for MultiWriter, StreamEvents, WithFlushInterval
-15. Add godoc example for FailureReason filtering
+6. ~~Update CHANGELOG.md [Unreleased] with all Phase C/D features~~ done (docs-health pass 2026-10-05)
+7. ~~Update FEATURES.md with new features~~ done (docs-health pass 2026-10-05)
+8. ~~Update AGENTS.md with new source files and helpers~~ done (docs-health pass 2026-10-05)
+9. ~~Update ROADMAP.md — remove completed raw ideas~~ done (docs-health pass 2026-10-05)
+10. ~~Update TODO_LIST.md~~ done (docs-health pass 2026-10-05)
+11. ~~Update docs/DOMAIN_LANGUAGE.md with FailureReason, StreamEvents, MultiWriter~~ done (docs-health pass 2026-10-05)
+12. Update website API reference (api-reference.mdx) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+13. Update website guides (event-stream.mdx, streaming.mdx) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+14. ~~Add godoc examples for MultiWriter, StreamEvents, WithFlushInterval~~ done (docs-health pass 2026-10-05)
+15. ~~Add godoc example for FailureReason filtering~~ done (docs-health pass 2026-10-05)
 
 ### Testing
 
-16. Add `FuzzStreamEvents` fuzz test
-17. Add `BenchmarkStreamEvents_{100,1000,10000}Events`
-18. Add `BenchmarkMultiWriter_{3,10,50}Callbacks`
-19. Add `BenchmarkWithFlushInterval` vs `WithAutoFlush`
-20. Add property test: Diff round-trip (Diff(A,B) then Diff(B,A) is antisymmetric for new fields)
-21. Add test: MultiWriter wired as Config.OnEvent (once type fixed)
-22. Add test: FailureReasonDependency populated for cascading failure
-23. Add test: FailureReasonPanic populated for recovered panic
-24. Re-run viz module tests after core FailureReason addition
-25. Re-run live module tests after core FailureReason addition
+16. ~~Add `FuzzStreamEvents` fuzz test~~ done (docs-health pass 2026-10-05)
+17. ~~Add `BenchmarkStreamEvents_{100,1000,10000}Events`~~ done (docs-health pass 2026-10-05)
+18. ~~Add `BenchmarkMultiWriter_{3,10,50}Callbacks`~~ done (docs-health pass 2026-10-05)
+19. ~~Add `BenchmarkWithFlushInterval` vs `WithAutoFlush`~~ done (docs-health pass 2026-10-05)
+20. ~~Add property test: Diff round-trip (Diff(A,B) then Diff(B,A) is antisymmetric for new fields)~~ done (docs-health pass 2026-10-05)
+21. ~~Add test: MultiWriter wired as Config.OnEvent (once type fixed)~~ done (docs-health pass 2026-10-05)
+22. ~~Add test: FailureReasonDependency populated for cascading failure~~ done (docs-health pass 2026-10-05)
+23. ~~Add test: FailureReasonPanic populated for recovered panic~~ done (docs-health pass 2026-10-05)
+24. ~~Re-run viz module tests after core FailureReason addition~~ done (docs-health pass 2026-10-05)
+25. ~~Re-run live module tests after core FailureReason addition~~ done (docs-health pass 2026-10-05)
 
 ### Lint / CI
 
-26. Re-run `golangci-lint run ./...` for viz module
-27. Re-run `golangci-lint run ./...` for live module
-28. Run `nix run .#check` end-to-end
-29. Investigate art-dupl `-t 3` findings (2 trivial groups)
-30. Install dprint to fix pre-commit hook
+26. ~~Re-run `golangci-lint run ./...` for viz module~~ done (docs-health pass 2026-10-05)
+27. ~~Re-run `golangci-lint run ./...` for live module~~ done (docs-health pass 2026-10-05)
+28. ~~Run `nix run .#check` end-to-end~~ done (docs-health pass 2026-10-05)
+29. ~~Investigate art-dupl `-t 3` findings (2 trivial groups)~~ done (docs-health pass 2026-10-05)
+30. ~~Install dprint to fix pre-commit hook~~ done (docs-health pass 2026-10-05)
 
 ### Features (ROADMAP items now actionable)
 
-31. `WithFlushInterval` integration test with real NDJSONStreamer + workflow
-32. `StreamEvents` integration test: stream large NDJSON file without OOM
-33. `MultiWriter` integration test: fan to NDJSON file + live hub simultaneously
-34. FailureReason surfacing in viz dashboard (display in steps table)
-35. FailureReason surfacing in CSV export
-36. Diff result JSON serialization test for new fields
-37. Add `FailureReason` to `StepInfo` (currently only on `Event`)
-38. Consider `FailureReasonLabel()` display method (like `StepStatus.Label()`)
-39. Add `EventsByFailureReason(reason)` query method on WorkflowReport
-40. Add `Filtered(WithEventsByFailureReason(reason))` filter option
+31. ~~`WithFlushInterval` integration test with real NDJSONStreamer + workflow~~ done (docs-health pass 2026-10-05)
+32. ~~`StreamEvents` integration test: stream large NDJSON file without OOM~~ done (docs-health pass 2026-10-05)
+33. ~~`MultiWriter` integration test: fan to NDJSON file + live hub simultaneously~~ **Won't implement — declined — coverage adequate.**
+34. ~~FailureReason surfacing in viz dashboard (display in steps table)~~ done (docs-health pass 2026-10-05)
+35. ~~FailureReason surfacing in CSV export~~ done (docs-health pass 2026-10-05)
+36. ~~Diff result JSON serialization test for new fields~~ done (docs-health pass 2026-10-05)
+37. ~~Add `FailureReason` to `StepInfo` (currently only on `Event`)~~ done (docs-health pass 2026-10-05)
+38. ~~Consider `FailureReasonLabel()` display method (like `StepStatus.Label()`)~~ done (docs-health pass 2026-10-05)
+39. ~~Add `EventsByFailureReason(reason)` query method on WorkflowReport~~ done (docs-health pass 2026-10-05)
+40. ~~Add `Filtered(WithEventsByFailureReason(reason))` filter option~~ done (docs-health pass 2026-10-05)
 
 ### Architecture
 
-41. Consider `Transport` interface for SSE extensibility (now that WS is gone)
-42. Consider gzip middleware for dashboard HTML (not SSE)
-43. Consider `GracefulDrain` documentation in MIGRATION.md
-44. Consider `ClientSideReplay` using the existing replay buffer
-45. Consider OTel span bridge (deferred but features like FailureReason make it more valuable)
+41. ~~Consider `Transport` interface for SSE extensibility (now that WS is gone)~~ done (docs-health pass 2026-10-05)
+42. ~~Consider gzip middleware for dashboard HTML (not SSE)~~ done (docs-health pass 2026-10-05)
+43. ~~Consider `GracefulDrain` documentation in MIGRATION.md~~ done (docs-health pass 2026-10-05)
+44. ~~Consider `ClientSideReplay` using the existing replay buffer~~ done (docs-health pass 2026-10-05)
+45. Consider OTel span bridge (deferred but features like FailureReason make it more valuable) **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
 
 ### Cleanup
 
-46. Remove the `_ = errors.Is` hack leftover (already done)
-47. Review all new code for naming quality (naming-review skill)
-48. Run `go mod tidy -e` on viz + live to ensure clean deps
-49. Verify `GOEXPERIMENT=jsonv2` consistency across all new code
-50. Final `git log --oneline` review to ensure clean commit history
+46. ~~Remove the `_ = errors.Is` hack leftover (already done)~~ done (docs-health pass 2026-10-05)
+47. ~~Review all new code for naming quality (naming-review skill)~~ done (docs-health pass 2026-10-05)
+48. ~~Run `go mod tidy -e` on viz + live to ensure clean deps~~ done (docs-health pass 2026-10-05)
+49. ~~Verify `GOEXPERIMENT=jsonv2` consistency across all new code~~ done (docs-health pass 2026-10-05)
+50. ~~Final `git log --oneline` review to ensure clean commit history~~ done (docs-health pass 2026-10-05)
 
 ---
 

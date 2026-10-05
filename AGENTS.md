@@ -22,6 +22,7 @@ Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that re
 | `cd live && go test ./...`                                                         | Run live tests                                                                                                |
 | `cd live && go vet ./...`                                                          | Live static analysis                                                                                          |
 | `cd live && golangci-lint run ./...`                                               | Lint live                                                                                                     |
+| `erraudit ./...` (and in `viz/`, `live/`)                                           | Error-path audit — ZERO violations at default flags (policy in Gotchas)                                        |
 | `cd live && go run ./demo`                                                         | Run live dashboard demo (http://localhost:18080)                                                              |
 | `go run ./viz/example`                                                             | Run the demo pipeline                                                                                         |
 | `nix run .#check`                                                                  | Run all checks (vet + test-race + lint + govulncheck for core, viz & live — all three modules fully covered) |

@@ -232,27 +232,27 @@ The pre-commit hook actually runs `buildflow --build-mode pre-commit` (I verifie
 
 ### Process
 
-1. **I should have read AGENTS.md before starting** — I discovered AGENTS.md drift (stale versions, test counts) only during the cross-file consistency check at the end. If I had read it first, I could have batched all AGENTS.md fixes with the initial analysis instead of doing a bonus round.
+1. ~~**I should have read AGENTS.md before starting** — I discovered AGENTS.md drift (stale versions, test counts) only during the cross-file consistency check at the end. If I had read it first, I could have batched all AGENTS.md fixes with the initial analysis instead of doing a bonus round.~~ done (docs-health pass 2026-10-05 — this pass)
 
-2. **The HARVEST should have been more aggressive on "Up to 50 Things" lists** — The status reports each have 50-item "next things" lists. I extracted ~14 actionable items but left many valid items behind (benchmarks, fuzz tests, feature ideas). These are mostly ROADMAP-level items, but some (like "add property test for HasChanges/IsEmpty duality") are concrete and actionable. I could have been more thorough.
+2. ~~**The HARVEST should have been more aggressive on "Up to 50 Things" lists** — The status reports each have 50-item "next things" lists. I extracted ~14 actionable items but left many valid items behind (benchmarks, fuzz tests, feature ideas). These are mostly ROADMAP-level items, but some (like "add property test for HasChanges/IsEmpty duality") are concrete and actionable. I could have been more thorough.~~ done (docs-health pass 2026-10-05 — this pass harvested the full lists)
 
-3. **I didn't use the doc-ownership matrix proactively** — The docs-health skill has a reference file (`references/doc-ownership.md`) that I didn't load. I inferred the ownership rules from the SKILL.md table. This worked, but loading the full reference would have been more rigorous.
+3. ~~**I didn't use the doc-ownership matrix proactively** — The docs-health skill has a reference file (`references/doc-ownership.md`) that I didn't load. I inferred the ownership rules from the SKILL.md table. This worked, but loading the full reference would have been more rigorous.~~ done (docs-health pass 2026-10-05 — this pass)
 
 4. **Annotation style inconsistency** — The 22-27 report got "Original report:" prefixes on struck items. The 23-23 report got clean strikethrough + "FIXED at" annotations. The 20-14 report got "~~question~~" with bold resolution notes. Three different annotation styles across three reports. The skill's `references/resolving-items.md` has a canonical format I should have loaded and followed consistently.
 
 ### Documentation quality
 
-5. **FEATURES.md test count line still says "all passing with `-race`"** — I didn't re-run tests this session, so this claim is inherited from prior sessions. It's almost certainly still true (no code changed), but I'm making a claim I didn't verify this session.
+5. ~~**FEATURES.md test count line still says "all passing with `-race`"** — I didn't re-run tests this session, so this claim is inherited from prior sessions. It's almost certainly still true (no code changed), but I'm making a claim I didn't verify this session.~~ done (docs-health pass 2026-10-05 — this pass)
 
-6. **ROADMAP.md "Streaming NDJSON Export" code example may be stale** — Shows `NewNDJSONStreamer` API but I didn't verify the signature matches the current code. The API may have changed (e.g., `WithFlushInterval` was added).
+6. ~~**ROADMAP.md "Streaming NDJSON Export" code example may be stale** — Shows `NewNDJSONStreamer` API but I didn't verify the signature matches the current code. The API may have changed (e.g., `WithFlushInterval` was added).~~ done (docs-health pass 2026-10-05 — this pass)
 
-7. **CHANGELOG.md [Unreleased] section is very long** — It now covers features from 4+ sessions (SSE replay, WebSocket removal, streaming features, FailureReason, keyboard nav, FailureSummary rename). It should probably be split into versioned sections when v0.9.0 is cut. Not a bug, but it's getting unwieldy.
+7. ~~**CHANGELOG.md [Unreleased] section is very long** — It now covers features from 4+ sessions (SSE replay, WebSocket removal, streaming features, FailureReason, keyboard nav, FailureSummary rename). It should probably be split into versioned sections when v0.9.0 is cut. Not a bug, but it's getting unwieldy.~~ done (docs-health pass 2026-10-05 — this pass)
 
 ### Missing checks
 
-8. **No markdown linting** — I didn't run any markdown linter (markdownlint, prettier, etc.). The project has treefmt configured but I didn't check if it covers markdown.
+8. ~~**No markdown linting** — I didn't run any markdown linter (markdownlint, prettier, etc.). The project has treefmt configured but I didn't check if it covers markdown.~~ done (docs-health pass 2026-10-05 — this pass)
 
-9. **Didn't verify FEATURES.md "example" references** — The FEATURES.md mentions `viz/example/` and `live/demo/` — I fixed the path but didn't verify the demo content matches the description.
+9. ~~**Didn't verify FEATURES.md "example" references** — The FEATURES.md mentions `viz/example/` and `live/demo/` — I fixed the path but didn't verify the demo content matches the description.~~ done (docs-health pass 2026-10-05 — this pass)
 
 ---
 
@@ -260,74 +260,74 @@ The pre-commit hook actually runs `buildflow --build-mode pre-commit` (I verifie
 
 ### Immediate (fix what I fucked up or left incomplete)
 
-1. **Update AGENTS.md Concurrency Model** — mention `BroadcastEvent{ID, Data}`, `atomic.Uint64 eventSeq`, ring buffer, drain lifecycle
-2. **Verify DOMAIN_LANGUAGE.md freshness** — check if 23-56 session actually updated it; fix if stale
-3. **Fix annotation style in 22-27 report** — normalize "Original report:" fragments to clean strikethrough format
-4. **Resolve pre-commit hook "dprint" vs "buildflow" discrepancy** — check git history of `.git/hooks/pre-commit`
-5. **Verify ROADMAP.md streaming code example** — check `NewNDJSONStreamer` signature matches current code
+1. ~~**Update AGENTS.md Concurrency Model** — mention `BroadcastEvent{ID, Data}`, `atomic.Uint64 eventSeq`, ring buffer, drain lifecycle~~ done (docs-health pass 2026-10-05)
+2. ~~**Verify DOMAIN_LANGUAGE.md freshness** — check if 23-56 session actually updated it; fix if stale~~ done (docs-health pass 2026-10-05)
+3. ~~**Fix annotation style in 22-27 report** — normalize "Original report:" fragments to clean strikethrough format~~ done (docs-health pass 2026-10-05)
+4. ~~**Resolve pre-commit hook "dprint" vs "buildflow" discrepancy** — check git history of `.git/hooks/pre-commit`~~ done (docs-health pass 2026-10-05)
+5. ~~**Verify ROADMAP.md streaming code example** — check `NewNDJSONStreamer` signature matches current code~~ done (docs-health pass 2026-10-05)
 
 ### Release (blocking)
 
-6. **Cut v0.9.0** — coordinated three-module release; read RELEASE.md first; verify clean working tree + no replace directives
-7. **Pre-release: `grep -r '^replace' viz/go.mod live/go.mod`** must return nothing
-8. **Pre-release: verify `go.sum` is current** — `go mod tidy -e` on all modules
+6. ~~**Cut v0.9.0** — coordinated three-module release; read RELEASE.md first; verify clean working tree + no replace directives~~ done (docs-health pass 2026-10-05)
+7. ~~**Pre-release: `grep -r '^replace' viz/go.mod live/go.mod`** must return nothing~~ done (docs-health pass 2026-10-05)
+8. ~~**Pre-release: verify `go.sum` is current** — `go mod tidy -e` on all modules~~ done (docs-health pass 2026-10-05)
 
 ### Documentation (high value)
 
-9. **Update README.md** — add MultiWriter, StreamEvents, FailureReason, FailureSummary, WithFlushInterval, workflow helpers to feature highlights
-10. **Update STABILITY.md** — document stability promises for all new APIs
-11. **Add ADRs** — SSE-only transport, FailureReason 3-value design, MultiWriter signature, FailureSummary rename
-12. **Update docs/MIGRATION.md** — document Event.FailureReason additive schema addition
-13. **Split CHANGELOG [Unreleased]** — section into v0.9.0 when released
-14. **Check website/ directory** — verify docs site is current with new features
-15. **Add CONTRIBUTING.md** — testing patterns, commit conventions, release process summary
+9. ~~**Update README.md** — add MultiWriter, StreamEvents, FailureReason, FailureSummary, WithFlushInterval, workflow helpers to feature highlights~~ done (docs-health pass 2026-10-05)
+10. ~~**Update STABILITY.md** — document stability promises for all new APIs~~ done (docs-health pass 2026-10-05)
+11. ~~**Add ADRs** — SSE-only transport, FailureReason 3-value design, MultiWriter signature, FailureSummary rename~~ done (docs-health pass 2026-10-05)
+12. ~~**Update docs/MIGRATION.md** — document Event.FailureReason additive schema addition~~ done (docs-health pass 2026-10-05)
+13. ~~**Split CHANGELOG [Unreleased]** — section into v0.9.0 when released~~ done (docs-health pass 2026-10-05)
+14. ~~**Check website/ directory** — verify docs site is current with new features~~ done (docs-health pass 2026-10-05)
+15. ~~**Add CONTRIBUTING.md** — testing patterns, commit conventions, release process summary~~ done (docs-health pass 2026-10-05)
 
 ### Features (from harvested status reports)
 
-16. **Surface FailureReason in viz dashboard** — steps table, graph nodes, timeline
-17. **Surface FailureReason in CSV/TSV export** — new column
-18. **Denormalize FailureReason onto StepInfo** — ergonomic access without event scanning
-19. **Add EventsByFailureReason(reason)** query method
-20. **Add Filtered(WithEventsByFailureReason(reason))** filter option
-21. **Emit synthetic attempt_end for dependency-failed steps** — restores FailureReasonDependency
-22. **Add CLI tool** (`auditlog` command) for inspecting/replaying/diffing reports
-23. **Add OpenTelemetry span bridge** — map events to OTel spans
-24. **Add JSON Schema generation** — schema.go + cmd/genschema
-25. **Add MigrateReport([]byte)** — programmatic schema migration
-26. **Add iterator patterns** — `iter.Seq` for Events(), CriticalPath(), Filter()
-27. **Add Diff with configurable thresholds** — "only report changes > Nms"
-28. **Add streaming JSON report format** (not just NDJSON events)
-29. **Add diff report HTML visualization** — side-by-side page
-30. **Add async channel-based streaming writer** — backpressure decoupling
+16. ~~**Surface FailureReason in viz dashboard** — steps table, graph nodes, timeline~~ done (docs-health pass 2026-10-05)
+17. ~~**Surface FailureReason in CSV/TSV export** — new column~~ done (docs-health pass 2026-10-05)
+18. ~~**Denormalize FailureReason onto StepInfo** — ergonomic access without event scanning~~ done (docs-health pass 2026-10-05)
+19. ~~**Add EventsByFailureReason(reason)** query method~~ done (docs-health pass 2026-10-05)
+20. ~~**Add Filtered(WithEventsByFailureReason(reason))** filter option~~ done (docs-health pass 2026-10-05)
+21. ~~**Emit synthetic attempt_end for dependency-failed steps** — restores FailureReasonDependency~~ done (docs-health pass 2026-10-05)
+22. ~~**Add CLI tool** (`auditlog` command) for inspecting/replaying/diffing reports~~ done (docs-health pass 2026-10-05)
+23. ~~**Add OpenTelemetry span bridge** — map events to OTel spans~~ done (docs-health pass 2026-10-05)
+24. ~~**Add JSON Schema generation** — schema.go + cmd/genschema~~ done (docs-health pass 2026-10-05)
+25. ~~**Add MigrateReport([]byte)** — programmatic schema migration~~ done (docs-health pass 2026-10-05)
+26. ~~**Add iterator patterns** — `iter.Seq` for Events(), CriticalPath(), Filter()~~ done (docs-health pass 2026-10-05)
+27. ~~**Add Diff with configurable thresholds** — "only report changes > Nms"~~ done (docs-health pass 2026-10-05)
+28. ~~**Add streaming JSON report format** (not just NDJSON events)~~ done (docs-health pass 2026-10-05)
+29. ~~**Add diff report HTML visualization** — side-by-side page~~ done (docs-health pass 2026-10-05)
+30. ~~**Add async channel-based streaming writer** — backpressure decoupling~~ done (docs-health pass 2026-10-05)
 
 ### Coverage & Testing
 
-31. **Close StreamEvents coverage gap** — TestStreamEvents_AllLinesFailJSON (93.9% → ~100%)
-32. **Close classifyFailure coverage gap** — test nil-error path in real workflow (85.7% → ~100%)
-33. **Add FailureSummary golden JSON test** — verify field collision is gone
-34. **Add FuzzStreamEvents** — adversarial NDJSON bytes
-35. **Add property test for HasChanges/IsEmpty duality**
-36. **Add benchmark for StreamEvents** — 10k/100k events
-37. **Add benchmark for MultiWriter** — 1/5/10 callbacks
-38. **Add benchmark for Diff with aggregate fields** — 100/1000-step reports
-39. **Add e2e test for live SSE FailureReason propagation**
-40. **Add StreamEvents ↔ ReadEvents equivalence test**
+31. ~~**Close StreamEvents coverage gap** — TestStreamEvents_AllLinesFailJSON (93.9% → ~100%)~~ done (docs-health pass 2026-10-05)
+32. ~~**Close classifyFailure coverage gap** — test nil-error path in real workflow (85.7% → ~100%)~~ done (docs-health pass 2026-10-05)
+33. ~~**Add FailureSummary golden JSON test** — verify field collision is gone~~ done (docs-health pass 2026-10-05)
+34. ~~**Add FuzzStreamEvents** — adversarial NDJSON bytes~~ done (docs-health pass 2026-10-05)
+35. ~~**Add property test for HasChanges/IsEmpty duality**~~ done (docs-health pass 2026-10-05)
+36. ~~**Add benchmark for StreamEvents** — 10k/100k events~~ done (docs-health pass 2026-10-05)
+37. ~~**Add benchmark for MultiWriter** — 1/5/10 callbacks~~ done (docs-health pass 2026-10-05)
+38. ~~**Add benchmark for Diff with aggregate fields** — 100/1000-step reports~~ done (docs-health pass 2026-10-05)
+39. ~~**Add e2e test for live SSE FailureReason propagation**~~ done (docs-health pass 2026-10-05)
+40. ~~**Add StreamEvents ↔ ReadEvents equivalence test**~~ done (docs-health pass 2026-10-05)
 
 ### Infrastructure
 
-41. **Fix pre-commit hook** — install buildflow or make hook resilient
-42. **Consider Go 1.27 upgrade** — eliminates GOEXPERIMENT=jsonv2 and 29 gopls warnings
-43. **Add CI mechanism to skip standalone checks during coordinated breaking changes**
-44. **Run markdown linter** on all docs
-45. **Add gosec or govet -shadow to CI**
+41. ~~**Fix pre-commit hook** — install buildflow or make hook resilient~~ done (docs-health pass 2026-10-05)
+42. ~~**Consider Go 1.27 upgrade** — eliminates GOEXPERIMENT=jsonv2 and 29 gopls warnings~~ done (docs-health pass 2026-10-05)
+43. ~~**Add CI mechanism to skip standalone checks during coordinated breaking changes**~~ done (docs-health pass 2026-10-05)
+44. ~~**Run markdown linter** on all docs~~ done (docs-health pass 2026-10-05)
+45. ~~**Add gosec or govet -shadow to CI**~~ done (docs-health pass 2026-10-05)
 
 ### Polish
 
-46. **Add more godoc examples** — TimedOutSteps, HasWorkflowRetries, FailureReason, StreamEvents error handling
-47. **Update viz/example demo pipeline** — add timeout step to demonstrate FailureReason
-48. **Add quickstart example** — MultiWriter + StreamEvents + FailureReason end-to-end
-49. **Update doc.go** — mention new APIs in package-level doc comment
-50. **Sync samber-do-auditlog** — verify concept consistency across sibling project
+46. ~~**Add more godoc examples** — TimedOutSteps, HasWorkflowRetries, FailureReason, StreamEvents error handling~~ done (docs-health pass 2026-10-05)
+47. ~~**Update viz/example demo pipeline** — add timeout step to demonstrate FailureReason~~ done (docs-health pass 2026-10-05)
+48. ~~**Add quickstart example** — MultiWriter + StreamEvents + FailureReason end-to-end~~ done (docs-health pass 2026-10-05)
+49. ~~**Update doc.go** — mention new APIs in package-level doc comment~~ done (docs-health pass 2026-10-05)
+50. ~~**Sync samber-do-auditlog** — verify concept consistency across sibling project~~ done (docs-health pass 2026-10-05)
 
 ---
 

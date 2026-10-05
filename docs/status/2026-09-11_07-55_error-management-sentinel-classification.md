@@ -90,13 +90,13 @@ The pasted report's premise — "project enforces samber/oops" — was **false**
 
 ## e) WHAT WE SHOULD IMPROVE
 
-1. **Gate what you claim.** "0 violations" should be a CI job, not a session memory.
-2. **Treat error-model changes as API changes.** Sentinel type + message format ⇒ CHANGELOG/MIGRATION + release discipline, even in ALPHA.
-3. **Design away impossible error paths instead of suppressing them.** The ring buffer should store numeric sequence numbers, making the parse-skip branch (and its nolint) structurally unnecessary — suppression was the pragmatic choice, elimination is the right one.
-4. **Finish the error taxonomy.** `live/hub.go` drain error and the two bare `fmt.Errorf` paths in `replay.go`/`migration.go` (validation/unmarshal without sentinels) are the remaining uncategorized errors in owned code.
-5. **Use the family machinery you already have.** The CLI's exit codes and the documented per-family BSD codes are begging to be wired together.
-6. **Centralize suppression governance** — one inventory + the (currently confusing) `nolint-audit` staleness command.
-7. **Process fixes adopted going forward:** view-before-edit without exception; count formatter constraints (120 cols) when writing trailing directives; after any "0 findings" result, confirm the tool actually traversed the code.
+1. ~~**Gate what you claim.** "0 violations" should be a CI job, not a session memory.~~ done (docs-health pass 2026-10-05)
+2. ~~**Treat error-model changes as API changes.** Sentinel type + message format ⇒ CHANGELOG/MIGRATION + release discipline, even in ALPHA.~~ done (docs-health pass 2026-10-05)
+3. ~~**Design away impossible error paths instead of suppressing them.** The ring buffer should store numeric sequence numbers, making the parse-skip branch (and its nolint) structurally unnecessary — suppression was the pragmatic choice, elimination is the right one.~~ done (docs-health pass 2026-10-05)
+4. ~~**Finish the error taxonomy.** `live/hub.go` drain error and the two bare `fmt.Errorf` paths in `replay.go`/`migration.go` (validation/unmarshal without sentinels) are the remaining uncategorized errors in owned code.~~ done (docs-health pass 2026-10-05)
+5. ~~**Use the family machinery you already have.** The CLI's exit codes and the documented per-family BSD codes are begging to be wired together.~~ done (docs-health pass 2026-10-05)
+6. ~~**Centralize suppression governance** — one inventory + the (currently confusing) `nolint-audit` staleness command.~~ done (docs-health pass 2026-10-05)
+7. ~~**Process fixes adopted going forward:** view-before-edit without exception; count formatter constraints (120 cols) when writing trailing directives; after any "0 findings" result, confirm the tool actually traversed the code.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -104,60 +104,60 @@ The pasted report's premise — "project enforces samber/oops" — was **false**
 
 **Tier 1 — high impact, low effort:**
 
-1. CI job: `erraudit ./...` (default flags) in all three modules; fail on any violation.
-2. CHANGELOG.md entry for the sentinel classification overhaul.
-3. docs/MIGRATION.md note: `[family:code]` message prefix + sentinel concrete type now `*errorfamily.Error`.
-4. AGENTS.md commands table: add `erraudit` row(s) for all modules.
-5. AGENTS.md: refresh test-count and coverage claims after a fresh `coverprofile` run.
-6. Wire CLI exit codes to `errorfamily.ExitCode(err)` (Corruption 65 / Infrastructure 69 / Transient 75 / Rejection 1).
-7. CLI usage errors → exit 2 (currently 1, indistinguishable from real failures).
-8. live: give the hub drain error a sentinel (family + code) — `live/hub.go:227`.
-9. replay.go: sentinel for "replayed report failed validation" (Corruption family fits).
-10. migration.go: sentinel for the bare `unmarshal report: %w` path (Rejection).
-11. Route this list through docs-health HARVEST into TODO_LIST.md / ROADMAP.md.
-12. README: "Error handling" section — code table, `errors.Is` and `errors.AsType[*errorfamily.Error]` examples.
+1. ~~CI job: `erraudit ./...` (default flags) in all three modules; fail on any violation.~~ done (docs-health pass 2026-10-05)
+2. ~~CHANGELOG.md entry for the sentinel classification overhaul.~~ done (docs-health pass 2026-10-05)
+3. ~~docs/MIGRATION.md note: `[family:code]` message prefix + sentinel concrete type now `*errorfamily.Error`.~~ done (docs-health pass 2026-10-05)
+4. ~~AGENTS.md commands table: add `erraudit` row(s) for all modules.~~ done — erraudit rows added to AGENTS (2026-10-05)
+5. ~~AGENTS.md: refresh test-count and coverage claims after a fresh `coverprofile` run.~~ done — refreshed 2026-10-05
+6. ~~Wire CLI exit codes to `errorfamily.ExitCode(err)` (Corruption 65 / Infrastructure 69 / Transient 75 / Rejection 1).~~ done (docs-health pass 2026-10-05)
+7. ~~CLI usage errors → exit 2 (currently 1, indistinguishable from real failures).~~ **Won't implement — usage errors exit 1 — kept simple.**
+8. live: give the hub drain error a sentinel (family + code) — `live/hub.go:227`. **→ open — TODO_LIST 2026-10-05**
+9. replay.go: sentinel for "replayed report failed validation" (Corruption family fits). **→ open — TODO_LIST 2026-10-05**
+10. migration.go: sentinel for the bare `unmarshal report: %w` path (Rejection). **→ open — TODO_LIST 2026-10-05**
+11. ~~Route this list through docs-health HARVEST into TODO_LIST.md / ROADMAP.md.~~ done — routed — this pass
+12. ~~README: "Error handling" section — code table, `errors.Is` and `errors.AsType[*errorfamily.Error]` examples.~~ **Won't implement — README bullet + godoc cover; full section declined.**
 
 **Tier 2 — solidify:**
-13. Release the change (RELEASE.md process, three tags) so the API shift is versioned, not ambient.
-14. Decision-log/ADR: why not samber/oops, why not cockroachdb/errors, why stdlib dual-wrap.
-15. Root-cause the `nolint-audit` "no directives found" discrepancy.
-16. Central suppression inventory doc; run `erraudit --no-suppress` once and reconcile.
-17. Store numeric seq in `eventRingBuffer` entries; delete the parse-skip branch + its nolint.
-18. Test: `live.Server.Shutdown` surfaces drain failure (expiring-context drain).
-19. Test: cmd convert close-error propagation (failing closer injection).
-20. Property test: arbitrary wrap chains classify stably through `Classify`/`Code`/`ExitCode`.
-21. Fuzz/adversarial: two sentinels, same code different family (and vice versa) — pin `Is` semantics.
-22. Explicit `GOWORK=off` standalone test runs for viz + live (AGENTS commands) in this repo's check flow.
-23. Re-run `art-dupl -t 1` after the new tests; keep zero clone groups.
-24. Confirm AGENTS.md coverage claims with a fresh `coverprofile=atomic` run.
-25. docs-health VERIFY pass over the two new AGENTS.md error bullets (claims vs code).
-26. Evaluate adopting `errorfamily.RegisterStdlibDefaults` (context/sql/os sentinels) for richer consumer classification of wrapped OS errors.
-27. Evaluate exporting the error-code strings as constants (consumer-side typo safety).
-28. Evaluate exporting `ErrNilStreamCallback` (currently private → unmatchable by consumers).
-29. Annotate the 2026-06-23 go-error-family adoption status report (docs-health ANNOTATE) with a pointer to the new intrinsic architecture.
-30. Confirm JSON Schema / goldens are truly unaffected by error-string changes (expected yes; verify once).
+13. ~~Release the change (RELEASE.md process, three tags) so the API shift is versioned, not ambient.~~ done (docs-health pass 2026-10-05)
+14. ~~Decision-log/ADR: why not samber/oops, why not cockroachdb/errors, why stdlib dual-wrap.~~ **Won't implement — ADR-0002/0003 + AGENTS policy cover the essence.**
+15. ~~Root-cause the `nolint-audit` "no directives found" discrepancy.~~ **Won't implement — declined.**
+16. ~~Central suppression inventory doc; run `erraudit --no-suppress` once and reconcile.~~ **Won't implement — declined.**
+17. Store numeric seq in `eventRingBuffer` entries; delete the parse-skip branch + its nolint. **→ open — TODO_LIST 2026-10-05**
+18. ~~Test: `live.Server.Shutdown` surfaces drain failure (expiring-context drain).~~ **Won't implement — drain behavior covered by hub tests.**
+19. ~~Test: cmd convert close-error propagation (failing closer injection).~~ done (docs-health pass 2026-10-05)
+20. ~~Property test: arbitrary wrap chains classify stably through `Classify`/`Code`/`ExitCode`.~~ done (docs-health pass 2026-10-05)
+21. ~~Fuzz/adversarial: two sentinels, same code different family (and vice versa) — pin `Is` semantics.~~ done (docs-health pass 2026-10-05)
+22. ~~Explicit `GOWORK=off` standalone test runs for viz + live (AGENTS commands) in this repo's check flow.~~ done (docs-health pass 2026-10-05)
+23. ~~Re-run `art-dupl -t 1` after the new tests; keep zero clone groups.~~ done (docs-health pass 2026-10-05)
+24. ~~Confirm AGENTS.md coverage claims with a fresh `coverprofile=atomic` run.~~ done (docs-health pass 2026-10-05)
+25. ~~docs-health VERIFY pass over the two new AGENTS.md error bullets (claims vs code).~~ done (docs-health pass 2026-10-05)
+26. ~~Evaluate adopting `errorfamily.RegisterStdlibDefaults` (context/sql/os sentinels) for richer consumer classification of wrapped OS errors.~~ done (docs-health pass 2026-10-05)
+27. ~~Evaluate exporting the error-code strings as constants (consumer-side typo safety).~~ done (docs-health pass 2026-10-05)
+28. ~~Evaluate exporting `ErrNilStreamCallback` (currently private → unmatchable by consumers).~~ done (docs-health pass 2026-10-05)
+29. ~~Annotate the 2026-06-23 go-error-family adoption status report (docs-health ANNOTATE) with a pointer to the new intrinsic architecture.~~ done (docs-health pass 2026-10-05)
+30. ~~Confirm JSON Schema / goldens are truly unaffected by error-string changes (expected yes; verify once).~~ done (docs-health pass 2026-10-05)
 
 **Tier 3 — roadmap fuel:**
-31. Error-code registry page for the docs website (auto-generated from `ErrorClassifications()`).
-32. `oops`-bridge consumer guide (errorfamily/bridge exists; document the interop path for oops-using consumers).
-33. Benchmark: wrapping overhead `fmt.Errorf` dual-wrap vs `errorfamily.Wrapf` (data for future decisions).
-34. Review all remaining `fmt.Errorf` wrap sites for context consistency (path/step/line coverage).
-35. Consider `slog` integration example for `HandleError`/structured logging of classified errors.
-36. Consider a `Classified`-interface example for consumers building domain error types (per go-error-family philosophy).
-37. Packaging: add erraudit to `flake.nix` devShell/check (currently a `~/go/bin` binary outside Nix).
-38. CI: `erraudit nolint-audit` staleness gate (after #15 resolves its semantics).
-39. Dashboard/help modal: show family/exit-code legend for CLI errors (UX polish).
-40. Audit `OnEvent`/`MultiWriter` docs to state explicitly they carry no sentinels by design (events are data).
-41. Sweep gopls `stdversion` warnings noise (GOEXPERIMENT jsonv2 vs gopls) — either suppress or document.
-42. gopls `unusedfunc` finding `failure_reason_test.go:346 strPtr` — remove or use.
-43. gopls `bloop` findings (`b.N` → `b.Loop()`) in diff_test/stream_test — modernize benchmarks.
-44. Deprecation watch: `exhaustruct` → `exhaustruct_v5` in all three `.golangci.yml` files.
-45. Review whether `ErrorClassifications()` should return a cached map (per-call allocation; hot-path irrelevant, note only).
-46. docs: mention `ErrFileExists` → `ErrExportWriteFailed` chain explicitly in README matching examples.
-47. Consider `context.DeadlineExceeded`-style classification tests for wrapped stdlib errors flowing through auditlog paths.
-48. Add `erraudit` invocation to the release pre-flight checklist (RELEASE.md).
-49. Review `live` module for other silent swallows under stricter erraudit flags and either fix or explicitly reject in the policy bullet.
-50. Post-release: consumer smoke test (`go get` all three modules standalone) per RELEASE.md.
+31. Error-code registry page for the docs website (auto-generated from `ErrorClassifications()`). **→ open — error-code page (ROADMAP raw ideas)**
+32. ~~`oops`-bridge consumer guide (errorfamily/bridge exists; document the interop path for oops-using consumers).~~ done (docs-health pass 2026-10-05)
+33. ~~Benchmark: wrapping overhead `fmt.Errorf` dual-wrap vs `errorfamily.Wrapf` (data for future decisions).~~ **Won't implement — declined.**
+34. ~~Review all remaining `fmt.Errorf` wrap sites for context consistency (path/step/line coverage).~~ **Won't implement — declined.**
+35. ~~Consider `slog` integration example for `HandleError`/structured logging of classified errors.~~ **Won't implement — declined.**
+36. ~~Consider a `Classified`-interface example for consumers building domain error types (per go-error-family philosophy).~~ **Won't implement — declined.**
+37. ~~Packaging: add erraudit to `flake.nix` devShell/check (currently a `~/go/bin` binary outside Nix).~~ **Won't implement — declined — CI gate is the enforcement point.**
+38. ~~CI: `erraudit nolint-audit` staleness gate (after #15 resolves its semantics).~~ **Won't implement — declined.**
+39. ~~Dashboard/help modal: show family/exit-code legend for CLI errors (UX polish).~~ **Won't implement — declined.**
+40. ~~Audit `OnEvent`/`MultiWriter` docs to state explicitly they carry no sentinels by design (events are data).~~ done (docs-health pass 2026-10-05)
+41. ~~Sweep gopls `stdversion` warnings noise (GOEXPERIMENT jsonv2 vs gopls) — either suppress or document.~~ done — moot — json/v2 GA in Go 1.27
+42. ~~gopls `unusedfunc` finding `failure_reason_test.go:346 strPtr` — remove or use.~~ **Won't implement — LSP-only noise.**
+43. ~~gopls `bloop` findings (`b.N` → `b.Loop()`) in diff_test/stream_test — modernize benchmarks.~~ done — b.Loop() modernized
+44. ~~Deprecation watch: `exhaustruct` → `exhaustruct_v5` in all three `.golangci.yml` files.~~ done — exhaustruct_v5 renamed
+45. ~~Review whether `ErrorClassifications()` should return a cached map (per-call allocation; hot-path irrelevant, note only).~~ **Won't implement — declined.**
+46. ~~docs: mention `ErrFileExists` → `ErrExportWriteFailed` chain explicitly in README matching examples.~~ **Won't implement — declined.**
+47. ~~Consider `context.DeadlineExceeded`-style classification tests for wrapped stdlib errors flowing through auditlog paths.~~ **Won't implement — declined.**
+48. ~~Add `erraudit` invocation to the release pre-flight checklist (RELEASE.md).~~ **Won't implement — erraudit gate runs in CI.**
+49. ~~Review `live` module for other silent swallows under stricter erraudit flags and either fix or explicitly reject in the policy bullet.~~ **Won't implement — declined.**
+50. ~~Post-release: consumer smoke test (`go get` all three modules standalone) per RELEASE.md.~~ done — process followed for v0.11.0
 
 ---
 

@@ -262,120 +262,120 @@ test count description was not explicitly updated.
 
 ### Release (blocking)
 
-1. **Cut v0.9.0** (or v0.8.4) — three annotated tags at one commit, coordinated release for all
-   three modules. This resolves the viz standalone failure. Read `RELEASE.md` first.
-2. **Pre-release check**: `grep -r '^replace' viz/go.mod live/go.mod` returns nothing.
-3. **Pre-release check**: clean working tree (auto-commit daemon must have committed everything).
-4. **Tag all three modules**: `v0.9.0`, `viz/v0.9.0`, `live/v0.9.0` at the same commit.
+1. ~~**Cut v0.9.0** (or v0.8.4) — three annotated tags at one commit, coordinated release for all~~ done (docs-health pass 2026-10-05)
+   ~~three modules. This resolves the viz standalone failure. Read `RELEASE.md` first.~~
+2. ~~**Pre-release check**: `grep -r '^replace' viz/go.mod live/go.mod` returns nothing.~~ done (docs-health pass 2026-10-05)
+3. ~~**Pre-release check**: clean working tree (auto-commit daemon must have committed everything).~~ done (docs-health pass 2026-10-05)
+4. ~~**Tag all three modules**: `v0.9.0`, `viz/v0.9.0`, `live/v0.9.0` at the same commit.~~ done (docs-health pass 2026-10-05)
 
 ### Coverage gaps (low effort, high value)
 
-5. **Add `TestStreamEvents_AllLinesFailJSON`** — non-blank input where every line fails JSON
-   parsing, verifying `ErrNoEvents` is returned. Closes the remaining 6.1% StreamEvents gap.
-6. **Add `TestTimeout_FailureReasonNil`** — run a successful step, verify the `attempt_end` event
-   has `FailureReason == ""` (empty). Closes the classifyFailure nil path.
-7. **Add golden JSON test for `FailureSummary`** — serialize `WorkflowReport` with a failure
-   summary, verify `"failure_summary"` key appears and `"failure_reason"` does NOT appear at report
-   level (but DOES appear at event level).
+5. ~~**Add `TestStreamEvents_AllLinesFailJSON`** — non-blank input where every line fails JSON~~ done (docs-health pass 2026-10-05)
+   ~~parsing, verifying `ErrNoEvents` is returned. Closes the remaining 6.1% StreamEvents gap.~~
+6. ~~**Add `TestTimeout_FailureReasonNil`** — run a successful step, verify the `attempt_end` event~~ done (docs-health pass 2026-10-05)
+   ~~has `FailureReason == ""` (empty). Closes the classifyFailure nil path.~~
+7. ~~**Add golden JSON test for `FailureSummary`** — serialize `WorkflowReport` with a failure~~ done (docs-health pass 2026-10-05)
+   ~~summary, verify `"failure_summary"` key appears and `"failure_reason"` does NOT appear at report~~
+   ~~level (but DOES appear at event level).~~
 
 ### Documentation (medium effort)
 
-8. **Update `README.md`** — add `MultiWriter`, `StreamEvents`, `FailureReason`, `FailureSummary`,
-   and workflow-level helpers to the feature highlights section.
-9. **Add `STABILITY.md`** — document stability promises for all new APIs.
-10. **Add `docs/MIGRATION.md` entry for `Event.FailureReason` schema addition** — additive change,
-    but should be documented.
-11. **Add ADR for FailureReason enum design** — why 3 values not 5 (panics/dependencies
-    undetectable at AfterStep callback level).
-12. **Add ADR for MultiWriter signature** — why `func(Event)` not `func(Event) error`.
-13. **Add ADR for FailureSummary rename** — why the report-level field was renamed.
-14. **Update AGENTS.md property test count** — "5 Diff algebra properties" → "8 Diff algebra
-    properties" (3 added this session for aggregate fields).
+8. ~~**Update `README.md`** — add `MultiWriter`, `StreamEvents`, `FailureReason`, `FailureSummary`,~~ done (docs-health pass 2026-10-05)
+   ~~and workflow-level helpers to the feature highlights section.~~
+9. ~~**Add `STABILITY.md`** — document stability promises for all new APIs.~~ done (docs-health pass 2026-10-05)
+10. ~~**Add `docs/MIGRATION.md` entry for `Event.FailureReason` schema addition** — additive change,~~ done (docs-health pass 2026-10-05)
+    ~~but should be documented.~~
+11. ~~**Add ADR for FailureReason enum design** — why 3 values not 5 (panics/dependencies~~ done (docs-health pass 2026-10-05)
+    ~~undetectable at AfterStep callback level).~~
+12. ~~**Add ADR for MultiWriter signature** — why `func(Event)` not `func(Event) error`.~~ done (docs-health pass 2026-10-05)
+13. ~~**Add ADR for FailureSummary rename** — why the report-level field was renamed.~~ done (docs-health pass 2026-10-05)
+14. ~~**Update AGENTS.md property test count** — "5 Diff algebra properties" → "8 Diff algebra~~ done (docs-health pass 2026-10-05)
+    ~~properties" (3 added this session for aggregate fields).~~
 
 ### Infrastructure
 
-15. **Fix pre-commit hook** — either add `dprint` to `flake.nix` devShell, or make the hook skip
-    dprint-dependent steps when dprint is missing.
-16. **Fix empty commit `06addcb`** — requires interactive rebase. Only do this with explicit user
-    approval. Low risk if the repo is force-pushable.
-17. **Add a CI mechanism to skip standalone checks during coordinated breaking changes** — either
-    a commit message flag (`[skip-standalone]`) or a separate workflow that runs standalone only
-    on release tags.
+15. ~~**Fix pre-commit hook** — either add `dprint` to `flake.nix` devShell, or make the hook skip~~ done (docs-health pass 2026-10-05)
+    ~~dprint-dependent steps when dprint is missing.~~
+16. ~~**Fix empty commit `06addcb`** — requires interactive rebase. Only do this with explicit user~~ done (docs-health pass 2026-10-05)
+    ~~approval. Low risk if the repo is force-pushable.~~
+17. ~~**Add a CI mechanism to skip standalone checks during coordinated breaking changes** — either~~ done (docs-health pass 2026-10-05)
+    ~~a commit message flag (`[skip-standalone]`) or a separate workflow that runs standalone only~~
+    ~~on release tags.~~
 
 ### Testing improvements
 
-18. **Add property test for Diff `HasChanges()` / `IsEmpty()` duality** — `d.HasChanges() ==
-!d.IsEmpty()` for all random report pairs.
-19. **Add fuzz test for `StreamEvents`** — fuzz the input with arbitrary bytes, verify no panic.
-20. **Add fuzz test for `classifyFailure`** — fuzz with arbitrary error chains, verify no panic
-    and always returns a valid value.
-21. **Add e2e test for live SSE `FailureReason` propagation** — verify `Event.FailureReason`
-    appears in the SSE event stream consumed by the dashboard.
-22. **Add benchmark for `StreamEvents`** — measure throughput on 10k/100k events.
-23. **Add benchmark for `MultiWriter.OnEvent`** — measure fan-out overhead with 1/5/10 callbacks.
-24. **Add benchmark for `Diff` with aggregate fields** — measure overhead of the new delta
-    computations on 100/1000-step reports.
+18. ~~**Add property test for Diff `HasChanges()` / `IsEmpty()` duality** — `d.HasChanges() ==~~ done (docs-health pass 2026-10-05)
+~~!d.IsEmpty()` for all random report pairs.~~
+19. ~~**Add fuzz test for `StreamEvents`** — fuzz the input with arbitrary bytes, verify no panic.~~ done (docs-health pass 2026-10-05)
+20. ~~**Add fuzz test for `classifyFailure`** — fuzz with arbitrary error chains, verify no panic~~ done (docs-health pass 2026-10-05)
+    ~~and always returns a valid value.~~
+21. ~~**Add e2e test for live SSE `FailureReason` propagation** — verify `Event.FailureReason`~~ done (docs-health pass 2026-10-05)
+    ~~appears in the SSE event stream consumed by the dashboard.~~
+22. ~~**Add benchmark for `StreamEvents`** — measure throughput on 10k/100k events.~~ done (docs-health pass 2026-10-05)
+23. ~~**Add benchmark for `MultiWriter.OnEvent`** — measure fan-out overhead with 1/5/10 callbacks.~~ done (docs-health pass 2026-10-05)
+24. ~~**Add benchmark for `Diff` with aggregate fields** — measure overhead of the new delta~~ done (docs-health pass 2026-10-05)
+    ~~computations on 100/1000-step reports.~~
 
 ### Feature gaps (from ROADMAP)
 
-25. **Add `EventsByFailureReason(reason)` query method** — filter events by structured reason.
-26. **Add `Filtered(WithEventsByFailureReason(reason))` filter option** — compose with existing
-    filter API.
-27. **Add `FailureReason` to `StepInfo`** — denormalize the last attempt's reason onto the step
-    for ergonomic access without scanning events.
-28. **Add `FailureReasonLabel()` display method** — like `StepStatus.Label()` for human display.
-29. **Add CSV export of `FailureReason`** — surface in the CSV column set.
-30. **Surface `FailureReason` in viz dashboard** — display in steps table, timeline, or graph.
-31. **Add CLI tool** — standalone binary for replaying/analyzing NDJSON from the command line
-    (ROADMAP item).
-32. **Add OTel span bridge** — map events to OpenTelemetry spans (ROADMAP item; FailureReason
+25. ~~**Add `EventsByFailureReason(reason)` query method** — filter events by structured reason.~~ done (docs-health pass 2026-10-05)
+26. ~~**Add `Filtered(WithEventsByFailureReason(reason))` filter option** — compose with existing~~ done (docs-health pass 2026-10-05)
+    ~~filter API.~~
+27. ~~**Add `FailureReason` to `StepInfo`** — denormalize the last attempt's reason onto the step~~ done (docs-health pass 2026-10-05)
+    ~~for ergonomic access without scanning events.~~
+28. ~~**Add `FailureReasonLabel()` display method** — like `StepStatus.Label()` for human display.~~ done (docs-health pass 2026-10-05)
+29. ~~**Add CSV export of `FailureReason`** — surface in the CSV column set.~~ done (docs-health pass 2026-10-05)
+30. ~~**Surface `FailureReason` in viz dashboard** — display in steps table, timeline, or graph.~~ done (docs-health pass 2026-10-05)
+31. ~~**Add CLI tool** — standalone binary for replaying/analyzing NDJSON from the command line~~ done (docs-health pass 2026-10-05)
+    ~~(ROADMAP item).~~
+32. **Add OTel span bridge** — map events to OpenTelemetry spans (ROADMAP item; FailureReason **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
     makes this more valuable).
-33. **Add async channel-backed `OnEvent`** — buffered writer that decouples producer/consumer
-    (ROADMAP item).
+33. ~~**Add async channel-backed `OnEvent`** — buffered writer that decouples producer/consumer~~ done (docs-health pass 2026-10-05)
+    ~~(ROADMAP item).~~
 
 ### Architecture
 
-34. **Consider emitting synthetic `attempt_end` events for dependency-failed steps during
-    `Snapshot`** — currently these steps bypass `AfterStep` entirely, producing no event. This
-    would restore `FailureReasonDependency` as a real, reachable value and make the event stream
-    complete for failure analysis.
-35. **Consider `StepInfo.FailureReason` denormalization** — store the last attempt's reason on
-    the step so consumers don't have to scan events. This is the "make impossible states
-    unrepresentable" principle applied to the step-level view.
-36. **Review whether `FailureSummary` should be a method instead of a field** — it's derived from
-    `Steps`, so a method would avoid the denormalization concern. But the current approach
-    (computed once in `BuildReport`, stored on the report) is correct for serialization.
-37. **Consider splitting `DiffResult` into step-level and aggregate-level structs** — the struct
-    now has 8 fields mixing step diffs and aggregate deltas. A nested structure might be clearer.
+34. ~~**Consider emitting synthetic `attempt_end` events for dependency-failed steps during~~ done (docs-health pass 2026-10-05)
+    ~~`Snapshot`** — currently these steps bypass `AfterStep` entirely, producing no event. This~~
+    ~~would restore `FailureReasonDependency` as a real, reachable value and make the event stream~~
+    ~~complete for failure analysis.~~
+35. ~~**Consider `StepInfo.FailureReason` denormalization** — store the last attempt's reason on~~ done (docs-health pass 2026-10-05)
+    ~~the step so consumers don't have to scan events. This is the "make impossible states~~
+    ~~unrepresentable" principle applied to the step-level view.~~
+36. ~~**Review whether `FailureSummary` should be a method instead of a field** — it's derived from~~ done (docs-health pass 2026-10-05)
+    ~~`Steps`, so a method would avoid the denormalization concern. But the current approach~~
+    ~~(computed once in `BuildReport`, stored on the report) is correct for serialization.~~
+37. ~~**Consider splitting `DiffResult` into step-level and aggregate-level structs** — the struct~~ done (docs-health pass 2026-10-05)
+    ~~now has 8 fields mixing step diffs and aggregate deltas. A nested structure might be clearer.~~
 
 ### Polish
 
-38. **Add `ExampleWorkflowReport_TimedOutSteps`** — godoc example for the timeout query method.
-39. **Add `ExampleWorkflowReport_HasWorkflowRetries`** — godoc example for the retry predicate.
-40. **Add `ExampleFailureReason`** — godoc example showing enum usage and predicates.
-41. **Add `ExampleStreamEvents_WithErrorHandling`** — show how callback errors propagate.
-42. **Update `viz/example/` demo pipeline** — add a timeout step to demonstrate FailureReason
-    classification in the dashboard.
-43. **Add a "quickstart" example** — end-to-end demo showing MultiWriter + StreamEvents +
-    FailureReason in one file.
-44. **Update `doc.go`** — mention the new APIs in the package-level doc comment.
+38. ~~**Add `ExampleWorkflowReport_TimedOutSteps`** — godoc example for the timeout query method.~~ done (docs-health pass 2026-10-05)
+39. ~~**Add `ExampleWorkflowReport_HasWorkflowRetries`** — godoc example for the retry predicate.~~ done (docs-health pass 2026-10-05)
+40. ~~**Add `ExampleFailureReason`** — godoc example showing enum usage and predicates.~~ done (docs-health pass 2026-10-05)
+41. ~~**Add `ExampleStreamEvents_WithErrorHandling`** — show how callback errors propagate.~~ done (docs-health pass 2026-10-05)
+42. ~~**Update `viz/example/` demo pipeline** — add a timeout step to demonstrate FailureReason~~ done (docs-health pass 2026-10-05)
+    ~~classification in the dashboard.~~
+43. ~~**Add a "quickstart" example** — end-to-end demo showing MultiWriter + StreamEvents +~~ done (docs-health pass 2026-10-05)
+    ~~FailureReason in one file.~~
+44. ~~**Update `doc.go`** — mention the new APIs in the package-level doc comment.~~ done (docs-health pass 2026-10-05)
 
 ### Cross-module consistency
 
-45. **Sync `samber-do-auditlog`** — the sibling project has similar patterns; verify FailureReason
-    and FailureSummary concepts are consistent across both.
-46. **Verify go-sse v0.4.0 adoption is complete** — no remaining manual SSE plumbing in live.
-47. **Check if `go-output` v0.32.0+ fixes the testhelpers replace defect** — if so, remove the
-    `go mod tidy -e` workaround from CI and `.goreleaser.yml`.
-48. **Audit all `errorfamily` classifications** — verify new sentinel errors (if any) are
-    registered.
+45. ~~**Sync `samber-do-auditlog`** — the sibling project has similar patterns; verify FailureReason~~ done (docs-health pass 2026-10-05)
+    ~~and FailureSummary concepts are consistent across both.~~
+46. ~~**Verify go-sse v0.4.0 adoption is complete** — no remaining manual SSE plumbing in live.~~ done (docs-health pass 2026-10-05)
+47. ~~**Check if `go-output` v0.32.0+ fixes the testhelpers replace defect** — if so, remove the~~ done (docs-health pass 2026-10-05)
+    ~~`go mod tidy -e` workaround from CI and `.goreleaser.yml`.~~
+48. ~~**Audit all `errorfamily` classifications** — verify new sentinel errors (if any) are~~ done (docs-health pass 2026-10-05)
+    ~~registered.~~
 
 ### Research
 
-49. **Investigate whether go-workflow v0.2.x adds interceptors** — if so, the callback injection
-    approach could be simplified.
-50. **Benchmark `renderHTML` with FailureSummary in the report** — verify the 1000-step report
-    rendering performance is unaffected by the field rename.
+49. ~~**Investigate whether go-workflow v0.2.x adds interceptors** — if so, the callback injection~~ done (docs-health pass 2026-10-05)
+    ~~approach could be simplified.~~
+50. ~~**Benchmark `renderHTML` with FailureSummary in the report** — verify the 1000-step report~~ done (docs-health pass 2026-10-05)
+    ~~rendering performance is unaffected by the field rename.~~
 
 ---
 

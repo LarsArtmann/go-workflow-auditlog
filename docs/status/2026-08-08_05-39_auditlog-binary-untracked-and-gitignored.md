@@ -44,11 +44,11 @@
 
 ## e) WHAT WE SHOULD IMPROVE
 
-19. **Verify tracking BEFORE answering "is X gitignored?"** A file can be on disk, not gitignored, AND tracked in git. All three are independent axes. The right answer to "is X gitignored?" is the literal gitignore status, not a recommendation about what to do with it. I conflated the two.
-20. **For "ignore this file" tasks, the canonical sequence is: (a) verify tracking, (b) verify the tracked file isn't referenced, (c) `git rm --cached`, (d) edit `.gitignore`, (e) verify with `check-ignore` AND a build.** I did all five, but in a flailing order after the user's "MAKE IT!" nudge. Should be reflexive from the start.
-21. **The commit `a73b092` accidentally committed 7 MB of binary** and the commit message never mentions it. This suggests the auto-commit daemon or the author did `git add .` without `git status` review. A `pre-commit` hook or a `git add` lint that warns on blobs >1 MB would catch this category of mistake at the source. Worth proposing as a follow-up.
-22. **`.gitignore` has two parallel systems**: hand-written rules at the top (lines 1–73) and a `# >>> buildflow-managed (.gitignore) >>>` block at the bottom (lines 74–119). The buildflow block regenerates on `buildflow --fix`. The hand-written section is stable. New root-binary ignores (`/auditlog`) belong in the hand-written section because the flake binary is not a buildflow artifact. Good that I put it there — but the two-system structure is non-obvious and a future contributor might put it in the wrong block.
-23. **The auto-commit daemon** (per AGENTS.md) will eventually commit the staged changes. Its message quality is unknown. If it produces a generic "update .gitignore" message, the auditlog binary's removal will be undocumented. Drafting a message and committing it ourselves (with user permission) would preserve context.
+19. ~~**Verify tracking BEFORE answering "is X gitignored?"** A file can be on disk, not gitignored, AND tracked in git. All three are independent axes. The right answer to "is X gitignored?" is the literal gitignore status, not a recommendation about what to do with it. I conflated the two.~~ **NOT-DO — process lesson.**
+20. ~~**For "ignore this file" tasks, the canonical sequence is: (a) verify tracking, (b) verify the tracked file isn't referenced, (c) `git rm --cached`, (d) edit `.gitignore`, (e) verify with `check-ignore` AND a build.** I did all five, but in a flailing order after the user's "MAKE IT!" nudge. Should be reflexive from the start.~~ **NOT-DO — process lesson.**
+21. ~~**The commit `a73b092` accidentally committed 7 MB of binary** and the commit message never mentions it. This suggests the auto-commit daemon or the author did `git add .` without `git status` review. A `pre-commit` hook or a `git add` lint that warns on blobs >1 MB would catch this category of mistake at the source. Worth proposing as a follow-up.~~ **Won't implement — daemon hygiene accepted.**
+22. ~~**`.gitignore` has two parallel systems**: hand-written rules at the top (lines 1–73) and a `# >>> buildflow-managed (.gitignore) >>>` block at the bottom (lines 74–119). The buildflow block regenerates on `buildflow --fix`. The hand-written section is stable. New root-binary ignores (`/auditlog`) belong in the hand-written section because the flake binary is not a buildflow artifact. Good that I put it there — but the two-system structure is non-obvious and a future contributor might put it in the wrong block.~~ **NOT-DO — two-system structure known.**
+23. ~~**The auto-commit daemon** (per AGENTS.md) will eventually commit the staged changes. Its message quality is unknown. If it produces a generic "update .gitignore" message, the auditlog binary's removal will be undocumented. Drafting a message and committing it ourselves (with user permission) would preserve context.~~ **NOT-DO — daemon accepted — documented in global AGENTS.**
 
 ---
 
@@ -56,36 +56,36 @@
 
 Ordered roughly by value-per-effort. Items 24–30 are direct continuations of this session. Items 31–50 are project-wide follow-ups surfaced by this work.
 
-24. **Commit the staged `.gitignore` + `auditlog` removal** with a message that explains: (a) the binary was accidentally committed in `a73b092`, (b) the flake uses `go run` so the binary is dead weight, (c) the `.gitignore` rule prevents recurrence. Suggested message body should include `Refs: a73b092` so future archaeologists find the cause.
-25. **Add a regression check** that fails CI if any blob >5 MB is committed without a `binary:` justification in its commit message. Could be a simple `git ls-tree -r -t HEAD` size scan in `scripts/`.
-26. **Audit the rest of the repo for other accidentally-tracked build artifacts.** `git ls-files | xargs -I{} stat -c '%s %n' {} | sort -n | tail -20` to see the largest tracked files. Anything executable, anything >1 MB, anything outside source/test/schema/doc directories is suspect.
-27. **Audit `.gitignore` against `.goreleaser.yml`** — goreleaser builds `workflow-auditlog-demo` (per `.goreleaser.yml:52`). Is that binary present on disk and untracked? Should it be ignored with `/workflow-auditlog-demo`?
-28. **Check `viz/example/` and any other examples** for compiled binaries — `ls viz/example/` and similar.
-29. **Run `nix run .#check`** end-to-end to confirm vet + test-race + lint + govulncheck still pass with the working tree in its current state. The `.gitignore` change is inert, but it's worth verifying nothing else regressed.
-30. **Document this fix in `CHANGELOG.md`** under an "Unreleased / Internal" section so future contributors understand the binary's absence is intentional, not a missing file.
+24. ~~**Commit the staged `.gitignore` + `auditlog` removal** with a message that explains: (a) the binary was accidentally committed in `a73b092`, (b) the flake uses `go run` so the binary is dead weight, (c) the `.gitignore` rule prevents recurrence. Suggested message body should include `Refs: a73b092` so future archaeologists find the cause.~~ done — committed with context
+25. ~~**Add a regression check** that fails CI if any blob >5 MB is committed without a `binary:` justification in its commit message. Could be a simple `git ls-tree -r -t HEAD` size scan in `scripts/`.~~ **Won't implement — declined — no CI blob gate.**
+26. **Audit the rest of the repo for other accidentally-tracked build artifacts.** `git ls-files | xargs -I{} stat -c '%s %n' {} | sort -n | tail -20` to see the largest tracked files. Anything executable, anything >1 MB, anything outside source/test/schema/doc directories is suspect. **→ open — TODO_LIST 2026-10-05**
+27. ~~**Audit `.gitignore` against `.goreleaser.yml`** — goreleaser builds `workflow-auditlog-demo` (per `.goreleaser.yml:52`). Is that binary present on disk and untracked? Should it be ignored with `/workflow-auditlog-demo`?~~ **Won't implement — covered by buildflow-managed ignores.**
+28. ~~**Check `viz/example/` and any other examples** for compiled binaries — `ls viz/example/` and similar.~~ **Won't implement — checked — clean.**
+29. ~~**Run `nix run .#check`** end-to-end to confirm vet + test-race + lint + govulncheck still pass with the working tree in its current state. The `.gitignore` change is inert, but it's worth verifying nothing else regressed.~~ done — run green 2026-10-05
+30. ~~**Document this fix in `CHANGELOG.md`** under an "Unreleased / Internal" section so future contributors understand the binary's absence is intentional, not a missing file.~~ **Won't implement — declined.**
 
 **Project-wide follow-ups (broader, lower priority):**
 
-31. **Wire a pre-commit hook** that runs `go build ./...` so accidentally-staged Go files that don't compile can't be committed.
-32. **Wire a pre-commit hook** that blocks `git add .` on blobs >2 MB unless `--force-large` is passed.
-33. **Add `git ls-files | grep -E '\.(exe|dll|so|dylib)$'` to CI** — fails if compiled artifacts are tracked.
-34. **Add `git ls-files | grep -E '^[^/]+$' | xargs file` to CI** — flags any root-level tracked file (the `/auditlog` and `/go-workflow-auditlog` ignores exist precisely because root-level files are usually build artifacts).
-35. **Replace `*.db` with explicit ignores** — `*.db` accidentally matches any SQLite file; the project uses no SQLite but the rule is sloppy.
-36. **The `audit-log.*` and `workflow-audit-log.*` rules in the buildflow block** are similar in spirit to `/auditlog` but glob, not anchored. Verify they cover what they claim to cover (the buildflow daemon produces files with those prefixes).
-37. **Investigate `docs/evaluations/`** — listed in `git status` as untracked. Is this intentional work-in-progress or accidentally-created scratch? Either `.gitignore` it or add it to the repo.
-38. **Investigate `viz/design_tokens.go` and `viz/design_tokens_test.go`** — listed in `git status` as untracked. Same question: intentional WIP or scratch?
-39. **Investigate the modified `.golangci.yml`** — staged in working tree. Not touched in this session. Flag for review by whoever made the change.
-40. **Investigate the modified `AGENTS.md`** — staged in working tree. Not touched in this session. The "Aggressive Update Protocol" in the user's AGENTS.md says to update on new info — but who updated it this session? Likely the daemon or a prior session.
-41. **Investigate the modified `scripts/coverage-gate.sh`** — staged in working tree. Not touched in this session.
-42. **Investigate the modified `cmd/auditlog/{convert,load,main}.go`** — staged in working tree. The recent commit `e4a4439` already touched these ("refactor(auditlog): remove unused auditlog imports from CLI subcommands"). Are these further uncommitted changes?
-43. **Investigate the modified `CHANGELOG.md`, `FEATURES.md`, `TODO_LIST.md`** — staged in working tree. Could be doc health updates from a prior session, or daemon activity.
-44. **Investigate the modified `.github/workflows/ci.yml`** — staged in working tree. Not touched in this session.
-45. **Consider whether the auto-commit daemon should be paused** when a human session is active, to avoid two actors editing the working tree concurrently. This is a workflow-level question; the daemon's commit during my edit attempt (causing the "file modified since last read" guard to fire) is exactly the kind of conflict that wastes time.
-46. **Add an `art-dupl` check to CI** — the AGENTS.md mentions zero clone groups at `-t 30` is the goal, but no CI gate enforces it. The risk: clones creep back.
-47. **Add a `govulncheck` gate to CI for the core module** — AGENTS.md mentions `live` has it but doesn't explicitly state whether core does. Worth verifying.
-48. **Verify the `go.work` file is gitignored** — `.gitignore:19` says `go.work`. Confirmed earlier in this session. Good.
-49. **Check whether `go.work.sum` is gitignored** — `.gitignore:100` (buildflow block) says `go.work.sum`. Good.
-50. **Document the canonical pattern for "untrack a wrongly-committed file"** in AGENTS.md under "Gotchas" so future sessions don't re-derive it. Pattern: verify tracking → verify no references → `git rm --cached` → edit `.gitignore` → `git check-ignore` → build.
+31. ~~**Wire a pre-commit hook** that runs `go build ./...` so accidentally-staged Go files that don't compile can't be committed.~~ **Won't implement — declined — existing pre-commit covers.**
+32. ~~**Wire a pre-commit hook** that blocks `git add .` on blobs >2 MB unless `--force-large` is passed.~~ **Won't implement — declined.**
+33. ~~**Add `git ls-files | grep -E '\.(exe|dll|so|dylib)$'` to CI** — fails if compiled artifacts are tracked.~~ **Won't implement — declined.**
+34. ~~**Add `git ls-files | grep -E '^[^/]+$' | xargs file` to CI** — flags any root-level tracked file (the `/auditlog` and `/go-workflow-auditlog` ignores exist precisely because root-level files are usually build artifacts).~~ **Won't implement — declined.**
+35. ~~**Replace `*.db` with explicit ignores** — `*.db` accidentally matches any SQLite file; the project uses no SQLite but the rule is sloppy.~~ **Won't implement — declined.**
+36. ~~**The `audit-log.*` and `workflow-audit-log.*` rules in the buildflow block** are similar in spirit to `/auditlog` but glob, not anchored. Verify they cover what they claim to cover (the buildflow daemon produces files with those prefixes).~~ **Won't implement — buildflow rules verified.**
+37. ~~**Investigate `docs/evaluations/`** — listed in `git status` as untracked. Is this intentional work-in-progress or accidentally-created scratch? Either `.gitignore` it or add it to the repo.~~ done — evaluations committed
+38. ~~**Investigate `viz/design_tokens.go` and `viz/design_tokens_test.go`** — listed in `git status` as untracked. Same question: intentional WIP or scratch?~~ done — design_tokens committed
+39. ~~**Investigate the modified `.golangci.yml`** — staged in working tree. Not touched in this session. Flag for review by whoever made the change.~~ done — resolved by history
+40. ~~**Investigate the modified `AGENTS.md`** — staged in working tree. Not touched in this session. The "Aggressive Update Protocol" in the user's AGENTS.md says to update on new info — but who updated it this session? Likely the daemon or a prior session.~~ done — resolved by history
+41. ~~**Investigate the modified `scripts/coverage-gate.sh`** — staged in working tree. Not touched in this session.~~ done — resolved by history
+42. ~~**Investigate the modified `cmd/auditlog/{convert,load,main}.go`** — staged in working tree. The recent commit `e4a4439` already touched these ("refactor(auditlog): remove unused auditlog imports from CLI subcommands"). Are these further uncommitted changes?~~ done — resolved by history
+43. ~~**Investigate the modified `CHANGELOG.md`, `FEATURES.md`, `TODO_LIST.md`** — staged in working tree. Could be doc health updates from a prior session, or daemon activity.~~ done — resolved by history
+44. ~~**Investigate the modified `.github/workflows/ci.yml`** — staged in working tree. Not touched in this session.~~ done — resolved by history
+45. ~~**Consider whether the auto-commit daemon should be paused** when a human session is active, to avoid two actors editing the working tree concurrently. This is a workflow-level question; the daemon's commit during my edit attempt (causing the "file modified since last read" guard to fire) is exactly the kind of conflict that wastes time.~~ **Won't implement — daemon accepted.**
+46. ~~**Add an `art-dupl` check to CI** — the AGENTS.md mentions zero clone groups at `-t 30` is the goal, but no CI gate enforces it. The risk: clones creep back.~~ **Won't implement — declined — manual policy.**
+47. ~~**Add a `govulncheck` gate to CI for the core module** — AGENTS.md mentions `live` has it but doesn't explicitly state whether core does. Worth verifying.~~ done — all three modules scanned
+48. ~~**Verify the `go.work` file is gitignored** — `.gitignore:19` says `go.work`. Confirmed earlier in this session. Good.~~ done — confirmed
+49. ~~**Check whether `go.work.sum` is gitignored** — `.gitignore:100` (buildflow block) says `go.work.sum`. Good.~~ done — confirmed
+50. ~~**Document the canonical pattern for "untrack a wrongly-committed file"** in AGENTS.md under "Gotchas" so future sessions don't re-derive it. Pattern: verify tracking → verify no references → `git rm --cached` → edit `.gitignore` → `git check-ignore` → build.~~ **Won't implement — pattern documented in this report; AGENTS covers daemon hygiene.**
 
 ---
 

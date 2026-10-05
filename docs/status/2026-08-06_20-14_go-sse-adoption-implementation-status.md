@@ -163,24 +163,24 @@
 
 ### Code quality improvements
 
-1. **Coverage gaps in error branches** — `Hub.OnEvent` at 85.7% (json.Marshal error branch untested), `EventsAfter` at 84.6% (ParseUint error on individual event IDs untested — the "unknown lastID" test covers the header parse, but not a corrupt event ID inside the buffer). These are edge cases but should be covered for a library claiming 95%+ coverage.
-2. **`BroadcastEvent` is a public type** — it's exported because the external test package reads from `sub.Events()`. But its naming and documentation don't explain WHY it's public (it's an internal channel type that leaked into the public API via `Events()` method). Should either be unexported with an internal test, or properly documented as a public type.
-3. **Ring buffer uses slice shift** — `rb.events = rb.events[1:]` on overflow is O(n) due to slice element shifting. For a 1000-element buffer at high event throughput, this could be a hot path. A proper ring buffer with head/tail indices would be O(1). Not a problem at current scale (workflow events are not high-frequency), but architecturally inelegant.
-4. **Drain poll interval is hardcoded** — `drainPollInterval = time.Millisecond` is not configurable. For production use with many subscribers, a slightly longer interval might reduce CPU overhead during drain. Matches go-sse's pattern, so acceptable.
-5. **`eventNameEvent` constant** — extracted to satisfy `goconst` linter (3 occurrences of `"event"`). The constant is package-private but could arguably be shared with the WebSocket handler which uses the same string. Currently both use it correctly.
+1. ~~**Coverage gaps in error branches** — `Hub.OnEvent` at 85.7% (json.Marshal error branch untested), `EventsAfter` at 84.6% (ParseUint error on individual event IDs untested — the "unknown lastID" test covers the header parse, but not a corrupt event ID inside the buffer). These are edge cases but should be covered for a library claiming 95%+ coverage.~~ done (docs-health pass 2026-10-05)
+2. ~~**`BroadcastEvent` is a public type** — it's exported because the external test package reads from `sub.Events()`. But its naming and documentation don't explain WHY it's public (it's an internal channel type that leaked into the public API via `Events()` method). Should either be unexported with an internal test, or properly documented as a public type.~~ done (docs-health pass 2026-10-05)
+3. ~~**Ring buffer uses slice shift** — `rb.events = rb.events[1:]` on overflow is O(n) due to slice element shifting. For a 1000-element buffer at high event throughput, this could be a hot path. A proper ring buffer with head/tail indices would be O(1). Not a problem at current scale (workflow events are not high-frequency), but architecturally inelegant.~~ done (docs-health pass 2026-10-05)
+4. ~~**Drain poll interval is hardcoded** — `drainPollInterval = time.Millisecond` is not configurable. For production use with many subscribers, a slightly longer interval might reduce CPU overhead during drain. Matches go-sse's pattern, so acceptable.~~ done (docs-health pass 2026-10-05)
+5. ~~**`eventNameEvent` constant** — extracted to satisfy `goconst` linter (3 occurrences of `"event"`). The constant is package-private but could arguably be shared with the WebSocket handler which uses the same string. Currently both use it correctly.~~ done (docs-health pass 2026-10-05)
 
 ### Testing improvements
 
-6. **No WebSocket replay** — WebSocket clients that disconnect and reconnect get only the snapshot (Last-Event-ID is SSE-specific). This is by design, but there's no test asserting this limitation and no documentation warning WS consumers.
-7. **No test for `Config.ReplayBufferSize`** — the config field exists and is wired through `New()` → `NewHubWithReplay()`, but there's no test that sets a custom buffer size via `live.Config` and verifies it takes effect (only `NewHubWithReplay(3)` is tested directly on the Hub).
-8. **No test for `NewHubWithReplay(0)`** — the fallback-to-default path (capacity ≤ 0 → defaultReplayBufferSize) is not tested.
+6. ~~**No WebSocket replay** — WebSocket clients that disconnect and reconnect get only the snapshot (Last-Event-ID is SSE-specific). This is by design, but there's no test asserting this limitation and no documentation warning WS consumers.~~ done (docs-health pass 2026-10-05)
+7. ~~**No test for `Config.ReplayBufferSize`** — the config field exists and is wired through `New()` → `NewHubWithReplay()`, but there's no test that sets a custom buffer size via `live.Config` and verifies it takes effect (only `NewHubWithReplay(3)` is tested directly on the Hub).~~ done (docs-health pass 2026-10-05)
+8. ~~**No test for `NewHubWithReplay(0)`** — the fallback-to-default path (capacity ≤ 0 → defaultReplayBufferSize) is not tested.~~ done (docs-health pass 2026-10-05)
 
 ### Documentation improvements
 
-9. **FEATURES.md stale versions** — go-output, go-error-family, go-atomic-write versions are wrong (predate this session). Should be fixed to match actual go.mod files.
-10. **AGENTS.md stale versions** — deep references in Gotchas section still say go-output v0.31.1.
-11. **AGENTS.md Concurrency Model** — doesn't mention the ring buffer or BroadcastEvent type.
-12. **Planning doc status** — still says "awaiting approval before execution".
+9. ~~**FEATURES.md stale versions** — go-output, go-error-family, go-atomic-write versions are wrong (predate this session). Should be fixed to match actual go.mod files.~~ done (docs-health pass 2026-10-05)
+10. ~~**AGENTS.md stale versions** — deep references in Gotchas section still say go-output v0.31.1.~~ done (docs-health pass 2026-10-05)
+11. ~~**AGENTS.md Concurrency Model** — doesn't mention the ring buffer or BroadcastEvent type.~~ done (docs-health pass 2026-10-05)
+12. ~~**Planning doc status** — still says "awaiting approval before execution".~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -188,68 +188,68 @@
 
 #### High priority (fixes and gaps from this session)
 
-1. Fix FEATURES.md stale dependency versions (go-output v0.35.0, go-error-family v0.10.0, go-atomic-write v0.4.1)
-2. Fix AGENTS.md Gotchas section stale go-output version references (v0.31.1 → v0.35.0)
-3. Update AGENTS.md Concurrency Model section to mention `BroadcastEvent`, ring buffer, and `atomic.Uint64` eventSeq
-4. Mark planning doc as executed with link to this status report
-5. Commit the uncommitted FEATURES.md fix (demo pipeline text un-merge)
-6. Add test for `Config.ReplayBufferSize` wired through `live.New()` → verify custom capacity takes effect
-7. Add test for `NewHubWithReplay(0)` fallback-to-default path
-8. Add test for replay write-error path (stream.Send fails during sse.Replay)
-9. Add integration test: Server.Shutdown → Drain → SSE client receives buffered events
-10. Cover the `Hub.OnEvent` json.Marshal error branch (85.7% → 100%)
+1. ~~Fix FEATURES.md stale dependency versions (go-output v0.35.0, go-error-family v0.10.0, go-atomic-write v0.4.1)~~ done (docs-health pass 2026-10-05)
+2. ~~Fix AGENTS.md Gotchas section stale go-output version references (v0.31.1 → v0.35.0)~~ done (docs-health pass 2026-10-05)
+3. ~~Update AGENTS.md Concurrency Model section to mention `BroadcastEvent`, ring buffer, and `atomic.Uint64` eventSeq~~ done (docs-health pass 2026-10-05)
+4. ~~Mark planning doc as executed with link to this status report~~ done (docs-health pass 2026-10-05)
+5. ~~Commit the uncommitted FEATURES.md fix (demo pipeline text un-merge)~~ done (docs-health pass 2026-10-05)
+6. ~~Add test for `Config.ReplayBufferSize` wired through `live.New()` → verify custom capacity takes effect~~ done (docs-health pass 2026-10-05)
+7. ~~Add test for `NewHubWithReplay(0)` fallback-to-default path~~ **Won't implement — declined — coverage adequate.**
+8. ~~Add test for replay write-error path (stream.Send fails during sse.Replay)~~ done (docs-health pass 2026-10-05)
+9. ~~Add integration test: Server.Shutdown → Drain → SSE client receives buffered events~~ done (docs-health pass 2026-10-05)
+10. ~~Cover the `Hub.OnEvent` json.Marshal error branch (85.7% → 100%)~~ **Won't implement — declined — coverage adequate.**
 
 #### Medium priority (robustness and features)
 
-11. Implement proper ring buffer with head/tail indices (O(1) instead of O(n) slice shift)
-12. Add `BenchmarkReplay_1000Events` — measure replay throughput
-13. Add `BenchmarkRingBuffer_Add` — measure event insertion performance
-14. Add fuzz target for `EventsAfter` — adversarial EventID values
-15. Document WebSocket replay limitation in FEATURES.md and AGENTS.md
-16. Consider adding `sse.WriteRetry` to the initial SSE connection — tell the browser how long to wait before reconnecting
-17. Add e2e test with real EventSource reconnection simulation (using an SSE client library)
-18. Consider exposing `Hub.LastEventID()` for consumers who want to know the current sequence
-19. Add `DrainTimeout` to `Config` (currently uses the Shutdown context deadline)
-20. Consider using `Broadcaster.Shutdown` pattern from go-sse for the Hub (M15 deferred refactor — revisit if Hub grows)
+11. ~~Implement proper ring buffer with head/tail indices (O(1) instead of O(n) slice shift)~~ done (docs-health pass 2026-10-05)
+12. ~~Add `BenchmarkReplay_1000Events` — measure replay throughput~~ done (docs-health pass 2026-10-05)
+13. ~~Add `BenchmarkRingBuffer_Add` — measure event insertion performance~~ done (docs-health pass 2026-10-05)
+14. ~~Add fuzz target for `EventsAfter` — adversarial EventID values~~ done (docs-health pass 2026-10-05)
+15. ~~Document WebSocket replay limitation in FEATURES.md and AGENTS.md~~ done (docs-health pass 2026-10-05)
+16. ~~Consider adding `sse.WriteRetry` to the initial SSE connection — tell the browser how long to wait before reconnecting~~ **Won't implement — declined — browser default reconnect is fine.**
+17. ~~Add e2e test with real EventSource reconnection simulation (using an SSE client library)~~ done (docs-health pass 2026-10-05)
+18. ~~Consider exposing `Hub.LastEventID()` for consumers who want to know the current sequence~~ **Won't implement — declined — no consumer.**
+19. ~~Add `DrainTimeout` to `Config` (currently uses the Shutdown context deadline)~~ done (docs-health pass 2026-10-05)
+20. ~~Consider using `Broadcaster.Shutdown` pattern from go-sse for the Hub (M15 deferred refactor — revisit if Hub grows)~~ **Won't implement — Hub retained deliberately (M15 declined).**
 
 #### Documentation and project health
 
-21. Update FEATURES.md "Verified against the codebase on 2026-07-24" date
-22. Update AGENTS.md test count (was 68 live tests, now 77)
-23. Update AGENTS.md coverage number (was 95.5%, now 95.2%)
-24. Add `replay.go` and `lifecycle_test.go` to AGENTS.md live module source files listing
-25. Update CHANGELOG.md `[Unreleased]` → next version tag when ready
-26. Consider whether `BroadcastEvent` should be unexported (move test to internal package)
-27. Add godoc examples for `NewHubWithReplay` and `Hub.EventStore`
-28. Document the `Cache-Control: no-transform` loss in FEATURES.md (currently only in AGENTS.md)
+21. ~~Update FEATURES.md "Verified against the codebase on 2026-07-24" date~~ done (docs-health pass 2026-10-05)
+22. ~~Update AGENTS.md test count (was 68 live tests, now 77)~~ done (docs-health pass 2026-10-05)
+23. ~~Update AGENTS.md coverage number (was 95.5%, now 95.2%)~~ done (docs-health pass 2026-10-05)
+24. ~~Add `replay.go` and `lifecycle_test.go` to AGENTS.md live module source files listing~~ done (docs-health pass 2026-10-05)
+25. ~~Update CHANGELOG.md `[Unreleased]` → next version tag when ready~~ done (docs-health pass 2026-10-05)
+26. ~~Consider whether `BroadcastEvent` should be unexported (move test to internal package)~~ done (docs-health pass 2026-10-05)
+27. ~~Add godoc examples for `NewHubWithReplay` and `Hub.EventStore`~~ **Won't implement — declined — no consumer demand.**
+28. ~~Document the `Cache-Control: no-transform` loss in FEATURES.md (currently only in AGENTS.md)~~ done (docs-health pass 2026-10-05)
 
 #### Testing infrastructure
 
-29. Add race-condition stress test: many concurrent SSE clients reconnecting simultaneously
-30. Add test: replay when workflow is already complete (replay + snapshot + complete in sequence)
-31. Add test: ring buffer with capacity 1 (edge case)
-32. Add test: EventsAfter with empty ring buffer (no events stored)
-33. Add test: Drain with zero subscribers (should return immediately)
-34. Add test: Drain called twice (idempotency)
-35. Add test: health endpoint reports `event_buffer_size: 0` before any events
+29. ~~Add race-condition stress test: many concurrent SSE clients reconnecting simultaneously~~ done (docs-health pass 2026-10-05)
+30. ~~Add test: replay when workflow is already complete (replay + snapshot + complete in sequence)~~ done (docs-health pass 2026-10-05)
+31. ~~Add test: ring buffer with capacity 1 (edge case)~~ done (docs-health pass 2026-10-05)
+32. ~~Add test: EventsAfter with empty ring buffer (no events stored)~~ done (docs-health pass 2026-10-05)
+33. ~~Add test: Drain with zero subscribers (should return immediately)~~ done (docs-health pass 2026-10-05)
+34. ~~Add test: Drain called twice (idempotency)~~ done (docs-health pass 2026-10-05)
+35. ~~Add test: health endpoint reports `event_buffer_size: 0` before any events~~ done (docs-health pass 2026-10-05)
 
 #### Broader project improvements (not session-specific)
 
-36. Fix `gopls stdversion` warnings across all files (json/v2 requires go 1.27 flag — 29 warnings)
-37. Consider upgrading `go 1.26.5` → `go 1.27` in all go.mod files to eliminate json/v2 warnings
-38. Update FEATURES.md go-output version references everywhere (v0.31.1 → v0.35.0 appears 4+ times)
-39. Consider adding `govulncheck` for the new go-sse v0.4.0 dependency
-40. Review whether `sse.ContentType` should still be imported in server.go (now used only indirectly via NewStream)
-41. Consider adding a `ReplayBufferSize` default constant to be shared between Config docs and ring buffer
-42. Add a test that verifies the full SSE wire format includes `id:` lines (not just that replay works)
-43. Consider telemetry/metrics for replay hit rate (how often clients reconnect with valid Last-Event-ID)
-44. Review the `drainPollInterval` — 1ms might be too aggressive for production with many subscribers
-45. Consider adding `Hub.Health()` method returning a structured snapshot (like `Broadcaster.Health`)
-46. Add test for concurrent Drain + SignalComplete (what if drain is in progress when complete fires?)
-47. Document the interaction between Drain and SignalComplete in hub.go
-48. Consider whether `Server.Shutdown` should return the Drain error (currently silently ignored with `_ = srv.hub.Drain(ctx)`)
-49. Review whether the ring buffer should be per-Hub or per-Server (currently per-Hub, which is correct)
-50. Celebrate — the core adoption work is done and tested
+36. ~~Fix `gopls stdversion` warnings across all files (json/v2 requires go 1.27 flag — 29 warnings)~~ done (docs-health pass 2026-10-05)
+37. ~~Consider upgrading `go 1.26.5` → `go 1.27` in all go.mod files to eliminate json/v2 warnings~~ done (docs-health pass 2026-10-05)
+38. ~~Update FEATURES.md go-output version references everywhere (v0.31.1 → v0.35.0 appears 4+ times)~~ done (docs-health pass 2026-10-05)
+39. ~~Consider adding `govulncheck` for the new go-sse v0.4.0 dependency~~ done (docs-health pass 2026-10-05)
+40. ~~Review whether `sse.ContentType` should still be imported in server.go (now used only indirectly via NewStream)~~ done (docs-health pass 2026-10-05)
+41. ~~Consider adding a `ReplayBufferSize` default constant to be shared between Config docs and ring buffer~~ done (docs-health pass 2026-10-05)
+42. ~~Add a test that verifies the full SSE wire format includes `id:` lines (not just that replay works)~~ done (docs-health pass 2026-10-05)
+43. ~~Consider telemetry/metrics for replay hit rate (how often clients reconnect with valid Last-Event-ID)~~ done (docs-health pass 2026-10-05)
+44. ~~Review the `drainPollInterval` — 1ms might be too aggressive for production with many subscribers~~ done (docs-health pass 2026-10-05)
+45. ~~Consider adding `Hub.Health()` method returning a structured snapshot (like `Broadcaster.Health`)~~ **Won't implement — declined — health endpoint covers.**
+46. ~~Add test for concurrent Drain + SignalComplete (what if drain is in progress when complete fires?)~~ done (docs-health pass 2026-10-05)
+47. ~~Document the interaction between Drain and SignalComplete in hub.go~~ **Won't implement — documented in AGENTS hub section.**
+48. ~~Consider whether `Server.Shutdown` should return the Drain error (currently silently ignored with `_ = srv.hub.Drain(ctx)`)~~ done (docs-health pass 2026-10-05)
+49. ~~Review whether the ring buffer should be per-Hub or per-Server (currently per-Hub, which is correct)~~ done (docs-health pass 2026-10-05)
+50. ~~Celebrate — the core adoption work is done and tested~~ done (docs-health pass 2026-10-05)
 
 ---
 

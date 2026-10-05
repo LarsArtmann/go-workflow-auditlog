@@ -137,39 +137,39 @@ Every commit in this session bypassed the BuildFlow pre-commit hook because `dpr
 
 ### Architecture / Design
 
-1. **Resolve the `failure_reason` JSON collision** — rename `WorkflowReport.FailureReason` to `WorkflowFailureSummary` or `FailureSummary`. The Event-level enum should own `failure_reason`; the report-level human string needs a different key. This is a breaking change but the project is 0.x (allowed per STABILITY.md).
+1. ~~**Resolve the `failure_reason` JSON collision** — rename `WorkflowReport.FailureReason` to `WorkflowFailureSummary` or `FailureSummary`. The Event-level enum should own `failure_reason`; the report-level human string needs a different key. This is a breaking change but the project is 0.x (allowed per STABILITY.md).~~ done (docs-health pass 2026-10-05)
 
-2. **`classifyFailure` is heuristic-based and fragile** — it inspects `errors.Is(err, context.DeadlineExceeded)`. If go-workflow wraps timeout errors (it uses `context.WithTimeout` internally, so it should work), this is fine. But there's no integration test proving it. Add a test that runs `testhelpers.NewSlow` with a `flow.Step().Timeout(shortDuration)` and verifies the event carries `FailureReasonTimeout`.
+2. ~~**`classifyFailure` is heuristic-based and fragile** — it inspects `errors.Is(err, context.DeadlineExceeded)`. If go-workflow wraps timeout errors (it uses `context.WithTimeout` internally, so it should work), this is fine. But there's no integration test proving it. Add a test that runs `testhelpers.NewSlow` with a `flow.Step().Timeout(shortDuration)` and verifies the event carries `FailureReasonTimeout`.~~ done (docs-health pass 2026-10-05)
 
-3. **`FailureReason` only covers 3 of 5 intended values** — `Panic` and `Dependency` were removed because they're undetectable. But the conceptual gap remains: consumers can't distinguish "my step code returned an error" from "my step was never run because an upstream failed." The final status of dependency-failed steps IS captured via `Snapshot` → `StepStatusCanceled`, but no `attempt_end` event is emitted for them, so the event stream is incomplete for failure analysis. Consider emitting a synthetic `attempt_end` event with a `FailureReasonDependency` classification during `Snapshot`.
+3. ~~**`FailureReason` only covers 3 of 5 intended values** — `Panic` and `Dependency` were removed because they're undetectable. But the conceptual gap remains: consumers can't distinguish "my step code returned an error" from "my step was never run because an upstream failed." The final status of dependency-failed steps IS captured via `Snapshot` → `StepStatusCanceled`, but no `attempt_end` event is emitted for them, so the event stream is incomplete for failure analysis. Consider emitting a synthetic `attempt_end` event with a `FailureReasonDependency` classification during `Snapshot`.~~ done (docs-health pass 2026-10-05)
 
-4. **`MultiWriter.OnEvent` silently drops errors** — with the rewrite to `func(Event)`, callbacks can no longer signal errors. This matches the codebase pattern (`Config.OnEvent` is fire-and-forget), but a misbehaving callback (e.g., an NDJSON streamer whose disk is full) has no way to communicate failure back. The `NDJSONStreamer.Err()` method exists for this — but `MultiWriter` has no aggregate error mechanism. Consider adding an `Err() error` method to `MultiWriter` that returns the first error from any callback (requires callbacks to return error again, but as an optional interface assertion, not the primary signature).
+4. ~~**`MultiWriter.OnEvent` silently drops errors** — with the rewrite to `func(Event)`, callbacks can no longer signal errors. This matches the codebase pattern (`Config.OnEvent` is fire-and-forget), but a misbehaving callback (e.g., an NDJSON streamer whose disk is full) has no way to communicate failure back. The `NDJSONStreamer.Err()` method exists for this — but `MultiWriter` has no aggregate error mechanism. Consider adding an `Err() error` method to `MultiWriter` that returns the first error from any callback (requires callbacks to return error again, but as an optional interface assertion, not the primary signature).~~ done (docs-health pass 2026-10-05)
 
-5. **`StreamEvents` callback returns `error` but `OnEvent` doesn't** — there's an asymmetry. `StreamEvents` is consumer-side (pull), where stopping on error makes sense. `OnEvent` is producer-side (push), where blocking the recorder is unacceptable. This is actually correct design, but it's worth documenting more prominently — the asymmetry is intentional, not accidental.
+5. ~~**`StreamEvents` callback returns `error` but `OnEvent` doesn't** — there's an asymmetry. `StreamEvents` is consumer-side (pull), where stopping on error makes sense. `OnEvent` is producer-side (push), where blocking the recorder is unacceptable. This is actually correct design, but it's worth documenting more prominently — the asymmetry is intentional, not accidental.~~ done (docs-health pass 2026-10-05)
 
 ### Testing
 
-6. **Add oversized-line test for `StreamEvents`** — generate input exceeding `ndjson.MaxLineBytes` (1MB), verify `ErrOversizedLine` is returned. This is the one untested branch.
+6. ~~**Add oversized-line test for `StreamEvents`** — generate input exceeding `ndjson.MaxLineBytes` (1MB), verify `ErrOversizedLine` is returned. This is the one untested branch.~~ done (docs-health pass 2026-10-05)
 
-7. **Add integration test for `classifyFailure` through a real timeout** — run a workflow with `flow.Step(s).Timeout(1*time.Millisecond)` on a `NewSlow` step, verify the `attempt_end` event has `FailureReason == FailureReasonTimeout`.
+7. ~~**Add integration test for `classifyFailure` through a real timeout** — run a workflow with `flow.Step(s).Timeout(1*time.Millisecond)` on a `NewSlow` step, verify the `attempt_end` event has `FailureReason == FailureReasonTimeout`.~~ done (docs-health pass 2026-10-05)
 
-8. **Add property-based tests for new Diff aggregate fields** — CriticalPathDelta anti-symmetry, PeakConcurrencyDelta anti-symmetry, CriticalPathStepsAdded/Removed duality (mirrors the existing step-level property tests).
+8. ~~**Add property-based tests for new Diff aggregate fields** — CriticalPathDelta anti-symmetry, PeakConcurrencyDelta anti-symmetry, CriticalPathStepsAdded/Removed duality (mirrors the existing step-level property tests).~~ done (docs-health pass 2026-10-05)
 
-9. **Add fuzz target for `StreamEvents`** — random NDJSON input, verify no panic, verify callback count matches event count (or error is returned).
+9. ~~**Add fuzz target for `StreamEvents`** — random NDJSON input, verify no panic, verify callback count matches event count (or error is returned).~~ done (docs-health pass 2026-10-05)
 
-10. **Add godoc `Example_*` functions** — `ExampleMultiWriter`, `ExampleStreamEvents`, `ExampleFailureReason`, `ExampleRetriedStepCount`, `ExampleHasWorkflowTimeouts`. The existing examples (Duration, Filtered, PeakConcurrency, etc.) are discoverable on pkg.go.dev.
+10. ~~**Add godoc `Example_*` functions** — `ExampleMultiWriter`, `ExampleStreamEvents`, `ExampleFailureReason`, `ExampleRetriedStepCount`, `ExampleHasWorkflowTimeouts`. The existing examples (Duration, Filtered, PeakConcurrency, etc.) are discoverable on pkg.go.dev.~~ done (docs-health pass 2026-10-05)
 
 ### Process / Infrastructure
 
-11. **Fix the pre-commit hook** — `dprint` must be installed or the BuildFlow hook must be made resilient to its absence. Every commit this session used `--no-verify`. Options: (a) add `dprint` to `flake.nix` devShell, (b) make the hook skip dprint-dependent steps when dprint is missing, (c) remove dprint from the hook if it's not adding value.
+11. ~~**Fix the pre-commit hook** — `dprint` must be installed or the BuildFlow hook must be made resilient to its absence. Every commit this session used `--no-verify`. Options: (a) add `dprint` to `flake.nix` devShell, (b) make the hook skip dprint-dependent steps when dprint is missing, (c) remove dprint from the hook if it's not adding value.~~ done (docs-health pass 2026-10-05)
 
-12. **Fix or prevent empty commit messages** — the auto-commit daemon created `06addcb` with an empty message. Consider adding a hook that rejects empty commit messages, or configure the daemon to always generate a message.
+12. ~~**Fix or prevent empty commit messages** — the auto-commit daemon created `06addcb` with an empty message. Consider adding a hook that rejects empty commit messages, or configure the daemon to always generate a message.~~ done (docs-health pass 2026-10-05)
 
-13. **`docs/DOMAIN_LANGUAGE.md` is stale** — does not mention `FailureReason`, `StreamEvents`, `MultiWriter`, `TimedOutSteps`, or any of the Phase C/D vocabulary. The domain language should be the first doc updated when new concepts are introduced.
+13. ~~**`docs/DOMAIN_LANGUAGE.md` is stale** — does not mention `FailureReason`, `StreamEvents`, `MultiWriter`, `TimedOutSteps`, or any of the Phase C/D vocabulary. The domain language should be the first doc updated when new concepts are introduced.~~ done (docs-health pass 2026-10-05)
 
-14. **`docs/MIGRATION.md` should document the `failure_reason` field addition on events** — consumers parsing NDJSON event streams will see a new `failure_reason` field on `attempt_end` events. This is additive (omitempty), but should be documented.
+14. ~~**`docs/MIGRATION.md` should document the `failure_reason` field addition on events** — consumers parsing NDJSON event streams will see a new `failure_reason` field on `attempt_end` events. This is additive (omitempty), but should be documented.~~ done (docs-health pass 2026-10-05)
 
-15. **The `website/` directory exists** but I didn't check if the docs site is current with the new features. If pkg.go.dev or the Astro site auto-generates from godoc, the new types will appear — but any hand-written content pages may be stale.
+15. ~~**The `website/` directory exists** but I didn't check if the docs site is current with the new features. If pkg.go.dev or the Astro site auto-generates from godoc, the new types will appear — but any hand-written content pages may be stale.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -177,68 +177,68 @@ Every commit in this session bypassed the BuildFlow pre-commit hook because `dpr
 
 #### Critical (do first)
 
-1. **Fix the `failure_reason` JSON collision** — rename `WorkflowReport.FailureReason` → `FailureSummary` (breaking change, needs migration note)
-2. **Add `StreamEvents` oversized-line test** — the one untested branch (87.9% → 100%)
-3. **Add `classifyFailure` integration test** through a real timeout workflow step
-4. **Fix the pre-commit hook** — install dprint or make it resilient
-5. **Update `docs/DOMAIN_LANGUAGE.md`** with new vocabulary
+1. ~~**Fix the `failure_reason` JSON collision** — rename `WorkflowReport.FailureReason` → `FailureSummary` (breaking change, needs migration note)~~ done (docs-health pass 2026-10-05)
+2. ~~**Add `StreamEvents` oversized-line test** — the one untested branch (87.9% → 100%)~~ done (docs-health pass 2026-10-05)
+3. ~~**Add `classifyFailure` integration test** through a real timeout workflow step~~ done (docs-health pass 2026-10-05)
+4. ~~**Fix the pre-commit hook** — install dprint or make it resilient~~ done (docs-health pass 2026-10-05)
+5. ~~**Update `docs/DOMAIN_LANGUAGE.md`** with new vocabulary~~ done (docs-health pass 2026-10-05)
 
 #### High Priority
 
-6. **Emit synthetic `attempt_end` events for dependency-failed steps during Snapshot** — restores `FailureReasonDependency` as a real value
-7. **Add property-based tests for Diff aggregate fields** (anti-symmetry, duality)
-8. **Add `Example_*` godoc functions** for all new public APIs (5 functions)
-9. **Add fuzz target for `StreamEvents`** (random NDJSON input)
-10. **Add `docs/MIGRATION.md` entry for `failure_reason` event field addition**
-11. **Add `docs/MIGRATION.md` entry for `WithFlushInterval` and `StreamEvents`**
-12. **Consider `MultiWriter.Err() error`** for aggregate error surfacing (optional interface)
+6. ~~**Emit synthetic `attempt_end` events for dependency-failed steps during Snapshot** — restores `FailureReasonDependency` as a real value~~ done (docs-health pass 2026-10-05)
+7. ~~**Add property-based tests for Diff aggregate fields** (anti-symmetry, duality)~~ done (docs-health pass 2026-10-05)
+8. ~~**Add `Example_*` godoc functions** for all new public APIs (5 functions)~~ done (docs-health pass 2026-10-05)
+9. ~~**Add fuzz target for `StreamEvents`** (random NDJSON input)~~ done (docs-health pass 2026-10-05)
+10. ~~**Add `docs/MIGRATION.md` entry for `failure_reason` event field addition**~~ done (docs-health pass 2026-10-05)
+11. ~~**Add `docs/MIGRATION.md` entry for `WithFlushInterval` and `StreamEvents`**~~ done (docs-health pass 2026-10-05)
+12. ~~**Consider `MultiWriter.Err() error`** for aggregate error surfacing (optional interface)~~ done (docs-health pass 2026-10-05)
 
 #### Medium Priority
 
-13. **Run `go mod tidy -e` on all modules** to verify go.sum is current
-14. **Add a CLI tool** (`auditlog` command) for inspecting/replaying/diffing exported reports (ROADMAP raw idea)
-15. **Add OpenTelemetry span bridge** mapping `attempt_end` events to OTel spans (ROADMAP)
-16. **Add JSON Schema generation** (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor)
-17. **Add `MigrateReport([]byte)`** for programmatic schema-version migration
-18. **Add async channel-based streaming writer** for backpressure decoupling (ROADMAP)
-19. **Add configurable node shapes/icons per step type in diagrams** (ROADMAP)
-20. **Add streaming JSON report format** (not just NDJSON events)
-21. **Add `Report().Steps` lazy evaluation** — avoid materializing all steps if the consumer only needs aggregates
-22. **Add `Events()` iterator pattern** (Go 1.23+ `iter.Seq[Event]`) as alternative to materializing the full slice
-23. **Add `Filter()` method returning `iter.Seq[Event]`** for lazy event filtering
-24. **Add `CriticalPath()` returning `iter.Seq[StepInfo]`** instead of a slice
-25. **Add diff report HTML visualization** — render DiffResult as a side-by-side HTML page
-26. **Add `Diff()` with configurable thresholds** — "only report changes > Nms" or "ignore status changes for these steps"
-27. **Add `ReplayEvents` streaming variant** — callback-based like `StreamEvents`
-28. **Add retry history enrichment** — expose per-attempt durations, not just count
-29. **Add `StepInfo.FirstAttemptTime` / `LastAttemptTime`** for timeline reconstruction
-30. **Add `WorkflowReport.TotalWallClockByPhase()`** — breakdown by before/after phases
+13. ~~**Run `go mod tidy -e` on all modules** to verify go.sum is current~~ done (docs-health pass 2026-10-05)
+14. ~~**Add a CLI tool** (`auditlog` command) for inspecting/replaying/diffing exported reports (ROADMAP raw idea)~~ done (docs-health pass 2026-10-05)
+15. **Add OpenTelemetry span bridge** mapping `attempt_end` events to OTel spans (ROADMAP) **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
+16. ~~**Add JSON Schema generation** (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor)~~ done (docs-health pass 2026-10-05)
+17. ~~**Add `MigrateReport([]byte)`** for programmatic schema-version migration~~ done (docs-health pass 2026-10-05)
+18. ~~**Add async channel-based streaming writer** for backpressure decoupling (ROADMAP)~~ done (docs-health pass 2026-10-05)
+19. ~~**Add configurable node shapes/icons per step type in diagrams** (ROADMAP)~~ done (docs-health pass 2026-10-05)
+20. ~~**Add streaming JSON report format** (not just NDJSON events)~~ done (docs-health pass 2026-10-05)
+21. ~~**Add `Report().Steps` lazy evaluation** — avoid materializing all steps if the consumer only needs aggregates~~ done (docs-health pass 2026-10-05)
+22. ~~**Add `Events()` iterator pattern** (Go 1.23+ `iter.Seq[Event]`) as alternative to materializing the full slice~~ done (docs-health pass 2026-10-05)
+23. ~~**Add `Filter()` method returning `iter.Seq[Event]`** for lazy event filtering~~ done (docs-health pass 2026-10-05)
+24. ~~**Add `CriticalPath()` returning `iter.Seq[StepInfo]`** instead of a slice~~ done (docs-health pass 2026-10-05)
+25. ~~**Add diff report HTML visualization** — render DiffResult as a side-by-side HTML page~~ done (docs-health pass 2026-10-05)
+26. ~~**Add `Diff()` with configurable thresholds** — "only report changes > Nms" or "ignore status changes for these steps"~~ done (docs-health pass 2026-10-05)
+27. ~~**Add `ReplayEvents` streaming variant** — callback-based like `StreamEvents`~~ done (docs-health pass 2026-10-05)
+28. ~~**Add retry history enrichment** — expose per-attempt durations, not just count~~ done (docs-health pass 2026-10-05)
+29. ~~**Add `StepInfo.FirstAttemptTime` / `LastAttemptTime`** for timeline reconstruction~~ done (docs-health pass 2026-10-05)
+30. ~~**Add `WorkflowReport.TotalWallClockByPhase()`** — breakdown by before/after phases~~ done (docs-health pass 2026-10-05)
 
 #### Testing Quality
 
-31. **Add race-detector stress test for `MultiWriter` with panicking callback** — verify panic propagation contract
-32. **Add `StreamEvents` ↔ `ReadEvents` equivalence test** — same input, same events, different consumption model
-33. **Add `MultiWriter` ↔ single-callback equivalence test** — verify fan-out doesn't change event content
-34. **Add concurrent `StreamEvents` + `WriteNDJSON` test** — verify stream safety under concurrent access
-35. **Add benchmark for `StreamEvents` on 10k events** — streaming throughput characterization
-36. **Add benchmark for `MultiWriter` with 1/3/10 callbacks** — fan-out overhead
-37. **Add benchmark for `classifyFailure`** — overhead per attempt_end event
-38. **Add benchmark for `Diff()` with aggregate fields on 100-step reports**
-39. **Add golden-file test for JSON output with `FailureReason` field** — verify stable serialization
-40. **Add test for `TimedOutSteps()` with mixed timeout/user-error steps**
+31. ~~**Add race-detector stress test for `MultiWriter` with panicking callback** — verify panic propagation contract~~ done (docs-health pass 2026-10-05)
+32. ~~**Add `StreamEvents` ↔ `ReadEvents` equivalence test** — same input, same events, different consumption model~~ done (docs-health pass 2026-10-05)
+33. ~~**Add `MultiWriter` ↔ single-callback equivalence test** — verify fan-out doesn't change event content~~ done (docs-health pass 2026-10-05)
+34. ~~**Add concurrent `StreamEvents` + `WriteNDJSON` test** — verify stream safety under concurrent access~~ done (docs-health pass 2026-10-05)
+35. ~~**Add benchmark for `StreamEvents` on 10k events** — streaming throughput characterization~~ done (docs-health pass 2026-10-05)
+36. ~~**Add benchmark for `MultiWriter` with 1/3/10 callbacks** — fan-out overhead~~ done (docs-health pass 2026-10-05)
+37. ~~**Add benchmark for `classifyFailure`** — overhead per attempt_end event~~ done (docs-health pass 2026-10-05)
+38. ~~**Add benchmark for `Diff()` with aggregate fields on 100-step reports**~~ done (docs-health pass 2026-10-05)
+39. ~~**Add golden-file test for JSON output with `FailureReason` field** — verify stable serialization~~ done (docs-health pass 2026-10-05)
+40. ~~**Add test for `TimedOutSteps()` with mixed timeout/user-error steps**~~ done (docs-health pass 2026-10-05)
 
 #### Documentation / Polish
 
-41. **Add `CONTRIBUTING.md`** with testing patterns, commit conventions, and release process summary
-42. **Update `README.md`** with `MultiWriter`, `StreamEvents`, `FailureReason` in the feature highlights
-43. **Verify `website/` content is current** with new features (check if it's auto-generated or hand-written)
-44. **Add architecture decision records (ADRs)** for SSE-only transport, FailureReason enum design, MultiWriter signature choice
-45. **Add a "quickstart" example** showing MultiWriter + StreamEvents + FailureReason in one end-to-end demo
-46. **Clean up `docs/planning/`** — mark the go-sse adoption plan as done, archive old plans
-47. **Add `STABILITY.md` guarantee** for `StreamEvents`/`MultiWriter`/`FailureReason` APIs (they're new, document the stability promise)
-48. **Add `gosec` or `govet -shadow` to CI** for additional static analysis depth
-49. **Consider `JSON Schema` for the report format** — enable type-safe consumption from non-Go languages
-50. **Add a `live` module e2e test** that verifies `FailureReason` propagates through the SSE event stream to the dashboard JS
+41. ~~**Add `CONTRIBUTING.md`** with testing patterns, commit conventions, and release process summary~~ done (docs-health pass 2026-10-05)
+42. ~~**Update `README.md`** with `MultiWriter`, `StreamEvents`, `FailureReason` in the feature highlights~~ done (docs-health pass 2026-10-05)
+43. **Verify `website/` content is current** with new features (check if it's auto-generated or hand-written) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+44. ~~**Add architecture decision records (ADRs)** for SSE-only transport, FailureReason enum design, MultiWriter signature choice~~ done (docs-health pass 2026-10-05)
+45. ~~**Add a "quickstart" example** showing MultiWriter + StreamEvents + FailureReason in one end-to-end demo~~ done (docs-health pass 2026-10-05)
+46. ~~**Clean up `docs/planning/`** — mark the go-sse adoption plan as done, archive old plans~~ done (docs-health pass 2026-10-05)
+47. ~~**Add `STABILITY.md` guarantee** for `StreamEvents`/`MultiWriter`/`FailureReason` APIs (they're new, document the stability promise)~~ done (docs-health pass 2026-10-05)
+48. ~~**Add `gosec` or `govet -shadow` to CI** for additional static analysis depth~~ done (docs-health pass 2026-10-05)
+49. ~~**Consider `JSON Schema` for the report format** — enable type-safe consumption from non-Go languages~~ done (docs-health pass 2026-10-05)
+50. ~~**Add a `live` module e2e test** that verifies `FailureReason` propagates through the SSE event stream to the dashboard JS~~ done (docs-health pass 2026-10-05)
 
 ---
 
