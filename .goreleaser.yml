@@ -15,10 +15,6 @@
 # commit. goreleaser's git-describe picks the wrong tag (alphabetically last)
 # without the override. Always pass the CORE tag.
 #
-# NOTE: is set explicitly on every hook and build below so
-# the release is reproducible without the caller remembering to export it. The
-# library imports the stdlib encoding/json/v2 (gated behind that experiment).
-#
 # NOTE: goreleaser OSS executes before-hooks via direct exec.CommandContext —
 # NOT through a shell (no sh -c). Inline env vars (FOO=bar cmd) and shell
 # builtins (cd, &&) are therefore ineffective unless wrapped in sh -c.

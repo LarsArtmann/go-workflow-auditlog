@@ -22,15 +22,15 @@ Reports made claims that are **already resolved** as of HEAD `4849d34`:
 
 | # | Issue                                           | Severity        | Verified location              |
 | - | ----------------------------------------------- | --------------- | ------------------------------ |
-| 1 | CHANGELOG [Unreleased] empty                    | Critical        | CHANGELOG.md:8-16              |
-| 2 | Edge direction diagrams ≠ tree                  | High bug        | diagram.go:67 vs tree.go:56    |
-| 3 | No edge-direction test assertions               | High            | tests only check "edge exists" |
-| 4 | Duration() in diff.go not report.go             | Medium cohesion | diff.go:110                    |
-| 5 | D2 title hardcoded, others none                 | Medium polish   | d2.go:50                       |
-| 6 | No Write\*String on Auditor                     | Medium API      | plugin.go                      |
-| 7 | No Export\* on WorkflowReport                   | Medium API      | report.go                      |
-| 8 | FEATURES.md / TODO_LIST.md / ROADMAP.md missing | Critical docs   | repo root                      |
-| 9 | README missing 3-duration explainer             | Low docs        | README.md                      |
+~~| 1 | CHANGELOG [Unreleased] empty                    | Critical        | CHANGELOG.md:8-16              |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
+~~| 2 | Edge direction diagrams ≠ tree                  | High bug        | diagram.go:67 vs tree.go:56    |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
+~~| 3 | No edge-direction test assertions               | High            | tests only check "edge exists" |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
+~~| 4 | Duration() in diff.go not report.go             | Medium cohesion | diff.go:110                    |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
+~~| 5 | D2 title hardcoded, others none                 | Medium polish   | d2.go:50                       |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
+~~| 6 | No Write\*String on Auditor                     | Medium API      | plugin.go                      |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
+~~| 7 | No Export\* on WorkflowReport                   | Medium API      | report.go                      |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
+~~| 8 | FEATURES.md / TODO_LIST.md / ROADMAP.md missing | Critical docs   | repo root                      |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
+~~| 9 | README missing 3-duration explainer             | Low docs        | README.md                      |~~ done (resolved same session / by v0.2.0 — see 2026-06-21_04-46 report)
 
 ## Tasks — sorted by impact/effort/customer-value
 
@@ -38,36 +38,36 @@ Reports made claims that are **already resolved** as of HEAD `4849d34`:
 
 | ID | Task                                        | Impact   | Effort | Est |
 | -- | ------------------------------------------- | -------- | ------ | --- |
-| T1 | Populate CHANGELOG [Unreleased]             | Critical | Low    | 10m |
-| T2 | Fix diagram edge direction → execution flow | High     | Low    | 6m  |
-| T3 | Add edge-direction regression tests         | High     | Low    | 12m |
-| T4 | Create FEATURES.md                          | High     | Low    | 12m |
-| T5 | Create TODO_LIST.md                         | High     | Low    | 10m |
-| T6 | Create ROADMAP.md                           | Medium   | Low    | 8m  |
+~~| T1 | Populate CHANGELOG [Unreleased]             | Critical | Low    | 10m |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T2 | Fix diagram edge direction → execution flow | High     | Low    | 6m  |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T3 | Add edge-direction regression tests         | High     | Low    | 12m |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T4 | Create FEATURES.md                          | High     | Low    | 12m |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T5 | Create TODO_LIST.md                         | High     | Low    | 10m |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T6 | Create ROADMAP.md                           | Medium   | Low    | 8m  |~~ done (executed same session — see 2026-06-21_04-46 report)
 
 ### Tier P1 — High value (execute now)
 
 | ID  | Task                                   | Impact | Effort | Est |
 | --- | -------------------------------------- | ------ | ------ | --- |
-| T7  | Move Duration() → report.go (cohesion) | Medium | Low    | 8m  |
-| T8  | Add Write\*String methods to Auditor   | Medium | Low    | 10m |
-| T9  | Add Export\* methods to WorkflowReport | Medium | Low    | 10m |
-| T10 | Make D2 diagram title configurable     | Medium | Low    | 8m  |
+~~| T7  | Move Duration() → report.go (cohesion) | Medium | Low    | 8m  |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T8  | Add Write\*String methods to Auditor   | Medium | Low    | 10m |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T9  | Add Export\* methods to WorkflowReport | Medium | Low    | 10m |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T10 | Make D2 diagram title configurable     | Medium | Low    | 8m  |~~ done (executed same session — see 2026-06-21_04-46 report)
 
 ### Tier P2 — Quality (execute now)
 
 | ID  | Task                                      | Impact | Effort | Est |
 | --- | ----------------------------------------- | ------ | ------ | --- |
-| T11 | PeakConcurrency stress test (8+ parallel) | Medium | Low    | 10m |
-| T12 | CriticalPath diamond DAG test             | Medium | Low    | 10m |
-| T13 | Document 3 duration metrics in README     | Low    | Low    | 8m  |
+~~| T11 | PeakConcurrency stress test (8+ parallel) | Medium | Low    | 10m |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T12 | CriticalPath diamond DAG test             | Medium | Low    | 10m |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T13 | Document 3 duration metrics in README     | Low    | Low    | 8m  |~~ done (executed same session — see 2026-06-21_04-46 report)
 
 ### Tier P3 — Verify & finalize
 
 | ID  | Task                                     | Impact   | Effort | Est |
 | --- | ---------------------------------------- | -------- | ------ | --- |
-| T14 | Full test suite + race + lint + coverage | Critical | Low    | 5m  |
-| T15 | Update AGENTS.md with decisions made     | Medium   | Low    | 8m  |
+~~| T14 | Full test suite + race + lint + coverage | Critical | Low    | 5m  |~~ done (executed same session — see 2026-06-21_04-46 report)
+~~| T15 | Update AGENTS.md with decisions made     | Medium   | Low    | 8m  |~~ done (executed same session — see 2026-06-21_04-46 report)
 
 ### Deferred to TODO_LIST.md / ROADMAP.md (high effort or needs user input)
 

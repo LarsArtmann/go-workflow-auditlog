@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **README "Example Output" refreshed** — the block now shows the real v0.11.0 demo run (8 steps incl. the `detect` cache-hit step, `⚡cached` marker, `failure_reason=timeout`, and the `Cached:` summary line).
 - **Nix `auditlog` package is real** — `packages.default` now builds the `cmd/auditlog` CLI via `buildGoModule` (replaces an empty `mkdir -p $out` marker whose checks asserted nothing).
 - **Website** — social preview image and accessibility contrast fixes.
 

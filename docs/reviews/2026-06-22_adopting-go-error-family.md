@@ -33,7 +33,7 @@ auditlog currently has 9 public sentinel errors with no behavioral metadata. go-
 - **3 error patterns**: direct sentinel return, `fmt.Errorf("%w")` wrapping, plain context wrapping (no sentinel)
 - **No custom error types** — no structs implementing `error`, no `errors.As` usage anywhere
 - **~30+ error return paths** total, but only 9 have matchable identity
-- **I/O/export errors have no sentinels** — `fmt.Errorf("render mermaid diagram: %w", err)` is unmatchable
+~~- **I/O/export errors have no sentinels** — `fmt.Errorf("render mermaid diagram: %w", err)` is unmatchable~~ done (3 I/O sentinels + 22 wrapped paths — v0.5.0)
 
 ### What's missing
 
@@ -63,13 +63,13 @@ Five behavioral categories, each carrying actionable metadata:
 
 ### Key capabilities for auditlog
 
-1. **`Classify(err) Family`** — universal classification from any error
-2. **`IsRetryable(err) bool`** — one-call retry decision
-3. **`ExitCode(err) int`** — BSD sysexits.h mapping
-4. **`Error.JSON()`** — canonical JSON encoding `{"family","code","message","context","retryable"}`
-5. **`RegisterClassification(sentinel, family)`** — attach Family to existing sentinels without changing them
-6. **Four structural interfaces** — `Coded`, `Classified`, `Contextual`, `Retryable` — satisfy what you need, no base type required
-7. **Zero-allocation hot paths** — Classify ~9-30ns, 0 allocs
+~~1. **`Classify(err) Family`** — universal classification from any error~~ done (shipped v0.5.0 — classify.go)
+~~2. **`IsRetryable(err) bool`** — one-call retry decision~~ done (shipped v0.5.0 — classify.go)
+~~3. **`ExitCode(err) int`** — BSD sysexits.h mapping~~ done (shipped v0.5.0 — classify.go)
+~~4. **`Error.JSON()`** — canonical JSON encoding `{"family","code","message","context","retryable"}`~~ done (shipped v0.5.0 — classify.go)
+~~5. **`RegisterClassification(sentinel, family)`** — attach Family to existing sentinels without changing them~~ done (shipped v0.5.0 — classify.go)
+~~6. **Four structural interfaces** — `Coded`, `Classified`, `Contextual`, `Retryable` — satisfy what you need, no base type required~~ done (shipped v0.5.0 — classify.go)
+~~7. **Zero-allocation hot paths** — Classify ~9-30ns, 0 allocs~~ done (shipped v0.5.0 — classify.go)
 
 ---
 
@@ -363,24 +363,24 @@ This is where Family adds the most value: **retry decisions on I/O failures**. B
 
 **Adopt Strategy A (registration) now.** Reasons:
 
-1. **Cost is near-zero** — one file, one import, no breaking changes
-2. **Value is immediate** — consumers get `IsRetryable()` and `Classify()` on all 9 public errors
-3. **Reversibility is total** — delete `classify.go` and the dependency is gone
-4. **Timing is correct** — ALPHA status means experimentation is free; post-1.0 it costs
-5. **Path to deeper adoption is open** — Strategy A doesn't preclude Strategy B or I/O classification later
+~~1. **Cost is near-zero** — one file, one import, no breaking changes~~ done (recommendation followed — Strategy A shipped v0.5.0)
+~~2. **Value is immediate** — consumers get `IsRetryable()` and `Classify()` on all 9 public errors~~ done (v0.5.0)
+~~3. **Reversibility is total** — delete `classify.go` and the dependency is gone~~ done (v0.5.0; superseded by v0.10.0 intrinsic classification)
+~~4. **Timing is correct** — ALPHA status means experimentation is free; post-1.0 it costs~~ done (v0.5.0)
+~~5. **Path to deeper adoption is open** — Strategy A doesn't preclude Strategy B or I/O classification later~~ done (I/O classification v0.5.0; intrinsic families v0.10.0)
 
-**Do NOT adopt Strategy B (full replacement) now.** The breaking `errors.Is` semantics and test rewrite cost aren't justified when the registration approach delivers 80% of the value at 5% of the cost.
+~~**Do NOT adopt Strategy B (full replacement) now.** The breaking `errors.Is` semantics and test rewrite cost aren't justified when the registration approach delivers 80% of the value at 5% of the cost.~~ **Update 2026-10-05:** Strategy B's core shipped anyway in v0.10.0 — sentinels are `*errorfamily.Error` with intrinsic families, and `errors.Is` stayed compatible (code+family matching).
 
-**Do pursue I/O error classification as a follow-up** if the registration proves valuable. This is where Family classification has the highest impact (retry decisions on transient failures).
+~~**Do pursue I/O error classification as a follow-up** if the registration proves valuable.~~ done (3 I/O sentinels + 22 wrapped paths — v0.5.0)
 
 ### Decision checklist
 
-- [ ] Confirm go-error-family v0.5.0 API stability is acceptable (same author — likely yes)
-- [ ] Decide: `init()` auto-registration vs explicit `RegisterClassifications()` export function
-- [ ] Verify `go mod tidy` resolves cleanly with the new dependency
-- [ ] Add tests: `Classify(ErrX) == expectedFamily` for all 9 sentinels
-- [ ] Update AGENTS.md with the classification mapping table
-- [ ] Consider: should auditlog expose `Classifications() map[error]Family` for consumer-side custom registries?
+~~- [ ] Confirm go-error-family v0.5.0 API stability is acceptable (same author — likely yes)~~ done (v0.5.0 adopted)
+~~- [ ] Decide: `init()` auto-registration vs explicit `RegisterClassifications()` export function~~ done (init() + escape hatch — v0.5.0)
+~~- [ ] Verify `go mod tidy` resolves cleanly with the new dependency~~ done (v0.5.0)
+~~- [ ] Add tests: `Classify(ErrX) == expectedFamily` for all 9 sentinels~~ done (classify_test.go, v0.5.0)
+~~- [ ] Update AGENTS.md with the classification mapping table~~ done (v0.5.0)
+~~- [ ] Consider: should auditlog expose `Classifications() map[error]Family` for consumer-side custom registries?~~ done (ErrorClassifications() — v0.5.0)
 
 ---
 
@@ -395,10 +395,10 @@ This is where Family adds the most value: **retry decisions on I/O failures**. B
 | 5   | `ErrEmpty`              | ndjson.go:14                            | direct return        | Rejection                  | A (register)          |
 | 6   | `ErrNoEvents`           | ndjson.go:15                            | direct return        | Rejection                  | A (register)          |
 | 7   | `ErrOversizedLine`      | ndjson.go:16                            | sentinel + `%w` wrap | Rejection                  | A (register)          |
-| 8   | `ErrWorkflowIDPathSep`  | plugin.go:50                            | sentinel + `%w` wrap | Rejection                  | A (register)          |
-| 9   | `ErrReplayNoEvents`     | replay.go:10                            | direct return        | Rejection                  | A (register)          |
-| 10  | `errUnknownEventType`   | ndjson.go:18                            | private sentinel     | Rejection                  | A (register, private) |
-| 11  | `errUnknownPhase`       | ndjson.go:19                            | private sentinel     | Rejection                  | A (register, private) |
+~~| 8   | `ErrWorkflowIDPathSep`  | plugin.go:50                            | sentinel + `%w` wrap | Rejection                  | A (register)          |~~ done (shipped v0.5.0 — classify.go)
+~~| 9   | `ErrReplayNoEvents`     | replay.go:10                            | direct return        | Rejection                  | A (register)          |~~ done (shipped v0.5.0 — classify.go)
+~~| 10  | `errUnknownEventType`   | ndjson.go:18                            | private sentinel     | Rejection                  | A (register, private) |~~ done (shipped v0.5.0 — classify.go)
+~~| 11  | `errUnknownPhase`       | ndjson.go:19                            | private sentinel     | Rejection                  | A (register, private) |~~ done (shipped v0.5.0 — classify.go)
 | 12+ | I/O/export errors       | loader.go, plugin.go, all diagram files | `fmt.Errorf` only    | Transient / Infrastructure | Follow-up             |
 
 ---
@@ -427,13 +427,13 @@ to `errorfamily.NewError(family, message)` structs. This enables:
 
 **Migration steps (if pursued):**
 
-1. Keep `RegisterClassifications` as-is (it still works with Error sentinels).
-2. Change each sentinel from `errors.New` to `errorfamily.NewError`.
-3. Update tests: `errors.Is` checks still work via the code+family path, but
+~~1. Keep `RegisterClassifications` as-is (it still works with Error sentinels).~~ done (kept; still the back-compat shim — v0.10.0)
+~~2. Change each sentinel from `errors.New` to `errorfamily.NewError`.~~ done (sentinels are *errorfamily.Error — v0.10.0)
+~~3. Update tests: `errors.Is` checks still work via the code+family path, but~~ done (Is preserved via code+family — v0.10.0)
    verify behavior with `Test_Classify_ErrorsIsUnchanged`.
-4. Add context fields to sentinels where useful (e.g., `ErrReportLoadFailed`
+~~4. Add context fields to sentinels where useful (e.g., `ErrReportLoadFailed`~~ Won't implement — codes+family suffice; no consumer demand
    with file path, `ErrRenderFailed` with format name).
-5. Consider exposing `HandleError` as a convenience for CLI consumers.
+~~5. Consider exposing `HandleError` as a convenience for CLI consumers.~~ Won't implement — no consumer demand
 
 **Recommendation:** Do NOT pursue Strategy B until a concrete consumer need
 for structured error context or JSON error serialization arises. Strategy A
