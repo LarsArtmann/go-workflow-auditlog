@@ -499,7 +499,7 @@ func TestServer_HandleSSE_WriteFailureAfterSnapshot(t *testing.T) {
 
 	srv.hub.OnEvent(auditlog.Event{
 		Sequence:  1,
-		StepRef:   auditlog.StepRef{Name: "post-snapshot-fail"},
+		Name:      "post-snapshot-fail",
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
 	})
@@ -543,7 +543,7 @@ func TestServer_HandleSSE_EventWriteFailure(t *testing.T) {
 
 	srv.hub.OnEvent(auditlog.Event{
 		Sequence:  1,
-		StepRef:   auditlog.StepRef{Name: "ev-write-fail"},
+		Name:      "ev-write-fail",
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
 	})

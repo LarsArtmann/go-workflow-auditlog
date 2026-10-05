@@ -123,8 +123,8 @@ func (r *Recorder) recordBeforeStep(step flow.Steper) {
 		Timestamp: now,
 		EventType: EventTypeAttemptStart,
 		Phase:     PhaseBefore,
-		StepRef:   StepRef{Name: name, StepType: rec.StepType},
-		Attempt:   rec.attemptCount,
+		Name:      name, StepType: rec.StepType,
+		Attempt: rec.attemptCount,
 	}
 	r.appendEventLocked(evt)
 
@@ -181,12 +181,12 @@ func (r *Recorder) recordAfterStep(step flow.Steper, err error) {
 	status := fromErrorToStatus(err)
 
 	evt := Event{
-		RunID:         r.runID,
-		Sequence:      seq,
-		Timestamp:     now,
-		EventType:     EventTypeAttemptEnd,
-		Phase:         PhaseAfter,
-		StepRef:       StepRef{Name: name, StepType: rec.StepType},
+		RunID:     r.runID,
+		Sequence:  seq,
+		Timestamp: now,
+		EventType: EventTypeAttemptEnd,
+		Phase:     PhaseAfter,
+		Name:      name, StepType: rec.StepType,
 		Attempt:       rec.attemptCount,
 		DurationMs:    durationMs,
 		Error:         errStr,
@@ -211,12 +211,10 @@ func (r *Recorder) getOrCreateStepLocked(step flow.Steper, name string, now time
 	}
 
 	rec := &stepRecord{
-		stepCore: stepCore{
-			StepRef:   StepRef{Name: name, StepType: stepTypeName(step)},
-			startedAt: &now,
-			status:    StepStatusRunning,
-		},
-		stepID: r.nextStepIDLocked(),
+		Name: name, StepType: stepTypeName(step),
+		startedAt: &now,
+		status:    StepStatusRunning,
+		stepID:    r.nextStepIDLocked(),
 	}
 	r.steps[step] = rec
 

@@ -26,7 +26,7 @@ func minimalReport() auditlog.WorkflowReport {
 		StepCount:  1,
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef:      auditlog.StepRef{Name: "step-a", StepType: "TestStep"},
+				Name: "step-a", StepType: "TestStep",
 				Status:       auditlog.StepStatusSucceeded,
 				AttemptCount: 1,
 				DurationMs:   &dur,
@@ -36,7 +36,7 @@ func minimalReport() auditlog.WorkflowReport {
 		},
 		Events: []auditlog.Event{
 			{
-				StepRef:    auditlog.StepRef{Name: "step-a", StepType: "TestStep"},
+				Name: "step-a", StepType: "TestStep",
 				Sequence:   1,
 				Timestamp:  now,
 				EventType:  auditlog.EventTypeAttemptStart,

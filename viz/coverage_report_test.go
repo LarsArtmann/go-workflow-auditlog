@@ -336,24 +336,24 @@ func TestReport_CriticalPathDuration_DependentChain(t *testing.T) {
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef:    auditlog.StepRef{Name: "parent"},
+				Name:       "parent",
 				Status:     auditlog.StepStatusSucceeded,
 				DurationMs: &d10,
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "child"},
+				Name:         "child",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &d20,
 				Dependencies: []auditlog.StepRef{{Name: "parent"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "grandchild"},
+				Name:         "grandchild",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &d30,
 				Dependencies: []auditlog.StepRef{{Name: "child"}},
 			},
 			{
-				StepRef:    auditlog.StepRef{Name: "leaf"},
+				Name:       "leaf",
 				Status:     auditlog.StepStatusSucceeded,
 				DurationMs: &d5,
 			},
@@ -425,24 +425,24 @@ func TestReport_CriticalPathDuration_DiamondDAG(t *testing.T) {
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef:    auditlog.StepRef{Name: "root"},
+				Name:       "root",
 				Status:     auditlog.StepStatusSucceeded,
 				DurationMs: &rootD,
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "left"},
+				Name:         "left",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &leftD,
 				Dependencies: []auditlog.StepRef{{Name: "root"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "right"},
+				Name:         "right",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &rightD,
 				Dependencies: []auditlog.StepRef{{Name: "root"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "bottom"},
+				Name:         "bottom",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &bottomD,
 				Dependencies: []auditlog.StepRef{{Name: "left"}, {Name: "right"}},
@@ -473,20 +473,20 @@ func TestReport_CriticalPath_DependentChain(t *testing.T) {
 
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "parent"}, Status: auditlog.StepStatusSucceeded, DurationMs: &d10},
+			{Name: "parent", Status: auditlog.StepStatusSucceeded, DurationMs: &d10},
 			{
-				StepRef:      auditlog.StepRef{Name: "child"},
+				Name:         "child",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &d20,
 				Dependencies: []auditlog.StepRef{{Name: "parent"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "grandchild"},
+				Name:         "grandchild",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &d30,
 				Dependencies: []auditlog.StepRef{{Name: "child"}},
 			},
-			{StepRef: auditlog.StepRef{Name: "leaf"}, Status: auditlog.StepStatusSucceeded, DurationMs: &d5},
+			{Name: "leaf", Status: auditlog.StepStatusSucceeded, DurationMs: &d5},
 		},
 	}
 
@@ -528,21 +528,21 @@ func TestReport_CriticalPath_DiamondDAG(t *testing.T) {
 
 	raw := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "root"}, Status: auditlog.StepStatusSucceeded, DurationMs: &rootD},
+			{Name: "root", Status: auditlog.StepStatusSucceeded, DurationMs: &rootD},
 			{
-				StepRef:      auditlog.StepRef{Name: "left"},
+				Name:         "left",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &leftD,
 				Dependencies: []auditlog.StepRef{{Name: "root"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "right"},
+				Name:         "right",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &rightD,
 				Dependencies: []auditlog.StepRef{{Name: "root"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "bottom"},
+				Name:         "bottom",
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   &bottomD,
 				Dependencies: []auditlog.StepRef{{Name: "left"}, {Name: "right"}},
@@ -903,19 +903,19 @@ func TestCoverage_MatchEvent_TimeFilters(t *testing.T) {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "s"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "s", Status: auditlog.StepStatusSucceeded},
 		},
 		EventCount: 2,
 		Events: []auditlog.Event{
 			{
-				StepRef:   auditlog.StepRef{Name: "s"},
+				Name:      "s",
 				Sequence:  1,
 				Timestamp: base,
 				EventType: auditlog.EventTypeAttemptStart,
 				Phase:     auditlog.PhaseBefore,
 			},
 			{
-				StepRef:    auditlog.StepRef{Name: "s"},
+				Name:       "s",
 				Sequence:   2,
 				Timestamp:  base.Add(5 * time.Second),
 				EventType:  auditlog.EventTypeAttemptEnd,
@@ -952,33 +952,33 @@ func TestFilter_CombinedEventTypeAndTimeRange(t *testing.T) {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "s"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "s", Status: auditlog.StepStatusSucceeded},
 		},
 		EventCount: 4,
 		Events: []auditlog.Event{
 			{
-				StepRef:   auditlog.StepRef{Name: "s"},
+				Name:      "s",
 				Sequence:  1,
 				Timestamp: base,
 				EventType: auditlog.EventTypeAttemptStart,
 				Phase:     auditlog.PhaseBefore,
 			},
 			{
-				StepRef:   auditlog.StepRef{Name: "s"},
+				Name:      "s",
 				Sequence:  2,
 				Timestamp: base.Add(3 * time.Second),
 				EventType: auditlog.EventTypeAttemptEnd,
 				Phase:     auditlog.PhaseAfter,
 			},
 			{
-				StepRef:   auditlog.StepRef{Name: "s"},
+				Name:      "s",
 				Sequence:  3,
 				Timestamp: base.Add(6 * time.Second),
 				EventType: auditlog.EventTypeAttemptStart,
 				Phase:     auditlog.PhaseBefore,
 			},
 			{
-				StepRef:   auditlog.StepRef{Name: "s"},
+				Name:      "s",
 				Sequence:  4,
 				Timestamp: base.Add(9 * time.Second),
 				EventType: auditlog.EventTypeAttemptEnd,

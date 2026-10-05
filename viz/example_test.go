@@ -112,8 +112,8 @@ func Example_filtering() {
 func ExampleWriteD2() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "a"}},
-			{StepRef: auditlog.StepRef{Name: "b"}, Dependencies: []auditlog.StepRef{{Name: "a"}}},
+			{Name: "a"},
+			{Name: "b", Dependencies: []auditlog.StepRef{{Name: "a"}}},
 		},
 	}
 
@@ -127,8 +127,8 @@ func ExampleWriteD2() {
 func ExampleWriteGraphviz() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "a"}},
-			{StepRef: auditlog.StepRef{Name: "b"}, Dependencies: []auditlog.StepRef{{Name: "a"}}},
+			{Name: "a"},
+			{Name: "b", Dependencies: []auditlog.StepRef{{Name: "a"}}},
 		},
 	}
 
@@ -142,7 +142,7 @@ func ExampleWriteGraphviz() {
 func ExampleWritePlantUML() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "a"}},
+			{Name: "a"},
 		},
 	}
 
@@ -156,8 +156,8 @@ func ExampleWritePlantUML() {
 func ExampleWriteTree() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}},
-			{StepRef: auditlog.StepRef{Name: "save"}, Dependencies: []auditlog.StepRef{{Name: "fetch"}}},
+			{Name: "fetch"},
+			{Name: "save", Dependencies: []auditlog.StepRef{{Name: "fetch"}}},
 		},
 	}
 
@@ -173,7 +173,7 @@ func ExampleWriteHTML() {
 	report := auditlog.WorkflowReport{
 		WorkflowID: "demo",
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "fetch", Status: auditlog.StepStatusSucceeded},
 		},
 	}
 

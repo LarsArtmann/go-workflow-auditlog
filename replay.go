@@ -106,8 +106,8 @@ func getOrCreateReplayStep(steps map[string]*stepCore, name, stepType string) *s
 	}
 
 	step := &stepCore{
-		StepRef: StepRef{Name: name, StepType: stepType},
-		status:  StepStatusPending,
+		Name: name, StepType: stepType,
+		status: StepStatusPending,
 	}
 	steps[name] = step
 

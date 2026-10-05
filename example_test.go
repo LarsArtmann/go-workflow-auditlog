@@ -20,14 +20,14 @@ func ExampleNDJSONStreamer() {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "fetch"},
+		Name:      "fetch",
 	})
 
 	streamer.OnEvent(auditlog.Event{
 		Sequence:  2,
 		EventType: auditlog.EventTypeAttemptEnd,
 		Phase:     auditlog.PhaseAfter,
-		StepRef:   auditlog.StepRef{Name: "fetch"},
+		Name:      "fetch",
 		Status:    auditlog.StepStatusSucceeded,
 	})
 
@@ -52,7 +52,7 @@ func ExampleReplayEvents() {
 			Timestamp: now,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: "fetch"},
+			Name:      "fetch",
 			Attempt:   1,
 		},
 		{
@@ -60,7 +60,7 @@ func ExampleReplayEvents() {
 			Timestamp: now.Add(10 * time.Millisecond),
 			EventType: auditlog.EventTypeAttemptEnd,
 			Phase:     auditlog.PhaseAfter,
-			StepRef:   auditlog.StepRef{Name: "fetch"},
+			Name:      "fetch",
 			Attempt:   1,
 			Status:    auditlog.StepStatusSucceeded,
 		},
@@ -82,8 +82,8 @@ func ExampleMarkCached() {
 	report := auditlog.WorkflowReport{
 		WorkflowID: "detect-pipeline",
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "gofmt:detect"}, Status: auditlog.StepStatusSucceeded, Cached: true},
-			{StepRef: auditlog.StepRef{Name: "erraudit:detect"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "gofmt:detect", Status: auditlog.StepStatusSucceeded, Cached: true},
+			{Name: "erraudit:detect", Status: auditlog.StepStatusSucceeded},
 		},
 	}
 
@@ -107,7 +107,7 @@ func ExampleWorkflowReport_Summary() {
 		WorkflowID:          "data-pipeline",
 		WallClockDurationMs: 28500,
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "fetch", Status: auditlog.StepStatusSucceeded},
 		},
 	}
 
@@ -125,14 +125,14 @@ func ExampleWorkflowReport_CriticalPath() {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, DurationMs: dur(10)},
+			{Name: "fetch", DurationMs: dur(10)},
 			{
-				StepRef:      auditlog.StepRef{Name: "transform"},
+				Name:         "transform",
 				DurationMs:   dur(50),
 				Dependencies: []auditlog.StepRef{{Name: "fetch"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "save"},
+				Name:         "save",
 				DurationMs:   dur(5),
 				Dependencies: []auditlog.StepRef{{Name: "transform"}},
 			},
@@ -174,7 +174,7 @@ func ExampleNewMultiWriter() {
 		func(evt auditlog.Event) { fmt.Fprintf(&buf, "otel: %s\n", evt.Name) },
 	)
 
-	mw.OnEvent(auditlog.Event{StepRef: auditlog.StepRef{Name: "fetch"}})
+	mw.OnEvent(auditlog.Event{Name: "fetch"})
 
 	fmt.Print(buf.String())
 
@@ -215,16 +215,16 @@ func ExampleStreamEvents() {
 func ExampleWorkflowReport_Diff() {
 	baseline := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
-			{StepRef: auditlog.StepRef{Name: "save"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "fetch", Status: auditlog.StepStatusSucceeded},
+			{Name: "save", Status: auditlog.StepStatusSucceeded},
 		},
 		WallClockDurationMs: 1000,
 	}
 
 	current := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusFailed},
-			{StepRef: auditlog.StepRef{Name: "notify"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "fetch", Status: auditlog.StepStatusFailed},
+			{Name: "notify", Status: auditlog.StepStatusSucceeded},
 		},
 		WallClockDurationMs: 1500,
 	}
@@ -242,15 +242,15 @@ func ExampleWorkflowReport_Diff() {
 func ExampleWorkflowReport_TimedOutSteps() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "fetch", Status: auditlog.StepStatusSucceeded},
 			{
-				StepRef: auditlog.StepRef{Name: "slow-api"}, Status: auditlog.StepStatusCanceled,
+				Name: "slow-api", Status: auditlog.StepStatusCanceled,
 				FailureReason: auditlog.FailureReasonTimeout,
 			},
 		},
 		Events: []auditlog.Event{
 			{
-				EventType: auditlog.EventTypeAttemptEnd, StepRef: auditlog.StepRef{Name: "slow-api"},
+				EventType: auditlog.EventTypeAttemptEnd, Name: "slow-api",
 				FailureReason: auditlog.FailureReasonTimeout,
 			},
 		},
@@ -268,8 +268,8 @@ func ExampleWorkflowReport_TimedOutSteps() {
 func ExampleWorkflowReport_HasWorkflowRetries() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded, AttemptCount: 1},
-			{StepRef: auditlog.StepRef{Name: "flaky"}, Status: auditlog.StepStatusSucceeded, AttemptCount: 3},
+			{Name: "fetch", Status: auditlog.StepStatusSucceeded, AttemptCount: 1},
+			{Name: "flaky", Status: auditlog.StepStatusSucceeded, AttemptCount: 3},
 		},
 	}
 

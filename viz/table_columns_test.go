@@ -284,8 +284,8 @@ func TestTable_CachedColumn(t *testing.T) {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "served-from-cache"}, Status: auditlog.StepStatusSucceeded, Cached: true},
-			{StepRef: auditlog.StepRef{Name: "executed-fresh"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "served-from-cache", Status: auditlog.StepStatusSucceeded, Cached: true},
+			{Name: "executed-fresh", Status: auditlog.StepStatusSucceeded},
 		},
 	}
 
@@ -319,10 +319,10 @@ func TestTable_FailureReasonColumn(t *testing.T) {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef: auditlog.StepRef{Name: "timed-out"}, Status: auditlog.StepStatusCanceled,
+				Name: "timed-out", Status: auditlog.StepStatusCanceled,
 				FailureReason: auditlog.FailureReasonTimeout,
 			},
-			{StepRef: auditlog.StepRef{Name: "ok"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "ok", Status: auditlog.StepStatusSucceeded},
 		},
 	}
 
@@ -349,7 +349,7 @@ func TestTable_ZeroDurationCell(t *testing.T) {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef:    auditlog.StepRef{Name: "instant"},
+				Name:       "instant",
 				Status:     auditlog.StepStatusSucceeded,
 				DurationMs: &zeroDur,
 			},
@@ -403,7 +403,7 @@ func TestTable_DefaultColumnsImmutability(t *testing.T) {
 	// Internally, applyTableOpts must copy DefaultTableColumns, not alias it.
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "s"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "s", Status: auditlog.StepStatusSucceeded},
 		},
 	}
 

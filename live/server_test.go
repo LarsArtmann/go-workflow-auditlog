@@ -255,7 +255,7 @@ func TestServer_SSE_SnapshotOnConnect(t *testing.T) {
 
 	server.OnEvent(auditlog.Event{
 		Sequence:  1,
-		StepRef:   auditlog.StepRef{Name: "step-a"},
+		Name:      "step-a",
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
 	})
@@ -291,7 +291,7 @@ func TestServer_SSE_LiveEventDelivery(t *testing.T) {
 
 	server.OnEvent(auditlog.Event{
 		Sequence:  1,
-		StepRef:   auditlog.StepRef{Name: "live-step"},
+		Name:      "live-step",
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
 	})
@@ -321,7 +321,7 @@ func TestServer_SSE_CachedEventFlag(t *testing.T) {
 
 	server.OnEvent(auditlog.Event{
 		Sequence:  1,
-		StepRef:   auditlog.StepRef{Name: "cache-hit-detect"},
+		Name:      "cache-hit-detect",
 		EventType: auditlog.EventTypeAttemptEnd,
 		Phase:     auditlog.PhaseAfter,
 		Status:    auditlog.StepStatusSucceeded,
@@ -378,7 +378,7 @@ func TestServer_SSE_FanOut(t *testing.T) {
 
 	server.OnEvent(auditlog.Event{
 		Sequence:  1,
-		StepRef:   auditlog.StepRef{Name: "fanout-step"},
+		Name:      "fanout-step",
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
 	})
@@ -455,7 +455,7 @@ func TestHub_OnEventDelivery(t *testing.T) {
 
 	evt := auditlog.Event{
 		Sequence: 42,
-		StepRef:  auditlog.StepRef{Name: "test"},
+		Name:     "test",
 	}
 
 	hub.OnEvent(evt)
@@ -563,7 +563,7 @@ func TestHub_ConcurrentSubscribeUnsubscribe(t *testing.T) {
 			for i := range iterations {
 				hub.OnEvent(auditlog.Event{
 					Sequence:  i,
-					StepRef:   auditlog.StepRef{Name: "concurrent-step"},
+					Name:      "concurrent-step",
 					EventType: auditlog.EventTypeAttemptStart,
 					Phase:     auditlog.PhaseBefore,
 				})
@@ -618,7 +618,7 @@ func TestHub_OnEventMarshalError(t *testing.T) {
 	// produces an unexpected result. A normal event should deliver fine.
 	hub.OnEvent(auditlog.Event{
 		Sequence: 1,
-		StepRef:  auditlog.StepRef{Name: "test"},
+		Name:     "test",
 	})
 
 	select {

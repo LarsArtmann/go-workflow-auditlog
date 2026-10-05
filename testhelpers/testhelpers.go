@@ -134,7 +134,7 @@ func NewCached(name string) *CachedStep { return &CachedStep{Name: name} }
 
 // StepFixture builds a StepInfo with just a name and status.
 func StepFixture(name string, status auditlog.StepStatus) auditlog.StepInfo {
-	return auditlog.StepInfo{StepRef: auditlog.StepRef{Name: name}, Status: status}
+	return auditlog.StepInfo{Name: name, Status: status}
 }
 
 // RetryOpts returns a retry config function with a FRESH backoff instance,

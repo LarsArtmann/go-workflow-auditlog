@@ -19,7 +19,7 @@ func BenchmarkRenderHTML_LargeReport(b *testing.B) {
 		dur := float64(i) * 0.1
 
 		steps = append(steps, auditlog.StepInfo{
-			StepRef:      auditlog.StepRef{Name: fmt.Sprintf("step-%04d", i), StepType: "BenchStep"},
+			Name: fmt.Sprintf("step-%04d", i), StepType: "BenchStep",
 			StepID:       i + 1,
 			Status:       auditlog.StepStatusSucceeded,
 			AttemptCount: 1,
@@ -58,9 +58,9 @@ func BenchmarkRenderHTML_SmallReport(b *testing.B) {
 		StepCount:      3,
 		SucceededCount: 3,
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded, DurationMs: &dur},
-			{StepRef: auditlog.StepRef{Name: "transform"}, Status: auditlog.StepStatusSucceeded, DurationMs: &dur},
-			{StepRef: auditlog.StepRef{Name: "save"}, Status: auditlog.StepStatusSucceeded, DurationMs: &dur},
+			{Name: "fetch", Status: auditlog.StepStatusSucceeded, DurationMs: &dur},
+			{Name: "transform", Status: auditlog.StepStatusSucceeded, DurationMs: &dur},
+			{Name: "save", Status: auditlog.StepStatusSucceeded, DurationMs: &dur},
 		},
 	}
 

@@ -274,9 +274,9 @@ func TestDiff_CachedDeltas(t *testing.T) {
 	// make both deterministic.
 	step := func(name string, cached bool) auditlog.StepInfo {
 		return auditlog.StepInfo{
-			StepRef: auditlog.StepRef{Name: name},
-			Status:  auditlog.StepStatusSucceeded,
-			Cached:  cached,
+			Name:   name,
+			Status: auditlog.StepStatusSucceeded,
+			Cached: cached,
 		}
 	}
 
@@ -332,9 +332,9 @@ func TestDiff_CachedOnlyChangeReportsHasChanges(t *testing.T) {
 	// like TestDiff_HasChanges_AggregateOnly but for the cached axis.
 	step := func(name string, cached bool) auditlog.StepInfo {
 		return auditlog.StepInfo{
-			StepRef: auditlog.StepRef{Name: name},
-			Status:  auditlog.StepStatusSucceeded,
-			Cached:  cached,
+			Name:   name,
+			Status: auditlog.StepStatusSucceeded,
+			Cached: cached,
 		}
 	}
 
@@ -358,9 +358,9 @@ func TestDiff_StepDiffCachedField(t *testing.T) {
 	r1 := auditlog.WorkflowReport{}
 	r2 := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{{
-			StepRef: auditlog.StepRef{Name: "fetch"},
-			Status:  auditlog.StepStatusSucceeded,
-			Cached:  true,
+			Name:   "fetch",
+			Status: auditlog.StepStatusSucceeded,
+			Cached: true,
 		}},
 	}
 
@@ -409,7 +409,7 @@ func BenchmarkDiff_100Steps(b *testing.B) {
 		steps := make([]auditlog.StepInfo, 0, 100)
 		for i := range 100 {
 			steps = append(steps, auditlog.StepInfo{
-				StepRef:      auditlog.StepRef{Name: fmt.Sprintf("step-%03d", i)},
+				Name:         fmt.Sprintf("step-%03d", i),
 				Status:       auditlog.StepStatusSucceeded,
 				DurationMs:   dur(baseDuration + float64(i)),
 				AttemptCount: 1,

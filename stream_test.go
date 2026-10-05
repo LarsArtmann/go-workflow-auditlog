@@ -27,11 +27,11 @@ func TestNDJSONStreamer_BasicRoundTrip(t *testing.T) {
 	originalEvents := []auditlog.Event{
 		{
 			Sequence: 1, EventType: auditlog.EventTypeAttemptStart, Phase: auditlog.PhaseBefore,
-			StepRef: auditlog.StepRef{Name: "step-a"},
+			Name: "step-a",
 		},
 		{
 			Sequence: 2, EventType: auditlog.EventTypeAttemptEnd, Phase: auditlog.PhaseAfter,
-			StepRef: auditlog.StepRef{Name: "step-a"}, Status: auditlog.StepStatusSucceeded,
+			Name: "step-a", Status: auditlog.StepStatusSucceeded,
 		},
 	}
 
@@ -109,7 +109,7 @@ func TestNDJSONStreamer_ConcurrentSafety(t *testing.T) {
 					Sequence:  groupID*eventsPerGoroutine + i + 1,
 					EventType: auditlog.EventTypeAttemptStart,
 					Phase:     auditlog.PhaseBefore,
-					StepRef:   auditlog.StepRef{Name: "concurrent"},
+					Name:      "concurrent",
 				})
 			}
 		}(g)
@@ -144,7 +144,7 @@ func TestNDJSONStreamer_AutoFlush(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "auto"},
+		Name:      "auto",
 	})
 
 	// With auto-flush, data must be visible immediately (no Flush call).
@@ -164,7 +164,7 @@ func TestNDJSONStreamer_BufferedThenFlush(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "buffered"},
+		Name:      "buffered",
 	})
 
 	// Without auto-flush, data may still be buffered (event is small).
@@ -197,7 +197,7 @@ func TestNDJSONStreamer_ErrorHandling(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "fail"},
+		Name:      "fail",
 	})
 
 	err := streamer.Flush()
@@ -222,7 +222,7 @@ func TestNDJSONStreamer_OnEventAfterError(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "first"},
+		Name:      "first",
 	})
 
 	firstErr := streamer.Err()
@@ -235,7 +235,7 @@ func TestNDJSONStreamer_OnEventAfterError(t *testing.T) {
 		Sequence:  2,
 		EventType: auditlog.EventTypeAttemptEnd,
 		Phase:     auditlog.PhaseAfter,
-		StepRef:   auditlog.StepRef{Name: "second"},
+		Name:      "second",
 	})
 
 	// Err() must still report the same family of error.
@@ -261,7 +261,7 @@ func TestNDJSONStreamer_Close(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "close-test"},
+		Name:      "close-test",
 	})
 
 	err = streamer.Close()
@@ -318,7 +318,7 @@ func TestNDJSONStreamer_OnEventAfterClose(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "after-close"},
+		Name:      "after-close",
 	})
 
 	if buf.Len() != 0 {
@@ -341,7 +341,7 @@ func TestNDJSONStreamer_CreateFile(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "create"},
+		Name:      "create",
 	})
 
 	err = streamer.Close()
@@ -460,7 +460,7 @@ func TestNDJSONStreamer_NilErr(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "nil-err"},
+		Name:      "nil-err",
 	})
 
 	err = streamer.Err()
@@ -526,7 +526,7 @@ func TestNDJSONStreamer_WithBufferSize(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "small-buf"},
+		Name:      "small-buf",
 	})
 
 	err := streamer.Flush()
@@ -564,7 +564,7 @@ func TestNDJSONStreamer_EncodeError(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "encode-fail"},
+		Name:      "encode-fail",
 	})
 
 	if !errors.Is(streamer.Err(), auditlog.ErrRenderFailed) {
@@ -585,7 +585,7 @@ func TestNDJSONStreamer_FlushReturnsExistingError(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "trigger"},
+		Name:      "trigger",
 	})
 
 	firstErr := streamer.Err()
@@ -615,7 +615,7 @@ func TestNDJSONStreamer_CloseError(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "close-fail"},
+		Name:      "close-fail",
 	})
 
 	err := streamer.Close()
@@ -642,7 +642,7 @@ func TestNDJSONStreamer_CloseAfterError(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "err-before-close"},
+		Name:      "err-before-close",
 	})
 
 	if streamer.Err() == nil {
@@ -670,7 +670,7 @@ func TestNDJSONStreamer_CloseFlushError(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "deferred-flush"},
+		Name:      "deferred-flush",
 	})
 
 	// No error yet — event was buffered.
@@ -750,7 +750,7 @@ func TestNDJSONStreamer_WithBufferSizeZeroOrNegative(t *testing.T) {
 					Sequence:  i + 1,
 					EventType: auditlog.EventTypeAttemptStart,
 					Phase:     auditlog.PhaseBefore,
-					StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", i)},
+					Name:      fmt.Sprintf("step-%d", i),
 				})
 			}
 
@@ -790,7 +790,7 @@ func TestNDJSONStreamer_WithFlushInterval_Bounds(t *testing.T) {
 			Sequence:  i + 1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: fmt.Sprintf("burst-%d", i)},
+			Name:      fmt.Sprintf("burst-%d", i),
 		})
 	}
 
@@ -812,7 +812,7 @@ func TestNDJSONStreamer_WithFlushInterval_Bounds(t *testing.T) {
 		Sequence:  51,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "trigger"},
+		Name:      "trigger",
 	})
 
 	if buf.Len() == 0 {
@@ -849,7 +849,7 @@ func TestNDJSONStreamer_WithFlushInterval_IgnoredForZeroAndNegative(t *testing.T
 				Sequence:  1,
 				EventType: auditlog.EventTypeAttemptStart,
 				Phase:     auditlog.PhaseBefore,
-				StepRef:   auditlog.StepRef{Name: "x"},
+				Name:      "x",
 			})
 
 			if buf.Len() != 0 {
@@ -881,7 +881,7 @@ func TestNDJSONStreamer_WithAutoFlushTakesPrecedence(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "x"},
+		Name:      "x",
 	})
 
 	if buf.Len() == 0 {
@@ -968,7 +968,7 @@ func TestNDJSONStreamer_ConcurrentCloseAndOnEvent(t *testing.T) {
 				Sequence:  i + 1,
 				EventType: auditlog.EventTypeAttemptStart,
 				Phase:     auditlog.PhaseBefore,
-				StepRef:   auditlog.StepRef{Name: "concurrent-step"},
+				Name:      "concurrent-step",
 			})
 		}
 	})
@@ -1020,7 +1020,7 @@ func assertStreamerRoundTrip(t *testing.T, n int) {
 			Sequence:  i + 1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", i)},
+			Name:      fmt.Sprintf("step-%d", i),
 		})
 	}
 
@@ -1068,7 +1068,7 @@ func benchmarkNDJSONStreamer(b *testing.B, n int) {
 			Sequence:  i + 1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", i)},
+			Name:      fmt.Sprintf("step-%d", i),
 		})
 	}
 
@@ -1128,7 +1128,7 @@ func BenchmarkMultiWriter_3Callbacks(b *testing.B) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "bench"},
+		Name:      "bench",
 	}
 
 	b.ResetTimer()
@@ -1146,7 +1146,7 @@ func BenchmarkMultiWriter_1Callback(b *testing.B) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "bench"},
+		Name:      "bench",
 	}
 
 	b.ResetTimer()

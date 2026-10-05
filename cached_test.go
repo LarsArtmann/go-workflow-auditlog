@@ -322,7 +322,7 @@ func TestCached_ValidateDetectsCountDrift(t *testing.T) {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "cached-drift"}, Status: auditlog.StepStatusSucceeded, Cached: true},
+			{Name: "cached-drift", Status: auditlog.StepStatusSucceeded, Cached: true},
 		},
 		StepCount:       1,
 		SucceededCount:  1,

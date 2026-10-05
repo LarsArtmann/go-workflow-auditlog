@@ -73,9 +73,9 @@ func TestNameCollisions_NoCollisions(t *testing.T) {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}},
-			{StepRef: auditlog.StepRef{Name: "validate"}},
-			{StepRef: auditlog.StepRef{Name: "save"}},
+			{Name: "fetch"},
+			{Name: "validate"},
+			{Name: "save"},
 		},
 	}
 
@@ -90,9 +90,9 @@ func TestNameCollisions_WithCollisions(t *testing.T) {
 
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}},
-			{StepRef: auditlog.StepRef{Name: "fetch"}}, // duplicate
-			{StepRef: auditlog.StepRef{Name: "validate"}},
+			{Name: "fetch"},
+			{Name: "fetch"}, // duplicate
+			{Name: "validate"},
 		},
 	}
 

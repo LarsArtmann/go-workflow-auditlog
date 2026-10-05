@@ -44,7 +44,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 		TotalDurationMs:     17.0,
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef:      auditlog.StepRef{Name: "fetch", StepType: "FetchStep"},
+				Name: "fetch", StepType: "FetchStep",
 				StepID:       1,
 				Status:       auditlog.StepStatusSucceeded,
 				AttemptCount: 1,
@@ -54,7 +54,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 				Dependents:   []auditlog.StepRef{{Name: "transform"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "transform", StepType: "TransformStep"},
+				Name: "transform", StepType: "TransformStep",
 				StepID:       2,
 				Status:       auditlog.StepStatusSucceeded,
 				AttemptCount: 1,
@@ -65,7 +65,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 				Dependents:   []auditlog.StepRef{{Name: "save"}},
 			},
 			{
-				StepRef:      auditlog.StepRef{Name: "save", StepType: "SaveStep"},
+				Name: "save", StepType: "SaveStep",
 				StepID:       3,
 				Status:       auditlog.StepStatusSucceeded,
 				AttemptCount: 1,
@@ -77,7 +77,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 		},
 		Events: []auditlog.Event{
 			{
-				StepRef:   auditlog.StepRef{Name: "fetch", StepType: "FetchStep"},
+				Name: "fetch", StepType: "FetchStep",
 				RunID:     "abcdef0123456789abcdef0123456789",
 				Sequence:  1,
 				Timestamp: fetchStarted,
@@ -86,7 +86,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 				Attempt:   1,
 			},
 			{
-				StepRef:    auditlog.StepRef{Name: "fetch", StepType: "FetchStep"},
+				Name: "fetch", StepType: "FetchStep",
 				RunID:      "abcdef0123456789abcdef0123456789",
 				Sequence:   2,
 				Timestamp:  fetchFinished,
@@ -97,7 +97,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 				Status:     auditlog.StepStatusSucceeded,
 			},
 			{
-				StepRef:   auditlog.StepRef{Name: "transform", StepType: "TransformStep"},
+				Name: "transform", StepType: "TransformStep",
 				RunID:     "abcdef0123456789abcdef0123456789",
 				Sequence:  3,
 				Timestamp: transformStarted,
@@ -106,7 +106,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 				Attempt:   1,
 			},
 			{
-				StepRef:    auditlog.StepRef{Name: "transform", StepType: "TransformStep"},
+				Name: "transform", StepType: "TransformStep",
 				RunID:      "abcdef0123456789abcdef0123456789",
 				Sequence:   4,
 				Timestamp:  transformFinished,
@@ -117,7 +117,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 				Status:     auditlog.StepStatusSucceeded,
 			},
 			{
-				StepRef:   auditlog.StepRef{Name: "save", StepType: "SaveStep"},
+				Name: "save", StepType: "SaveStep",
 				RunID:     "abcdef0123456789abcdef0123456789",
 				Sequence:  5,
 				Timestamp: saveStarted,
@@ -126,7 +126,7 @@ func goldenHTMLReport() auditlog.WorkflowReport {
 				Attempt:   1,
 			},
 			{
-				StepRef:    auditlog.StepRef{Name: "save", StepType: "SaveStep"},
+				Name: "save", StepType: "SaveStep",
 				RunID:      "abcdef0123456789abcdef0123456789",
 				Sequence:   6,
 				Timestamp:  saveFinished,

@@ -20,7 +20,7 @@ import (
 func makeEvent(seq int) auditlog.Event {
 	return auditlog.Event{
 		Sequence:  seq,
-		StepRef:   auditlog.StepRef{Name: fmt.Sprintf("step-%d", seq)},
+		Name:      fmt.Sprintf("step-%d", seq),
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
 	}

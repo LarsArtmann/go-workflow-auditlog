@@ -283,17 +283,17 @@ func TestWriteHTML_AllSixStatuses(t *testing.T) {
 		EventCount:          0,
 		WallClockDurationMs: 10.0,
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "s1"}, Status: auditlog.StepStatusSucceeded, DurationMs: &dur},
+			{Name: "s1", Status: auditlog.StepStatusSucceeded, DurationMs: &dur},
 			{
-				StepRef:    auditlog.StepRef{Name: "s2"},
+				Name:       "s2",
 				Status:     auditlog.StepStatusFailed,
 				DurationMs: &dur,
 				Error:      &errMsg,
 			},
-			{StepRef: auditlog.StepRef{Name: "s3"}, Status: auditlog.StepStatusSkipped},
-			{StepRef: auditlog.StepRef{Name: "s4"}, Status: auditlog.StepStatusCanceled, Error: &errMsg},
-			{StepRef: auditlog.StepRef{Name: "s5"}, Status: auditlog.StepStatusPending},
-			{StepRef: auditlog.StepRef{Name: "s6"}, Status: auditlog.StepStatusRunning},
+			{Name: "s3", Status: auditlog.StepStatusSkipped},
+			{Name: "s4", Status: auditlog.StepStatusCanceled, Error: &errMsg},
+			{Name: "s5", Status: auditlog.StepStatusPending},
+			{Name: "s6", Status: auditlog.StepStatusRunning},
 		},
 	}
 
@@ -407,14 +407,14 @@ func TestWriteHTML_HighFanOut(t *testing.T) {
 	dur := 2.0
 	steps := make([]auditlog.StepInfo, 0, 11)
 	steps = append(steps, auditlog.StepInfo{
-		StepRef:    auditlog.StepRef{Name: "fan-root", StepType: "RootStep"},
+		Name: "fan-root", StepType: "RootStep",
 		Status:     auditlog.StepStatusSucceeded,
 		DurationMs: &dur,
 	})
 
 	for i := range 10 {
 		steps = append(steps, auditlog.StepInfo{
-			StepRef:      auditlog.StepRef{Name: fmt.Sprintf("fan-%d", i), StepType: "LeafStep"},
+			Name: fmt.Sprintf("fan-%d", i), StepType: "LeafStep",
 			Status:       auditlog.StepStatusSucceeded,
 			DurationMs:   &dur,
 			Dependencies: []auditlog.StepRef{{Name: "fan-root"}},

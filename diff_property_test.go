@@ -47,9 +47,9 @@ func randWorkflowReport(rng *rand.Rand) auditlog.WorkflowReport {
 		}
 
 		steps = append(steps, auditlog.StepInfo{
-			StepRef: auditlog.StepRef{Name: namePool[i]},
-			Status:  diffStepStatuses[rng.IntN(len(diffStepStatuses))],
-			Cached:  cached,
+			Name:   namePool[i],
+			Status: diffStepStatuses[rng.IntN(len(diffStepStatuses))],
+			Cached: cached,
 		})
 	}
 

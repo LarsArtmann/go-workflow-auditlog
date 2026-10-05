@@ -152,9 +152,9 @@ func TestReport_WriteCSV_SpecialChars_RoundTrip(t *testing.T) {
 
 	for i, name := range names {
 		step := auditlog.StepInfo{
-			StepRef: auditlog.StepRef{Name: name, StepType: "TrickyStep"},
-			StepID:  i + 1,
-			Status:  auditlog.StepStatusSucceeded,
+			Name: name, StepType: "TrickyStep",
+			StepID: i + 1,
+			Status: auditlog.StepStatusSucceeded,
 		}
 
 		// Wire a dependency whose NAME carries special CSV chars (comma, quote,
@@ -236,9 +236,9 @@ func TestReport_WriteCSV_FormulaVectors_PreservedVerbatim(t *testing.T) {
 
 	for i, name := range formulaVectors {
 		steps = append(steps, auditlog.StepInfo{
-			StepRef: auditlog.StepRef{Name: name, StepType: "FormulaStep"},
-			StepID:  i + 1,
-			Status:  auditlog.StepStatusFailed,
+			Name: name, StepType: "FormulaStep",
+			StepID: i + 1,
+			Status: auditlog.StepStatusFailed,
 		})
 	}
 
@@ -279,9 +279,9 @@ func TestReport_WriteCSV_DependencySemicolonCollision(t *testing.T) {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef: auditlog.StepRef{Name: "root", StepType: "Step"},
-				StepID:  1,
-				Status:  auditlog.StepStatusSucceeded,
+				Name: "root", StepType: "Step",
+				StepID: 1,
+				Status: auditlog.StepStatusSucceeded,
 				Dependencies: []auditlog.StepRef{
 					{Name: withSemicolon, StepType: "Step"},
 				},
@@ -337,9 +337,9 @@ func ExampleWorkflowReport_WriteCSV() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef: auditlog.StepRef{Name: "fetch"},
-				StepID:  1,
-				Status:  auditlog.StepStatusSucceeded,
+				Name:   "fetch",
+				StepID: 1,
+				Status: auditlog.StepStatusSucceeded,
 			},
 		},
 	}
@@ -357,7 +357,7 @@ func BenchmarkWriteCSV_LargeReport(b *testing.B) {
 		dur := float64(i * 100)
 
 		steps = append(steps, auditlog.StepInfo{
-			StepRef:      auditlog.StepRef{Name: fmt.Sprintf("step-%04d", i), StepType: "BenchStep"},
+			Name: fmt.Sprintf("step-%04d", i), StepType: "BenchStep",
 			StepID:       i + 1,
 			Status:       auditlog.StepStatusSucceeded,
 			AttemptCount: 1,

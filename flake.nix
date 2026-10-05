@@ -39,7 +39,7 @@
           devShells.default = pkgs.mkShellNoCC {
             packages = builtins.attrValues {
               inherit (pkgs)
-                go_1_26
+                go_1_27
                 golangci-lint
                 actionlint
                 govulncheck
@@ -76,7 +76,7 @@
             name = "check";
 
             runtimeInputs = [
-              pkgs.go_1_26
+              pkgs.go_1_27
               pkgs.golangci-lint
               pkgs.govulncheck
             ];
@@ -147,7 +147,7 @@
               pkgs.writeShellApplication {
                 name = "auditlog";
 
-                runtimeInputs = [ pkgs.go_1_26 ];
+                runtimeInputs = [ pkgs.go_1_27 ];
 
                 text = ''
                   export GOEXPERIMENT=jsonv2

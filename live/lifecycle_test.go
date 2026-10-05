@@ -31,7 +31,7 @@ func TestHub_Drain_DeliversBufferedEvents(t *testing.T) {
 	for i := range 10 {
 		hub.OnEvent(auditlog.Event{
 			Sequence:  i + 1,
-			StepRef:   auditlog.StepRef{Name: "drain-test"},
+			Name:      "drain-test",
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
 		})
@@ -75,7 +75,7 @@ func TestHub_Drain_Timeout(t *testing.T) {
 	for i := range 10 {
 		hub.OnEvent(auditlog.Event{
 			Sequence:  i + 1,
-			StepRef:   auditlog.StepRef{Name: "drain-timeout"},
+			Name:      "drain-timeout",
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
 		})
@@ -108,7 +108,7 @@ func TestServer_Health_ReportsDrainState(t *testing.T) {
 	// Broadcast an event so the buffer is non-empty.
 	hub.OnEvent(auditlog.Event{
 		Sequence:  1,
-		StepRef:   auditlog.StepRef{Name: "health-test"},
+		Name:      "health-test",
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
 	})

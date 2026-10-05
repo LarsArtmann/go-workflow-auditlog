@@ -19,7 +19,7 @@ func TestEvent_ConvenienceMethods(t *testing.T) {
 	startEvent := auditlog.Event{
 		EventType:  auditlog.EventTypeAttemptStart,
 		Phase:      auditlog.PhaseBefore,
-		StepRef:    auditlog.StepRef{Name: "step-a"},
+		Name:       "step-a",
 		DurationMs: &dur,
 	}
 
@@ -196,7 +196,7 @@ func TestCoverage_StepInfo_Type(t *testing.T) {
 	t.Parallel()
 
 	step := auditlog.StepInfo{
-		StepRef: auditlog.StepRef{Name: "x", StepType: "FetchStep"},
+		Name: "x", StepType: "FetchStep",
 	}
 
 	if step.Type() != "FetchStep" {

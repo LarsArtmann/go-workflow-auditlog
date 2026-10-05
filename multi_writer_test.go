@@ -34,7 +34,7 @@ func TestMultiWriter_FansOutToAllCallbacks(t *testing.T) {
 		Sequence:  1,
 		EventType: auditlog.EventTypeAttemptStart,
 		Phase:     auditlog.PhaseBefore,
-		StepRef:   auditlog.StepRef{Name: "s1"},
+		Name:      "s1",
 	}
 
 	wg.Add(3)

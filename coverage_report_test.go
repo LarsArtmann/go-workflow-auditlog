@@ -84,12 +84,12 @@ func TestCoverage_Report_CriticalPath(t *testing.T) {
 		WorkflowID: "critical-path-test",
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef:    auditlog.StepRef{Name: "a"},
+				Name:       "a",
 				Status:     auditlog.StepStatusSucceeded,
 				DurationMs: &ms,
 			},
 			{
-				StepRef:    auditlog.StepRef{Name: "b"},
+				Name:       "b",
 				Status:     auditlog.StepStatusSucceeded,
 				DurationMs: &ms,
 				Dependencies: []auditlog.StepRef{
@@ -97,7 +97,7 @@ func TestCoverage_Report_CriticalPath(t *testing.T) {
 				},
 			},
 			{
-				StepRef:    auditlog.StepRef{Name: "c"},
+				Name:       "c",
 				Status:     auditlog.StepStatusSucceeded,
 				DurationMs: &ms,
 				Dependencies: []auditlog.StepRef{
@@ -139,28 +139,28 @@ func TestCoverage_Report_PeakConcurrencySteps(t *testing.T) {
 	report := auditlog.WorkflowReport{
 		WorkflowID: "concurrency-test",
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "a"}, Status: auditlog.StepStatusSucceeded},
-			{StepRef: auditlog.StepRef{Name: "b"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "a", Status: auditlog.StepStatusSucceeded},
+			{Name: "b", Status: auditlog.StepStatusSucceeded},
 		},
 		Events: []auditlog.Event{
 			{
 				EventType: auditlog.EventTypeAttemptStart,
-				StepRef:   auditlog.StepRef{Name: "a"},
+				Name:      "a",
 				Timestamp: now,
 			},
 			{
 				EventType: auditlog.EventTypeAttemptStart,
-				StepRef:   auditlog.StepRef{Name: "b"},
+				Name:      "b",
 				Timestamp: now.Add(time.Millisecond),
 			},
 			{
 				EventType: auditlog.EventTypeAttemptEnd,
-				StepRef:   auditlog.StepRef{Name: "a"},
+				Name:      "a",
 				Timestamp: now.Add(2 * time.Millisecond),
 			},
 			{
 				EventType: auditlog.EventTypeAttemptEnd,
-				StepRef:   auditlog.StepRef{Name: "b"},
+				Name:      "b",
 				Timestamp: now.Add(3 * time.Millisecond),
 			},
 		},

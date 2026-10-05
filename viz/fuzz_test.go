@@ -50,8 +50,8 @@ func FuzzDiagramSpecialChars(f *testing.F) {
 			WorkflowID: "fuzz-run",
 			Steps: []auditlog.StepInfo{
 				{
-					StepRef: auditlog.StepRef{Name: stepName},
-					Status:  auditlog.StepStatusSucceeded,
+					Name:   stepName,
+					Status: auditlog.StepStatusSucceeded,
 				},
 			},
 		}
@@ -138,14 +138,14 @@ func FuzzHTMLSpecialChars(f *testing.F) {
 			StepCount:  2,
 			Steps: []auditlog.StepInfo{
 				{
-					StepRef:      auditlog.StepRef{Name: input, StepType: input},
+					Name: input, StepType: input,
 					Status:       auditlog.StepStatusFailed,
 					AttemptCount: 1,
 					DurationMs:   &dur,
 					Error:        &errMsg,
 				},
 				{
-					StepRef:      auditlog.StepRef{Name: "normal"},
+					Name:         "normal",
 					Status:       auditlog.StepStatusSucceeded,
 					AttemptCount: 1,
 					DurationMs:   &dur,
@@ -155,7 +155,7 @@ func FuzzHTMLSpecialChars(f *testing.F) {
 			EventCount: 2,
 			Events: []auditlog.Event{
 				{
-					StepRef:    auditlog.StepRef{Name: input, StepType: input},
+					Name: input, StepType: input,
 					Sequence:   1,
 					EventType:  auditlog.EventTypeAttemptEnd,
 					Phase:      auditlog.PhaseAfter,
@@ -289,12 +289,12 @@ func FuzzDiagramSanitization_MultiStep(f *testing.F) {
 			WorkflowID: "fuzz-multi",
 			Steps: []auditlog.StepInfo{
 				{
-					StepRef: auditlog.StepRef{Name: name1},
-					Status:  auditlog.StepStatusSucceeded,
+					Name:   name1,
+					Status: auditlog.StepStatusSucceeded,
 				},
 				{
-					StepRef: auditlog.StepRef{Name: name2},
-					Status:  auditlog.StepStatusFailed,
+					Name:   name2,
+					Status: auditlog.StepStatusFailed,
 					Dependencies: []auditlog.StepRef{
 						{Name: name1},
 					},

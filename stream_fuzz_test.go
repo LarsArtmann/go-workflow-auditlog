@@ -18,14 +18,14 @@ func FuzzNDJSONStreamer(f *testing.F) {
 			Sequence:  1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: "s"},
+			Name:      "s",
 		},
 		// Event with all fields.
 		{
 			Sequence:  1,
 			EventType: auditlog.EventTypeAttemptEnd,
 			Phase:     auditlog.PhaseAfter,
-			StepRef:   auditlog.StepRef{Name: "step", StepType: "MyStep"},
+			Name:      "step", StepType: "MyStep",
 			Timestamp: time.Now(),
 			Attempt:   3,
 			Status:    auditlog.StepStatusFailed,
@@ -35,35 +35,35 @@ func FuzzNDJSONStreamer(f *testing.F) {
 			Sequence:  1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: ""},
+			Name:      "",
 		},
 		// Event with special characters in name.
 		{
 			Sequence:  1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: "<script>alert('xss')</script>"},
+			Name:      "<script>alert('xss')</script>",
 		},
 		// Event with unicode name.
 		{
 			Sequence:  1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: "ステップ"},
+			Name:      "ステップ",
 		},
 		// Very long step name.
 		{
 			Sequence:  1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: string(make([]byte, 10000))},
+			Name:      string(make([]byte, 10000)),
 		},
 		// Event with unusual but valid fields.
 		{
 			Sequence:  -1,
 			EventType: auditlog.EventTypeAttemptStart,
 			Phase:     auditlog.PhaseBefore,
-			StepRef:   auditlog.StepRef{Name: "neg-seq"},
+			Name:      "neg-seq",
 		},
 	}
 
@@ -82,7 +82,7 @@ func FuzzNDJSONStreamer(f *testing.F) {
 			Sequence:  seq,
 			EventType: auditlog.EventType(evtType),
 			Phase:     auditlog.Phase(phase),
-			StepRef:   auditlog.StepRef{Name: name, StepType: stepType},
+			Name:      name, StepType: stepType,
 		}
 
 		if evt.EventType == "" {
@@ -141,7 +141,7 @@ func FuzzReplayEvents(f *testing.F) {
 				Timestamp: time.Now(),
 				EventType: auditlog.EventTypeAttemptStart,
 				Phase:     auditlog.PhaseBefore,
-				StepRef:   auditlog.StepRef{Name: "a"},
+				Name:      "a",
 				Attempt:   1,
 			},
 			{
@@ -149,7 +149,7 @@ func FuzzReplayEvents(f *testing.F) {
 				Timestamp: time.Now(),
 				EventType: auditlog.EventTypeAttemptEnd,
 				Phase:     auditlog.PhaseAfter,
-				StepRef:   auditlog.StepRef{Name: "a"},
+				Name:      "a",
 				Attempt:   1,
 				Status:    auditlog.StepStatusSucceeded,
 			},
@@ -163,7 +163,7 @@ func FuzzReplayEvents(f *testing.F) {
 				Timestamp: time.Now(),
 				EventType: auditlog.EventTypeAttemptStart,
 				Phase:     auditlog.PhaseBefore,
-				StepRef:   auditlog.StepRef{Name: "lone"},
+				Name:      "lone",
 				Attempt:   1,
 			},
 		},
@@ -185,7 +185,7 @@ func FuzzReplayEvents(f *testing.F) {
 				Timestamp: now,
 				EventType: auditlog.EventTypeAttemptStart,
 				Phase:     auditlog.PhaseBefore,
-				StepRef:   auditlog.StepRef{Name: name},
+				Name:      name,
 				Attempt:   1,
 			},
 			{
@@ -193,7 +193,7 @@ func FuzzReplayEvents(f *testing.F) {
 				Timestamp: now.Add(time.Millisecond),
 				EventType: auditlog.EventTypeAttemptEnd,
 				Phase:     auditlog.PhaseAfter,
-				StepRef:   auditlog.StepRef{Name: name},
+				Name:      name,
 				Attempt:   1,
 				Status:    auditlog.StepStatusSucceeded,
 			},

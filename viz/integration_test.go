@@ -148,7 +148,7 @@ func TestCrossFormat_DiagramNodeConsistency(t *testing.T) {
 	dur := 10.0
 
 	report.Steps = append(report.Steps, auditlog.StepInfo{
-		StepRef:      auditlog.StepRef{Name: "step-b", StepType: "TestStep"},
+		Name: "step-b", StepType: "TestStep",
 		Status:       auditlog.StepStatusFailed,
 		AttemptCount: 2,
 		DurationMs:   &dur,

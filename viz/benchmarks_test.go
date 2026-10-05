@@ -217,9 +217,9 @@ func ExampleWorkflowReport_Duration() {
 func ExampleWorkflowReport_Filtered() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fetch"}, Status: auditlog.StepStatusSucceeded},
-			{StepRef: auditlog.StepRef{Name: "validate"}, Status: auditlog.StepStatusFailed},
-			{StepRef: auditlog.StepRef{Name: "transform"}, Status: auditlog.StepStatusSkipped},
+			{Name: "fetch", Status: auditlog.StepStatusSucceeded},
+			{Name: "validate", Status: auditlog.StepStatusFailed},
+			{Name: "transform", Status: auditlog.StepStatusSkipped},
 		},
 	}
 
@@ -283,7 +283,7 @@ func ExampleWriteTable() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef:  auditlog.StepRef{Name: "fetch"},
+				Name:     "fetch",
 				Status:   auditlog.StepStatusSucceeded,
 				HasRetry: true,
 			},
@@ -307,8 +307,8 @@ func ExampleWriteTable() {
 func ExampleWriteMermaid() {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "a"}},
-			{StepRef: auditlog.StepRef{Name: "b"}, Dependencies: []auditlog.StepRef{{Name: "a"}}},
+			{Name: "a"},
+			{Name: "b", Dependencies: []auditlog.StepRef{{Name: "a"}}},
 		},
 	}
 
@@ -333,7 +333,7 @@ func benchmarkReport(n int) auditlog.WorkflowReport {
 		dur := float64(i * 100)
 
 		steps = append(steps, auditlog.StepInfo{
-			StepRef:      auditlog.StepRef{Name: "step-" + itoa(i), StepType: "BenchStep"},
+			Name: "step-" + itoa(i), StepType: "BenchStep",
 			Status:       auditlog.StepStatusSucceeded,
 			AttemptCount: 1,
 			HasRetry:     i%3 == 0,

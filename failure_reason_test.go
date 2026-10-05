@@ -248,11 +248,11 @@ func TestReplay_FailureReasonOnStepInfo(t *testing.T) {
 	events := []auditlog.Event{
 		{
 			Sequence: 1, EventType: auditlog.EventTypeAttemptStart, Phase: auditlog.PhaseBefore,
-			Timestamp: time.Now(), StepRef: auditlog.StepRef{Name: "fail"}, Attempt: 1,
+			Timestamp: time.Now(), Name: "fail", Attempt: 1,
 		},
 		{
 			Sequence: 2, EventType: auditlog.EventTypeAttemptEnd, Phase: auditlog.PhaseAfter,
-			Timestamp: time.Now(), StepRef: auditlog.StepRef{Name: "fail"}, Attempt: 1,
+			Timestamp: time.Now(), Name: "fail", Attempt: 1,
 			Status: auditlog.StepStatusFailed, FailureReason: auditlog.FailureReasonTimeout,
 			Error: new("deadline exceeded"),
 		},
@@ -277,10 +277,10 @@ func TestCSV_FailureReasonColumn(t *testing.T) {
 	report := auditlog.WorkflowReport{
 		Steps: []auditlog.StepInfo{
 			{
-				StepRef: auditlog.StepRef{Name: "failed-step"}, Status: auditlog.StepStatusFailed,
+				Name: "failed-step", Status: auditlog.StepStatusFailed,
 				FailureReason: auditlog.FailureReasonUserError, Error: &errMsg,
 			},
-			{StepRef: auditlog.StepRef{Name: "ok-step"}, Status: auditlog.StepStatusSucceeded},
+			{Name: "ok-step", Status: auditlog.StepStatusSucceeded},
 		},
 	}
 
@@ -356,7 +356,7 @@ func TestFailureSummary_GoldenJSON(t *testing.T) {
 	failedReport := auditlog.WorkflowReport{
 		WorkflowID: "test-pipeline",
 		Steps: []auditlog.StepInfo{
-			{StepRef: auditlog.StepRef{Name: "fail"}, Status: auditlog.StepStatusFailed},
+			{Name: "fail", Status: auditlog.StepStatusFailed},
 		},
 		FailedCount:    1,
 		FailureSummary: "1 step(s) failed: fail",
