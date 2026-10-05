@@ -63,36 +63,36 @@ These are valuable but not blocking. They belong in ROADMAP as scoped items, not
 
 Sorted by impact x customer-value / effort. Risk level annotated. Dependency chain respected.
 
-| #   | Task                                                                                                                           | Phase      | Impact   | Effort   | Risk   | Dependencies |
-| --- | ------------------------------------------------------------------------------------------------------------------------------ | ---------- | -------- | -------- | ------ | ------------ |
-| ~~M1~~  | ~~Commit + push all docs-health session output (9 files + plan)~~ done (docs-health pass 2026-10-05) | ~~Foundation~~ | ~~Critical~~ | ~~30 min~~ | ~~None~~ | ~~—~~ |
-| ~~M2~~  | ~~Cut v0.9.0 coordinated three-module release~~ done (docs-health pass 2026-10-05) | ~~Foundation~~ | ~~Critical~~ | ~~60 min~~ | ~~Low~~ | ~~M1~~ |
-| ~~M3~~  | ~~Update README.md with new APIs (MultiWriter, StreamEvents, FailureReason, FailureSummary, WithFlushInterval, workflow helpers)~~ done — README refreshed by the 2026-10-05 pass | ~~Docs~~ | ~~High~~ | ~~60 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M4~~  | ~~Add FailureReason display to viz dashboard (steps table + graph nodes)~~ done (docs-health pass 2026-10-05) | ~~Feature~~ | ~~High~~ | ~~100 min~~ | ~~Low~~ | ~~M2~~ |
-| ~~M5~~  | ~~Add FailureReason column to CSV/TSV export~~ done — CSV failure_reason column shipped (v0.9.0 era) | ~~Feature~~ | ~~Medium~~ | ~~45 min~~ | ~~Low~~ | ~~M2~~ |
-| ~~M6~~  | ~~Close StreamEvents coverage gap (93.9% -> ~100%)~~ **Won't implement — covered by existing test suites.** | ~~Quality~~ | ~~Medium~~ | ~~30 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M7~~  | ~~Close classifyFailure coverage gap (85.7% -> ~100%)~~ **Won't implement — covered by existing test suites.** | ~~Quality~~ | ~~Medium~~ | ~~30 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M8~~  | ~~Add FailureSummary golden JSON test~~ **Won't implement — covered by existing test suites.** | ~~Quality~~ | ~~Medium~~ | ~~30 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M9~~  | ~~Update STABILITY.md with new API stability promises~~ done (docs-health pass 2026-10-05) | ~~Docs~~ | ~~Medium~~ | ~~45 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M10~~ | ~~Add ADRs (SSE-only transport, FailureReason 3-value, MultiWriter sig, FailureSummary rename)~~ done (docs-health pass 2026-10-05) | ~~Docs~~ | ~~Medium~~ | ~~90 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M11~~ | ~~Update docs/MIGRATION.md for Event.FailureReason additive schema~~ done (docs-health pass 2026-10-05) | ~~Docs~~ | ~~Low~~ | ~~30 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M12~~ | ~~Verify DOMAIN_LANGUAGE.md freshness (check if 23-56 session updated it)~~ **Won't implement — terms stable since.** | ~~Docs~~ | ~~Low~~ | ~~15 min~~ | ~~None~~ | ~~—~~ |
-| ~~M13~~ | ~~Normalize historical report annotation styles (22-27 "Original report:" fragments)~~ done — normalized by the 2026-10-05 pass | ~~Docs~~ | ~~Low~~ | ~~30 min~~ | ~~None~~ | ~~—~~ |
-| ~~M14~~ | ~~Denormalize FailureReason onto StepInfo~~ done (docs-health pass 2026-10-05) | ~~Feature~~ | ~~Medium~~ | ~~60 min~~ | ~~Low~~ | ~~M4, M5~~ |
-| ~~M15~~ | ~~Add FuzzStreamEvents fuzz target~~ done (docs-health pass 2026-10-05) | ~~Quality~~ | ~~Low~~ | ~~45 min~~ | ~~None~~ | ~~M6~~ |
-| ~~M16~~ | ~~Fix pre-commit hook (install buildflow or make resilient)~~ done (docs-health pass 2026-10-05) | ~~Infra~~ | ~~Medium~~ | ~~45 min~~ | ~~Medium~~ | ~~—~~ |
-| ~~M17~~ | ~~Add CONTRIBUTING.md~~ done (docs-health pass 2026-10-05) | ~~Docs~~ | ~~Low~~ | ~~45 min~~ | ~~None~~ | ~~M2~~ |
-| M18 | Check website/ directory for stale content **→ open — website guide pages (TODO_LIST 2026-10-05)** | Docs       | Low      | 30 min   | None   | M2           |
-| ~~M19~~ | ~~Add EventsByFailureReason query method + filter option~~ **Won't implement — declined.** | ~~Feature~~ | ~~Medium~~ | ~~60 min~~ | ~~Low~~ | ~~M14~~ |
-| ~~M20~~ | ~~Add more godoc examples (TimedOutSteps, HasWorkflowRetries, FailureReason, StreamEvents error handling)~~ done (docs-health pass 2026-10-05) | ~~Polish~~ | ~~Low~~ | ~~60 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M21~~ | ~~Add benchmarks (StreamEvents, MultiWriter, Diff with aggregates)~~ done (docs-health pass 2026-10-05) | ~~Quality~~ | ~~Low~~ | ~~90 min~~ | ~~None~~ | ~~M2~~ |
-| ~~M22~~ | ~~Update viz/example demo pipeline (add timeout step for FailureReason)~~ done (docs-health pass 2026-10-05) | ~~Polish~~ | ~~Low~~ | ~~30 min~~ | ~~None~~ | ~~M4~~ |
-| M23 | Emit synthetic attempt_end events for dependency-failed steps **→ open — synthetic dependency-failed events (ROADMAP raw ideas)** | Feature    | Medium   | 90 min   | Medium | M14          |
-| ~~M24~~ | ~~Add CLI tool (`auditlog` command)~~ done (docs-health pass 2026-10-05) | ~~Feature~~ | ~~Medium~~ | ~~100 min+~~ | ~~Medium~~ | ~~M2~~ |
-| ~~M25~~ | ~~Consider Go 1.27 upgrade (eliminates GOEXPERIMENT=jsonv2 + 29 gopls warnings)~~ done — DONE — Go 1.27 shipped; experiment flag removed (2026-10-05) | ~~Infra~~ | ~~Low~~ | ~~60 min~~ | ~~HIGH~~ | ~~—~~ |
-| M26 | Add OpenTelemetry span bridge **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)** | Feature    | Medium   | 100 min+ | Medium | M2           |
-| M27 | Add iterator patterns (iter.Seq for Events, CriticalPath, Filter) **→ open — iter.Seq patterns (ROADMAP raw ideas)** | Feature    | Low      | 90 min   | Medium | M2           |
-| ~~M28~~ | ~~Add JSON Schema generation (schema.go + cmd/genschema)~~ done (docs-health pass 2026-10-05) | ~~Feature~~ | ~~Low~~ | ~~90 min~~ | ~~Low~~ | ~~M2~~ |
+| #       | Task                                                                                                                                                                              | Phase          | Impact       | Effort       | Risk       | Dependencies |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------ | ------------ | ---------- | ------------ |
+| ~~M1~~  | ~~Commit + push all docs-health session output (9 files + plan)~~ done (docs-health pass 2026-10-05)                                                                              | ~~Foundation~~ | ~~Critical~~ | ~~30 min~~   | ~~None~~   | ~~—~~        |
+| ~~M2~~  | ~~Cut v0.9.0 coordinated three-module release~~ done (docs-health pass 2026-10-05)                                                                                                | ~~Foundation~~ | ~~Critical~~ | ~~60 min~~   | ~~Low~~    | ~~M1~~       |
+| ~~M3~~  | ~~Update README.md with new APIs (MultiWriter, StreamEvents, FailureReason, FailureSummary, WithFlushInterval, workflow helpers)~~ done — README refreshed by the 2026-10-05 pass | ~~Docs~~       | ~~High~~     | ~~60 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M4~~  | ~~Add FailureReason display to viz dashboard (steps table + graph nodes)~~ done (docs-health pass 2026-10-05)                                                                     | ~~Feature~~    | ~~High~~     | ~~100 min~~  | ~~Low~~    | ~~M2~~       |
+| ~~M5~~  | ~~Add FailureReason column to CSV/TSV export~~ done — CSV failure_reason column shipped (v0.9.0 era)                                                                              | ~~Feature~~    | ~~Medium~~   | ~~45 min~~   | ~~Low~~    | ~~M2~~       |
+| ~~M6~~  | ~~Close StreamEvents coverage gap (93.9% -> ~100%)~~ **Won't implement — covered by existing test suites.**                                                                       | ~~Quality~~    | ~~Medium~~   | ~~30 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M7~~  | ~~Close classifyFailure coverage gap (85.7% -> ~100%)~~ **Won't implement — covered by existing test suites.**                                                                    | ~~Quality~~    | ~~Medium~~   | ~~30 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M8~~  | ~~Add FailureSummary golden JSON test~~ **Won't implement — covered by existing test suites.**                                                                                    | ~~Quality~~    | ~~Medium~~   | ~~30 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M9~~  | ~~Update STABILITY.md with new API stability promises~~ done (docs-health pass 2026-10-05)                                                                                        | ~~Docs~~       | ~~Medium~~   | ~~45 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M10~~ | ~~Add ADRs (SSE-only transport, FailureReason 3-value, MultiWriter sig, FailureSummary rename)~~ done (docs-health pass 2026-10-05)                                               | ~~Docs~~       | ~~Medium~~   | ~~90 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M11~~ | ~~Update docs/MIGRATION.md for Event.FailureReason additive schema~~ done (docs-health pass 2026-10-05)                                                                           | ~~Docs~~       | ~~Low~~      | ~~30 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M12~~ | ~~Verify DOMAIN_LANGUAGE.md freshness (check if 23-56 session updated it)~~ **Won't implement — terms stable since.**                                                             | ~~Docs~~       | ~~Low~~      | ~~15 min~~   | ~~None~~   | ~~—~~        |
+| ~~M13~~ | ~~Normalize historical report annotation styles (22-27 "Original report:" fragments)~~ done — normalized by the 2026-10-05 pass                                                   | ~~Docs~~       | ~~Low~~      | ~~30 min~~   | ~~None~~   | ~~—~~        |
+| ~~M14~~ | ~~Denormalize FailureReason onto StepInfo~~ done (docs-health pass 2026-10-05)                                                                                                    | ~~Feature~~    | ~~Medium~~   | ~~60 min~~   | ~~Low~~    | ~~M4, M5~~   |
+| ~~M15~~ | ~~Add FuzzStreamEvents fuzz target~~ done (docs-health pass 2026-10-05)                                                                                                           | ~~Quality~~    | ~~Low~~      | ~~45 min~~   | ~~None~~   | ~~M6~~       |
+| ~~M16~~ | ~~Fix pre-commit hook (install buildflow or make resilient)~~ done (docs-health pass 2026-10-05)                                                                                  | ~~Infra~~      | ~~Medium~~   | ~~45 min~~   | ~~Medium~~ | ~~—~~        |
+| ~~M17~~ | ~~Add CONTRIBUTING.md~~ done (docs-health pass 2026-10-05)                                                                                                                        | ~~Docs~~       | ~~Low~~      | ~~45 min~~   | ~~None~~   | ~~M2~~       |
+| M18     | Check website/ directory for stale content **→ open — website guide pages (TODO_LIST 2026-10-05)**                                                                                | Docs           | Low          | 30 min       | None       | M2           |
+| ~~M19~~ | ~~Add EventsByFailureReason query method + filter option~~ **Won't implement — declined.**                                                                                        | ~~Feature~~    | ~~Medium~~   | ~~60 min~~   | ~~Low~~    | ~~M14~~      |
+| ~~M20~~ | ~~Add more godoc examples (TimedOutSteps, HasWorkflowRetries, FailureReason, StreamEvents error handling)~~ done (docs-health pass 2026-10-05)                                    | ~~Polish~~     | ~~Low~~      | ~~60 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M21~~ | ~~Add benchmarks (StreamEvents, MultiWriter, Diff with aggregates)~~ done (docs-health pass 2026-10-05)                                                                           | ~~Quality~~    | ~~Low~~      | ~~90 min~~   | ~~None~~   | ~~M2~~       |
+| ~~M22~~ | ~~Update viz/example demo pipeline (add timeout step for FailureReason)~~ done (docs-health pass 2026-10-05)                                                                      | ~~Polish~~     | ~~Low~~      | ~~30 min~~   | ~~None~~   | ~~M4~~       |
+| M23     | Emit synthetic attempt_end events for dependency-failed steps **→ open — synthetic dependency-failed events (ROADMAP raw ideas)**                                                 | Feature        | Medium       | 90 min       | Medium     | M14          |
+| ~~M24~~ | ~~Add CLI tool (`auditlog` command)~~ done (docs-health pass 2026-10-05)                                                                                                          | ~~Feature~~    | ~~Medium~~   | ~~100 min+~~ | ~~Medium~~ | ~~M2~~       |
+| ~~M25~~ | ~~Consider Go 1.27 upgrade (eliminates GOEXPERIMENT=jsonv2 + 29 gopls warnings)~~ done — DONE — Go 1.27 shipped; experiment flag removed (2026-10-05)                             | ~~Infra~~      | ~~Low~~      | ~~60 min~~   | ~~HIGH~~   | ~~—~~        |
+| M26     | Add OpenTelemetry span bridge **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**                                                                                        | Feature        | Medium       | 100 min+     | Medium     | M2           |
+| M27     | Add iterator patterns (iter.Seq for Events, CriticalPath, Filter) **→ open — iter.Seq patterns (ROADMAP raw ideas)**                                                              | Feature        | Low          | 90 min       | Medium     | M2           |
+| ~~M28~~ | ~~Add JSON Schema generation (schema.go + cmd/genschema)~~ done (docs-health pass 2026-10-05)                                                                                     | ~~Feature~~    | ~~Low~~      | ~~90 min~~   | ~~Low~~    | ~~M2~~       |
 
 **Total estimated effort (M1-M13, immediate execution):** ~10.5 hours
 **Total estimated effort (M1-M28, full roadmap):** ~30+ hours
@@ -105,97 +105,97 @@ Sorted by execution order within each phase. Each task is atomic: one logical ch
 
 ### Phase A: Commit + Release (1% -> 51%)
 
-| #   | Task                                                                                 | Parent | Est    | Verify                     |
-| --- | ------------------------------------------------------------------------------------ | ------ | ------ | -------------------------- |
-| ~~F1~~  | ~~`git status` — verify all 10 changed files are expected~~ done (docs-health pass 2026-10-05) | ~~M1~~ | ~~2 min~~ | ~~Output matches expectation~~ |
-| ~~F2~~  | ~~`git diff --stat` — sanity-check no unexpected files~~ done (docs-health pass 2026-10-05) | ~~M1~~ | ~~2 min~~ | ~~Only docs files~~ |
-| ~~F3~~  | ~~`git add -A && git commit` with detailed message listing all changes~~ done (docs-health pass 2026-10-05) | ~~M1~~ | ~~5 min~~ | ~~Clean commit~~ |
-| ~~F4~~  | ~~`git push origin master`~~ done (docs-health pass 2026-10-05) | ~~M1~~ | ~~2 min~~ | ~~Push succeeds~~ |
-| ~~F5~~  | ~~Read RELEASE.md fully before touching anything~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Mental model~~ |
-| ~~F6~~  | ~~`grep -r '^replace' viz/go.mod live/go.mod go.mod` — must return nothing~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~2 min~~ | ~~Empty output~~ |
-| ~~F7~~  | ~~`git status` — verify clean working tree~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~2 min~~ | ~~Clean~~ |
-| ~~F8~~  | ~~Tag all three modules: `git tag -a v0.9.0 -m "..."`, `viz/v0.9.0`, `live/v0.9.0`~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~`git tag -l` shows all 3~~ |
-| ~~F9~~  | ~~`git push origin v0.9.0 viz/v0.9.0 live/v0.9.0`~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~2 min~~ | ~~Tags pushed~~ |
-| ~~F10~~ | ~~`GORELEASER_CURRENT_TAG=v0.9.0 goreleaser release` (or `gh release create` fallback)~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~10 min~~ | ~~GitHub Release created~~ |
-| ~~F11~~ | ~~Verify pkg.go.dev picks up v0.9.0 (probe URL)~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Version visible~~ |
-| ~~F12~~ | ~~`nix run .#check` — verify standalone builds pass for all 3 modules~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~10 min~~ | ~~All green~~ |
+| #       | Task                                                                                                                        | Parent | Est        | Verify                         |
+| ------- | --------------------------------------------------------------------------------------------------------------------------- | ------ | ---------- | ------------------------------ |
+| ~~F1~~  | ~~`git status` — verify all 10 changed files are expected~~ done (docs-health pass 2026-10-05)                              | ~~M1~~ | ~~2 min~~  | ~~Output matches expectation~~ |
+| ~~F2~~  | ~~`git diff --stat` — sanity-check no unexpected files~~ done (docs-health pass 2026-10-05)                                 | ~~M1~~ | ~~2 min~~  | ~~Only docs files~~            |
+| ~~F3~~  | ~~`git add -A && git commit` with detailed message listing all changes~~ done (docs-health pass 2026-10-05)                 | ~~M1~~ | ~~5 min~~  | ~~Clean commit~~               |
+| ~~F4~~  | ~~`git push origin master`~~ done (docs-health pass 2026-10-05)                                                             | ~~M1~~ | ~~2 min~~  | ~~Push succeeds~~              |
+| ~~F5~~  | ~~Read RELEASE.md fully before touching anything~~ done (docs-health pass 2026-10-05)                                       | ~~M2~~ | ~~5 min~~  | ~~Mental model~~               |
+| ~~F6~~  | ~~`grep -r '^replace' viz/go.mod live/go.mod go.mod` — must return nothing~~ done (docs-health pass 2026-10-05)             | ~~M2~~ | ~~2 min~~  | ~~Empty output~~               |
+| ~~F7~~  | ~~`git status` — verify clean working tree~~ done (docs-health pass 2026-10-05)                                             | ~~M2~~ | ~~2 min~~  | ~~Clean~~                      |
+| ~~F8~~  | ~~Tag all three modules: `git tag -a v0.9.0 -m "..."`, `viz/v0.9.0`, `live/v0.9.0`~~ done (docs-health pass 2026-10-05)     | ~~M2~~ | ~~5 min~~  | ~~`git tag -l` shows all 3~~   |
+| ~~F9~~  | ~~`git push origin v0.9.0 viz/v0.9.0 live/v0.9.0`~~ done (docs-health pass 2026-10-05)                                      | ~~M2~~ | ~~2 min~~  | ~~Tags pushed~~                |
+| ~~F10~~ | ~~`GORELEASER_CURRENT_TAG=v0.9.0 goreleaser release` (or `gh release create` fallback)~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~10 min~~ | ~~GitHub Release created~~     |
+| ~~F11~~ | ~~Verify pkg.go.dev picks up v0.9.0 (probe URL)~~ done (docs-health pass 2026-10-05)                                        | ~~M2~~ | ~~5 min~~  | ~~Version visible~~            |
+| ~~F12~~ | ~~`nix run .#check` — verify standalone builds pass for all 3 modules~~ done (docs-health pass 2026-10-05)                  | ~~M2~~ | ~~10 min~~ | ~~All green~~                  |
 
 ### Phase B: README.md (4% -> 64%)
 
-| #   | Task                                                                                    | Parent | Est    | Verify                      |
-| --- | --------------------------------------------------------------------------------------- | ------ | ------ | --------------------------- |
-| ~~F13~~ | ~~Read current README.md fully — identify feature highlights section~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~5 min~~ | ~~Know insertion point~~ |
-| ~~F14~~ | ~~Add MultiWriter to features section with one-line description + code snippet~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~10 min~~ | ~~Read~~ |
-| ~~F15~~ | ~~Add StreamEvents to features section with description~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~10 min~~ | ~~Read~~ |
-| ~~F16~~ | ~~Add FailureReason/FailureSummary to features section~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~10 min~~ | ~~Read~~ |
-| ~~F17~~ | ~~Add WithFlushInterval to streaming section~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~5 min~~ | ~~Read~~ |
-| ~~F18~~ | ~~Add workflow-level helpers (RetriedStepCount, TimedOutSteps, etc.) to query API section~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~10 min~~ | ~~Read~~ |
-| ~~F19~~ | ~~Verify all code snippets compile against actual API~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~10 min~~ | ~~`go build` snippet mentally~~ |
+| #       | Task                                                                                                                           | Parent | Est        | Verify                          |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------ | ------ | ---------- | ------------------------------- |
+| ~~F13~~ | ~~Read current README.md fully — identify feature highlights section~~ done (docs-health pass 2026-10-05)                      | ~~M3~~ | ~~5 min~~  | ~~Know insertion point~~        |
+| ~~F14~~ | ~~Add MultiWriter to features section with one-line description + code snippet~~ done (docs-health pass 2026-10-05)            | ~~M3~~ | ~~10 min~~ | ~~Read~~                        |
+| ~~F15~~ | ~~Add StreamEvents to features section with description~~ done (docs-health pass 2026-10-05)                                   | ~~M3~~ | ~~10 min~~ | ~~Read~~                        |
+| ~~F16~~ | ~~Add FailureReason/FailureSummary to features section~~ done (docs-health pass 2026-10-05)                                    | ~~M3~~ | ~~10 min~~ | ~~Read~~                        |
+| ~~F17~~ | ~~Add WithFlushInterval to streaming section~~ done (docs-health pass 2026-10-05)                                              | ~~M3~~ | ~~5 min~~  | ~~Read~~                        |
+| ~~F18~~ | ~~Add workflow-level helpers (RetriedStepCount, TimedOutSteps, etc.) to query API section~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~10 min~~ | ~~Read~~                        |
+| ~~F19~~ | ~~Verify all code snippets compile against actual API~~ done (docs-health pass 2026-10-05)                                     | ~~M3~~ | ~~10 min~~ | ~~`go build` snippet mentally~~ |
 
 ### Phase C: FailureReason Surfacing (20% -> 80%)
 
-| #   | Task                                                                                     | Parent | Est    | Verify             |
-| --- | ---------------------------------------------------------------------------------------- | ------ | ------ | ------------------ |
-| ~~F20~~ | ~~Read `viz/diagram.go` + `viz/metadata.go` — understand how step data flows to renderers~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~10 min~~ | ~~Mental model~~ |
-| ~~F21~~ | ~~Read `dashboard.js` — find where step rows are rendered, identify column insertion point~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~10 min~~ | ~~Know JS location~~ |
-| ~~F22~~ | ~~Add FailureReason to `StepInfo` or `stepCore` (denormalize from Event)~~ done (docs-health pass 2026-10-05) | ~~M14~~ | ~~10 min~~ | ~~`go build`~~ |
-| ~~F23~~ | ~~Update `report_builder.go` — populate FailureReason from last attempt_end event~~ done (docs-health pass 2026-10-05) | ~~M14~~ | ~~10 min~~ | ~~`go build`~~ |
-| ~~F24~~ | ~~Add FailureReason to `viz/metadata.go` TypeMetadata for JS consumption~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F25~~ | ~~Add FailureReason column to viz table export (`table_options.go` TableColumn enum)~~ done (docs-health pass 2026-10-05) | ~~M5~~ | ~~10 min~~ | ~~Test passes~~ |
-| ~~F26~~ | ~~Add FailureReason to CSV export (`csv.go`)~~ done (docs-health pass 2026-10-05) | ~~M5~~ | ~~10 min~~ | ~~Test passes~~ |
-| ~~F27~~ | ~~Add FailureReason display to dashboard.js steps table~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~12 min~~ | ~~JS structural test~~ |
-| ~~F28~~ | ~~Add FailureReason icon/badge to dashboard.js graph nodes~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~12 min~~ | ~~JS structural test~~ |
-| ~~F29~~ | ~~Write test: FailureReason flows from Event to StepInfo to viz rendering~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~12 min~~ | ~~Test passes~~ |
-| ~~F30~~ | ~~Write test: CSV export includes failure_reason column~~ done (docs-health pass 2026-10-05) | ~~M5~~ | ~~10 min~~ | ~~Test passes~~ |
+| #       | Task                                                                                                                            | Parent  | Est        | Verify                 |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------- | ------- | ---------- | ---------------------- |
+| ~~F20~~ | ~~Read `viz/diagram.go` + `viz/metadata.go` — understand how step data flows to renderers~~ done (docs-health pass 2026-10-05)  | ~~M4~~  | ~~10 min~~ | ~~Mental model~~       |
+| ~~F21~~ | ~~Read `dashboard.js` — find where step rows are rendered, identify column insertion point~~ done (docs-health pass 2026-10-05) | ~~M4~~  | ~~10 min~~ | ~~Know JS location~~   |
+| ~~F22~~ | ~~Add FailureReason to `StepInfo` or `stepCore` (denormalize from Event)~~ done (docs-health pass 2026-10-05)                   | ~~M14~~ | ~~10 min~~ | ~~`go build`~~         |
+| ~~F23~~ | ~~Update `report_builder.go` — populate FailureReason from last attempt_end event~~ done (docs-health pass 2026-10-05)          | ~~M14~~ | ~~10 min~~ | ~~`go build`~~         |
+| ~~F24~~ | ~~Add FailureReason to `viz/metadata.go` TypeMetadata for JS consumption~~ done (docs-health pass 2026-10-05)                   | ~~M4~~  | ~~5 min~~  | ~~Compile~~            |
+| ~~F25~~ | ~~Add FailureReason column to viz table export (`table_options.go` TableColumn enum)~~ done (docs-health pass 2026-10-05)       | ~~M5~~  | ~~10 min~~ | ~~Test passes~~        |
+| ~~F26~~ | ~~Add FailureReason to CSV export (`csv.go`)~~ done (docs-health pass 2026-10-05)                                               | ~~M5~~  | ~~10 min~~ | ~~Test passes~~        |
+| ~~F27~~ | ~~Add FailureReason display to dashboard.js steps table~~ done (docs-health pass 2026-10-05)                                    | ~~M4~~  | ~~12 min~~ | ~~JS structural test~~ |
+| ~~F28~~ | ~~Add FailureReason icon/badge to dashboard.js graph nodes~~ done (docs-health pass 2026-10-05)                                 | ~~M4~~  | ~~12 min~~ | ~~JS structural test~~ |
+| ~~F29~~ | ~~Write test: FailureReason flows from Event to StepInfo to viz rendering~~ done (docs-health pass 2026-10-05)                  | ~~M4~~  | ~~12 min~~ | ~~Test passes~~        |
+| ~~F30~~ | ~~Write test: CSV export includes failure_reason column~~ done (docs-health pass 2026-10-05)                                    | ~~M5~~  | ~~10 min~~ | ~~Test passes~~        |
 
 ### Phase D: Coverage + Quality
 
-| #   | Task                                                                                                | Parent | Est    | Verify        |
-| --- | --------------------------------------------------------------------------------------------------- | ------ | ------ | ------------- |
-| ~~F31~~ | ~~Write `TestStreamEvents_AllLinesFailJSON` — non-blank lines all fail JSON -> ErrNoEvents~~ done (docs-health pass 2026-10-05) | ~~M6~~ | ~~10 min~~ | ~~Coverage >99%~~ |
-| ~~F32~~ | ~~Write `TestTimeout_FailureReasonNil` — successful step -> FailureReason == ""~~ done (docs-health pass 2026-10-05) | ~~M7~~ | ~~10 min~~ | ~~Coverage >95%~~ |
-| ~~F33~~ | ~~Write golden JSON test — verify failure_summary at report level, failure_reason at event level only~~ done (docs-health pass 2026-10-05) | ~~M8~~ | ~~12 min~~ | ~~Test passes~~ |
-| ~~F34~~ | ~~Write `FuzzStreamEvents` — adversarial NDJSON bytes, no panic~~ done (docs-health pass 2026-10-05) | ~~M15~~ | ~~12 min~~ | ~~Fuzz passes~~ |
-| ~~F35~~ | ~~Write `TestDiff_HasChangesIsEmptyDuality` — property test, 200 iterations~~ done (docs-health pass 2026-10-05) | ~~M15~~ | ~~10 min~~ | ~~Test passes~~ |
+| #       | Task                                                                                                                                       | Parent  | Est        | Verify            |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | ---------- | ----------------- |
+| ~~F31~~ | ~~Write `TestStreamEvents_AllLinesFailJSON` — non-blank lines all fail JSON -> ErrNoEvents~~ done (docs-health pass 2026-10-05)            | ~~M6~~  | ~~10 min~~ | ~~Coverage >99%~~ |
+| ~~F32~~ | ~~Write `TestTimeout_FailureReasonNil` — successful step -> FailureReason == ""~~ done (docs-health pass 2026-10-05)                       | ~~M7~~  | ~~10 min~~ | ~~Coverage >95%~~ |
+| ~~F33~~ | ~~Write golden JSON test — verify failure_summary at report level, failure_reason at event level only~~ done (docs-health pass 2026-10-05) | ~~M8~~  | ~~12 min~~ | ~~Test passes~~   |
+| ~~F34~~ | ~~Write `FuzzStreamEvents` — adversarial NDJSON bytes, no panic~~ done (docs-health pass 2026-10-05)                                       | ~~M15~~ | ~~12 min~~ | ~~Fuzz passes~~   |
+| ~~F35~~ | ~~Write `TestDiff_HasChangesIsEmptyDuality` — property test, 200 iterations~~ done (docs-health pass 2026-10-05)                           | ~~M15~~ | ~~10 min~~ | ~~Test passes~~   |
 
 ### Phase E: Documentation Completeness
 
-| #   | Task                                                                                                                    | Parent | Est    | Verify          |
-| --- | ----------------------------------------------------------------------------------------------------------------------- | ------ | ------ | --------------- |
-| ~~F36~~ | ~~Read STABILITY.md — identify which APIs lack stability promises~~ done (docs-health pass 2026-10-05) | ~~M9~~ | ~~5 min~~ | ~~Know gaps~~ |
-| ~~F37~~ | ~~Add stability entries for StreamEvents, MultiWriter, FailureReason, FailureSummary, WithFlushInterval, workflow helpers~~ done (docs-health pass 2026-10-05) | ~~M9~~ | ~~12 min~~ | ~~Read~~ |
-| ~~F38~~ | ~~Create `docs/adr/0001-sse-only-transport.md`~~ done (docs-health pass 2026-10-05) | ~~M10~~ | ~~12 min~~ | ~~File exists~~ |
-| ~~F39~~ | ~~Create `docs/adr/0002-failure-reason-three-values.md`~~ done (docs-health pass 2026-10-05) | ~~M10~~ | ~~12 min~~ | ~~File exists~~ |
-| ~~F40~~ | ~~Create `docs/adr/0003-multiwriter-func-event-signature.md`~~ done (docs-health pass 2026-10-05) | ~~M10~~ | ~~10 min~~ | ~~File exists~~ |
-| ~~F41~~ | ~~Create `docs/adr/0004-failuresummary-rename.md`~~ done (docs-health pass 2026-10-05) | ~~M10~~ | ~~10 min~~ | ~~File exists~~ |
-| ~~F42~~ | ~~Add MIGRATION.md entry for Event.FailureReason additive schema~~ done (docs-health pass 2026-10-05) | ~~M11~~ | ~~10 min~~ | ~~Read~~ |
-| ~~F43~~ | ~~Verify DOMAIN_LANGUAGE.md has FailureReason, StreamEvents, MultiWriter, FailureSummary vocabulary~~ done (docs-health pass 2026-10-05) | ~~M12~~ | ~~10 min~~ | ~~All present~~ |
-| ~~F44~~ | ~~Fix 22-27 report annotation style — normalize "Original report:" fragments~~ done (docs-health pass 2026-10-05) | ~~M13~~ | ~~12 min~~ | ~~Read~~ |
-| ~~F45~~ | ~~Check website/ directory for stale content~~ done (docs-health pass 2026-10-05) | ~~M18~~ | ~~10 min~~ | ~~Report findings~~ |
-| ~~F46~~ | ~~Add CONTRIBUTING.md with testing patterns, commit conventions, release summary~~ done (docs-health pass 2026-10-05) | ~~M17~~ | ~~12 min~~ | ~~File exists~~ |
+| #       | Task                                                                                                                                                           | Parent  | Est        | Verify              |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ---------- | ------------------- |
+| ~~F36~~ | ~~Read STABILITY.md — identify which APIs lack stability promises~~ done (docs-health pass 2026-10-05)                                                         | ~~M9~~  | ~~5 min~~  | ~~Know gaps~~       |
+| ~~F37~~ | ~~Add stability entries for StreamEvents, MultiWriter, FailureReason, FailureSummary, WithFlushInterval, workflow helpers~~ done (docs-health pass 2026-10-05) | ~~M9~~  | ~~12 min~~ | ~~Read~~            |
+| ~~F38~~ | ~~Create `docs/adr/0001-sse-only-transport.md`~~ done (docs-health pass 2026-10-05)                                                                            | ~~M10~~ | ~~12 min~~ | ~~File exists~~     |
+| ~~F39~~ | ~~Create `docs/adr/0002-failure-reason-three-values.md`~~ done (docs-health pass 2026-10-05)                                                                   | ~~M10~~ | ~~12 min~~ | ~~File exists~~     |
+| ~~F40~~ | ~~Create `docs/adr/0003-multiwriter-func-event-signature.md`~~ done (docs-health pass 2026-10-05)                                                              | ~~M10~~ | ~~10 min~~ | ~~File exists~~     |
+| ~~F41~~ | ~~Create `docs/adr/0004-failuresummary-rename.md`~~ done (docs-health pass 2026-10-05)                                                                         | ~~M10~~ | ~~10 min~~ | ~~File exists~~     |
+| ~~F42~~ | ~~Add MIGRATION.md entry for Event.FailureReason additive schema~~ done (docs-health pass 2026-10-05)                                                          | ~~M11~~ | ~~10 min~~ | ~~Read~~            |
+| ~~F43~~ | ~~Verify DOMAIN_LANGUAGE.md has FailureReason, StreamEvents, MultiWriter, FailureSummary vocabulary~~ done (docs-health pass 2026-10-05)                       | ~~M12~~ | ~~10 min~~ | ~~All present~~     |
+| ~~F44~~ | ~~Fix 22-27 report annotation style — normalize "Original report:" fragments~~ done (docs-health pass 2026-10-05)                                              | ~~M13~~ | ~~12 min~~ | ~~Read~~            |
+| ~~F45~~ | ~~Check website/ directory for stale content~~ done (docs-health pass 2026-10-05)                                                                              | ~~M18~~ | ~~10 min~~ | ~~Report findings~~ |
+| ~~F46~~ | ~~Add CONTRIBUTING.md with testing patterns, commit conventions, release summary~~ done (docs-health pass 2026-10-05)                                          | ~~M17~~ | ~~12 min~~ | ~~File exists~~     |
 
 ### Phase F: Infrastructure + Polish
 
-| #   | Task                                                                           | Parent | Est    | Verify           |
-| --- | ------------------------------------------------------------------------------ | ------ | ------ | ---------------- |
-| ~~F47~~ | ~~Read `.git/hooks/pre-commit` — verify whether buildflow or dprint is the issue~~ done (docs-health pass 2026-10-05) | ~~M16~~ | ~~5 min~~ | ~~Know root cause~~ |
-| ~~F48~~ | ~~Add buildflow to flake.nix devShell OR make hook skip when binary missing~~ done (docs-health pass 2026-10-05) | ~~M16~~ | ~~12 min~~ | ~~Hook runs~~ |
-| ~~F49~~ | ~~Add godoc Example_TimedOutSteps~~ done (docs-health pass 2026-10-05) | ~~M20~~ | ~~10 min~~ | ~~`go test` passes~~ |
-| ~~F50~~ | ~~Add godoc Example_HasWorkflowRetries~~ done (docs-health pass 2026-10-05) | ~~M20~~ | ~~10 min~~ | ~~`go test` passes~~ |
-| ~~F51~~ | ~~Add godoc Example_FailureReason~~ done (docs-health pass 2026-10-05) | ~~M20~~ | ~~10 min~~ | ~~`go test` passes~~ |
-| ~~F52~~ | ~~Update viz/example demo pipeline — add timeout step~~ done (docs-health pass 2026-10-05) | ~~M22~~ | ~~12 min~~ | ~~Demo runs~~ |
-| ~~F53~~ | ~~Add BenchmarkStreamEvents (100/1000/10000 events)~~ done (docs-health pass 2026-10-05) | ~~M21~~ | ~~12 min~~ | ~~Bench runs~~ |
-| ~~F54~~ | ~~Add BenchmarkMultiWriter (1/5/10 callbacks)~~ done (docs-health pass 2026-10-05) | ~~M21~~ | ~~10 min~~ | ~~Bench runs~~ |
-| ~~F55~~ | ~~Add BenchmarkDiff_Aggregates (100-step reports)~~ done (docs-health pass 2026-10-05) | ~~M21~~ | ~~10 min~~ | ~~Bench runs~~ |
+| #       | Task                                                                                                                  | Parent  | Est        | Verify               |
+| ------- | --------------------------------------------------------------------------------------------------------------------- | ------- | ---------- | -------------------- |
+| ~~F47~~ | ~~Read `.git/hooks/pre-commit` — verify whether buildflow or dprint is the issue~~ done (docs-health pass 2026-10-05) | ~~M16~~ | ~~5 min~~  | ~~Know root cause~~  |
+| ~~F48~~ | ~~Add buildflow to flake.nix devShell OR make hook skip when binary missing~~ done (docs-health pass 2026-10-05)      | ~~M16~~ | ~~12 min~~ | ~~Hook runs~~        |
+| ~~F49~~ | ~~Add godoc Example_TimedOutSteps~~ done (docs-health pass 2026-10-05)                                                | ~~M20~~ | ~~10 min~~ | ~~`go test` passes~~ |
+| ~~F50~~ | ~~Add godoc Example_HasWorkflowRetries~~ done (docs-health pass 2026-10-05)                                           | ~~M20~~ | ~~10 min~~ | ~~`go test` passes~~ |
+| ~~F51~~ | ~~Add godoc Example_FailureReason~~ done (docs-health pass 2026-10-05)                                                | ~~M20~~ | ~~10 min~~ | ~~`go test` passes~~ |
+| ~~F52~~ | ~~Update viz/example demo pipeline — add timeout step~~ done (docs-health pass 2026-10-05)                            | ~~M22~~ | ~~12 min~~ | ~~Demo runs~~        |
+| ~~F53~~ | ~~Add BenchmarkStreamEvents (100/1000/10000 events)~~ done (docs-health pass 2026-10-05)                              | ~~M21~~ | ~~12 min~~ | ~~Bench runs~~       |
+| ~~F54~~ | ~~Add BenchmarkMultiWriter (1/5/10 callbacks)~~ done (docs-health pass 2026-10-05)                                    | ~~M21~~ | ~~10 min~~ | ~~Bench runs~~       |
+| ~~F55~~ | ~~Add BenchmarkDiff_Aggregates (100-step reports)~~ done (docs-health pass 2026-10-05)                                | ~~M21~~ | ~~10 min~~ | ~~Bench runs~~       |
 
 ### Phase G: Large Features (deferred unless explicitly approved)
 
-| #   | Task                                                                            | Parent | Est    | Verify            |
-| --- | ------------------------------------------------------------------------------- | ------ | ------ | ----------------- |
-| ~~F56~~ | ~~Design CLI tool architecture (cmd/auditlog, subcommands: inspect, replay, diff)~~ done (docs-health pass 2026-10-05) | ~~M24~~ | ~~12 min~~ | ~~Design doc~~ |
-| ~~F57~~ | ~~Design OTel span bridge architecture (module structure, span mapping)~~ done (docs-health pass 2026-10-05) | ~~M26~~ | ~~12 min~~ | ~~Design doc~~ |
-| ~~F58~~ | ~~Design iterator pattern migration plan (which methods, backward compat)~~ done (docs-health pass 2026-10-05) | ~~M27~~ | ~~12 min~~ | ~~Design doc~~ |
-| ~~F59~~ | ~~Research Go 1.27 release status + json/v2 stabilization timeline~~ done (docs-health pass 2026-10-05) | ~~M25~~ | ~~10 min~~ | ~~Go/No-go decision~~ |
+| #       | Task                                                                                                                   | Parent  | Est        | Verify                |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- | ------- | ---------- | --------------------- |
+| ~~F56~~ | ~~Design CLI tool architecture (cmd/auditlog, subcommands: inspect, replay, diff)~~ done (docs-health pass 2026-10-05) | ~~M24~~ | ~~12 min~~ | ~~Design doc~~        |
+| ~~F57~~ | ~~Design OTel span bridge architecture (module structure, span mapping)~~ done (docs-health pass 2026-10-05)           | ~~M26~~ | ~~12 min~~ | ~~Design doc~~        |
+| ~~F58~~ | ~~Design iterator pattern migration plan (which methods, backward compat)~~ done (docs-health pass 2026-10-05)         | ~~M27~~ | ~~12 min~~ | ~~Design doc~~        |
+| ~~F59~~ | ~~Research Go 1.27 release status + json/v2 stabilization timeline~~ done (docs-health pass 2026-10-05)                | ~~M25~~ | ~~10 min~~ | ~~Go/No-go decision~~ |
 
 **Total fine-grained tasks: 59**
 **Total estimated effort (Phase A-E, immediate):** ~12 hours

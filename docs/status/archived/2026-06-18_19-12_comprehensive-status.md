@@ -149,33 +149,33 @@ Built over 3 sessions from scratch. 5,233 LOC (16 source files + 11 test files),
 
 ## f) Top #25 Things to Get Done Next
 
-| #  | Task                                                               | Impact | Effort | Priority |
-| -- | ------------------------------------------------------------------ | ------ | ------ | -------- |
-| ~~1~~  | ~~Fix `go.mod` go directive to `1.23`~~ done — go directive now 1.27 | ~~High~~ | ~~1min~~ | ~~P0~~ |
-| ~~2~~  | ~~Add `WritePlantUMLString` test (0% coverage)~~ done (docs-health pass 2026-10-05) | ~~Medium~~ | ~~5min~~ | ~~P0~~ |
-| ~~3~~  | ~~Write `CHANGELOG.md` for v0.1.0~~ done — CHANGELOG v0.1.0 | ~~High~~ | ~~15min~~ | ~~P0~~ |
-| ~~4~~  | ~~Cut v0.1.0 git tag + release~~ done — tag v0.1.0 exists; GitHub Releases standardized from v0.8.1 | ~~High~~ | ~~5min~~ | ~~P0~~ |
-| ~~5~~  | ~~Add `FEATURES.md` inventory~~ done (docs-health pass 2026-10-05) | ~~Medium~~ | ~~15min~~ | ~~P1~~ |
-| ~~6~~  | ~~Add `TODO_LIST.md` from this report~~ done (docs-health pass 2026-10-05) | ~~Medium~~ | ~~10min~~ | ~~P1~~ |
-| ~~7~~  | ~~Add fuzz test for Mermaid XSS~~ done — FuzzDiagramSpecialChars | ~~Medium~~ | ~~30min~~ | ~~P1~~ |
-| ~~8~~  | ~~Add fuzz test for replay integrity~~ done — FuzzReadEvents v0.2.1 | ~~Medium~~ | ~~30min~~ | ~~P1~~ |
-| ~~9~~  | ~~Cache `stepTypeName` reflection results~~ **Won't implement — reflection cost negligible; never a bottleneck.** | ~~Medium~~ | ~~15min~~ | ~~P1~~ |
-| ~~10~~ | ~~Add full lifecycle integration test~~ done (docs-health pass 2026-10-05) | ~~Medium~~ | ~~30min~~ | ~~P1~~ |
-| ~~11~~ | ~~Consolidate `sortByName` usage (remove duplication)~~ done (docs-health pass 2026-10-05) | ~~Low~~ | ~~10min~~ | ~~P1~~ |
-| ~~12~~ | ~~Fix `statusClass` to cover `StepStatusRunning`~~ done — statusClass covers running since v0.2.x | ~~Low~~ | ~~5min~~ | ~~P1~~ |
-| 13 | Add `go mod verify` to CI **→ open — TODO_LIST 2026-10-05** | Low    | 5min   | P2       |
-| ~~14~~ | ~~Raise coverage gate from 90% to 95%~~ done — CI coverage gate ≥94% | ~~Low~~ | ~~30min~~ | ~~P2~~ |
-| ~~15~~ | ~~Add error-path tests (`ReadEvents` oversized, `writeToFile` close)~~ done (docs-health pass 2026-10-05) | ~~Low~~ | ~~20min~~ | ~~P2~~ |
-| ~~16~~ | ~~Add `STABILITY.md`~~ done — STABILITY.md shipped | ~~Low~~ | ~~10min~~ | ~~P2~~ |
-| ~~17~~ | ~~Port HTML visualization from samber-do~~ done — HTML dashboard v0.3.0 | ~~High~~ | ~~2-4h~~ | ~~P2~~ |
-| ~~18~~ | ~~Add `flake.nix` devShell~~ done — flake.nix shipped | ~~Medium~~ | ~~30min~~ | ~~P2~~ |
-| ~~19~~ | ~~Split `ClassAssign` out of `diagramFormatter` interface~~ **NOT-DO — superseded by go-output renderer adoption.** | ~~Low~~ | ~~20min~~ | ~~P2~~ |
-| ~~20~~ | ~~Add `go generate` support if templ is added~~ **NOT-DO — templ DEFERRED per docs/evaluations.** | ~~Low~~ | ~~15min~~ | ~~P3~~ |
-| 21 | Add OTel bridge example **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)** | Medium | 1h     | P3       |
-| ~~22~~ | ~~Add Mermaid edge labels ("depends on")~~ **Won't implement — never demanded — dashboard era covers diagram polish.** | ~~Low~~ | ~~15min~~ | ~~P3~~ |
-| ~~23~~ | ~~Add conditional branch (`If`/`Switch`) visualization~~ **Won't implement — never demanded.** | ~~Low~~ | ~~30min~~ | ~~P3~~ |
-| ~~24~~ | ~~Add `Contributing.md`~~ done — CONTRIBUTING.md exists | ~~Low~~ | ~~10min~~ | ~~P3~~ |
-| ~~25~~ | ~~Add `Code of Conduct`~~ **Won't implement — no external contributor base; CONTRIBUTING covers expectations.** | ~~Low~~ | ~~5min~~ | ~~P3~~ |
+| #      | Task                                                                                                                   | Impact     | Effort    | Priority |
+| ------ | ---------------------------------------------------------------------------------------------------------------------- | ---------- | --------- | -------- |
+| ~~1~~  | ~~Fix `go.mod` go directive to `1.23`~~ done — go directive now 1.27                                                   | ~~High~~   | ~~1min~~  | ~~P0~~   |
+| ~~2~~  | ~~Add `WritePlantUMLString` test (0% coverage)~~ done (docs-health pass 2026-10-05)                                    | ~~Medium~~ | ~~5min~~  | ~~P0~~   |
+| ~~3~~  | ~~Write `CHANGELOG.md` for v0.1.0~~ done — CHANGELOG v0.1.0                                                            | ~~High~~   | ~~15min~~ | ~~P0~~   |
+| ~~4~~  | ~~Cut v0.1.0 git tag + release~~ done — tag v0.1.0 exists; GitHub Releases standardized from v0.8.1                    | ~~High~~   | ~~5min~~  | ~~P0~~   |
+| ~~5~~  | ~~Add `FEATURES.md` inventory~~ done (docs-health pass 2026-10-05)                                                     | ~~Medium~~ | ~~15min~~ | ~~P1~~   |
+| ~~6~~  | ~~Add `TODO_LIST.md` from this report~~ done (docs-health pass 2026-10-05)                                             | ~~Medium~~ | ~~10min~~ | ~~P1~~   |
+| ~~7~~  | ~~Add fuzz test for Mermaid XSS~~ done — FuzzDiagramSpecialChars                                                       | ~~Medium~~ | ~~30min~~ | ~~P1~~   |
+| ~~8~~  | ~~Add fuzz test for replay integrity~~ done — FuzzReadEvents v0.2.1                                                    | ~~Medium~~ | ~~30min~~ | ~~P1~~   |
+| ~~9~~  | ~~Cache `stepTypeName` reflection results~~ **Won't implement — reflection cost negligible; never a bottleneck.**      | ~~Medium~~ | ~~15min~~ | ~~P1~~   |
+| ~~10~~ | ~~Add full lifecycle integration test~~ done (docs-health pass 2026-10-05)                                             | ~~Medium~~ | ~~30min~~ | ~~P1~~   |
+| ~~11~~ | ~~Consolidate `sortByName` usage (remove duplication)~~ done (docs-health pass 2026-10-05)                             | ~~Low~~    | ~~10min~~ | ~~P1~~   |
+| ~~12~~ | ~~Fix `statusClass` to cover `StepStatusRunning`~~ done — statusClass covers running since v0.2.x                      | ~~Low~~    | ~~5min~~  | ~~P1~~   |
+| 13     | Add `go mod verify` to CI **→ open — TODO_LIST 2026-10-05**                                                            | Low        | 5min      | P2       |
+| ~~14~~ | ~~Raise coverage gate from 90% to 95%~~ done — CI coverage gate ≥94%                                                   | ~~Low~~    | ~~30min~~ | ~~P2~~   |
+| ~~15~~ | ~~Add error-path tests (`ReadEvents` oversized, `writeToFile` close)~~ done (docs-health pass 2026-10-05)              | ~~Low~~    | ~~20min~~ | ~~P2~~   |
+| ~~16~~ | ~~Add `STABILITY.md`~~ done — STABILITY.md shipped                                                                     | ~~Low~~    | ~~10min~~ | ~~P2~~   |
+| ~~17~~ | ~~Port HTML visualization from samber-do~~ done — HTML dashboard v0.3.0                                                | ~~High~~   | ~~2-4h~~  | ~~P2~~   |
+| ~~18~~ | ~~Add `flake.nix` devShell~~ done — flake.nix shipped                                                                  | ~~Medium~~ | ~~30min~~ | ~~P2~~   |
+| ~~19~~ | ~~Split `ClassAssign` out of `diagramFormatter` interface~~ **NOT-DO — superseded by go-output renderer adoption.**    | ~~Low~~    | ~~20min~~ | ~~P2~~   |
+| ~~20~~ | ~~Add `go generate` support if templ is added~~ **NOT-DO — templ DEFERRED per docs/evaluations.**                      | ~~Low~~    | ~~15min~~ | ~~P3~~   |
+| 21     | Add OTel bridge example **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**                                   | Medium     | 1h        | P3       |
+| ~~22~~ | ~~Add Mermaid edge labels ("depends on")~~ **Won't implement — never demanded — dashboard era covers diagram polish.** | ~~Low~~    | ~~15min~~ | ~~P3~~   |
+| ~~23~~ | ~~Add conditional branch (`If`/`Switch`) visualization~~ **Won't implement — never demanded.**                         | ~~Low~~    | ~~30min~~ | ~~P3~~   |
+| ~~24~~ | ~~Add `Contributing.md`~~ done — CONTRIBUTING.md exists                                                                | ~~Low~~    | ~~10min~~ | ~~P3~~   |
+| ~~25~~ | ~~Add `Code of Conduct`~~ **Won't implement — no external contributor base; CONTRIBUTING covers expectations.**        | ~~Low~~    | ~~5min~~  | ~~P3~~   |
 
 ---
 

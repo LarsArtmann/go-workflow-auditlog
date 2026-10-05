@@ -118,53 +118,53 @@ The `renderHTML` function is essentially a manual template engine (`sb.WriteStri
 
 ### Quick wins (low effort, high impact)
 
-| # | Task                                                                   | Effort | Impact |
-| - | ---------------------------------------------------------------------- | ------ | ------ |
-| ~~1~~ | ~~Add `WriteHTML`/`ExportHTML` to API symmetry tests in `output_test.go`~~ done (docs-health pass 2026-10-05) | ~~5 min~~ | ~~High~~ |
-| ~~2~~ | ~~Add `WriteHTMLString` to `TestAuditor_WriteStringMethods`~~ done (docs-health pass 2026-10-05) | ~~2 min~~ | ~~High~~ |
-| ~~3~~ | ~~Test HTML export from `ReplayEvents` report~~ done — replayed-report HTML tests shipped | ~~5 min~~ | ~~Medium~~ |
-| ~~4~~ | ~~Document the JS↔Go tree logic duplication as intentional~~ done — documented in AGENTS | ~~2 min~~ | ~~Low~~ |
+| #     | Task                                                                                                          | Effort    | Impact     |
+| ----- | ------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| ~~1~~ | ~~Add `WriteHTML`/`ExportHTML` to API symmetry tests in `output_test.go`~~ done (docs-health pass 2026-10-05) | ~~5 min~~ | ~~High~~   |
+| ~~2~~ | ~~Add `WriteHTMLString` to `TestAuditor_WriteStringMethods`~~ done (docs-health pass 2026-10-05)              | ~~2 min~~ | ~~High~~   |
+| ~~3~~ | ~~Test HTML export from `ReplayEvents` report~~ done — replayed-report HTML tests shipped                     | ~~5 min~~ | ~~Medium~~ |
+| ~~4~~ | ~~Document the JS↔Go tree logic duplication as intentional~~ done — documented in AGENTS                      | ~~2 min~~ | ~~Low~~    |
 
 ### Medium effort, high impact
 
-| #  | Task                                                                        | Effort | Impact    |
-| -- | --------------------------------------------------------------------------- | ------ | --------- |
-| ~~5~~  | ~~Extract CSS to `dashboard.css` via `go:embed`~~ done — go:embed dashboard.css/js | ~~15 min~~ | ~~Very High~~ |
-| ~~6~~  | ~~Extract JS to `dashboard.js` via `go:embed`~~ done — go:embed dashboard.css/js | ~~15 min~~ | ~~Very High~~ |
-| ~~7~~  | ~~Remove `//nolint:lll` and `//nolint:funlen` after extraction~~ done — nolint removed with extraction | ~~1 min~~ | ~~Medium~~ |
-| ~~8~~  | ~~Unify JS status colors to read from CSS variables~~ done — JS reads CSS variables | ~~10 min~~ | ~~Medium~~ |
-| ~~9~~  | ~~Add HTML export test for replayed/loaded reports~~ done — replayed/loaded HTML tests | ~~10 min~~ | ~~Medium~~ |
-| ~~10~~ | ~~Add structured HTML validation to fuzz test (parse output, check structure)~~ done — structural integrity fuzz checks | ~~15 min~~ | ~~Medium~~ |
+| #      | Task                                                                                                                    | Effort     | Impact        |
+| ------ | ----------------------------------------------------------------------------------------------------------------------- | ---------- | ------------- |
+| ~~5~~  | ~~Extract CSS to `dashboard.css` via `go:embed`~~ done — go:embed dashboard.css/js                                      | ~~15 min~~ | ~~Very High~~ |
+| ~~6~~  | ~~Extract JS to `dashboard.js` via `go:embed`~~ done — go:embed dashboard.css/js                                        | ~~15 min~~ | ~~Very High~~ |
+| ~~7~~  | ~~Remove `//nolint:lll` and `//nolint:funlen` after extraction~~ done — nolint removed with extraction                  | ~~1 min~~  | ~~Medium~~    |
+| ~~8~~  | ~~Unify JS status colors to read from CSS variables~~ done — JS reads CSS variables                                     | ~~10 min~~ | ~~Medium~~    |
+| ~~9~~  | ~~Add HTML export test for replayed/loaded reports~~ done — replayed/loaded HTML tests                                  | ~~10 min~~ | ~~Medium~~    |
+| ~~10~~ | ~~Add structured HTML validation to fuzz test (parse output, check structure)~~ done — structural integrity fuzz checks | ~~15 min~~ | ~~Medium~~    |
 
 ### Architecture improvements
 
-| #  | Task                                                                  | Effort | Impact |
-| -- | --------------------------------------------------------------------- | ------ | ------ |
+| #      | Task                                                                                                                                           | Effort     | Impact     |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ---------- |
 | ~~11~~ | ~~Consider `html/template` for the HTML structure (auto-escaping)~~ **Won't implement — html/template declined — proven XSS-tested approach.** | ~~30 min~~ | ~~Medium~~ |
-| ~~12~~ | ~~Consider structured `StepTypeRegistry` for step type display metadata~~ **Won't implement — StepTypeRegistry declined — no demand.** | ~~30 min~~ | ~~Low~~ |
-| ~~13~~ | ~~Extract graph layout algorithm as standalone JS module~~ **NOT-DO — superseded by daghtml SDK (v0.5.1).** | ~~20 min~~ | ~~Low~~ |
-| ~~14~~ | ~~Add CSP nonce support for embedding in larger pages~~ **Won't implement — CSP nonce declined — no embedding demand.** | ~~15 min~~ | ~~Low~~ |
-| 15 | Add dark/light theme toggle **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | 30 min | Low    |
+| ~~12~~ | ~~Consider structured `StepTypeRegistry` for step type display metadata~~ **Won't implement — StepTypeRegistry declined — no demand.**         | ~~30 min~~ | ~~Low~~    |
+| ~~13~~ | ~~Extract graph layout algorithm as standalone JS module~~ **NOT-DO — superseded by daghtml SDK (v0.5.1).**                                    | ~~20 min~~ | ~~Low~~    |
+| ~~14~~ | ~~Add CSP nonce support for embedding in larger pages~~ **Won't implement — CSP nonce declined — no embedding demand.**                        | ~~15 min~~ | ~~Low~~    |
+| 15     | Add dark/light theme toggle **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)**                                             | 30 min     | Low        |
 
 ### Testing improvements
 
-| #  | Task                                                     | Effort | Impact |
-| -- | -------------------------------------------------------- | ------ | ------ |
-| ~~16~~ | ~~Test all 6 step statuses render correctly in graph nodes~~ done — status render tests | ~~10 min~~ | ~~Medium~~ |
-| ~~17~~ | ~~Test diamond DAG renders correctly in graph~~ done — diamond DAG tests | ~~10 min~~ | ~~Medium~~ |
-| ~~18~~ | ~~Test fan-out/fan-in workflow HTML export~~ done — fan-out tests | ~~10 min~~ | ~~Medium~~ |
-| ~~19~~ | ~~Benchmark `renderHTML` for large reports (1000+ steps)~~ done — renderHTML benchmarks | ~~10 min~~ | ~~Low~~ |
-| ~~20~~ | ~~Add property-based test for HTML output determinism~~ done — HTML determinism property test | ~~15 min~~ | ~~Low~~ |
+| #      | Task                                                                                          | Effort     | Impact     |
+| ------ | --------------------------------------------------------------------------------------------- | ---------- | ---------- |
+| ~~16~~ | ~~Test all 6 step statuses render correctly in graph nodes~~ done — status render tests       | ~~10 min~~ | ~~Medium~~ |
+| ~~17~~ | ~~Test diamond DAG renders correctly in graph~~ done — diamond DAG tests                      | ~~10 min~~ | ~~Medium~~ |
+| ~~18~~ | ~~Test fan-out/fan-in workflow HTML export~~ done — fan-out tests                             | ~~10 min~~ | ~~Medium~~ |
+| ~~19~~ | ~~Benchmark `renderHTML` for large reports (1000+ steps)~~ done — renderHTML benchmarks       | ~~10 min~~ | ~~Low~~    |
+| ~~20~~ | ~~Add property-based test for HTML output determinism~~ done — HTML determinism property test | ~~15 min~~ | ~~Low~~    |
 
 ### Documentation & polish
 
-| #  | Task                                                                      | Effort | Impact |
-| -- | ------------------------------------------------------------------------- | ------ | ------ |
-| ~~21~~ | ~~Add screenshot of HTML dashboard to README~~ done — screenshot in README | ~~5 min~~ | ~~High~~ |
+| #      | Task                                                                                                        | Effort     | Impact     |
+| ------ | ----------------------------------------------------------------------------------------------------------- | ---------- | ---------- |
+| ~~21~~ | ~~Add screenshot of HTML dashboard to README~~ done — screenshot in README                                  | ~~5 min~~  | ~~High~~   |
 | ~~22~~ | ~~Document the security model (JSON script tags + esc + CSP) in AGENTS.md~~ done — security model in AGENTS | ~~10 min~~ | ~~Medium~~ |
-| ~~23~~ | ~~Add HTML dashboard section to example README output~~ **Won't implement — moot — website carries docs.** | ~~5 min~~ | ~~Low~~ |
-| ~~24~~ | ~~Consider adding a `--html` flag to example for quick dashboard generation~~ done — --export flag | ~~10 min~~ | ~~Low~~ |
-| ~~25~~ | ~~Update coverage badge in README (92.9% → current)~~ done — badge ~95% | ~~1 min~~ | ~~Low~~ |
+| ~~23~~ | ~~Add HTML dashboard section to example README output~~ **Won't implement — moot — website carries docs.**  | ~~5 min~~  | ~~Low~~    |
+| ~~24~~ | ~~Consider adding a `--html` flag to example for quick dashboard generation~~ done — --export flag          | ~~10 min~~ | ~~Low~~    |
+| ~~25~~ | ~~Update coverage badge in README (92.9% → current)~~ done — badge ~95%                                     | ~~1 min~~  | ~~Low~~    |
 
 ---
 

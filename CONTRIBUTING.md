@@ -28,20 +28,20 @@ golangci-lint run ./...                      # 0 issues
 
 ## Commands
 
-| Command                                                           | Purpose                                    |
-| ----------------------------------------------------------------- | ------------------------------------------ |
+| Command                                       | Purpose                                    |
+| --------------------------------------------- | ------------------------------------------ |
 | `go test ./...`                               | Run core tests                             |
 | `go test -race ./...`                         | Core tests with race detector              |
 | `go test -race -coverprofile=cover.out ./...` | Core tests with coverage                   |
 | `go vet ./...`                                | Core static analysis                       |
-| `golangci-lint run ./...`                                         | Lint core (config in `.golangci.yml`)      |
+| `golangci-lint run ./...`                     | Lint core (config in `.golangci.yml`)      |
 | `cd viz && go test ./...`                     | Run viz tests                              |
-| `cd viz && golangci-lint run ./...`                               | Lint viz                                   |
+| `cd viz && golangci-lint run ./...`           | Lint viz                                   |
 | `cd live && go test ./...`                    | Run live tests                             |
-| `cd live && golangci-lint run ./...`                              | Lint live                                  |
-| `go run ./viz/example`                                            | Run the demo pipeline                      |
+| `cd live && golangci-lint run ./...`          | Lint live                                  |
+| `go run ./viz/example`                        | Run the demo pipeline                      |
 | `cd live && go run ./demo`                    | Run live dashboard demo (:18080)           |
-| `nix run .#check`                                                 | All checks: vet+test-race+lint+govulncheck |
+| `nix run .#check`                             | All checks: vet+test-race+lint+govulncheck |
 
 A pull request is mergeable only when **all** of the above pass cleanly.
 

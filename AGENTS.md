@@ -8,28 +8,28 @@ Go library for [Azure/go-workflow](https://github.com/Azure/go-workflow) that re
 
 ## Commands
 
-| Command                                                                             | Purpose                                                                                                      |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `go test ./...`                                                                    | Run core tests                                                                                                |
-| `go test -race ./...`                                                              | Run core tests with race detector                                                                            |
-| `go test -race -coverprofile=cover.out -covermode=atomic ./...`                    | Core tests with coverage (~97.0%)                                                                            |
-| `go vet ./...`                                                                     | Core static analysis                                                                                          |
-| `golangci-lint run ./...`                                                          | Lint core (golangci-lint v2, 0 issues)                                                                       |
-| `cd viz && go test ./...`                                                          | Run viz tests                                                                                                 |
-| `cd viz && GOWORK=off go test ./...`                                               | Run viz tests in standalone mode (no workspace)                                                               |
-| `cd viz && go vet ./...`                                                           | Viz static analysis                                                                                           |
-| `cd viz && golangci-lint run ./...`                                                | Lint viz                                                                                                      |
-| `cd live && go test ./...`                                                         | Run live tests                                                                                                |
-| `cd live && go vet ./...`                                                          | Live static analysis                                                                                          |
-| `cd live && golangci-lint run ./...`                                               | Lint live                                                                                                     |
-| `erraudit ./...` (and in `viz/`, `live/`)                                           | Error-path audit — ZERO violations at default flags (policy in Gotchas)                                        |
-| `cd live && go run ./demo`                                                         | Run live dashboard demo (http://localhost:18080)                                                              |
-| `go run ./viz/example`                                                             | Run the demo pipeline                                                                                         |
-| `nix run .#check`                                                                  | Run all checks (vet + test-race + lint + govulncheck for core, viz & live — all three modules fully covered) |
-| `go run ./cmd/auditlog help`                                                       | CLI: info/convert/diff/validate/schema subcommands for exported reports                                      |
-| `go run ./cmd/genschema`                                                           | Regenerate JSON Schema (`schema/report.schema.json`)                                                          |
-| `nix run .#auditlog -- help`                                                       | Run the CLI via Nix (no install)                                                                             |
-| `go work sync`                                                                     | Sync `go.work` and `go.work.sum` with module state                                                           |
+| Command                                                         | Purpose                                                                                                      |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `go test ./...`                                                 | Run core tests                                                                                               |
+| `go test -race ./...`                                           | Run core tests with race detector                                                                            |
+| `go test -race -coverprofile=cover.out -covermode=atomic ./...` | Core tests with coverage (~97.0%)                                                                            |
+| `go vet ./...`                                                  | Core static analysis                                                                                         |
+| `golangci-lint run ./...`                                       | Lint core (golangci-lint v2, 0 issues)                                                                       |
+| `cd viz && go test ./...`                                       | Run viz tests                                                                                                |
+| `cd viz && GOWORK=off go test ./...`                            | Run viz tests in standalone mode (no workspace)                                                              |
+| `cd viz && go vet ./...`                                        | Viz static analysis                                                                                          |
+| `cd viz && golangci-lint run ./...`                             | Lint viz                                                                                                     |
+| `cd live && go test ./...`                                      | Run live tests                                                                                               |
+| `cd live && go vet ./...`                                       | Live static analysis                                                                                         |
+| `cd live && golangci-lint run ./...`                            | Lint live                                                                                                    |
+| `erraudit ./...` (and in `viz/`, `live/`)                       | Error-path audit — ZERO violations at default flags (policy in Gotchas)                                      |
+| `cd live && go run ./demo`                                      | Run live dashboard demo (http://localhost:18080)                                                             |
+| `go run ./viz/example`                                          | Run the demo pipeline                                                                                        |
+| `nix run .#check`                                               | Run all checks (vet + test-race + lint + govulncheck for core, viz & live — all three modules fully covered) |
+| `go run ./cmd/auditlog help`                                    | CLI: info/convert/diff/validate/schema subcommands for exported reports                                      |
+| `go run ./cmd/genschema`                                        | Regenerate JSON Schema (`schema/report.schema.json`)                                                         |
+| `nix run .#auditlog -- help`                                    | Run the CLI via Nix (no install)                                                                             |
+| `go work sync`                                                  | Sync `go.work` and `go.work.sum` with module state                                                           |
 
 No `GOEXPERIMENT` flag is needed on any command — `encoding/json/v2` is GA in Go 1.27 (a set `GOEXPERIMENT=jsonv2` is a harmless no-op).
 

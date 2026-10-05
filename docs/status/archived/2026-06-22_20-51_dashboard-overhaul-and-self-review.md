@@ -92,33 +92,33 @@ Nothing. All issues from the self-review were fixed before committing.
 
 ### f) Top 25 Things to Do Next
 
-| #  | Task                                                                 | Impact | Effort |
-| -- | -------------------------------------------------------------------- | ------ | ------ |
-| ~~1~~  | ~~Add unit tests for `humanizeDuration()` edge cases~~ **Won't implement — edge cases covered by structural tests.** | ~~Medium~~ | ~~Low~~ |
-| ~~2~~  | ~~Add eslint/biome config for dashboard.js + dashboard.css~~ **Won't implement — JS linting declined.** | ~~Medium~~ | ~~Low~~ |
-| ~~3~~  | ~~Group failures by error type in the failure banner~~ **Won't implement — declined.** | ~~High~~ | ~~Medium~~ |
-| ~~4~~  | ~~Show per-retry-attempt bars in Gantt timeline~~ **Won't implement — declined — final duration shown.** | ~~High~~ | ~~Medium~~ |
-| 5  | Add light theme support (CSS custom properties already in place) **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Medium | Low    |
-| ~~6~~  | ~~Make Gantt bars clickable → navigate to step in steps table~~ **Won't implement — declined.** | ~~Medium~~ | ~~Medium~~ |
-| ~~7~~  | ~~Add "Copy failure summary" button to failure banner~~ **Won't implement — declined.** | ~~Medium~~ | ~~Low~~ |
-| ~~8~~  | ~~Add filter for Gantt (show only failed, only slow, etc.)~~ **Won't implement — declined.** | ~~Medium~~ | ~~Medium~~ |
-| ~~9~~  | ~~Split dashboard.js into modules (graph.js, gantt.js, table.js)~~ **Won't implement — single-file by design.** | ~~Medium~~ | ~~Medium~~ |
-| ~~10~~ | ~~Add step search by error text (already in data-search, verify works)~~ done (docs-health pass 2026-10-05) | ~~Low~~ | ~~Low~~ |
-| ~~11~~ | ~~Add total wall-clock time axis labels to Gantt (not just timestamps)~~ **Won't implement — declined.** | ~~Low~~ | ~~Low~~ |
-| ~~12~~ | ~~Add "shareable link" with step highlighted via URL hash~~ **Won't implement — declined.** | ~~Low~~ | ~~Medium~~ |
-| 13 | Add print-friendly CSS for PDF export **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Low    | Medium |
-| ~~14~~ | ~~Consider branded type for `ErrorMessage` instead of `*string`~~ **Won't implement — branded type declined.** | ~~Medium~~ | ~~Medium~~ |
-| ~~15~~ | ~~Add workflow comparison view (diff two reports in browser)~~ **Won't implement — comparison covered by Diff API + CLI.** | ~~High~~ | ~~High~~ |
-| ~~16~~ | ~~Add real-time updates via Server-Sent Events for live monitoring~~ done — live SSE module shipped v0.8.0/v0.9.0 | ~~High~~ | ~~High~~ |
-| ~~17~~ | ~~Add keyboard shortcuts help overlay ("?" to toggle)~~ done — help modal shipped v0.9.0 | ~~Low~~ | ~~Low~~ |
-| ~~18~~ | ~~Add accessibility audit (ARIA roles on Gantt, graph, tree)~~ done — keyboard nav + ARIA shipped v0.9.0 | ~~Medium~~ | ~~Medium~~ |
-| ~~19~~ | ~~Add color-blind-friendly mode (patterns instead of just colors)~~ **Won't implement — declined.** | ~~Medium~~ | ~~Medium~~ |
-| ~~20~~ | ~~Add step duration percentile chart (p50, p90, p99)~~ **Won't implement — declined.** | ~~Medium~~ | ~~Medium~~ |
-| ~~21~~ | ~~Add "critical path" highlight in Gantt (bottleneck chain)~~ done — critical-path highlight shipped | ~~High~~ | ~~Medium~~ |
-| ~~22~~ | ~~Add zoom/brush to Gantt timeline for large workflows~~ **Won't implement — declined.** | ~~Medium~~ | ~~Medium~~ |
-| ~~23~~ | ~~Consider `templ` for HTML template instead of `fmt.Sprintf`~~ **Won't implement — templ deferred per docs/evaluations.** | ~~Medium~~ | ~~Medium~~ |
-| ~~24~~ | ~~Add OpenGraph meta tags for shareable report links~~ **Won't implement — self-contained HTML — no meta tags.** | ~~Low~~ | ~~Low~~ |
-| ~~25~~ | ~~Add JSON schema validation for embedded report data~~ **Won't implement — Validate() API covers.** | ~~Medium~~ | ~~Medium~~ |
+| #      | Task                                                                                                                                    | Impact     | Effort     |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ---------- |
+| ~~1~~  | ~~Add unit tests for `humanizeDuration()` edge cases~~ **Won't implement — edge cases covered by structural tests.**                    | ~~Medium~~ | ~~Low~~    |
+| ~~2~~  | ~~Add eslint/biome config for dashboard.js + dashboard.css~~ **Won't implement — JS linting declined.**                                 | ~~Medium~~ | ~~Low~~    |
+| ~~3~~  | ~~Group failures by error type in the failure banner~~ **Won't implement — declined.**                                                  | ~~High~~   | ~~Medium~~ |
+| ~~4~~  | ~~Show per-retry-attempt bars in Gantt timeline~~ **Won't implement — declined — final duration shown.**                                | ~~High~~   | ~~Medium~~ |
+| 5      | Add light theme support (CSS custom properties already in place) **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)** | Medium     | Low        |
+| ~~6~~  | ~~Make Gantt bars clickable → navigate to step in steps table~~ **Won't implement — declined.**                                         | ~~Medium~~ | ~~Medium~~ |
+| ~~7~~  | ~~Add "Copy failure summary" button to failure banner~~ **Won't implement — declined.**                                                 | ~~Medium~~ | ~~Low~~    |
+| ~~8~~  | ~~Add filter for Gantt (show only failed, only slow, etc.)~~ **Won't implement — declined.**                                            | ~~Medium~~ | ~~Medium~~ |
+| ~~9~~  | ~~Split dashboard.js into modules (graph.js, gantt.js, table.js)~~ **Won't implement — single-file by design.**                         | ~~Medium~~ | ~~Medium~~ |
+| ~~10~~ | ~~Add step search by error text (already in data-search, verify works)~~ done (docs-health pass 2026-10-05)                             | ~~Low~~    | ~~Low~~    |
+| ~~11~~ | ~~Add total wall-clock time axis labels to Gantt (not just timestamps)~~ **Won't implement — declined.**                                | ~~Low~~    | ~~Low~~    |
+| ~~12~~ | ~~Add "shareable link" with step highlighted via URL hash~~ **Won't implement — declined.**                                             | ~~Low~~    | ~~Medium~~ |
+| 13     | Add print-friendly CSS for PDF export **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)**                            | Low        | Medium     |
+| ~~14~~ | ~~Consider branded type for `ErrorMessage` instead of `*string`~~ **Won't implement — branded type declined.**                          | ~~Medium~~ | ~~Medium~~ |
+| ~~15~~ | ~~Add workflow comparison view (diff two reports in browser)~~ **Won't implement — comparison covered by Diff API + CLI.**              | ~~High~~   | ~~High~~   |
+| ~~16~~ | ~~Add real-time updates via Server-Sent Events for live monitoring~~ done — live SSE module shipped v0.8.0/v0.9.0                       | ~~High~~   | ~~High~~   |
+| ~~17~~ | ~~Add keyboard shortcuts help overlay ("?" to toggle)~~ done — help modal shipped v0.9.0                                                | ~~Low~~    | ~~Low~~    |
+| ~~18~~ | ~~Add accessibility audit (ARIA roles on Gantt, graph, tree)~~ done — keyboard nav + ARIA shipped v0.9.0                                | ~~Medium~~ | ~~Medium~~ |
+| ~~19~~ | ~~Add color-blind-friendly mode (patterns instead of just colors)~~ **Won't implement — declined.**                                     | ~~Medium~~ | ~~Medium~~ |
+| ~~20~~ | ~~Add step duration percentile chart (p50, p90, p99)~~ **Won't implement — declined.**                                                  | ~~Medium~~ | ~~Medium~~ |
+| ~~21~~ | ~~Add "critical path" highlight in Gantt (bottleneck chain)~~ done — critical-path highlight shipped                                    | ~~High~~   | ~~Medium~~ |
+| ~~22~~ | ~~Add zoom/brush to Gantt timeline for large workflows~~ **Won't implement — declined.**                                                | ~~Medium~~ | ~~Medium~~ |
+| ~~23~~ | ~~Consider `templ` for HTML template instead of `fmt.Sprintf`~~ **Won't implement — templ deferred per docs/evaluations.**              | ~~Medium~~ | ~~Medium~~ |
+| ~~24~~ | ~~Add OpenGraph meta tags for shareable report links~~ **Won't implement — self-contained HTML — no meta tags.**                        | ~~Low~~    | ~~Low~~    |
+| ~~25~~ | ~~Add JSON schema validation for embedded report data~~ **Won't implement — Validate() API covers.**                                    | ~~Medium~~ | ~~Medium~~ |
 
 ### g) Top Question I Cannot Figure Out Myself
 

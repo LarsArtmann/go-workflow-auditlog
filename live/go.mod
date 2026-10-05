@@ -32,17 +32,17 @@ require (
 	github.com/larsartmann/go-branded-id v0.7.0 // indirect
 	github.com/larsartmann/go-error-family v0.11.0 // indirect
 	github.com/larsartmann/go-ndjson v0.0.1 // indirect
-	github.com/larsartmann/go-output v0.38.3 // indirect
-	github.com/larsartmann/go-output/d2 v0.38.3 // indirect
-	github.com/larsartmann/go-output/delimited v0.38.3 // indirect
+	github.com/larsartmann/go-output v0.38.4 // indirect
+	github.com/larsartmann/go-output/d2 v0.38.4 // indirect
+	github.com/larsartmann/go-output/delimited v0.38.4 // indirect
 	github.com/larsartmann/go-output/escape v0.38.3 // indirect
-	github.com/larsartmann/go-output/graph v0.38.3 // indirect
-	github.com/larsartmann/go-output/markdown v0.38.3 // indirect
-	github.com/larsartmann/go-output/markup v0.38.3 // indirect
-	github.com/larsartmann/go-output/plantuml v0.38.3 // indirect
-	github.com/larsartmann/go-output/serialization v0.38.3 // indirect
-	github.com/larsartmann/go-output/table v0.38.3 // indirect
-	github.com/larsartmann/go-output/tree v0.38.3 // indirect
+	github.com/larsartmann/go-output/graph v0.38.4 // indirect
+	github.com/larsartmann/go-output/markdown v0.38.4 // indirect
+	github.com/larsartmann/go-output/markup v0.38.4 // indirect
+	github.com/larsartmann/go-output/plantuml v0.38.4 // indirect
+	github.com/larsartmann/go-output/serialization v0.38.4 // indirect
+	github.com/larsartmann/go-output/table v0.38.4 // indirect
+	github.com/larsartmann/go-output/tree v0.38.4 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/mattn/go-runewidth v0.0.30 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect

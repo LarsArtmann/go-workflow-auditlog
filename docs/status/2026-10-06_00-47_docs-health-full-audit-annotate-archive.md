@@ -101,6 +101,7 @@
 ## f) Top things to get done next (Pareto-ordered; honest count — no padding)
 
 **P0 (correctness of this pass's output):**
+
 1. Correct the two overstated pkg.go.dev annotations (probe live@v0.11.0, or reword to viz-probed + v0.10.0 evidence).
 2. `nix shell` actionlint → validate `ci.yml` + `website.yml` mechanically.
 3. `nix flake check` / `nix build .#auditlog` → resolves TODO item (buildGo126Module vs Go 1.27) in 30 seconds.

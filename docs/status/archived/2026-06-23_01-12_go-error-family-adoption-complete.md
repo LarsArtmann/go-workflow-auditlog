@@ -147,53 +147,53 @@ The entire go-error-family adoption plan was executed end-to-end: Strategy A (Re
 
 ### Immediate (this session's loose ends)
 
-| # | Task                                                                                           | Impact | Effort |
-| - | ---------------------------------------------------------------------------------------------- | ------ | ------ |
-| ~~1~~ | ~~Add CHANGELOG `[Unreleased]` entry for go-error-family adoption~~ done — CHANGELOG v0.5.0 | ~~Medium~~ | ~~5 min~~ |
-| ~~2~~ | ~~Mark `TODO_LIST.md` go-error-family item as `[DONE]`~~ done — TODO_LIST updated v0.5.0 | ~~Low~~ | ~~2 min~~ |
-| ~~3~~ | ~~Update `STABILITY.md` with 3 new sentinels + dependency note~~ done — STABILITY v0.5.0 | ~~Medium~~ | ~~5 min~~ |
-| ~~4~~ | ~~Fix PRO/CONTRA report exit codes (Rejection=1, Corruption=65, Infrastructure=69, Transient=75)~~ done — exit codes corrected v0.5.0 | ~~Low~~ | ~~5 min~~ |
+| #     | Task                                                                                                                                  | Impact     | Effort    |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------- | --------- |
+| ~~1~~ | ~~Add CHANGELOG `[Unreleased]` entry for go-error-family adoption~~ done — CHANGELOG v0.5.0                                           | ~~Medium~~ | ~~5 min~~ |
+| ~~2~~ | ~~Mark `TODO_LIST.md` go-error-family item as `[DONE]`~~ done — TODO_LIST updated v0.5.0                                              | ~~Low~~    | ~~2 min~~ |
+| ~~3~~ | ~~Update `STABILITY.md` with 3 new sentinels + dependency note~~ done — STABILITY v0.5.0                                              | ~~Medium~~ | ~~5 min~~ |
+| ~~4~~ | ~~Fix PRO/CONTRA report exit codes (Rejection=1, Corruption=65, Infrastructure=69, Transient=75)~~ done — exit codes corrected v0.5.0 | ~~Low~~    | ~~5 min~~ |
 
 ### Error handling deepening
 
-| # | Task                                                                                                                                 | Impact | Effort |
-| - | ------------------------------------------------------------------------------------------------------------------------------------ | ------ | ------ |
-| ~~5~~ | ~~Add error-path tests: inject failing `io.Writer` into all `Write*` methods, verify `ErrRenderFailed`/`ErrExportWriteFailed` wrapping~~ done — error-path tests v0.5.0 | ~~High~~ | ~~45 min~~ |
-| ~~6~~ | ~~Add `LoadReport("nonexistent.json")` test verifying `ErrReportLoadFailed` + `errors.Is`~~ done — LoadReport test v0.5.0 | ~~High~~ | ~~10 min~~ |
-| ~~7~~ | ~~Add fuzz test for `Classify()` — adversarial wrapped error chains, deeply nested `fmt.Errorf("%w")`~~ done — Classify fuzz v0.5.0 | ~~Medium~~ | ~~20 min~~ |
-| ~~8~~ | ~~Add property test: "wrapping preserves family through arbitrary depth"~~ done — wrapping-preserves-family property v0.5.0 | ~~Medium~~ | ~~15 min~~ |
+| #     | Task                                                                                                                                                                    | Impact     | Effort     |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ---------- |
+| ~~5~~ | ~~Add error-path tests: inject failing `io.Writer` into all `Write*` methods, verify `ErrRenderFailed`/`ErrExportWriteFailed` wrapping~~ done — error-path tests v0.5.0 | ~~High~~   | ~~45 min~~ |
+| ~~6~~ | ~~Add `LoadReport("nonexistent.json")` test verifying `ErrReportLoadFailed` + `errors.Is`~~ done — LoadReport test v0.5.0                                               | ~~High~~   | ~~10 min~~ |
+| ~~7~~ | ~~Add fuzz test for `Classify()` — adversarial wrapped error chains, deeply nested `fmt.Errorf("%w")`~~ done — Classify fuzz v0.5.0                                     | ~~Medium~~ | ~~20 min~~ |
+| ~~8~~ | ~~Add property test: "wrapping preserves family through arbitrary depth"~~ done — wrapping-preserves-family property v0.5.0                                             | ~~Medium~~ | ~~15 min~~ |
 
 ### Pre-release polish
 
-| #  | Task                                                                               | Impact | Effort |
-| -- | ---------------------------------------------------------------------------------- | ------ | ------ |
-| ~~9~~  | ~~Push coverage 92.9% → 95%+ (target: error-path branches in Write\* methods)~~ done — 97% reached | ~~High~~ | ~~60 min~~ |
-| ~~10~~ | ~~Tag v0.5.0 release (go-error-family adoption + I/O sentinels warrant a minor bump)~~ done — v0.5.0 tagged | ~~High~~ | ~~10 min~~ |
-| ~~11~~ | ~~Add `StepInfo.Type()` method for API consistency with `Status.Label()`~~ done — Type() v0.5.1 | ~~Low~~ | ~~10 min~~ |
-| ~~12~~ | ~~Add retry/timeout columns to table export~~ done — columns v0.5.1 | ~~Medium~~ | ~~20 min~~ |
+| #      | Task                                                                                                        | Impact     | Effort     |
+| ------ | ----------------------------------------------------------------------------------------------------------- | ---------- | ---------- |
+| ~~9~~  | ~~Push coverage 92.9% → 95%+ (target: error-path branches in Write\* methods)~~ done — 97% reached          | ~~High~~   | ~~60 min~~ |
+| ~~10~~ | ~~Tag v0.5.0 release (go-error-family adoption + I/O sentinels warrant a minor bump)~~ done — v0.5.0 tagged | ~~High~~   | ~~10 min~~ |
+| ~~11~~ | ~~Add `StepInfo.Type()` method for API consistency with `Status.Label()`~~ done — Type() v0.5.1             | ~~Low~~    | ~~10 min~~ |
+| ~~12~~ | ~~Add retry/timeout columns to table export~~ done — columns v0.5.1                                         | ~~Medium~~ | ~~20 min~~ |
 
 ### Feature work (from TODO_LIST.md)
 
-| #  | Task                                                                       | Impact | Effort |
-| -- | -------------------------------------------------------------------------- | ------ | ------ |
-| ~~13~~ | ~~Make table columns configurable (column-selection options)~~ done — WithColumns v0.7.0 | ~~Medium~~ | ~~45 min~~ |
-| ~~14~~ | ~~Add diagram layout direction option (TD vs LR)~~ done — WithDirection v0.7.0 | ~~Medium~~ | ~~30 min~~ |
-| ~~15~~ | ~~Add `writeToFile` overwrite protection (`O_EXCL` / "file exists" error)~~ done — CheckNoClobber v0.5.1 | ~~Low~~ | ~~15 min~~ |
-| ~~16~~ | ~~Add benchmarks for WriteD2, WriteTable, WriteTree~~ done — benchmarks v0.5.1 | ~~Medium~~ | ~~30 min~~ |
-| ~~17~~ | ~~Add fuzz tests for diagram ID sanitization~~ done — diagram fuzz shipped | ~~Medium~~ | ~~25 min~~ |
-| ~~18~~ | ~~Add integration/round-trip tests (report → JSON → Load → diagram → verify)~~ done — integration tests v0.5.0 | ~~High~~ | ~~45 min~~ |
-| ~~19~~ | ~~Surface name collisions in diagrams (warn when `String()` collides)~~ done — NameCollisions v0.5.1 | ~~Low~~ | ~~20 min~~ |
-| ~~20~~ | ~~Offer `Name(step)` fallback helper~~ done — HasPointerAddress v0.5.1 | ~~Low~~ | ~~15 min~~ |
+| #      | Task                                                                                                           | Impact     | Effort     |
+| ------ | -------------------------------------------------------------------------------------------------------------- | ---------- | ---------- |
+| ~~13~~ | ~~Make table columns configurable (column-selection options)~~ done — WithColumns v0.7.0                       | ~~Medium~~ | ~~45 min~~ |
+| ~~14~~ | ~~Add diagram layout direction option (TD vs LR)~~ done — WithDirection v0.7.0                                 | ~~Medium~~ | ~~30 min~~ |
+| ~~15~~ | ~~Add `writeToFile` overwrite protection (`O_EXCL` / "file exists" error)~~ done — CheckNoClobber v0.5.1       | ~~Low~~    | ~~15 min~~ |
+| ~~16~~ | ~~Add benchmarks for WriteD2, WriteTable, WriteTree~~ done — benchmarks v0.5.1                                 | ~~Medium~~ | ~~30 min~~ |
+| ~~17~~ | ~~Add fuzz tests for diagram ID sanitization~~ done — diagram fuzz shipped                                     | ~~Medium~~ | ~~25 min~~ |
+| ~~18~~ | ~~Add integration/round-trip tests (report → JSON → Load → diagram → verify)~~ done — integration tests v0.5.0 | ~~High~~   | ~~45 min~~ |
+| ~~19~~ | ~~Surface name collisions in diagrams (warn when `String()` collides)~~ done — NameCollisions v0.5.1           | ~~Low~~    | ~~20 min~~ |
+| ~~20~~ | ~~Offer `Name(step)` fallback helper~~ done — HasPointerAddress v0.5.1                                         | ~~Low~~    | ~~15 min~~ |
 
 ### Strategic (from ROADMAP.md)
 
-| #  | Task                                                | Impact | Effort    |
-| -- | --------------------------------------------------- | ------ | --------- |
-| ~~21~~ | ~~Migrate `justfile` → `flake.nix`~~ done — flake.nix shipped | ~~Medium~~ | ~~60 min~~ |
-| ~~22~~ | ~~Split library into core + visualization sub-modules~~ done — module split v0.8.0 | ~~High~~ | ~~2-4 hours~~ |
-| ~~23~~ | ~~Streaming NDJSON export option~~ done — streaming v0.8.0 | ~~High~~ | ~~2 hours~~ |
-| 24 | OpenTelemetry span bridge **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)** | High   | 3 hours   |
-| ~~25~~ | ~~`encoding/json/v2` migration~~ done — json/v2 v0.7.0 | ~~Medium~~ | ~~1 hour~~ |
+| #      | Task                                                                                   | Impact     | Effort        |
+| ------ | -------------------------------------------------------------------------------------- | ---------- | ------------- |
+| ~~21~~ | ~~Migrate `justfile` → `flake.nix`~~ done — flake.nix shipped                          | ~~Medium~~ | ~~60 min~~    |
+| ~~22~~ | ~~Split library into core + visualization sub-modules~~ done — module split v0.8.0     | ~~High~~   | ~~2-4 hours~~ |
+| ~~23~~ | ~~Streaming NDJSON export option~~ done — streaming v0.8.0                             | ~~High~~   | ~~2 hours~~   |
+| 24     | OpenTelemetry span bridge **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)** | High       | 3 hours       |
+| ~~25~~ | ~~`encoding/json/v2` migration~~ done — json/v2 v0.7.0                                 | ~~Medium~~ | ~~1 hour~~    |
 
 ---
 

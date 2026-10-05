@@ -33,7 +33,7 @@ auditlog currently has 9 public sentinel errors with no behavioral metadata. go-
 - **3 error patterns**: direct sentinel return, `fmt.Errorf("%w")` wrapping, plain context wrapping (no sentinel)
 - **No custom error types** — no structs implementing `error`, no `errors.As` usage anywhere
 - **~30+ error return paths** total, but only 9 have matchable identity
-~~- **I/O/export errors have no sentinels** — `fmt.Errorf("render mermaid diagram: %w", err)` is unmatchable~~ done (3 I/O sentinels + 22 wrapped paths — v0.5.0)
+  ~~- **I/O/export errors have no sentinels** — `fmt.Errorf("render mermaid diagram: %w", err)` is unmatchable~~ done (3 I/O sentinels + 22 wrapped paths — v0.5.0)
 
 ### What's missing
 
@@ -386,20 +386,20 @@ This is where Family adds the most value: **retry decisions on I/O failures**. B
 
 ## Appendix: Full Error Inventory with Proposed Classification
 
-| #   | Error                   | File                                    | Current Pattern      | Proposed Family            | Strategy              |
-| --- | ----------------------- | --------------------------------------- | -------------------- | -------------------------- | --------------------- |
-| 1   | `ErrEventCountMismatch` | report.go:22                            | sentinel + `%w` wrap | Corruption                 | A (register)          |
-| 2   | `ErrStepCountMismatch`  | report.go:25                            | sentinel + `%w` wrap | Corruption                 | A (register)          |
-| 3   | `ErrStatusDrift`        | report.go:29                            | sentinel + `%w` wrap | Corruption                 | A (register)          |
-| 4   | `ErrCountMismatch`      | report.go:29                            | sentinel + `%w` wrap | Corruption                 | A (register)          |
-| 5   | `ErrEmpty`              | ndjson.go:14                            | direct return        | Rejection                  | A (register)          |
-| 6   | `ErrNoEvents`           | ndjson.go:15                            | direct return        | Rejection                  | A (register)          |
-| 7   | `ErrOversizedLine`      | ndjson.go:16                            | sentinel + `%w` wrap | Rejection                  | A (register)          |
-~~| 8   | `ErrWorkflowIDPathSep`  | plugin.go:50                            | sentinel + `%w` wrap | Rejection                  | A (register)          |~~ done (shipped v0.5.0 — classify.go)
-~~| 9   | `ErrReplayNoEvents`     | replay.go:10                            | direct return        | Rejection                  | A (register)          |~~ done (shipped v0.5.0 — classify.go)
-~~| 10  | `errUnknownEventType`   | ndjson.go:18                            | private sentinel     | Rejection                  | A (register, private) |~~ done (shipped v0.5.0 — classify.go)
-~~| 11  | `errUnknownPhase`       | ndjson.go:19                            | private sentinel     | Rejection                  | A (register, private) |~~ done (shipped v0.5.0 — classify.go)
-| 12+ | I/O/export errors       | loader.go, plugin.go, all diagram files | `fmt.Errorf` only    | Transient / Infrastructure | Follow-up             |
+| #   | Error                   | File                                    | Current Pattern      | Proposed Family            | Strategy     |
+| --- | ----------------------- | --------------------------------------- | -------------------- | -------------------------- | ------------ |
+| 1   | `ErrEventCountMismatch` | report.go:22                            | sentinel + `%w` wrap | Corruption                 | A (register) |
+| 2   | `ErrStepCountMismatch`  | report.go:25                            | sentinel + `%w` wrap | Corruption                 | A (register) |
+| 3   | `ErrStatusDrift`        | report.go:29                            | sentinel + `%w` wrap | Corruption                 | A (register) |
+| 4   | `ErrCountMismatch`      | report.go:29                            | sentinel + `%w` wrap | Corruption                 | A (register) |
+| 5   | `ErrEmpty`              | ndjson.go:14                            | direct return        | Rejection                  | A (register) |
+| 6   | `ErrNoEvents`           | ndjson.go:15                            | direct return        | Rejection                  | A (register) |
+| 7   | `ErrOversizedLine`      | ndjson.go:16                            | sentinel + `%w` wrap | Rejection                  | A (register) |
+| ~~  | 8                       | `ErrWorkflowIDPathSep`                  | plugin.go:50         | sentinel + `%w` wrap       | Rejection    |
+| ~~  | 9                       | `ErrReplayNoEvents`                     | replay.go:10         | direct return              | Rejection    |
+| ~~  | 10                      | `errUnknownEventType`                   | ndjson.go:18         | private sentinel           | Rejection    |
+| ~~  | 11                      | `errUnknownPhase`                       | ndjson.go:19         | private sentinel           | Rejection    |
+| 12+ | I/O/export errors       | loader.go, plugin.go, all diagram files | `fmt.Errorf` only    | Transient / Infrastructure | Follow-up    |
 
 ---
 
@@ -430,9 +430,9 @@ to `errorfamily.NewError(family, message)` structs. This enables:
 ~~1. Keep `RegisterClassifications` as-is (it still works with Error sentinels).~~ done (kept; still the back-compat shim — v0.10.0)
 ~~2. Change each sentinel from `errors.New` to `errorfamily.NewError`.~~ done (sentinels are *errorfamily.Error — v0.10.0)
 ~~3. Update tests: `errors.Is` checks still work via the code+family path, but~~ done (Is preserved via code+family — v0.10.0)
-   verify behavior with `Test_Classify_ErrorsIsUnchanged`.
+verify behavior with `Test_Classify_ErrorsIsUnchanged`.
 ~~4. Add context fields to sentinels where useful (e.g., `ErrReportLoadFailed`~~ Won't implement — codes+family suffice; no consumer demand
-   with file path, `ErrRenderFailed` with format name).
+with file path, `ErrRenderFailed` with format name).
 ~~5. Consider exposing `HandleError` as a convenience for CLI consumers.~~ Won't implement — no consumer demand
 
 **Recommendation:** Do NOT pursue Strategy B until a concrete consumer need

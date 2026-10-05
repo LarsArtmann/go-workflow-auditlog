@@ -65,23 +65,23 @@ The Hub refactor is **deferred** (see risk assessment above). Documentation upda
 
 Sorted by impact × customer-value ÷ effort. Risk level annotated.
 
-| #   | Task                                                                                    | Phase          | Impact   | Effort | Risk     | Dependencies |
-| --- | --------------------------------------------------------------------------------------- | -------------- | -------- | ------ | -------- | ------------ |
-| ~~M1~~  | ~~Upgrade go-sse v0.3.0 → v0.4.0 in live/go.mod~~ done (docs-health pass 2026-10-05) | ~~Foundation~~ | ~~Medium~~ | ~~30 min~~ | ~~None~~ | ~~—~~ |
-| ~~M2~~  | ~~Adopt sse.Stream in handleSSE — replace manual headers, flusher, WriteEvent+Flush~~ done (docs-health pass 2026-10-05) | ~~Foundation~~ | ~~High~~ | ~~60 min~~ | ~~Low~~ | ~~M1~~ |
-| ~~M3~~  | ~~Adopt Stream.Heartbeat goroutine — replace manual heartbeat ticker case~~ done (docs-health pass 2026-10-05) | ~~Foundation~~ | ~~Medium~~ | ~~30 min~~ | ~~Low~~ | ~~M2~~ |
-| ~~M4~~  | ~~Update server tests for Stream adoption (heartbeat test, header test, snapshot test)~~ done (docs-health pass 2026-10-05) | ~~Foundation~~ | ~~High~~ | ~~45 min~~ | ~~Low~~ | ~~M2, M3~~ |
-| ~~M5~~  | ~~Implement bounded event ring buffer (EventStore) for reconnection replay~~ done (docs-health pass 2026-10-05) | ~~Customer Value~~ | ~~Critical~~ | ~~60 min~~ | ~~Low~~ | ~~M1~~ |
-| ~~M6~~  | ~~Assign EventIDs to broadcast events + wire EventStore into Hub~~ done (docs-health pass 2026-10-05) | ~~Customer Value~~ | ~~Critical~~ | ~~45 min~~ | ~~Low~~ | ~~M5~~ |
-| ~~M7~~  | ~~Wire sse.Replay into handleSSE — read Last-Event-ID, replay before event loop~~ done (docs-health pass 2026-10-05) | ~~Customer Value~~ | ~~Critical~~ | ~~45 min~~ | ~~Low~~ | ~~M5, M6~~ |
-| ~~M8~~  | ~~Test reconnection replay end-to-end (reconnect → missed events arrive)~~ done (docs-health pass 2026-10-05) | ~~Customer Value~~ | ~~Critical~~ | ~~45 min~~ | ~~None~~ | ~~M7~~ |
-| ~~M9~~  | ~~Add graceful subscriber drain in Server.Shutdown~~ done (docs-health pass 2026-10-05) | ~~Lifecycle~~ | ~~Medium~~ | ~~30 min~~ | ~~Low~~ | ~~M1~~ |
-| ~~M10~~ | ~~Test graceful shutdown drain~~ done (docs-health pass 2026-10-05) | ~~Lifecycle~~ | ~~Medium~~ | ~~30 min~~ | ~~None~~ | ~~M9~~ |
-| ~~M11~~ | ~~Integrate lifecycle info into health endpoint~~ done (docs-health pass 2026-10-05) | ~~Lifecycle~~ | ~~Low~~ | ~~30 min~~ | ~~Low~~ | ~~M9~~ |
-| ~~M12~~ | ~~Update dashboard.js for reconnection awareness (status indicator, EventSource handling)~~ done (docs-health pass 2026-10-05) | ~~UX~~ | ~~Medium~~ | ~~45 min~~ | ~~Low~~ | ~~M7~~ |
-| ~~M13~~ | ~~Update AGENTS.md, FEATURES.md, CHANGELOG.md with new SSE architecture~~ done (docs-health pass 2026-10-05) | ~~Docs~~ | ~~Medium~~ | ~~45 min~~ | ~~None~~ | ~~M2-M11~~ |
-| ~~M14~~ | ~~Full test suite verification (all 3 modules, race detector)~~ done (docs-health pass 2026-10-05) | ~~Quality~~ | ~~High~~ | ~~30 min~~ | ~~None~~ | ~~All~~ |
-| ~~M15~~ | ~~**[DEFERRED]** Refactor Hub to delegate fan-out to Broadcaster internally~~ **Won't implement — Hub retained deliberately — Broadcaster refactor declined.** | ~~Code Quality~~ | ~~Low~~ | ~~90 min~~ | ~~**HIGH**~~ | ~~All~~ |
+| #       | Task                                                                                                                                                           | Phase              | Impact       | Effort     | Risk         | Dependencies |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------ | ---------- | ------------ | ------------ |
+| ~~M1~~  | ~~Upgrade go-sse v0.3.0 → v0.4.0 in live/go.mod~~ done (docs-health pass 2026-10-05)                                                                           | ~~Foundation~~     | ~~Medium~~   | ~~30 min~~ | ~~None~~     | ~~—~~        |
+| ~~M2~~  | ~~Adopt sse.Stream in handleSSE — replace manual headers, flusher, WriteEvent+Flush~~ done (docs-health pass 2026-10-05)                                       | ~~Foundation~~     | ~~High~~     | ~~60 min~~ | ~~Low~~      | ~~M1~~       |
+| ~~M3~~  | ~~Adopt Stream.Heartbeat goroutine — replace manual heartbeat ticker case~~ done (docs-health pass 2026-10-05)                                                 | ~~Foundation~~     | ~~Medium~~   | ~~30 min~~ | ~~Low~~      | ~~M2~~       |
+| ~~M4~~  | ~~Update server tests for Stream adoption (heartbeat test, header test, snapshot test)~~ done (docs-health pass 2026-10-05)                                    | ~~Foundation~~     | ~~High~~     | ~~45 min~~ | ~~Low~~      | ~~M2, M3~~   |
+| ~~M5~~  | ~~Implement bounded event ring buffer (EventStore) for reconnection replay~~ done (docs-health pass 2026-10-05)                                                | ~~Customer Value~~ | ~~Critical~~ | ~~60 min~~ | ~~Low~~      | ~~M1~~       |
+| ~~M6~~  | ~~Assign EventIDs to broadcast events + wire EventStore into Hub~~ done (docs-health pass 2026-10-05)                                                          | ~~Customer Value~~ | ~~Critical~~ | ~~45 min~~ | ~~Low~~      | ~~M5~~       |
+| ~~M7~~  | ~~Wire sse.Replay into handleSSE — read Last-Event-ID, replay before event loop~~ done (docs-health pass 2026-10-05)                                           | ~~Customer Value~~ | ~~Critical~~ | ~~45 min~~ | ~~Low~~      | ~~M5, M6~~   |
+| ~~M8~~  | ~~Test reconnection replay end-to-end (reconnect → missed events arrive)~~ done (docs-health pass 2026-10-05)                                                  | ~~Customer Value~~ | ~~Critical~~ | ~~45 min~~ | ~~None~~     | ~~M7~~       |
+| ~~M9~~  | ~~Add graceful subscriber drain in Server.Shutdown~~ done (docs-health pass 2026-10-05)                                                                        | ~~Lifecycle~~      | ~~Medium~~   | ~~30 min~~ | ~~Low~~      | ~~M1~~       |
+| ~~M10~~ | ~~Test graceful shutdown drain~~ done (docs-health pass 2026-10-05)                                                                                            | ~~Lifecycle~~      | ~~Medium~~   | ~~30 min~~ | ~~None~~     | ~~M9~~       |
+| ~~M11~~ | ~~Integrate lifecycle info into health endpoint~~ done (docs-health pass 2026-10-05)                                                                           | ~~Lifecycle~~      | ~~Low~~      | ~~30 min~~ | ~~Low~~      | ~~M9~~       |
+| ~~M12~~ | ~~Update dashboard.js for reconnection awareness (status indicator, EventSource handling)~~ done (docs-health pass 2026-10-05)                                 | ~~UX~~             | ~~Medium~~   | ~~45 min~~ | ~~Low~~      | ~~M7~~       |
+| ~~M13~~ | ~~Update AGENTS.md, FEATURES.md, CHANGELOG.md with new SSE architecture~~ done (docs-health pass 2026-10-05)                                                   | ~~Docs~~           | ~~Medium~~   | ~~45 min~~ | ~~None~~     | ~~M2-M11~~   |
+| ~~M14~~ | ~~Full test suite verification (all 3 modules, race detector)~~ done (docs-health pass 2026-10-05)                                                             | ~~Quality~~        | ~~High~~     | ~~30 min~~ | ~~None~~     | ~~All~~      |
+| ~~M15~~ | ~~**[DEFERRED]** Refactor Hub to delegate fan-out to Broadcaster internally~~ **Won't implement — Hub retained deliberately — Broadcaster refactor declined.** | ~~Code Quality~~   | ~~Low~~      | ~~90 min~~ | ~~**HIGH**~~ | ~~All~~      |
 
 **Total estimated effort (excluding M15):** ~10.5 hours
 **Total estimated effort (including M15):** ~12 hours
@@ -94,88 +94,88 @@ Sorted by execution order within each phase. Each task is atomic: one logical ch
 
 ### Phase A: Foundation (v0.4.0 upgrade + Stream adoption)
 
-| #   | Task                                                                                                                     | Parent | Est    | Verify       |
-| --- | ------------------------------------------------------------------------------------------------------------------------ | ------ | ------ | ------------ |
-| ~~F1~~  | ~~Read go-sse v0.4.0 CHANGELOG for any hidden breaking changes~~ done (docs-health pass 2026-10-05) | ~~M1~~ | ~~5 min~~ | ~~Mental~~ |
-| ~~F2~~  | ~~Bump `github.com/larsartmann/go-sse v0.3.0` → `v0.4.0` in live/go.mod~~ done (docs-health pass 2026-10-05) | ~~M1~~ | ~~2 min~~ | ~~Diff~~ |
-| ~~F3~~  | ~~Run `cd live && go mod tidy -e && GOEXPERIMENT=jsonv2 go build ./...`~~ done (docs-health pass 2026-10-05) | ~~M1~~ | ~~5 min~~ | ~~Build passes~~ |
-| ~~F4~~  | ~~Run `cd live && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...`~~ done (docs-health pass 2026-10-05) | ~~M1~~ | ~~5 min~~ | ~~Tests pass~~ |
-| ~~F5~~  | ~~In handleSSE: set `X-Accel-Buffering: no` header BEFORE NewStream call~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F6~~  | ~~In handleSSE: replace manual header block (Content-Type, Cache-Control, Connection) with `stream := sse.NewStream(w, r)`~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~10 min~~ | ~~Compile~~ |
-| ~~F7~~  | ~~In handleSSE: replace manual `flusher, ok := w.(http.Flusher)` check with Stream's internal flusher~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F8~~  | ~~In sendSnapshot: change signature from `(w, flusher)` to `(stream *sse.Stream)`~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F9~~  | ~~In sendSnapshot: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F10~~ | ~~In handleSSE event case: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F11~~ | ~~In sendComplete: change signature from `(w, flusher)` to `(stream *sse.Stream)`~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F12~~ | ~~In sendComplete: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`~~ done (docs-health pass 2026-10-05) | ~~M2~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F13~~ | ~~In handleSSE: remove manual heartbeat ticker + heartbeat.C case from select loop~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F14~~ | ~~In handleSSE: add `go stream.Heartbeat(stream.Context(), srv.config.HeartbeatInterval)` before select loop~~ done (docs-health pass 2026-10-05) | ~~M3~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F15~~ | ~~Run `go build ./...` to verify compilation~~ done (docs-health pass 2026-10-05) | ~~M2-M3~~ | ~~3 min~~ | ~~Build passes~~ |
-| ~~F16~~ | ~~Run live tests — identify any failures from Stream adoption~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~10 min~~ | ~~Test output~~ |
-| ~~F17~~ | ~~Fix heartbeat test: update to work with Stream.Heartbeat goroutine (if needed)~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~10 min~~ | ~~Test passes~~ |
-| ~~F18~~ | ~~Fix any header-checking tests: update assertions for Stream's header set~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~10 min~~ | ~~Test passes~~ |
-| ~~F19~~ | ~~Run full live test suite with race detector~~ done (docs-health pass 2026-10-05) | ~~M4~~ | ~~5 min~~ | ~~All green~~ |
+| #       | Task                                                                                                                                                            | Parent    | Est        | Verify           |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- | ---------------- |
+| ~~F1~~  | ~~Read go-sse v0.4.0 CHANGELOG for any hidden breaking changes~~ done (docs-health pass 2026-10-05)                                                             | ~~M1~~    | ~~5 min~~  | ~~Mental~~       |
+| ~~F2~~  | ~~Bump `github.com/larsartmann/go-sse v0.3.0` → `v0.4.0` in live/go.mod~~ done (docs-health pass 2026-10-05)                                                    | ~~M1~~    | ~~2 min~~  | ~~Diff~~         |
+| ~~F3~~  | ~~Run `cd live && go mod tidy -e && GOEXPERIMENT=jsonv2 go build ./...`~~ done (docs-health pass 2026-10-05)                                                    | ~~M1~~    | ~~5 min~~  | ~~Build passes~~ |
+| ~~F4~~  | ~~Run `cd live && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...`~~ done (docs-health pass 2026-10-05)                                                        | ~~M1~~    | ~~5 min~~  | ~~Tests pass~~   |
+| ~~F5~~  | ~~In handleSSE: set `X-Accel-Buffering: no` header BEFORE NewStream call~~ done (docs-health pass 2026-10-05)                                                   | ~~M2~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F6~~  | ~~In handleSSE: replace manual header block (Content-Type, Cache-Control, Connection) with `stream := sse.NewStream(w, r)`~~ done (docs-health pass 2026-10-05) | ~~M2~~    | ~~10 min~~ | ~~Compile~~      |
+| ~~F7~~  | ~~In handleSSE: replace manual `flusher, ok := w.(http.Flusher)` check with Stream's internal flusher~~ done (docs-health pass 2026-10-05)                      | ~~M2~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F8~~  | ~~In sendSnapshot: change signature from `(w, flusher)` to `(stream *sse.Stream)`~~ done (docs-health pass 2026-10-05)                                          | ~~M2~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F9~~  | ~~In sendSnapshot: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`~~ done (docs-health pass 2026-10-05)                                             | ~~M2~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F10~~ | ~~In handleSSE event case: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`~~ done (docs-health pass 2026-10-05)                                     | ~~M2~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F11~~ | ~~In sendComplete: change signature from `(w, flusher)` to `(stream *sse.Stream)`~~ done (docs-health pass 2026-10-05)                                          | ~~M2~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F12~~ | ~~In sendComplete: replace `sse.WriteEvent + flusher.Flush` with `stream.Send`~~ done (docs-health pass 2026-10-05)                                             | ~~M2~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F13~~ | ~~In handleSSE: remove manual heartbeat ticker + heartbeat.C case from select loop~~ done (docs-health pass 2026-10-05)                                         | ~~M3~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F14~~ | ~~In handleSSE: add `go stream.Heartbeat(stream.Context(), srv.config.HeartbeatInterval)` before select loop~~ done (docs-health pass 2026-10-05)               | ~~M3~~    | ~~5 min~~  | ~~Compile~~      |
+| ~~F15~~ | ~~Run `go build ./...` to verify compilation~~ done (docs-health pass 2026-10-05)                                                                               | ~~M2-M3~~ | ~~3 min~~  | ~~Build passes~~ |
+| ~~F16~~ | ~~Run live tests — identify any failures from Stream adoption~~ done (docs-health pass 2026-10-05)                                                              | ~~M4~~    | ~~10 min~~ | ~~Test output~~  |
+| ~~F17~~ | ~~Fix heartbeat test: update to work with Stream.Heartbeat goroutine (if needed)~~ done (docs-health pass 2026-10-05)                                           | ~~M4~~    | ~~10 min~~ | ~~Test passes~~  |
+| ~~F18~~ | ~~Fix any header-checking tests: update assertions for Stream's header set~~ done (docs-health pass 2026-10-05)                                                 | ~~M4~~    | ~~10 min~~ | ~~Test passes~~  |
+| ~~F19~~ | ~~Run full live test suite with race detector~~ done (docs-health pass 2026-10-05)                                                                              | ~~M4~~    | ~~5 min~~  | ~~All green~~    |
 
 ### Phase B: Reconnection Replay (customer-facing feature)
 
-| #   | Task                                                                                                        | Parent | Est    | Verify      |
-| --- | ----------------------------------------------------------------------------------------------------------- | ------ | ------ | ----------- |
-| ~~F20~~ | ~~Define `eventRingBuffer` struct: bounded slice of `sse.Event` with mutex + capacity~~ done (docs-health pass 2026-10-05) | ~~M5~~ | ~~10 min~~ | ~~Compile~~ |
-| ~~F21~~ | ~~Implement `EventsAfter(lastID sse.EventID) ([]sse.Event, error)` on eventRingBuffer~~ done (docs-health pass 2026-10-05) | ~~M5~~ | ~~10 min~~ | ~~Unit test~~ |
-| ~~F22~~ | ~~Add `nextEventID()` method: atomic counter → `sse.NewEventID(strconv.Itoa(n))`~~ done (docs-health pass 2026-10-05) | ~~M6~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F23~~ | ~~In Hub.OnEvent: create `sse.Event` with ID, store in ring buffer, broadcast Data~~ done (docs-health pass 2026-10-05) | ~~M6~~ | ~~10 min~~ | ~~Compile~~ |
-| ~~F24~~ | ~~Add `EventStore()` method on Hub: return the ring buffer as `sse.EventStore`~~ done (docs-health pass 2026-10-05) | ~~M6~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F25~~ | ~~Add ring buffer capacity to `Config` (default 1000)~~ done (docs-health pass 2026-10-05) | ~~M5~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F26~~ | ~~Wire ring buffer into Hub struct + NewHub constructor~~ done (docs-health pass 2026-10-05) | ~~M5~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F27~~ | ~~In handleSSE: call `stream.LastEventID()` to read reconnection header~~ done (docs-health pass 2026-10-05) | ~~M7~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F28~~ | ~~In handleSSE: if Last-Event-ID is non-zero, call `sse.Replay(stream, store, lastID)` before snapshot~~ done (docs-health pass 2026-10-05) | ~~M7~~ | ~~10 min~~ | ~~Compile~~ |
-| ~~F29~~ | ~~Handle replay error: log + continue to snapshot fallback~~ done (docs-health pass 2026-10-05) | ~~M7~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F30~~ | ~~Run live tests — verify replay doesn't break existing behavior~~ done (docs-health pass 2026-10-05) | ~~M7~~ | ~~5 min~~ | ~~Tests pass~~ |
+| #       | Task                                                                                                                                               | Parent | Est        | Verify          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------- | --------------- |
+| ~~F20~~ | ~~Define `eventRingBuffer` struct: bounded slice of `sse.Event` with mutex + capacity~~ done (docs-health pass 2026-10-05)                         | ~~M5~~ | ~~10 min~~ | ~~Compile~~     |
+| ~~F21~~ | ~~Implement `EventsAfter(lastID sse.EventID) ([]sse.Event, error)` on eventRingBuffer~~ done (docs-health pass 2026-10-05)                         | ~~M5~~ | ~~10 min~~ | ~~Unit test~~   |
+| ~~F22~~ | ~~Add `nextEventID()` method: atomic counter → `sse.NewEventID(strconv.Itoa(n))`~~ done (docs-health pass 2026-10-05)                              | ~~M6~~ | ~~5 min~~  | ~~Compile~~     |
+| ~~F23~~ | ~~In Hub.OnEvent: create `sse.Event` with ID, store in ring buffer, broadcast Data~~ done (docs-health pass 2026-10-05)                            | ~~M6~~ | ~~10 min~~ | ~~Compile~~     |
+| ~~F24~~ | ~~Add `EventStore()` method on Hub: return the ring buffer as `sse.EventStore`~~ done (docs-health pass 2026-10-05)                                | ~~M6~~ | ~~5 min~~  | ~~Compile~~     |
+| ~~F25~~ | ~~Add ring buffer capacity to `Config` (default 1000)~~ done (docs-health pass 2026-10-05)                                                         | ~~M5~~ | ~~5 min~~  | ~~Compile~~     |
+| ~~F26~~ | ~~Wire ring buffer into Hub struct + NewHub constructor~~ done (docs-health pass 2026-10-05)                                                       | ~~M5~~ | ~~5 min~~  | ~~Compile~~     |
+| ~~F27~~ | ~~In handleSSE: call `stream.LastEventID()` to read reconnection header~~ done (docs-health pass 2026-10-05)                                       | ~~M7~~ | ~~5 min~~  | ~~Compile~~     |
+| ~~F28~~ | ~~In handleSSE: if Last-Event-ID is non-zero, call `sse.Replay(stream, store, lastID)` before snapshot~~ done (docs-health pass 2026-10-05)        | ~~M7~~ | ~~10 min~~ | ~~Compile~~     |
+| ~~F29~~ | ~~Handle replay error: log + continue to snapshot fallback~~ done (docs-health pass 2026-10-05)                                                    | ~~M7~~ | ~~5 min~~  | ~~Compile~~     |
+| ~~F30~~ | ~~Run live tests — verify replay doesn't break existing behavior~~ done (docs-health pass 2026-10-05)                                              | ~~M7~~ | ~~5 min~~  | ~~Tests pass~~  |
 | ~~F31~~ | ~~Write test: basic reconnection replay (broadcast 3 events, reconnect with Last-Event-ID, verify 2 replayed)~~ done (docs-health pass 2026-10-05) | ~~M8~~ | ~~10 min~~ | ~~Test passes~~ |
-| ~~F32~~ | ~~Write test: replay with empty store (Last-Event-ID not found)~~ done (docs-health pass 2026-10-05) | ~~M8~~ | ~~5 min~~ | ~~Test passes~~ |
-| ~~F33~~ | ~~Write test: replay with zero Last-Event-ID (initial connection, no replay)~~ done (docs-health pass 2026-10-05) | ~~M8~~ | ~~5 min~~ | ~~Test passes~~ |
-| ~~F34~~ | ~~Write test: concurrent broadcast during replay (race safety)~~ done (docs-health pass 2026-10-05) | ~~M8~~ | ~~10 min~~ | ~~Race clean~~ |
-| ~~F35~~ | ~~Write test: ring buffer overflow (capacity exceeded, oldest events dropped)~~ done (docs-health pass 2026-10-05) | ~~M8~~ | ~~10 min~~ | ~~Test passes~~ |
+| ~~F32~~ | ~~Write test: replay with empty store (Last-Event-ID not found)~~ done (docs-health pass 2026-10-05)                                               | ~~M8~~ | ~~5 min~~  | ~~Test passes~~ |
+| ~~F33~~ | ~~Write test: replay with zero Last-Event-ID (initial connection, no replay)~~ done (docs-health pass 2026-10-05)                                  | ~~M8~~ | ~~5 min~~  | ~~Test passes~~ |
+| ~~F34~~ | ~~Write test: concurrent broadcast during replay (race safety)~~ done (docs-health pass 2026-10-05)                                                | ~~M8~~ | ~~10 min~~ | ~~Race clean~~  |
+| ~~F35~~ | ~~Write test: ring buffer overflow (capacity exceeded, oldest events dropped)~~ done (docs-health pass 2026-10-05)                                 | ~~M8~~ | ~~10 min~~ | ~~Test passes~~ |
 
 ### Phase C: Lifecycle Improvements
 
-| #   | Task                                                                                 | Parent | Est    | Verify      |
-| --- | ------------------------------------------------------------------------------------ | ------ | ------ | ----------- |
-| ~~F36~~ | ~~In Server.Shutdown: add `srv.hub.Drain(ctx)` call before `httpServer.Shutdown(ctx)`~~ done (docs-health pass 2026-10-05) | ~~M9~~ | ~~10 min~~ | ~~Compile~~ |
-| ~~F37~~ | ~~Implement `Hub.Drain(ctx)`: wait for all subscriber channels to empty or ctx timeout~~ done (docs-health pass 2026-10-05) | ~~M9~~ | ~~10 min~~ | ~~Compile~~ |
-| ~~F38~~ | ~~Write test: graceful drain delivers buffered events before shutdown~~ done (docs-health pass 2026-10-05) | ~~M10~~ | ~~10 min~~ | ~~Test passes~~ |
-| ~~F39~~ | ~~Write test: drain timeout falls back to force-close~~ done (docs-health pass 2026-10-05) | ~~M10~~ | ~~10 min~~ | ~~Test passes~~ |
-| ~~F40~~ | ~~In handleHealth: add `draining` and `event_buffer_size` fields from Hub state~~ done (docs-health pass 2026-10-05) | ~~M11~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F41~~ | ~~Update healthResponse struct with new fields~~ done (docs-health pass 2026-10-05) | ~~M11~~ | ~~5 min~~ | ~~Compile~~ |
-| ~~F42~~ | ~~Write test: health endpoint reports drain state~~ done (docs-health pass 2026-10-05) | ~~M11~~ | ~~5 min~~ | ~~Test passes~~ |
+| #       | Task                                                                                                                        | Parent  | Est        | Verify          |
+| ------- | --------------------------------------------------------------------------------------------------------------------------- | ------- | ---------- | --------------- |
+| ~~F36~~ | ~~In Server.Shutdown: add `srv.hub.Drain(ctx)` call before `httpServer.Shutdown(ctx)`~~ done (docs-health pass 2026-10-05)  | ~~M9~~  | ~~10 min~~ | ~~Compile~~     |
+| ~~F37~~ | ~~Implement `Hub.Drain(ctx)`: wait for all subscriber channels to empty or ctx timeout~~ done (docs-health pass 2026-10-05) | ~~M9~~  | ~~10 min~~ | ~~Compile~~     |
+| ~~F38~~ | ~~Write test: graceful drain delivers buffered events before shutdown~~ done (docs-health pass 2026-10-05)                  | ~~M10~~ | ~~10 min~~ | ~~Test passes~~ |
+| ~~F39~~ | ~~Write test: drain timeout falls back to force-close~~ done (docs-health pass 2026-10-05)                                  | ~~M10~~ | ~~10 min~~ | ~~Test passes~~ |
+| ~~F40~~ | ~~In handleHealth: add `draining` and `event_buffer_size` fields from Hub state~~ done (docs-health pass 2026-10-05)        | ~~M11~~ | ~~5 min~~  | ~~Compile~~     |
+| ~~F41~~ | ~~Update healthResponse struct with new fields~~ done (docs-health pass 2026-10-05)                                         | ~~M11~~ | ~~5 min~~  | ~~Compile~~     |
+| ~~F42~~ | ~~Write test: health endpoint reports drain state~~ done (docs-health pass 2026-10-05)                                      | ~~M11~~ | ~~5 min~~  | ~~Test passes~~ |
 
 ### Phase D: Dashboard UX
 
-| #   | Task                                                                             | Parent | Est    | Verify             |
-| --- | -------------------------------------------------------------------------------- | ------ | ------ | ------------------ |
+| #       | Task                                                                                                                    | Parent  | Est        | Verify                 |
+| ------- | ----------------------------------------------------------------------------------------------------------------------- | ------- | ---------- | ---------------------- |
 | ~~F43~~ | ~~In dashboard.js: add EventSource onerror handler showing "Reconnecting..." badge~~ done (docs-health pass 2026-10-05) | ~~M12~~ | ~~10 min~~ | ~~JS structural test~~ |
-| ~~F44~~ | ~~In dashboard.js: handle reconnection by updating connection status indicator~~ done (docs-health pass 2026-10-05) | ~~M12~~ | ~~10 min~~ | ~~JS structural test~~ |
-| ~~F45~~ | ~~In dashboard.js: hide "Reconnecting..." badge when events resume after reconnect~~ done (docs-health pass 2026-10-05) | ~~M12~~ | ~~5 min~~ | ~~JS structural test~~ |
-| ~~F46~~ | ~~Update dashboardjs_test.go to verify reconnection indicator presence~~ done (docs-health pass 2026-10-05) | ~~M12~~ | ~~10 min~~ | ~~Test passes~~ |
+| ~~F44~~ | ~~In dashboard.js: handle reconnection by updating connection status indicator~~ done (docs-health pass 2026-10-05)     | ~~M12~~ | ~~10 min~~ | ~~JS structural test~~ |
+| ~~F45~~ | ~~In dashboard.js: hide "Reconnecting..." badge when events resume after reconnect~~ done (docs-health pass 2026-10-05) | ~~M12~~ | ~~5 min~~  | ~~JS structural test~~ |
+| ~~F46~~ | ~~Update dashboardjs_test.go to verify reconnection indicator presence~~ done (docs-health pass 2026-10-05)             | ~~M12~~ | ~~10 min~~ | ~~Test passes~~        |
 
 ### Phase E: Documentation
 
-| #   | Task                                                                                       | Parent | Est    | Verify |
-| --- | ------------------------------------------------------------------------------------------ | ------ | ------ | ------ |
-| ~~F47~~ | ~~Update AGENTS.md: SSE architecture section (Stream, Replay, ring buffer, graceful drain)~~ done (docs-health pass 2026-10-05) | ~~M13~~ | ~~10 min~~ | ~~Read~~ |
-| ~~F48~~ | ~~Update FEATURES.md: reconnection replay feature, graceful drain feature~~ done (docs-health pass 2026-10-05) | ~~M13~~ | ~~10 min~~ | ~~Read~~ |
+| #       | Task                                                                                                                              | Parent  | Est        | Verify   |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------- | ------- | ---------- | -------- |
+| ~~F47~~ | ~~Update AGENTS.md: SSE architecture section (Stream, Replay, ring buffer, graceful drain)~~ done (docs-health pass 2026-10-05)   | ~~M13~~ | ~~10 min~~ | ~~Read~~ |
+| ~~F48~~ | ~~Update FEATURES.md: reconnection replay feature, graceful drain feature~~ done (docs-health pass 2026-10-05)                    | ~~M13~~ | ~~10 min~~ | ~~Read~~ |
 | ~~F49~~ | ~~Update CHANGELOG.md [Unreleased]: Added (replay, drain), Changed (Stream adoption, v0.4.0)~~ done (docs-health pass 2026-10-05) | ~~M13~~ | ~~10 min~~ | ~~Read~~ |
-| ~~F50~~ | ~~Update live/go.mod comment or FEATURES.md: note Cache-Control no-transform trade-off~~ done (docs-health pass 2026-10-05) | ~~M13~~ | ~~5 min~~ | ~~Read~~ |
+| ~~F50~~ | ~~Update live/go.mod comment or FEATURES.md: note Cache-Control no-transform trade-off~~ done (docs-health pass 2026-10-05)       | ~~M13~~ | ~~5 min~~  | ~~Read~~ |
 
 ### Phase F: Final Verification
 
-| #   | Task                                                                               | Parent | Est   | Verify |
-| --- | ---------------------------------------------------------------------------------- | ------ | ----- | ------ |
-| ~~F51~~ | ~~Run full test suite: `GOEXPERIMENT=jsonv2 go test -race -count=1 ./...` (core)~~ done (docs-health pass 2026-10-05) | ~~M14~~ | ~~5 min~~ | ~~Green~~ |
-| ~~F52~~ | ~~Run full test suite: `cd viz && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...`~~ done (docs-health pass 2026-10-05) | ~~M14~~ | ~~5 min~~ | ~~Green~~ |
+| #       | Task                                                                                                                      | Parent  | Est       | Verify    |
+| ------- | ------------------------------------------------------------------------------------------------------------------------- | ------- | --------- | --------- |
+| ~~F51~~ | ~~Run full test suite: `GOEXPERIMENT=jsonv2 go test -race -count=1 ./...` (core)~~ done (docs-health pass 2026-10-05)     | ~~M14~~ | ~~5 min~~ | ~~Green~~ |
+| ~~F52~~ | ~~Run full test suite: `cd viz && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...`~~ done (docs-health pass 2026-10-05)  | ~~M14~~ | ~~5 min~~ | ~~Green~~ |
 | ~~F53~~ | ~~Run full test suite: `cd live && GOEXPERIMENT=jsonv2 go test -race -count=1 ./...`~~ done (docs-health pass 2026-10-05) | ~~M14~~ | ~~5 min~~ | ~~Green~~ |
-| ~~F54~~ | ~~Run lint: `cd live && golangci-lint run ./...`~~ done (docs-health pass 2026-10-05) | ~~M14~~ | ~~5 min~~ | ~~Clean~~ |
-| ~~F55~~ | ~~Verify no `replace` directives in live/go.mod: `grep '^replace' live/go.mod`~~ done (docs-health pass 2026-10-05) | ~~M14~~ | ~~2 min~~ | ~~Empty~~ |
+| ~~F54~~ | ~~Run lint: `cd live && golangci-lint run ./...`~~ done (docs-health pass 2026-10-05)                                     | ~~M14~~ | ~~5 min~~ | ~~Clean~~ |
+| ~~F55~~ | ~~Verify no `replace` directives in live/go.mod: `grep '^replace' live/go.mod`~~ done (docs-health pass 2026-10-05)       | ~~M14~~ | ~~2 min~~ | ~~Empty~~ |
 
 **Total fine-grained tasks: 55**
 **Total estimated effort: ~9.5 hours (excluding deferred M15)**

@@ -176,58 +176,58 @@ Git showed `working tree clean` and commits I don't remember making. The files h
 
 ## F) Up to 50 Things to Get Done Next
 
-| #  | Task                                                                         | Priority | Effort |
-| -- | ---------------------------------------------------------------------------- | -------- | ------ |
-| ~~1~~  | ~~**Remove dead `DashboardProvider` type from `live/server.go`**~~ done (docs-health pass 2026-10-05) | ~~P0~~ | ~~XS~~ |
-| ~~2~~  | ~~**Fix STABILITY.md CORS description** (empty=disabled, no "off")~~ done (docs-health pass 2026-10-05) | ~~P0~~ | ~~XS~~ |
-| ~~3~~  | ~~**Revert `go-sse/go.mod` to 1.26.5, upgrade toolchain in flake.nix instead**~~ done (docs-health pass 2026-10-05) | ~~P0~~ | ~~S~~ |
-| ~~4~~  | ~~**Add test: normalizePrefix handles `//` and `///` trailing slashes**~~ **Won't implement — declined — coverage adequate.** | ~~P0~~ | ~~XS~~ |
-| ~~5~~  | ~~**Add test: export buttons present in rendered dashboard HTML**~~ **Won't implement — declined — coverage adequate.** | ~~P0~~ | ~~S~~ |
-| ~~6~~  | ~~**Add test: CSV handles step names with commas, quotes, newlines**~~ done (docs-health pass 2026-10-05) | ~~P1~~ | ~~S~~ |
-| ~~7~~  | ~~**Add test: CORS headers NOT on dashboard route (only API)**~~ **Won't implement — declined — coverage adequate.** | ~~P1~~ | ~~XS~~ |
-| ~~8~~  | ~~Update BENCHMARKS.md with CSV benchmark numbers (~70µs/op)~~ done — BENCHMARKS.md current | ~~P1~~ | ~~XS~~ |
-| ~~9~~  | ~~Update TODO_LIST.md with completed items from this session~~ done (docs-health pass 2026-10-05) | ~~P1~~ | ~~S~~ |
-| ~~10~~ | ~~Add `docs/status/INDEX.md` entry for this report~~ done (docs-health pass 2026-10-05) | ~~P1~~ | ~~XS~~ |
-| ~~11~~ | ~~Add integration test: workflow → live server → export endpoint round-trip~~ **Won't implement — declined — coverage adequate.** | ~~P1~~ | ~~M~~ |
-| ~~12~~ | ~~Add CSV formula injection fuzz test (`=cmd`, `+cmd`, `-cmd`, `@cmd`)~~ **Won't implement — declined.** | ~~P2~~ | ~~S~~ |
-| ~~13~~ | ~~Add JSON Schema generation (`schema.go` + `cmd/genschema`)~~ done (docs-health pass 2026-10-05) | ~~P2~~ | ~~L~~ |
-| ~~14~~ | ~~Add `MigrateReport()` programmatic migration function~~ done (docs-health pass 2026-10-05) | ~~P2~~ | ~~L~~ |
-| ~~15~~ | ~~Build CLI tool (`cmd/auditlog`)~~ done (docs-health pass 2026-10-05) | ~~P2~~ | ~~L~~ |
-| ~~16~~ | ~~Extract shared CSS design tokens between viz + live modules~~ done (docs-health pass 2026-10-05) | ~~P2~~ | ~~S~~ |
-| ~~17~~ | ~~Add `docs/examples/` directory (OTel bridge, Prometheus bridge)~~ **Won't implement — declined.** | ~~P2~~ | ~~M~~ |
-| ~~18~~ | ~~Add schema-drift test (Go types vs JSON Schema, once schema exists)~~ done (docs-health pass 2026-10-05) | ~~P2~~ | ~~M~~ |
-| 19 | Add `STABILITY.md` JSON Schema Versioning section **→ open — TODO_LIST 2026-10-05** | P2       | S      |
-| ~~20~~ | ~~Update `docs/DOMAIN_LANGUAGE.md` for new terms (CORS, prefix, export)~~ done (docs-health pass 2026-10-05) | ~~P2~~ | ~~S~~ |
-| 21 | Add `live.Config.Addr()` validation (reject invalid addresses early) **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | S      |
-| ~~22~~ | ~~Add graceful SSE disconnect on server shutdown~~ done (docs-health pass 2026-10-05) | ~~P3~~ | ~~M~~ |
-| 23 | Add request logging middleware for live server **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | S      |
-| 24 | Add `live.Server.URL()` helper method **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | XS     |
-| 25 | Add live demo `--prefix` and `--cors` flags **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | S      |
-| ~~26~~ | ~~Add `nix run .#auditlog` flake app for CLI (once built)~~ done (docs-health pass 2026-10-05) | ~~P3~~ | ~~S~~ |
-| ~~27~~ | ~~Add coverage gate to CI workflow~~ done (docs-health pass 2026-10-05) | ~~P3~~ | ~~S~~ |
-| 28 | Add `CONTRIBUTING.md` mention of CSV export **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | XS     |
-| 29 | Add `ExportFilteredToFile` convenience method **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | S      |
-| 30 | Add `WriteCSVColumns` option for column selection (like table export) **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | M      |
-| 31 | Consider `max-step-count` guard for CSV (avoid OOM on huge reports) **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | S      |
-| ~~32~~ | ~~Add `Report.Stats()` method for quick summary~~ done (docs-health pass 2026-10-05) | ~~P3~~ | ~~S~~ |
-| ~~33~~ | ~~Add websocket streaming example doc~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).** | ~~P3~~ | ~~M~~ |
-| ~~34~~ | ~~Add Prometheus metrics bridge example~~ **Won't implement — declined.** | ~~P3~~ | ~~M~~ |
-| ~~35~~ | ~~Add OTel trace bridge example~~ **Won't implement — declined.** | ~~P3~~ | ~~M~~ |
-| ~~36~~ | ~~Consider rate-limiting on export endpoints~~ **Won't implement — declined.** | ~~P3~~ | ~~M~~ |
-| ~~37~~ | ~~Add CSV with dependencies as full StepRef (not just Name)~~ **Won't implement — declined.** | ~~P3~~ | ~~S~~ |
-| ~~38~~ | ~~Add TSV content-type negotiation test~~ **Won't implement — declined.** | ~~P3~~ | ~~XS~~ |
-| ~~39~~ | ~~Add OPTIONS test for export endpoints specifically~~ **Won't implement — declined.** | ~~P3~~ | ~~XS~~ |
-| ~~40~~ | ~~Document `CORSAllowedOrigins` in README quick-start~~ **Won't implement — declined.** | ~~P3~~ | ~~S~~ |
-| ~~41~~ | ~~Add pre-commit hook for generated code drift~~ done (docs-health pass 2026-10-05) | ~~P3~~ | ~~S~~ |
-| 42 | Add property-based migration test (once migration exists) **→ open — TODO_LIST 2026-10-05** | P3       | M      |
-| ~~43~~ | ~~Consider extracting NDJSON reader/writer into `go-ndjson` module~~ done (docs-health pass 2026-10-05) | ~~P3~~ | ~~L~~ |
-| ~~44~~ | ~~Add `BENCHMARKS.md` to CI (fail on >10% regression)~~ done — BENCHMARKS.md current | ~~P3~~ | ~~S~~ |
-| ~~45~~ | ~~Add `cmd/genschema` to `flake.nix` devShell~~ done (docs-health pass 2026-10-05) | ~~P3~~ | ~~S~~ |
-| ~~46~~ | ~~Run existing benchmarks with count=3 + benchstat for proper baseline~~ done — BENCHMARKS.md current | ~~P3~~ | ~~M~~ |
-| ~~47~~ | ~~Add `WorkflowReport.Diff` CLI documentation~~ done (docs-health pass 2026-10-05) | ~~P3~~ | ~~S~~ |
-| ~~48~~ | ~~Verify CSP doesn't block export button navigation (`<a download>`)~~ **Won't implement — declined.** | ~~P3~~ | ~~S~~ |
-| ~~49~~ | ~~Add fuzz test for prefix normalization (adversarial inputs)~~ **Won't implement — declined.** | ~~P3~~ | ~~S~~ |
-| ~~50~~ | ~~Review all auto-commits from this session for correctness~~ **Won't implement — declined.** | ~~P3~~ | ~~M~~ |
+| #      | Task                                                                                                                                 | Priority | Effort |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------ |
+| ~~1~~  | ~~**Remove dead `DashboardProvider` type from `live/server.go`**~~ done (docs-health pass 2026-10-05)                                | ~~P0~~   | ~~XS~~ |
+| ~~2~~  | ~~**Fix STABILITY.md CORS description** (empty=disabled, no "off")~~ done (docs-health pass 2026-10-05)                              | ~~P0~~   | ~~XS~~ |
+| ~~3~~  | ~~**Revert `go-sse/go.mod` to 1.26.5, upgrade toolchain in flake.nix instead**~~ done (docs-health pass 2026-10-05)                  | ~~P0~~   | ~~S~~  |
+| ~~4~~  | ~~**Add test: normalizePrefix handles `//` and `///` trailing slashes**~~ **Won't implement — declined — coverage adequate.**        | ~~P0~~   | ~~XS~~ |
+| ~~5~~  | ~~**Add test: export buttons present in rendered dashboard HTML**~~ **Won't implement — declined — coverage adequate.**              | ~~P0~~   | ~~S~~  |
+| ~~6~~  | ~~**Add test: CSV handles step names with commas, quotes, newlines**~~ done (docs-health pass 2026-10-05)                            | ~~P1~~   | ~~S~~  |
+| ~~7~~  | ~~**Add test: CORS headers NOT on dashboard route (only API)**~~ **Won't implement — declined — coverage adequate.**                 | ~~P1~~   | ~~XS~~ |
+| ~~8~~  | ~~Update BENCHMARKS.md with CSV benchmark numbers (~70µs/op)~~ done — BENCHMARKS.md current                                          | ~~P1~~   | ~~XS~~ |
+| ~~9~~  | ~~Update TODO_LIST.md with completed items from this session~~ done (docs-health pass 2026-10-05)                                    | ~~P1~~   | ~~S~~  |
+| ~~10~~ | ~~Add `docs/status/INDEX.md` entry for this report~~ done (docs-health pass 2026-10-05)                                              | ~~P1~~   | ~~XS~~ |
+| ~~11~~ | ~~Add integration test: workflow → live server → export endpoint round-trip~~ **Won't implement — declined — coverage adequate.**    | ~~P1~~   | ~~M~~  |
+| ~~12~~ | ~~Add CSV formula injection fuzz test (`=cmd`, `+cmd`, `-cmd`, `@cmd`)~~ **Won't implement — declined.**                             | ~~P2~~   | ~~S~~  |
+| ~~13~~ | ~~Add JSON Schema generation (`schema.go` + `cmd/genschema`)~~ done (docs-health pass 2026-10-05)                                    | ~~P2~~   | ~~L~~  |
+| ~~14~~ | ~~Add `MigrateReport()` programmatic migration function~~ done (docs-health pass 2026-10-05)                                         | ~~P2~~   | ~~L~~  |
+| ~~15~~ | ~~Build CLI tool (`cmd/auditlog`)~~ done (docs-health pass 2026-10-05)                                                               | ~~P2~~   | ~~L~~  |
+| ~~16~~ | ~~Extract shared CSS design tokens between viz + live modules~~ done (docs-health pass 2026-10-05)                                   | ~~P2~~   | ~~S~~  |
+| ~~17~~ | ~~Add `docs/examples/` directory (OTel bridge, Prometheus bridge)~~ **Won't implement — declined.**                                  | ~~P2~~   | ~~M~~  |
+| ~~18~~ | ~~Add schema-drift test (Go types vs JSON Schema, once schema exists)~~ done (docs-health pass 2026-10-05)                           | ~~P2~~   | ~~M~~  |
+| 19     | Add `STABILITY.md` JSON Schema Versioning section **→ open — TODO_LIST 2026-10-05**                                                  | P2       | S      |
+| ~~20~~ | ~~Update `docs/DOMAIN_LANGUAGE.md` for new terms (CORS, prefix, export)~~ done (docs-health pass 2026-10-05)                         | ~~P2~~   | ~~S~~  |
+| 21     | Add `live.Config.Addr()` validation (reject invalid addresses early) **→ open — ROADMAP: Real-Time Monitoring remaining direction**  | P3       | S      |
+| ~~22~~ | ~~Add graceful SSE disconnect on server shutdown~~ done (docs-health pass 2026-10-05)                                                | ~~P3~~   | ~~M~~  |
+| 23     | Add request logging middleware for live server **→ open — ROADMAP: Real-Time Monitoring remaining direction**                        | P3       | S      |
+| 24     | Add `live.Server.URL()` helper method **→ open — ROADMAP: Real-Time Monitoring remaining direction**                                 | P3       | XS     |
+| 25     | Add live demo `--prefix` and `--cors` flags **→ open — ROADMAP: Real-Time Monitoring remaining direction**                           | P3       | S      |
+| ~~26~~ | ~~Add `nix run .#auditlog` flake app for CLI (once built)~~ done (docs-health pass 2026-10-05)                                       | ~~P3~~   | ~~S~~  |
+| ~~27~~ | ~~Add coverage gate to CI workflow~~ done (docs-health pass 2026-10-05)                                                              | ~~P3~~   | ~~S~~  |
+| 28     | Add `CONTRIBUTING.md` mention of CSV export **→ open — ROADMAP: Real-Time Monitoring remaining direction**                           | P3       | XS     |
+| 29     | Add `ExportFilteredToFile` convenience method **→ open — ROADMAP: Real-Time Monitoring remaining direction**                         | P3       | S      |
+| 30     | Add `WriteCSVColumns` option for column selection (like table export) **→ open — ROADMAP: Real-Time Monitoring remaining direction** | P3       | M      |
+| 31     | Consider `max-step-count` guard for CSV (avoid OOM on huge reports) **→ open — ROADMAP: Real-Time Monitoring remaining direction**   | P3       | S      |
+| ~~32~~ | ~~Add `Report.Stats()` method for quick summary~~ done (docs-health pass 2026-10-05)                                                 | ~~P3~~   | ~~S~~  |
+| ~~33~~ | ~~Add websocket streaming example doc~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**                 | ~~P3~~   | ~~M~~  |
+| ~~34~~ | ~~Add Prometheus metrics bridge example~~ **Won't implement — declined.**                                                            | ~~P3~~   | ~~M~~  |
+| ~~35~~ | ~~Add OTel trace bridge example~~ **Won't implement — declined.**                                                                    | ~~P3~~   | ~~M~~  |
+| ~~36~~ | ~~Consider rate-limiting on export endpoints~~ **Won't implement — declined.**                                                       | ~~P3~~   | ~~M~~  |
+| ~~37~~ | ~~Add CSV with dependencies as full StepRef (not just Name)~~ **Won't implement — declined.**                                        | ~~P3~~   | ~~S~~  |
+| ~~38~~ | ~~Add TSV content-type negotiation test~~ **Won't implement — declined.**                                                            | ~~P3~~   | ~~XS~~ |
+| ~~39~~ | ~~Add OPTIONS test for export endpoints specifically~~ **Won't implement — declined.**                                               | ~~P3~~   | ~~XS~~ |
+| ~~40~~ | ~~Document `CORSAllowedOrigins` in README quick-start~~ **Won't implement — declined.**                                              | ~~P3~~   | ~~S~~  |
+| ~~41~~ | ~~Add pre-commit hook for generated code drift~~ done (docs-health pass 2026-10-05)                                                  | ~~P3~~   | ~~S~~  |
+| 42     | Add property-based migration test (once migration exists) **→ open — TODO_LIST 2026-10-05**                                          | P3       | M      |
+| ~~43~~ | ~~Consider extracting NDJSON reader/writer into `go-ndjson` module~~ done (docs-health pass 2026-10-05)                              | ~~P3~~   | ~~L~~  |
+| ~~44~~ | ~~Add `BENCHMARKS.md` to CI (fail on >10% regression)~~ done — BENCHMARKS.md current                                                 | ~~P3~~   | ~~S~~  |
+| ~~45~~ | ~~Add `cmd/genschema` to `flake.nix` devShell~~ done (docs-health pass 2026-10-05)                                                   | ~~P3~~   | ~~S~~  |
+| ~~46~~ | ~~Run existing benchmarks with count=3 + benchstat for proper baseline~~ done — BENCHMARKS.md current                                | ~~P3~~   | ~~M~~  |
+| ~~47~~ | ~~Add `WorkflowReport.Diff` CLI documentation~~ done (docs-health pass 2026-10-05)                                                   | ~~P3~~   | ~~S~~  |
+| ~~48~~ | ~~Verify CSP doesn't block export button navigation (`<a download>`)~~ **Won't implement — declined.**                               | ~~P3~~   | ~~S~~  |
+| ~~49~~ | ~~Add fuzz test for prefix normalization (adversarial inputs)~~ **Won't implement — declined.**                                      | ~~P3~~   | ~~S~~  |
+| ~~50~~ | ~~Review all auto-commits from this session for correctness~~ **Won't implement — declined.**                                        | ~~P3~~   | ~~M~~  |
 
 ---
 

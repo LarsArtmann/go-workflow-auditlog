@@ -6,17 +6,17 @@ require (
 	github.com/Azure/go-workflow v0.1.13
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/larsartmann/go-error-family v0.11.0
-	github.com/larsartmann/go-output v0.38.3
-	github.com/larsartmann/go-output/d2 v0.38.3
+	github.com/larsartmann/go-output v0.38.4
+	github.com/larsartmann/go-output/d2 v0.38.4
 	github.com/larsartmann/go-output/daghtml v0.38.3
-	github.com/larsartmann/go-output/delimited v0.38.3
-	github.com/larsartmann/go-output/graph v0.38.3
-	github.com/larsartmann/go-output/markdown v0.38.3
-	github.com/larsartmann/go-output/markup v0.38.3
-	github.com/larsartmann/go-output/plantuml v0.38.3
-	github.com/larsartmann/go-output/serialization v0.38.3
-	github.com/larsartmann/go-output/table v0.38.3
-	github.com/larsartmann/go-output/tree v0.38.3
+	github.com/larsartmann/go-output/delimited v0.38.4
+	github.com/larsartmann/go-output/graph v0.38.4
+	github.com/larsartmann/go-output/markdown v0.38.4
+	github.com/larsartmann/go-output/markup v0.38.4
+	github.com/larsartmann/go-output/plantuml v0.38.4
+	github.com/larsartmann/go-output/serialization v0.38.4
+	github.com/larsartmann/go-output/table v0.38.4
+	github.com/larsartmann/go-output/tree v0.38.4
 	github.com/larsartmann/go-workflow-auditlog v0.11.0
 )
 
