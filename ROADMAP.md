@@ -33,11 +33,12 @@ The long-term arc moves from "capture and export" toward **analyze and act**:
 
 - **Core** (`github.com/larsartmann/go-workflow-auditlog`) — event capture,
   JSON/NDJSON export (batch + streaming), replay, diff, filter, index,
-  error classification. 3 direct deps, no go-output.
+  error classification. 6 direct deps (go-workflow, backoff/v4, invopop/jsonschema
+  for schema generation, go-atomic-write, go-error-family, go-ndjson), no go-output.
 - **Visualization** (`github.com/larsartmann/go-workflow-auditlog/viz`) —
   diagrams, tables, trees, HTML dashboard. Depends on core + go-output.
 - **Live** (`github.com/larsartmann/go-workflow-auditlog/live`) — real-time
-  SSE dashboard. Depends on core + viz + go-sse v0.4.0 (public, pinned).
+  SSE dashboard. Depends on core + viz + go-sse (public, pinned in `live/go.mod`).
 
 Consumers who only need JSON/NDJSON audit trails import the core module and pay
 zero go-output dependency cost. All modules share a `go.work` workspace in
@@ -106,17 +107,17 @@ already cover the wiring.
 
 ## Raw Ideas (not yet scoped)
 
-- CLI tool (`auditlog`) for inspecting/replaying/diffing exported reports
 - Configurable node shapes/icons per step type in diagrams
 - Async channel-based streaming writer (decouple step execution from I/O latency)
 - Iterator patterns (`iter.Seq`) for `Events()`, `CriticalPath()`, `Filter()` — lazy evaluation avoiding full-slice materialization on large reports
 - Streaming JSON report format (not just NDJSON events)
-- JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor) for type-safe consumption from non-Go languages
-- `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md` exists)
 - `Diff()` with configurable thresholds — "only report changes > Nms" or "ignore status changes for these steps"
 - `ReplayEvents` streaming variant — callback-based like `StreamEvents`
 - Diff report HTML visualization — render `DiffResult` as a side-by-side HTML page
 - Emit synthetic `attempt_end` events for dependency-failed steps during `Snapshot` — would restore `FailureReasonDependency` as a real, reachable value and make the event stream complete for failure analysis
+- Website polish backlog: OG image generation, Lighthouse + link checking, themed 404 page, RSS changelog feed, dependents page (candidates from `docs/status/2026-07-13_21-17`)
+- Dashboard visual niceties: responsive graph-canvas height (`clamp(400px, 60vh, 700px)` or viewport-based), light/dark theme, print styles for the static HTML export (from `docs/status/2026-09-11_10-38`)
+- Error-code registry page for the docs website, auto-generated from `ErrorClassifications()` (from `docs/status/2026-09-11_07-55`)
 
 ---
 
@@ -143,6 +144,13 @@ streamer.Close()
 ```
 
 File convenience: `auditlog.CreateNDJSONStreamer(path, opts...)`.
+
+### Datastar + templ Adoption — Evaluated, Not Scheduled
+
+Evaluated 2026-08 (`docs/evaluations/`): **ADOPT Datastar** at medium priority
+when the live dashboard module is next touched; **adopt templ together with
+Datastar** (deferred standalone — `fmt.Sprintf` assembly is adequate until
+then). Not yet scheduled; revisit when live-module work resumes.
 
 ### init() Auto-Registration — Decision: KEEP
 

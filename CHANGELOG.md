@@ -6,13 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Added
+### Changed
 
-- Nothing yet.
+- **Go 1.27 toolchain** — all three modules bumped from `go 1.26.7`. `encoding/json/v2` is GA in Go 1.27, so the `GOEXPERIMENT=jsonv2` flag is no longer required; it was removed from `flake.nix`, CI, `.goreleaser.yml`, and the documentation.
+- **Dependency bumps** — go-error-family v0.11.0, go-atomic-write v0.6.0, go-output family v0.38.3 (root + graph/plantuml/d2/daghtml/tree/table/markup/markdown/delimited/serialization/escape sub-modules), go-sse v0.6.2, go-branded-id v0.7.0, and `pb33f/go-yaml` replaces the previous yaml indirection.
+- **CI** — GitHub Actions bumped (checkout v7.0.1, setup-go v7.0.0); Dependabot now groups minor-and-patch updates and additionally covers the `live` module (gomod) and `website` (npm).
 
 ### Fixed
 
-- Nothing yet.
+- **Nix `auditlog` package is real** — `packages.default` now builds the `cmd/auditlog` CLI via `buildGoModule` (replaces an empty `mkdir -p $out` marker whose checks asserted nothing).
+- **Website** — social preview image and accessibility contrast fixes.
 
 ## [0.11.0] - 2026-09-11
 

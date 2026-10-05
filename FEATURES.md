@@ -1,8 +1,8 @@
 # Features — go-workflow-auditlog
 
-Honest feature inventory by status. Verified against the codebase on 2026-08-06.
+Honest feature inventory by status. Verified against the codebase on 2026-10-05.
 
-**Modules**: `github.com/larsartmann/go-workflow-auditlog` (core) · `…/viz` (visualization) · `…/live` (real-time dashboard) · **Go**: 1.26+ · **Status**: ALPHA
+**Modules**: `github.com/larsartmann/go-workflow-auditlog` (core) · `…/viz` (visualization) · `…/live` (real-time dashboard) · **Go**: 1.27+ · **Status**: ALPHA
 
 ---
 
@@ -53,12 +53,12 @@ Honest feature inventory by status. Verified against the codebase on 2026-08-06.
 
 ### Error Classification
 
-- **[go-error-family](https://github.com/larsartmann/go-error-family) integration** — all 12 public sentinel errors auto-registered with behavioral `Family` classification on import via `init()` into `DefaultRegistry`
-- **12 public sentinels** classified: 4 Corruption (exit 65), 5 Rejection (exit 1), 1 Transient (exit 75, retryable), 2 Infrastructure (exit 69)
+- **Intrinsic error classification (v0.10.0)** — every sentinel owned by auditlog is constructed via a [go-error-family](https://github.com/larsartmann/go-error-family) family constructor and carries its behavioral `Family` plus a stable `"auditlog.*"` code intrinsically (`errors.AsType[*errorfamily.Error]` / `errorfamily.Classify` / `errorfamily.Code` / `errorfamily.ExitCode` work on any library error without registry setup); the CLI exits with the family's code
+- **16 public sentinels** classified: 4 Corruption (exit 65), 9 Rejection (exit 1, incl. 3 re-exported go-ndjson sentinels), 1 Transient (exit 75, retryable), 2 Infrastructure (exit 69)
 - **`Classify(err)`**, **`IsRetryable(err)`**, **`ExitCode(err)`** work on any auditlog error — no consumer-side setup needed
-- **`errors.Is` semantics unchanged** — registration is additive metadata, not replacement (Strategy A)
-- **`RegisterClassifications(reg)`** for custom registries; **`ErrorClassifications()`** returns the canonical mapping
-- **All I/O error paths wrapped** — render, write, load, flush, rename failures carry matchable sentinels
+- **`errors.Is` semantics unchanged** — identity + `%w` chains preserved (`ErrFileExists` still unwraps to `ErrExportWriteFailed`)
+- **`RegisterClassifications(reg)`** for custom registries; **`ErrorClassifications()`** returns the canonical mapping (back-compat shim; owned sentinels no longer need it)
+- **All I/O error paths wrapped** — render, write, load, flush, rename failures carry matchable sentinels (stdlib dual-wrap: sentinel + cause both matchable)
 
 ### Report Aggregate Fields
 
@@ -125,7 +125,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 ### Configurable Output Options
 
-- **Configurable table columns** — `WithColumns(TableColumn...)` selects which columns appear in table export. 10 columns available: Step, Status, Duration, Attempts, MaxAttempts, Retry, Timeout, Error, Type, Dependencies. Default preserves backward compatibility (original 7). Works across all 16 table sub-formats.
+- **Configurable table columns** — `WithColumns(TableColumn...)` selects which columns appear in table export. 12 columns available: Step, Status, Duration, Attempts, MaxAttempts, Retry, Timeout, Error, Type, Dependencies, FailureReason, Cached. Default preserves backward compatibility (original 7). Works across all 16 table sub-formats.
 - **Diagram layout direction** — `WithDirection(output.Direction)` sets TD/LR/BT/RL on Mermaid, Graphviz, D2, and PlantUML. Uses native go-output renderer support for DOT and D2; post-processing for Mermaid and PlantUML.
 
 ### Dashboard Visualization Enhancements
@@ -161,12 +161,12 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 ### Infrastructure
 
 - **Three Go modules**: core (`auditlog`), visualization (`viz`), live dashboard (`live`) — linked via `go.work` workspace
-- **go-output** at v0.35.0 (root + graph/plantuml/d2/daghtml/tree/table/markup/delimited/serialization sub-modules) — includes D2/DOT quoting fix; resolved from published tags (no local `replace`)
-- **go-error-family** at v0.10.0
-- **go-sse** at v0.4.0 (public, pinned in `live/go.mod`)
-- **go-atomic-write** at v0.4.1 and **go-ndjson** at v0.0.1 (pinned in core `go.mod`)
-- **go-branded-id** v0.5.1 (indirect, via go-output)
-- **golangci-lint v2** with depguard allow-list, pinned to v2.12.2 in CI
+- **go-output** at v0.38.3 (root + graph/plantuml/d2/daghtml/tree/table/markup/markup/delimited/serialization/escape sub-modules) — includes D2/DOT quoting fix; resolved from published tags (no local `replace`)
+- **go-error-family** at v0.11.0
+- **go-sse** at v0.6.2 (public, pinned in `live/go.mod`)
+- **go-atomic-write** at v0.6.0 and **go-ndjson** at v0.0.1 (pinned in core `go.mod`)
+- **go-branded-id** v0.7.0 (indirect, via go-output)
+- **golangci-lint v2** with depguard allow-list, pinned to v2.13.2 in CI
 - **govulncheck** in CI (golang/govulncheck-action) — all three modules scanned
 - **actionlint** in CI (workflow linting)
 - **SHA-pinned GitHub Actions** — all `uses:` references pinned to commit SHAs with version comments (supply-chain hardening)
@@ -174,9 +174,9 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **`stale-generation` CI job** — detects generated-code drift
 - **`pnpm audit`** in website CI
 - **Firebase secret JSON validation** in website CI via `node -e JSON.parse`
-- **Go pinned to 1.26.5** in CI with `GOTOOLCHAIN=go1.26.5`
-- **Coverage**: core 95.4%, viz 91.8%, live 96.2%
-- **flake.nix** devShell (Go 1.26.5, golangci-lint, govulncheck, actionlint, `d2` CLI; GOEXPERIMENT=jsonv2)
+- **Go 1.27** in CI and devShell (`GOEXPERIMENT=jsonv2` no longer required — json/v2 is GA)
+- **Coverage**: core 97.0%, viz 95.0%, live 97.1% (measured 2026-10-05, `go test -cover`)
+- **flake.nix** devShell (Go 1.27, golangci-lint, govulncheck, actionlint, `d2` CLI)
 - **flake-parts** + **treefmt-nix** for build automation (includes `d2-fmt`, `nixfmt`, `gofmt`)
 - **Pre-commit hook** (vet + lint + test)
 - **STABILITY.md** documenting API stability promises
@@ -186,7 +186,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 
 - `AGENTS.md` — comprehensive session context (file map, data flow, gotchas, testing patterns, 3-module architecture)
 - `README.md` — end-user guide with API reference, examples, 3-duration-metrics explainer, streaming section, screenshots
-- `CHANGELOG.md` — v0.8.1 tagged (module split sub-module tags + go-atomic-write/go-error-family bumps + govulncheck fix); `[Unreleased]` covers SSE reconnection replay, graceful shutdown drain, go-sse v0.4.0 adoption, WebSocket transport removal, `WithFlushInterval`, `StreamEvents`, `MultiWriter`, `FailureReason` enum, extended `Diff()`, workflow-level helpers, `FailureSummary` rename, keyboard navigation accessibility, RELEASE.md
+- `CHANGELOG.md` — v0.11.0 tagged (cache-hit attribution + Diff cached deltas); `[Unreleased]` covers the Go 1.27 toolchain bump, jsonv2 GA (GOEXPERIMENT flag removed), dependency bumps (go-output v0.38.3, go-sse v0.6.2, go-error-family v0.11.0, go-atomic-write v0.6.0), the real Nix `auditlog` package, and CI/Dependabot hardening
 - `docs/DOMAIN_LANGUAGE.md` — DDD glossary
 - `viz/example/` — demos all export formats via `--export` flag
 - `live/demo/main.go` — demos real-time SSE dashboard with retry pipeline
@@ -199,7 +199,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **Atomic file writes**: crash-safe export (temp file + rename + bufio)
 - **Enum validation on ingest**: ReadEvents rejects unknown event_type/phase values
 - **Benchmarks**: runtime overhead (Invocation, Attach, BuildReport, EventsCopy, OnEventCallback, RetryWithAudit) + export rendering (WriteD2/Table/Tree/JSON/Mermaid on 100-step reports) + renderHTML (small 3-step + large 1000-step) + NDJSONStreamer throughput (100/1000/10000 events) + godoc examples
-- **505 test functions** across 3 modules (core: 218; viz: 215; live: 72), all passing with `-race`
+- **570 test functions** across 3 modules (core: 262; viz: 234; live: 74 — counted with `rg -c '^func (Test|Example|Benchmark|Fuzz)' -g '*_test.go'`), all passing with `-race`
 
 ---
 
@@ -208,5 +208,4 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - OpenTelemetry span bridge (defer until a consumer has an OTel stack)
 - Synthetic `attempt_end` events for dependency-failed steps (restoring `FailureReasonDependency` as a real value)
 - `Events()` / `CriticalPath()` iterator patterns (Go `iter.Seq`) for lazy evaluation on large reports
-- CSS design token extraction with sync-enforcement tests (port from samber-do pattern)
-- Datastar/templ evaluation for live dashboard and HTML rendering
+- Datastar + templ adoption for the live dashboard (evaluated 2026-08 — ADOPT at medium priority; templ together with Datastar, not standalone)
