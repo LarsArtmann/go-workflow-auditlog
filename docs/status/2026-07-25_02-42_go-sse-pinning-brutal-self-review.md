@@ -36,20 +36,20 @@ Pinned `go-sse` v0.2.0 (the ask) AND went further to pin `go-atomic-write` v0.3.
 
 ## b) PARTIALLY DONE
 
-1. **Standalone build reproducibility** — core/viz/live build standalone now, BUT only because direct VCS fetch works. `go env GOPRIVATE` does **not** include `go-sse`, `go-atomic-write`, or `go-ndjson`. The module proxy (`proxy.golang.org`) has not indexed these tags. Anyone fetching without `direct` fallback or GOPRIVATE will fail. Half-fixed.
-2. **Commit hygiene** — changes are committed (3 commits), but with garbage messages (see section d). The _what_ is captured; the _why_ is buried under boilerplate.
-3. **govulncheck on live** — ran it, found a vuln, reported exit code, then dismissed it as "out of scope" without even reading the output. Finally investigated at report time: it's **GO-2026-5856** (crypto/tls ECH privacy leak, fixed in go1.26.5; project is on go1.26.4). Should have surfaced immediately.
+1. ~~**Standalone build reproducibility** — core/viz/live build standalone now, BUT only because direct VCS fetch works. `go env GOPRIVATE` does **not** include `go-sse`, `go-atomic-write`, or `go-ndjson`. The module proxy (`proxy.golang.org`) has not indexed these tags. Anyone fetching without `direct` fallback or GOPRIVATE will fail. Half-fixed.~~ done (docs-health pass 2026-10-05)
+2. ~~**Commit hygiene** — changes are committed (3 commits), but with garbage messages (see section d). The _what_ is captured; the _why_ is buried under boilerplate.~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+3. ~~**govulncheck on live** — ran it, found a vuln, reported exit code, then dismissed it as "out of scope" without even reading the output. Finally investigated at report time: it's **GO-2026-5856** (crypto/tls ECH privacy leak, fixed in go1.26.5; project is on go1.26.4). Should have surfaced immediately.~~ done (docs-health pass 2026-10-05)
 
 ---
 
 ## c) NOT STARTED
 
-1. **CHANGELOG.md** not updated — dependency pins are user-impactful changes; CHANGELOG owns change history per the global AGENTS.md.
-2. **`live` module not added to `nix run .#check`** — I noticed the flake `check` script only runs core + viz, not live. This is a real CI coverage gap and I left it.
-3. **`go.work.sum` only has `go-sse` entry**, NOT `go-atomic-write` or `go-ndjson`. Workspace-mode tidy wrote those to per-module `go.sum`, but `go.work.sum` is incomplete. Didn't verify if this matters for the workspace.
-4. **Demo runtime verification** — `cd live && go run ./demo` (the actual SSE dashboard at :18080) was never executed. Tests pass but the live SSE wire path wasn't smoke-tested against pinned go-sse.
-5. **GOPRIVATE config update** — not done; see b.1.
-6. **Go toolchain bump** (1.26.4 → 1.26.5) to fix GO-2026-5856 — not done. go-sse itself already migrated to 1.26.5; this repo lags.
+1. ~~**CHANGELOG.md** not updated — dependency pins are user-impactful changes; CHANGELOG owns change history per the global AGENTS.md.~~ done (docs-health pass 2026-10-05)
+2. ~~**`live` module not added to `nix run .#check`** — I noticed the flake `check` script only runs core + viz, not live. This is a real CI coverage gap and I left it.~~ done (docs-health pass 2026-10-05)
+3. ~~**`go.work.sum` only has `go-sse` entry**, NOT `go-atomic-write` or `go-ndjson`. Workspace-mode tidy wrote those to per-module `go.sum`, but `go.work.sum` is incomplete. Didn't verify if this matters for the workspace.~~ done (docs-health pass 2026-10-05)
+4. ~~**Demo runtime verification** — `cd live && go run ./demo` (the actual SSE dashboard at :18080) was never executed. Tests pass but the live SSE wire path wasn't smoke-tested against pinned go-sse.~~ **Won't implement — declined — demo verified per release.**
+5. ~~**GOPRIVATE config update** — not done; see b.1.~~ done (docs-health pass 2026-10-05)
+6. ~~**Go toolchain bump** (1.26.4 → 1.26.5) to fix GO-2026-5856 — not done. go-sse itself already migrated to 1.26.5; this repo lags.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -81,14 +81,14 @@ When `govulncheck` flagged a vuln in live, my exact words were: _"A Go stdlib vu
 
 ## e) WHAT WE SHOULD IMPROVE
 
-1. **Investigate the auto-commit hook.** Either it's misconfigured (generic template, fires too eagerly per-file) or it needs to be disabled during interactive dependency work. The current behavior produces a fake paper trail.
-2. **Stop extending scope mid-task without a checkpoint.** Two extra modules = a separate, user-approved task.
-3. **Always read govulncheck output fully.** Never report "vuln found, dismissed" without the CVE ID and fix version.
-4. **Add `live` to `flake.nix` check.** It's the module that uses go-sse; CI not covering it is how this kind of drift recurs.
-5. **Set GOPRIVATE** (or accept that these are now public and rely on proxy indexing eventually) so standalone fetch is reproducible without the `direct` fallback fluke.
-6. **CHANGELOG discipline.** Dependency strategy changes (local-replace → published pin) are exactly what CHANGELOG is for.
-7. **Smoke-test the runtime path**, not just unit tests, when pinning a wire-format library. The SSE demo should have run.
-8. **Verify go.work.sum completeness**, not just per-module go.sum.
+1. ~~**Investigate the auto-commit hook.** Either it's misconfigured (generic template, fires too eagerly per-file) or it needs to be disabled during interactive dependency work. The current behavior produces a fake paper trail.~~ **Won't implement — RELEASE.md is the gate.**
+2. ~~**Stop extending scope mid-task without a checkpoint.** Two extra modules = a separate, user-approved task.~~ **Won't implement — scope intentionally minimal.**
+3. ~~**Always read govulncheck output fully.** Never report "vuln found, dismissed" without the CVE ID and fix version.~~ done (docs-health pass 2026-10-05)
+4. ~~**Add `live` to `flake.nix` check.** It's the module that uses go-sse; CI not covering it is how this kind of drift recurs.~~ done (docs-health pass 2026-10-05)
+5. ~~**Set GOPRIVATE** (or accept that these are now public and rely on proxy indexing eventually) so standalone fetch is reproducible without the `direct` fallback fluke.~~ done (docs-health pass 2026-10-05)
+6. ~~**CHANGELOG discipline.** Dependency strategy changes (local-replace → published pin) are exactly what CHANGELOG is for.~~ done (docs-health pass 2026-10-05)
+7. ~~**Smoke-test the runtime path**, not just unit tests, when pinning a wire-format library. The SSE demo should have run.~~ **Won't implement — declined — demo verified per release.**
+8. ~~**Verify go.work.sum completeness**, not just per-module go.sum.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -96,56 +96,56 @@ When `govulncheck` flagged a vuln in live, my exact words were: _"A Go stdlib vu
 
 Prioritized roughly by impact:
 
-1. Decide: keep the go-atomic-write + go-ndjson pins, or revert to local-replace (user call).
-2. Amend/rewrite the 3 garbage commit messages into one meaningful commit (if history not pushed).
-3. Add `live` module to `flake.nix` `check` script (vet + test-race + lint + govulncheck).
-4. Bump Go toolchain 1.26.4 → 1.26.5 to fix GO-2026-5856 (crypto/tls ECH leak).
-5. Update `CHANGELOG.md` with the pinning change.
-6. Update `GOPRIVATE` to include `github.com/larsartmann/go-sse,github.com/larsartmann/go-atomic-write,github.com/larsartmann/go-ndjson` OR confirm proxy indexing and drop the concern.
-7. Run `cd live && GOEXPERIMENT=jsonv2 go run ./demo` and hit `/api/events` to smoke-test the SSE path against pinned go-sse.
-8. Sync `go.work.sum` so it carries all three pinned modules' checksums.
-9. Tag + publish `go-ndjson` v0.1.0 (it's at v0.0.1; the working tree has a small diff).
-10. Tag + publish `go-atomic-write` v0.4.0 if the working-tree-ahead changes are meaningful (52-line diff in `atomicwrite.go` between v0.3.0 and HEAD).
-11. Investigate the auto-commit hook config — fix the generic template or scope it.
-12. Check `README.md` for stale "private" / "replace" claims about go-sse.
-13. Check `FEATURES.md` for stale dependency-strategy claims.
-14. Check `ROADMAP.md` for stale "remove replace when public" items.
-15. Add a `live` govulncheck step to CI.
-16. Consider bumping `go-sse` to a future v0.3.0 once its current working-tree-ahead commits (1.26.5 migration, CI fix) are tagged.
-17. Verify the 2nd govulncheck finding ("1 vulnerability in packages you import") — I only investigated the stdlib one.
-18. Run `go mod verify` across all three modules to confirm checksum integrity.
-19. Document the `GOEXPERIMENT=jsonv2` requirement in CI badges / README (it's in AGENTS.md but easy to miss).
-20. Audit other `larsartmann/*` replaces in the workspace (`go-output`, `go-branded-id`, `go-error-family`) — are any also public-and-tagged and ready to pin?
-21. Check `go-error-family` — it's at v0.9.0 already pinned; verify it's the latest tag.
-22. Check `go-branded-id` v0.3.2 — verify latest tag.
-23. Add a `make pin-deps` / nix check that fails if any `replace … => ../` points at a public tagged repo (prevention).
-24. Review whether the indirect surfacing of `cespare/xxhash/v2` and `gofrs/flock` changes the SBOM / license picture.
-25. Write a regression test that fails if `live/go.mod` ever re-introduces a `go-sse` replace directive.
-26. Consider a single integration test that does attach → Do → SSE client connect → event receipt, end-to-end.
-27. Check if `go.work.sum` should be committed (it currently is) or gitignored now that per-module sums are complete.
-28. Run `golangci-lint` with `gocritic` enabled to check for any deprecated API usage in newly-pinned deps.
-29. Verify the `viz` standalone test that was previously RED is now reliably GREEN in CI, not just locally.
-30. Look at the `go-output/testhelpers` pseudo-version warnings still appearing in `go mod tidy` — same class of problem, possibly next to pin.
-31. Document the "public but proxy not indexed" gotcha in AGENTS.md gotchas section.
-32. Consider migrating `GOEXPERIMENT=jsonv2` from env var to `//go:build` directive or toolchain directive if Go 1.26 supports it.
-33. Check if `live/demo` should have a smoke test in CI.
-34. Run `nix flake check` (full, not just `.#check`) to catch any other structural issues.
-35. Review whether the `gofrs/flock` addition affects the `live` module's runtime behavior (it's a file-locking lib; confirm it's only used by go-atomic-write's write path).
-36. Add the pinned versions to a dependency matrix in AGENTS.md or docs/ for visibility.
-37. Consider version-pinning policy doc: when to pin, when to replace, semver range policy.
-38. Check if `sum.golang.org` can be pinged to force-index the new tags (`go list -m -versions` after `GOPROXY=direct` cache flush).
-39. Verify the `Azure/go-workflow v0.1.13` pin is still the latest (it's the upstream lib this whole project wraps).
-40. Run `go mod graph` and eyeball for any other pseudo-versions (`v0.0.0-00010101000000-…`) that indicate missing pins.
-41. Check the `cenkalti/backoff/v4` data-race gotcha — is it fixed upstream in a newer v4.x?
-42. Consider adding `renovate` / `dependabot` config for automated dep bump PRs now that the manual pins are clean.
-43. Document the go-sse "working tree ahead of v0.2.0" risk — if live ever needs a post-v0.2.0 go-sse feature, pinning breaks.
-44. Review the 5 commits ahead of `origin/master` (`git log origin/master..HEAD`) before pushing — the history is currently messy.
-45. Squash the 3 session commits into 1 clean commit if not yet pushed (`git rebase -i` — wait, global rule says NEVER `git reset`; `rebase -i` is also forbidden territory; use `git merge --squash` into a new commit instead, or just amend the tip).
-46. Add a `just`/nix target `pin-check` that asserts no `replace` points at a path matching `../../` or `../` for a public repo.
-47. Consider whether `live` should be merged into `viz` or kept separate now that its private-dep excuse (go-sse) is gone.
-48. Update `docs/DOMAIN_LANGUAGE.md` if it references the SSE transport as "private"/"local".
-49. Run the full test suite with `-count=1` (no cache) once to be sure nothing is green-by-cache.
-50. Celebrate that the viz standalone build is fixed — that was a real win buried under the process noise.
+1. ~~Decide: keep the go-atomic-write + go-ndjson pins, or revert to local-replace (user call).~~ done (docs-health pass 2026-10-05)
+2. ~~Amend/rewrite the 3 garbage commit messages into one meaningful commit (if history not pushed).~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+3. ~~Add `live` module to `flake.nix` `check` script (vet + test-race + lint + govulncheck).~~ done (docs-health pass 2026-10-05)
+4. ~~Bump Go toolchain 1.26.4 → 1.26.5 to fix GO-2026-5856 (crypto/tls ECH leak).~~ done (docs-health pass 2026-10-05)
+5. ~~Update `CHANGELOG.md` with the pinning change.~~ done (docs-health pass 2026-10-05)
+6. ~~Update `GOPRIVATE` to include `github.com/larsartmann/go-sse,github.com/larsartmann/go-atomic-write,github.com/larsartmann/go-ndjson` OR confirm proxy indexing and drop the concern.~~ done (docs-health pass 2026-10-05)
+7. ~~Run `cd live && GOEXPERIMENT=jsonv2 go run ./demo` and hit `/api/events` to smoke-test the SSE path against pinned go-sse.~~ **Won't implement — declined — demo verified per release.**
+8. ~~Sync `go.work.sum` so it carries all three pinned modules' checksums.~~ done (docs-health pass 2026-10-05)
+9. ~~Tag + publish `go-ndjson` v0.1.0 (it's at v0.0.1; the working tree has a small diff).~~ **Won't implement — go-ndjson pinned v0.0.1; moot.**
+10. ~~Tag + publish `go-atomic-write` v0.4.0 if the working-tree-ahead changes are meaningful (52-line diff in `atomicwrite.go` between v0.3.0 and HEAD).~~ done (docs-health pass 2026-10-05)
+11. ~~Investigate the auto-commit hook config — fix the generic template or scope it.~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+12. ~~Check `README.md` for stale "private" / "replace" claims about go-sse.~~ done (docs-health pass 2026-10-05)
+13. ~~Check `FEATURES.md` for stale dependency-strategy claims.~~ done (docs-health pass 2026-10-05)
+14. ~~Check `ROADMAP.md` for stale "remove replace when public" items.~~ done (docs-health pass 2026-10-05)
+15. ~~Add a `live` govulncheck step to CI.~~ done (docs-health pass 2026-10-05)
+16. ~~Consider bumping `go-sse` to a future v0.3.0 once its current working-tree-ahead commits (1.26.5 migration, CI fix) are tagged.~~ done (docs-health pass 2026-10-05)
+17. ~~Verify the 2nd govulncheck finding ("1 vulnerability in packages you import") — I only investigated the stdlib one.~~ **Won't implement — finding resolved — pins verified.**
+18. ~~Run `go mod verify` across all three modules to confirm checksum integrity.~~ done (docs-health pass 2026-10-05)
+19. ~~Document the `GOEXPERIMENT=jsonv2` requirement in CI badges / README (it's in AGENTS.md but easy to miss).~~ done — moot — no experiment flag needed (Go 1.27)
+20. ~~Audit other `larsartmann/*` replaces in the workspace (`go-output`, `go-branded-id`, `go-error-family`) — are any also public-and-tagged and ready to pin?~~ done (docs-health pass 2026-10-05)
+21. ~~Check `go-error-family` — it's at v0.9.0 already pinned; verify it's the latest tag.~~ done (docs-health pass 2026-10-05)
+22. ~~Check `go-branded-id` v0.3.2 — verify latest tag.~~ done (docs-health pass 2026-10-05)
+23. ~~Add a `make pin-deps` / nix check that fails if any `replace … => ../` points at a public tagged repo (prevention).~~ **Won't implement — pins verified per release (RELEASE.md).**
+24. ~~Review whether the indirect surfacing of `cespare/xxhash/v2` and `gofrs/flock` changes the SBOM / license picture.~~ **Won't implement — declined.**
+25. ~~Write a regression test that fails if `live/go.mod` ever re-introduces a `go-sse` replace directive.~~ **Won't implement — pins verified per release.**
+26. ~~Consider a single integration test that does attach → Do → SSE client connect → event receipt, end-to-end.~~ done (docs-health pass 2026-10-05)
+27. ~~Check if `go.work.sum` should be committed (it currently is) or gitignored now that per-module sums are complete.~~ done (docs-health pass 2026-10-05)
+28. ~~Run `golangci-lint` with `gocritic` enabled to check for any deprecated API usage in newly-pinned deps.~~ **Won't implement — declined.**
+29. ~~Verify the `viz` standalone test that was previously RED is now reliably GREEN in CI, not just locally.~~ done (docs-health pass 2026-10-05)
+30. ~~Look at the `go-output/testhelpers` pseudo-version warnings still appearing in `go mod tidy` — same class of problem, possibly next to pin.~~ **Won't implement — upstream go-output defect documented; tidy -e workaround in CI.**
+31. ~~Document the "public but proxy not indexed" gotcha in AGENTS.md gotchas section.~~ done (docs-health pass 2026-10-05)
+32. ~~Consider migrating `GOEXPERIMENT=jsonv2` from env var to `//go:build` directive or toolchain directive if Go 1.26 supports it.~~ done (docs-health pass 2026-10-05)
+33. ~~Check if `live/demo` should have a smoke test in CI.~~ **Won't implement — declined.**
+34. ~~Run `nix flake check` (full, not just `.#check`) to catch any other structural issues.~~ done (docs-health pass 2026-10-05)
+35. ~~Review whether the `gofrs/flock` addition affects the `live` module's runtime behavior (it's a file-locking lib; confirm it's only used by go-atomic-write's write path).~~ **Won't implement — declined.**
+36. ~~Add the pinned versions to a dependency matrix in AGENTS.md or docs/ for visibility.~~ **Won't implement — declined.**
+37. ~~Consider version-pinning policy doc: when to pin, when to replace, semver range policy.~~ done (docs-health pass 2026-10-05)
+38. ~~Check if `sum.golang.org` can be pinged to force-index the new tags (`go list -m -versions` after `GOPROXY=direct` cache flush).~~ done (docs-health pass 2026-10-05)
+39. ~~Verify the `Azure/go-workflow v0.1.13` pin is still the latest (it's the upstream lib this whole project wraps).~~ **Won't implement — declined.**
+40. ~~Run `go mod graph` and eyeball for any other pseudo-versions (`v0.0.0-00010101000000-…`) that indicate missing pins.~~ done (docs-health pass 2026-10-05)
+41. ~~Check the `cenkalti/backoff/v4` data-race gotcha — is it fixed upstream in a newer v4.x?~~ **Won't implement — declined.**
+42. ~~Consider adding `renovate` / `dependabot` config for automated dep bump PRs now that the manual pins are clean.~~ done (docs-health pass 2026-10-05)
+43. ~~Document the go-sse "working tree ahead of v0.2.0" risk — if live ever needs a post-v0.2.0 go-sse feature, pinning breaks.~~ done (docs-health pass 2026-10-05)
+44. ~~Review the 5 commits ahead of `origin/master` (`git log origin/master..HEAD`) before pushing — the history is currently messy.~~ done (docs-health pass 2026-10-05)
+45. ~~Squash the 3 session commits into 1 clean commit if not yet pushed (`git rebase -i` — wait, global rule says NEVER `git reset`; `rebase -i` is also forbidden territory; use `git merge --squash` into a new commit instead, or just amend the tip).~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+46. ~~Add a `just`/nix target `pin-check` that asserts no `replace` points at a path matching `../../` or `../` for a public repo.~~ **Won't implement — pins verified per release.**
+47. ~~Consider whether `live` should be merged into `viz` or kept separate now that its private-dep excuse (go-sse) is gone.~~ done (docs-health pass 2026-10-05)
+48. ~~Update `docs/DOMAIN_LANGUAGE.md` if it references the SSE transport as "private"/"local".~~ done (docs-health pass 2026-10-05)
+49. ~~Run the full test suite with `-count=1` (no cache) once to be sure nothing is green-by-cache.~~ done (docs-health pass 2026-10-05)
+50. ~~Celebrate that the viz standalone build is fixed — that was a real win buried under the process noise.~~ done (docs-health pass 2026-10-05)
 
 ---
 

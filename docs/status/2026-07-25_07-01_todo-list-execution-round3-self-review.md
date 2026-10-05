@@ -158,36 +158,36 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
 
 ### Code quality
 
-1. **Fix `writeDelimited` error wrapping** — wrap header/step write errors with
-   `ErrExportWriteFailed` for consistency with the flush path. Defends against
-   `csv.Writer` buffering changes.
-2. **Consider escaping `;` in CSV dependency names** — or document more loudly
-   that JSON/NDJSON is the lossless export for dependency lists.
-3. **Extract `failAfterNFlusher` into a "fail after first Flush" writer** — more
-   robust than the magic-number approach.
+1. ~~**Fix `writeDelimited` error wrapping** — wrap header/step write errors with~~ done (docs-health pass 2026-10-05)
+   ~~`ErrExportWriteFailed` for consistency with the flush path. Defends against~~
+   ~~`csv.Writer` buffering changes.~~
+2. ~~**Consider escaping `;` in CSV dependency names** — or document more loudly~~ done (docs-health pass 2026-10-05)
+   ~~that JSON/NDJSON is the lossless export for dependency lists.~~
+3. ~~**Extract `failAfterNFlusher` into a "fail after first Flush" writer** — more~~ done (docs-health pass 2026-10-05)
+   ~~robust than the magic-number approach.~~
 
 ### Test coverage (remaining live gaps — all unreachable defensive branches)
 
-4. `hub.OnEvent` marshal-error branch (75%) — `json.Marshal(evt)` failing.
-5. `renderDashboardHTML` (85.7%) — template error branch.
-6. `makeReportProvider` (87.5%) — encode-error branch.
-7. `ListenAndServe` (84.6%) — `net.Listen` failure path.
-8. `Shutdown` (88.9%) — `server.Shutdown` error path.
-9. `handleHealth` (81.8%) — marshal-error branch.
-10. `writeWS` (83.3%) — marshal-failure returns `true` branch.
-11. `handleWebSocket` upgrade-failure path (returns on err, no assertion).
+4. ~~`hub.OnEvent` marshal-error branch (75%) — `json.Marshal(evt)` failing.~~ done (docs-health pass 2026-10-05)
+5. ~~`renderDashboardHTML` (85.7%) — template error branch.~~ **Won't implement — declined — defensive branches, low value.**
+6. ~~`makeReportProvider` (87.5%) — encode-error branch.~~ **Won't implement — declined.**
+7. ~~`ListenAndServe` (84.6%) — `net.Listen` failure path.~~ **Won't implement — declined.**
+8. ~~`Shutdown` (88.9%) — `server.Shutdown` error path.~~ done (docs-health pass 2026-10-05)
+9. ~~`handleHealth` (81.8%) — marshal-error branch.~~ **Won't implement — declined.**
+10. ~~`writeWS` (83.3%) — marshal-failure returns `true` branch.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+11. ~~`handleWebSocket` upgrade-failure path (returns on err, no assertion).~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
 
 ### CI / infrastructure
 
-12. **Pin a newer nixpkgs revision** that provides `go_1_26` ≥ 1.26.5 — unblocks
-    the Go bump AND live govulncheck.
-13. **Add `nix flake check` to the documented commands** — I ran it manually and
-    it passes (treefmt clean), but it's not in the AGENTS.md command table.
+12. ~~**Pin a newer nixpkgs revision** that provides `go_1_26` ≥ 1.26.5 — unblocks~~ done (docs-health pass 2026-10-05)
+    ~~the Go bump AND live govulncheck.~~
+13. ~~**Add `nix flake check` to the documented commands** — I ran it manually and~~ **Won't implement — conventions documented in AGENTS.**
+    ~~it passes (treefmt clean), but it's not in the AGENTS.md command table.~~
 
 ### Documentation
 
-14. **Add a "Documentation" subsection convention to CHANGELOG** — or use
-    "Changed" for doc updates instead of "Added".
+14. ~~**Add a "Documentation" subsection convention to CHANGELOG** — or use~~ **Won't implement — declined.**
+    ~~"Changed" for doc updates instead of "Added".~~
 
 ---
 
@@ -195,63 +195,63 @@ vet+test+lint green. But here are the rough edges and honest self-criticism:
 
 ### High impact
 
-1. Bump Go 1.26.4 → 1.26.5 (once nixpkgs provides it) — unblocks govulncheck.
-2. Re-enable live `govulncheck` in `flake.nix` (command documented inline).
-3. Pin a newer `nixos-unstable` revision in `flake.lock` (provides go 1.26.5).
-4. Fix `writeDelimited` header/step error wrapping with `ErrExportWriteFailed`.
-5. Add `Transport` interface to deduplicate SSE/WebSocket handlers in `live/`.
-6. Cover `hub.OnEvent` marshal-error branch (inject a failing marshaler).
-7. Cover `handleHealth` marshal-error branch.
-8. Cover `makeReportProvider` encode-error branch.
-9. Cover `ListenAndServe` `net.Listen` failure path.
-10. Cover `Shutdown` error path.
+1. ~~Bump Go 1.26.4 → 1.26.5 (once nixpkgs provides it) — unblocks govulncheck.~~ done (docs-health pass 2026-10-05)
+2. ~~Re-enable live `govulncheck` in `flake.nix` (command documented inline).~~ done (docs-health pass 2026-10-05)
+3. ~~Pin a newer `nixos-unstable` revision in `flake.lock` (provides go 1.26.5).~~ done (docs-health pass 2026-10-05)
+4. ~~Fix `writeDelimited` header/step error wrapping with `ErrExportWriteFailed`.~~ done (docs-health pass 2026-10-05)
+5. ~~Add `Transport` interface to deduplicate SSE/WebSocket handlers in `live/`.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+6. ~~Cover `hub.OnEvent` marshal-error branch (inject a failing marshaler).~~ done (docs-health pass 2026-10-05)
+7. ~~Cover `handleHealth` marshal-error branch.~~ **Won't implement — declined.**
+8. ~~Cover `makeReportProvider` encode-error branch.~~ **Won't implement — declined.**
+9. ~~Cover `ListenAndServe` `net.Listen` failure path.~~ **Won't implement — declined.**
+10. ~~Cover `Shutdown` error path.~~ done (docs-health pass 2026-10-05)
 
 ### Medium impact
 
-11. Add `nix flake check` to the AGENTS.md command table.
-12. Improve `failAfterNFlusher` test helper (fail-after-Flush semantics).
-13. Escape `;` in CSV dependency names OR add a JSON-only note in csv.go doc.
-14. Add WebSocket upgrade-failure test.
-15. Add `writeWS` marshal-failure test.
-16. Add `renderDashboardHTML` template-error test.
-17. Add multi-run support (concurrent workflow dashboards).
-18. Add authentication to the live dashboard.
-19. Add TLS/HTTPS support to the live server.
-20. Add compression (gzip/brotli) to SSE responses.
-21. Add client-side replay/playback to the dashboard.
-22. Add graceful drain on shutdown (wait for connected clients).
-23. Add OpenTelemetry span bridge (ROADMAP item).
-24. Add CLI tool (`auditlog`) for inspecting/replaying/diffing.
-25. Add alerting hooks (on-failure, on-slow).
-26. Add a `//go:build browser_e2e` tagged test suite (if pixel tests needed).
-27. Verify the GO-2026-5856 advisory URL resolves (independent web check).
-28. Audit all `//nolint` directives for staleness (now that nlreturn is gone).
-29. Add a `CHANGELOG.md` "Documentation" subsection convention.
-30. Re-measure core + viz coverage to confirm AGENTS.md stats are accurate.
+11. ~~Add `nix flake check` to the AGENTS.md command table.~~ **Won't implement — declined.**
+12. ~~Improve `failAfterNFlusher` test helper (fail-after-Flush semantics).~~ done (docs-health pass 2026-10-05)
+13. ~~Escape `;` in CSV dependency names OR add a JSON-only note in csv.go doc.~~ done (docs-health pass 2026-10-05)
+14. ~~Add WebSocket upgrade-failure test.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+15. ~~Add `writeWS` marshal-failure test.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+16. ~~Add `renderDashboardHTML` template-error test.~~ **Won't implement — declined.**
+17. Add multi-run support (concurrent workflow dashboards). **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+18. Add authentication to the live dashboard. **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+19. Add TLS/HTTPS support to the live server. **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+20. Add compression (gzip/brotli) to SSE responses. **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+21. Add client-side replay/playback to the dashboard. **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+22. ~~Add graceful drain on shutdown (wait for connected clients).~~ done (docs-health pass 2026-10-05)
+23. Add OpenTelemetry span bridge (ROADMAP item). **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+24. ~~Add CLI tool (`auditlog`) for inspecting/replaying/diffing.~~ done (docs-health pass 2026-10-05)
+25. Add alerting hooks (on-failure, on-slow). **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+26. Add a `//go:build browser_e2e` tagged test suite (if pixel tests needed). **→ open — browser E2E behind //go:build tag (ROADMAP, deferred by design)**
+27. ~~Verify the GO-2026-5856 advisory URL resolves (independent web check).~~ done (docs-health pass 2026-10-05)
+28. ~~Audit all `//nolint` directives for staleness (now that nlreturn is gone).~~ **Won't implement — declined.**
+29. ~~Add a `CHANGELOG.md` "Documentation" subsection convention.~~ **Won't implement — declined.**
+30. ~~Re-measure core + viz coverage to confirm AGENTS.md stats are accurate.~~ done (docs-health pass 2026-10-05)
 
 ### Lower impact / polish
 
-31. Shorten the `flake.nix` govulncheck-omission comment (move detail to TODO).
-32. Add a fuzz test for `writeDelimited` (random special-char step names).
-33. Add a property test for CSV round-trip (random StepInfo → WriteCSV → Read).
-34. Add TSV-specific escaping tests (tab in field name).
-35. Add a test for CSV export with 0 steps (empty report).
-36. Add a test for CSV export with nil pointer fields (timestamps, duration).
-37. Document the `csv.Writer` buffering dependency in `csv.go` (why header/step
-    errors don't hit the underlying writer).
-38. Add `WriteCSV` example with dependencies (current example has none).
-39. Add a benchmark for `writeDelimited` with special-char-heavy steps.
-40. Consider a `WriteXLSX` export (formula-injection-safe by design).
-41. Add a `live.Config.Timeout` for idle SSE connections.
-42. Add SSE reconnection support (`Last-Event-ID` header).
-43. Add WebSocket ping/pong heartbeat.
-44. Add a `/api/export/csv` endpoint to the live dashboard.
-45. Add a `/api/export/d2` endpoint to the live dashboard.
-46. Add Prometheus metrics endpoint (`/metrics`).
-47. Add structured logging (slog) to the live server.
-48. Add rate limiting to the SSE/WS endpoints.
-49. Add a health check for the hub (subscriber count vs threshold).
-50. Add a `CONTRIBUTING.md` with the test/lint/coverage workflow.
+31. ~~Shorten the `flake.nix` govulncheck-omission comment (move detail to TODO).~~ **Won't implement — declined.**
+32. ~~Add a fuzz test for `writeDelimited` (random special-char step names).~~ **Won't implement — declined.**
+33. ~~Add a property test for CSV round-trip (random StepInfo → WriteCSV → Read).~~ **Won't implement — declined.**
+34. ~~Add TSV-specific escaping tests (tab in field name).~~ **Won't implement — declined.**
+35. ~~Add a test for CSV export with 0 steps (empty report).~~ **Won't implement — declined.**
+36. ~~Add a test for CSV export with nil pointer fields (timestamps, duration).~~ **Won't implement — declined.**
+37. ~~Document the `csv.Writer` buffering dependency in `csv.go` (why header/step~~ **Won't implement — declined.**
+    ~~errors don't hit the underlying writer).~~
+38. ~~Add `WriteCSV` example with dependencies (current example has none).~~ **Won't implement — declined.**
+39. ~~Add a benchmark for `writeDelimited` with special-char-heavy steps.~~ **Won't implement — declined.**
+40. ~~Consider a `WriteXLSX` export (formula-injection-safe by design).~~ **Won't implement — declined.**
+41. ~~Add a `live.Config.Timeout` for idle SSE connections.~~ **Won't implement — declined.**
+42. ~~Add SSE reconnection support (`Last-Event-ID` header).~~ done (docs-health pass 2026-10-05)
+43. ~~Add WebSocket ping/pong heartbeat.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+44. ~~Add a `/api/export/csv` endpoint to the live dashboard.~~ **Won't implement — declined.**
+45. ~~Add a `/api/export/d2` endpoint to the live dashboard.~~ **Won't implement — declined.**
+46. ~~Add Prometheus metrics endpoint (`/metrics`).~~ **Won't implement — declined.**
+47. ~~Add structured logging (slog) to the live server.~~ **Won't implement — declined.**
+48. ~~Add rate limiting to the SSE/WS endpoints.~~ **Won't implement — declined.**
+49. ~~Add a health check for the hub (subscriber count vs threshold).~~ **Won't implement — declined.**
+50. ~~Add a `CONTRIBUTING.md` with the test/lint/coverage workflow.~~ **Won't implement — declined.**
 
 ---
 

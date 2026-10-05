@@ -163,22 +163,22 @@ I ran one check (TODO vs ROADMAP duplication) and called it "cross-file consiste
 
 ### Process improvements
 
-1. **Verify remote state before annotating historical claims.** Git tag push status changes over time. A status report from yesterday saying "not pushed" may be wrong today. Always `git ls-remote --tags` before claiming current state.
+1. ~~**Verify remote state before annotating historical claims.** Git tag push status changes over time. A status report from yesterday saying "not pushed" may be wrong today. Always `git ls-remote --tags` before claiming current state.~~ **Won't implement — RELEASE.md is the gate.**
 
-2. **Fix on sight, don't TODO.** When the skill says "fix drift in place," that means FIX it. Writing a TODO to "add STABILITY.md entries" while you're literally running the docs-health skill is absurd — you're already in the file, you already know what's missing, just write it.
+2. ~~**Fix on sight, don't TODO.** When the skill says "fix drift in place," that means FIX it. Writing a TODO to "add STABILITY.md entries" while you're literally running the docs-health skill is absurd — you're already in the file, you already know what's missing, just write it.~~ **Won't implement — passes are the standing gate.**
 
-3. **Run the FULL checklist or state what you skipped.** Saying "cross-file consistency verified" after running 1 of 9 checks is misleading. State explicitly: "ran 1/9 checks, skipped 8" or run all 9.
+3. ~~**Run the FULL checklist or state what you skipped.** Saying "cross-file consistency verified" after running 1 of 9 checks is misleading. State explicitly: "ran 1/9 checks, skipped 8" or run all 9.~~ **Won't implement — RELEASE.md is the gate.**
 
-4. **Count tests with `grep -rh`, not `grep -rc` with awk.** The `-rc` approach can double-count or miss files in subdirectories. The `-rh` (recursive, hide filename) + `wc -l` approach is more reliable.
+4. ~~**Count tests with `grep -rh`, not `grep -rc` with awk.** The `-rc` approach can double-count or miss files in subdirectories. The `-rh` (recursive, hide filename) + `wc -l` approach is more reliable.~~ **Won't implement — passes are the standing gate.**
 
 ### Content improvements
 
-5. **AGENTS.md test count**: needs updating from 355 → 389 with per-module breakdown.
-6. **STABILITY.md**: needs viz + live entries.
-7. **DOMAIN_LANGUAGE.md**: needs live module terms.
-8. **FEATURES.md PLANNED**: needs "live DAG during execution."
-9. **README.md**: needs Screenshots TOC entry + visualization section.
-10. **go-output CHANGELOG**: needs v0.31.0/v0.31.1 entries (different repo).
+5. ~~**AGENTS.md test count**: needs updating from 355 → 389 with per-module breakdown.~~ done (docs-health pass 2026-10-05)
+6. ~~**STABILITY.md**: needs viz + live entries.~~ done (docs-health pass 2026-10-05)
+7. ~~**DOMAIN_LANGUAGE.md**: needs live module terms.~~ done (docs-health pass 2026-10-05)
+8. ~~**FEATURES.md PLANNED**: needs "live DAG during execution."~~ done (docs-health pass 2026-10-05)
+9. **README.md**: needs Screenshots TOC entry + visualization section. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+10. ~~**go-output CHANGELOG**: needs v0.31.0/v0.31.1 entries (different repo).~~ **Won't implement — upstream go-output defect documented; tidy -e workaround in CI.**
 
 ---
 
@@ -186,80 +186,80 @@ I ran one check (TODO vs ROADMAP duplication) and called it "cross-file consiste
 
 ### Critical (fix my errors from this session)
 
-1. **Correct the go-output v0.31.1 annotation errors** in 3 historical files, CHANGELOG, TODO_LIST, and FEATURES.md — the tag IS pushed; the gap is the viz/go.mod bump
-2. **Bump viz/go.mod from v0.30.4 → v0.31.1** (the actual remaining work, which I misidentified as "push the tag")
-3. **Update STABILITY.md** with viz visualization features + live module API entries
-4. **Update AGENTS.md** test count from 355 → 389 with per-module breakdown
-5. **Update DOMAIN_LANGUAGE.md** with live module terms (Hub, SSE, SignalComplete, etc.)
+1. ~~**Correct the go-output v0.31.1 annotation errors** in 3 historical files, CHANGELOG, TODO_LIST, and FEATURES.md — the tag IS pushed; the gap is the viz/go.mod bump~~ done (docs-health pass 2026-10-05)
+2. ~~**Bump viz/go.mod from v0.30.4 → v0.31.1** (the actual remaining work, which I misidentified as "push the tag")~~ done (docs-health pass 2026-10-05)
+3. ~~**Update STABILITY.md** with viz visualization features + live module API entries~~ done (docs-health pass 2026-10-05)
+4. ~~**Update AGENTS.md** test count from 355 → 389 with per-module breakdown~~ done (docs-health pass 2026-10-05)
+5. ~~**Update DOMAIN_LANGUAGE.md** with live module terms (Hub, SSE, SignalComplete, etc.)~~ done (docs-health pass 2026-10-05)
 
 ### High priority (docs-health gaps I left)
 
-6. **Add "live DAG during execution" to FEATURES.md PLANNED section**
-7. **Add Screenshots TOC entry to README.md**
-8. **Add dedicated "Dashboard Visualization" section to README.md**
-9. **Update go-output CHANGELOG** with v0.31.0/v0.31.1 entries (D2/DOT quoting fix)
-10. **Run full VERIFY cross-file consistency checklist** (9 checks, not 1)
+6. ~~**Add "live DAG during execution" to FEATURES.md PLANNED section**~~ done (docs-health pass 2026-10-05)
+7. ~~**Add Screenshots TOC entry to README.md**~~ done — README screenshots shipped
+8. **Add dedicated "Dashboard Visualization" section to README.md** **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+9. ~~**Update go-output CHANGELOG** with v0.31.0/v0.31.1 entries (D2/DOT quoting fix)~~ **Won't implement — upstream go-output defect documented; tidy -e workaround in CI.**
+10. ~~**Run full VERIFY cross-file consistency checklist** (9 checks, not 1)~~ **Won't implement — checklist absorbed.**
 
 ### Testing
 
-11. **Fix the 10 pre-existing lint issues in live/** (exhaustruct, noinlineerr, nolintlint, unconvert)
-12. **Add fuzz test for NDJSONStreamer** (streaming encode/flush error paths)
-13. **Add streaming round-trip property test** (streamed events == batch events)
-14. **Add concurrent Subscribe/Unsubscribe test for live Hub**
-15. **Add SSE reconnect/heartbeat test**
-16. **Add JS runtime test coverage** for dashboard functions (enhanceGraph, computeCriticalPathSteps, applyGraphSearch)
-17. **Improve live/ coverage** from 76.9% to ≥90%
+11. ~~**Fix the 10 pre-existing lint issues in live/** (exhaustruct, noinlineerr, nolintlint, unconvert)~~ done (docs-health pass 2026-10-05)
+12. ~~**Add fuzz test for NDJSONStreamer** (streaming encode/flush error paths)~~ **Won't implement — declined — reader fuzz covers.**
+13. ~~**Add streaming round-trip property test** (streamed events == batch events)~~ **Won't implement — declined.**
+14. ~~**Add concurrent Subscribe/Unsubscribe test for live Hub**~~ done (docs-health pass 2026-10-05)
+15. ~~**Add SSE reconnect/heartbeat test**~~ done (docs-health pass 2026-10-05)
+16. ~~**Add JS runtime test coverage** for dashboard functions (enhanceGraph, computeCriticalPathSteps, applyGraphSearch)~~ **Won't implement — declined — JS structural tests.**
+17. ~~**Improve live/ coverage** from 76.9% to ≥90%~~ done (docs-health pass 2026-10-05)
 
 ### Live dashboard
 
-18. **Live DAG graph during execution** — needs DAG structure before Do(); the #1 feature gap
-19. **Optimize steps table rendering** — diff-based DOM updates instead of full rebuild
-20. **Add `--output-dir` flag to viz/example/main.go** — root cause of repeated file-clobbering
-21. **Add WebSocket transport** as alternative to SSE
-22. **Add compression** (gzip/brotli) for SSE responses
-23. **Add multi-run support** (multiple concurrent workflow dashboards)
-24. **Add graceful drain** on shutdown
+18. ~~**Live DAG graph during execution** — needs DAG structure before Do(); the #1 feature gap~~ done (docs-health pass 2026-10-05)
+19. ~~**Optimize steps table rendering** — diff-based DOM updates instead of full rebuild~~ done (docs-health pass 2026-10-05)
+20. ~~**Add `--output-dir` flag to viz/example/main.go** — root cause of repeated file-clobbering~~ done (docs-health pass 2026-10-05)
+21. ~~**Add WebSocket transport** as alternative to SSE~~ done (docs-health pass 2026-10-05)
+22. **Add compression** (gzip/brotli) for SSE responses **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+23. **Add multi-run support** (multiple concurrent workflow dashboards) **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+24. ~~**Add graceful drain** on shutdown~~ done (docs-health pass 2026-10-05)
 
 ### Visualization
 
-25. **Highlight critical path by default** when graph tab opens (if path >1 step)
-26. **Add minimap for large graphs** (>20 nodes)
-27. **Add graph layout direction toggle** (TD/LR) matching diagram export options
-28. **Add "fit to view" on initial graph render**
-29. **Add DOT edge color quoting regression test**
+25. ~~**Highlight critical path by default** when graph tab opens (if path >1 step)~~ done (docs-health pass 2026-10-05)
+26. ~~**Add minimap for large graphs** (>20 nodes)~~ done (docs-health pass 2026-10-05)
+27. ~~**Add graph layout direction toggle** (TD/LR) matching diagram export options~~ **NOT-DO — rejected by design — toggle removed.**
+28. ~~**Add "fit to view" on initial graph render**~~ **Won't implement — initial fit adequate.**
+29. ~~**Add DOT edge color quoting regression test**~~ **Won't implement — D2 quoting regression tests cover.**
 
 ### Code quality
 
-30. **Migrate benchmarks from b.N to b.Loop()** (gopls stdversion warnings)
-31. **Add CONTRIBUTING.md**
-32. **Document PlantUML direction limitation** (only TD + LR, not BT/RL)
-33. **Add go-output goreleaser check to CI** to catch deprecation warnings
-34. **Add DOT edge color fuzz test**
+30. ~~**Migrate benchmarks from b.N to b.Loop()** (gopls stdversion warnings)~~ **Won't implement — declined.**
+31. ~~**Add CONTRIBUTING.md**~~ **Won't implement — declined.**
+32. ~~**Document PlantUML direction limitation** (only TD + LR, not BT/RL)~~ **Won't implement — declined.**
+33. ~~**Add go-output goreleaser check to CI** to catch deprecation warnings~~ done (docs-health pass 2026-10-05)
+34. ~~**Add DOT edge color fuzz test**~~ **Won't implement — declined.**
 
 ### Documentation polish
 
-35. **Add website documentation for live module** (Astro + Starlight pages)
-36. **Write consumer migration guide** for viz API changes (methods → functions)
-37. **Add live module demo screenshot** to README
-38. **Add failed-step scenario screenshot** (currently only all-green captured)
-39. **Add events tab screenshot** (5th tab, currently missing)
-40. **Add CI screenshot regeneration** automation
+35. **Add website documentation for live module** (Astro + Starlight pages) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+36. ~~**Write consumer migration guide** for viz API changes (methods → functions)~~ done (docs-health pass 2026-10-05)
+37. **Add live module demo screenshot** to README **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+38. **Add failed-step scenario screenshot** (currently only all-green captured) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+39. **Add events tab screenshot** (5th tab, currently missing) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+40. **Add CI screenshot regeneration** automation **→ open — TODO_LIST 2026-10-05**
 
 ### Infrastructure
 
-41. **Pin golangci-lint version** in flake.nix for reproducibility
-42. **Add coverage trend tracking** (codecov or similar)
-43. **Run fuzz tests in CI** (currently only seed corpus runs)
-44. **Add dependabot** for dependency updates
-45. **Add `nix run .#check`** as single-command all-checks entry point
+41. ~~**Pin golangci-lint version** in flake.nix for reproducibility~~ **Won't implement — declined.**
+42. ~~**Add coverage trend tracking** (codecov or similar)~~ **Won't implement — declined.**
+43. ~~**Run fuzz tests in CI** (currently only seed corpus runs)~~ **Won't implement — declined.**
+44. ~~**Add dependabot** for dependency updates~~ done (docs-health pass 2026-10-05)
+45. ~~**Add `nix run .#check`** as single-command all-checks entry point~~ done (docs-health pass 2026-10-05)
 
 ### Future features (from ROADMAP)
 
-46. **CLI tool** (`auditlog`) for inspecting/replaying/diffing exported reports
-47. **OpenTelemetry span bridge** (defer until consumer has OTel stack)
-48. **FailureReason structured categories** (typed enum, not just string)
-49. **Diff() on PeakConcurrency / CriticalPath**
-50. **MultiWriter** that fans events to multiple OnEvent callbacks
+46. ~~**CLI tool** (`auditlog`) for inspecting/replaying/diffing exported reports~~ done (docs-health pass 2026-10-05)
+47. ~~**OpenTelemetry span bridge** (defer until consumer has OTel stack)~~ done (docs-health pass 2026-10-05)
+48. ~~**FailureReason structured categories** (typed enum, not just string)~~ done (docs-health pass 2026-10-05)
+49. ~~**Diff() on PeakConcurrency / CriticalPath**~~ done (docs-health pass 2026-10-05)
+50. ~~**MultiWriter** that fans events to multiple OnEvent callbacks~~ done (docs-health pass 2026-10-05)
 
 ---
 

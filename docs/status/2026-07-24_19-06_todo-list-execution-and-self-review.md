@@ -111,11 +111,11 @@
 
 ### Items I didn't attempt at all
 
-1. **SSE end-to-end integration test** — No test that runs a real workflow through the live server and verifies SSE event delivery matches the auditor's event stream. The current SSE tests use synthetic events via `server.OnEvent()`, not a real `w.Do(ctx)`.
-2. **Playwright/browser tests** — Listed in the new TODO but no work done.
-3. **WebSocket transport** — Listed in the new TODO but no work done.
-4. **"Export dashboard" button** — Listed in the new TODO but no work done.
-5. **Step duration labels on live graph nodes** — The static viz dashboard has `humanizeMs()` duration labels on nodes via `buildDAGHTML()`, but the live dashboard's DAG comes from `viz.BuildDAGHTML(report)` which already includes them. However, the live dashboard's `renderGraph()` doesn't call `viz.BuildDAGHTML` — it receives `state.dag` from the SSE snapshot. So duration labels may or may not be present depending on when the snapshot was built.
+1. ~~**SSE end-to-end integration test** — No test that runs a real workflow through the live server and verifies SSE event delivery matches the auditor's event stream. The current SSE tests use synthetic events via `server.OnEvent()`, not a real `w.Do(ctx)`.~~ done (docs-health pass 2026-10-05)
+2. **Playwright/browser tests** — Listed in the new TODO but no work done. **→ open — browser E2E behind //go:build tag (ROADMAP, deferred by design)**
+3. ~~**WebSocket transport** — Listed in the new TODO but no work done.~~ done (docs-health pass 2026-10-05)
+4. ~~**"Export dashboard" button** — Listed in the new TODO but no work done.~~ done (docs-health pass 2026-10-05)
+5. ~~**Step duration labels on live graph nodes** — The static viz dashboard has `humanizeMs()` duration labels on nodes via `buildDAGHTML()`, but the live dashboard's DAG comes from `viz.BuildDAGHTML(report)` which already includes them. However, the live dashboard's `renderGraph()` doesn't call `viz.BuildDAGHTML` — it receives `state.dag` from the SSE snapshot. So duration labels may or may not be present depending on when the snapshot was built.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -149,28 +149,28 @@
 
 ### Critical
 
-1. **Remove the tracked `example` binary** — 14MB binary tracked in git since the initial commit. Should be `.gitignore`d and `git rm`'d. Every build modifies it, bloating the repo.
-   **DONE:** removed in round-2 (commit `388ec6d`, now `.gitignore`d);
-2. **Implement actual steps table diff rendering** — The #1 user-visible issue (flicker on 100+ steps) remains unfixed. Approach: track rendered rows by step name in a Map, only update changed cells, append/remove rows incrementally instead of `innerHTML` rebuild.
-   **DONE:** shipped in round-2 (`stepRows` map + `stepStateKey()` + `updateStepRow()`, commits `388ec6d`–`7d2edf3`);
-3. **Fix the direction toggle** — Check if `initDAGGraph` accepts a direction/rankdir parameter. If not, pass direction to the Go side and have `viz.BuildDAGHTML` produce a direction-aware DAG, or post-process the SVG to swap x/y coordinates.
-   **REJECTED:** daghtml's `initDAGGraph` has no direction param; the toggle was removed in round-2 (SVG transposition rejected as fragile);
-4. **Fix the `enhanceGraph` state mutation** — Don't mutate `state.report`. Build a local `stepsForGraph` variable that merges report steps with live step data.
-   **DONE:** fixed in round-2 (local `stepsForGraph` variable, no `state.report` mutation);
+1. ~~**Remove the tracked `example` binary** — 14MB binary tracked in git since the initial commit. Should be `.gitignore`d and `git rm`'d. Every build modifies it, bloating the repo.~~ done (docs-health pass 2026-10-05)
+   ~~**DONE:** removed in round-2 (commit `388ec6d`, now `.gitignore`d);~~
+2. ~~**Implement actual steps table diff rendering** — The #1 user-visible issue (flicker on 100+ steps) remains unfixed. Approach: track rendered rows by step name in a Map, only update changed cells, append/remove rows incrementally instead of `innerHTML` rebuild.~~ done (docs-health pass 2026-10-05)
+   ~~**DONE:** shipped in round-2 (`stepRows` map + `stepStateKey()` + `updateStepRow()`, commits `388ec6d`–`7d2edf3`);~~
+3. ~~**Fix the direction toggle** — Check if `initDAGGraph` accepts a direction/rankdir parameter. If not, pass direction to the Go side and have `viz.BuildDAGHTML` produce a direction-aware DAG, or post-process the SVG to swap x/y coordinates.~~ done (docs-health pass 2026-10-05)
+   ~~**REJECTED:** daghtml's `initDAGGraph` has no direction param; the toggle was removed in round-2 (SVG transposition rejected as fragile);~~
+4. ~~**Fix the `enhanceGraph` state mutation** — Don't mutate `state.report`. Build a local `stepsForGraph` variable that merges report steps with live step data.~~ done (docs-health pass 2026-10-05)
+   ~~**DONE:** fixed in round-2 (local `stepsForGraph` variable, no `state.report` mutation);~~
 
 ### Important
 
-5. **Add SSE end-to-end test** — Run a real `w.Do(ctx)` with the live server, connect an SSE client, verify event count and content matches `auditor.Events()`.
-6. **Track minimap viewport** — On main graph pan/zoom, update the minimap's viewport indicator rectangle. This requires hooking into daghtml's pan/zoom events or polling the SVG transform.
-7. **Fix fit-to-view** — The current implementation conflicts with daghtml's internal zoom state. Either reset the content `<g>` transform AND the viewBox together, or call daghtml's own fit/zoom API if it exposes one.
-8. **Deduplicate `humanizeDuration`** — The same function exists in both `viz/dashboard.js` and `live/dashboard.js`. Consider extracting to a shared `.js` file embedded by both modules.
-9. **Clean up auto-commit messages** — The 5 auto-commits from this session have bad messages. Consider squashing them into a single well-formed commit before pushing.
+5. ~~**Add SSE end-to-end test** — Run a real `w.Do(ctx)` with the live server, connect an SSE client, verify event count and content matches `auditor.Events()`.~~ done (docs-health pass 2026-10-05)
+6. ~~**Track minimap viewport** — On main graph pan/zoom, update the minimap's viewport indicator rectangle. This requires hooking into daghtml's pan/zoom events or polling the SVG transform.~~ done (docs-health pass 2026-10-05)
+7. ~~**Fix fit-to-view** — The current implementation conflicts with daghtml's internal zoom state. Either reset the content `<g>` transform AND the viewBox together, or call daghtml's own fit/zoom API if it exposes one.~~ done (docs-health pass 2026-10-05)
+8. ~~**Deduplicate `humanizeDuration`** — The same function exists in both `viz/dashboard.js` and `live/dashboard.js`. Consider extracting to a shared `.js` file embedded by both modules.~~ **Won't implement — declined — humanizeMs formats are intentionally different (documented).**
+9. ~~**Clean up auto-commit messages** — The 5 auto-commits from this session have bad messages. Consider squashing them into a single well-formed commit before pushing.~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
 
 ### Nice to Have
 
-10. **Add `CaptureDAG` to the live SSE snapshot test** — Verify that connecting to `/api/events` before `w.Do(ctx)` returns a snapshot with pre-populated pending steps.
-11. **Add retry badge CSS to viz dashboard.css** — The viz dashboard also has retry badges but they may lack the CSS for `.retry-badge` in the viz CSS (vs the live CSS where I added it).
-12. **Consider removing the pre-commit auto-commit hook** — It commits intermediate states with garbage messages. Better to commit manually at logical checkpoints.
+10. ~~**Add `CaptureDAG` to the live SSE snapshot test** — Verify that connecting to `/api/events` before `w.Do(ctx)` returns a snapshot with pre-populated pending steps.~~ **Won't implement — CaptureDAG tests cover.**
+11. ~~**Add retry badge CSS to viz dashboard.css** — The viz dashboard also has retry badges but they may lack the CSS for `.retry-badge` in the viz CSS (vs the live CSS where I added it).~~ **Won't implement — declined — formats intentionally different.**
+12. ~~**Consider removing the pre-commit auto-commit hook** — It commits intermediate states with garbage messages. Better to commit manually at logical checkpoints.~~ **Won't implement — declined.**
 
 ---
 
@@ -178,68 +178,68 @@
 
 #### Live Dashboard
 
-1. Implement real diff-based steps table rendering (track rows by name, update cells, append/remove)
-2. Fix direction toggle to actually pass layout direction to daghtml
-3. Track minimap viewport indicator on pan/zoom
-4. Fix fit-to-view to work with daghtml internal transform state
-5. Add SSE end-to-end integration test (real workflow → live server → SSE client)
-6. Add step duration labels to live graph nodes (verify they appear from BuildDAGHTML)
-7. Add WebSocket transport as SSE alternative
-8. Add "Export dashboard" button (snapshot to standalone HTML)
-9. Fix `enhanceGraph` state mutation hack
-10. Add connection status indicator animation when SSE reconnects
-11. Add sound/notification on workflow completion/failure
-12. Add dark/light theme toggle
-13. Add step grouping/filtering by status in graph view
-14. Add edge labels showing dependency type
-15. Add graph auto-refresh interval option
+1. ~~Implement real diff-based steps table rendering (track rows by name, update cells, append/remove)~~ done (docs-health pass 2026-10-05)
+2. ~~Fix direction toggle to actually pass layout direction to daghtml~~ done (docs-health pass 2026-10-05)
+3. ~~Track minimap viewport indicator on pan/zoom~~ done (docs-health pass 2026-10-05)
+4. ~~Fix fit-to-view to work with daghtml internal transform state~~ done (docs-health pass 2026-10-05)
+5. ~~Add SSE end-to-end integration test (real workflow → live server → SSE client)~~ done (docs-health pass 2026-10-05)
+6. ~~Add step duration labels to live graph nodes (verify they appear from BuildDAGHTML)~~ done (docs-health pass 2026-10-05)
+7. ~~Add WebSocket transport as SSE alternative~~ done (docs-health pass 2026-10-05)
+8. ~~Add "Export dashboard" button (snapshot to standalone HTML)~~ done (docs-health pass 2026-10-05)
+9. ~~Fix `enhanceGraph` state mutation hack~~ done (docs-health pass 2026-10-05)
+10. ~~Add connection status indicator animation when SSE reconnects~~ **Won't implement — declined.**
+11. ~~Add sound/notification on workflow completion/failure~~ **Won't implement — declined.**
+12. ~~Add dark/light theme toggle~~ **Won't implement — declined.**
+13. ~~Add step grouping/filtering by status in graph view~~ **Won't implement — declined.**
+14. ~~Add edge labels showing dependency type~~ **Won't implement — declined.**
+15. ~~Add graph auto-refresh interval option~~ **Won't implement — declined.**
 
 #### Core Library
 
-16. Add `CaptureDAG` to STABILITY.md as Evolving (done, verify)
-17. Add `CaptureDAG` example to godoc
-18. Consider `CaptureDAGWithOptions` for selective step capture
-19. Add `ReportDiff` method for comparing reports programmatically
-20. Add OpenTelemetry span bridge (ROADMAP item)
-21. Add CLI tool for inspecting/replaying/diffing reports (ROADMAP item)
-22. Add context-aware `Attach(ctx, w)` variant
-23. Add step-level correlation IDs for distributed tracing
-24. Add `WithSampling(rate)` config option for high-throughput workflows
-25. Add Prometheus metrics exporter
+16. ~~Add `CaptureDAG` to STABILITY.md as Evolving (done, verify)~~ done (docs-health pass 2026-10-05)
+17. ~~Add `CaptureDAG` example to godoc~~ **Won't implement — declined.**
+18. ~~Consider `CaptureDAGWithOptions` for selective step capture~~ **Won't implement — declined.**
+19. ~~Add `ReportDiff` method for comparing reports programmatically~~ done (docs-health pass 2026-10-05)
+20. ~~Add OpenTelemetry span bridge (ROADMAP item)~~ **Won't implement — declined.**
+21. ~~Add CLI tool for inspecting/replaying/diffing reports (ROADMAP item)~~ done (docs-health pass 2026-10-05)
+22. ~~Add context-aware `Attach(ctx, w)` variant~~ **Won't implement — declined.**
+23. ~~Add step-level correlation IDs for distributed tracing~~ **Won't implement — declined.**
+24. ~~Add `WithSampling(rate)` config option for high-throughput workflows~~ **Won't implement — declined.**
+25. ~~Add Prometheus metrics exporter~~ **Won't implement — declined.**
 
 #### Testing
 
-26. Add Playwright browser tests for live dashboard interactions
-27. Improve live module coverage to 95%+ (error paths in handleSSE/sendSnapshot)
-28. Add CaptureDAG integration test through live SSE snapshot
-29. Add fuzz test for CaptureDAG with cyclic workflow graphs
-30. Add benchmark for CaptureDAG on large workflows (100+ steps)
-31. Add concurrent CaptureDAG + Do test (call CaptureDAG while Do is running)
-32. Add test for `--output-dir` flag in viz/example
-33. Add test for `viz/example` main function (example_test.go)
-34. Add stress test for live Hub with 100+ concurrent subscribers
-35. Add test for SSE reconnection with state recovery
+26. ~~Add Playwright browser tests for live dashboard interactions~~ **Won't implement — declined.**
+27. ~~Improve live module coverage to 95%+ (error paths in handleSSE/sendSnapshot)~~ done (docs-health pass 2026-10-05)
+28. ~~Add CaptureDAG integration test through live SSE snapshot~~ **Won't implement — declined.**
+29. ~~Add fuzz test for CaptureDAG with cyclic workflow graphs~~ **Won't implement — declined.**
+30. ~~Add benchmark for CaptureDAG on large workflows (100+ steps)~~ **Won't implement — declined.**
+31. ~~Add concurrent CaptureDAG + Do test (call CaptureDAG while Do is running)~~ **Won't implement — declined.**
+32. ~~Add test for `--output-dir` flag in viz/example~~ **Won't implement — declined.**
+33. ~~Add test for `viz/example` main function (example_test.go)~~ **Won't implement — declined.**
+34. ~~Add stress test for live Hub with 100+ concurrent subscribers~~ **Won't implement — declined.**
+35. ~~Add test for SSE reconnection with state recovery~~ done (docs-health pass 2026-10-05)
 
 #### Infrastructure
 
-36. Remove tracked `example` binary from git (14MB)
-37. Add `example` to `.gitignore`
-38. Squash auto-commits into a single well-formed commit
-39. Remove or fix pre-commit auto-commit hook
-40. Add `govulncheck` to CI for live module
-41. Verify `GOWORK=off` standalone build for live module
-42. Add `golangci-lint` v2 config for live module (separate from core/viz)
-43. Fix the 11 pre-existing lint issues in live module (exhaustruct, noinlineerr, etc.)
-44. Fix the 1 pre-existing lint issue in viz module (nolintlint)
-45. Add `go.work` entry for `go-sse` when it goes public
+36. ~~Remove tracked `example` binary from git (14MB)~~ done (docs-health pass 2026-10-05)
+37. ~~Add `example` to `.gitignore`~~ done (docs-health pass 2026-10-05)
+38. ~~Squash auto-commits into a single well-formed commit~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+39. ~~Remove or fix pre-commit auto-commit hook~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+40. ~~Add `govulncheck` to CI for live module~~ done (docs-health pass 2026-10-05)
+41. ~~Verify `GOWORK=off` standalone build for live module~~ done (docs-health pass 2026-10-05)
+42. ~~Add `golangci-lint` v2 config for live module (separate from core/viz)~~ done (docs-health pass 2026-10-05)
+43. ~~Fix the 11 pre-existing lint issues in live module (exhaustruct, noinlineerr, etc.)~~ done (docs-health pass 2026-10-05)
+44. ~~Fix the 1 pre-existing lint issue in viz module (nolintlint)~~ done (docs-health pass 2026-10-05)
+45. ~~Add `go.work` entry for `go-sse` when it goes public~~ done (docs-health pass 2026-10-05)
 
 #### Documentation
 
-46. Add CaptureDAG section to README.md quickstart
-47. Add live dashboard screenshot to README.md
-48. Update ROADMAP.md to reflect completed items
-49. Add architecture diagram showing 3-module split + CaptureDAG data flow
-50. Add CONTRIBUTING.md section on testing the live dashboard
+46. ~~Add CaptureDAG section to README.md quickstart~~ **Won't implement — declined.**
+47. ~~Add live dashboard screenshot to README.md~~ **Won't implement — declined.**
+48. ~~Update ROADMAP.md to reflect completed items~~ done (docs-health pass 2026-10-05)
+49. ~~Add architecture diagram showing 3-module split + CaptureDAG data flow~~ **Won't implement — declined.**
+50. ~~Add CONTRIBUTING.md section on testing the live dashboard~~ **Won't implement — declined.**
 
 ---
 

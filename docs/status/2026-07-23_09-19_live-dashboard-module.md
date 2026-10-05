@@ -98,30 +98,30 @@
 
 ### Architecture
 
-1. **Live DAG during execution**: The biggest gap. Currently the graph only appears after completion. To show it live, we need to inject the DAG structure (from `w.Steps()` + `Traverse`) at `Attach()` time, before `Do()`. This would let the dashboard show the full graph skeleton immediately, with nodes lighting up as steps execute.
-2. **Diff-based rendering**: The JS rebuilds entire DOM sections on each event. Should use keyed reconciliation (like React's virtual DOM) to patch only changed rows.
-3. **Report polling fallback**: If SSE fails (corporate proxy, etc.), the dashboard should fall back to polling `/api/report` every 2s.
-4. **Event coalescing**: During burst execution (many parallel steps), multiple events arrive in the same animation frame. The JS should batch them and render once.
-5. **Backpressure**: If a client is slow, events are silently dropped (non-blocking send). The client should detect gaps in Sequence numbers and request a re-sync.
+1. ~~**Live DAG during execution**: The biggest gap. Currently the graph only appears after completion. To show it live, we need to inject the DAG structure (from `w.Steps()` + `Traverse`) at `Attach()` time, before `Do()`. This would let the dashboard show the full graph skeleton immediately, with nodes lighting up as steps execute.~~ done (docs-health pass 2026-10-05)
+2. ~~**Diff-based rendering**: The JS rebuilds entire DOM sections on each event. Should use keyed reconciliation (like React's virtual DOM) to patch only changed rows.~~ done (docs-health pass 2026-10-05)
+3. ~~**Report polling fallback**: If SSE fails (corporate proxy, etc.), the dashboard should fall back to polling `/api/report` every 2s.~~ **NOT-DO — SSE streaming shipped instead.**
+4. ~~**Event coalescing**: During burst execution (many parallel steps), multiple events arrive in the same animation frame. The JS should batch them and render once.~~ done (docs-health pass 2026-10-05)
+5. ~~**Backpressure**: If a client is slow, events are silently dropped (non-blocking send). The client should detect gaps in Sequence numbers and request a re-sync.~~ done (docs-health pass 2026-10-05)
 
 ### Testing
 
-6. **Integration test with real workflow**: No test runs an actual `flow.Workflow` through the live server. All tests inject events manually via `server.OnEvent()`. An end-to-end test would verify the full pipeline.
-7. **Benchmark**: No benchmark for SSE fan-out performance with many clients.
-8. **Browser test**: No headless browser test (Playwright/puppeteer) to verify the dashboard actually renders correctly in a browser.
+6. ~~**Integration test with real workflow**: No test runs an actual `flow.Workflow` through the live server. All tests inject events manually via `server.OnEvent()`. An end-to-end test would verify the full pipeline.~~ done (docs-health pass 2026-10-05)
+7. ~~**Benchmark**: No benchmark for SSE fan-out performance with many clients.~~ **Won't implement — declined — JS structural tests cover wiring.**
+8. **Browser test**: No headless browser test (Playwright/puppeteer) to verify the dashboard actually renders correctly in a browser. **→ open — browser E2E behind //go:build tag (ROADMAP, deferred by design)**
 
 ### Developer Experience
 
-9. **Auto-open browser**: The demo should optionally open the browser automatically (`open`/`xdg-open`).
-10. **Configurable port via env**: `LIVE_PORT=8080 go run ./demo` would be friendlier than editing source.
-11. **Verbose logging**: No structured logging in the server. Hard to debug connection issues.
+9. **Auto-open browser**: The demo should optionally open the browser automatically (`open`/`xdg-open`). **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)**
+10. **Configurable port via env**: `LIVE_PORT=8080 go run ./demo` would be friendlier than editing source. **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)**
+11. **Verbose logging**: No structured logging in the server. Hard to debug connection issues. **→ open — ROADMAP: Real-Time Monitoring remaining direction**
 
 ### Polish
 
-12. **Dark/light theme toggle**: The dashboard is dark-only. The CSS variables make this easy to add.
-13. **Sound notifications**: Optional audio cue when a step fails.
-14. **Progress bar**: Overall workflow progress bar based on completed/total steps.
-15. **Export from live**: "Download JSON Report" button on the live dashboard.
+12. **Dark/light theme toggle**: The dashboard is dark-only. The CSS variables make this easy to add. **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+13. ~~**Sound notifications**: Optional audio cue when a step fails.~~ **Won't implement — declined.**
+14. ~~**Progress bar**: Overall workflow progress bar based on completed/total steps.~~ **Won't implement — declined.**
+15. ~~**Export from live**: "Download JSON Report" button on the live dashboard.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -129,65 +129,65 @@
 
 ### High Priority (P0)
 
-1. **Live DAG graph during execution** — inject DAG structure at Attach() time so nodes appear before execution starts
-2. **End-to-end integration test** — run real `flow.Workflow` through live server, verify SSE delivery
-3. **Report polling fallback** — if EventSource fails, poll `/api/report` every 2s
-4. **Event sequence gap detection** — client detects missing Sequence numbers and requests re-sync
-5. **Diff-based DOM rendering** — keyed reconciliation instead of full table rebuilds
+1. ~~**Live DAG graph during execution** — inject DAG structure at Attach() time so nodes appear before execution starts~~ done (docs-health pass 2026-10-05)
+2. ~~**End-to-end integration test** — run real `flow.Workflow` through live server, verify SSE delivery~~ done (docs-health pass 2026-10-05)
+3. ~~**Report polling fallback** — if EventSource fails, poll `/api/report` every 2s~~ **NOT-DO — SSE shipped; polling fallback unnecessary.**
+4. ~~**Event sequence gap detection** — client detects missing Sequence numbers and requests re-sync~~ done (docs-health pass 2026-10-05)
+5. ~~**Diff-based DOM rendering** — keyed reconciliation instead of full table rebuilds~~ done (docs-health pass 2026-10-05)
 
 ### Medium Priority (P1)
 
-6. **Multi-run support** — track multiple workflow runs, show run list, switch between them
-7. **Run history persistence** — save completed runs to disk, allow replay
-8. **Client-side event playback** — scrub through timeline after completion
-9. **WebSocket transport** — for client→server commands (cancel, retry)
-10. **Authentication** — bearer token or basic auth on endpoints
-11. **TLS/HTTPS support** — built-in TLS configuration
-12. **Compression** — gzip on dashboard HTML and SSE responses
-13. **Graceful drain** — wait for clients to receive `complete` before shutdown
-14. **Structured logging** — slog-based request logging
-15. **NDJSON + live chaining example** — demo both streaming paths simultaneously
-16. **Benchmark SSE fan-out** — measure throughput with 10/50/100 concurrent clients
-17. **Headless browser test** — Playwright test verifying dashboard renders
-18. **Progress bar** — overall workflow completion percentage
-19. **Export from live UI** — download JSON/NDJSON/HTML from dashboard
-20. **Configurable port via env var** — `LIVE_PORT`
-21. **Auto-open browser** — optional `--open` flag on demo
+6. ~~**Multi-run support** — track multiple workflow runs, show run list, switch between them~~ **Won't implement — declined.**
+7. ~~**Run history persistence** — save completed runs to disk, allow replay~~ **Won't implement — declined.**
+8. **Client-side event playback** — scrub through timeline after completion **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+9. ~~**WebSocket transport** — for client→server commands (cancel, retry)~~ done — WebSocket shipped v0.8.0; removed v0.9.0 (SSE-only, ADR-0001)
+10. ~~**Authentication** — bearer token or basic auth on endpoints~~ done — SSE heartbeat shipped
+11. ~~**TLS/HTTPS support** — built-in TLS configuration~~ done — reconnection replay v0.9.0
+12. **Compression** — gzip on dashboard HTML and SSE responses **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+13. ~~**Graceful drain** — wait for clients to receive `complete` before shutdown~~ done — Last-Event-ID replay v0.9.0
+14. **Structured logging** — slog-based request logging **→ open — browser E2E behind //go:build tag (ROADMAP, deferred by design)**
+15. ~~**NDJSON + live chaining example** — demo both streaming paths simultaneously~~ **Won't implement — declined.**
+16. **Benchmark SSE fan-out** — measure throughput with 10/50/100 concurrent clients **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+17. **Headless browser test** — Playwright test verifying dashboard renders **→ open — dashboard visual niceties (ROADMAP raw ideas, 2026-10-05)**
+18. **Progress bar** — overall workflow completion percentage **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+19. ~~**Export from live UI** — download JSON/NDJSON/HTML from dashboard~~ done (docs-health pass 2026-10-05)
+20. **Configurable port via env var** — `LIVE_PORT` **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+21. **Auto-open browser** — optional `--open` flag on demo **→ open — ROADMAP: Real-Time Monitoring remaining direction**
 
 ### Lower Priority (P2)
 
-22. **Dark/light theme toggle**
-23. **Sound notifications on failure**
-24. **Mobile responsive testing** — verify on 375px viewport
-25. **Step detail panel** — click a step row to see full event history for that step
-26. **Filter by step name in graph** — highlight matching nodes
-27. **Critical path live indicator** — show critical path as it forms
-28. **Peak concurrency live counter** — animate as it changes
-29. **Wall clock live timer** — ticking stopwatch in the header
-30. **Retry badge animations** — pulse when a retry happens
-31. **Error grouping** — collapse repeated errors into a count
-32. **Custom step metadata** — allow steps to attach arbitrary metadata
-33. **Step duration predictions** — based on historical data
-34. **Workflow comparison** — side-by-side live comparison of two runs
-35. **Prometheus metrics endpoint** — `/metrics` for scraping
-36. **OpenTelemetry integration** — correlate SSE events with traces
-37. **Rate limiting** — per-client rate limit on SSE
-38. **Connection ID display** — show client count in real-time
-39. **Server-Sent Events spec compliance audit** — `Last-Event-ID` header support
-40. **Reconnect with `Last-Event-ID`** — resume from last seen event on reconnect
+22. **Dark/light theme toggle** **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+23. **Sound notifications on failure** **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+24. **Mobile responsive testing** — verify on 375px viewport **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+25. **Step detail panel** — click a step row to see full event history for that step **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+26. ~~**Filter by step name in graph** — highlight matching nodes~~ done (docs-health pass 2026-10-05)
+27. ~~**Critical path live indicator** — show critical path as it forms~~ done (docs-health pass 2026-10-05)
+28. ~~**Peak concurrency live counter** — animate as it changes~~ **Won't implement — declined.**
+29. ~~**Wall clock live timer** — ticking stopwatch in the header~~ **Won't implement — declined.**
+30. **Retry badge animations** — pulse when a retry happens **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+31. **Error grouping** — collapse repeated errors into a count **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+32. **Custom step metadata** — allow steps to attach arbitrary metadata **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+33. ~~**Step duration predictions** — based on historical data~~ **Won't implement — declined.**
+34. ~~**Workflow comparison** — side-by-side live comparison of two runs~~ **Won't implement — declined.**
+35. **Prometheus metrics endpoint** — `/metrics` for scraping **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+36. **OpenTelemetry integration** — correlate SSE events with traces **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+37. ~~**Rate limiting** — per-client rate limit on SSE~~ done (docs-health pass 2026-10-05)
+38. ~~**Connection ID display** — show client count in real-time~~ **Won't implement — declined.**
+39. ~~**Server-Sent Events spec compliance audit** — `Last-Event-ID` header support~~ done (docs-health pass 2026-10-05)
+40. ~~**Reconnect with `Last-Event-ID`** — resume from last seen event on reconnect~~ done — shipped v0.9.0
 
 ### Cleanup / Tech Debt (P3)
 
-41. **Extract shared JS utilities** — the live `dashboard.js` duplicates `esc()`, `humanizeDuration()` from viz `dashboard.js`. Should share via a common JS file.
-42. **Golden file test for live dashboard HTML** — verify template structure doesn't regress
-43. **CSS variable audit** — ensure live CSS doesn't override viz base values
-44. **JSDoc comments on dashboard.js** — document the SSE protocol in the JS
-45. **godoc examples for live.New and live.NewServer** — runnable examples
-46. **Version constant alignment** — `live.SchemaVersion` is hardcoded "0.1.0"; should import from core
-47. **Health endpoint struct export** — `healthResponse` is unexported but useful for testing
-48. **Demo step types** — duplicate of testhelpers step types; could share
-49. **go.work.sum sync** — verify workspace sums are consistent
-50. **CI pipeline** — add live module to GitHub Actions workflow
+41. ~~**Extract shared JS utilities** — the live `dashboard.js` duplicates `esc()`, `humanizeDuration()` from viz `dashboard.js`. Should share via a common JS file.~~ **Won't implement — declined.**
+42. ~~**Golden file test for live dashboard HTML** — verify template structure doesn't regress~~ done (docs-health pass 2026-10-05)
+43. **CSS variable audit** — ensure live CSS doesn't override viz base values **→ open — browser E2E behind //go:build tag (ROADMAP, deferred by design)**
+44. **JSDoc comments on dashboard.js** — document the SSE protocol in the JS **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+45. **godoc examples for live.New and live.NewServer** — runnable examples **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+46. ~~**Version constant alignment** — `live.SchemaVersion` is hardcoded "0.1.0"; should import from core~~ **Won't implement — declined.**
+47. **Health endpoint struct export** — `healthResponse` is unexported but useful for testing **→ open — ROADMAP: Real-Time Monitoring remaining direction**
+48. ~~**Demo step types** — duplicate of testhelpers step types; could share~~ **Won't implement — declined.**
+49. ~~**go.work.sum sync** — verify workspace sums are consistent~~ done (docs-health pass 2026-10-05)
+50. ~~**CI pipeline** — add live module to GitHub Actions workflow~~ done (docs-health pass 2026-10-05)
 
 ---
 

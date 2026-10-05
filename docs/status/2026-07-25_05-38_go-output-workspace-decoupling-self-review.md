@@ -60,15 +60,15 @@ and the full improvement plan below.
 
 ## c) NOT STARTED ❌ (relevant to this session's work)
 
-1. `nix run .#check` — the canonical "all checks" command from `AGENTS.md`. Bypassed entirely.
-2. `govulncheck` — a dependency-graph change is _exactly_ when you want vuln scanning. Not run.
-3. `go mod tidy` on core / viz / live — standard post-dependency-change hygiene. Builds passing ≠ go.mod tidied (stale `// indirect` lines possible).
-4. `nix flake check` — verify the nix side (which references module structure) still validates.
-5. Check for a newer go-output release than v0.31.1 and bump if one fixes the broken published go.mod.
-6. File/PR an upstream issue against `larsartmann/go-output` for the broken `replace` directives in the v0.31.1 release.
-7. Update `FEATURES.md` (lines 142–143) to reflect go-output is no longer a local workspace member.
-8. Update the redundant "Module split" gotcha in `AGENTS.md`.
-9. Reclaim commit 40ec82b — its message ("docs(agents): update AGENTS.md documentation for project agents") is generic and does not describe the actual go-output workspace decoupling. The auto-git daemon wrote it; I failed to commit with a proper message first.
+1. ~~`nix run .#check` — the canonical "all checks" command from `AGENTS.md`. Bypassed entirely.~~ done (docs-health pass 2026-10-05)
+2. ~~`govulncheck` — a dependency-graph change is _exactly_ when you want vuln scanning. Not run.~~ done (docs-health pass 2026-10-05)
+3. ~~`go mod tidy` on core / viz / live — standard post-dependency-change hygiene. Builds passing ≠ go.mod tidied (stale `// indirect` lines possible).~~ done (docs-health pass 2026-10-05)
+4. ~~`nix flake check` — verify the nix side (which references module structure) still validates.~~ done (docs-health pass 2026-10-05)
+5. ~~Check for a newer go-output release than v0.31.1 and bump if one fixes the broken published go.mod.~~ **NOT-DO — newer go-output does not fix it — documented workaround stands.**
+6. ~~File/PR an upstream issue against `larsartmann/go-output` for the broken `replace` directives in the v0.31.1 release.~~ **Won't implement — workaround documented in AGENTS; upstream issue never filed.**
+7. ~~Update `FEATURES.md` (lines 142–143) to reflect go-output is no longer a local workspace member.~~ done (docs-health pass 2026-10-05)
+8. ~~Update the redundant "Module split" gotcha in `AGENTS.md`.~~ done (docs-health pass 2026-10-05)
+9. ~~Reclaim commit 40ec82b — its message ("docs(agents): update AGENTS.md documentation for project agents") is generic and does not describe the actual go-output workspace decoupling. The auto-git daemon wrote it; I failed to commit with a proper message first.~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
 
 ---
 
@@ -93,18 +93,18 @@ Nothing is _broken_ — all builds, tests, vet, and lint pass. But two things qu
 
 ## e) WHAT WE SHOULD IMPROVE (process-level)
 
-1. **Always run the canonical check command, not its pieces.** `nix run .#check` exists for a
-   reason — it includes `govulncheck`, which manual `go test`+`vet`+`lint` does not. The
-   shortcut is a false economy.
-2. **Run `go mod tidy` after _any_ `go.work` / `go.mod` / dependency change.** Builds passing
-   does not guarantee the go.mod files are minimal and correct.
-3. **When documenting a wart, attach a concrete resolution path** (upstream issue link, bump
-   target, or explicit "won't fix because X"). Bare documentation rots.
-4. **Commit before the auto-daemon does**, with a message that describes the _actual_ change.
-   The daemon's templated messages ("Update agent configuration…") are noise in `git log`.
-5. **Cross-check sibling docs when editing one.** Editing `AGENTS.md` without checking
-   `FEATURES.md` / `README.md` for the same claim creates documentation drift (the exact thing
-   the docs-health skill warns about).
+1. ~~**Always run the canonical check command, not its pieces.** `nix run .#check` exists for a~~ done (docs-health pass 2026-10-05)
+   ~~reason — it includes `govulncheck`, which manual `go test`+`vet`+`lint` does not. The~~
+   ~~shortcut is a false economy.~~
+2. ~~**Run `go mod tidy` after _any_ `go.work` / `go.mod` / dependency change.** Builds passing~~ done (docs-health pass 2026-10-05)
+   ~~does not guarantee the go.mod files are minimal and correct.~~
+3. ~~**When documenting a wart, attach a concrete resolution path** (upstream issue link, bump~~ **Won't implement — workaround documented; upstream issue never filed.**
+   ~~target, or explicit "won't fix because X"). Bare documentation rots.~~
+4. ~~**Commit before the auto-daemon does**, with a message that describes the _actual_ change.~~ **NOT-DO — daemon behavior accepted — documented in global AGENTS.**
+   ~~The daemon's templated messages ("Update agent configuration…") are noise in `git log`.~~
+5. ~~**Cross-check sibling docs when editing one.** Editing `AGENTS.md` without checking~~ done (docs-health pass 2026-10-05)
+   ~~`FEATURES.md` / `README.md` for the same claim creates documentation drift (the exact thing~~
+   ~~the docs-health skill warns about).~~
 
 ---
 
@@ -112,38 +112,38 @@ Nothing is _broken_ — all builds, tests, vet, and lint pass. But two things qu
 
 ### Immediate (this session's loose ends — HIGH priority)
 
-1. Run `nix run .#check` and confirm green (includes govulncheck).
-2. Run `go mod tidy` on core, viz, live; commit if any go.mod/go.sum deltas.
-3. Run `nix flake check`.
-4. Update `FEATURES.md` lines 142–143 (go-output no longer local workspace member).
-5. De-duplicate the "Module split" gotcha in `AGENTS.md` against the updated main section.
-6. Amend/replace commit 40ec82b's generic message with one describing the go-output decoupling (e.g. "build: resolve go-output from published v0.31.1 instead of local workspace").
+1. ~~Run `nix run .#check` and confirm green (includes govulncheck).~~ done (docs-health pass 2026-10-05)
+2. ~~Run `go mod tidy` on core, viz, live; commit if any go.mod/go.sum deltas.~~ done (docs-health pass 2026-10-05)
+3. ~~Run `nix flake check`.~~ done (docs-health pass 2026-10-05)
+4. ~~Update `FEATURES.md` lines 142–143 (go-output no longer local workspace member).~~ done (docs-health pass 2026-10-05)
+5. ~~De-duplicate the "Module split" gotcha in `AGENTS.md` against the updated main section.~~ done (docs-health pass 2026-10-05)
+6. ~~Amend/replace commit 40ec82b's generic message with one describing the go-output decoupling (e.g. "build: resolve go-output from published v0.31.1 instead of local workspace").~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
 
 ### Investigate the upstream wart (MEDIUM priority)
 
-7. Check `git tag` / remote on `../go-output` for any release newer than v0.31.1.
-8. If a newer tag exists and fixes the broken `replace` directives → bump go.mod in viz + live, re-verify.
-9. If not → open issue (or PR) on `larsartmann/go-output` to strip local `replace` directives from the published go.mod before tagging.
-10. Verify `go work sync` is truly idempotent (diff go.work.sum before/after a second run).
+7. ~~Check `git tag` / remote on `../go-output` for any release newer than v0.31.1.~~ done (docs-health pass 2026-10-05)
+8. ~~If a newer tag exists and fixes the broken `replace` directives → bump go.mod in viz + live, re-verify.~~ done (docs-health pass 2026-10-05)
+9. ~~If not → open issue (or PR) on `larsartmann/go-output` to strip local `replace` directives from the published go.mod before tagging.~~ **Won't implement — workaround documented; upstream issue never filed.**
+10. ~~Verify `go work sync` is truly idempotent (diff go.work.sum before/after a second run).~~ done (docs-health pass 2026-10-05)
 
 ### Documentation health (MEDIUM priority)
 
-11. `grep -rn "go.work\|workspace\|../go-output"` across repo to find any other stale references.
-12. Verify `README.md` makes no stale workspace claims (currently clean, but re-check after any future change).
-13. Add a one-line note to `AGENTS.md` Commands table that `go work sync` may print harmless testhelpers pseudo-version download lines.
+11. ~~`grep -rn "go.work\|workspace\|../go-output"` across repo to find any other stale references.~~ done (docs-health pass 2026-10-05)
+12. ~~Verify `README.md` makes no stale workspace claims (currently clean, but re-check after any future change).~~ done (docs-health pass 2026-10-05)
+13. ~~Add a one-line note to `AGENTS.md` Commands table that `go work sync` may print harmless testhelpers pseudo-version download lines.~~ done (docs-health pass 2026-10-05)
 
 ### Broader project hardening (LOWER priority — surfaced by this session, not in scope)
 
-14. Consider adding `govulncheck` as a standalone `flake.nix` check output if not already exposed separately.
-15. Consider a CI guard that fails if `go.work` gains `use` directives for paths outside the repo (prevents re-coupling).
-16. Consider committing `go.work` / `go.work.sum` (un-ignoring) if reproducible local workspace is desired — currently local-only, which is a deliberate choice but worth re-confirming.
-17. Audit other `larsartmann/*` deps (go-sse, go-atomic-write, go-ndjson, go-error-family, go-branded-id) for the same "published go.mod with local replace" defect.
-18. Pin or document the Go toolchain version expectation (`go 1.26.4`) in CI beyond go.mod.
+14. ~~Consider adding `govulncheck` as a standalone `flake.nix` check output if not already exposed separately.~~ done (docs-health pass 2026-10-05)
+15. ~~Consider a CI guard that fails if `go.work` gains `use` directives for paths outside the repo (prevents re-coupling).~~ **Won't implement — CI builds standalone already (GOWORK=off jobs).**
+16. ~~Consider committing `go.work` / `go.work.sum` (un-ignoring) if reproducible local workspace is desired — currently local-only, which is a deliberate choice but worth re-confirming.~~ **Won't implement — go.work gitignored by design.**
+17. ~~Audit other `larsartmann/*` deps (go-sse, go-atomic-write, go-ndjson, go-error-family, go-branded-id) for the same "published go.mod with local replace" defect.~~ done (docs-health pass 2026-10-05)
+18. ~~Pin or document the Go toolchain version expectation (`go 1.26.4`) in CI beyond go.mod.~~ done (docs-health pass 2026-10-05)
 
 ### Out-of-scope but noticed (LOW priority — do not act without instruction)
 
-19. The local `../go-output` clone exists on disk (5 commits ahead of v0.31.1) — its presence is no longer required by this repo's workspace. Whether to keep/refresh it is a separate decision.
-20. `audit-log.html` in `../go-output` is a large committed artifact — not this repo's concern.
+19. ~~The local `../go-output` clone exists on disk (5 commits ahead of v0.31.1) — its presence is no longer required by this repo's workspace. Whether to keep/refresh it is a separate decision.~~ **NOT-DO — decision moot — resolved by later state.**
+20. ~~`audit-log.html` in `../go-output` is a large committed artifact — not this repo's concern.~~ **NOT-DO — decision moot — resolved by later state.**
 
 ---
 

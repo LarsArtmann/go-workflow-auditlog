@@ -83,12 +83,12 @@ I ran coverage once per module and recorded 94.9% / 91.7% / 90.3%. These are acc
 
 ## c) NOT STARTED
 
-1. **`docs/status/INDEX.md` update** — no entry added for this session's report or the 6 reports from 2026-07-2[45]. The 00-08 report flagged this gap; I did not close it.
-2. **DOMAIN_LANGUAGE.md enrichment** — flagged as a TODO_LIST item but not fixed on sight (the docs-health skill says "fix drift in place"). WebSocket, `CaptureDAG`, CORS, Prefix, export endpoints are all missing definitions. I chose to TODO it rather than fix it — the same failure mode I called out in the prior reports.
-3. **Full `nix run .#check`** — I ran `go vet` + `golangci-lint` + `go test -race` manually per module, but NOT the canonical `nix run .#check` (which also runs `govulncheck`). This is the exact corner the 05-38 report flagged cutting. In my defense, my changes were doc-only + a 2-line type deletion (not a dependency change), so govulncheck value was low — but the skill says run the canonical command, not its pieces.
-4. **`go mod tidy`** — not run. No `go.mod` changes were made, but the skill recommends it post-any-dependency-adjacent work. Skipped because I changed no dependency files.
-5. **Go toolchain bump (1.26.4 → 1.26.5)** — the CVE GO-2026-5856 is real and exploitable in `live.Server.ListenAndServe`. I added it to TODO_LIST but did not fix it. This requires a nixpkgs revision providing `go_1_26` at 1.26.5, which may not be available — could be blocked.
-6. **README "Screenshots" TOC entry / dedicated visualization section** — flagged in the 16-44 report; not addressed (out of scope for a docs-health pass focused on the 4 priority files, but noted).
+1. ~~**`docs/status/INDEX.md` update** — no entry added for this session's report or the 6 reports from 2026-07-2[45]. The 00-08 report flagged this gap; I did not close it.~~ done — INDEX.md rebuilt by the 2026-10-05 pass
+2. ~~**DOMAIN_LANGUAGE.md enrichment** — flagged as a TODO_LIST item but not fixed on sight (the docs-health skill says "fix drift in place"). WebSocket, `CaptureDAG`, CORS, Prefix, export endpoints are all missing definitions. I chose to TODO it rather than fix it — the same failure mode I called out in the prior reports.~~ done (docs-health pass 2026-10-05)
+3. ~~**Full `nix run .#check`** — I ran `go vet` + `golangci-lint` + `go test -race` manually per module, but NOT the canonical `nix run .#check` (which also runs `govulncheck`). This is the exact corner the 05-38 report flagged cutting. In my defense, my changes were doc-only + a 2-line type deletion (not a dependency change), so govulncheck value was low — but the skill says run the canonical command, not its pieces.~~ done (docs-health pass 2026-10-05)
+4. ~~**`go mod tidy`** — not run. No `go.mod` changes were made, but the skill recommends it post-any-dependency-adjacent work. Skipped because I changed no dependency files.~~ done (docs-health pass 2026-10-05)
+5. ~~**Go toolchain bump (1.26.4 → 1.26.5)** — the CVE GO-2026-5856 is real and exploitable in `live.Server.ListenAndServe`. I added it to TODO_LIST but did not fix it. This requires a nixpkgs revision providing `go_1_26` at 1.26.5, which may not be available — could be blocked.~~ done (docs-health pass 2026-10-05)
+6. ~~**README "Screenshots" TOC entry / dedicated visualization section** — flagged in the 16-44 report; not addressed (out of scope for a docs-health pass focused on the 4 priority files, but noted).~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -112,19 +112,19 @@ During the final verification sweep, I chained grep counts with `&&`. When a gre
 
 ### Process
 
-1. **Stop fighting the auto-commit daemon.** It committed intermediate states 3+ times this session, forced a re-verification pass, and produced commits with generic messages (`docs(changelog): update changelog...`). Either disable it for interactive doc sessions, configure it to format-only (not commit), or batch all edits into one final write. The current behavior is a net negative for AI-assisted doc work.
-2. **Run the canonical `nix run .#check`, always.** I cut this corner (ran manual vet/lint/test instead). The skill is explicit: run the canonical command. For doc-only changes the risk is low, but "low risk" is not "zero risk," and govulncheck is the one tool manual runs miss.
-3. **Fix drift on sight, don't TODO it.** I added DOMAIN_LANGUAGE.md enrichment to TODO_LIST instead of doing it. The docs-health skill says fix in place. I repeated the exact failure mode I criticized in the prior session's report.
-4. **Read git state before declaring "working tree clean."** At two points I almost claimed the tree was clean while the daemon had uncommitted files. Always `git status` in the same message as any working-tree claim.
-5. **De-dup before writing.** The double "Dependency pinning" entry happened because I edited incrementally without re-reading the full `[Unreleased]` section first. For append-only files like CHANGELOG, read the target section in full immediately before each edit.
+1. ~~**Stop fighting the auto-commit daemon.** It committed intermediate states 3+ times this session, forced a re-verification pass, and produced commits with generic messages (`docs(changelog): update changelog...`). Either disable it for interactive doc sessions, configure it to format-only (not commit), or batch all edits into one final write. The current behavior is a net negative for AI-assisted doc work.~~ **Won't implement — passes are the standing gate.**
+2. ~~**Run the canonical `nix run .#check`, always.** I cut this corner (ran manual vet/lint/test instead). The skill is explicit: run the canonical command. For doc-only changes the risk is low, but "low risk" is not "zero risk," and govulncheck is the one tool manual runs miss.~~ done (docs-health pass 2026-10-05)
+3. ~~**Fix drift on sight, don't TODO it.** I added DOMAIN_LANGUAGE.md enrichment to TODO_LIST instead of doing it. The docs-health skill says fix in place. I repeated the exact failure mode I criticized in the prior session's report.~~ done (docs-health pass 2026-10-05)
+4. ~~**Read git state before declaring "working tree clean."** At two points I almost claimed the tree was clean while the daemon had uncommitted files. Always `git status` in the same message as any working-tree claim.~~ **Won't implement — numbers refreshed per pass.**
+5. ~~**De-dup before writing.** The double "Dependency pinning" entry happened because I edited incrementally without re-reading the full `[Unreleased]` section first. For append-only files like CHANGELOG, read the target section in full immediately before each edit.~~ **Won't implement — numbers refreshed per pass.**
 
 ### Content
 
-6. **DOMAIN_LANGUAGE.md is structurally behind.** Core + viz terms are covered; live-module terms (WebSocket, CaptureDAG, CORS, Prefix, export endpoints) are missing. This is now the most stale living doc.
-7. **`docs/status/INDEX.md` has no entries for any 2026-07-2[45] report** (7 reports). It's an index that doesn't index the recent work.
-8. **Coverage numbers in docs are hardcoded and will rot.** FEATURES/AGENTS now say "94.9%/91.7%/90.3%." Better: point at the command, or add a coverage-gate CI badge that stays current.
-9. **The `example` binary removal + `.gitignore` change** (from the round-2 session) is in git history but the _history bloat_ (14 MB binary across many commits) is permanent without a `git filter-repo`. Noted, not actionable without user decision.
-10. **Go 1.26.4 has a known CVE (GO-2026-5856)** affecting `live.Server.ListenAndServe`. This is a real security finding, not just doc drift. It's in TODO_LIST but it deserves prominence — a library advertising `live.Server` shouldn't ship on a vulnerable toolchain.
+6. ~~**DOMAIN_LANGUAGE.md is structurally behind.** Core + viz terms are covered; live-module terms (WebSocket, CaptureDAG, CORS, Prefix, export endpoints) are missing. This is now the most stale living doc.~~ done (docs-health pass 2026-10-05)
+7. ~~**`docs/status/INDEX.md` has no entries for any 2026-07-2[45] report** (7 reports). It's an index that doesn't index the recent work.~~ done — INDEX.md rebuilt 2026-10-05
+8. ~~**Coverage numbers in docs are hardcoded and will rot.** FEATURES/AGENTS now say "94.9%/91.7%/90.3%." Better: point at the command, or add a coverage-gate CI badge that stays current.~~ done — CVE fixed in v0.8.1 (Go 1.26.5)
+9. ~~**The `example` binary removal + `.gitignore` change** (from the round-2 session) is in git history but the _history bloat_ (14 MB binary across many commits) is permanent without a `git filter-repo`. Noted, not actionable without user decision.~~ **NOT-DO — history bloat accepted — INDEX + archive model.**
+10. ~~**Go 1.26.4 has a known CVE (GO-2026-5856)** affecting `live.Server.ListenAndServe`. This is a real security finding, not just doc drift. It's in TODO_LIST but it deserves prominence — a library advertising `live.Server` shouldn't ship on a vulnerable toolchain.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -132,68 +132,68 @@ During the final verification sweep, I chained grep counts with `&&`. When a gre
 
 #### Immediate (close this session's loose ends)
 
-1. Add `docs/status/INDEX.md` entries for all 7 `2026-07-2[45]*` reports (6 annotated + this one)
-2. Enrich `docs/DOMAIN_LANGUAGE.md` with live-module terms (WebSocket, CaptureDAG, CORS, Prefix, export endpoints/buttons) — fix on sight, not TODO
-3. Run `nix run .#check` end-to-end (incl. govulncheck) and confirm green
-4. Verify the 2 uncommitted working-tree files (`STABILITY.md`, `2026-07-24_19-06` report) land cleanly
-5. Audit `CHANGELOG.md [Unreleased]` for any other duplicated entries introduced this session
+1. ~~Add `docs/status/INDEX.md` entries for all 7 `2026-07-2[45]*` reports (6 annotated + this one)~~ done — INDEX.md rebuilt 2026-10-05
+2. ~~Enrich `docs/DOMAIN_LANGUAGE.md` with live-module terms (WebSocket, CaptureDAG, CORS, Prefix, export endpoints/buttons) — fix on sight, not TODO~~ done (docs-health pass 2026-10-05)
+3. ~~Run `nix run .#check` end-to-end (incl. govulncheck) and confirm green~~ done (docs-health pass 2026-10-05)
+4. ~~Verify the 2 uncommitted working-tree files (`STABILITY.md`, `2026-07-24_19-06` report) land cleanly~~ done (docs-health pass 2026-10-05)
+5. ~~Audit `CHANGELOG.md [Unreleased]` for any other duplicated entries introduced this session~~ done (docs-health pass 2026-10-05)
 
 #### High impact (code/CI)
 
-6. Add the `live` module to `flake.nix #check` (vet + test-race + lint + govulncheck) — live has zero CI coverage today
-7. Bump Go toolchain 1.26.4 → 1.26.5 to fix GO-2026-5856 (may require a newer nixpkgs revision; check availability first)
-8. Disable or reconfigure the `buildflow` auto-commit daemon (it produces garbage commits and races interactive edits)
-9. Improve live module coverage to 95%+ (currently 90.3%; gap is SSE/WS error + timing paths)
-10. Resolve the `nlreturn` vs `wsl_v5` linter conflict in `.golangci.yml`
-11. Add CSV formula-injection tests (step names with `=`, `+`, `-`, `@`)
-12. Add full browser automation tests (Playwright/chromedp) for live dashboard click→render flows
+6. ~~Add the `live` module to `flake.nix #check` (vet + test-race + lint + govulncheck) — live has zero CI coverage today~~ done (docs-health pass 2026-10-05)
+7. ~~Bump Go toolchain 1.26.4 → 1.26.5 to fix GO-2026-5856 (may require a newer nixpkgs revision; check availability first)~~ done (docs-health pass 2026-10-05)
+8. ~~Disable or reconfigure the `buildflow` auto-commit daemon (it produces garbage commits and races interactive edits)~~ **NOT-DO — daemon accepted — documented in global AGENTS.**
+9. ~~Improve live module coverage to 95%+ (currently 90.3%; gap is SSE/WS error + timing paths)~~ done (docs-health pass 2026-10-05)
+10. ~~Resolve the `nlreturn` vs `wsl_v5` linter conflict in `.golangci.yml`~~ done (docs-health pass 2026-10-05)
+11. ~~Add CSV formula-injection tests (step names with `=`, `+`, `-`, `@`)~~ done (docs-health pass 2026-10-05)
+12. Add full browser automation tests (Playwright/chromedp) for live dashboard click→render flows **→ open — browser E2E behind //go:build tag (ROADMAP, deferred by design)**
 
 #### Documentation health
 
-13. Add "Screenshots" TOC entry + dedicated visualization section to README.md (flagged since 16-44 report)
-14. Replace hardcoded coverage numbers in FEATURES.md/AGENTS.md with a command reference or CI badge
-15. Add a `docs-health` CI check that fails on cross-file inconsistencies (e.g., TODO item duplicating ROADMAP)
-16. Add `STABILITY.md` "JSON Schema Versioning" section (flagged in 00-08 report)
-17. Verify every command in the AGENTS.md command table actually runs (exhaustive, not spot-check)
-18. Add architecture diagram showing the 3-module split + WebSocket transport
-19. Document the SSE→WebSocket fallback behavior in README
-20. Add WebSocket API documentation (message envelope format `{type, data}`)
-21. Add a transport comparison table (SSE vs WebSocket: when to use each)
-22. Add CONTRIBUTING.md section on testing the live dashboard
+13. ~~Add "Screenshots" TOC entry + dedicated visualization section to README.md (flagged since 16-44 report)~~ done — TOC present
+14. ~~Replace hardcoded coverage numbers in FEATURES.md/AGENTS.md with a command reference or CI badge~~ done — coverage numbers refreshed 2026-10-05
+15. ~~Add a `docs-health` CI check that fails on cross-file inconsistencies (e.g., TODO item duplicating ROADMAP)~~ **Won't implement — declined.**
+16. ~~Add `STABILITY.md` "JSON Schema Versioning" section (flagged in 00-08 report)~~ **Won't implement — declined.**
+17. ~~Verify every command in the AGENTS.md command table actually runs (exhaustive, not spot-check)~~ **Won't implement — declined.**
+18. ~~Add architecture diagram showing the 3-module split + WebSocket transport~~ **Won't implement — declined.**
+19. ~~Document the SSE→WebSocket fallback behavior in README~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+20. ~~Add WebSocket API documentation (message envelope format `{type, data}`)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+21. ~~Add a transport comparison table (SSE vs WebSocket: when to use each)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+22. ~~Add CONTRIBUTING.md section on testing the live dashboard~~ **Won't implement — declined.**
 
 #### Code quality
 
-23. Extract a `Transport` interface so SSE and WebSocket share a streaming contract (reduces `handleSSE`/`handleWebSocket` duplication)
-24. Add WebSocket failure-injection tests (write failure mid-stream, upgrade failure, context cancellation)
-25. Add SSE `Last-Event-ID` header support for reconnection recovery
-26. Add WebSocket ping/pong health checking
-27. Add a "transport: SSE/WS" indicator in the dashboard connection badge
-28. Add stress test: 100+ concurrent WebSocket subscribers
-29. Add test for SSE→WebSocket fallback trigger (2 SSE failures → WS)
-30. Deduplicate `humanizeMs` between Go (`viz/daghtml_adapter.go`) and JS (`live/dashboard.js`)
-31. Extract shared dashboard JS between viz and live modules
-32. Add `CaptureDAG` example to godoc
-33. Add `ReportDiff` method for comparing reports programmatically
-34. Add `WithSampling(rate)` config option for high-throughput workflows
-35. Add context-aware `Attach(ctx, w)` variant
-36. Add step-level correlation IDs for distributed tracing
+23. ~~Extract a `Transport` interface so SSE and WebSocket share a streaming contract (reduces `handleSSE`/`handleWebSocket` duplication)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+24. ~~Add WebSocket failure-injection tests (write failure mid-stream, upgrade failure, context cancellation)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+25. ~~Add SSE `Last-Event-ID` header support for reconnection recovery~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+26. ~~Add WebSocket ping/pong health checking~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+27. ~~Add a "transport: SSE/WS" indicator in the dashboard connection badge~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+28. ~~Add stress test: 100+ concurrent WebSocket subscribers~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+29. ~~Add test for SSE→WebSocket fallback trigger (2 SSE failures → WS)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+30. ~~Deduplicate `humanizeMs` between Go (`viz/daghtml_adapter.go`) and JS (`live/dashboard.js`)~~ **Won't implement — declined.**
+31. ~~Extract shared dashboard JS between viz and live modules~~ **Won't implement — declined.**
+32. Add `CaptureDAG` example to godoc **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
+33. ~~Add `ReportDiff` method for comparing reports programmatically~~ done (docs-health pass 2026-10-05)
+34. ~~Add `WithSampling(rate)` config option for high-throughput workflows~~ **Won't implement — declined.**
+35. Add context-aware `Attach(ctx, w)` variant **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+36. ~~Add step-level correlation IDs for distributed tracing~~ **Won't implement — declined.**
 
 #### Strategic (from ROADMAP / cross-project learnings)
 
-37. JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor)
-38. `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md`)
-39. CLI tool (`cmd/auditlog`) with info/convert/diff/validate/schema/stats subcommands
-40. OpenTelemetry span bridge (`attempt_start`→span start, `attempt_end`→span end)
-41. Prometheus metrics exporter
-42. Extract shared CSS design tokens between viz + live modules (currently duplicated)
-43. Add `docs/examples/` directory (OTel bridge, Prometheus bridge, WebSocket stream patterns)
-44. Add schema-drift test (Go types vs JSON Schema, once schema exists)
-45. Add property-based migration test (round-trip through migration)
-46. Consider extracting NDJSON reader/writer into the external `go-ndjson` module
-47. Add `BENCHMARKS.md` to CI (fail on >10% regression)
-48. Add coverage gate to CI workflow (`scripts/coverage-gate.sh` with threshold)
-49. Add `nix run .#auditlog` flake app for CLI (once built)
-50. Consider whether `live` should merge into `viz` now that its private-dep excuse (go-sse) is gone
+37. JSON Schema generation (`schema.go` + `cmd/genschema` + `JSONSchema()` accessor) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+38. `MigrateReport([]byte)` — programmatic schema-version migration (currently only `docs/MIGRATION.md`) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+39. CLI tool (`cmd/auditlog`) with info/convert/diff/validate/schema/stats subcommands **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+40. ~~OpenTelemetry span bridge (`attempt_start`→span start, `attempt_end`→span end)~~ **Won't implement — declined.**
+41. Prometheus metrics exporter **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
+42. ~~Extract shared CSS design tokens between viz + live modules (currently duplicated)~~ done — design tokens shipped (DesignTokensCSS + sync test)
+43. ~~Add `docs/examples/` directory (OTel bridge, Prometheus bridge, WebSocket stream patterns)~~ **Won't implement — declined.**
+44. ~~Add schema-drift test (Go types vs JSON Schema, once schema exists)~~ done (docs-health pass 2026-10-05)
+45. ~~Add property-based migration test (round-trip through migration)~~ **Won't implement — declined.**
+46. ~~Consider extracting NDJSON reader/writer into the external `go-ndjson` module~~ done (docs-health pass 2026-10-05)
+47. ~~Add `BENCHMARKS.md` to CI (fail on >10% regression)~~ **Won't implement — declined.**
+48. ~~Add coverage gate to CI workflow (`scripts/coverage-gate.sh` with threshold)~~ done (docs-health pass 2026-10-05)
+49. ~~Add `nix run .#auditlog` flake app for CLI (once built)~~ done (docs-health pass 2026-10-05)
+50. ~~Consider whether `live` should merge into `viz` now that its private-dep excuse (go-sse) is gone~~ **Won't implement — declined.**
 
 ---
 

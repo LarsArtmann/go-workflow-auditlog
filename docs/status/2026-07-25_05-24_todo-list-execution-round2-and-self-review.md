@@ -247,35 +247,35 @@ The `.golangci.yml` has `nlreturn` enabled (requires blank line before `return`)
 
 ### Critical
 
-1. **Remove or reconfigure the BuildFlow pre-commit hook.** It produces 15+ garbage commits per session, each with intermediate states. Options: (a) remove it entirely, (b) configure it to only format (not commit), (c) configure it to amend instead of creating new commits. The current behavior is actively harmful for AI-assisted development.
+1. ~~**Remove or reconfigure the BuildFlow pre-commit hook.** It produces 15+ garbage commits per session, each with intermediate states. Options: (a) remove it entirely, (b) configure it to only format (not commit), (c) configure it to amend instead of creating new commits. The current behavior is actively harmful for AI-assisted development.~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
 
-2. **Fix the `nlreturn` vs `wsl_v5` linter conflict.** These two linters directly contradict each other on blank-line-before-return. Either disable one, or add a project-level exception for the conflicting pattern.
+2. ~~**Fix the `nlreturn` vs `wsl_v5` linter conflict.** These two linters directly contradict each other on blank-line-before-return. Either disable one, or add a project-level exception for the conflicting pattern.~~ done (docs-health pass 2026-10-05)
 
-3. **Squash the 15 auto-commits before pushing.** They should be consolidated into 2-3 logical commits: (a) fix broken dashboard features, (b) add WebSocket transport, (c) add E2E + coverage tests.
+3. ~~**Squash the 15 auto-commits before pushing.** They should be consolidated into 2-3 logical commits: (a) fix broken dashboard features, (b) add WebSocket transport, (c) add E2E + coverage tests.~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
 
 ### Important
 
-4. **Extract a `Transport` interface** so SSE and WebSocket share a common streaming contract. Currently `handleSSE` and `handleWebSocket` have parallel but independent implementations (subscribe → snapshot → event loop → complete). An interface would reduce duplication and make adding a third transport trivial.
+4. ~~**Extract a `Transport` interface** so SSE and WebSocket share a common streaming contract. Currently `handleSSE` and `handleWebSocket` have parallel but independent implementations (subscribe → snapshot → event loop → complete). An interface would reduce duplication and make adding a third transport trivial.~~ **Won't implement — declined — SSE-only via go-sse; no transport abstraction needed.**
 
-5. **Add `golangci-lint` to CI with `-fail-level=error`.** The pre-commit hook runs `buildflow`, not `golangci-lint`. Lint issues were only caught because I ran `golangci-lint run ./...` manually at the end. CI should enforce 0 issues.
+5. ~~**Add `golangci-lint` to CI with `-fail-level=error`.** The pre-commit hook runs `buildflow`, not `golangci-lint`. Lint issues were only caught because I ran `golangci-lint run ./...` manually at the end. CI should enforce 0 issues.~~ done (docs-health pass 2026-10-05)
 
-6. **Consider `nhooyr.io/websocket` instead of `gorilla/websocket`.** The gorilla library is in maintenance mode. `nhooyr.io/websocket` is the modern alternative with a simpler API, context support, and active maintenance. However, gorilla/websocket is stable, widely used, and not banned — so this is a future consideration, not urgent.
+6. ~~**Consider `nhooyr.io/websocket` instead of `gorilla/websocket`.** The gorilla library is in maintenance mode. `nhooyr.io/websocket` is the modern alternative with a simpler API, context support, and active maintenance. However, gorilla/websocket is stable, widely used, and not banned — so this is a future consideration, not urgent.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
 
-7. **Add a WebSocket connection test with actual failure injection.** The current WebSocket E2E test verifies the happy path only. Missing: write failure (closed connection mid-stream), upgrade failure (invalid origin), context cancellation during event delivery.
+7. ~~**Add a WebSocket connection test with actual failure injection.** The current WebSocket E2E test verifies the happy path only. Missing: write failure (closed connection mid-stream), upgrade failure (invalid origin), context cancellation during event delivery.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
 
-8. **The `humanizeMs` function is duplicated** between `viz/daghtml_adapter.go` (Go) and `live/dashboard.js` (JS). They produce the same format but must be kept in sync manually. Consider generating the JS from Go, or extracting to a shared data file.
+8. ~~**The `humanizeMs` function is duplicated** between `viz/daghtml_adapter.go` (Go) and `live/dashboard.js` (JS). They produce the same format but must be kept in sync manually. Consider generating the JS from Go, or extracting to a shared data file.~~ **Won't implement — declined — humanizeMs formats intentionally different.**
 
 ### Nice to Have
 
-9. **Add `ws://` URL to the dashboard HTML** so the client knows the WebSocket endpoint without constructing it at runtime. Currently the JS constructs the URL from `location.protocol` + `location.host` + `ROUTE_PREFIX`.
+9. ~~**Add `ws://` URL to the dashboard HTML** so the client knows the WebSocket endpoint without constructing it at runtime. Currently the JS constructs the URL from `location.protocol` + `location.host` + `ROUTE_PREFIX`.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
 
-10. **Add a "transport: SSE/WS" indicator** in the connection status badge so users know which transport is active.
+10. ~~**Add a "transport: SSE/WS" indicator** in the connection status badge so users know which transport is active.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
 
-11. **Add WebSocket ping/pong** for connection health checking. Currently relies on write deadlines only.
+11. ~~**Add WebSocket ping/pong** for connection health checking. Currently relies on write deadlines only.~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
 
-12. **Consider Server-Sent Events `Last-Event-ID` header** for SSE reconnection recovery. Currently reconnects get a fresh snapshot, which works but wastes bandwidth for large reports.
+12. ~~**Consider Server-Sent Events `Last-Event-ID` header** for SSE reconnection recovery. Currently reconnects get a fresh snapshot, which works but wastes bandwidth for large reports.~~ done (docs-health pass 2026-10-05)
 
-13. **The diff-based steps table rendering should use `DocumentFragment`** for batch row insertion to minimize layout thrashing, though the current approach is already a massive improvement over innerHTML.
+13. ~~**The diff-based steps table rendering should use `DocumentFragment`** for batch row insertion to minimize layout thrashing, though the current approach is already a massive improvement over innerHTML.~~ **Won't implement — declined.**
 
 ---
 
@@ -283,71 +283,71 @@ The `.golangci.yml` has `nlreturn` enabled (requires blank line before `return`)
 
 #### Live Dashboard
 
-1. Extract `Transport` interface (SSE + WebSocket share streaming contract)
-2. Add WebSocket failure injection tests (write failure, upgrade failure, context cancellation)
-3. Add connection transport indicator in UI (SSE vs WS badge)
-4. Add WebSocket ping/pong health checking
-5. Add SSE `Last-Event-ID` reconnection recovery
-6. Improve `handleSSE` coverage to 95%+ (heartbeat timing, WriteEvent failure, context cancellation)
-7. Improve `handleWebSocket` coverage to 95%+ (upgrade failure, write deadline timeout)
-8. Add stress test: 100+ concurrent WebSocket subscribers
-9. Add test for SSE→WebSocket fallback trigger (2 SSE failures → WS)
-10. Add dark/light theme toggle
-11. Add sound/notification on workflow completion/failure
-12. Add step grouping/filtering by status in graph view
-13. Add edge labels showing dependency type
-14. Add graph auto-refresh interval option
+1. ~~Extract `Transport` interface (SSE + WebSocket share streaming contract)~~ **Won't implement — declined — SSE-only; no transport abstraction.**
+2. ~~Add WebSocket failure injection tests (write failure, upgrade failure, context cancellation)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+3. ~~Add connection transport indicator in UI (SSE vs WS badge)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+4. ~~Add WebSocket ping/pong health checking~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+5. ~~Add SSE `Last-Event-ID` reconnection recovery~~ done (docs-health pass 2026-10-05)
+6. ~~Improve `handleSSE` coverage to 95%+ (heartbeat timing, WriteEvent failure, context cancellation)~~ done (docs-health pass 2026-10-05)
+7. ~~Improve `handleWebSocket` coverage to 95%+ (upgrade failure, write deadline timeout)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+8. ~~Add stress test: 100+ concurrent WebSocket subscribers~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+9. ~~Add test for SSE→WebSocket fallback trigger (2 SSE failures → WS)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+10. ~~Add dark/light theme toggle~~ **Won't implement — declined.**
+11. ~~Add sound/notification on workflow completion/failure~~ **Won't implement — declined.**
+12. ~~Add step grouping/filtering by status in graph view~~ done — filter chips shipped v0.11.0
+13. ~~Add edge labels showing dependency type~~ **Won't implement — declined.**
+14. ~~Add graph auto-refresh interval option~~ **Won't implement — declined.**
 
 #### Core Library
 
-15. Add `CaptureDAG` example to godoc
-16. Consider `CaptureDAGWithOptions` for selective step capture
-17. Add `ReportDiff` method for comparing reports programmatically
-18. Add OpenTelemetry span bridge (ROADMAP item)
-19. Add CLI tool for inspecting/replaying/diffing reports (ROADMAP item)
-20. Add context-aware `Attach(ctx, w)` variant
-21. Add step-level correlation IDs for distributed tracing
-22. Add `WithSampling(rate)` config option for high-throughput workflows
-23. Add Prometheus metrics exporter
+15. ~~Add `CaptureDAG` example to godoc~~ **Won't implement — declined.**
+16. ~~Consider `CaptureDAGWithOptions` for selective step capture~~ done (docs-health pass 2026-10-05)
+17. ~~Add `ReportDiff` method for comparing reports programmatically~~ done (docs-health pass 2026-10-05)
+18. ~~Add OpenTelemetry span bridge (ROADMAP item)~~ **Won't implement — declined.**
+19. ~~Add CLI tool for inspecting/replaying/diffing reports (ROADMAP item)~~ done (docs-health pass 2026-10-05)
+20. ~~Add context-aware `Attach(ctx, w)` variant~~ **Won't implement — declined.**
+21. ~~Add step-level correlation IDs for distributed tracing~~ **Won't implement — declined.**
+22. ~~Add `WithSampling(rate)` config option for high-throughput workflows~~ **Won't implement — declined.**
+23. ~~Add Prometheus metrics exporter~~ **Won't implement — declined.**
 
 #### Testing
 
-24. Add Playwright/chromedp browser automation tests for live dashboard
-25. Add fuzz test for CaptureDAG with cyclic workflow graphs
-26. Add benchmark for CaptureDAG on large workflows (100+ steps)
-27. Add concurrent CaptureDAG + Do test (call CaptureDAG while Do is running)
-28. Add test for `--output-dir` flag in viz/example
-29. Add test for `viz/example` main function (example_test.go)
-30. Add stress test for live Hub with 100+ concurrent subscribers
-31. Add test for SSE reconnection with state recovery
+24. ~~Add Playwright/chromedp browser automation tests for live dashboard~~ **Won't implement — declined.**
+25. ~~Add fuzz test for CaptureDAG with cyclic workflow graphs~~ **Won't implement — declined.**
+26. ~~Add benchmark for CaptureDAG on large workflows (100+ steps)~~ **Won't implement — declined.**
+27. ~~Add concurrent CaptureDAG + Do test (call CaptureDAG while Do is running)~~ **Won't implement — declined.**
+28. ~~Add test for `--output-dir` flag in viz/example~~ **Won't implement — declined.**
+29. ~~Add test for `viz/example` main function (example_test.go)~~ **Won't implement — declined.**
+30. ~~Add stress test for live Hub with 100+ concurrent subscribers~~ **Won't implement — declined.**
+31. ~~Add test for SSE reconnection with state recovery~~ done (docs-health pass 2026-10-05)
 
 #### Infrastructure
 
-32. Squash 15 auto-commits into 2-3 logical commits before pushing
-33. Remove or reconfigure BuildFlow pre-commit hook
-34. Fix `nlreturn` vs `wsl_v5` linter conflict in `.golangci.yml`
-35. Add `golangci-lint` to CI pipeline (currently only runs manually)
-36. Add `govulncheck` to CI for live module
-37. Verify `GOWORK=off` standalone build for live module
-38. Consider `nhooyr.io/websocket` instead of `gorilla/websocket`
-39. Add `go.work` entry for future go-sse versions
+32. ~~Squash 15 auto-commits into 2-3 logical commits before pushing~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+33. ~~Remove or reconfigure BuildFlow pre-commit hook~~ **Won't implement — history accepted — auto-commit daemon owns commits.**
+34. ~~Fix `nlreturn` vs `wsl_v5` linter conflict in `.golangci.yml`~~ done (docs-health pass 2026-10-05)
+35. ~~Add `golangci-lint` to CI pipeline (currently only runs manually)~~ done (docs-health pass 2026-10-05)
+36. ~~Add `govulncheck` to CI for live module~~ done (docs-health pass 2026-10-05)
+37. ~~Verify `GOWORK=off` standalone build for live module~~ done (docs-health pass 2026-10-05)
+38. ~~Consider `nhooyr.io/websocket` instead of `gorilla/websocket`~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+39. ~~Add `go.work` entry for future go-sse versions~~ done (docs-health pass 2026-10-05)
 
 #### Documentation
 
-40. Add CaptureDAG section to README.md quickstart
-41. Add live dashboard screenshot to README.md
-42. Update ROADMAP.md to reflect completed items
-43. Add architecture diagram showing 3-module split + WebSocket transport
-44. Add CONTRIBUTING.md section on testing the live dashboard
-45. Document the SSE→WebSocket fallback behavior in README
-46. Add WebSocket API documentation (message envelope format)
-47. Add transport comparison table (SSE vs WebSocket: when to use each)
+40. ~~Add CaptureDAG section to README.md quickstart~~ **Won't implement — declined.**
+41. ~~Add live dashboard screenshot to README.md~~ **Won't implement — declined.**
+42. ~~Update ROADMAP.md to reflect completed items~~ done (docs-health pass 2026-10-05)
+43. ~~Add architecture diagram showing 3-module split + WebSocket transport~~ **Won't implement — declined.**
+44. ~~Add CONTRIBUTING.md section on testing the live dashboard~~ **Won't implement — declined.**
+45. ~~Document the SSE→WebSocket fallback behavior in README~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+46. ~~Add WebSocket API documentation (message envelope format)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+47. ~~Add transport comparison table (SSE vs WebSocket: when to use each)~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
 
 #### Code Quality
 
-48. Deduplicate `humanizeMs` between Go (`viz/daghtml_adapter.go`) and JS (`live/dashboard.js`)
-49. Extract shared dashboard JS between viz and live modules
-50. Add `// Transport` interface documentation for future transport contributors
+48. ~~Deduplicate `humanizeMs` between Go (`viz/daghtml_adapter.go`) and JS (`live/dashboard.js`)~~ **Won't implement — declined — formats intentionally different.**
+49. ~~Extract shared dashboard JS between viz and live modules~~ **Won't implement — declined — formats intentionally different.**
+50. ~~Add `// Transport` interface documentation for future transport contributors~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
 
 ---
 

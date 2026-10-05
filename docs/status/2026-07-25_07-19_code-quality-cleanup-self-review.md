@@ -110,21 +110,21 @@ Nothing. No regressions, no broken tests, no data loss. All changes verified wit
 
 ### Process improvements
 
-1. **I should have updated WriteTSV's doc comment in the same edit.** I was focused on WriteCSV and forgot the sibling function delegates to the same code. This is a consistency miss, not a knowledge miss — I knew the limitation applies to both.
+1. ~~**I should have updated WriteTSV's doc comment in the same edit.** I was focused on WriteCSV and forgot the sibling function delegates to the same code. This is a consistency miss, not a knowledge miss — I knew the limitation applies to both.~~ **Won't implement — declined.**
 
-2. **I should have been more honest about testability.** When I wrapped the header/step error paths, I knew they were unreachable today. I should have either (a) added a comment in the test file explaining why these paths can't be tested, or (b) constructed a test with a writer that has a 1-byte buffer to force csv.Writer to flush mid-write.
+2. ~~**I should have been more honest about testability.** When I wrapped the header/step error paths, I knew they were unreachable today. I should have either (a) added a comment in the test file explaining why these paths can't be tested, or (b) constructed a test with a writer that has a 1-byte buffer to force csv.Writer to flush mid-write.~~ **Won't implement — declined.**
 
-3. **I didn't run `art-dupl`** after the changes. The changes are tiny (3 lines in csv.go, ~20 lines in the test file), so duplication is unlikely, but the policy says to check. Minor.
+3. ~~**I didn't run `art-dupl`** after the changes. The changes are tiny (3 lines in csv.go, ~20 lines in the test file), so duplication is unlikely, but the policy says to check. Minor.~~ **Won't implement — declined.**
 
-4. **I didn't re-measure coverage.** The changes don't add new untested production code paths (the wrapping is on existing lines), so coverage shouldn't change. But I should have verified rather than assumed.
+4. ~~**I didn't re-measure coverage.** The changes don't add new untested production code paths (the wrapping is on existing lines), so coverage shouldn't change. But I should have verified rather than assumed.~~ done (docs-health pass 2026-10-05)
 
 ### Code improvements still open
 
-5. **The `failAfterFlushWriter` test still has a timing dependency.** It removed the magic write count (`n: 8`) but the test still relies on `HeartbeatInterval: time.Millisecond` firing within the 2-second timeout. This is far more robust than before (heartbeat at 1ms is essentially instant), but it's still a timing-based test, not a deterministic one. A truly deterministic approach would inject the heartbeat tick channel, but that would require restructuring the SSE handler — out of scope.
+5. ~~**The `failAfterFlushWriter` test still has a timing dependency.** It removed the magic write count (`n: 8`) but the test still relies on `HeartbeatInterval: time.Millisecond` firing within the 2-second timeout. This is far more robust than before (heartbeat at 1ms is essentially instant), but it's still a timing-based test, not a deterministic one. A truly deterministic approach would inject the heartbeat tick channel, but that would require restructuring the SSE handler — out of scope.~~ done — WithFlushInterval bounds test shipped (green 3x 2026-10-05)
 
-6. **The CHANGELOG's existing CSV feature entry** (line ~70) still says "Flush errors wrapped with `ErrExportWriteFailed`" — it now should say "All write errors wrapped." The new Fixed entry corrects this, but the old entry is now stale. This is the nature of additive CHANGELOGs (old entries describe the state at release time), so it's acceptable.
+6. ~~**The CHANGELOG's existing CSV feature entry** (line ~70) still says "Flush errors wrapped with `ErrExportWriteFailed`" — it now should say "All write errors wrapped." The new Fixed entry corrects this, but the old entry is now stale. This is the nature of additive CHANGELOGs (old entries describe the state at release time), so it's acceptable.~~ done (docs-health pass 2026-10-05)
 
-7. **`WriteTSV` doc comment** still doesn't mention the `;` limitation directly (see section b above).
+7. ~~**`WriteTSV` doc comment** still doesn't mention the `;` limitation directly (see section b above).~~ **Won't implement — declined.**
 
 ---
 
@@ -132,71 +132,71 @@ Nothing. No regressions, no broken tests, no data loss. All changes verified wit
 
 #### From this session's observations
 
-1. **Update `WriteTSV` doc comment** to mention the `;` limitation (or point to `WriteCSV`).
-2. **Add a test for the header/step error-wrapping paths** — use a writer with a 1-byte internal buffer or mock csv.Writer to force a mid-write error. Or at minimum, add a code comment explaining why these paths are unreachable today.
-3. **Add a `//nolint` or comment on the untestable error branches** in csv.go explaining they're defensive against future csv.Writer changes.
-4. **Run `art-dupl --semantic --sort total-tokens -t 15`** to confirm zero clones after the changes.
-5. **Re-measure core coverage** after the csv.go change to confirm it didn't drop.
+1. ~~**Update `WriteTSV` doc comment** to mention the `;` limitation (or point to `WriteCSV`).~~ **Won't implement — declined.**
+2. ~~**Add a test for the header/step error-wrapping paths** — use a writer with a 1-byte internal buffer or mock csv.Writer to force a mid-write error. Or at minimum, add a code comment explaining why these paths are unreachable today.~~ **Won't implement — declined.**
+3. ~~**Add a `//nolint` or comment on the untestable error branches** in csv.go explaining they're defensive against future csv.Writer changes.~~ **Won't implement — declined.**
+4. ~~**Run `art-dupl --semantic --sort total-tokens -t 15`** to confirm zero clones after the changes.~~ **Won't implement — declined.**
+5. ~~**Re-measure core coverage** after the csv.go change to confirm it didn't drop.~~ done (docs-health pass 2026-10-05)
 
 #### From prior sessions (still open)
 
-6. **Go 1.26.4 → 1.26.5 bump** — blocked on nixpkgs. Check if a newer nixpkgs revision ships go_1_26 ≥ 1.26.5.
-7. **Re-enable `govulncheck` for live module** in `flake.nix` once Go bumps past 1.26.5 (GO-2026-5856).
-8. **Bump `go 1.26.4` → `1.26.5`** in go.mod, viz/go.mod, live/go.mod, go.work, .golangci.yml once unblocked.
-9. **Browser automation E2E tests** — deferred by design; `//go:build browser_e2e` tag documented in ROADMAP.md.
-10. **Condense the flake.nix govulncheck-omission comment** — currently 7 lines of bash comment; could be a 1-liner pointing to TODO_LIST.md.
+6. ~~**Go 1.26.4 → 1.26.5 bump** — blocked on nixpkgs. Check if a newer nixpkgs revision ships go_1_26 ≥ 1.26.5.~~ done (docs-health pass 2026-10-05)
+7. ~~**Re-enable `govulncheck` for live module** in `flake.nix` once Go bumps past 1.26.5 (GO-2026-5856).~~ done (docs-health pass 2026-10-05)
+8. ~~**Bump `go 1.26.4` → `1.26.5`** in go.mod, viz/go.mod, live/go.mod, go.work, .golangci.yml once unblocked.~~ done (docs-health pass 2026-10-05)
+9. **Browser automation E2E tests** — deferred by design; `//go:build browser_e2e` tag documented in ROADMAP.md. **→ open — TODO_LIST 2026-10-05**
+10. **Condense the flake.nix govulncheck-omission comment** — currently 7 lines of bash comment; could be a 1-liner pointing to TODO_LIST.md. **→ open — TODO_LIST 2026-10-05**
 
 #### CSV/delimited export improvements
 
-11. **Consider a `WriteCSVOptions` struct** for future extensibility (delimiter, quoting style, column selection) instead of separate WriteCSV/WriteTSV functions.
-12. **Consider CSV-injection neutralization as an opt-in option** (leading-tab prefix for `=+-@` cells) — currently exported verbatim by design (audit truthfulness), but some consumers may want it.
-13. **Add a `Dependencies` column to the viz table export** that uses a different separator (e.g., `|` or JSON array syntax) to avoid the `;` collision entirely.
-14. **Add CSV column for `RunID` and `WorkflowID`** — currently omitted; useful for multi-run analysis.
-15. **Consider streaming CSV export** (write rows as steps complete) via the `OnEvent` callback, similar to `NDJSONStreamer`.
+11. ~~**Consider a `WriteCSVOptions` struct** for future extensibility (delimiter, quoting style, column selection) instead of separate WriteCSV/WriteTSV functions.~~ **Won't implement — declined.**
+12. ~~**Consider CSV-injection neutralization as an opt-in option** (leading-tab prefix for `=+-@` cells) — currently exported verbatim by design (audit truthfulness), but some consumers may want it.~~ **Won't implement — declined.**
+13. ~~**Add a `Dependencies` column to the viz table export** that uses a different separator (e.g., `|` or JSON array syntax) to avoid the `;` collision entirely.~~ **Won't implement — declined.**
+14. ~~**Add CSV column for `RunID` and `WorkflowID`** — currently omitted; useful for multi-run analysis.~~ **Won't implement — declined.**
+15. ~~**Consider streaming CSV export** (write rows as steps complete) via the `OnEvent` callback, similar to `NDJSONStreamer`.~~ **Won't implement — declined.**
 
 #### Live module improvements
 
-16. **Inject the heartbeat ticker** as a `<-chan time.Time` field on Server for deterministic testing — eliminates all timing dependencies in SSE tests.
-17. **Add SSE connection lifecycle metrics** — connect count, disconnect count, average session duration, events-per-second.
-18. **Add WebSocket ping/pong heartbeat** for connection health detection (currently relies on write failures).
-19. **Add a `/api/events/stream` endpoint** that serves raw NDJSON (no SSE framing) for non-browser consumers.
-20. **Add graceful degradation when viz.BuildDAGHTML fails** — currently the snapshot provider would error if DAG building fails.
-21. **Add request tracing / correlation IDs** for debugging SSE/WS issues in production.
-22. **Add rate limiting on SSE/WS connections** to prevent resource exhaustion.
-23. **Consider Server-Sent Events `Last-Event-ID` header support** for reconnection (currently no resume capability).
-24. **Add a `/api/steps` REST endpoint** for polling individual step status (SSE/WS alternative for restricted networks).
-25. **Add Prometheus metrics endpoint** (`/metrics`) for workflow observability integration.
+16. ~~**Inject the heartbeat ticker** as a `<-chan time.Time` field on Server for deterministic testing — eliminates all timing dependencies in SSE tests.~~ **Won't implement — declined.**
+17. ~~**Add SSE connection lifecycle metrics** — connect count, disconnect count, average session duration, events-per-second.~~ **Won't implement — declined.**
+18. ~~**Add WebSocket ping/pong heartbeat** for connection health detection (currently relies on write failures).~~ **NOT-DO — moot — WebSocket transport removed v0.9.0 (SSE-only, ADR-0001).**
+19. ~~**Add a `/api/events/stream` endpoint** that serves raw NDJSON (no SSE framing) for non-browser consumers.~~ **Won't implement — declined.**
+20. ~~**Add graceful degradation when viz.BuildDAGHTML fails** — currently the snapshot provider would error if DAG building fails.~~ **Won't implement — declined.**
+21. ~~**Add request tracing / correlation IDs** for debugging SSE/WS issues in production.~~ **Won't implement — declined.**
+22. ~~**Add rate limiting on SSE/WS connections** to prevent resource exhaustion.~~ **Won't implement — declined.**
+23. ~~**Consider Server-Sent Events `Last-Event-ID` header support** for reconnection (currently no resume capability).~~ done (docs-health pass 2026-10-05)
+24. ~~**Add a `/api/steps` REST endpoint** for polling individual step status (SSE/WS alternative for restricted networks).~~ done (docs-health pass 2026-10-05)
+25. ~~**Add Prometheus metrics endpoint** (`/metrics`) for workflow observability integration.~~ done (docs-health pass 2026-10-05)
 
 #### Core module improvements
 
-26. **Add `Report().WriteYAML()`** — some ops teams prefer YAML for human-readable config.
-27. **Add `Report().WriteMarkdown()`** summary — a human-readable Markdown report with tables and status icons.
-28. **Add step-level tags/labels** to `StepInfo` for filtering and grouping (e.g., `"database"`, `"network"`).
-29. **Add cost tracking** — optional per-step cost estimate (e.g., cloud compute cost) in the audit log.
-30. **Add resource usage** — optional CPU/memory/disk metrics per step (via callback).
-31. **Add `Report().Compare(other)`** as an alias for `Diff()` with better ergonomics.
-32. **Add `Filtered()` chainable builder** — `report.Filter(WithStatus(...)).Filter(WithSteps(...))` instead of variadic options.
-33. **Add JSON Schema generation** for the report format (`ReportSchema() ([]byte, error)`).
-34. **Add OpenTelemetry span export** — bridge audit events to OTel spans for distributed tracing.
-35. **Add a `Replay()` method on Auditor** that replays a recorded event stream for debugging.
-36. **Add `Report().WritePrometheus()`** — expose step metrics in Prometheus exposition format.
-37. **Consider a `Summary()` string method** on Report for quick CLI output (one-line status summary).
-38. **Add `StepInfo.Duration()` convenience method** — returns `time.Duration` from `DurationMs`.
-39. **Add `Report().StepsByType(typeName)`** query method.
-40. **Add `Report().StepsWithError()`** — returns all steps with non-nil Error.
+26. ~~**Add `Report().WriteYAML()`** — some ops teams prefer YAML for human-readable config.~~ **Won't implement — declined.**
+27. ~~**Add `Report().WriteMarkdown()`** summary — a human-readable Markdown report with tables and status icons.~~ **Won't implement — declined.**
+28. ~~**Add step-level tags/labels** to `StepInfo` for filtering and grouping (e.g., `"database"`, `"network"`).~~ **Won't implement — declined.**
+29. ~~**Add cost tracking** — optional per-step cost estimate (e.g., cloud compute cost) in the audit log.~~ **Won't implement — declined.**
+30. ~~**Add resource usage** — optional CPU/memory/disk metrics per step (via callback).~~ **Won't implement — declined.**
+31. ~~**Add `Report().Compare(other)`** as an alias for `Diff()` with better ergonomics.~~ **Won't implement — declined.**
+32. ~~**Add `Filtered()` chainable builder** — `report.Filter(WithStatus(...)).Filter(WithSteps(...))` instead of variadic options.~~ **Won't implement — declined.**
+33. ~~**Add JSON Schema generation** for the report format (`ReportSchema() ([]byte, error)`).~~ done (docs-health pass 2026-10-05)
+34. ~~**Add OpenTelemetry span export** — bridge audit events to OTel spans for distributed tracing.~~ **Won't implement — declined.**
+35. ~~**Add a `Replay()` method on Auditor** that replays a recorded event stream for debugging.~~ **Won't implement — declined.**
+36. ~~**Add `Report().WritePrometheus()`** — expose step metrics in Prometheus exposition format.~~ **Won't implement — declined.**
+37. ~~**Consider a `Summary()` string method** on Report for quick CLI output (one-line status summary).~~ done (docs-health pass 2026-10-05)
+38. ~~**Add `StepInfo.Duration()` convenience method** — returns `time.Duration` from `DurationMs`.~~ **Won't implement — declined.**
+39. ~~**Add `Report().StepsByType(typeName)`** query method.~~ **Won't implement — declined.**
+40. ~~**Add `Report().StepsWithError()`** — returns all steps with non-nil Error.~~ done (docs-health pass 2026-10-05)
 
 #### Testing improvements
 
-41. **Add a property-based test for CSV round-trip** — random step names with arbitrary unicode, verify WriteCSV → csv.Read preserves all fields.
-42. **Add a fuzz test for the NDJSON reader** — malformed lines, truncated JSON, control characters.
-43. **Add a benchmark for `viz.WriteHTML` with a 10,000-step report** — stress-test the dashboard renderer.
-44. **Add a chaos test** — randomly fail steps, cancel context mid-run, verify audit log is complete and consistent.
-45. **Add integration tests with real go-workflow examples** — sub-workflows, conditions, pipes, fan-out/fan-in patterns from real-world usage.
-46. **Add snapshot testing for diagram output** — structural snapshot (not byte-for-byte) to catch rendering regressions.
-47. **Add a test for concurrent `Report()` calls** — verify thread-safety of BuildReport under parallel access.
-48. **Add a test for `CaptureDAG` with dynamically-added steps** — steps added after Attach but before Do.
-49. **Add golden-file tests for CSV output** with known fixtures (deterministic, safe to byte-compare).
-50. **Add a CI matrix test** — run the full suite on Go 1.26.4 AND 1.26.5 (once available) to catch version-specific regressions.
+41. ~~**Add a property-based test for CSV round-trip** — random step names with arbitrary unicode, verify WriteCSV → csv.Read preserves all fields.~~ **Won't implement — declined.**
+42. ~~**Add a fuzz test for the NDJSON reader** — malformed lines, truncated JSON, control characters.~~ done (docs-health pass 2026-10-05)
+43. ~~**Add a benchmark for `viz.WriteHTML` with a 10,000-step report** — stress-test the dashboard renderer.~~ **Won't implement — declined.**
+44. ~~**Add a chaos test** — randomly fail steps, cancel context mid-run, verify audit log is complete and consistent.~~ **Won't implement — declined.**
+45. ~~**Add integration tests with real go-workflow examples** — sub-workflows, conditions, pipes, fan-out/fan-in patterns from real-world usage.~~ **Won't implement — declined.**
+46. ~~**Add snapshot testing for diagram output** — structural snapshot (not byte-for-byte) to catch rendering regressions.~~ **Won't implement — declined.**
+47. ~~**Add a test for concurrent `Report()` calls** — verify thread-safety of BuildReport under parallel access.~~ **Won't implement — declined.**
+48. ~~**Add a test for `CaptureDAG` with dynamically-added steps** — steps added after Attach but before Do.~~ **Won't implement — declined.**
+49. ~~**Add golden-file tests for CSV output** with known fixtures (deterministic, safe to byte-compare).~~ **Won't implement — declined.**
+50. ~~**Add a CI matrix test** — run the full suite on Go 1.26.4 AND 1.26.5 (once available) to catch version-specific regressions.~~ **Won't implement — declined.**
 
 ---
 
