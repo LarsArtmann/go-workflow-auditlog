@@ -19,7 +19,7 @@ HARVEST pass before they pile up.
 
 | Date  | Report | Summary |
 | ----- | ------ | ------- |
-| 10-05 | (this docs-health audit was printed inline per the skill — no snapshot file) | Full AUDIT: living docs rebuilt, GOEXPERIMENT sweep, ~1,500 items annotated, 72 files archived |
+| 10-06 | [docs-health-full-audit-annotate-archive](./2026-10-06_00-47_docs-health-full-audit-annotate-archive.md) | Full AUDIT: living docs rebuilt, GOEXPERIMENT sweep, ~1,500 items annotated, 72 files archived, gate repaired to green |
 
 ## Archived (closed history — see [archived/README.md](./archived/README.md) for the full manifest)
 
