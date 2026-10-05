@@ -279,14 +279,14 @@ succeeds on its own merits — the new flag records WHERE the result came from.
 
 ### What changed (all additive, `omitempty`)
 
-| Scope             | JSON key              | Type     | Example           | Default (not cached)  |
-| ----------------- | --------------------- | -------- | ----------------- | --------------------- |
-| `Event`           | `cached`              | `bool`   | `true`            | omitted               |
-| `StepInfo`        | `cached`              | `bool`   | `true`            | omitted               |
-| `WorkflowReport`  | `cached_step_count`   | `int`    | `3`               | omitted               |
-| `DiffResult`      | `cached_step_count_delta` | `int` | `+2` (always emitted) | `0` (present)     |
-| `DiffResult`      | `cached_steps_added` / `cached_steps_removed` | `[]string` | `["detect"]` | omitted |
-| `StepDiff`        | `cached`              | `bool`   | `true`            | omitted               |
+| Scope            | JSON key                                      | Type       | Example               | Default (not cached) |
+| ---------------- | --------------------------------------------- | ---------- | --------------------- | -------------------- |
+| `Event`          | `cached`                                      | `bool`     | `true`                | omitted              |
+| `StepInfo`       | `cached`                                      | `bool`     | `true`                | omitted              |
+| `WorkflowReport` | `cached_step_count`                           | `int`      | `3`                   | omitted              |
+| `DiffResult`     | `cached_step_count_delta`                     | `int`      | `+2` (always emitted) | `0` (present)        |
+| `DiffResult`     | `cached_steps_added` / `cached_steps_removed` | `[]string` | `["detect"]`          | omitted              |
+| `StepDiff`       | `cached`                                      | `bool`     | `true`                | omitted              |
 
 The JSON Schema (`schema/report.schema.json`) was regenerated to include the
 report-level additions. NDJSON replay round-trips the `cached` event flag.
@@ -315,4 +315,3 @@ func (s *DetectStep) Do(ctx context.Context) error {
 
 Filtering: `report.Filtered(auditlog.WithCachedSteps())` answers "what did we
 NOT re-verify this run?"; `WithUncachedSteps()` answers "what ran fresh?".
-

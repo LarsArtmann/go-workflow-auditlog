@@ -32,22 +32,22 @@ User's directive: "Maybe we need to add this!??!" + "I hate lying to users … n
 
 ### Core implementation (all files)
 
-| File | Change |
-|---|---|
-| `cached.go` (NEW) | `MarkCached`, `ErrMarkCachedNoStepContext`, `stepContext`/`stepContextKey`, `withStepContext`, `Recorder.markCached` (mutex-guarded) |
-| `event.go` | `Cached` field + `WasCached()` predicate |
-| `step.go` | `stepCore.cached`, `StepInfo.Cached` + doc, `toStepInfo` propagation |
-| `attach.go` | BeforeStep injects step identity into ctx |
-| `recorder.go` | attempt_end event carries `Cached: rec.cached` (retry-correct: attempt 1 false, attempt 2 true) |
-| `replay.go` | `replayApplyEvent` sets `step.cached` from attempt_end → NDJSON round-trip preserves flag |
-| `report.go` | `CachedStepCount` field + `validateCachedStepCount` (`ErrCountMismatch` on drift) |
-| `report_builder.go` | `finalizeDenormalized` computes the count |
-| `filter.go` | `WithCachedSteps()` / `WithUncachedSteps()` ("what did we NOT re-verify?" / "what ran fresh?"); cached filter also restricts events to kept steps |
-| `csv.go` | `cached` column (after has_timeout) in CSV + TSV |
-| `classify.go` | sentinel registered (Rejection) |
-| `cmd/auditlog/info.go` | `cached: N (results reused, not re-verified)` breakdown + `⚡cached` marker per step in step list |
-| `testhelpers/testhelpers.go` | `CachedStep` type + `NewCached(name)` (succeeds by "reusing a stored result", calls `MarkCached`) |
-| `schema/report.schema.json` | regenerated via `cmd/genschema` (+9 lines) |
+| File                         | Change                                                                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cached.go` (NEW)            | `MarkCached`, `ErrMarkCachedNoStepContext`, `stepContext`/`stepContextKey`, `withStepContext`, `Recorder.markCached` (mutex-guarded)              |
+| `event.go`                   | `Cached` field + `WasCached()` predicate                                                                                                          |
+| `step.go`                    | `stepCore.cached`, `StepInfo.Cached` + doc, `toStepInfo` propagation                                                                              |
+| `attach.go`                  | BeforeStep injects step identity into ctx                                                                                                         |
+| `recorder.go`                | attempt_end event carries `Cached: rec.cached` (retry-correct: attempt 1 false, attempt 2 true)                                                   |
+| `replay.go`                  | `replayApplyEvent` sets `step.cached` from attempt_end → NDJSON round-trip preserves flag                                                         |
+| `report.go`                  | `CachedStepCount` field + `validateCachedStepCount` (`ErrCountMismatch` on drift)                                                                 |
+| `report_builder.go`          | `finalizeDenormalized` computes the count                                                                                                         |
+| `filter.go`                  | `WithCachedSteps()` / `WithUncachedSteps()` ("what did we NOT re-verify?" / "what ran fresh?"); cached filter also restricts events to kept steps |
+| `csv.go`                     | `cached` column (after has_timeout) in CSV + TSV                                                                                                  |
+| `classify.go`                | sentinel registered (Rejection)                                                                                                                   |
+| `cmd/auditlog/info.go`       | `cached: N (results reused, not re-verified)` breakdown + `⚡cached` marker per step in step list                                                 |
+| `testhelpers/testhelpers.go` | `CachedStep` type + `NewCached(name)` (succeeds by "reusing a stored result", calls `MarkCached`)                                                 |
+| `schema/report.schema.json`  | regenerated via `cmd/genschema` (+9 lines)                                                                                                        |
 
 ### Viz module
 
@@ -137,6 +137,7 @@ Individual gates all ran green (`go test -race`, `go vet`, `golangci-lint` per m
 ## f) NEXT — up to 50 tasks, roughly Pareto-ordered
 
 **Close out this feature (P0):**
+
 1. Finish AGENTS.md: file map + Cached Gotcha + column count 10→11 + accurate test counts (decide counting method and state it).
 2. Resolve the AGENTS-vs-.golangci.yml `nlreturn` contradiction (verify config; fix the lying doc).
 3. docs/MIGRATION.md: additive `cached` fields section (+ schema regen note).
