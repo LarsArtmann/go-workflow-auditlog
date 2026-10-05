@@ -67,29 +67,29 @@
 
 ## b) PARTIALLY DONE
 
-1. **Stale commit message `66e2dc8`** — says "launch public documentation website at **auditlog.lars.software**" but the domain was renamed to `go-workflow-auditlog.lars.software` before it went live. The commit is already on `origin/master` (pushed). Amending would require force-push on a public repo. **Left for user to decide** — this is an irreversible/reversible judgment call that belongs to the user.
+1. ~~**Stale commit message `66e2dc8`** — says "launch public documentation website at **auditlog.lars.software**" but the domain was renamed to `go-workflow-auditlog.lars.software` before it went live. The commit is already on `origin/master` (pushed). Amending would require force-push on a public repo. **Left for user to decide** — this is an irreversible/reversible judgment call that belongs to the user.~~ **Won't implement — commit message left as-is — history accepted.**
 
-2. **Prior status report `2026-07-13_21-17_public-presence-overhaul.md`** — references `auditlog.lars.software` throughout. The second report (21-42) already flagged this as stale. **Left unchanged** — point-in-time snapshots are historical records, not living docs. Adding a deprecation header would be reasonable but was not done.
+2. ~~**Prior status report `2026-07-13_21-17_public-presence-overhaul.md`** — references `auditlog.lars.software` throughout. The second report (21-42) already flagged this as stale. **Left unchanged** — point-in-time snapshots are historical records, not living docs. Adding a deprecation header would be reasonable but was not done.~~ **NOT-DO — point-in-time by design; annotated by the 2026-10-05 pass instead.**
 
-3. **CHANGELOG link references** — `[Unreleased]`, `[0.5.1]`, `[0.6.0]` sections have no bottom-of-file link references (e.g., `[Unreleased]: https://github.com/.../compare/v0.6.0...HEAD`). The older entries also lack them. The file works fine without them (headers are self-contained) but Keep a Changelog convention suggests they should exist.
+3. ~~**CHANGELOG link references** — `[Unreleased]`, `[0.5.1]`, `[0.6.0]` sections have no bottom-of-file link references (e.g., `[Unreleased]: https://github.com/.../compare/v0.6.0...HEAD`). The older entries also lack them. The file works fine without them (headers are self-contained) but Keep a Changelog convention suggests they should exist.~~ **Won't implement — compare-links declined — low value.**
 
 ---
 
 ## c) NOT STARTED
 
-1. **CHANGELOG `[Unreleased]` → `[0.7.0]` promotion** — the Unreleased section has substantial content (json/v2, website, go-output v0.30.4, go-error-family v0.7.0, flake-parts). No `v0.7.0` tag exists yet. This is a release decision, not a docs-health decision.
+1. ~~**CHANGELOG `[Unreleased]` → `[0.7.0]` promotion** — the Unreleased section has substantial content (json/v2, website, go-output v0.30.4, go-error-family v0.7.0, flake-parts). No `v0.7.0` tag exists yet. This is a release decision, not a docs-health decision.~~ done — v0.7.0 promoted + tagged
 
-2. **CHANGELOG `[0.5.0]` entry accuracy** — the existing entry says "go-error-family v0.5.0" but go.mod now shows v0.7.0. The v0.5.0 entry correctly reflects what shipped _at that version_. The v0.7.0 bump is captured in `[Unreleased]`. No fix needed, but worth noting.
+2. ~~**CHANGELOG `[0.5.0]` entry accuracy** — the existing entry says "go-error-family v0.5.0" but go.mod now shows v0.7.0. The v0.5.0 entry correctly reflects what shipped _at that version_. The v0.7.0 bump is captured in `[Unreleased]`. No fix needed, but worth noting.~~ done — correct by design — entries reflect version-at-release
 
-3. **CONTRIBUTING.md audit** — not in the docs-health model's core 7 files, but it exists. Not reviewed for freshness this session.
+3. ~~**CONTRIBUTING.md audit** — not in the docs-health model's core 7 files, but it exists. Not reviewed for freshness this session.~~ **NOT-DO — out of docs-health core model — maintained ad hoc.**
 
-4. **STABILITY.md audit** — same as above. Exists, not reviewed.
+4. ~~**STABILITY.md audit** — same as above. Exists, not reviewed.~~ **NOT-DO — out of docs-health core model.**
 
-5. **SECURITY.md audit** — same. Exists, not reviewed.
+5. ~~**SECURITY.md audit** — same. Exists, not reviewed.~~ **NOT-DO — out of docs-health core model.**
 
-6. **Website content audit** — the `website/` directory has 10 doc pages generated from scratch in the prior session. Their content freshness vs the codebase was not checked (out of scope for this session, but noted for next time).
+6. **Website content audit** — the `website/` directory has 10 doc pages generated from scratch in the prior session. Their content freshness vs the codebase was not checked (out of scope for this session, but noted for next time). **→ open — website guide pages (TODO_LIST 2026-10-05)**
 
-7. **`docs/planning/` and `docs/reviews/` directories** — contain historical planning and review docs. Not part of the docs-health model's core files. Not audited.
+7. ~~**`docs/planning/` and `docs/reviews/` directories** — contain historical planning and review docs. Not part of the docs-health model's core files. Not audited.~~ done — planning/reviews annotated by the 2026-10-05 pass
 
 ---
 
@@ -143,86 +143,86 @@
 
 ### CI/CD (critical — prevents future drift)
 
-1. **Investigate why the golden file test wasn't caught in CI** — check `.github/workflows/ci.yml` for `GOEXPERIMENT=jsonv2` and golden test execution
-2. **Add `GOEXPERIMENT=jsonv2` to CI** if missing (flake.nix sets it but CI may use raw Go)
-3. **Add CHANGELOG pre-tag check** — `scripts/check-changelog.sh` that verifies a CHANGELOG entry exists before allowing `git tag`
-4. **Add docs freshness CI job** — grep hardcoded go-output/go-error-family versions in docs, compare against go.mod
-5. **Add test-count drift detector** — CI script that counts `func Test` and warns if docs claim a different number
-6. **Add website build + deploy workflow** (`.github/workflows/website.yml`) — still not done from prior sessions
-7. **Add website build check** to PR CI (non-blocking)
-8. **Add html-validate** to CI for website build output
+1. ~~**Investigate why the golden file test wasn't caught in CI** — check `.github/workflows/ci.yml` for `GOEXPERIMENT=jsonv2` and golden test execution~~ done — golden byte-test retired for structural golden-content test
+2. ~~**Add `GOEXPERIMENT=jsonv2` to CI** if missing (flake.nix sets it but CI may use raw Go)~~ **NOT-DO — flag unnecessary — json/v2 GA in Go 1.27.**
+3. ~~**Add CHANGELOG pre-tag check** — `scripts/check-changelog.sh` that verifies a CHANGELOG entry exists before allowing `git tag`~~ **Won't implement — RELEASE.md process gate covers it.**
+4. ~~**Add docs freshness CI job** — grep hardcoded go-output/go-error-family versions in docs, compare against go.mod~~ **Won't implement — docs-health passes are the standing gate.**
+5. **Add test-count drift detector** — CI script that counts `func Test` and warns if docs claim a different number **→ open — TODO_LIST 2026-10-05**
+6. ~~**Add website build + deploy workflow** (`.github/workflows/website.yml`) — still not done from prior sessions~~ done — website.yml shipped
+7. ~~**Add website build check** to PR CI (non-blocking)~~ done — website build check
+8. ~~**Add html-validate** to CI for website build output~~ done — html-validate in CI
 
 ### Release management
 
-9. **Promote CHANGELOG `[Unreleased]` to `[0.7.0]`** — substantial content ready (json/v2, website, go-output v0.30.4, go-error-family v0.7.0, flake-parts)
-10. **Tag v0.7.0** after CHANGELOG promotion
-11. **Run goreleaser** for v0.7.0 release
-12. **Decide on the stale commit message `66e2dc8`** — amend (force-push) or leave as-is
+9. ~~**Promote CHANGELOG `[Unreleased]` to `[0.7.0]`** — substantial content ready (json/v2, website, go-output v0.30.4, go-error-family v0.7.0, flake-parts)~~ done — v0.7.0 promoted
+10. ~~**Tag v0.7.0** after CHANGELOG promotion~~ done — v0.7.0 tagged
+11. ~~**Run goreleaser** for v0.7.0 release~~ done — goreleaser used from v0.8.x
+12. ~~**Decide on the stale commit message `66e2dc8`** — amend (force-push) or leave as-is~~ **Won't implement — history accepted.**
 
 ### Documentation polish
 
-13. **Add CHANGELOG link references** at bottom of file (`[Unreleased]: https://github.com/.../compare/v0.6.0...HEAD` etc.)
-14. **Mention `GOEXPERIMENT=jsonv2` in README install section** for non-nix users
-15. **Add deprecation header to 21-17 status report** noting the domain rename
-16. **Audit CONTRIBUTING.md for freshness** — not reviewed this session
-17. **Audit STABILITY.md for freshness** — not reviewed this session
-18. **Trim README** — move detailed API tables to docs website, replace with links (flagged in prior sessions)
-19. **Audit website content** — 10 doc pages generated from scratch; verify accuracy against codebase
+13. ~~**Add CHANGELOG link references** at bottom of file (`[Unreleased]: https://github.com/.../compare/v0.6.0...HEAD` etc.)~~ **Won't implement — compare-links declined.**
+14. ~~**Mention `GOEXPERIMENT=jsonv2` in README install section** for non-nix users~~ **NOT-DO — moot — flag unnecessary (Go 1.27).**
+15. ~~**Add deprecation header to 21-17 status report** noting the domain rename~~ **NOT-DO — superseded — 2026-10-05 annotate pass.**
+16. ~~**Audit CONTRIBUTING.md for freshness** — not reviewed this session~~ done — CONTRIBUTING commands refreshed 2026-10-05
+17. ~~**Audit STABILITY.md for freshness** — not reviewed this session~~ done — STABILITY audited across releases
+18. ~~**Trim README** — move detailed API tables to docs website, replace with links (flagged in prior sessions)~~ **Won't implement — README kept comprehensive deliberately.**
+19. **Audit website content** — 10 doc pages generated from scratch; verify accuracy against codebase **→ open — website guide pages (TODO_LIST 2026-10-05)**
 
 ### Code quality
 
-20. **Investigate the `example/` package coverage** — shows 0.0% coverage; it's a demo binary (no tests) but the coverage tool includes it
-21. **Add godoc `ExampleX` for `PeakConcurrency` and `CriticalPathDurationMs`** — still in TODO_LIST
-22. **Add godoc `ExampleX` for `WallClockDurationMs`** — still in TODO_LIST
-23. **Add `WritePlantUMLString` coverage test** — still at 80% coverage per TODO_LIST
-24. **Push coverage 93.9% → 95%+** — target writeToFile and renderHTML error paths per TODO_LIST
+20. ~~**Investigate the `example/` package coverage** — shows 0.0% coverage; it's a demo binary (no tests) but the coverage tool includes it~~ **NOT-DO — example demos have no tests by design.**
+21. ~~**Add godoc `ExampleX` for `PeakConcurrency` and `CriticalPathDurationMs`** — still in TODO_LIST~~ done — godoc examples shipped
+22. ~~**Add godoc `ExampleX` for `WallClockDurationMs`** — still in TODO_LIST~~ done — godoc examples shipped
+23. ~~**Add `WritePlantUMLString` coverage test** — still at 80% coverage per TODO_LIST~~ done — 80% v0.5.0
+24. ~~**Push coverage 93.9% → 95%+** — target writeToFile and renderHTML error paths per TODO_LIST~~ done — 97% reached
 
 ### Domain/DNS (from prior sessions, still blocked)
 
-25. **Refresh Namecheap API key** in `domains/terraform.tfvars`
-26. **Apply Terraform** for DNS records
-27. **Verify DNS propagation** for `go-workflow-auditlog.lars.software`
-28. **Verify Firebase SSL provisioning**
-29. **Commit the 4-file domain rename** in auditlog repo (README.md, astro.config.mjs, robots.txt, config.ts)
+25. ~~**Refresh Namecheap API key** in `domains/terraform.tfvars`~~ done — resolved — 21-42
+26. ~~**Apply Terraform** for DNS records~~ done — resolved — 21-42
+27. ~~**Verify DNS propagation** for `go-workflow-auditlog.lars.software`~~ done — DNS live
+28. ~~**Verify Firebase SSL provisioning**~~ done — SSL provisioned
+29. ~~**Commit the 4-file domain rename** in auditlog repo (README.md, astro.config.mjs, robots.txt, config.ts)~~ done — rename committed — 21-42
 
 ### Website improvements (from prior sessions)
 
-30. **Run `pnpm run typecheck`** on website — never run
-31. **Add OG image generation** (`src/pages/og/[...slug].ts`)
-32. **Add screenshot of HTML dashboard** to landing page
-33. **Add error classification guide page** (`/guides/error-classification/`)
-34. **Add retry & timeout tracking guide** (`/guides/retry-and-timeout/`)
-35. **Add concurrency model guide** (`/guides/concurrency-model/`)
-36. **Add replay & load guide** (`/guides/replay-and-load/`)
-37. **Sync website changelog** from CHANGELOG.md instead of maintaining a copy
-38. **Add link checking** (lychee or similar) for website
-39. **Add Lighthouse CI** for performance/accessibility/SEO
+30. **Run `pnpm run typecheck`** on website — never run **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+31. **Add OG image generation** (`src/pages/og/[...slug].ts`) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+32. ~~**Add screenshot of HTML dashboard** to landing page~~ done — screenshots shipped
+33. **Add error classification guide page** (`/guides/error-classification/`) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+34. **Add retry & timeout tracking guide** (`/guides/retry-and-timeout/`) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+35. **Add concurrency model guide** (`/guides/concurrency-model/`) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+36. **Add replay & load guide** (`/guides/replay-and-load/`) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+37. **Sync website changelog** from CHANGELOG.md instead of maintaining a copy **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+38. **Add link checking** (lychee or similar) for website **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+39. **Add Lighthouse CI** for performance/accessibility/SEO **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### Structural improvements
 
-40. **Split AGENTS.md** into essentials + `docs/ARCHITECTURE.md` detailed reference (consider)
-41. **Add `docs/status/INDEX.md`** linking all status reports (from ROADMAP.md)
-42. **Add automated docs freshness linting** as a flake.nix check target
-43. **Consider splitting the library** into core + visualization sub-modules (from ROADMAP.md)
-44. **Add streaming NDJSON export** (from ROADMAP.md)
-45. **Add OpenTelemetry span bridge** (from ROADMAP.md)
-46. **Add CLI tool** for inspecting/replaying/diffing reports (from ROADMAP.md)
+40. ~~**Split AGENTS.md** into essentials + `docs/ARCHITECTURE.md` detailed reference (consider)~~ **Won't implement — Discussions declined.**
+41. ~~**Add `docs/status/INDEX.md`** linking all status reports (from ROADMAP.md)~~ done — docs/status/INDEX.md exists
+42. **Add automated docs freshness linting** as a flake.nix check target **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+43. ~~**Consider splitting the library** into core + visualization sub-modules (from ROADMAP.md)~~ **Won't implement — pinned issue declined.**
+44. **Add streaming NDJSON export** (from ROADMAP.md) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+45. **Add OpenTelemetry span bridge** (from ROADMAP.md) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+46. **Add CLI tool** for inspecting/replaying/diffing reports (from ROADMAP.md) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### Git/repo hygiene
 
-47. **Commit the docs-health audit changes** — 6 files modified + 1 golden file updated, currently uncommitted
-48. **Add `website` topic** to GitHub repo
-49. **Add GitHub social preview image** (1200x630px)
-50. **Set up GitHub Discussions** for Q&A
+47. **Commit the docs-health audit changes** — 6 files modified + 1 golden file updated, currently uncommitted **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+48. **Add `website` topic** to GitHub repo **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+49. **Add GitHub social preview image** (1200x630px) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+50. **Set up GitHub Discussions** for Q&A **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 
 ## g) Top 2 Questions
 
-### 1. Why was the stale golden file not caught by CI for 11 days and 3 tagged releases?
+### 1. ~~Why was the stale golden file not caught by CI for 11 days and 3 tagged releases?~~ **Resolved:** byte-for-byte golden testing was retired in favor of a structural golden-content test (see AGENTS.md) — the stale-golden failure mode no longer exists.
 
 The HTML golden file (`testdata/golden/report.html`) has been stale since the daghtml SDK migration on 2026-07-02 (v0.5.1). The output changed from 88391 bytes to 70870 bytes, but the golden was never updated — meaning `TestReport_WriteHTML_GoldenFile` was failing. Yet v0.5.1 and v0.6.0 were both tagged and presumably released during this window. **Is the CI workflow setting `GOEXPERIMENT=jsonv2`? Is the golden test even running in CI? Or was CI green despite the failure?** I can check `.github/workflows/ci.yml` but this feels like it needs your eyes — it may indicate a deeper CI gap where json/v2 code paths aren't being tested at all.
 
-### 2. Should the docs-health audit changes be committed as a single commit, or split by file?
+### 2. ~~Should the docs-health audit changes be committed as a single commit, or split by file?~~ **Resolved:** moot — the auto-commit daemon commits continuously; commit curation is not practiced here.
 
 This session modified 6 documentation files (AGENTS.md, FEATURES.md, TODO_LIST.md, ROADMAP.md, CHANGELOG.md, README.md) plus 1 golden test data file (`testdata/golden/report.html`). The changes are all "docs freshness" in nature but span different concerns: the CHANGELOG rebuild is substantial (2 new version entries + Unreleased rewrite), the FEATURES.md PLANNED section cleanup is a split-brain fix, and the golden file update is a test data fix. **Do you want one commit like `docs: full docs-health audit — fix 17 drift issues across 6 files`, or should I split into logical commits (CHANGELOG rebuild, FEATURES split-brain fix, AGENTS commands fix, golden file update)?**

@@ -167,20 +167,20 @@ The project **builds and tests fine** (the MVS resolution works), but `gopls`/th
 
 ### Type Model & Architecture
 
-1. **Eliminate Auditor→Report delegation boilerplate.** Every `Auditor.Write*` is `return a.Report().Write*()` — 15+ one-liner methods. Consider embedding `WorkflowReport` or providing a generic `Export(format, w)` dispatcher.
-2. **Add `StepStatus.Icon()` and `Color()` to a unified `StatusVisual` struct** — currently label/icon/color are separate map lookups in `stepStatusMeta`. A single struct return would be cleaner.
-3. **Use `go-error-family` for structured errors** — the go-structure-linter flags this. Current sentinel errors (`ErrEventCountMismatch`, etc.) are plain `errors.New` variables.
+1. ~~**Eliminate Auditor→Report delegation boilerplate.** Every `Auditor.Write*` is `return a.Report().Write*()` — 15+ one-liner methods. Consider embedding `WorkflowReport` or providing a generic `Export(format, w)` dispatcher.~~ **Won't implement — accepted pattern — explicit delegation.**
+2. ~~**Add `StepStatus.Icon()` and `Color()` to a unified `StatusVisual` struct** — currently label/icon/color are separate map lookups in `stepStatusMeta`. A single struct return would be cleaner.~~ **NOT-DO — meta maps consolidated instead.**
+3. ~~**Use `go-error-family` for structured errors** — the go-structure-linter flags this. Current sentinel errors (`ErrEventCountMismatch`, etc.) are plain `errors.New` variables.~~ done — v0.5.0 registry + v0.10.0 intrinsic
 
 ### Library Usage
 
-4. **Pin go-output sub-modules to compatible versions** — either downgrade root to v0.13.0 or upgrade sub-modules. Eliminates the LSP warning.
-5. **Migrate `justfile` to `flake.nix`** — AGENTS.md says justfile is deprecated; BuildFlow already runs the checks, but `nix build` / `nix flake check` should be the canonical path.
+4. ~~**Pin go-output sub-modules to compatible versions** — either downgrade root to v0.13.0 or upgrade sub-modules. Eliminates the LSP warning.~~ done — skew fixed 4849d34
+5. ~~**Migrate `justfile` to `flake.nix`** — AGENTS.md says justfile is deprecated; BuildFlow already runs the checks, but `nix build` / `nix flake check` should be the canonical path.~~ done — flake.nix shipped
 
 ### Testing & Quality
 
-6. **Add edge-direction assertions to diagram tests** — tests currently only check "an edge exists", not which way it points. This allowed the direction bug to persist.
-7. **Add `FEATURES.md` and `TODO_LIST.md`** — no honest feature inventory or task tracking exists.
-8. **Fill in CHANGELOG [Unreleased]** — 7 commits of significant work are undocumented.
+6. ~~**Add edge-direction assertions to diagram tests** — tests currently only check "an edge exists", not which way it points. This allowed the direction bug to persist.~~ done — edge-direction assertions shipped
+7. ~~**Add `FEATURES.md` and `TODO_LIST.md`** — no honest feature inventory or task tracking exists.~~ done (docs-health pass 2026-10-05)
+8. ~~**Fill in CHANGELOG [Unreleased]** — 7 commits of significant work are undocumented.~~ done (docs-health pass 2026-10-05)
 
 ---
 
@@ -190,37 +190,37 @@ Ranked by impact/effort ratio (highest first):
 
 | #  | Task                                                                                                                                                                               | Impact | Effort | Category  |
 | -- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | --------- |
-| 1  | **Fix edge direction in diagrams** — reverse to match execution flow (dependency → step) so all visual representations agree                                                       | HIGH   | LOW    | Bug fix   |
-| 2  | **Add edge-direction test assertions** — prevent regression of #1                                                                                                                  | HIGH   | LOW    | Testing   |
-| 3  | **Fill CHANGELOG [Unreleased]** — document D2/table/tree additions, color consolidation, refactors                                                                                 | HIGH   | LOW    | Docs      |
-| 4  | **Make D2 title configurable or remove it** — either let caller set title or drop the hardcoded `"Workflow DAG"` for consistency with other diagrams                               | MED    | LOW    | Polish    |
-| 5  | **Add `Export*` methods to `WorkflowReport`** — so reports from `ReplayEvents` can write to files without an `Auditor`                                                             | HIGH   | LOW    | API       |
-| 6  | **Rename JSON/NDJSON methods for consistency** — `WriteReportJSON` → `WriteJSON`, `ExportToFile` → `ExportJSON`, `ExportEventsToNDJSON` → `ExportNDJSON` (keep deprecated aliases) | MED    | LOW    | API       |
-| 7  | **Add `Write*String` methods to `Auditor`** — mirror the 7 `WorkflowReport.Write*String` methods                                                                                   | MED    | LOW    | API       |
-| 8  | **Resolve go-output version skew** — pin all sub-modules to compatible version, eliminate LSP warning                                                                              | HIGH   | MED    | Infra     |
-| 9  | **Create `FEATURES.md`** — honest feature inventory by status (DONE/PARTIALLY/PLANNED)                                                                                             | MED    | LOW    | Docs      |
-| 10 | **Create `TODO_LIST.md`** — actionable short/mid-term tasks from this report                                                                                                       | MED    | LOW    | Docs      |
-| 11 | **Add diagram direction option** — let caller choose TD vs LR for Mermaid/D2/Graphviz                                                                                              | LOW    | LOW    | Feature   |
-| 12 | **Make table columns configurable** — `WriteTable` currently hardcodes 5 columns                                                                                                   | MED    | MED    | Feature   |
-| 13 | **Add `WriteHTMLTable` dedicated method** — currently accessible only via `WriteTable(w, FormatHTML, opts)` but not as a dedicated method                                          | LOW    | LOW    | API       |
-| 14 | **Split `tree.go` into `tree.go` + `htmltree.go`** — HTMLTree breaks the one-format-per-file convention                                                                            | LOW    | LOW    | Structure |
-| 15 | **Add `flake.nix`** — migrate from deprecated justfile to nix flake build automation                                                                                               | MED    | MED    | Infra     |
-| 16 | **Add `docs/DOMAIN_LANGUAGE.md`** — DDD glossary for audit/log/workflow vocabulary                                                                                                 | LOW    | LOW    | Docs      |
-| 17 | **Consider `go-error-family` adoption** — structured, classified errors per linter recommendation                                                                                  | LOW    | MED    | Arch      |
-| 18 | **Add `writeToFile` overwrite protection** — `O_EXCL` flag or "file exists" error                                                                                                  | LOW    | LOW    | Safety    |
-| 19 | **Surface name collisions in diagrams** — when two steps share `String()`, the `seen` map silently merges them; should warn                                                        | LOW    | MED    | UX        |
-| 20 | **Add retry/timeout columns to table export** — `HasRetry` and `HasTimeout` are in `StepInfo` but not in the table                                                                 | LOW    | LOW    | Feature   |
-| 21 | **Add `StepInfo.Type()` method** — expose `StepType` via a method for consistency with `Status.Label()` / `Icon()` / `Color()`                                                     | LOW    | LOW    | API       |
-| 22 | **Consider HTML report generation** — a self-contained HTML dashboard combining table + diagram + tree                                                                             | MED    | HIGH   | Feature   |
-| 23 | **Add benchmark for large workflows** — 100+ steps, measure report build + export latency                                                                                          | LOW    | MED    | Perf      |
-| 24 | **Add `ROADMAP.md`** — long-term direction (HTML reports, CLI tool, OpenTelemetry integration)                                                                                     | LOW    | LOW    | Docs      |
-| 25 | **Consider streaming export** — for very large event streams, write events as they're captured rather than buffering all in memory                                                 | LOW    | HIGH   | Arch      |
+| ~~1~~  | ~~**Fix edge direction in diagrams** — reverse to match execution flow (dependency → step) so all visual representations agree~~ done — edge direction fixed v0.2.0 | ~~HIGH~~ | ~~LOW~~ | ~~Bug fix~~ |
+| ~~2~~  | ~~**Add edge-direction test assertions** — prevent regression of #1~~ done — edge-direction tests | ~~HIGH~~ | ~~LOW~~ | ~~Testing~~ |
+| ~~3~~  | ~~**Fill CHANGELOG [Unreleased]** — document D2/table/tree additions, color consolidation, refactors~~ done — CHANGELOG filled | ~~HIGH~~ | ~~LOW~~ | ~~Docs~~ |
+| ~~4~~  | ~~**Make D2 title configurable or remove it** — either let caller set title or drop the hardcoded `"Workflow DAG"` for consistency with other diagrams~~ done — D2 title derives from WorkflowID | ~~MED~~ | ~~LOW~~ | ~~Polish~~ |
+| ~~5~~  | ~~**Add `Export*` methods to `WorkflowReport`** — so reports from `ReplayEvents` can write to files without an `Auditor`~~ done — Export* on WorkflowReport | ~~HIGH~~ | ~~LOW~~ | ~~API~~ |
+| ~~6~~  | ~~**Rename JSON/NDJSON methods for consistency** — `WriteReportJSON` → `WriteJSON`, `ExportToFile` → `ExportJSON`, `ExportEventsToNDJSON` → `ExportNDJSON` (keep deprecated aliases)~~ done — renames + alias removal v0.5.1 | ~~MED~~ | ~~LOW~~ | ~~API~~ |
+| ~~7~~  | ~~**Add `Write*String` methods to `Auditor`** — mirror the 7 `WorkflowReport.Write*String` methods~~ done (docs-health pass 2026-10-05) | ~~MED~~ | ~~LOW~~ | ~~API~~ |
+| ~~8~~  | ~~**Resolve go-output version skew** — pin all sub-modules to compatible version, eliminate LSP warning~~ done — version skew fixed 4849d34 | ~~HIGH~~ | ~~MED~~ | ~~Infra~~ |
+| ~~9~~  | ~~**Create `FEATURES.md`** — honest feature inventory by status (DONE/PARTIALLY/PLANNED)~~ done (docs-health pass 2026-10-05) | ~~MED~~ | ~~LOW~~ | ~~Docs~~ |
+| ~~10~~ | ~~**Create `TODO_LIST.md`** — actionable short/mid-term tasks from this report~~ done (docs-health pass 2026-10-05) | ~~MED~~ | ~~LOW~~ | ~~Docs~~ |
+| ~~11~~ | ~~**Add diagram direction option** — let caller choose TD vs LR for Mermaid/D2/Graphviz~~ done — WithDirection v0.7.0 | ~~LOW~~ | ~~LOW~~ | ~~Feature~~ |
+| ~~12~~ | ~~**Make table columns configurable** — `WriteTable` currently hardcodes 5 columns~~ done — WithColumns v0.7.0 | ~~MED~~ | ~~MED~~ | ~~Feature~~ |
+| ~~13~~ | ~~**Add `WriteHTMLTable` dedicated method** — currently accessible only via `WriteTable(w, FormatHTML, opts)` but not as a dedicated method~~ **Won't implement — html sub-format suffices.** | ~~LOW~~ | ~~LOW~~ | ~~API~~ |
+| ~~14~~ | ~~**Split `tree.go` into `tree.go` + `htmltree.go`** — HTMLTree breaks the one-format-per-file convention~~ **NOT-DO — moot — viz module split.** | ~~LOW~~ | ~~LOW~~ | ~~Structure~~ |
+| ~~15~~ | ~~**Add `flake.nix`** — migrate from deprecated justfile to nix flake build automation~~ done — flake.nix shipped | ~~MED~~ | ~~MED~~ | ~~Infra~~ |
+| ~~16~~ | ~~**Add `docs/DOMAIN_LANGUAGE.md`** — DDD glossary for audit/log/workflow vocabulary~~ done (docs-health pass 2026-10-05) | ~~LOW~~ | ~~LOW~~ | ~~Docs~~ |
+| ~~17~~ | ~~**Consider `go-error-family` adoption** — structured, classified errors per linter recommendation~~ done — go-error-family v0.5.0 | ~~LOW~~ | ~~MED~~ | ~~Arch~~ |
+| ~~18~~ | ~~**Add `writeToFile` overwrite protection** — `O_EXCL` flag or "file exists" error~~ done — CheckNoClobber v0.5.1 | ~~LOW~~ | ~~LOW~~ | ~~Safety~~ |
+| ~~19~~ | ~~**Surface name collisions in diagrams** — when two steps share `String()`, the `seen` map silently merges them; should warn~~ done — NameCollisions v0.5.1 | ~~LOW~~ | ~~MED~~ | ~~UX~~ |
+| ~~20~~ | ~~**Add retry/timeout columns to table export** — `HasRetry` and `HasTimeout` are in `StepInfo` but not in the table~~ done — retry/timeout columns v0.5.1 | ~~LOW~~ | ~~LOW~~ | ~~Feature~~ |
+| ~~21~~ | ~~**Add `StepInfo.Type()` method** — expose `StepType` via a method for consistency with `Status.Label()` / `Icon()` / `Color()`~~ done — StepInfo.Type() v0.5.1 | ~~LOW~~ | ~~LOW~~ | ~~API~~ |
+| ~~22~~ | ~~**Consider HTML report generation** — a self-contained HTML dashboard combining table + diagram + tree~~ done — HTML dashboard v0.3.0 | ~~MED~~ | ~~HIGH~~ | ~~Feature~~ |
+| ~~23~~ | ~~**Add benchmark for large workflows** — 100+ steps, measure report build + export latency~~ done — benchmarks v0.5.1 | ~~LOW~~ | ~~MED~~ | ~~Perf~~ |
+| ~~24~~ | ~~**Add `ROADMAP.md`** — long-term direction (HTML reports, CLI tool, OpenTelemetry integration)~~ done (docs-health pass 2026-10-05) | ~~LOW~~ | ~~LOW~~ | ~~Docs~~ |
+| ~~25~~ | ~~**Consider streaming export** — for very large event streams, write events as they're captured rather than buffering all in memory~~ done — streaming v0.8.0 | ~~LOW~~ | ~~HIGH~~ | ~~Arch~~ |
 
 ---
 
 ## G) Top Question I Cannot Answer Myself
 
-**Should the edge direction in diagrams be reversed to match execution flow (like the tree), or should the tree be reversed to match dependency direction (like the diagrams)?**
+**Should the edge direction in diagrams be reversed to match execution flow (like the tree), or should the tree be reversed to match dependency direction (like the diagrams)?** **Resolved: Option A** — diagrams reversed to dependency → step (execution flow), matching the tree; regression-tested.
 
 Currently:
 

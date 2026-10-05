@@ -22,22 +22,22 @@
 
 ## b) PARTIALLY DONE
 
-1. **Firebase hosting target** — `.firebaserc` specifies target `"auditlog"` on project `"lars-software"`, matching the sibling pattern. However, **the Firebase hosting site `auditlog` does not exist yet** in the Firebase console — it must be created manually or via `firebase hosting:sites:create auditlog`
-2. **DNS / domain** — `auditlog.lars.software` is referenced everywhere (README, robots.txt, sitemap, manifest, config) but **the DNS record and Firebase custom domain connection are not configured**. The site cannot actually be reached at that URL yet
-3. **Website git tracking** — `website/` is untracked. Not committed. The entire directory is new and unstaged
+1. ~~**Firebase hosting target** — `.firebaserc` specifies target `"auditlog"` on project `"lars-software"`, matching the sibling pattern. However, **the Firebase hosting site `auditlog` does not exist yet** in the Firebase console — it must be created manually or via `firebase hosting:sites:create auditlog`~~ done — hosting site created — 2026-07-13_21-42
+2. ~~**DNS / domain** — `auditlog.lars.software` is referenced everywhere (README, robots.txt, sitemap, manifest, config) but **the DNS record and Firebase custom domain connection are not configured**. The site cannot actually be reached at that URL yet~~ done — DNS live — 2026-07-13_21-42
+3. ~~**Website git tracking** — `website/` is untracked. Not committed. The entire directory is new and unstaged~~ done — website committed
 
 ---
 
 ## c) NOT STARTED
 
-1. **Website CI/CD** — no GitHub Actions workflow for building and deploying the website on push. Sibling repos (go-atomic-write, gogenfilter) also lack this, so deployment is currently manual (`nix run .#deploy`)
-2. **OG image generation** — gogenfilter has `src/pages/og/[...slug].ts` using astro-og-canvas for social media preview images. Not implemented for this website
-3. **HTML validation** — `.htmlvalidate.json` config exists but no pnpm script or CI step runs `html-validate` on the built output
-4. **`.node-version` git tracking** — file created but website is not committed
-5. **Website typecheck** — `pnpm run typecheck` (astro check) exists in package.json but was never run during this session
-6. **Website preview/lighthouse** — no Lighthouse audit was run on the built output for performance/accessibility/SEO scores
-7. **Link checking** — no automated check that all internal links in the website resolve correctly
-8. **Dependents page** — gogenfilter has a `dependents.astro` page showing projects that use the library. Not applicable yet for this alpha library but could be added later
+1. ~~**Website CI/CD** — no GitHub Actions workflow for building and deploying the website on push. Sibling repos (go-atomic-write, gogenfilter) also lack this, so deployment is currently manual (`nix run .#deploy`)~~ done — website.yml shipped
+2. **OG image generation** — gogenfilter has `src/pages/og/[...slug].ts` using astro-og-canvas for social media preview images. Not implemented for this website **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+3. ~~**HTML validation** — `.htmlvalidate.json` config exists but no pnpm script or CI step runs `html-validate` on the built output~~ done — html-validate wired in website CI
+4. ~~**`.node-version` git tracking** — file created but website is not committed~~ **Won't implement — .node-version tracked with website/.**
+5. **Website typecheck** — `pnpm run typecheck` (astro check) exists in package.json but was never run during this session **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+6. **Website preview/lighthouse** — no Lighthouse audit was run on the built output for performance/accessibility/SEO scores **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+7. **Link checking** — no automated check that all internal links in the website resolve correctly **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+8. **Dependents page** — gogenfilter has a `dependents.astro` page showing projects that use the library. Not applicable yet for this alpha library but could be added later **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 
@@ -82,80 +82,80 @@ Nothing. No errors, no broken builds, no data loss. The website builds cleanly o
 
 ### Critical (blocks public launch)
 
-1. **Create Firebase hosting site `auditlog`** in Firebase console
-2. **Configure DNS** for `auditlog.lars.software` → Firebase hosting
-3. **Commit `website/` to git** and push to GitHub
-4. **Deploy the website** via `firebase deploy --only hosting`
-5. **Verify `auditlog.lars.software` loads** in a browser after DNS propagates
-6. **Run `pnpm run typecheck`** (astro check) and fix any TypeScript errors
-7. **Run html-validate** on `dist/` output and fix any HTML validation issues
+1. ~~**Create Firebase hosting site `auditlog`** in Firebase console~~ done — site created — 21-42
+2. ~~**Configure DNS** for `auditlog.lars.software` → Firebase hosting~~ done — DNS configured — 21-42
+3. ~~**Commit `website/` to git** and push to GitHub~~ done — website committed
+4. ~~**Deploy the website** via `firebase deploy --only hosting`~~ done — deployed — 21-42
+5. ~~**Verify `auditlog.lars.software` loads** in a browser after DNS propagates~~ done — go-workflow-auditlog.lars.software live
+6. **Run `pnpm run typecheck`** (astro check) and fix any TypeScript errors **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+7. ~~**Run html-validate** on `dist/` output and fix any HTML validation issues~~ done — html-validate in CI
 
 ### Website improvements
 
-8. **Add OG image generation** (`src/pages/og/[...slug].ts` with astro-og-canvas)
-9. **Add a screenshot of the HTML dashboard** to the landing page
-10. **Add an animated GIF or video** of the interactive DAG graph in the dashboard
-11. **Add a "How It Works" visual diagram** (Attach → Do → Snapshot flow)
-12. **Add an error classification guide page** (`/guides/error-classification/`)
-13. **Add a retry & timeout tracking guide page** (`/guides/retry-and-timeout/`)
-14. **Add a concurrency model guide page** (`/guides/concurrency-model/`)
-15. **Add a replay guide page** (`/guides/replay-and-load/`)
-16. **Sync website changelog** to import from CHANGELOG.md instead of maintaining a copy
-17. **Add a "Known Limitations" doc page** based on the README section
-18. **Add live GitHub star count** to the landing page hero (currently fetched but could add last commit date, contributor count)
-19. **Add a comparison row where manual logging wins** (e.g. "Zero dependencies: yes/yes/no")
-20. **Add Lighthouse CI** to check performance/accessibility/SEO scores
-21. **Add link checking** (lychee or similar) to catch broken internal/external links
-22. **Add a 404 page** design matching the landing page theme (currently uses Starlight default)
-23. **Add a `dependents.astro` page** once the library has external users
-24. **Add dark/light theme persistence indicator** (visual feedback on current theme)
-25. **Add keyboard navigation** for the comparison matrix table
-26. **Add code copy buttons** to all doc page code blocks (Starlight has this built-in, verify it works)
+8. **Add OG image generation** (`src/pages/og/[...slug].ts` with astro-og-canvas) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+9. ~~**Add a screenshot of the HTML dashboard** to the landing page~~ done — screenshots shipped (README + docs/screenshots)
+10. **Add an animated GIF or video** of the interactive DAG graph in the dashboard **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+11. **Add a "How It Works" visual diagram** (Attach → Do → Snapshot flow) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+12. **Add an error classification guide page** (`/guides/error-classification/`) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+13. **Add a retry & timeout tracking guide page** (`/guides/retry-and-timeout/`) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+14. **Add a concurrency model guide page** (`/guides/concurrency-model/`) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+15. **Add a replay guide page** (`/guides/replay-and-load/`) **→ open — website guide pages (TODO_LIST 2026-10-05)**
+16. **Sync website changelog** to import from CHANGELOG.md instead of maintaining a copy **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+17. **Add a "Known Limitations" doc page** based on the README section **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+18. **Add live GitHub star count** to the landing page hero (currently fetched but could add last commit date, contributor count) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+19. **Add a comparison row where manual logging wins** (e.g. "Zero dependencies: yes/yes/no") **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+20. **Add Lighthouse CI** to check performance/accessibility/SEO scores **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+21. **Add link checking** (lychee or similar) to catch broken internal/external links **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+22. **Add a 404 page** design matching the landing page theme (currently uses Starlight default) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+23. **Add a `dependents.astro` page** once the library has external users **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+24. **Add dark/light theme persistence indicator** (visual feedback on current theme) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+25. **Add keyboard navigation** for the comparison matrix table **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+26. **Add code copy buttons** to all doc page code blocks (Starlight has this built-in, verify it works) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### README improvements
 
-27. **Trim README** — move detailed API tables and error classification examples to the docs website, replace with links
-28. **Add a "Documentation" callout box** near the top pointing to `auditlog.lars.software`
-29. **Add a dashboard screenshot** to the README (after the Example Output section)
-30. **Add a "Comparison with alternatives" section** (like the website comparison matrix)
-31. **Update coverage badge** to be dynamic (Codecov or similar) instead of hardcoded
-32. **Add a "Used by" section** once there are external adopters
-33. **Add badges for latest release version** (GitHub Releases badge)
+27. ~~**Trim README** — move detailed API tables and error classification examples to the docs website, replace with links~~ **Won't implement — README deliberately comprehensive — pkg.go.dev landing page.**
+28. ~~**Add a "Documentation" callout box** near the top pointing to `auditlog.lars.software`~~ done — Documentation links at top
+29. ~~**Add a dashboard screenshot** to the README (after the Example Output section)~~ done — screenshot present
+30. ~~**Add a "Comparison with alternatives" section** (like the website comparison matrix)~~ **Won't implement — comparison matrix lives on the website.**
+31. **Update coverage badge** to be dynamic (Codecov or similar) instead of hardcoded **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+32. ~~**Add a "Used by" section** once there are external adopters~~ **Won't implement — no external adopters yet.**
+33. **Add badges for latest release version** (GitHub Releases badge) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### CI/CD
 
-34. **Add website build + deploy workflow** to `.github/workflows/website.yml`
-35. **Add website build check** to PR CI (ensure website doesn't break on changes)
-36. **Add automatic Firebase deploy** on push to master (after DNS is configured)
-37. **Add html-validate to CI** for the website build output
-38. **Add lighthouse CI** as a non-blocking status check
+34. ~~**Add website build + deploy workflow** to `.github/workflows/website.yml`~~ done — website.yml shipped
+35. ~~**Add website build check** to PR CI (ensure website doesn't break on changes)~~ done — website build check
+36. ~~**Add automatic Firebase deploy** on push to master (after DNS is configured)~~ done — auto-deploy on push
+37. ~~**Add html-validate to CI** for the website build output~~ done — html-validate in CI
+38. **Add lighthouse CI** as a non-blocking status check **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### GitHub repo
 
-39. **Add a GitHub social preview image** (1200x630px) in repo settings
-40. **Create a GitHub Discussion** category for Q&A (separate from Issues)
-41. **Set up GitHub Pages** as a fallback/redirect to Firebase hosting
-42. **Add `website` as a GitHub topic** to make the docs site discoverable
-43. **Pin an issue** with getting started links and docs URL
+39. ~~**Add a GitHub social preview image** (1200x630px) in repo settings~~ done — social preview added (3426a4c)
+40. ~~**Create a GitHub Discussion** category for Q&A (separate from Issues)~~ **Won't implement — Discussions declined — Issues suffice.**
+41. ~~**Set up GitHub Pages** as a fallback/redirect to Firebase hosting~~ **Won't implement — Firebase hosting is canonical.**
+42. **Add `website` as a GitHub topic** to make the docs site discoverable **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+43. ~~**Pin an issue** with getting started links and docs URL~~ **Won't implement — pinned issue declined.**
 
 ### Content & SEO
 
-44. **Submit sitemap to Google Search Console** after DNS resolves
-45. **Add structured data** (JSON-LD) for the documentation articles (currently only on landing page)
-46. **Add canonical URLs** to all doc pages
-47. **Add a blog/changelog feed** (RSS) for release announcements
-48. **Add meta descriptions** to every doc page frontmatter (some have them, verify all)
-49. **Add Open Graph tags** to doc pages (Starlight adds some, verify they include the site URL)
-50. **Add a "Edit this page on GitHub" link** to all doc pages (Starlight built-in, verify configured)
+44. **Submit sitemap to Google Search Console** after DNS resolves **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+45. **Add structured data** (JSON-LD) for the documentation articles (currently only on landing page) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+46. **Add canonical URLs** to all doc pages **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+47. **Add a blog/changelog feed** (RSS) for release announcements **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+48. **Add meta descriptions** to every doc page frontmatter (some have them, verify all) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+49. **Add Open Graph tags** to doc pages (Starlight adds some, verify they include the site URL) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+50. **Add a "Edit this page on GitHub" link** to all doc pages (Starlight built-in, verify configured) **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 
 ## g) Top 2 Questions
 
-### 1. Has the Firebase hosting site `auditlog` been created in the `lars-software` project?
+### 1. ~~Has the Firebase hosting site `auditlog` been created in the `lars-software` project?~~ **Resolved:** yes — site created and deployed in the 2026-07-13_21-42 session (final domain: go-workflow-auditlog.lars.software).
 
 The `.firebaserc` references `"auditlog"` as a hosting target in `"lars-software"`, matching the exact pattern of go-atomic-write (`"atomicwrite"`) and gogenfilter (`"gogenfilter"`). However, Firebase hosting sites must be **created explicitly** before first deploy — `firebase deploy` will fail with "hosting site not found" if the site doesn't exist. I cannot run `firebase hosting:sites:create` because I don't have Firebase CLI credentials in this environment. **Can you run `firebase hosting:sites:create auditlog` (from the `lars-software` project), or has this already been done?**
 
-### 2. Is the DNS record for `auditlog.lars.software` already configured?
+### 2. ~~Is the DNS record for `auditlog.lars.software` already configured?~~ **Resolved:** domain renamed to go-workflow-auditlog.lars.software; DNS + Firebase custom domain live (2026-07-13_21-42).
 
 The README and entire website assume this URL is live. If DNS is not pointed at Firebase yet, the "Documentation" link in the README is a **broken public link**. I see the sibling pattern uses `<name>.lars.software` subdomains, so I assume you have a wildcard DNS or manual setup process. **Should I change the README link to a placeholder until DNS is confirmed, or is this domain already routing / will be configured imminently?**

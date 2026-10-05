@@ -120,30 +120,30 @@ Built over 3 sessions from scratch. 5,233 LOC (16 source files + 11 test files),
 
 ### Architecture
 
-1. **`go.mod` go directive** — Change from `go 1.26.3` to `go 1.23` to match go-workflow's minimum and CI config.
-2. **`diagramFormatter` interface** — The `ClassAssign` method is Mermaid-specific. Either split into a `MermaidExtras` interface or make the diagram engine handle absent classes gracefully.
-3. **Type-safe step identity** — Currently `stepKey = flow.Steper` (an interface). Step names can collide if two steps have the same `String()` output. Consider a `StepID` type that combines pointer + name for disambiguation.
-4. **`Recorder.workflowID` is write-only after construction** — No way to change it. If someone reuses the recorder across workflows, all events get the original ID. Consider making it mutable or documenting the constraint.
+1. ~~**`go.mod` go directive** — Change from `go 1.26.3` to `go 1.23` to match go-workflow's minimum and CI config.~~ done — go directive now 1.27 — meaningful minimum
+2. ~~**`diagramFormatter` interface** — The `ClassAssign` method is Mermaid-specific. Either split into a `MermaidExtras` interface or make the diagram engine handle absent classes gracefully.~~ **NOT-DO — ClassAssign retired with in-house diagram code (go-output renderers).**
+3. ~~**Type-safe step identity** — Currently `stepKey = flow.Steper` (an interface). Step names can collide if two steps have the same `String()` output. Consider a `StepID` type that combines pointer + name for disambiguation.~~ done — StepID + name-collision documentation shipped
+4. ~~**`Recorder.workflowID` is write-only after construction** — No way to change it. If someone reuses the recorder across workflows, all events get the original ID. Consider making it mutable or documenting the constraint.~~ **Won't implement — Recorder is per-run by design.**
 
 ### Code Quality
 
-5. **Reflection caching** — `stepTypeName` calls `reflect.TypeOf` on every step. Cache results by `reflect.Type` in a `sync.Map`.
-6. **`sortByName` duplication** — Defined in `types.go` but inline `slices.SortFunc` used in `filter.go` and `report_builder.go`. Consolidate.
-7. **Error sentinel coverage** — `Validate()` has 3 sentinel errors but `LoadReport` and `ReadEvents` errors are not sentinel-wrapped, making them hard to test with `errors.Is`.
+5. ~~**Reflection caching** — `stepTypeName` calls `reflect.TypeOf` on every step. Cache results by `reflect.Type` in a `sync.Map`.~~ **Won't implement — reflection cost negligible (Invocation benchmark); never a bottleneck.**
+6. ~~**`sortByName` duplication** — Defined in `types.go` but inline `slices.SortFunc` used in `filter.go` and `report_builder.go`. Consolidate.~~ done — sortByName consolidated in types.go
+7. ~~**Error sentinel coverage** — `Validate()` has 3 sentinel errors but `LoadReport` and `ReadEvents` errors are not sentinel-wrapped, making them hard to test with `errors.Is`.~~ done — sentinels shipped v0.5.0
 
 ### Testing
 
-8. **`WritePlantUMLString` has 0% coverage** — Add at least one test.
-9. **Error path coverage** — `ReadEvents` oversized line, `writeToFile` close error, `matchEvent` time-range edge cases.
-10. **Fuzz tests** — Add `FuzzMermaidXSS` and `FuzzReplayIntegrity` targets.
-11. **Integration test** — A single test that exercises the full lifecycle: Attach → Do → Snapshot → Report → Export JSON → Load JSON → Export NDJSON → Read NDJSON → Replay → Diff.
+~~8. **`WritePlantUMLString` has 0% coverage** — Add at least one test.~~ done — 80% coverage reached v0.5.0
+~~9. **Error path coverage** — `ReadEvents` oversized line, `writeToFile` close error, `matchEvent` time-range edge cases.~~ done — error-path tests v0.5.0
+~~10. **Fuzz tests** — Add `FuzzMermaidXSS` and `FuzzReplayIntegrity` targets.~~ done — FuzzDiagramSpecialChars shipped
+~~11. **Integration test** — A single test that exercises the full lifecycle: Attach → Do → Snapshot → Report → Export JSON → Load JSON → Export NDJSON → Read NDJSON → Replay → Diff.~~ done — integration tests v0.5.0
 
 ### Features
 
-12. **HTML export** — Port the samber-do HTML template for a self-contained visual dashboard.
-13. **`CHANGELOG.md`** — Document the v0.1.0 features for release.
-14. **`flake.nix`** — Add Nix devShell for reproducible builds.
-15. **OTel integration** — Bridge `OnEvent` to OpenTelemetry spans.
+12. ~~**HTML export** — Port the samber-do HTML template for a self-contained visual dashboard.~~ done — HTML dashboard v0.3.0
+13. ~~**`CHANGELOG.md`** — Document the v0.1.0 features for release.~~ done — CHANGELOG v0.1.0
+14. ~~**`flake.nix`** — Add Nix devShell for reproducible builds.~~ done — flake.nix shipped
+15. **OTel integration** — Bridge `OnEvent` to OpenTelemetry spans. **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)**
 
 ---
 
@@ -151,37 +151,37 @@ Built over 3 sessions from scratch. 5,233 LOC (16 source files + 11 test files),
 
 | #  | Task                                                               | Impact | Effort | Priority |
 | -- | ------------------------------------------------------------------ | ------ | ------ | -------- |
-| 1  | Fix `go.mod` go directive to `1.23`                                | High   | 1min   | P0       |
-| 2  | Add `WritePlantUMLString` test (0% coverage)                       | Medium | 5min   | P0       |
-| 3  | Write `CHANGELOG.md` for v0.1.0                                    | High   | 15min  | P0       |
-| 4  | Cut v0.1.0 git tag + release                                       | High   | 5min   | P0       |
-| 5  | Add `FEATURES.md` inventory                                        | Medium | 15min  | P1       |
-| 6  | Add `TODO_LIST.md` from this report                                | Medium | 10min  | P1       |
-| 7  | Add fuzz test for Mermaid XSS                                      | Medium | 30min  | P1       |
-| 8  | Add fuzz test for replay integrity                                 | Medium | 30min  | P1       |
-| 9  | Cache `stepTypeName` reflection results                            | Medium | 15min  | P1       |
-| 10 | Add full lifecycle integration test                                | Medium | 30min  | P1       |
-| 11 | Consolidate `sortByName` usage (remove duplication)                | Low    | 10min  | P1       |
-| 12 | Fix `statusClass` to cover `StepStatusRunning`                     | Low    | 5min   | P1       |
-| 13 | Add `go mod verify` to CI                                          | Low    | 5min   | P2       |
-| 14 | Raise coverage gate from 90% to 95%                                | Low    | 30min  | P2       |
-| 15 | Add error-path tests (`ReadEvents` oversized, `writeToFile` close) | Low    | 20min  | P2       |
-| 16 | Add `STABILITY.md`                                                 | Low    | 10min  | P2       |
-| 17 | Port HTML visualization from samber-do                             | High   | 2-4h   | P2       |
-| 18 | Add `flake.nix` devShell                                           | Medium | 30min  | P2       |
-| 19 | Split `ClassAssign` out of `diagramFormatter` interface            | Low    | 20min  | P2       |
-| 20 | Add `go generate` support if templ is added                        | Low    | 15min  | P3       |
-| 21 | Add OTel bridge example                                            | Medium | 1h     | P3       |
-| 22 | Add Mermaid edge labels ("depends on")                             | Low    | 15min  | P3       |
-| 23 | Add conditional branch (`If`/`Switch`) visualization               | Low    | 30min  | P3       |
-| 24 | Add `Contributing.md`                                              | Low    | 10min  | P3       |
-| 25 | Add `Code of Conduct`                                              | Low    | 5min   | P3       |
+| ~~1~~  | ~~Fix `go.mod` go directive to `1.23`~~ done — go directive now 1.27 | ~~High~~ | ~~1min~~ | ~~P0~~ |
+| ~~2~~  | ~~Add `WritePlantUMLString` test (0% coverage)~~ done (docs-health pass 2026-10-05) | ~~Medium~~ | ~~5min~~ | ~~P0~~ |
+| ~~3~~  | ~~Write `CHANGELOG.md` for v0.1.0~~ done — CHANGELOG v0.1.0 | ~~High~~ | ~~15min~~ | ~~P0~~ |
+| ~~4~~  | ~~Cut v0.1.0 git tag + release~~ done — tag v0.1.0 exists; GitHub Releases standardized from v0.8.1 | ~~High~~ | ~~5min~~ | ~~P0~~ |
+| ~~5~~  | ~~Add `FEATURES.md` inventory~~ done (docs-health pass 2026-10-05) | ~~Medium~~ | ~~15min~~ | ~~P1~~ |
+| ~~6~~  | ~~Add `TODO_LIST.md` from this report~~ done (docs-health pass 2026-10-05) | ~~Medium~~ | ~~10min~~ | ~~P1~~ |
+| ~~7~~  | ~~Add fuzz test for Mermaid XSS~~ done — FuzzDiagramSpecialChars | ~~Medium~~ | ~~30min~~ | ~~P1~~ |
+| ~~8~~  | ~~Add fuzz test for replay integrity~~ done — FuzzReadEvents v0.2.1 | ~~Medium~~ | ~~30min~~ | ~~P1~~ |
+| ~~9~~  | ~~Cache `stepTypeName` reflection results~~ **Won't implement — reflection cost negligible; never a bottleneck.** | ~~Medium~~ | ~~15min~~ | ~~P1~~ |
+| ~~10~~ | ~~Add full lifecycle integration test~~ done (docs-health pass 2026-10-05) | ~~Medium~~ | ~~30min~~ | ~~P1~~ |
+| ~~11~~ | ~~Consolidate `sortByName` usage (remove duplication)~~ done (docs-health pass 2026-10-05) | ~~Low~~ | ~~10min~~ | ~~P1~~ |
+| ~~12~~ | ~~Fix `statusClass` to cover `StepStatusRunning`~~ done — statusClass covers running since v0.2.x | ~~Low~~ | ~~5min~~ | ~~P1~~ |
+| 13 | Add `go mod verify` to CI **→ open — TODO_LIST 2026-10-05** | Low    | 5min   | P2       |
+| ~~14~~ | ~~Raise coverage gate from 90% to 95%~~ done — CI coverage gate ≥94% | ~~Low~~ | ~~30min~~ | ~~P2~~ |
+| ~~15~~ | ~~Add error-path tests (`ReadEvents` oversized, `writeToFile` close)~~ done (docs-health pass 2026-10-05) | ~~Low~~ | ~~20min~~ | ~~P2~~ |
+| ~~16~~ | ~~Add `STABILITY.md`~~ done — STABILITY.md shipped | ~~Low~~ | ~~10min~~ | ~~P2~~ |
+| ~~17~~ | ~~Port HTML visualization from samber-do~~ done — HTML dashboard v0.3.0 | ~~High~~ | ~~2-4h~~ | ~~P2~~ |
+| ~~18~~ | ~~Add `flake.nix` devShell~~ done — flake.nix shipped | ~~Medium~~ | ~~30min~~ | ~~P2~~ |
+| ~~19~~ | ~~Split `ClassAssign` out of `diagramFormatter` interface~~ **NOT-DO — superseded by go-output renderer adoption.** | ~~Low~~ | ~~20min~~ | ~~P2~~ |
+| ~~20~~ | ~~Add `go generate` support if templ is added~~ **NOT-DO — templ DEFERRED per docs/evaluations.** | ~~Low~~ | ~~15min~~ | ~~P3~~ |
+| 21 | Add OTel bridge example **→ open — deferred (ROADMAP: OTel bridge, consumer-gated)** | Medium | 1h     | P3       |
+| ~~22~~ | ~~Add Mermaid edge labels ("depends on")~~ **Won't implement — never demanded — dashboard era covers diagram polish.** | ~~Low~~ | ~~15min~~ | ~~P3~~ |
+| ~~23~~ | ~~Add conditional branch (`If`/`Switch`) visualization~~ **Won't implement — never demanded.** | ~~Low~~ | ~~30min~~ | ~~P3~~ |
+| ~~24~~ | ~~Add `Contributing.md`~~ done — CONTRIBUTING.md exists | ~~Low~~ | ~~10min~~ | ~~P3~~ |
+| ~~25~~ | ~~Add `Code of Conduct`~~ **Won't implement — no external contributor base; CONTRIBUTING covers expectations.** | ~~Low~~ | ~~5min~~ | ~~P3~~ |
 
 ---
 
 ## g) Top #1 Question I Cannot Figure Out Myself
 
-**Should the Mermaid diagram show the full sub-workflow tree flattened, or nest sub-workflow steps under a cluster/subgraph?**
+**Should the Mermaid diagram show the full sub-workflow tree flattened, or nest sub-workflow steps under a cluster/subgraph?** **Resolved:** stayed flattened — sub-workflow steps render at one level; documented as a known limitation in README/AGENTS.
 
 Currently, `snapshotWorkflow` traverses sub-workflows with `flow.Traverse` and flattens all inner steps into a single `[]StepInfo`. This means the Mermaid diagram shows all steps at the same level — you lose the parent-child relationship between a composite step and its inner steps.
 
