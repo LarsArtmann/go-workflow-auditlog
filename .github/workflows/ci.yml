@@ -9,7 +9,6 @@ permissions:
   contents: read
 
 env:
-  GOEXPERIMENT: jsonv2
 
 jobs:
   test:
@@ -19,7 +18,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: go vet (workspace)
         run: go vet ./...
@@ -61,7 +60,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: go test -race with coverage
         run: |
@@ -80,7 +79,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: Install golangci-lint
         run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2
@@ -113,7 +112,7 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         if: env.HAS_ERRAUDIT_CREDENTIALS == 'true'
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: Authenticate git for private module fetch
         if: env.HAS_ERRAUDIT_CREDENTIALS == 'true'
@@ -155,7 +154,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: govulncheck (core)
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
@@ -175,7 +174,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: go mod tidy (core)
         run: go mod tidy
@@ -211,7 +210,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: go generate
         run: go generate ./...
@@ -230,7 +229,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: Install actionlint
         run: go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
@@ -244,7 +243,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26.5"
+          go-version: "1.27"
           cache: true
       - name: Install goreleaser
         run: go install github.com/goreleaser/goreleaser/v2@latest

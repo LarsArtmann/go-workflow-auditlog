@@ -5,7 +5,7 @@ set -euo pipefail
 # Uses headless Chromium with direct switchTab() injection for reliable tab rendering.
 #
 # Usage: ./scripts/capture-screenshots.sh [output-dir]
-# Prerequisites: nix (for chromium + imagemagick), GOEXPERIMENT=jsonv2, go
+# Prerequisites: nix (for chromium + imagemagick), go
 #
 # This script builds the example binary, runs it from a temp directory
 # (to avoid clobbering tracked reference files), captures all 4 dashboard
@@ -22,11 +22,11 @@ cd "$PROJECT_ROOT"
 
 # --- Step 1: Build example binary ---
 echo "=== Building example binary ==="
-GOEXPERIMENT=jsonv2 go build -o "$TMPDIR/demo" ./viz/example
+go build -o "$TMPDIR/demo" ./viz/example
 
 # --- Step 2: Run export from temp dir (avoids clobbering tracked files) ---
 echo "=== Generating example dashboard ==="
-(cd "$TMPDIR" && GOEXPERIMENT=jsonv2 ./demo --export) >/dev/null 2>&1
+(cd "$TMPDIR" && ./demo --export) >/dev/null 2>&1
 
 DASHBOARD_HTML="$TMPDIR/dashboard.html"
 if [[ ! -f "$DASHBOARD_HTML" ]]; then

@@ -44,7 +44,7 @@ breaking changes in 0.x minor releases.
 2. **Verify coverage** is at or above the 92% gate:
 
    ```bash
-   GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic -coverpkg=./ ./...
+   go test -race -coverprofile=cover.out -covermode=atomic -coverpkg=./ ./...
    go tool cover -func=cover.out | tail -1
    ```
 
@@ -55,8 +55,8 @@ breaking changes in 0.x minor releases.
 4. **Verify standalone builds** (proves consumers can `go get`):
 
    ```bash
-   cd viz  && GOWORK=off GOEXPERIMENT=jsonv2 go test -count=1 ./...
-   cd live && GOWORK=off GOEXPERIMENT=jsonv2 go test -count=1 ./...
+   cd viz  && GOWORK=off go test -count=1 ./...
+   cd live && GOWORK=off go test -count=1 ./...
    ```
 
 5. **CRITICAL: Verify no `replace` directives in sub-module go.mod files:**
@@ -125,7 +125,7 @@ gh release create "v${VERSION}" ...   # see Option B if tree is dirty
 # When the tree is clean:
 GORELEASER_CURRENT_TAG="v${VERSION}" \
 GITHUB_TOKEN="$(gh auth token)" \
-GOEXPERIMENT=jsonv2 \
+\
   goreleaser release --clean --release-notes /tmp/release-notes.md
 ```
 
@@ -174,7 +174,7 @@ for pair in "linux_amd64" "linux_arm64" "darwin_amd64" "darwin_arm64"; do
   archive_name="go-workflow-auditlog_${VERSION}_${os_title}_${arch_title}"
   dir="$BUILD_DIR/$archive_name"
   mkdir -p "$dir"
-  GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 GOEXPERIMENT=jsonv2 \
+  GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 \
     go build -o "$dir/workflow-auditlog-demo" \
     -ldflags "-s -w -X main.version=${VERSION}" \
     ./viz/example
@@ -221,15 +221,15 @@ Verify the pages render:
    ```bash
    # Core
    cd /tmp/test-core && go mod init test && \
-   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog@v${VERSION}
+   go get github.com/larsartmann/go-workflow-auditlog@v${VERSION}
 
    # Viz (standalone — proves no replace-directive leak)
    cd /tmp/test-viz && go mod init test && \
-   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog/viz@v${VERSION}
+   go get github.com/larsartmann/go-workflow-auditlog/viz@v${VERSION}
 
    # Live (standalone — proves no replace-directive leak)
    cd /tmp/test-live && go mod init test && \
-   GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog/live@v${VERSION}
+   go get github.com/larsartmann/go-workflow-auditlog/live@v${VERSION}
    ```
 3. **GitHub Release** has correct assets and notes.
 4. **CHANGELOG.md** has an empty `[Unreleased]` section.

@@ -27,7 +27,7 @@ broken sub-module go.mod files. Follow it precisely.
 | Visualization | `github.com/larsartmann/go-workflow-auditlog/viz`  | `viz/vX.Y.Z`  | `./viz/go.mod`  |
 | Live          | `github.com/larsartmann/go-workflow-auditlog/live` | `live/vX.Y.Z` | `./live/go.mod` |
 
-- **Go**: 1.26.5+ (requires `GOEXPERIMENT=jsonv2` for all Go commands)
+- **Go**: 1.27+ (no experiment flag needed — `encoding/json/v2` is GA)
 - **Stability**: ALPHA (pre-1.0) — breaking changes permitted in minor releases per `STABILITY.md`
 - **Workspace**: `go.work` links all three modules locally; consumers use `GOWORK=off`
 - **External deps**: `go-output` v0.35.0+, `go-sse` v0.4.0, `go-error-family` v0.10.0
@@ -180,29 +180,29 @@ unpublished v0.9.0 tag doesn't matter.
 ### 4.1 Core module
 
 ```bash
-GOEXPERIMENT=jsonv2 go vet ./...
-GOEXPERIMENT=jsonv2 go test -race -count=1 ./...
+go vet ./...
+go test -race -count=1 ./...
 golangci-lint run --timeout=10m ./...
 ```
 
 ### 4.2 Viz module (workspace mode)
 
 ```bash
-GOEXPERIMENT=jsonv2 go vet ./viz/...
-GOEXPERIMENT=jsonv2 go test -race -count=1 ./viz/...
+go vet ./viz/...
+go test -race -count=1 ./viz/...
 ```
 
 ### 4.3 Live module (workspace mode)
 
 ```bash
-GOEXPERIMENT=jsonv2 go vet ./live/...
-GOEXPERIMENT=jsonv2 go test -race -count=1 ./live/...
+go vet ./live/...
+go test -race -count=1 ./live/...
 ```
 
 ### 4.4 Coverage check
 
 ```bash
-GOEXPERIMENT=jsonv2 go test -race -coverprofile=cover.out -covermode=atomic -coverpkg=./ ./...
+go test -race -coverprofile=cover.out -covermode=atomic -coverpkg=./ ./...
 go tool cover -func=cover.out | tail -1
 # Must be >= 92%
 ```
@@ -274,8 +274,8 @@ Now that tags are on the remote, the Go module proxy can resolve the new
 version. Run `go mod tidy -e` on the sub-modules:
 
 ```bash
-cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy -e && cd ..
-cd live && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy -e && cd ..
+cd viz && GOWORK=off go mod tidy -e && cd ..
+cd live && GOWORK=off go mod tidy -e && cd ..
 ```
 
 The `-e` flag is required because go-output's published go.mod ships broken
@@ -302,8 +302,8 @@ git push origin master --force-with-lease
 ### 6.1 Verify standalone builds
 
 ```bash
-cd viz  && GOWORK=off GOEXPERIMENT=jsonv2 go test -count=1 ./... && cd ..
-cd live && GOWORK=off GOEXPERIMENT=jsonv2 go test -count=1 ./... && cd ..
+cd viz  && GOWORK=off go test -count=1 ./... && cd ..
+cd live && GOWORK=off go test -count=1 ./... && cd ..
 ```
 
 ### 6.2 Full nix check
@@ -324,7 +324,7 @@ nix run .#check
 ```bash
 GORELEASER_CURRENT_TAG="v${VERSION}" \
 GITHUB_TOKEN="$(gh auth token)" \
-GOEXPERIMENT=jsonv2 \
+\
   goreleaser release --clean --release-notes /tmp/release-notes.md
 ```
 
@@ -366,7 +366,7 @@ for pair in "linux_amd64" "linux_arm64" "darwin_amd64" "darwin_arm64"; do
   archive_name="go-workflow-auditlog_${VERSION}_${os_title}_${arch_title}"
   dir="$BUILD_DIR/$archive_name"
   mkdir -p "$dir"
-  GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 GOEXPERIMENT=jsonv2 \
+  GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 \
     go build -o "$dir/workflow-auditlog-demo" \
     -ldflags "-s -w -X main.version=${VERSION}" \
     ./viz/example
@@ -398,15 +398,15 @@ https://pkg.go.dev/fetch/github.com/larsartmann/go-workflow-auditlog/live@live/v
 ```bash
 # Core
 rm -rf /tmp/test-core && mkdir /tmp/test-core && cd /tmp/test-core
-go mod init test && GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog@v${VERSION}
+go mod init test && go get github.com/larsartmann/go-workflow-auditlog@v${VERSION}
 
 # Viz (standalone — proves no replace-directive leak)
 rm -rf /tmp/test-viz && mkdir /tmp/test-viz && cd /tmp/test-viz
-go mod init test && GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog/viz@viz/v${VERSION}
+go mod init test && go get github.com/larsartmann/go-workflow-auditlog/viz@viz/v${VERSION}
 
 # Live (standalone — proves no replace-directive leak)
 rm -rf /tmp/test-live && mkdir /tmp/test-live && cd /tmp/test-live
-go mod init test && GOEXPERIMENT=jsonv2 go get github.com/larsartmann/go-workflow-auditlog/live@live/v${VERSION}
+go mod init test && go get github.com/larsartmann/go-workflow-auditlog/live@live/v${VERSION}
 ```
 
 If any `go get` fails with `unknown revision 000000000000`, the sub-module

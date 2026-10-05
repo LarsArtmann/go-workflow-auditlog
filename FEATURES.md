@@ -175,7 +175,7 @@ Table sub-formats: table, json, csv, tsv, markdown, xml, d2, yaml, html, tree, m
 - **`pnpm audit`** in website CI
 - **Firebase secret JSON validation** in website CI via `node -e JSON.parse`
 - **Go 1.27** in CI and devShell (`GOEXPERIMENT=jsonv2` no longer required — json/v2 is GA)
-- **Coverage**: core 97.0%, viz 95.0%, live 97.1% (measured 2026-10-05, `go test -cover`)
+- **Coverage**: core 97.0%, viz 94.9%, live 97.1% (measured 2026-10-05, `go test -race -covermode=atomic`)
 - **flake.nix** devShell (Go 1.27, golangci-lint, govulncheck, actionlint, `d2` CLI)
 - **flake-parts** + **treefmt-nix** for build automation (includes `d2-fmt`, `nixfmt`, `gofmt`)
 - **Pre-commit hook** (vet + lint + test)

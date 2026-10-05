@@ -4,7 +4,7 @@
 [![CI](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/go-workflow-auditlog/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-~95%25-brightgreen)](#)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
+[![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8.svg)](https://go.dev)
 
 **[Documentation](https://go-workflow-auditlog.lars.software)** · **[API Reference](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog)** · **[Viz API Reference](https://pkg.go.dev/github.com/larsartmann/go-workflow-auditlog/viz)** · **[Interactive Demo](./viz/example)**
 
@@ -88,9 +88,9 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - **Event replay** — reconstruct a report from a flat NDJSON event stream
 - **O(1) lookups** — `ReportIndex` precomputes lookup maps for repeated queries
 - **Sentinel errors** — matchable via `errors.Is` for programmatic branching
-- **Error classification** — auto-registered with [go-error-family](https://github.com/larsartmann/go-error-family) for `Classify()`, `IsRetryable()`, `ExitCode()`
+- **Error classification** — every library sentinel carries an intrinsic [go-error-family](https://github.com/larsartmann/go-error-family) `Family` + stable code: `Classify()`, `IsRetryable()`, `ExitCode()` work on any auditlog error with zero setup
 - **Workflow-level queries** — `RetriedStepCount()`, `TotalRetryAttempts()`, `TimedOutSteps()`, `HasWorkflowRetries()`, `HasWorkflowTimeouts()`, `CriticalPath()`, `PeakConcurrencySteps()`
-- **~500 tests across 3 modules, 95%+ coverage** with race detector, 0 lint issues, 0 runtime dependencies beyond go-workflow + backoff/v4
+- **~570 tests across 3 modules, 95%+ coverage** with race detector, 0 lint issues; the core module keeps a light dependency footprint (go-workflow, backoff/v4, plus four small utility libs — no TUI/web frameworks reach core consumers)
 
 ## Installation
 
@@ -105,7 +105,7 @@ go get github.com/larsartmann/go-workflow-auditlog/viz
 go get github.com/larsartmann/go-workflow-auditlog/live
 ```
 
-Requires Go 1.26+ and `github.com/Azure/go-workflow v0.1.13`. The `viz` module also requires `github.com/larsartmann/go-output` and its format-specific sub-modules. The `live` module additionally requires `github.com/larsartmann/go-output/daghtml` and `github.com/larsartmann/go-sse`.
+Requires Go 1.27+ and `github.com/Azure/go-workflow v0.1.13`. The `viz` module also requires `github.com/larsartmann/go-output` and its format-specific sub-modules. The `live` module additionally requires `github.com/larsartmann/go-output/daghtml` and `github.com/larsartmann/go-sse`.
 
 ## Quick Start
 
@@ -215,29 +215,36 @@ go run ./viz/example
 ```
 ━━━ demo version: dev | run id: 1dc74b1ad3d1b5c84e76097018e643f9 ━━━
   [audit] ▶ #1 attempt_start attempt=1 step=fetch
-  [audit] ■ #2 attempt_end attempt=1 step=fetch (10.12ms)
-  [audit] ▶ #3 attempt_start attempt=1 step=flaky-api-call
-  [audit] ■ #4 attempt_end attempt=1 step=flaky-api-call error=transient error (0.01ms)
-  [audit] ▶ #13 attempt_start attempt=2 step=flaky-api-call
-  [audit] ■ #14 attempt_end attempt=2 step=flaky-api-call error=transient error (0.02ms)
-  [audit] ▶ #15 attempt_start attempt=3 step=flaky-api-call
+  [audit] ■ #2 attempt_end attempt=1 step=fetch (10.19ms)
+  [audit] ▶ #7 attempt_start attempt=1 step=detect
+  → detect: result cache hit, reusing stored report
+  [audit] ■ #8 attempt_end attempt=1 step=detect (0.01ms)
+  [audit] ■ #16 attempt_end attempt=1 step=slow-endpoint error=context deadline exceeded (100.90ms)
+  [audit] ▶ #17 attempt_start attempt=2 step=flaky-api-call
+  [audit] ■ #18 attempt_end attempt=2 step=flaky-api-call error=transient error (0.02ms)
+  [audit] ▶ #19 attempt_start attempt=3 step=flaky-api-call
   → flaky step succeeded on attempt 3
-  [audit] ■ #16 attempt_end attempt=3 step=flaky-api-call (0.02ms)
-━━━ Workflow completed in 911.58ms ━━━
+  [audit] ■ #20 attempt_end attempt=3 step=flaky-api-call (0.03ms)
+━━━ Workflow completed in 1.29s ━━━
 
 ━━━ Audit Report ━━━
 Workflow:     data-pipeline
-Steps:        6
-Succeeded:    6
+Steps:        8
+Succeeded:    7
 Failed:       0
-Events:       16
-Total time:   28.53ms
-Succeeded:    true
+Skipped:      0
+Canceled:     1
+Cached:       1 (results reused, not re-verified)
+Events:       20
+Total time:   129.55ms
+Succeeded:    false
 
 ━━━ Step Details ━━━
-  🟢 fetch [succeeded] attempts=1 type=FetchStep (10.12ms)
-  🟢 flaky-api-call [succeeded] attempts=3 deps=[fetch] retry(max=5) error=transient error
-  🟢 save [succeeded] attempts=1 type=SaveStep (5.12ms) deps=[transform]
+  🟢 detect [succeeded] attempts=1 type=CachedDetectStep (0.01ms) ⚡cached deps=[{fetch FetchStep}]
+  🟢 fetch [succeeded] attempts=1 type=FetchStep (10.19ms)
+  🟢 flaky-api-call [succeeded] attempts=3 type=FlakyStep (0.03ms) deps=[{fetch FetchStep}] retry(max=5)
+  🚫 slow-endpoint [canceled] attempts=1 type=SlowEndpointStep (100.90ms) deps=[{fetch FetchStep}] timeout error=context deadline exceeded failure_reason=timeout
+  🟢 save [succeeded] attempts=1 type=SaveStep (5.13ms) deps=[{transform TransformStep}]
 ```
 
 ## How It Works

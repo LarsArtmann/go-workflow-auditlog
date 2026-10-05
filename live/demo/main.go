@@ -6,7 +6,7 @@
 //
 // Run with:
 //
-//	GOEXPERIMENT=jsonv2 go run ./demo
+//	go run ./demo
 //
 // Then open http://localhost:8080 in your browser.
 package main

@@ -6,8 +6,8 @@
 # library's output without writing code first.
 #
 # Usage:
-#   GORELEASER_CURRENT_TAG=vX.Y.Z GOEXPERIMENT=jsonv2 goreleaser release --clean            # full release
-#   GORELEASER_CURRENT_TAG=vX.Y.Z GOEXPERIMENT=jsonv2 goreleaser release --snapshot --clean  # local dry-run
+#   GORELEASER_CURRENT_TAG=vX.Y.Z goreleaser release --clean            # full release
+#   GORELEASER_CURRENT_TAG=vX.Y.Z goreleaser release --snapshot --clean  # local dry-run
 #   goreleaser check                                           # validate config
 #
 # GORELEASER_CURRENT_TAG is REQUIRED: this is a multi-module monorepo where
@@ -15,7 +15,7 @@
 # commit. goreleaser's git-describe picks the wrong tag (alphabetically last)
 # without the override. Always pass the CORE tag.
 #
-# NOTE: GOEXPERIMENT=jsonv2 is set explicitly on every hook and build below so
+# NOTE: is set explicitly on every hook and build below so
 # the release is reproducible without the caller remembering to export it. The
 # library imports the stdlib encoding/json/v2 (gated behind that experiment).
 #
@@ -29,22 +29,22 @@ version: 2
 before:
   hooks:
     # Core module (workspace mode — resolves viz/live via go.work).
-    - sh -c "GOEXPERIMENT=jsonv2 go mod tidy"
-    - sh -c "GOEXPERIMENT=jsonv2 go vet ./..."
-    - sh -c "GOEXPERIMENT=jsonv2 go test -race ./..."
+    - sh -c "go mod tidy"
+    - sh -c "go vet ./..."
+    - sh -c "go test -race ./..."
     # Viz module (standalone — proves consumers can build it without go.work).
     # `tidy -e`: error-tolerant. go-output's published go.mod ships local
     # `replace => ./testhelpers` directives that resolve to an invalid zero
     # version when consumed as a dependency; plain `go mod tidy` exits 1.
     # `-e` proceeds past the unresolvable test graph while still tidying the
     # rest. See AGENTS.md "go-output testhelpers defect".
-    - sh -c "cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy -e"
-    - sh -c "cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go vet ./..."
-    - sh -c "cd viz && GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./..."
+    - sh -c "cd viz && GOWORK=off go mod tidy -e"
+    - sh -c "cd viz && GOWORK=off go vet ./..."
+    - sh -c "cd viz && GOWORK=off go test -race ./..."
     # Live module (standalone — proves consumers can build it without go.work).
-    - sh -c "cd live && GOWORK=off GOEXPERIMENT=jsonv2 go mod tidy -e"
-    - sh -c "cd live && GOWORK=off GOEXPERIMENT=jsonv2 go vet ./..."
-    - sh -c "cd live && GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./..."
+    - sh -c "cd live && GOWORK=off go mod tidy -e"
+    - sh -c "cd live && GOWORK=off go vet ./..."
+    - sh -c "cd live && GOWORK=off go test -race ./..."
 
 builds:
   - id: demo
@@ -52,7 +52,6 @@ builds:
     binary: workflow-auditlog-demo
     env:
       - CGO_ENABLED=0
-      - GOEXPERIMENT=jsonv2
     goos:
       - linux
       - darwin

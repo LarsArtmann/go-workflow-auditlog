@@ -10,8 +10,6 @@ Completed items are documented in [CHANGELOG.md](./CHANGELOG.md) — never retai
 
 - [ ] **STABILITY.md: classify the v0.9.0 + v0.11.0 public API** — `MigrateReport`, `JSONSchema()`, `RedriveReportStatuses`, the migration sentinels, the CLI subcommands, `MarkCached`, `ErrMarkCachedNoStepContext`, `WithCachedSteps`/`WithUncachedSteps`, the `Diff()` cached fields, and `ColumnCached` appear in no stability table. Default everything new to Evolving.
       _Source: `docs/status/2026-09-11_15-36` §f1, `docs/status/2026-08-12_09-50` §f16_
-- [ ] **README "Example Output" refresh** — the block still shows the pre-v0.11.0 six-step demo run; the demo now has a `detect` step and prints a `Cached: N (results reused, not re-verified)` summary line. pkg.go.dev renders the stale block for v0.11.0.
-      _Source: `docs/status/2026-09-11_15-36` §f2_
 - [ ] **Fix the release skill's workspace-mode claim** — `skills/release/SKILL.md` Phase 4 still implies the workspace resolves sibling modules locally after a version bump. Since Go 1.26.7, a workspace member's required sibling version resolves from the module proxy even with `use` directives, so bumped `go.mod` files break ALL local builds until the tags are pushed. Verify pre-bump; bump → tag → push promptly.
       _Source: `docs/status/2026-09-11_15-36` §f3/§d4_
 - [ ] **Untrack stray generated dashboards at repo root** — `workflow-audit-log-20260911-080328-e614c0a7.html` and `dashboard.html` are tracked in git although `.gitignore` covers the pattern. `git rm --cached` both (keep on disk if wanted).

@@ -49,7 +49,6 @@
             };
 
             BUILDFLOW_LANGUAGE = "go";
-            GOEXPERIMENT = "jsonv2";
           };
 
           # Real package: the auditlog CLI (cmd/auditlog). Replaces a former
@@ -82,7 +81,6 @@
             ];
 
             text = ''
-              export GOEXPERIMENT=jsonv2
 
               echo "==> go vet (core)"
               go vet ./...
@@ -150,7 +148,6 @@
                 runtimeInputs = [ pkgs.go_1_27 ];
 
                 text = ''
-                  export GOEXPERIMENT=jsonv2
                   exec go run ${./.}/cmd/auditlog "$@"
                 '';
               }

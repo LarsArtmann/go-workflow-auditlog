@@ -4,14 +4,14 @@ Baseline benchmark results for `go-workflow-auditlog`, captured post-v0.7.0.
 
 These serve as a regression detection baseline. Re-run with:
 
-> **Requires `GOEXPERIMENT=jsonv2`** — set in the Nix devShell automatically, or `export GOEXPERIMENT=jsonv2` manually.
+> Run on Go 1.27+ — no experiment flag needed (`encoding/json/v2` is GA).
 
 ```bash
 # Core module
-GOEXPERIMENT=jsonv2 go test -bench=. -benchmem -count=3 -run=^$ ./...
+go test -bench=. -benchmem -count=3 -run=^$ ./...
 
 # Viz module
-cd viz && GOEXPERIMENT=jsonv2 go test -bench=. -benchmem -count=3 -run=^$ ./...
+cd viz && go test -bench=. -benchmem -count=3 -run=^$ ./...
 ```
 
 Compare against this file with `benchstat`:
