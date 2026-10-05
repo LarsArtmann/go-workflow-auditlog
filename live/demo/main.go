@@ -109,7 +109,7 @@ func main() {
 		log.Fatalf("create server: %v", err)
 	}
 
-	w := &flow.Workflow{}
+	w := &flow.Workflow{} //nolint:exhaustruct_v5 // zero-value workflow is intentional in the demo
 
 	fetch := &fetchStep{url: "https://api.example.com/data"}
 	validate := &validateStep{}

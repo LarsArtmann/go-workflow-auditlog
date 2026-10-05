@@ -115,9 +115,9 @@ already cover the wiring.
 - `ReplayEvents` streaming variant — callback-based like `StreamEvents`
 - Diff report HTML visualization — render `DiffResult` as a side-by-side HTML page
 - Emit synthetic `attempt_end` events for dependency-failed steps during `Snapshot` — would restore `FailureReasonDependency` as a real, reachable value and make the event stream complete for failure analysis
-- Website polish backlog: OG image generation, Lighthouse + link checking, themed 404 page, RSS changelog feed, dependents page (candidates from `docs/status/2026-07-13_21-17`)
-- Dashboard visual niceties: responsive graph-canvas height (`clamp(400px, 60vh, 700px)` or viewport-based), light/dark theme, print styles for the static HTML export (from `docs/status/2026-09-11_10-38`)
-- Error-code registry page for the docs website, auto-generated from `ErrorClassifications()` (from `docs/status/2026-09-11_07-55`)
+- Website polish backlog: OG image generation, Lighthouse + link checking, themed 404 page, RSS changelog feed, dependents page (candidates from `docs/status/archived/2026-07-13_21-17`)
+- Dashboard visual niceties: responsive graph-canvas height (`clamp(400px, 60vh, 700px)` or viewport-based), light/dark theme, print styles for the static HTML export (from `docs/status/archived/2026-09-11_10-38`)
+- Error-code registry page for the docs website, auto-generated from `ErrorClassifications()` (from `docs/status/archived/2026-09-11_07-55`)
 
 ---
 

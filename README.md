@@ -798,7 +798,6 @@ Or use `flow.Name(step, "name")` when adding to the workflow.
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing patterns, code style, and the release process.
 
 - [Changelog](CHANGELOG.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Report a bug or request a feature](https://github.com/LarsArtmann/go-workflow-auditlog/issues)
 
 ## License

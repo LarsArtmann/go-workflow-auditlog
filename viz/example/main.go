@@ -224,7 +224,7 @@ func buildWorkflow() *flow.Workflow {
 	flaky := &FlakyStep{}
 	detect := &CachedDetectStep{}
 
-	w := &flow.Workflow{}
+	w := &flow.Workflow{} //nolint:exhaustruct_v5 // zero-value workflow is intentional in the demo
 	w.Add(
 		// Linear pipeline: fetch → validate → transform → save.
 		flow.Step(fetch),
@@ -347,13 +347,23 @@ func buildExportTasks(audit *auditlog.Auditor, report auditlog.WorkflowReport, j
 		{"dag.puml", func() error { return viz.ExportPlantUML(report, join("dag.puml")) }},
 		{"dag.d2", func() error { return viz.ExportD2(report, join("dag.d2")) }},
 		{"steps.csv", func() error {
-			return viz.ExportTable(report, join("steps.csv"), output.FormatCSV, output.RenderOptions{})
+			return viz.ExportTable(
+				report,
+				join("steps.csv"),
+				output.FormatCSV,
+				output.RenderOptions{}, //nolint:exhaustruct_v5 // zero-value options are intentional
+			)
 		}},
 		{"steps-compact.md", func() error {
-			return viz.ExportTable(report, join("steps-compact.md"), output.FormatMarkdown, output.RenderOptions{},
+			return viz.ExportTable(
+				report,
+				join("steps-compact.md"),
+				output.FormatMarkdown,
+				output.RenderOptions{}, //nolint:exhaustruct_v5 // zero-value options are intentional
 				viz.WithColumns(
 					viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration,
-				))
+				),
+			)
 		}},
 		{"tree.txt", func() error { return viz.ExportTree(report, join("tree.txt")) }},
 		{"dashboard.html", func() error { return viz.ExportHTML(report, join("dashboard.html")) }},

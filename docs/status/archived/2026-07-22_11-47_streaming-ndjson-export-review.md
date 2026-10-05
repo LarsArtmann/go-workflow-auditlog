@@ -39,7 +39,7 @@
 
 ## c) NOT STARTED
 
-| Item                                      | Why it matters                                                                                                                                                                            |
+| ~~Item~~ ~~done — verified by the 2026-10-05 docs-health pass~~| ~~Why it matters~~|
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ~~**`FEATURES.md` update**~~| ~~Line 127 lists "Streaming NDJSON export" under "WORTH CONSIDERING" — should move to DONE/PARTIALLY DONE~~ done — streaming listed under DONE in FEATURES.md|
 | ~~**`TODO_LIST.md` update**~~| ~~Line 15 has `- [ ] Streaming NDJSON export option` — checkbox not checked~~ done — item completed and later removed per TODO_LIST policy|
