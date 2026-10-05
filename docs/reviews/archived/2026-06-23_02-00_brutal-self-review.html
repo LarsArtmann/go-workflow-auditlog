@@ -868,7 +868,7 @@
         <h2 id="forgot"><span class="num">01</span>What Did You Forget?</h2>
 
         <div class="card card-problem">
-          <h4>doc.go taught deprecated API to every new user</h4>
+          <h4><s>doc.go taught deprecated API to every new user</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             The package doc comment — the
             <strong>first code example anyone sees</strong> — used
@@ -879,7 +879,7 @@
         </div>
 
         <div class="card card-problem">
-          <h4>20+ internal references to deprecated methods</h4>
+          <h4><s>20+ internal references to deprecated methods</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             After deprecating <code>WriteReportJSON</code>,
             <code>WriteEventsNDJSON</code>, <code>ExportToFile</code>,
@@ -891,7 +891,7 @@
         </div>
 
         <div class="card card-warning">
-          <h4>No gosec in CI</h4>
+          <h4><s>No gosec in CI</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             CI has <code>govulncheck</code> (dependency CVEs) but not
             <code>gosec</code> (code-level security analysis). The how-to-golang
@@ -902,7 +902,7 @@
         </div>
 
         <div class="card card-warning">
-          <h4>encoding/json v2 not available</h4>
+          <h4><s>encoding/json v2 not available</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             The how-to-golang skill says Go 1.25+ should use
             <code>encoding/json/v2</code>, but it is
@@ -917,7 +917,7 @@
         </h2>
 
         <div class="card card-problem">
-          <h4>Deprecated aliases for an ALPHA library — FIXED</h4>
+          <h4><s>Deprecated aliases for an ALPHA library — FIXED</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             Four deprecated backward-compat aliases
             (<code>WriteReportJSON</code>,
@@ -930,7 +930,7 @@
         </div>
 
         <div class="card card-problem">
-          <h4>Two benchmark files with nearly identical names — FIXED</h4>
+          <h4><s>Two benchmark files with nearly identical names — FIXED</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             <code>benchmarks_test.go</code> (runtime overhead benchmarks) and
             <code>benchmark_test.go</code> (export rendering benchmarks + godoc
@@ -943,7 +943,7 @@
         </div>
 
         <div class="card card-warning">
-          <h4>result symlink in working tree — FIXED</h4>
+          <h4><s>result symlink in working tree — FIXED</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             The nix build output symlink (<code>result → /nix/store/...</code>)
             sat in the repo root. It's gitignored but BuildFlow flags it as
@@ -956,7 +956,7 @@
 
         <div class="issue issue-critical">
           <span class="severity severity-critical">Fixed</span>
-          <h3>Deprecated methods used in our own codebase</h3>
+          <h3><s>Deprecated methods used in our own codebase</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
           <div class="where">
             doc.go, README.md, loader_test.go, replay_test.go, coverage_test.go,
             auditlog_test.go, example_test.go, loader.go, replay.go
@@ -976,7 +976,7 @@
 
         <div class="issue issue-important">
           <span class="severity severity-nice">Fixed</span>
-          <h3>benchmark_test.go vs benchmarks_test.go</h3>
+          <h3><s>benchmark_test.go vs benchmarks_test.go</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
           <div class="where">benchmark_test.go, benchmarks_test.go</div>
           <p>
             Two files with names differing by one letter, serving different
@@ -991,7 +991,7 @@
 
         <div class="issue issue-important">
           <span class="severity severity-nice">Fixed</span>
-          <h3>doc.go vs plugin.go disagreement</h3>
+          <h3><s>doc.go vs plugin.go disagreement</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
           <div class="where">doc.go:21, plugin.go:190</div>
           <p>
             doc.go recommended <code>ExportToFile</code> in the quick-start
@@ -1006,7 +1006,7 @@
         <h2 id="ghost"><span class="num">04</span>Ghost Systems</h2>
 
         <div class="card card-problem">
-          <h4>Deprecated API aliases — ghost system eliminated</h4>
+          <h4><s>Deprecated API aliases — ghost system eliminated</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             The four deprecated aliases were a ghost system: code that exists
             for an imagined future need (backward compatibility with nonexistent
@@ -1031,7 +1031,7 @@
         </div>
 
         <div class="card card-warning">
-          <h4>helpers.go utilities — borderline ghost</h4>
+          <h4><s>helpers.go utilities — borderline ghost</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             <code>CheckNoClobber</code>, <code>HasPointerAddress</code>, and
             <code>NameCollisions</code> are standalone utilities not integrated
@@ -1051,7 +1051,7 @@
         <h2 id="better"><span class="num">05</span>What Could Be Better?</h2>
 
         <div class="card card-solution">
-          <h4>Type model: denormalized status counts</h4>
+          <h4><s>Type model: denormalized status counts</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             <code>WorkflowReport</code> has 6 manually-denormalized status count
             fields (<code>SucceededCount</code>, <code>FailedCount</code>,
@@ -1071,7 +1071,7 @@
         </div>
 
         <div class="card card-solution">
-          <h4>Duration uses *float64 (nullable pointer)</h4>
+          <h4><s>Duration uses *float64 (nullable pointer)</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             <code>DurationMs *float64</code> uses a nullable pointer for
             "duration not measured" semantics. This is awkward in Go — callers
@@ -1087,7 +1087,7 @@
         </div>
 
         <div class="card">
-          <h4>encoding/json v1 on Go 1.26</h4>
+          <h4><s>encoding/json v1 on Go 1.26</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             The how-to-golang skill recommends <code>encoding/json/v2</code> for
             Go 1.25+, but this package is
@@ -1104,7 +1104,7 @@
         <h2 id="lie"><span class="num">06</span>Did I Lie?</h2>
 
         <div class="card card-problem">
-          <h4>YES — doc.go lied about the correct API</h4>
+          <h4><s>YES — doc.go lied about the correct API</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             The package doc comment showed
             <code>audit.ExportToFile("audit.json")</code> as the recommended way
@@ -1118,7 +1118,7 @@
         </div>
 
         <div class="card card-solution">
-          <h4>Coverage claim verified: 93.9%</h4>
+          <h4><s>Coverage claim verified: 93.9%</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             Verified:
             <code
@@ -1151,7 +1151,7 @@
         </div>
 
         <div class="card card-warning">
-          <h4>What can be better</h4>
+          <h4><s>What can be better</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <ul>
             <li>
               <strong>Add gosec to CI</strong> — currently only govulncheck runs
@@ -1239,43 +1239,43 @@
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
-              <td>Add <code>gosec</code> to CI alongside govulncheck</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td><span class="badge badge-medium">Medium</span></td>
+              <td><s>1</s> ~~done — gosec enabled in .golangci.yml~~</td>
+              <td><s>Add <code>gosec</code> to CI alongside govulncheck</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
             </tr>
             <tr>
-              <td>2</td>
-              <td>
+              <td><s>2</s> ~~**NOT-DO — viz/example is the home (module split).**~~</td>
+              <td><s>
                 Move <code>example/</code> to <code>examples/</code> (Go
                 convention)
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td><span class="badge badge-low">Low</span></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
             </tr>
             <tr>
-              <td>3</td>
-              <td>
+              <td><s>3</s> ~~**Won't implement — count fields suffice.**~~</td>
+              <td><s>
                 Add <code>StatusCount(status) int</code> method for programmatic
                 access
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td><span class="badge badge-medium">Medium</span></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
             </tr>
             <tr>
-              <td>4</td>
-              <td>
+              <td><s>4</s> ~~done — json/v2 migration v0.7.0~~</td>
+              <td><s>
                 Migrate to <code>encoding/json/v2</code> when it lands in Go
                 stdlib
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td><span class="badge badge-medium">Medium</span></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
             </tr>
             <tr>
-              <td>5</td>
-              <td>Add property tests for replay/rebuild round-trip</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td><span class="badge badge-low">Low</span></td>
+              <td><s>5</s> ~~done — replay round-trip tests v0.5.1~~</td>
+              <td><s>Add property tests for replay/rebuild round-trip</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
             </tr>
           </tbody>
         </table>

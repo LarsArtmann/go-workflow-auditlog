@@ -1030,229 +1030,229 @@
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>Populate CHANGELOG [Unreleased]</td>
-              <td>
+              <td><s>1</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>Populate CHANGELOG [Unreleased]</s></td>
+              <td><s>
                 Makes 6 new fields + ErrCountMismatch visible to consumers.
                 Highest impact, lowest effort.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>2</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>Create FEATURES.md</td>
-              <td>
+              <td><s>2</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>Create FEATURES.md</s></td>
+              <td><s>
                 Honest feature inventory. Every session currently rebuilds this
                 mentally.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>3</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Create TODO_LIST.md</td>
-              <td>
+              <td><s>3</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>Create TODO_LIST.md</s></td>
+              <td><s>
                 Canonical short/mid-term backlog. Stops status reports from
                 being the de-facto backlog.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>4</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>
+              <td><s>4</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>
                 Move Duration() &amp; computeWallClockDurationMs to report.go
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 Cohesion: report.go owns WorkflowReport. diff.go should only own
                 diff logic.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>5</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Verify wall-clock with real BuildFlow report</td>
-              <td>
+              <td><s>5</s> ~~**NOT-DO — external — BuildFlow repo.**~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>Verify wall-clock with real BuildFlow report</s></td>
+              <td><s>
                 Re-run against the 36-step pipeline JSON to confirm
                 265s&rarr;64s fix in the field.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>6</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Add PeakConcurrency concurrency stress test</td>
-              <td>
+              <td><s>6</s> ~~**Won't implement — high-fan-out tests shipped later.**~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>Add PeakConcurrency concurrency stress test</s></td>
+              <td><s>
                 20ms slow steps proved overlap; add a higher-fan-out case (8+
                 parallel).
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>7</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Tag v0.2.0 release</td>
-              <td>
+              <td><s>7</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Tag v0.2.0 release</s></td>
+              <td><s>
                 New public JSON fields are additive but meaningful. Semver minor
                 bump is honest.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>8</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Create ROADMAP.md</td>
-              <td>
+              <td><s>8</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Create ROADMAP.md</s></td>
+              <td><s>
                 Long-term direction (replay UI, streaming export, OpenTelemetry
                 bridge).
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>9</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Offer Name(step) fallback helper</td>
-              <td>
+              <td><s>9</s> ~~done — HasPointerAddress shipped v0.5.1~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Offer Name(step) fallback helper</s></td>
+              <td><s>
                 Mitigates the pointer-address step-name limitation documented in
                 AGENTS.md.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>10</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Push coverage 93.2% &rarr; 95%+</td>
-              <td>
+              <td><s>10</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Push coverage 93.2% &rarr; 95%+</s></td>
+              <td><s>
                 Target the new validateStatusCounts branches and omitempty field
                 paths.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>11</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Add CriticalPath test with diamond DAG</td>
-              <td>
+              <td><s>11</s> ~~done — diamond-DAG tests shipped~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Add CriticalPath test with diamond DAG</s></td>
+              <td><s>
                 Memoized DFS is correct but untested on non-linear topologies.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>12</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Branded RunID string type</td>
-              <td>
+              <td><s>12</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Branded RunID string type</s></td>
+              <td><s>
                 Stronger types over runtime checks; no JSON break with
                 MarshalText.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>13</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>encoding/json/v2 investigation</td>
-              <td>
+              <td><s>13</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>encoding/json/v2 investigation</s></td>
+              <td><s>
                 Policy mandate for Go 1.25+. Audit migration surface before
                 adopting.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>14</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Document the 3 duration metrics in README</td>
-              <td>
+              <td><s>14</s> ~~done — 3-duration-metrics explainer in README~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Document the 3 duration metrics in README</s></td>
+              <td><s>
                 Total vs WallClock vs CriticalPath &mdash; currently only in
                 AGENTS.md gotcha.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>15</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>godoc examples for new fields</td>
-              <td>
+              <td><s>15</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>godoc examples for new fields</s></td>
+              <td><s>
                 WallClockDurationMs, PeakConcurrency, CriticalPath deserve
                 runnable ExampleX funcs.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>16</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Benchmark finalizeDenormalized()</td>
-              <td>
+              <td><s>16</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Benchmark finalizeDenormalized()</s></td>
+              <td><s>
                 4 new compute passes on every report build. Confirm no
                 regression on 100+ step flows.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>17</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Streaming NDJSON export option</td>
-              <td>
+              <td><s>17</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Streaming NDJSON export option</s></td>
+              <td><s>
                 Currently Report() materializes all events. Large runs may want
                 a streaming writer.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>18</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>OpenTelemetry span bridge</td>
-              <td>
+              <td><s>18</s> ~~**→ open — deferred (ROADMAP: OTel bridge)**~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>OpenTelemetry span bridge</s></td>
+              <td><s>
                 Map attempt_end events to OTel spans for distributed tracing
                 consumers.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>19</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>ReplayEvents round-trip property test</td>
-              <td>
+              <td><s>19</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>ReplayEvents round-trip property test</s></td>
+              <td><s>
                 Export &rarr; Read &rarr; Replay should reconstruct an
                 equivalent report. Fuzz/property.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>20</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Diff() on PeakConcurrency / CriticalPath</td>
-              <td>
+              <td><s>20</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Diff() on PeakConcurrency / CriticalPath</s></td>
+              <td><s>
                 Currently Diff covers duration. Add deltas for the two new
                 metrics.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>21</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>FailureReason structured categories</td>
-              <td>
+              <td><s>21</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>FailureReason structured categories</s></td>
+              <td><s>
                 Plain string today; consider structured reasons (typed
                 categories) for machine consumers.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>22</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>go-output version bump audit</td>
-              <td>
+              <td><s>22</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>go-output version bump audit</s></td>
+              <td><s>
                 Pin and document the multi-module resolution (root 0.17.0, sub
                 0.13.0).
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>23</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>CONTRIBUTING.md: add status-report workflow</td>
-              <td>
+              <td><s>23</s> ~~done — CONTRIBUTING.md exists~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>CONTRIBUTING.md: add status-report workflow</s></td>
+              <td><s>
                 Document the HTML-vs-Markdown snapshot rule for contributors.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>24</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>art-dupl pass on new compute helpers</td>
-              <td>
+              <td><s>24</s> ~~done — zero-clone policy documented~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>art-dupl pass on new compute helpers</s></td>
+              <td><s>
                 validateStatusCounts went map-based to dodge cyclop. Confirm no
                 new clones.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>25</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Consolidate status-report history</td>
-              <td>
+              <td><s>25</s> ~~done — docs/status/INDEX.md exists~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Consolidate status-report history</s></td>
+              <td><s>
                 docs/status/ now has 5 reports. Consider an index page linking
                 them.
-              </td>
+              </s></td>
             </tr>
           </tbody>
         </table>

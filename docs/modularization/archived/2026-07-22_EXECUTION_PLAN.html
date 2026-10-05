@@ -130,7 +130,7 @@
       <h2>Tier 1 — Domain / Foundation</h2>
 
       <div class="tier tier-1">
-        <h3>Step 1: Extract shared test helpers into a core package</h3>
+        <h3><s>Step 1: Extract shared test helpers into a core package</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Create <code>testhelpers/testhelpers.go</code>, move step
           constructors, workflow builders, assertions, and runner helpers from
@@ -149,7 +149,7 @@
       </div>
 
       <div class="tier tier-1">
-        <h3>Step 2: Create the visualization module skeleton</h3>
+        <h3><s>Step 2: Create the visualization module skeleton</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Create <code>viz/</code> directory, <code>viz/go.mod</code> with a
           require/replace for the core module, and
@@ -169,7 +169,7 @@
       <h2>Tier 2 — Untangle / Move Code</h2>
 
       <div class="tier tier-2">
-        <h3>Step 3: Move rendering files into <code>viz/</code></h3>
+        <h3><s>Step 3: Move rendering files into <code>viz/</code></s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Move
           <code
@@ -192,7 +192,7 @@
       </div>
 
       <div class="tier tier-2">
-        <h3>Step 4: Convert visualization methods to functions</h3>
+        <h3><s>Step 4: Convert visualization methods to functions</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           In <code>viz/</code>, convert all
           <code>func (r WorkflowReport) WriteX(...)</code> methods to
@@ -208,7 +208,7 @@
       </div>
 
       <div class="tier tier-2">
-        <h3>Step 5: Remove visualization code from core</h3>
+        <h3><s>Step 5: Remove visualization code from core</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Delete the old visualization files from the root. Remove visualization
           methods from
@@ -229,7 +229,7 @@
       <h2>Tier 3 — Infrastructure / Wiring</h2>
 
       <div class="tier tier-3">
-        <h3>Step 6: Move visualization tests to <code>viz/</code></h3>
+        <h3><s>Step 6: Move visualization tests to <code>viz/</code></s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Move
           <code
@@ -254,7 +254,7 @@
       </div>
 
       <div class="tier tier-3">
-        <h3>Step 7: Move the demo example to the visualization module</h3>
+        <h3><s>Step 7: Move the demo example to the visualization module</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Move <code>example/</code> to <code>viz/example/</code>. Update its
           imports to use
@@ -275,7 +275,7 @@
       </div>
 
       <div class="tier tier-3">
-        <h3>Step 8: Configure workspace and CI</h3>
+        <h3><s>Step 8: Configure workspace and CI</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Create <code>go.work</code> listing <code>.</code> and
           <code>./viz</code>. Update <code>.github/workflows/ci.yml</code> to
@@ -297,7 +297,7 @@
       <h2>Tier 4 — Polish / Documentation</h2>
 
       <div class="tier tier-4">
-        <h3>Step 9: Update README, AGENTS.md, and website docs</h3>
+        <h3><s>Step 9: Update README, AGENTS.md, and website docs</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Update README quick-start to import the <code>viz</code> module for
           diagram/table/HTML exports. Update AGENTS.md with the new module
@@ -312,7 +312,7 @@
       </div>
 
       <div class="tier tier-4">
-        <h3>Step 10: Final verification and reflection</h3>
+        <h3><s>Step 10: Final verification and reflection</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
         <p>
           Run the full test suite with race and coverage across both modules.
           Verify

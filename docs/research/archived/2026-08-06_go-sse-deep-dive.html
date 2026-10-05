@@ -1561,104 +1561,104 @@
             </thead>
             <tbody>
               <tr>
-                <td>1</td>
-                <td>
+                <td><s>1</s> ~~**Won't implement — Broadcaster refactor declined — local Hub retained.**~~</td>
+                <td><s>
                   Replace Hub with
                   <code>Broadcaster[jsontext.Value]</code> &mdash; eliminate 141
                   lines of duplicated fan-out code
-                </td>
-                <td class="yes">5</td>
-                <td>3</td>
-                <td><strong>15</strong></td>
+                </s></td>
+                <td class="yes"><s>5</s></td>
+                <td><s>3</s></td>
+                <td><s><strong>15</strong></s></td>
               </tr>
               <tr>
-                <td>2</td>
-                <td>
+                <td><s>2</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Upgrade to v0.4.0 (unlocks Shutdown, Health, WithBufferSize)
-                </td>
-                <td class="yes">3</td>
-                <td class="yes">5</td>
-                <td><strong>15</strong></td>
+                </s></td>
+                <td class="yes"><s>3</s></td>
+                <td class="yes"><s>5</s></td>
+                <td><s><strong>15</strong></s></td>
               </tr>
               <tr>
-                <td>3</td>
-                <td>
+                <td><s>3</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Replace handleSSE with <code>Stream</code> &mdash; eliminate
                   manual headers, flusher, heartbeat loop
-                </td>
-                <td class="yes">4</td>
-                <td>3</td>
-                <td><strong>12</strong></td>
+                </s></td>
+                <td class="yes"><s>4</s></td>
+                <td><s>3</s></td>
+                <td><s><strong>12</strong></s></td>
               </tr>
               <tr>
-                <td>4</td>
-                <td>
+                <td><s>4</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Use <code>Stream.Send</code> instead of WriteEvent + manual
                   Flush
-                </td>
-                <td>3</td>
-                <td>4</td>
-                <td><strong>12</strong></td>
+                </s></td>
+                <td><s>3</s></td>
+                <td><s>4</s></td>
+                <td><s><strong>12</strong></s></td>
               </tr>
               <tr>
-                <td>5</td>
-                <td>
+                <td><s>5</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Add <code>Broadcaster.Shutdown(ctx)</code> to Server.Shutdown
                   for graceful drain
-                </td>
-                <td>3</td>
-                <td>4</td>
-                <td><strong>12</strong></td>
+                </s></td>
+                <td><s>3</s></td>
+                <td><s>4</s></td>
+                <td><s><strong>12</strong></s></td>
               </tr>
               <tr>
-                <td>6</td>
-                <td>
+                <td><s>6</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Replace hardcoded heartbeat with
                   <code>sse.WriteHeartbeat</code> or
                   <code>Stream.Heartbeat</code>
-                </td>
-                <td>2</td>
-                <td class="yes">5</td>
-                <td><strong>10</strong></td>
+                </s></td>
+                <td><s>2</s></td>
+                <td class="yes"><s>5</s></td>
+                <td><s><strong>10</strong></s></td>
               </tr>
               <tr>
-                <td>7</td>
-                <td>
+                <td><s>7</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Implement <code>EventStore</code> + <code>Replay</code> for
                   reconnection support
-                </td>
-                <td class="yes">5</td>
-                <td>2</td>
-                <td><strong>10</strong></td>
+                </s></td>
+                <td class="yes"><s>5</s></td>
+                <td><s>2</s></td>
+                <td><s><strong>10</strong></s></td>
               </tr>
               <tr>
-                <td>8</td>
-                <td>
+                <td><s>8</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Use <code>Stream.Heartbeat(ctx, interval)</code> goroutine
                   instead of manual ticker
-                </td>
-                <td>3</td>
-                <td>3</td>
-                <td><strong>9</strong></td>
+                </s></td>
+                <td><s>3</s></td>
+                <td><s>3</s></td>
+                <td><s><strong>9</strong></s></td>
               </tr>
               <tr>
-                <td>9</td>
-                <td>
+                <td><s>9</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Wire <code>Broadcaster.Health()</code> into health endpoint
-                </td>
-                <td>2</td>
-                <td>4</td>
-                <td><strong>8</strong></td>
+                </s></td>
+                <td><s>2</s></td>
+                <td><s>4</s></td>
+                <td><s><strong>8</strong></s></td>
               </tr>
               <tr>
-                <td>10</td>
-                <td>
+                <td><s>10</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>
                   Use <code>sse.SetHeaders</code> for core headers (add 2 extras
                   after)
-                </td>
-                <td>2</td>
-                <td class="yes">5</td>
-                <td><strong>10</strong></td>
+                </s></td>
+                <td><s>2</s></td>
+                <td class="yes"><s>5</s></td>
+                <td><s><strong>10</strong></s></td>
               </tr>
             </tbody>
           </table>

@@ -51,30 +51,30 @@ Nothing. No errors, no broken builds, no data loss. The website builds cleanly o
 
 ### Immediate issues I noticed
 
-1. **Website is not committed to git** — the entire `website/` directory is untracked. It needs to be committed and pushed for anyone to see it
-2. **The `auditlog.lars.software` domain doesn't resolve** — README and website both link to it, but there is no DNS record and no Firebase hosting site. Users clicking the link get a 404/error. This is a **broken link in the public README right now**
-3. **No website deployment workflow** — even if committed, there is no automated path from push to live site. Deployment requires manual `nix run .#deploy` or `pnpm run build && firebase deploy`
-4. **Website `package-lock.json` committed but `node_modules/` in `.gitignore`** — this is correct, but the lockfile was generated with pnpm and the `.gitignore` mentions "CI uses pnpm" — need to ensure CI also uses pnpm not bun
-5. **README still 527 lines** — the improvement added a "Why?" section and better header, but the README is still extremely long. Some content (detailed API tables, error classification code examples) could be trimmed with "see docs website" links now that the website exists
-6. **Coverage badge says ~94%** — the actual coverage gate in CI checks `>=92%`. The AGENTS.md says ~94%. The old README said 93.2%. The badge now says ~94%. These should all be consistent and ideally dynamically linked (e.g. via Codecov)
+1. **Website is not committed to git** — the entire `website/` directory is untracked. It needs to be committed and pushed for anyone to see it **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+2. **The `auditlog.lars.software` domain doesn't resolve** — README and website both link to it, but there is no DNS record and no Firebase hosting site. Users clicking the link get a 404/error. This is a **broken link in the public README right now** **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+3. **No website deployment workflow** — even if committed, there is no automated path from push to live site. Deployment requires manual `nix run .#deploy` or `pnpm run build && firebase deploy` **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+4. **Website `package-lock.json` committed but `node_modules/` in `.gitignore`** — this is correct, but the lockfile was generated with pnpm and the `.gitignore` mentions "CI uses pnpm" — need to ensure CI also uses pnpm not bun **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+5. **README still 527 lines** — the improvement added a "Why?" section and better header, but the README is still extremely long. Some content (detailed API tables, error classification code examples) could be trimmed with "see docs website" links now that the website exists **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+6. ~~**Coverage badge says ~94%** — the actual coverage gate in CI checks `>=92%`. The AGENTS.md says ~94%. The old README said 93.2%. The badge now says ~94%. These should all be consistent and ideally dynamically linked (e.g. via Codecov)~~ done — verified by the 2026-10-05 docs-health pass
 
 ### Design/content improvements
 
-7. **No screenshots or GIFs** — the landing page is text + code only. A screenshot of the HTML dashboard or an animated GIF of the interactive DAG graph would dramatically improve the "show don't tell" factor
-8. **Hero code snippet doesn't show output** — it shows the integration code but not what you get. A small "output preview" panel showing the report summary or dashboard thumbnail would be more compelling
-9. **Comparison matrix is onesided** — every row is "no, no, yes" for the library. Adding a row where manual logging has an advantage (e.g. "Zero dependencies") would make it more honest
-10. **No "How It Works" diagram** — the 3-step section is good but a visual diagram of the Attach → Do → Snapshot flow with the callback injection mechanism would be more intuitive
-11. **Changelog on website is abridged** — I summarized 5 versions. The real CHANGELOG.md has much more detail. The website version could be a direct embed or symlink
-12. **No error classification guide page** — the README has a detailed error classification section with code examples and a family table, but the website has no dedicated guide page for this feature
-13. **Missing guide: Retry & Timeout tracking** — the library captures retry/timeout config per step, but no guide page explains how to read and use this data
-14. **Missing guide: Concurrency model** — the README has a concurrency model section but the website doesn't document it for consumers who need thread-safety guarantees
+7. **No screenshots or GIFs** — the landing page is text + code only. A screenshot of the HTML dashboard or an animated GIF of the interactive DAG graph would dramatically improve the "show don't tell" factor **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+8. ~~**Hero code snippet doesn't show output** — it shows the integration code but not what you get. A small "output preview" panel showing the report summary or dashboard thumbnail would be more compelling~~ done — verified by the 2026-10-05 docs-health pass
+9. ~~**Comparison matrix is onesided** — every row is "no, no, yes" for the library. Adding a row where manual logging has an advantage (e.g. "Zero dependencies") would make it more honest~~ done — verified by the 2026-10-05 docs-health pass
+10. ~~**No "How It Works" diagram** — the 3-step section is good but a visual diagram of the Attach → Do → Snapshot flow with the callback injection mechanism would be more intuitive~~ done — verified by the 2026-10-05 docs-health pass
+11. **Changelog on website is abridged** — I summarized 5 versions. The real CHANGELOG.md has much more detail. The website version could be a direct embed or symlink **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+12. **No error classification guide page** — the README has a detailed error classification section with code examples and a family table, but the website has no dedicated guide page for this feature **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+13. ~~**Missing guide: Retry & Timeout tracking** — the library captures retry/timeout config per step, but no guide page explains how to read and use this data~~ done — verified by the 2026-10-05 docs-health pass
+14. **Missing guide: Concurrency model** — the README has a concurrency model section but the website doesn't document it for consumers who need thread-safety guarantees **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ### Infrastructure improvements
 
-15. **No sitemap submission** — robots.txt points to the sitemap but it is not submitted to Google Search Console
-16. **No analytics** — sibling sites likely have no analytics either, but for a public OSS project, basic privacy-respecting analytics (Plausible/Umami) would help understand traffic
-17. **No social preview image** — GitHub link unfurls will have no preview image. An OG image (static or generated) would improve social sharing
-18. **The `example/` directory** — the README links to `./example` as "Interactive Demo" but this is a Go program, not a web demo. Consider a hosted live demo or at least a screenshot
+15. **No sitemap submission** — robots.txt points to the sitemap but it is not submitted to Google Search Console **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+16. ~~**No analytics** — sibling sites likely have no analytics either, but for a public OSS project, basic privacy-respecting analytics (Plausible/Umami) would help understand traffic~~ done — verified by the 2026-10-05 docs-health pass
+17. **No social preview image** — GitHub link unfurls will have no preview image. An OG image (static or generated) would improve social sharing **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
+18. **The `example/` directory** — the README links to `./example` as "Interactive Demo" but this is a Go program, not a web demo. Consider a hosted live demo or at least a screenshot **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 

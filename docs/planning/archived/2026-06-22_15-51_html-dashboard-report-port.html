@@ -1077,90 +1077,90 @@
           <tbody>
             <!-- PHASE 0: FOUNDATION -->
             <tr>
-              <td class="td-id">01</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>01</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>Create <code>metadata.go</code></strong> —
                 <code>BuildTypeMetadata()</code> with
                 <code>TypeMetadata</code> struct (Statuses map + Events map).
                 Maps StepStatus→icon/label, EventType→label/color. Single source
                 of truth for JS display metadata.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span>
-              </td>
-              <td><span class="file-ref">metadata.go (new)</span></td>
+              </s></td>
+              <td><s><span class="file-ref">metadata.go (new)</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">02</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">6 min</td>
-              <td>
+              <td class="td-id"><s>02</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>6 min</s></td>
+              <td><s>
                 <strong>Create <code>html.go</code> API surface</strong> —
                 <code>WorkflowReport.WriteHTML(w)</code>,
                 <code>ExportHTML(path)</code>, <code>WriteHTMLString()</code>.
                 Delegate <code>WriteHTML</code> to
                 <code>renderHTML(report)</code> in html_render.go. Use existing
                 <code>writeToFile</code> for ExportHTML.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html.go (new)</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html.go (new)</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">03</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>03</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Add Auditor delegation methods</strong> to
                 <code>plugin.go</code> — <code>WriteHTML</code>,
                 <code>ExportHTML</code>, <code>WriteHTMLString</code>. Follow
                 exact same delegation pattern as WriteD2/WriteTree/etc.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">plugin.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">plugin.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">04</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">7 min</td>
-              <td>
+              <td class="td-id"><s>04</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>7 min</s></td>
+              <td><s>
                 <strong>Create <code>html_render.go</code> skeleton</strong> —
                 <code>renderHTML(report WorkflowReport) (string, error)</code>
                 using <code>strings.Builder</code>. Marshal report + metadata to
                 JSON. Wire template constants (CSS + JS) as
                 <code>const</code> blocks. Return assembled HTML string.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go (new)</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go (new)</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">05</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>05</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong
                   >Wire <code>renderHTML</code> into
                   <code>WriteHTML</code></strong
@@ -1168,82 +1168,82 @@
                 — Write to <code>io.Writer</code>, verify compilation, verify
                 <code>go vet</code> clean. This is the "hello world" moment — a
                 blank HTML page renders.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html.go</span></s></td>
             </tr>
 
             <!-- PHASE 1: CSS -->
             <tr>
-              <td class="td-id">06</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>06</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong>Write CSS: theme tokens + global styles</strong> —
                 <code>const cssTheme</code>: <code>:root</code> variables (dark
                 amber theme from samber adapted: <code>--bg:#14110d</code>,
                 <code>--accent:#e8a838</code>, status colors), resets, body
                 typography, focus-visible, scrollbar styling.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">07</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>07</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong>Write CSS: header + waveform + stats + tabs</strong> —
                 <code>const cssLayout</code>: header layout (logo dot, version
                 badge, subtitle, legend), waveform section (event strip bars),
                 stats grid (auto-fit stat cards), tab bar + tab-content panels.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">08</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>08</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong>Write CSS: tables + badges + filter bar</strong> —
                 <code>const cssComponents</code>: data table (sortable headers,
                 hover, sticky thead), status badges
                 (succeeded/failed/canceled/skipped colors), filter bar (search
                 input, chip buttons), retry/timeout mini-badges, error tooltips.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">09</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>09</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong
                   >Write CSS: graph + tree + timeline + empty states</strong
                 >
@@ -1251,21 +1251,21 @@
                 (rect + accent bar + text), graph-edge (bezier path), zoom
                 controls buttons, timeline bar chart rows, collapsible tree
                 nodes, empty-state panels, footer.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">10</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">7 min</td>
-              <td>
+              <td class="td-id"><s>10</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>7 min</s></td>
+              <td><s>
                 <strong
                   >Write CSS: responsive + accessibility +
                   reduced-motion</strong
@@ -1276,22 +1276,22 @@
                 <code>prefers-reduced-motion</code>,
                 <code>.sr-only</code> screen-reader text, print styles, ARIA
                 focus states.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
 
             <!-- PHASE 2: HTML STRUCTURE -->
             <tr>
-              <td class="td-id">11</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>11</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>Build HTML: head + header + waveform</strong> — DOCTYPE,
                 <code>&lt;meta charset&gt;</code>, CSP meta tag (<code
                   >default-src 'none'; style-src 'unsafe-inline'; script-src
@@ -1299,80 +1299,80 @@
                 >), title with WorkflowID, header (logo dot, title, version
                 badge, subtitle with workflow ID + exported-at, legend
                 container), waveform section.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">12</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">6 min</td>
-              <td>
+              <td class="td-id"><s>12</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>6 min</s></td>
+              <td><s>
                 <strong>Build HTML: stats grid + tab bar</strong> — Stats grid
                 container (populated by JS), 5-tab bar with ARIA
                 <code>role="tablist"</code>: Steps, Tree, DAG Graph, Timeline,
                 Events. Each tab has <code>aria-selected</code>,
                 <code>aria-controls</code>, keyboard nav support.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">13</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>13</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>Build HTML: Steps tab</strong> — Filter bar (search
                 input + errors-only toggle chip + result count), sortable table
                 with columns: Step, Type, Status, Attempts, Max, Duration (ms),
                 Dependencies, Dependents, Retry, Timeout, Error. Empty-state
                 row.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">14</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">7 min</td>
-              <td>
+              <td class="td-id"><s>14</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>7 min</s></td>
+              <td><s>
                 <strong>Build HTML: Tree + Graph + Timeline tabs</strong> — Tree
                 tab: collapsible container. Graph tab: SVG container + zoom
                 controls (+/−/fit buttons) + info hint. Timeline tab: bar chart
                 container.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">15</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">7 min</td>
-              <td>
+              <td class="td-id"><s>15</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>7 min</s></td>
+              <td><s>
                 <strong
                   >Build HTML: Events tab + JSON injection + footer</strong
                 >
@@ -1381,99 +1381,99 @@
                 report-data + type-metadata as
                 <code>&lt;script type="application/json"&gt;</code>. Footer with
                 timestamp + schema stats.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
 
             <!-- PHASE 3: JAVASCRIPT — DATA & UI -->
             <tr>
-              <td class="td-id">16</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">7 min</td>
-              <td>
+              <td class="td-id"><s>16</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>7 min</s></td>
+              <td><s>
                 <strong>JS: data loading + legend + header population</strong> —
                 Parse JSON from script tags, build lookup maps (statusIcons,
                 eventLabels, eventColors). Populate workflow ID, exported-at,
                 render status legend (icon + label + count per status).
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">17</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>17</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>JS: waveform renderer</strong> — Event timeline strip:
                 position events by timestamp (min→max range), color by event
                 type or error, height by duration. Tooltip on hover with event
                 type + step name + phase + duration.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">18</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">6 min</td>
-              <td>
+              <td class="td-id"><s>18</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>6 min</s></td>
+              <td><s>
                 <strong>JS: stats renderer</strong> — 6 stat cards: Steps,
                 Events, Succeeded, Failed, Wall Clock (ms), Peak Concurrency.
                 Color-code: green for succeeded, red for failed. Use
                 <code>report.wall_clock_duration_ms</code> as primary duration.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">19</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">7 min</td>
-              <td>
+              <td class="td-id"><s>19</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>7 min</s></td>
+              <td><s>
                 <strong>JS: tab switching + keyboard navigation</strong> — Click
                 tabs to switch panels. Keyboard: number keys 1–5 jump to tabs,
                 left/right arrows cycle. Update <code>aria-selected</code>.
                 Lazy-render graph on first visit.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">20</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>20</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong
                   >JS: Steps table (render + sort + filter + paginate)</strong
                 >
@@ -1482,21 +1482,21 @@
                 tooltip. Sort on header click (name, status, duration,
                 attempts). Filter by search input + errors-only toggle. Paginate
                 at 100 rows.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">21</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>21</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong
                   >JS: Events table (render + type filters + paginate)</strong
                 >
@@ -1504,59 +1504,59 @@
                 type badge (attempt_start=green, attempt_end=amber), phase, step
                 name, attempt number, duration, error tooltip. Type filter chips
                 (all / attempt_start / attempt_end). Paginate at 100.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">22</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>22</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>JS: Timeline bar chart</strong> — Step durations sorted
                 descending. Each row: step name + status icon, bar chart (width
                 proportional to max duration, colored by status). Dual bars:
                 step duration vs wall-clock for context. Tooltip with exact ms.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">23</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>23</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>JS: Tree renderer (collapsible)</strong> — Recursive
                 function building nested <code>&lt;ul&gt;</code> from step DAG.
                 Roots = steps with no dependencies. Children = dependents.
                 Collapsible nodes with expand/collapse toggle. Status icon +
                 retry indicator per node.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">24</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>24</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong
                   >JS: XSS <code>esc()</code> + error tooltips + footer</strong
                 >
@@ -1564,81 +1564,81 @@
                 <code>&amp; &lt; &gt; " '</code>. Error tooltip with viewport
                 edge detection. Footer timestamp + schema stats.
                 <strong>This completes the MVP.</strong>
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
 
             <!-- PHASE 4: GRAPH ENGINE -->
             <tr>
-              <td class="td-id">25</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>25</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong>JS: Sugiyama Phase 1 — rank assignment</strong> — Kahn's
                 algorithm topological sort. Compute longest-path rank for each
                 node (roots = rank 0, dependents = max(parent+1)). Build layers
                 array. Handle disconnected nodes (rank 0).
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">26</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>26</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong>JS: Sugiyama Phase 2 — barycenter ordering</strong> —
                 4-pass forward+backward crossing reduction. For each layer,
                 compute barycenter from neighbor positions in adjacent layer.
                 Sort by barycenter. Reduces edge crossings significantly.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">27</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>27</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>JS: Sugiyama Phase 3 — position computation</strong> —
                 Center nodes within each layer (equal spacing). Then
                 median-alignment pass: for each node, align x-position to median
                 of predecessors' positions, clamped to not overlap neighbors.
                 Straightens edges.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">28</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>28</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong>JS: SVG graph builder</strong> — Create SVG element with
                 computed viewBox. Build <code>&lt;defs&gt;</code> arrow markers
                 (normal + highlight). Render edges as cubic bezier paths. Render
@@ -1646,455 +1646,455 @@
                 status-color stroke) + accent bar + text label +
                 <code>&lt;title&gt;</code> tooltip. Layer depth labels (L0, L1,
                 ...).
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">29</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>29</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>JS: pan/zoom</strong> — Mouse wheel zoom (prevent
                 default, zoom toward cursor). Click-drag pan (track
                 mousedown/move/up on window). Zoom in/out/fit buttons. Maintain
                 viewBox state, apply on change.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">30</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>30</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>JS: touch support</strong> — 1-finger touch = pan (track
                 touchstart/move/end). 2-finger pinch = zoom (compute distance
                 ratio, scale viewBox). <code>{passive:false}</code> to allow
                 preventDefault.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">31</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">7 min</td>
-              <td>
+              <td class="td-id"><s>31</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>7 min</s></td>
+              <td><s>
                 <strong>JS: click-to-highlight connected subgraph</strong> —
                 Click node: find all connected nodes/edges via BFS over edges
                 array. Dim unconnected, highlight connected, highlight clicked.
                 Click again or click empty SVG = clear. Use CSS classes + arrow
                 marker swap.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
 
             <!-- PHASE 5: ASSEMBLY -->
             <tr>
-              <td class="td-id">32</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>32</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Assemble <code>renderHTML()</code></strong> —
                 Concatenate: DOCTYPE + head (meta + title + all CSS consts in
                 <code>&lt;style&gt;</code>) + body (header + waveform + stats +
                 tabs + all tab content + JSON script tags + all JS consts in
                 <code>&lt;script&gt;</code> + footer). Verify
                 <code>go build</code> + <code>go vet</code>.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span>
-              </td>
-              <td><span class="file-ref">html_render.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_render.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">33</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>33</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Visual smoke test</strong> — Run
                 <code>go run ./example</code>, export HTML, open in browser.
                 Verify: tabs switch, steps table renders, graph lays out, events
                 display. Fix any obvious rendering issues.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">example/main.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">example/main.go</span></s></td>
             </tr>
 
             <!-- PHASE 6: TESTS -->
             <tr>
-              <td class="td-id">34</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">7 min</td>
-              <td>
+              <td class="td-id"><s>34</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>7 min</s></td>
+              <td><s>
                 <strong>Test: basic WriteHTML</strong> —
                 <code>TestWriteHTML_BasicReport</code>: render report with 2+
                 steps. Assert DOCTYPE present, HTML >500 bytes, step names
                 present in output, CSP meta tag present, all 5 tab IDs present.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_test.go (new)</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_test.go (new)</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">35</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">6 min</td>
-              <td>
+              <td class="td-id"><s>35</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>6 min</s></td>
+              <td><s>
                 <strong>Test: ExportHTML file write</strong> —
                 <code>TestExportHTML</code>: write to temp dir, read file,
                 assert DOCTYPE + content. Verify <code>writeToFile</code> atomic
                 write path is exercised.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_test.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_test.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">36</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>36</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>Test: multi-step DAG</strong> —
                 <code>TestWriteHTML_MultiStepDAG</code>: workflow with
                 dependencies, retry, failure, skip, cancel. Assert: all step
                 names in HTML, status badges present, type-metadata injected,
                 graph container present, event-filters present.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_test.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_test.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">37</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>37</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Test: empty report</strong> —
                 <code>TestWriteHTML_EmptyReport</code>: zero steps, zero events.
                 Assert no crash, DOCTYPE present, empty-state elements present.
                 Edge case coverage.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_test.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_test.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">38</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>38</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong>Test: golden file (byte-stable)</strong> —
                 <code>TestReport_WriteHTML_GoldenFile</code>: build
                 deterministic report via ReplayEvents with fixed timestamps, pin
                 ExportedAt, render HTML, compare byte-for-byte against committed
                 golden file. <code>UPDATE_GOLDEN=1</code> to regenerate.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="file-ref"
                   >html_golden_test.go (new)<br />testdata/golden/report.html</span
                 >
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td class="td-id">39</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">10 min</td>
-              <td>
+              <td class="td-id"><s>39</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>10 min</s></td>
+              <td><s>
                 <strong>Test: XSS fuzz</strong> — <code>FuzzHTML</code>: seed
                 with malicious payloads (<code>&lt;script&gt;</code>,
                 <code>onload=</code>, SQL injection, null bytes, template
                 injection). Inject via step names + error messages. Assert no
                 raw XSS in output (<code>&lt;script&gt;</code> tags from JSON
                 injection don't count — strip them first).
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_fuzz_test.go (new)</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_fuzz_test.go (new)</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">40</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>40</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Test: error-path + API symmetry</strong> — Failing
                 <code>io.Writer</code> test (verify error wrapping).
                 <code>WriteHTMLString</code> == <code>WriteHTML</code> output.
                 <code>Auditor.WriteHTML</code> ==
                 <code>Auditor.Report().WriteHTML</code>.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_test.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_test.go</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">41</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>41</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Test: type metadata injection</strong> — Assert
                 <code>type-metadata</code> script tag present, contains
                 <code>"statuses"</code> and <code>"events"</code> keys, values
                 match StepStatus/EventType enums. Verify JSONScript pattern
                 works without templ.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">html_test.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">html_test.go</span></s></td>
             </tr>
 
             <!-- PHASE 7: DOCS -->
             <tr>
-              <td class="td-id">42</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>42</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>Update README.md</strong> — Add "HTML Dashboard" section
                 under Export Formats with usage example
                 (<code>a.ExportHTML("report.html")</code>),
                 screenshot/description of 5 tabs, mention CSP + XSS hardening.
                 Update export format table.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">README.md</span></td>
+              </s></td>
+              <td><s><span class="file-ref">README.md</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">43</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">6 min</td>
-              <td>
+              <td class="td-id"><s>43</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>6 min</s></td>
+              <td><s>
                 <strong>Update FEATURES.md + CHANGELOG.md</strong> —
                 FEATURES.md: move "HTML dashboard report" from PLANNED → DONE.
                 CHANGELOG.md: add under [Unreleased] — "feat: add self-contained
                 interactive HTML dashboard report (WriteHTML/ExportHTML) with
                 Sugiyama DAG graph, sortable step table, timeline, event stream,
                 and collapsible tree".
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="file-ref">FEATURES.md<br />CHANGELOG.md</span>
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td class="td-id">44</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">8 min</td>
-              <td>
+              <td class="td-id"><s>44</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>8 min</s></td>
+              <td><s>
                 <strong>Update AGENTS.md</strong> — Add
                 html.go/metadata.go/html_render.go to architecture file list.
                 Add gotcha: "HTML dashboard uses raw string builder (no templ
                 dep) — CSS/JS are Go const blocks, data injected via JSON script
                 tags". Add to test patterns: golden file + XSS fuzz count.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">AGENTS.md</span></td>
+              </s></td>
+              <td><s><span class="file-ref">AGENTS.md</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">45</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>45</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Update TODO_LIST.md + ROADMAP.md</strong> —
                 TODO_LIST.md: remove "HTML dashboard report" from Deferred
                 section. ROADMAP.md: move "HTML dashboard report" from
                 "Direction" to "Done" (or remove since it's shipped). Add any
                 follow-up TODOs discovered during implementation.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="file-ref">TODO_LIST.md<br />ROADMAP.md</span>
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td class="td-id">46</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>46</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Add HTML export to example/main.go</strong> — After the
                 existing JSON/diagram exports, add
                 <code>a.ExportHTML("audit-report.html")</code> so the demo
                 produces a shareable dashboard. Verify it renders correctly.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">example/main.go</span></td>
+              </s></td>
+              <td><s><span class="file-ref">example/main.go</span></s></td>
             </tr>
 
             <!-- PHASE 8: VERIFICATION -->
             <tr>
-              <td class="td-id">47</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>47</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Run full test suite with race detector</strong> —
                 <code>go test -race ./...</code>. Fix any failures. The HTML
                 rendering path is pure CPU (no goroutines), so races are
                 unlikely, but verify.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">—</span></td>
+              </s></td>
+              <td><s><span class="file-ref">—</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">48</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>48</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Run golangci-lint</strong> —
                 <code>golangci-lint run ./...</code>. Fix any issues in new
                 files (likely: gosec G304 for file paths, errcheck on writer
                 writes, gochecknoglobals for CSS/JS consts — use
                 <code>//nolint</code> where justified).
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">—</span></td>
+              </s></td>
+              <td><s><span class="file-ref">—</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">49</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>49</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Run coverage check</strong> —
                 <code
                   >go test -race -coverprofile=cover.out -covermode=atomic
                   ./...</code
                 >. Ensure HTML paths (renderHTML, WriteHTML, ExportHTML,
                 metadata) are covered. Target: overall coverage stays ≥93%.
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot"></span><span class="impact-dot"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">—</span></td>
+              </s></td>
+              <td><s><span class="file-ref">—</span></s></td>
             </tr>
             <tr>
-              <td class="td-id">50</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td class="td-time">5 min</td>
-              <td>
+              <td class="td-id"><s>50</s> ~~done — shipped in v0.3.0 (HTML dashboard); verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td class="td-time"><s>5 min</s></td>
+              <td><s>
                 <strong>Final visual review</strong> — Open generated HTML in
                 browser. Click through all 5 tabs. Test sort/filter on Steps
                 table. Test graph zoom/pan/click. Test event filters. Verify
                 responsive layout at 768px and 480px. Verify CSP doesn't block
                 anything. <strong>Ship it.</strong>
-              </td>
-              <td>
+              </s></td>
+              <td><s>
                 <span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot on"></span
                 ><span class="impact-dot"></span
                 ><span class="impact-dot"></span>
-              </td>
-              <td><span class="file-ref">—</span></td>
+              </s></td>
+              <td><s><span class="file-ref">—</span></s></td>
             </tr>
           </tbody>
         </table>
@@ -2115,67 +2115,67 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>0. Foundation & API</strong></td>
-              <td>5</td>
-              <td>~31 min</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td>Compiles, renders blank HTML</td>
+              <td><s><strong>0. Foundation & API</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>5</s></td>
+              <td><s>~31 min</s></td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td><s>Compiles, renders blank HTML</s></td>
             </tr>
             <tr>
-              <td><strong>1. CSS Theme</strong></td>
-              <td>5</td>
-              <td>~47 min</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td>Styled shell, no content</td>
+              <td><s><strong>1. CSS Theme</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>5</s></td>
+              <td><s>~47 min</s></td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td><s>Styled shell, no content</s></td>
             </tr>
             <tr>
-              <td><strong>2. HTML Structure</strong></td>
-              <td>5</td>
-              <td>~36 min</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td>All tabs + data injection</td>
+              <td><s><strong>2. HTML Structure</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>5</s></td>
+              <td><s>~36 min</s></td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td><s>All tabs + data injection</s></td>
             </tr>
             <tr>
-              <td><strong>3. JS: Data & UI</strong></td>
-              <td>9</td>
-              <td>~67 min</td>
-              <td><span class="tier-badge tier-1">1%→51%</span></td>
-              <td><strong>★ MVP — working dashboard (no graph)</strong></td>
+              <td><s><strong>3. JS: Data & UI</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>9</s></td>
+              <td><s>~67 min</s></td>
+              <td><s><span class="tier-badge tier-1">1%→51%</span></s></td>
+              <td><s><strong>★ MVP — working dashboard (no graph)</strong></s></td>
             </tr>
             <tr>
-              <td><strong>4. JS: Graph Engine</strong></td>
-              <td>7</td>
-              <td>~61 min</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td>Interactive Sugiyama DAG graph</td>
+              <td><s><strong>4. JS: Graph Engine</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>7</s></td>
+              <td><s>~61 min</s></td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td><s>Interactive Sugiyama DAG graph</s></td>
             </tr>
             <tr>
-              <td><strong>5. Assembly</strong></td>
-              <td>2</td>
-              <td>~10 min</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td>All pieces wired, smoke tested</td>
+              <td><s><strong>5. Assembly</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>2</s></td>
+              <td><s>~10 min</s></td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td><s>All pieces wired, smoke tested</s></td>
             </tr>
             <tr>
-              <td><strong>6. Tests</strong></td>
-              <td>8</td>
-              <td>~56 min</td>
-              <td><span class="tier-badge tier-2">4%→64%</span></td>
-              <td><strong>★ Tested & hardened</strong></td>
+              <td><s><strong>6. Tests</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>8</s></td>
+              <td><s>~56 min</s></td>
+              <td><s><span class="tier-badge tier-2">4%→64%</span></s></td>
+              <td><s><strong>★ Tested & hardened</strong></s></td>
             </tr>
             <tr>
-              <td><strong>7. Docs</strong></td>
-              <td>5</td>
-              <td>~32 min</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td>All docs current</td>
+              <td><s><strong>7. Docs</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>5</s></td>
+              <td><s>~32 min</s></td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td><s>All docs current</s></td>
             </tr>
             <tr>
-              <td><strong>8. Verification</strong></td>
-              <td>4</td>
-              <td>~20 min</td>
-              <td><span class="tier-badge tier-3">20%→80%</span></td>
-              <td><strong>★ Shipped v0.3.0</strong></td>
+              <td><s><strong>8. Verification</strong></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>4</s></td>
+              <td><s>~20 min</s></td>
+              <td><s><span class="tier-badge tier-3">20%→80%</span></s></td>
+              <td><s><strong>★ Shipped v0.3.0</strong></s></td>
             </tr>
             <tr
               style="

@@ -105,37 +105,37 @@
 
 ### Immediate issues I noticed during the audit
 
-1. **GOEXPERIMENT=jsonv2 dependency is undocumented for non-nix users** — the flake.nix devShell sets it, but the README install instructions say `go get` with no mention of the required experiment flag. Anyone who clones the repo and runs `go test ./...` outside of nix will hit build errors. **The README should mention this** or we should file a feature request upstream / add a `.envrc` or `Makefile` shim.
+1. ~~**GOEXPERIMENT=jsonv2 dependency is undocumented for non-nix users** — the flake.nix devShell sets it, but the README install instructions say `go get` with no mention of the required experiment flag. Anyone who clones the repo and runs `go test ./...` outside of nix will hit build errors. **The README should mention this** or we should file a feature request upstream / add a `.envrc` or `Makefile` shim.~~ done — verified by the 2026-10-05 docs-health pass
 
-2. **CI may not be running the golden file test** — the golden was stale for 11 days and 3 tagged releases (v0.5.1, v0.6.0, and unreleased work). Either CI doesn't set `GOEXPERIMENT=jsonv2`, or CI doesn't run the golden test, or CI is not enforced. **This needs investigation**.
+2. ~~**CI may not be running the golden file test** — the golden was stale for 11 days and 3 tagged releases (v0.5.1, v0.6.0, and unreleased work). Either CI doesn't set `GOEXPERIMENT=jsonv2`, or CI doesn't run the golden test, or CI is not enforced. **This needs investigation**.~~ done — verified by the 2026-10-05 docs-health pass
 
-3. **CHANGELOG had two missing tagged versions** — v0.5.1 and v0.6.0 were tagged but never documented in the CHANGELOG. The v0.5.1 tag contained 14 commits with significant features (daghtml refactor, helper methods, deprecated alias removal). **The tagging process should include CHANGELOG promotion as a gate.**
+3. ~~**CHANGELOG had two missing tagged versions** — v0.5.1 and v0.6.0 were tagged but never documented in the CHANGELOG. The v0.5.1 tag contained 14 commits with significant features (daghtml refactor, helper methods, deprecated alias removal). **The tagging process should include CHANGELOG promotion as a gate.**~~ done — verified by the 2026-10-05 docs-health pass
 
-4. **Test count drift** — docs said 244 tests, actual was 234. The daghtml SDK migration (v0.5.1) likely removed some inline JS tests when the JS engine was replaced. But the docs weren't updated. **Test count should be computed, not hardcoded** — a CI check or `make test-count` target would prevent this.
+4. ~~**Test count drift** — docs said 244 tests, actual was 234. The daghtml SDK migration (v0.5.1) likely removed some inline JS tests when the JS engine was replaced. But the docs weren't updated. **Test count should be computed, not hardcoded** — a CI check or `make test-count` target would prevent this.~~ done — verified by the 2026-10-05 docs-health pass
 
-5. **FEATURES.md had 5 "PLANNED" items that were already shipped** — the worst kind of split brain: FEATURES.md (the honest inventory) was lying about what exists. Items like `encoding/json/v2 migration`, `flake.nix migration`, `Name(step) helper`, and `benchmarks for render paths` were all done but still listed as planned. **This is the #1 documentation rot pattern the docs-health skill warns about.**
+5. ~~**FEATURES.md had 5 "PLANNED" items that were already shipped** — the worst kind of split brain: FEATURES.md (the honest inventory) was lying about what exists. Items like `encoding/json/v2 migration`, `flake.nix migration`, `Name(step) helper`, and `benchmarks for render paths` were all done but still listed as planned. **This is the #1 documentation rot pattern the docs-health skill warns about.**~~ done — verified by the 2026-10-05 docs-health pass
 
-6. **go-output version said v0.17.0 in FEATURES.md** — 13 minor versions behind reality (v0.30.4). The version was hardcoded in the doc and never updated through 5 dependency upgrades. **Dependency versions in docs should use `go.mod` as the single source of truth** — or not be hardcoded at all.
+6. ~~**go-output version said v0.17.0 in FEATURES.md** — 13 minor versions behind reality (v0.30.4). The version was hardcoded in the doc and never updated through 5 dependency upgrades. **Dependency versions in docs should use `go.mod` as the single source of truth** — or not be hardcoded at all.~~ done — verified by the 2026-10-05 docs-health pass
 
-7. **The docs-health skill worked excellently** — the structured VERIFY process (inventory → read → verify → classify → fix → cross-check → report) caught issues I would have missed with ad-hoc review. The per-file checklists and cross-file consistency table were particularly valuable.
+7. ~~**The docs-health skill worked excellently** — the structured VERIFY process (inventory → read → verify → classify → fix → cross-check → report) caught issues I would have missed with ad-hoc review. The per-file checklists and cross-file consistency table were particularly valuable.~~ done — verified by the 2026-10-05 docs-health pass
 
 ### Design/structural improvements
 
-8. **No automated docs freshness check** — the kind of drift found here (versions, counts, statuses) could be partially automated. A simple CI script that greps for hardcoded versions in docs and compares against `go.mod` would catch the go-output version drift. Similarly, a script that counts `func Test` and compares against documented counts would prevent the 244→234 drift.
+8. ~~**No automated docs freshness check** — the kind of drift found here (versions, counts, statuses) could be partially automated. A simple CI script that greps for hardcoded versions in docs and compares against `go.mod` would catch the go-output version drift. Similarly, a script that counts `func Test` and compares against documented counts would prevent the 244→234 drift.~~ done — verified by the 2026-10-05 docs-health pass
 
-9. **Golden file test should fail loudly in CI** — if it was passing in CI while being stale, the golden file update process is broken. If it wasn't running in CI, it should be added to the mandatory test matrix.
+9. ~~**Golden file test should fail loudly in CI** — if it was passing in CI while being stale, the golden file update process is broken. If it wasn't running in CI, it should be added to the mandatory test matrix.~~ done — verified by the 2026-10-05 docs-health pass
 
-10. **CHANGELOG should have a pre-tag hook** — before `git tag v*`, verify that the CHANGELOG has an entry for that version. A simple `scripts/check-changelog.sh` invoked by a pre-tag hook would prevent the v0.5.1/v0.6.0 gap.
+10. ~~**CHANGELOG should have a pre-tag hook** — before `git tag v*`, verify that the CHANGELOG has an entry for that version. A simple `scripts/check-changelog.sh` invoked by a pre-tag hook would prevent the v0.5.1/v0.6.0 gap.~~ done — verified by the 2026-10-05 docs-health pass
 
-11. **Status report references stale domain** — the 21-17 report still references `auditlog.lars.software`. While status reports are historical snapshots, a deprecation note at the top ("This report references the old domain name; see the 21-42 report for the rename to `go-workflow-auditlog.lars.software`") would help any future reader who lands there first.
+11. ~~**Status report references stale domain** — the 21-17 report still references `auditlog.lars.software`. While status reports are historical snapshots, a deprecation note at the top ("This report references the old domain name; see the 21-42 report for the rename to `go-workflow-auditlog.lars.software`") would help any future reader who lands there first.~~ done — verified by the 2026-10-05 docs-health pass
 
 ### Documentation architecture improvements
 
-12. **FEATURES.md PLANNED section should cross-reference TODO_LIST.md and ROADMAP.md** — currently the section just says "see TODO_LIST.md and ROADMAP.md" but doesn't distinguish which planned items are short-term actionable (TODO_LIST) vs long-term vision (ROADMAP). The split should be explicit.
+12. ~~**FEATURES.md PLANNED section should cross-reference TODO_LIST.md and ROADMAP.md** — currently the section just says "see TODO_LIST.md and ROADMAP.md" but doesn't distinguish which planned items are short-term actionable (TODO_LIST) vs long-term vision (ROADMAP). The split should be explicit.~~ done — verified by the 2026-10-05 docs-health pass
 
-13. **AGENTS.md is 27KB** — it's comprehensive but very long. The file map, data flow, concurrency model, integration model, gotchas, and testing patterns sections are all valuable but could be overwhelming for a new session. Consider splitting into `AGENTS.md` (essentials) + `docs/ARCHITECTURE.md` (detailed reference). This is a structural change and should be weighed carefully.
+13. ~~**AGENTS.md is 27KB** — it's comprehensive but very long. The file map, data flow, concurrency model, integration model, gotchas, and testing patterns sections are all valuable but could be overwhelming for a new session. Consider splitting into `AGENTS.md` (essentials) + `docs/ARCHITECTURE.md` (detailed reference). This is a structural change and should be weighed carefully.~~ done — verified by the 2026-10-05 docs-health pass
 
-14. **README is 30KB (527+ lines)** — status report 21-17 already flagged this. The docs website exists now, which is the right home for detailed API tables and guides. The README could be trimmed significantly with links to the website.
+14. **README is 30KB (527+ lines)** — status report 21-17 already flagged this. The docs website exists now, which is the right home for detailed API tables and guides. The README could be trimmed significantly with links to the website. **→ open — website polish backlog (ROADMAP raw ideas, 2026-10-05)**
 
 ---
 

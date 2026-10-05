@@ -727,49 +727,49 @@
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>
+              <td><s>1</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>
                 <code
                   >go get github.com/larsartmann/go-error-family@v0.5.0</code
                 >
-              </td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>2 min</td>
-              <td><code>go.mod</code>, <code>go.sum</code></td>
+              </s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>2 min</s></td>
+              <td><s><code>go.mod</code>, <code>go.sum</code></s></td>
             </tr>
             <tr>
-              <td>2</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>
+              <td><s>2</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>
                 Create <code>classify.go</code>: package doc +
                 <code>init()</code> with
                 <code>RegisterClassifications</code> for all 9 public + 2
                 private sentinels (4→Corruption, 5→Rejection, 2→Rejection
                 private)
-              </td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>10 min</td>
-              <td><code>classify.go</code> (new)</td>
+              </s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>10 min</s></td>
+              <td><s><code>classify.go</code> (new)</s></td>
             </tr>
             <tr>
-              <td>3</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>
+              <td><s>3</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>
                 <code>go mod tidy</code> to resolve dependency tree + verify
                 <code>go.sum</code>
-              </td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>2 min</td>
-              <td><code>go.mod</code>, <code>go.sum</code></td>
+              </s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>2 min</s></td>
+              <td><s><code>go.mod</code>, <code>go.sum</code></s></td>
             </tr>
             <tr>
-              <td>4</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>Verify <code>go build ./...</code> compiles cleanly</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>2 min</td>
-              <td>—</td>
+              <td><s>4</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>Verify <code>go build ./...</code> compiles cleanly</s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>2 min</s></td>
+              <td><s>—</s></td>
             </tr>
           </tbody>
         </table>
@@ -814,60 +814,60 @@
           </thead>
           <tbody>
             <tr>
-              <td>5</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>5</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Create <code>classify_test.go</code>: table-driven
                 <code>Classify()</code> test for all 9 public sentinels (4
                 Corruption + 5 Rejection)
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>10 min</td>
-              <td><code>classify_test.go</code> (new)</td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>10 min</s></td>
+              <td><s><code>classify_test.go</code> (new)</s></td>
             </tr>
             <tr>
-              <td>6</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>6</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Test <code>IsRetryable()</code> returns <code>false</code> for
                 all Corruption/Rejection sentinels (non-retryable by design)
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5 min</td>
-              <td><code>classify_test.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>classify_test.go</code></s></td>
             </tr>
             <tr>
-              <td>7</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>7</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Test <code>ExitCode()</code> returns correct BSD sysexits code
                 per Family (Corruption=70, Rejection=64)
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5 min</td>
-              <td><code>classify_test.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>classify_test.go</code></s></td>
             </tr>
             <tr>
-              <td>8</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>8</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Test <code>Classify()</code> traverses
                 <code>fmt.Errorf("%w")</code> wrapping chains (proves auditlog's
                 existing wrapped errors classify correctly)
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>8 min</td>
-              <td><code>classify_test.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>8 min</s></td>
+              <td><s><code>classify_test.go</code></s></td>
             </tr>
             <tr>
-              <td>9</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>
+              <td><s>9</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>
                 Run <code>go test -race ./...</code> — all 196+ tests green
-              </td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>5 min</td>
-              <td>—</td>
+              </s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s>—</s></td>
             </tr>
           </tbody>
         </table>
@@ -891,65 +891,65 @@
           </thead>
           <tbody>
             <tr>
-              <td>10</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>10</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Update AGENTS.md: add <code>classify.go</code> to architecture
                 file table
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>4 min</td>
-              <td><code>AGENTS.md</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>4 min</s></td>
+              <td><s><code>AGENTS.md</code></s></td>
             </tr>
             <tr>
-              <td>11</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>11</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Update AGENTS.md: add "Error Classification" subsection to
                 Gotchas with full sentinel→Family mapping table
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>8 min</td>
-              <td><code>AGENTS.md</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>8 min</s></td>
+              <td><s><code>AGENTS.md</code></s></td>
             </tr>
             <tr>
-              <td>12</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>12</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Update AGENTS.md: add <code>init()</code> side-effect note
                 (global <code>DefaultRegistry</code> mutation on import)
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>3 min</td>
-              <td><code>AGENTS.md</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>3 min</s></td>
+              <td><s><code>AGENTS.md</code></s></td>
             </tr>
             <tr>
-              <td>13</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Run <code>golangci-lint run ./...</code> — 0 issues</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5 min</td>
-              <td>—</td>
+              <td><s>13</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Run <code>golangci-lint run ./...</code> — 0 issues</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>14</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>Run <code>go vet ./...</code> — clean</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>2 min</td>
-              <td>—</td>
+              <td><s>14</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>Run <code>go vet ./...</code> — clean</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>2 min</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>15</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>15</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Check coverage:
                 <code>go test -race -coverprofile=cover.out ./...</code> —
                 confirm &ge;93% maintained
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5 min</td>
-              <td>—</td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s>—</s></td>
             </tr>
           </tbody>
         </table>
@@ -1023,207 +1023,207 @@
           </thead>
           <tbody>
             <tr>
-              <td>16</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>16</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Add sentinel <code>ErrReportLoadFailed</code> to
                 <code>loader.go</code>
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>3 min</td>
-              <td><code>loader.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>3 min</s></td>
+              <td><s><code>loader.go</code></s></td>
             </tr>
             <tr>
-              <td>17</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>17</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Wrap <code>LoadReport</code> /
                 <code>LoadReportFromReader</code> /
                 <code>LoadReportFromBytes</code> errors with
                 <code>ErrReportLoadFailed</code>
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>8 min</td>
-              <td><code>loader.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>8 min</s></td>
+              <td><s><code>loader.go</code></s></td>
             </tr>
             <tr>
-              <td>18</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>18</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Add sentinel <code>ErrExportWriteFailed</code> to
                 <code>plugin.go</code>
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>3 min</td>
-              <td><code>plugin.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>3 min</s></td>
+              <td><s><code>plugin.go</code></s></td>
             </tr>
             <tr>
-              <td>19</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>19</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Wrap <code>writeToFile</code> errors (create/flush/close/rename)
                 with
                 <code>ErrExportWriteFailed</code>
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>10 min</td>
-              <td><code>plugin.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>10 min</s></td>
+              <td><s><code>plugin.go</code></s></td>
             </tr>
             <tr>
-              <td>20</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>20</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Add sentinel <code>ErrRenderFailed</code> for
                 diagram/table/tree/HTML exports (define in a shared location)
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>3 min</td>
-              <td><code>report.go</code> or <code>types.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>3 min</s></td>
+              <td><s><code>report.go</code> or <code>types.go</code></s></td>
             </tr>
             <tr>
-              <td>21</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>21</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Wrap <code>mermaid.go</code> render+write errors with
                 <code>ErrRenderFailed</code>
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5 min</td>
-              <td><code>mermaid.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>mermaid.go</code></s></td>
             </tr>
             <tr>
-              <td>22</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>22</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Wrap <code>plantuml.go</code> render+write errors with
                 <code>ErrRenderFailed</code>
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5 min</td>
-              <td><code>plantuml.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>plantuml.go</code></s></td>
             </tr>
             <tr>
-              <td>23</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>23</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Wrap <code>graphviz.go</code> render+write errors with
                 <code>ErrRenderFailed</code>
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5 min</td>
-              <td><code>graphviz.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>graphviz.go</code></s></td>
             </tr>
             <tr>
-              <td>24</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>24</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Wrap <code>d2.go</code> render+write errors with
                 <code>ErrRenderFailed</code>
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5 min</td>
-              <td><code>d2.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>d2.go</code></s></td>
             </tr>
             <tr>
-              <td>25</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>25</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Wrap <code>table.go</code> render+write errors with
                 <code>ErrRenderFailed</code>
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5 min</td>
-              <td><code>table.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>table.go</code></s></td>
             </tr>
             <tr>
-              <td>26</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>26</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Wrap <code>tree.go</code> render+write errors with
                 <code>ErrRenderFailed</code>
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5 min</td>
-              <td><code>tree.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>tree.go</code></s></td>
             </tr>
             <tr>
-              <td>27</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>27</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Wrap <code>html_render.go</code> render+write errors with
                 <code>ErrRenderFailed</code>
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5 min</td>
-              <td><code>html_render.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>html_render.go</code></s></td>
             </tr>
             <tr>
-              <td>28</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>28</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Register all new I/O sentinels in <code>classify.go</code>:
                 <code>ErrReportLoadFailed</code>→Transient,
                 <code>ErrExportWriteFailed</code>→Infrastructure,
                 <code>ErrRenderFailed</code>→Infrastructure
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5 min</td>
-              <td><code>classify.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>classify.go</code></s></td>
             </tr>
             <tr>
-              <td>29</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>29</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Test: <code>Classify(ErrReportLoadFailed)</code> returns
                 <code>Transient</code>
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5 min</td>
-              <td><code>classify_test.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>classify_test.go</code></s></td>
             </tr>
             <tr>
-              <td>30</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>30</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Test: <code>Classify(ErrExportWriteFailed)</code> returns
                 <code>Infrastructure</code>
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5 min</td>
-              <td><code>classify_test.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>classify_test.go</code></s></td>
             </tr>
             <tr>
-              <td>31</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>31</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Test: <code>IsRetryable(ErrReportLoadFailed)</code> returns
                 <code>true</code> — proves retry hint works
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>3 min</td>
-              <td><code>classify_test.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>3 min</s></td>
+              <td><s><code>classify_test.go</code></s></td>
             </tr>
             <tr>
-              <td>32</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>32</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Test: <code>IsRetryable(ErrExportWriteFailed)</code> returns
                 <code>false</code>
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>3 min</td>
-              <td><code>classify_test.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>3 min</s></td>
+              <td><s><code>classify_test.go</code></s></td>
             </tr>
             <tr>
-              <td>33</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>
+              <td><s>33</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>
                 Run <code>go test -race ./...</code> — all green after I/O
                 classification
-              </td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>5 min</td>
-              <td>—</td>
+              </s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s>—</s></td>
             </tr>
           </tbody>
         </table>
@@ -1247,94 +1247,94 @@
           </thead>
           <tbody>
             <tr>
-              <td>34</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>34</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Update AGENTS.md: add I/O sentinel inventory + classification
                 mapping (extend the table from task 11)
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>8 min</td>
-              <td><code>AGENTS.md</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>8 min</s></td>
+              <td><s><code>AGENTS.md</code></s></td>
             </tr>
             <tr>
-              <td>35</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>35</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Update <code>FEATURES.md</code>: add "Error Classification"
                 feature row with DONE status
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5 min</td>
-              <td><code>FEATURES.md</code></td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s><code>FEATURES.md</code></s></td>
             </tr>
             <tr>
-              <td>36</td>
-              <td><span class="badge badge-p4">P4</span></td>
-              <td>
+              <td><s>36</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p4">P4</span></s></td>
+              <td><s>
                 Update adoption report: mark Strategy A as DONE, note
                 implementation details
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>3 min</td>
-              <td><code>docs/reviews/</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>3 min</s></td>
+              <td><s><code>docs/reviews/</code></s></td>
             </tr>
             <tr>
-              <td>37</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>37</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Update <code>example/main.go</code>: demonstrate
                 <code>errorfamily.Classify</code> on a workflow error (shows
                 consumer value)
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>10 min</td>
-              <td><code>example/main.go</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>10 min</s></td>
+              <td><s><code>example/main.go</code></s></td>
             </tr>
             <tr>
-              <td>38</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>
+              <td><s>38</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>
                 Run <code>golangci-lint run ./...</code> — final check, 0 issues
-              </td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5 min</td>
-              <td>—</td>
+              </s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>39</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>39</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Run coverage:
                 <code>go test -race -coverprofile=cover.out ./...</code> — final
                 report
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5 min</td>
-              <td>—</td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>40</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>
+              <td><s>40</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>
                 Run
                 <code>art-dupl --semantic --sort total-tokens -t 15</code> on
                 all changed files
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5 min</td>
-              <td>—</td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5 min</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>41</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>
+              <td><s>41</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>
                 Final <code>go mod tidy</code> + verify
                 <code>go.sum</code> clean
-              </td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>3 min</td>
-              <td><code>go.mod</code>, <code>go.sum</code></td>
+              </s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>3 min</s></td>
+              <td><s><code>go.mod</code>, <code>go.sum</code></s></td>
             </tr>
           </tbody>
         </table>
@@ -2441,377 +2441,377 @@
           <tbody>
             <!-- P0 tasks -->
             <tr>
-              <td>1</td>
-              <td>T1</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td><code>go get @v0.5.0</code></td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>2m</td>
-              <td>go.mod</td>
+              <td><s>1</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T1</s></td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s><code>go get @v0.5.0</code></s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>2m</s></td>
+              <td><s>go.mod</s></td>
             </tr>
             <tr>
-              <td>2</td>
-              <td>T1</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>Create classify.go (11 registrations)</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>10m</td>
-              <td>classify.go</td>
+              <td><s>2</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T1</s></td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>Create classify.go (11 registrations)</s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>10m</s></td>
+              <td><s>classify.go</s></td>
             </tr>
             <tr>
-              <td>3</td>
-              <td>T1</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>go mod tidy</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>2m</td>
-              <td>go.mod</td>
+              <td><s>3</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T1</s></td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>go mod tidy</s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>2m</s></td>
+              <td><s>go.mod</s></td>
             </tr>
             <tr>
-              <td>4</td>
-              <td>T1</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>go build ./... ✓</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>2m</td>
-              <td>—</td>
+              <td><s>4</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T1</s></td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>go build ./... ✓</s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>2m</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>9</td>
-              <td>T2</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>go test -race ./... ✓</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>5m</td>
-              <td>—</td>
+              <td><s>9</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T2</s></td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>go test -race ./... ✓</s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>33</td>
-              <td>T4</td>
-              <td><span class="badge badge-p0">P0</span></td>
-              <td>go test -race ./... ✓ (after I/O)</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>5m</td>
-              <td>—</td>
+              <td><s>33</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p0">P0</span></s></td>
+              <td><s>go test -race ./... ✓ (after I/O)</s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>—</s></td>
             </tr>
             <!-- P1 tasks -->
             <tr>
-              <td>5</td>
-              <td>T2</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Classify() table test (9 sentinels)</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>10m</td>
-              <td>classify_test.go</td>
+              <td><s>5</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T2</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Classify() table test (9 sentinels)</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>10m</s></td>
+              <td><s>classify_test.go</s></td>
             </tr>
             <tr>
-              <td>6</td>
-              <td>T2</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>IsRetryable() returns false test</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5m</td>
-              <td>classify_test.go</td>
+              <td><s>6</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T2</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>IsRetryable() returns false test</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>classify_test.go</s></td>
             </tr>
             <tr>
-              <td>8</td>
-              <td>T2</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Wrapped error chain Classify test</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>8m</td>
-              <td>classify_test.go</td>
+              <td><s>8</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T2</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Wrapped error chain Classify test</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>8m</s></td>
+              <td><s>classify_test.go</s></td>
             </tr>
             <tr>
-              <td>11</td>
-              <td>T3</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>AGENTS.md: Error Classification gotcha</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>8m</td>
-              <td>AGENTS.md</td>
+              <td><s>11</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T3</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>AGENTS.md: Error Classification gotcha</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>8m</s></td>
+              <td><s>AGENTS.md</s></td>
             </tr>
             <tr>
-              <td>13</td>
-              <td>T3</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>golangci-lint run ./... ✓</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5m</td>
-              <td>—</td>
+              <td><s>13</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T3</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>golangci-lint run ./... ✓</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>17</td>
-              <td>T4</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Wrap LoadReport errors + ErrReportLoadFailed</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>8m</td>
-              <td>loader.go</td>
+              <td><s>17</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Wrap LoadReport errors + ErrReportLoadFailed</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>8m</s></td>
+              <td><s>loader.go</s></td>
             </tr>
             <tr>
-              <td>19</td>
-              <td>T4</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Wrap writeToFile errors + ErrExportWriteFailed</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>10m</td>
-              <td>plugin.go</td>
+              <td><s>19</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Wrap writeToFile errors + ErrExportWriteFailed</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>10m</s></td>
+              <td><s>plugin.go</s></td>
             </tr>
             <tr>
-              <td>28</td>
-              <td>T4</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Register I/O sentinels in classify.go</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5m</td>
-              <td>classify.go</td>
+              <td><s>28</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Register I/O sentinels in classify.go</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>classify.go</s></td>
             </tr>
             <tr>
-              <td>29</td>
-              <td>T4</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Test Classify(loader) == Transient</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5m</td>
-              <td>classify_test.go</td>
+              <td><s>29</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Test Classify(loader) == Transient</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>classify_test.go</s></td>
             </tr>
             <tr>
-              <td>30</td>
-              <td>T4</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Test Classify(export) == Infrastructure</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5m</td>
-              <td>classify_test.go</td>
+              <td><s>30</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Test Classify(export) == Infrastructure</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>classify_test.go</s></td>
             </tr>
             <tr>
-              <td>31</td>
-              <td>T4</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Test IsRetryable(loader) == true</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>3m</td>
-              <td>classify_test.go</td>
+              <td><s>31</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Test IsRetryable(loader) == true</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>3m</s></td>
+              <td><s>classify_test.go</s></td>
             </tr>
             <tr>
-              <td>38</td>
-              <td>T5</td>
-              <td><span class="badge badge-p1">P1</span></td>
-              <td>Final golangci-lint ✓</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>5m</td>
-              <td>—</td>
+              <td><s>38</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T5</s></td>
+              <td><s><span class="badge badge-p1">P1</span></s></td>
+              <td><s>Final golangci-lint ✓</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>—</s></td>
             </tr>
             <!-- P2 tasks -->
             <tr>
-              <td>7</td>
-              <td>T2</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>ExitCode() BSD sysexits test</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5m</td>
-              <td>classify_test.go</td>
+              <td><s>7</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T2</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>ExitCode() BSD sysexits test</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>classify_test.go</s></td>
             </tr>
             <tr>
-              <td>10</td>
-              <td>T3</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>AGENTS.md: classify.go in file table</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>4m</td>
-              <td>AGENTS.md</td>
+              <td><s>10</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T3</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>AGENTS.md: classify.go in file table</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>4m</s></td>
+              <td><s>AGENTS.md</s></td>
             </tr>
             <tr>
-              <td>14</td>
-              <td>T3</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>go vet ./... ✓</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>2m</td>
-              <td>—</td>
+              <td><s>14</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T3</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>go vet ./... ✓</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>2m</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>15</td>
-              <td>T3</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>Coverage check ≥93% ✓</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5m</td>
-              <td>—</td>
+              <td><s>15</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T3</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>Coverage check ≥93% ✓</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>16</td>
-              <td>T4</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>Add ErrReportLoadFailed sentinel</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>3m</td>
-              <td>loader.go</td>
+              <td><s>16</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>Add ErrReportLoadFailed sentinel</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>3m</s></td>
+              <td><s>loader.go</s></td>
             </tr>
             <tr>
-              <td>18</td>
-              <td>T4</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>Add ErrExportWriteFailed sentinel</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>3m</td>
-              <td>plugin.go</td>
+              <td><s>18</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>Add ErrExportWriteFailed sentinel</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>3m</s></td>
+              <td><s>plugin.go</s></td>
             </tr>
             <tr>
-              <td>20</td>
-              <td>T4</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>Add ErrRenderFailed sentinel</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>3m</td>
-              <td>report.go</td>
+              <td><s>20</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>Add ErrRenderFailed sentinel</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>3m</s></td>
+              <td><s>report.go</s></td>
             </tr>
             <tr>
-              <td>32</td>
-              <td>T4</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>Test IsRetryable(export) == false</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>3m</td>
-              <td>classify_test.go</td>
+              <td><s>32</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>Test IsRetryable(export) == false</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>3m</s></td>
+              <td><s>classify_test.go</s></td>
             </tr>
             <tr>
-              <td>34</td>
-              <td>T5</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>AGENTS.md: I/O sentinel inventory</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>8m</td>
-              <td>AGENTS.md</td>
+              <td><s>34</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T5</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>AGENTS.md: I/O sentinel inventory</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>8m</s></td>
+              <td><s>AGENTS.md</s></td>
             </tr>
             <tr>
-              <td>35</td>
-              <td>T5</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>FEATURES.md: Error Classification row</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5m</td>
-              <td>FEATURES.md</td>
+              <td><s>35</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T5</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>FEATURES.md: Error Classification row</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>FEATURES.md</s></td>
             </tr>
             <tr>
-              <td>39</td>
-              <td>T5</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>Final coverage report</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5m</td>
-              <td>—</td>
+              <td><s>39</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T5</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>Final coverage report</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>—</s></td>
             </tr>
             <tr>
-              <td>40</td>
-              <td>T5</td>
-              <td><span class="badge badge-p2">P2</span></td>
-              <td>art-dupl on changed files</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5m</td>
-              <td>—</td>
+              <td><s>40</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T5</s></td>
+              <td><s><span class="badge badge-p2">P2</span></s></td>
+              <td><s>art-dupl on changed files</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>—</s></td>
             </tr>
             <!-- P3 tasks -->
             <tr>
-              <td>12</td>
-              <td>T3</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>AGENTS.md: init() side-effect note</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>3m</td>
-              <td>AGENTS.md</td>
+              <td><s>12</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T3</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>AGENTS.md: init() side-effect note</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>3m</s></td>
+              <td><s>AGENTS.md</s></td>
             </tr>
             <tr>
-              <td>21</td>
-              <td>T4</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap mermaid.go errors</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>5m</td>
-              <td>mermaid.go</td>
+              <td><s>21</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Wrap mermaid.go errors</s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>mermaid.go</s></td>
             </tr>
             <tr>
-              <td>22</td>
-              <td>T4</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap plantuml.go errors</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5m</td>
-              <td>plantuml.go</td>
+              <td><s>22</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Wrap plantuml.go errors</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>plantuml.go</s></td>
             </tr>
             <tr>
-              <td>23</td>
-              <td>T4</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap graphviz.go errors</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5m</td>
-              <td>graphviz.go</td>
+              <td><s>23</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Wrap graphviz.go errors</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>graphviz.go</s></td>
             </tr>
             <tr>
-              <td>24</td>
-              <td>T4</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap d2.go errors</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5m</td>
-              <td>d2.go</td>
+              <td><s>24</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Wrap d2.go errors</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>d2.go</s></td>
             </tr>
             <tr>
-              <td>25</td>
-              <td>T4</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap table.go errors</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5m</td>
-              <td>table.go</td>
+              <td><s>25</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Wrap table.go errors</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>table.go</s></td>
             </tr>
             <tr>
-              <td>26</td>
-              <td>T4</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap tree.go errors</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5m</td>
-              <td>tree.go</td>
+              <td><s>26</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Wrap tree.go errors</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>tree.go</s></td>
             </tr>
             <tr>
-              <td>27</td>
-              <td>T4</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Wrap html_render.go errors</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>5m</td>
-              <td>html_render.go</td>
+              <td><s>27</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T4</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Wrap html_render.go errors</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>5m</s></td>
+              <td><s>html_render.go</s></td>
             </tr>
             <tr>
-              <td>37</td>
-              <td>T5</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Example: demo errorfamily.Classify</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>10m</td>
-              <td>example/main.go</td>
+              <td><s>37</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T5</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Example: demo errorfamily.Classify</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>10m</s></td>
+              <td><s>example/main.go</s></td>
             </tr>
             <tr>
-              <td>41</td>
-              <td>T5</td>
-              <td><span class="badge badge-p3">P3</span></td>
-              <td>Final go mod tidy + go.sum check</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>3m</td>
-              <td>go.mod</td>
+              <td><s>41</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T5</s></td>
+              <td><s><span class="badge badge-p3">P3</span></s></td>
+              <td><s>Final go mod tidy + go.sum check</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>3m</s></td>
+              <td><s>go.mod</s></td>
             </tr>
             <!-- P4 tasks -->
             <tr>
-              <td>36</td>
-              <td>T5</td>
-              <td><span class="badge badge-p4">P4</span></td>
-              <td>Update adoption report: mark DONE</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>3m</td>
-              <td>docs/reviews/</td>
+              <td><s>36</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>T5</s></td>
+              <td><s><span class="badge badge-p4">P4</span></s></td>
+              <td><s>Update adoption report: mark DONE</s></td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>3m</s></td>
+              <td><s>docs/reviews/</s></td>
             </tr>
           </tbody>
         </table>
@@ -2829,34 +2829,34 @@
             </thead>
             <tbody>
               <tr>
-                <td><span class="badge badge-p0">P0</span></td>
-                <td>6</td>
-                <td>26 min</td>
-                <td>12%</td>
+                <td><s><span class="badge badge-p0">P0</span></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>6</s></td>
+                <td><s>26 min</s></td>
+                <td><s>12%</s></td>
               </tr>
               <tr>
-                <td><span class="badge badge-p1">P1</span></td>
-                <td>12</td>
-                <td>82 min</td>
-                <td>37%</td>
+                <td><s><span class="badge badge-p1">P1</span></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>12</s></td>
+                <td><s>82 min</s></td>
+                <td><s>37%</s></td>
               </tr>
               <tr>
-                <td><span class="badge badge-p2">P2</span></td>
-                <td>12</td>
-                <td>57 min</td>
-                <td>26%</td>
+                <td><s><span class="badge badge-p2">P2</span></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>12</s></td>
+                <td><s>57 min</s></td>
+                <td><s>26%</s></td>
               </tr>
               <tr>
-                <td><span class="badge badge-p3">P3</span></td>
-                <td>10</td>
-                <td>51 min</td>
-                <td>23%</td>
+                <td><s><span class="badge badge-p3">P3</span></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>10</s></td>
+                <td><s>51 min</s></td>
+                <td><s>23%</s></td>
               </tr>
               <tr>
-                <td><span class="badge badge-p4">P4</span></td>
-                <td>1</td>
-                <td>3 min</td>
-                <td>1%</td>
+                <td><s><span class="badge badge-p4">P4</span></s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+                <td><s>1</s></td>
+                <td><s>3 min</s></td>
+                <td><s>1%</s></td>
               </tr>
               <tr style="font-weight: 700">
                 <td>Total</td>

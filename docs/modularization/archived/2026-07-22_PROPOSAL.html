@@ -315,35 +315,35 @@ viz.ExportHTML(report, "report.html")</pre>
 
       <h2>Migration Strategy</h2>
       <ol>
-        <li>
+        <li><s>
           Create <code>testhelpers</code> package and move shared fixtures;
           update core tests.
-        </li>
-        <li>
+        </s> ~~done — verified by the 2026-10-05 docs-health pass~~</li>
+        <li><s>
           Create <code>viz</code> directory, <code>viz/go.mod</code>, and public
           <code>viz</code> API.
-        </li>
-        <li>
+        </s> ~~done — verified by the 2026-10-05 docs-health pass~~</li>
+        <li><s>
           Move rendering files and their tests into <code>viz</code>; convert
           methods to functions.
-        </li>
-        <li>
+        </s> ~~done — verified by the 2026-10-05 docs-health pass~~</li>
+        <li><s>
           Remove visualization methods from core <code>Auditor</code> and
           <code>WorkflowReport</code>; remove go-output from core
           <code>go.mod</code>.
-        </li>
-        <li>
+        </s> ~~done — verified by the 2026-10-05 docs-health pass~~</li>
+        <li><s>
           Move <code>example</code> to <code>viz/example</code> and update
           imports.
-        </li>
-        <li>
+        </s> ~~done — verified by the 2026-10-05 docs-health pass~~</li>
+        <li><s>
           Create <code>go.work</code> and update <code>go.work.sum</code>.
-        </li>
-        <li>Update CI, goreleaser, README, and AGENTS.md.</li>
-        <li>
+        </s> ~~done — verified by the 2026-10-05 docs-health pass~~</li>
+        <li><s>Update CI, goreleaser, README, and AGENTS.md.</s> ~~done — verified by the 2026-10-05 docs-health pass~~</li>
+        <li><s>
           Run full test suite and <code>GOWORK=off</code> per-module
           verification.
-        </li>
+        </s> ~~done — verified by the 2026-10-05 docs-health pass~~</li>
       </ol>
 
       <h2>Risk Assessment</h2>

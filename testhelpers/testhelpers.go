@@ -255,7 +255,7 @@ func NewAuditAndWorkflow(t *testing.T) (*auditlog.Auditor, *flow.Workflow) {
 	t.Helper()
 
 	a := MustNew(t, auditlog.Config{Enabled: true, WorkflowID: "test"})
-	w := &flow.Workflow{} //nolint:exhaustruct
+	w := &flow.Workflow{} //nolint:exhaustruct_v5
 
 	return a, w
 }

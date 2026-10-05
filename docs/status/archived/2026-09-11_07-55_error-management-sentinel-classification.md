@@ -51,12 +51,12 @@ The pasted report's premise — "project enforces samber/oops" — was **false**
 
 ## b) PARTIALLY DONE
 
-1. **`live/hub.go:227`** — `fmt.Errorf("drain: %w", ctx.Err())` is still an uncategorized error (no sentinel, no family, no code). Spotted during the pass, deliberately deferred; inconsistent with the now-intrinsic architecture.
-2. **Error() format change is user-visible but undocumented** — sentinel messages gained the `[family:code]` prefix (CLI output changes shape). Not reflected in `docs/MIGRATION.md` or a CHANGELOG entry.
-3. **Rejection of the strict flags is documented in exactly one place** (AGENTS.md policy bullet). No decision-log/ADR artifact; no CI wiring that would _enforce_ the default-flag cleanliness so it doesn't rot.
-4. **Per-module standalone verification** — all three modules passed vet/lint/test/race via `nix run .#check`, but the explicit `GOWORK=off` standalone test commands from the AGENTS.md table were not run individually this session.
-5. **`erraudit nolint-audit` discrepancy** — it reports "No //nolint:erraudit directives found" while the analyzer demonstrably honors the 9 directives I added. Noticed, not root-caused (possibly comment-association differences in its go/parser pass).
-6. **Suppression catalog** — the 9 suppressions each carry a local reason, but there is no single inventory listing them for periodic re-audit (staleness detection exists as `erraudit nolint-audit`, see #5).
+1. ~~**`live/hub.go:227`** — `fmt.Errorf("drain: %w", ctx.Err())` is still an uncategorized error (no sentinel, no family, no code). Spotted during the pass, deliberately deferred; inconsistent with the now-intrinsic architecture.~~ done — verified by the 2026-10-05 docs-health pass
+2. ~~**Error() format change is user-visible but undocumented** — sentinel messages gained the `[family:code]` prefix (CLI output changes shape). Not reflected in `docs/MIGRATION.md` or a CHANGELOG entry.~~ done — verified by the 2026-10-05 docs-health pass
+3. ~~**Rejection of the strict flags is documented in exactly one place** (AGENTS.md policy bullet). No decision-log/ADR artifact; no CI wiring that would _enforce_ the default-flag cleanliness so it doesn't rot.~~ done — verified by the 2026-10-05 docs-health pass
+4. ~~**Per-module standalone verification** — all three modules passed vet/lint/test/race via `nix run .#check`, but the explicit `GOWORK=off` standalone test commands from the AGENTS.md table were not run individually this session.~~ done — verified by the 2026-10-05 docs-health pass
+5. ~~**`erraudit nolint-audit` discrepancy** — it reports "No //nolint:erraudit directives found" while the analyzer demonstrably honors the 9 directives I added. Noticed, not root-caused (possibly comment-association differences in its go/parser pass).~~ done — verified by the 2026-10-05 docs-health pass
+6. ~~**Suppression catalog** — the 9 suppressions each carry a local reason, but there is no single inventory listing them for periodic re-audit (staleness detection exists as `erraudit nolint-audit`, see #5).~~ done — verified by the 2026-10-05 docs-health pass
 
 ---
 

@@ -1317,259 +1317,259 @@
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>Correctness</td>
-              <td>
+              <td><s>1</s> ~~**NOT-DO — StepID + NameCollisions shipped instead.**~~</td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>Correctness</s></td>
+              <td><s>
                 Refactor <code>buildDependentsMapLocked</code> to use pointer
                 identity (not name) for the reverse-dependency graph. Closes the
                 silent name-collision bug.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>2</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>Hardening</td>
-              <td>
+              <td><s>2</s> ~~**Won't implement — CI race detector covers.**~~</td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>Hardening</s></td>
+              <td><s>
                 Add an integration test that runs the example binary under
                 <code>-race</code> with concurrent retries. Guards against the
                 go-workflow backoff race regression.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>3</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>UX</td>
-              <td>
+              <td><s>3</s> ~~**Won't implement — RunID is trusted input.**~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>UX</s></td>
+              <td><s>
                 Validate <code>Config.RunID</code> in <code>New()</code>:
                 auto-generate when empty, warn on malformed input. Prevents
                 silent correlation breakage.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>4</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Testing</td>
-              <td>
+              <td><s>4</s> ~~**Won't implement — 95–97% accepted (97.0/94.9/97.1, 2026-10).**~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>Testing</s></td>
+              <td><s>
                 Push coverage 94.7% → 99% by targeting the ~70 uncovered
                 statements. Highest-impact:
                 <code>recordAfterStep</code> nil branch,
                 <code>attach.go</code> wrapper nil path,
                 <code>fromFlowStatus</code> default,
                 <code>export.go</code> write-error paths.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>5</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Observability</td>
-              <td>
+              <td><s>5</s> ~~**Won't implement — no consumer.**~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>Observability</s></td>
+              <td><s>
                 <code>SlogHandler</code> adapter: emit one
                 <code>slog.Record</code> per event with step name, attempt,
                 duration, status, error. Unlocks native observability pipelines.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>6</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Documentation</td>
-              <td>
+              <td><s>6</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>Documentation</s></td>
+              <td><s>
                 Create <code>docs/DOMAIN_LANGUAGE.md</code>. Glossary for Step,
                 Attempt, Event, Recorder, Snapshot, Replay, Report, RunID. One
                 of the highest-leverage doc investments.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>7</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Testing</td>
-              <td>
+              <td><s>7</s> ~~**Won't implement — seeded property tests suffice.**~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>Testing</s></td>
+              <td><s>
                 Add a property-based test (rapid or quick) that generates random
                 workflow topologies + attempt result sequences and asserts
                 report invariants: event count = 2×attempt count, error/status
                 coherence, no orphaned steps.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>8</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>CI</td>
-              <td>
+              <td><s>8</s> ~~**Won't implement — benchmarks track perf.**~~</td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>CI</s></td>
+              <td><s>
                 GitHub Action that runs
                 <code>go test -bench=. -benchmem</code> on PRs and posts a perf
                 delta comment. Catches regressions like the broken retry
                 benchmark before merge.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>9</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Correctness</td>
-              <td>
+              <td><s>9</s> ~~**Won't implement — declined.**~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Correctness</s></td>
+              <td><s>
                 Add a test asserting <code>flow.StatusFromError</code> returns
                 the specific strings <code>fromFlowStatus</code> expects.
                 Catches upstream rename breakage.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>10</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Observability</td>
-              <td>
+              <td><s>10</s> ~~**→ open — deferred (ROADMAP: OTel bridge)**~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Observability</s></td>
+              <td><s>
                 OpenTelemetry trace correlation: helper to derive RunID from
                 <code>trace.SpanContextFromContext(ctx).TraceID()</code>. Emits
                 OTel events for each attempt boundary.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>11</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Benchmarks</td>
-              <td>
+              <td><s>11</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Benchmarks</s></td>
+              <td><s>
                 Fix <code>BenchmarkRetryWithAudit</code> to use zero-duration
                 backoff. Currently measures sleep, not overhead. The 1.5s number
                 is a lie.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>12</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>UX</td>
-              <td>
+              <td><s>12</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>UX</s></td>
+              <td><s>
                 Enrich the example to call <code>ExportJSON</code>,
                 <code>ExportMermaid</code>, <code>Diff</code>. Show the full
                 feature surface, not just the report struct.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>13</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Architecture</td>
-              <td>
+              <td><s>13</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Architecture</s></td>
+              <td><s>
                 Split single package into <code>auditlog</code> (core) +
                 <code>auditlog/export</code> (JSON, NDJSON) +
                 <code>auditlog/diagram</code> (Mermaid, PlantUML, DOT).
                 Mechanical refactor, big readability win.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>14</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Metrics</td>
-              <td>
+              <td><s>14</s> ~~**Won't implement — no consumer.**~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Metrics</s></td>
+              <td><s>
                 Prometheus exporter: per-step duration histograms, status
                 transition counters, in-flight attempt gauges.
                 <code>Collect()</code> method on a new type.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>15</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Error model</td>
-              <td>
+              <td><s>15</s> ~~done — superseded by FailureReason enum (v0.9.0)~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Error model</s></td>
+              <td><s>
                 Replace sentinel errors with typed error structs carrying
                 attempt #, step name, and inner cause.
                 <code
                   >type StepFailedError struct { StepName string; Attempt int;
                   Cause error }</code
                 >. ~30 lines, dramatic debuggability win.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>16</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Documentation</td>
-              <td>
+              <td><s>16</s> ~~**Won't implement — declined.**~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Documentation</s></td>
+              <td><s>
                 <code>docs/FAILURE_MODES.md</code>: central list of "things that
                 can go wrong" (RunID collision, name collision, dropped events,
                 snapshot after Do, Attach after Do).
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>17</td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Testing</td>
-              <td>
+              <td><s>17</s> ~~done — 1000-step render benchmarks exist~~</td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Testing</s></td>
+              <td><s>
                 Stress test: 1000-step workflow with all steps retrying under
                 -race. Establish a baseline for "no flake under load."
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>18</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>UX</td>
-              <td>
+              <td><s>18</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>UX</s></td>
+              <td><s>
                 Better <code>go doc</code> output: run <code>gomarkdoc</code> on
                 the package and commit the result, or write hand-curated
                 examples in <code>Example*</code> functions.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>19</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>UX</td>
-              <td>
+              <td><s>19</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>UX</s></td>
+              <td><s>
                 PlantUML/DOT visual differentiation for retry/timeout (Mermaid
                 already has it). Shared engine makes this a
                 one-formatter-at-a-time task.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>20</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Documentation</td>
-              <td>
+              <td><s>20</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Documentation</s></td>
+              <td><s>
                 Move <code>export_test.go</code> into the new
                 <code>auditlog/export</code> package when we split. Co-located
                 tests discover better.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>21</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Tooling</td>
-              <td>
+              <td><s>21</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Tooling</s></td>
+              <td><s>
                 Taskfile / flake.nix / justfile for unified <code>test</code>,
                 <code>lint</code>, <code>cover</code>, <code>bench</code>,
                 <code>demo</code> entrypoints. Replaces the copy-paste in
                 AGENTS.md.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>22</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Export</td>
-              <td>
+              <td><s>22</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Export</s></td>
+              <td><s>
                 Self-contained HTML report exporter: timeline + DAG + step
                 detail table. We have the template skill; this is a glue job.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>23</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Export</td>
-              <td>
+              <td><s>23</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Export</s></td>
+              <td><s>
                 WorkflowReport → protobuf or flatbuffers for IPC / gRPC use
                 cases. Not urgent.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>24</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Testing</td>
-              <td>
+              <td><s>24</s> ~~done — sub-workflow traversal tests shipped~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Testing</s></td>
+              <td><s>
                 Sub-workflow composition: deeply nested, sub-workflow with its
                 own retries, error propagation. One test each.
-              </td>
+              </s></td>
             </tr>
             <tr>
-              <td>25</td>
-              <td><span class="badge badge-low">Low</span></td>
-              <td>Comment hygiene</td>
-              <td>
+              <td><s>25</s> ~~**Won't implement — declined.**~~</td>
+              <td><s><span class="badge badge-low">Low</span></s></td>
+              <td><s>Comment hygiene</s></td>
+              <td><s>
                 Review every comment in <code>recorder.go</code> for "what vs
                 why." A few restate the code. Quick polish, not a blocker.
-              </td>
+              </s></td>
             </tr>
           </tbody>
         </table>
@@ -1601,20 +1601,20 @@
           </p>
 
           <ol style="margin: 0.5rem 0 1rem 1.5rem">
-            <li>
+            <li><s>
               <strong>Stay minimal.</strong> Error = final outcome. Users who
               want per-attempt history go to the Event stream. Clean, single
               source of truth. But: extra work for the common "did this step
               ever fail?" question.
-            </li>
-            <li>
+            </s> ~~**NOT-DO — StepID + NameCollisions shipped instead.**~~</li>
+            <li><s>
               <strong>Add <code>TransientErrors []string</code>.</strong> All
               non-final attempt error messages, in order. Final outcome is still
               <code>Error</code>. Preserves forensics, doesn't conflate with
               final error. Cost: ~5 lines, one extra test, one extra JSON field.
               Slight schema bump (additive only — v0.2.0 is fine).
-            </li>
-            <li>
+            </s> ~~**Won't implement — CI race detector covers.**~~</li>
+            <li><s>
               <strong
                 >Add <code>LastAttempt int</code> + reuse <code>Error</code> for
                 final, <code>AttemptErrors map[int]string</code> for the
@@ -1622,7 +1622,7 @@
               >
               Most expressive, most schema surface, most complexity. Probably
               overkill for v0.x.
-            </li>
+            </s> ~~**Won't implement — RunID is trusted input.**~~</li>
           </ol>
 
           <p>

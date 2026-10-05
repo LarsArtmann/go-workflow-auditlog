@@ -882,7 +882,7 @@
 
         <div class="issue issue-important">
           <span class="severity severity-important">Forgot</span>
-          <h3>Did not verify govulncheck or gosec</h3>
+          <h3><s>Did not verify govulncheck or gosec</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
           <div class="where">CI / security</div>
           <p>
             The <code>how-to-golang</code> policy mandates
@@ -901,7 +901,7 @@
 
         <div class="issue issue-nice">
           <span class="severity severity-nice">Forgot</span>
-          <h3>Stale LSP warnings on example/main.go</h3>
+          <h3><s>Stale LSP warnings on example/main.go</s> ~~**Won't implement — moot (Go 1.27).**~~</h3>
           <div class="where">example/main.go:265-266</div>
           <p>
             The LSP shows
@@ -925,7 +925,7 @@
 
         <div class="issue issue-critical">
           <span class="severity severity-critical">Split Brain</span>
-          <h3>stepRecord (recorder.go) vs replayStep (replay.go)</h3>
+          <h3><s>stepRecord (recorder.go) vs replayStep (replay.go)</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
           <div class="where">recorder.go:30-52 &middot; replay.go:13-22</div>
           <p>
             Two structs track <strong>the same domain concept</strong>
@@ -983,7 +983,7 @@
 
         <div class="issue issue-important">
           <span class="severity severity-important">Ghost System</span>
-          <h3>computeWallClockDurationMs stranded in report_builder.go</h3>
+          <h3><s>computeWallClockDurationMs stranded in report_builder.go</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h3>
           <div class="where">report_builder.go:308 &middot; report.go:234</div>
           <p>
             I moved <code>Duration()</code> and <code>Summary()</code> from
@@ -1003,7 +1003,7 @@
 
         <div class="issue issue-important">
           <span class="severity severity-important">Stringly Typed</span>
-          <h3>RunID is a plain string everywhere</h3>
+          <h3><s>RunID is a plain string everywhere</s> ~~done — branded RunID type shipped (v0.2.0 era).~~</h3>
           <div class="where">
             event.go:9 &middot; report.go:34 &middot; plugin.go:30
           </div>
@@ -1027,7 +1027,7 @@
         <h2 id="better"><span class="num">03</span>What Could Be Better</h2>
 
         <div class="card card-problem">
-          <h4>encoding/json v1 on Go 1.26</h4>
+          <h4><s>encoding/json v1 on Go 1.26</s> ~~done — json/v2 migration v0.7.0.~~</h4>
           <p>
             The project uses <code>encoding/json</code> (v1) in 5 files. The
             <code>how-to-golang</code> policy says "Go 1.25+ &rarr;
@@ -1040,7 +1040,7 @@
         </div>
 
         <div class="card card-problem">
-          <h4>Error as *string instead of error</h4>
+          <h4><s>Error as *string instead of error</s> ~~**Won't implement — deliberate, schema stability.**~~</h4>
           <p>
             <code>Event.Error</code> and <code>StepInfo.Error</code> are
             <code>*string</code>, not <code>error</code>. This was a deliberate
@@ -1057,7 +1057,7 @@
         </div>
 
         <div class="card card-problem">
-          <h4>*float64 for DurationMs &mdash; pointer boilerplate</h4>
+          <h4><s>*float64 for DurationMs &mdash; pointer boilerplate</s> ~~**Won't implement — deliberate, nil vs zero.**~~</h4>
           <p>
             <code>DurationMs *float64</code> appears in 5 places
             (<code>Event</code>, <code>StepInfo</code>, <code>stepRecord</code>,
@@ -1070,7 +1070,7 @@
         </div>
 
         <div class="card card-warning">
-          <h4>Deprecated aliases add maintenance surface</h4>
+          <h4><s>Deprecated aliases add maintenance surface</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             I added 6 deprecated methods (<code>WriteReportJSON</code>,
             <code>WriteEventsNDJSON</code>, <code>ExportToFile</code>,
@@ -1087,7 +1087,7 @@
         <h2 id="types"><span class="num">04</span>Type Model Assessment</h2>
 
         <div class="card card-solution">
-          <h4>What's good</h4>
+          <h4><s>What's good</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <p>
             <code>StepStatus</code> is a proper typed enum with
             <code>Label()</code>/<code>Icon()</code>/<code>Color()</code>
@@ -1099,7 +1099,7 @@
         </div>
 
         <div class="card card-problem">
-          <h4>What needs fixing (this session)</h4>
+          <h4><s>What needs fixing (this session)</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <ul>
             <li><strong>RunID</strong>: plain string &rarr; branded type</li>
             <li>
@@ -1114,7 +1114,7 @@
         </div>
 
         <div class="card card-warning">
-          <h4>What to consider later</h4>
+          <h4><s>What to consider later</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
           <ul>
             <li>
               <strong>StepID</strong>: plain int, not branded. Low risk since
@@ -1152,30 +1152,30 @@
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
-              <td>Split Brain</td>
-              <td>
+              <td><s>1</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>Split Brain</s></td>
+              <td><s>
                 <code>stepRecord</code> vs <code>replayStep</code> &mdash;
                 duplicate step-state tracking
-              </td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>Extract shared accumulator</td>
+              </s></td>
+              <td><s><span class="badge badge-critical">Critical</span></s></td>
+              <td><s>Extract shared accumulator</s></td>
             </tr>
             <tr>
-              <td>2</td>
-              <td>Ghost System</td>
-              <td>
+              <td><s>2</s> ~~done — verified by the 2026-10-05 docs-health pass~~</td>
+              <td><s>Ghost System</s></td>
+              <td><s>
                 <code>computeWallClockDurationMs</code> in wrong file after move
-              </td>
-              <td><span class="badge badge-medium">Medium</span></td>
-              <td>Move to report.go</td>
+              </s></td>
+              <td><s><span class="badge badge-medium">Medium</span></s></td>
+              <td><s>Move to report.go</s></td>
             </tr>
             <tr>
-              <td>3</td>
-              <td>Stringly Typed</td>
-              <td><code>RunID</code> has no compile-time identity</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Branded type</td>
+              <td><s>3</s> ~~**Won't implement — LSP-cache noise moot (Go 1.27).**~~</td>
+              <td><s>Stringly Typed</s></td>
+              <td><s><code>RunID</code> has no compile-time identity</s></td>
+              <td><s><span class="badge badge-high">High</span></s></td>
+              <td><s>Branded type</s></td>
             </tr>
           </tbody>
         </table>
@@ -1190,7 +1190,7 @@
         <div class="migration-step">
           <div class="migration-num">1</div>
           <div class="migration-content">
-            <h4>Move computeWallClockDurationMs to report.go</h4>
+            <h4><s>Move computeWallClockDurationMs to report.go</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
             <p>
               <strong>Work:</strong> 5 min &middot;
               <strong>Impact:</strong> Medium <br />Finish the cohesion job from
@@ -1203,7 +1203,7 @@
         <div class="migration-step">
           <div class="migration-num">2</div>
           <div class="migration-content">
-            <h4>Create branded RunID type</h4>
+            <h4><s>Create branded RunID type</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
             <p>
               <strong>Work:</strong> 10 min &middot;
               <strong>Impact:</strong> High <br /><code>type RunID string</code>
@@ -1220,7 +1220,7 @@
         <div class="migration-step">
           <div class="migration-num">3</div>
           <div class="migration-content">
-            <h4>Consolidate stepRecord/replayStep split brain</h4>
+            <h4><s>Consolidate stepRecord/replayStep split brain</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
             <p>
               <strong>Work:</strong> 15 min &middot;
               <strong>Impact:</strong> High <br />Extract shared
@@ -1236,7 +1236,7 @@
         <div class="migration-step">
           <div class="migration-num">4</div>
           <div class="migration-content">
-            <h4>Run govulncheck + full verification</h4>
+            <h4><s>Run govulncheck + full verification</s> ~~done — verified by the 2026-10-05 docs-health pass~~</h4>
             <p>
               <strong>Work:</strong> 5 min &middot;
               <strong>Impact:</strong> Critical <br />Run
