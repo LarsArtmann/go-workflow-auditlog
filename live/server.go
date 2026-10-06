@@ -17,7 +17,7 @@ import (
 	"github.com/larsartmann/go-output/daghtml"
 	"github.com/larsartmann/go-sse"
 	auditlog "github.com/larsartmann/go-workflow-auditlog"
-	"github.com/larsartmann/go-workflow-auditlog/forward"
+	"github.com/larsartmann/go-workflow-auditlog/live/forward"
 	viz "github.com/larsartmann/go-workflow-auditlog/viz"
 )
 
