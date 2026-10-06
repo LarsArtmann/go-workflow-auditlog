@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **`live/forward` package — stream workflow audit events to a PapDashboard audit-run collector** (2026-10-06): batches events per run (250ms / 200-event flush, drop-oldest under burst) and POSTs them over a unix socket (zero config — the default `$XDG_RUNTIME_DIR/papdashboard/audit-runs.sock` is probed once; `WORKFLOW_AUDITLOG_FORWARD_TARGET` accepts `off`, `unix:///path`, a bare path, or an `http(s)://` URL with `WORKFLOW_AUDITLOG_FORWARD_API_KEY`). `live.New` auto-attaches an enabled Forwarder (sourceId defaults to `Config.WorkflowID`); `SignalComplete` forwards the explicit completion marker — workflow runs have NO derivable terminal event, so the marker is the only completion signal. Lives inside the live module (live consumes published core tags; a core-side package would break GOWORK=off CI until a release). Stdlib-only.
+
+
+
 ### Changed
 
 - **Go 1.27 toolchain** — all three modules bumped from `go 1.26.7`. `encoding/json/v2` is GA in Go 1.27, so the `GOEXPERIMENT=jsonv2` flag is no longer required; it was removed from `flake.nix`, CI, `.goreleaser.yml`, and the documentation.
