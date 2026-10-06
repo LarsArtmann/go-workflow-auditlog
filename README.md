@@ -61,6 +61,7 @@ The `viz.ExportHTML` call produces a self-contained interactive dashboard:
 - [Workflow-Level Queries](#workflow-level-queries)
 - [Diagrams](#diagrams)
 - [HTML Dashboard](#html-dashboard)
+- [Forwarding to PapDashboard](#forwarding-to-papdashboard) — zero-config audit-run aggregation
 - [Screenshots](#screenshots)
 - [Concurrency Model](#concurrency-model)
 - [Step Naming](#step-naming)
@@ -767,6 +768,39 @@ viz.ExportHTML(report, "dashboard.html")
 // To a string:
 html, _ := viz.WriteHTMLString(report)
 ```
+
+## Forwarding to PapDashboard
+
+The `live/forward/` sub-package streams workflow audit runs to a [PapDashboard](https://github.com/larsartmann/PapDashboard) audit-run collector — the aggregation hub for questions, alerts, and audit runs across a fleet. It batches events per run, POSTs them over a unix socket (zero config) or HTTP, and marks run completion via the explicit terminal marker (workflow runs have no root-scope shutdown to derive completion from — `live.Server.SignalComplete` is the primary signal).
+
+**Zero-code wiring**: `live.New` auto-attaches an enabled Forwarder to the live module. Plain consumers compose it themselves:
+
+```go
+import "github.com/larsartmann/go-workflow-auditlog/live/forward"
+
+fwd := forward.New("") // source label defaults to the executable name
+if fwd.Enabled() {
+    auditor.OnEvent = fwd.OnEvent // or compose via your own MultiWriter
+    defer fwd.Shutdown(context.Background())
+}
+// on run end:
+fwd.Complete()
+```
+
+Environment knobs (all optional):
+
+| Knob                                          | Default           | Meaning                                                                                                                                                    |
+| --------------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WORKFLOW_AUDITLOG_FORWARD_TARGET`            | armed auto-target | Comma-separated for fan-out to multiple collectors; `off`/`disabled` never forwards; `unix:///path`, `/path`, `http(s)://…`                                |
+| `WORKFLOW_AUDITLOG_FORWARD_API_KEY`           | none              | Bearer key for remote HTTP collectors                                                                                                                      |
+| `WORKFLOW_AUDITLOG_FORWARD_SOURCE`            | executable name   | The source label the collector UI shows for this workflow                                                                                                  |
+| `WORKFLOW_AUDITLOG_FORWARD_BATCH_MAX`         | `200` (1–8192)    | Events per POST batch                                                                                                                                      |
+| `WORKFLOW_AUDITLOG_FORWARD_FLUSH_MS`          | `250` (16–60000)  | Batch flush interval in milliseconds                                                                                                                       |
+| `WORKFLOW_AUDITLOG_FORWARD_COMPLETE_ON_ERROR` | `off`             | Rescue hatch: derive run completion from a terminal error status (failed/canceled) on a run's last event, for workflows whose `SignalComplete` never fires |
+
+With the target **unset** the forwarder _arms_ the conventional socket (`$XDG_RUNTIME_DIR/papdashboard/audit-runs.sock`) and probes until it answers — events seen while it is down stay buffered, so a workflow binary that boots **before** PapDashboard still forwards its early run events once it appears.
+
+Delivery is best-effort: failed POSTs are counted (`Failed()`), logged on state change, and never retried in place — the collector dedups by `(run_id, sequence)`, so a later batch safely re-delivers anything lost. The sub-package is stdlib-only so this public repo stays fetchable through proxy.golang.org.
 
 ## Concurrency Model
 

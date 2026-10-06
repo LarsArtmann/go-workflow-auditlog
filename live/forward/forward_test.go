@@ -1,11 +1,17 @@
 package forward_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"log/slog"
 	"net"
 	"net/http"
+	"net/http/httptest"
+	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -28,6 +34,16 @@ func startFakeCollector(t *testing.T) (*fakeCollector, string) {
 	t.Helper()
 
 	path := filepath.Join(t.TempDir(), "audit-runs.sock")
+
+	return startFakeCollectorAtPath(t, path), path
+}
+
+func startFakeCollectorAtPath(t *testing.T, path string) *fakeCollector {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatalf("mkdir socket dir: %v", err)
+	}
 
 	listener, err := net.Listen("unix", path)
 	if err != nil {
@@ -64,7 +80,7 @@ func startFakeCollector(t *testing.T) (*fakeCollector, string) {
 		collector.wg.Wait()
 	})
 
-	return collector, path
+	return collector
 }
 
 func (c *fakeCollector) awaitEnvelopes(t *testing.T, want int) []map[string]any {
@@ -95,6 +111,10 @@ func (c *fakeCollector) awaitEnvelopes(t *testing.T, want int) []map[string]any 
 }
 
 func wfEvent(runID string, sequence int) auditlog.Event {
+	return wfStatusEvent(runID, sequence, auditlog.StepStatusSucceeded)
+}
+
+func wfStatusEvent(runID string, sequence int, status auditlog.StepStatus) auditlog.Event {
 	return auditlog.Event{
 		StepRef:   auditlog.StepRef{Name: "build", StepType: "shell"},
 		RunID:     auditlog.RunID(runID),
@@ -103,7 +123,7 @@ func wfEvent(runID string, sequence int) auditlog.Event {
 		EventType: auditlog.EventTypeAttemptEnd,
 		Phase:     auditlog.PhaseAfter,
 		Attempt:   1,
-		Status:    auditlog.StepStatusSucceeded,
+		Status:    status,
 	}
 }
 
@@ -171,5 +191,209 @@ func TestForwarder_OffModes(t *testing.T) {
 
 	if err := fwd.Shutdown(context.Background()); err != nil {
 		t.Fatalf("disabled shutdown: %v", err)
+	}
+
+	// Default (empty target) with a dead conventional socket stays ARMED:
+	// delivery starts whenever the socket answers (see the activation test).
+	t.Setenv("XDG_RUNTIME_DIR", t.TempDir())
+
+	fwd = forward.NewWithTarget("", "wf")
+	if !fwd.Enabled() {
+		t.Fatal("dead default socket must stay armed, not disable forwarding")
+	}
+
+	if err := fwd.Shutdown(context.Background()); err != nil {
+		t.Fatalf("armed shutdown: %v", err)
+	}
+}
+
+func TestForwarder_AutoTargetActivatesWhenSocketAppears(t *testing.T) {
+	// SHORT temp runtime dir — unix socket paths must stay under the
+	// kernel's 108-byte sun_path limit.
+	runtimeDir, err := os.MkdirTemp("", "wfwd-xdg-*")
+	if err != nil {
+		t.Fatalf("temp runtime dir: %v", err)
+	}
+
+	t.Cleanup(func() { _ = os.RemoveAll(runtimeDir) })
+
+	t.Setenv("XDG_RUNTIME_DIR", runtimeDir)
+
+	fwd := forward.NewWithTarget("", "late-workflow")
+	if !fwd.Enabled() {
+		t.Fatal("empty target must arm the forwarder")
+	}
+
+	t.Cleanup(func() { _ = fwd.Shutdown(context.Background()) })
+
+	// Events buffered while PapDashboard is still down…
+	fwd.OnEvent(wfEvent("run-late", 1))
+
+	// …and the collector appears later at the conventional socket.
+	collector := startFakeCollectorAtPath(t, filepath.Join(runtimeDir, "papdashboard", "audit-runs.sock"))
+
+	envelopes := collector.awaitEnvelopes(t, 1)
+	if envelopes[0]["runId"] != "run-late" || envelopes[0]["sourceId"] != "late-workflow" {
+		t.Fatalf("activation must flush buffered events: %+v", envelopes[0])
+	}
+
+	// Live events keep flowing through the now-active target; the explicit
+	// marker rides the same batch (workflow semantics: one run, one flush).
+	fwd.OnEvent(wfEvent("run-late", 2))
+	fwd.Complete()
+
+	all := collector.awaitEnvelopes(t, 2)
+	last := all[len(all)-1]
+	if last["complete"] != true || last["runId"] != "run-late" {
+		t.Fatalf("explicit complete must flow after activation: %+v", last)
+	}
+}
+
+func TestForwarder_HTTPTargetBearerKey(t *testing.T) {
+	var gotAuth, gotPath string
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		gotAuth = request.Header.Get("Authorization")
+		gotPath = request.URL.Path
+
+		writer.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	t.Setenv("WORKFLOW_AUDITLOG_FORWARD_API_KEY", "secret-key")
+
+	fwd := forward.NewWithTarget(server.URL, "http-workflow")
+	if !fwd.Enabled() {
+		t.Fatal("http target must enable the forwarder")
+	}
+
+	t.Cleanup(func() { _ = fwd.Shutdown(context.Background()) })
+
+	fwd.OnEvent(wfEvent("run-http", 1))
+	_ = fwd.Shutdown(context.Background())
+
+	if gotAuth != "Bearer secret-key" {
+		t.Fatalf("http target must send the bearer key, got %q", gotAuth)
+	}
+
+	if gotPath != "/events" {
+		t.Fatalf("http target must POST the ingest path, got %q", gotPath)
+	}
+}
+
+func TestForwarder_FanOutToUnixAndHTTP(t *testing.T) {
+	collector, socketPath := startFakeCollector(t)
+
+	httpSink := make(chan string, 8)
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		body, _ := io.ReadAll(request.Body)
+		httpSink <- string(body)
+		writer.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	fwd := forward.NewWithTarget("unix://"+socketPath+","+server.URL, "fan-workflow")
+	if !fwd.Enabled() {
+		t.Fatal("fan-out spec must enable the forwarder")
+	}
+
+	t.Cleanup(func() { _ = fwd.Shutdown(context.Background()) })
+
+	fwd.OnEvent(wfEvent("run-fan", 1))
+	_ = fwd.Shutdown(context.Background())
+
+	envelopes := collector.awaitEnvelopes(t, 1)
+	if envelopes[0]["runId"] != "run-fan" {
+		t.Fatalf("unix leg must receive the batch: %+v", envelopes[0])
+	}
+
+	select {
+	case body := <-httpSink:
+		if !strings.Contains(body, `"runId":"run-fan"`) {
+			t.Fatalf("http leg must receive the batch: %s", body)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("http leg received nothing")
+	}
+}
+
+func TestForwarder_PostFailuresCountedAndLogged(t *testing.T) {
+	var logBuf bytes.Buffer
+
+	original := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&logBuf, nil)))
+	t.Cleanup(func() { slog.SetDefault(original) })
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.WriteHeader(http.StatusInternalServerError)
+	}))
+	t.Cleanup(server.Close)
+
+	fwd := forward.NewWithTarget(server.URL, "flaky-workflow")
+
+	t.Cleanup(func() { _ = fwd.Shutdown(context.Background()) })
+
+	for i := range 3 {
+		fwd.OnEvent(wfEvent("run-flaky", i+1))
+		time.Sleep(300 * time.Millisecond) // let flushes hit the failing target
+	}
+
+	if fwd.Failed() == 0 {
+		t.Fatal("failed POSTs must be counted")
+	}
+
+	transitionLogs := strings.Count(logBuf.String(), "delivery failing")
+	if transitionLogs != 1 {
+		t.Fatalf("failure transition must be logged exactly once, got %d: %s", transitionLogs, logBuf.String())
+	}
+}
+
+func TestForwarder_BatchMaxChunksEnvelopes(t *testing.T) {
+	collector, socketPath := startFakeCollector(t)
+
+	t.Setenv("WORKFLOW_AUDITLOG_FORWARD_BATCH_MAX", "2")
+
+	fwd := forward.NewWithTarget("unix://"+socketPath, "chunk-workflow")
+
+	for i := range 5 {
+		fwd.OnEvent(wfEvent("run-chunk", i+1))
+	}
+
+	_ = fwd.Shutdown(context.Background())
+
+	envelopes := collector.awaitEnvelopes(t, 3)
+	if len(envelopes) < 3 {
+		t.Fatalf("batch max 2 over 5 events must chunk into 3 envelopes, got %d", len(envelopes))
+	}
+
+	total := 0
+	for _, envelope := range envelopes {
+		events, _ := envelope["events"].([]any)
+		total += len(events)
+	}
+
+	if total != 5 {
+		t.Fatalf("chunks must carry every event exactly once, got %d of 5", total)
+	}
+}
+
+func TestForwarder_CompleteOnErrorDerivation(t *testing.T) {
+	collector, socketPath := startFakeCollector(t)
+
+	t.Setenv("WORKFLOW_AUDITLOG_FORWARD_COMPLETE_ON_ERROR", "1")
+
+	fwd := forward.NewWithTarget("unix://"+socketPath, "crash-workflow")
+
+	t.Cleanup(func() { _ = fwd.Shutdown(context.Background()) })
+
+	// A terminal failed attempt with no SignalComplete must still complete
+	// the run when the derivation knob is on.
+	fwd.OnEvent(wfEvent("run-crash", 1))
+	fwd.OnEvent(wfStatusEvent("run-crash", 2, auditlog.StepStatusFailed))
+
+	envelopes := collector.awaitEnvelopes(t, 1)
+	if envelopes[0]["complete"] != true {
+		t.Fatalf("terminal error status must derive completion: %+v", envelopes[0])
 	}
 }
