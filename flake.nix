@@ -52,7 +52,9 @@
 
           # Real package: the auditlog CLI (cmd/auditlog). Replaces a former
           # `mkdir -p $out` marker whose checks.build asserted nothing.
-          packages.default = pkgs.buildGo126Module {
+          # go_1_27 override: go.mod requires >= 1.27 and this nixpkgs pin's
+          # default go is 1.26 (no buildGo127Module alias on this rev).
+          packages.default = pkgs.buildGoModule.override { go = pkgs.go_1_27; } {
             pname = "auditlog";
             version = self.shortRev or self.dirtyShortRev or "dev";
             src = lib.fileset.toSource {
@@ -60,7 +62,7 @@
               fileset = lib.fileset.gitTracked ./.;
             };
             subPackages = [ "cmd/auditlog" ];
-            vendorHash = "sha256-X54/+f3DN8ue8EzHjmKVQnwKD/mb/T1gX2CFPdXN6QU=";
+            vendorHash = "sha256-B+m81h3u3fp7BgzDNF42ErPbld+O0mGoTRKh+sBR4yE=";
             meta = with lib; {
               description = "Audit logging CLI for Azure/go-workflow";
               homepage = "https://github.com/larsartmann/go-workflow-auditlog";
