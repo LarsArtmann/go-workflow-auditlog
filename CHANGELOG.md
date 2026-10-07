@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-07
+
 ### Added
 
 - **`live/forward` package — stream workflow audit events to a PapDashboard audit-run collector** (2026-10-06): batches events per run (`WORKFLOW_AUDITLOG_FORWARD_FLUSH_MS` default 250ms, range 16–60000 / `WORKFLOW_AUDITLOG_FORWARD_BATCH_MAX` default 200 events, range 1–8192, drop-oldest under burst) and POSTs them over a unix socket or HTTP. Target selection via `WORKFLOW_AUDITLOG_FORWARD_TARGET` (`off`, `unix:///path`, a bare path, or an `http(s)://` URL, comma-separated for fan-out; `WORKFLOW_AUDITLOG_FORWARD_API_KEY` for keyed collectors; `WORKFLOW_AUDITLOG_FORWARD_SOURCE` overrides the source label). The zero-config default (`$XDG_RUNTIME_DIR/papdashboard/audit-runs.sock`) is an **armed target**: it re-probes every 30s while idle and at flush cadence once events pend, so a PapDashboard that boots later still receives the run. `live.New` auto-attaches an enabled Forwarder (sourceId defaults to `Config.WorkflowID`); `SignalComplete` forwards the explicit completion marker — workflow runs have NO derivable terminal event, so the marker is the only completion signal (`WORKFLOW_AUDITLOG_FORWARD_COMPLETE_ON_ERROR` is the rescue hatch that derives completion from a terminal failed/canceled status). Delivery is best-effort: failed POSTs are counted (`Failed()`), logged on state change, and never retried in place — the collector dedups by `(run_id, sequence)`. Lives inside the live module (live consumes published core tags; a core-side package would break GOWORK=off CI until a release). Stdlib-only.
