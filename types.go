@@ -25,6 +25,10 @@ const (
 	EventTypeAttemptStart EventType = "attempt_start"
 	// EventTypeAttemptEnd fires when a step attempt finishes (each retry try).
 	EventTypeAttemptEnd EventType = "attempt_end"
+	// EventTypeSystem marks a host-injected synthetic event (Recorder.Record):
+	// observations outside any step's lifecycle (the pre-DAG window - doctor
+	// preflight, cache warmup - or post-run annotations).
+	EventTypeSystem EventType = "system"
 )
 
 // IsKnown returns true if the event type is a recognized value.
@@ -45,6 +49,7 @@ var eventTypeMeta = map[EventType]struct {
 }{
 	EventTypeAttemptStart: {Label: "Attempt Start", Color: "var(--success)"},
 	EventTypeAttemptEnd:   {Label: "Attempt End", Color: "var(--warning)"},
+	EventTypeSystem:       {Label: "System", Color: "var(--info)"},
 }
 
 // Label returns the human-readable display label for this event type.

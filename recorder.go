@@ -233,6 +233,35 @@ func (r *Recorder) appendEventLocked(evt Event) {
 	r.events = append(r.events, evt)
 }
 
+// Record injects a caller-authored event into the audit stream (PD2/M7: the
+// pre-DAG window has no step lifecycle to hook, so hosts need a public
+// injection point). RunID, Sequence, and Timestamp are stamped when unset so
+// injected events interleave with captured ones; every other field is the
+// caller's. Safe before Attach and after the workflow completes; respects
+// MaxEvents identically to captured events. The onEvent callback fires
+// outside the lock, per the locking protocol.
+func (r *Recorder) Record(evt Event) {
+	if evt.Timestamp.IsZero() {
+		evt.Timestamp = time.Now()
+	}
+
+	if evt.Sequence == 0 {
+		evt.Sequence = r.nextSequence()
+	}
+
+	if evt.RunID == "" {
+		evt.RunID = r.runID
+	}
+
+	r.mu.Lock()
+	r.appendEventLocked(evt)
+	r.mu.Unlock()
+
+	if r.onEvent != nil {
+		r.onEvent(evt)
+	}
+}
+
 // DroppedEventCount returns the number of events dropped due to MaxEvents cap.
 func (r *Recorder) DroppedEventCount() int64 {
 	return r.droppedEvents.Load()

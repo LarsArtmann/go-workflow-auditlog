@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-10-14
+
+### Added
+- **`Auditor.Record` / `Recorder.Record` (PD2/M7)**: hosts can inject synthetic
+  events into the audit stream - the pre-DAG window (doctor preflight, cache
+  warmup) has no step lifecycle to hook, so the only options were dropping the
+  observation or writing a parallel log. Record stamps run_id, sequence, and
+  timestamp when unset so injected events interleave with captured ones,
+  respects MaxEvents identically, and fires onEvent outside the lock per the
+  locking protocol.
+- **`EventTypeSystem` ("system")**: the event type for injected observations,
+  registered in the display metadata and NDJSON round-trip validation.
+
 ## [0.12.0] - 2026-10-07
 
 ### Added

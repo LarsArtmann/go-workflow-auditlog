@@ -142,6 +142,12 @@ func (a *Auditor) Report() WorkflowReport {
 }
 
 // Events returns a defensive copy of all captured events.
+// Record injects a caller-authored event into the audit stream (see
+// Recorder.Record for the stamping and ordering contract).
+func (a *Auditor) Record(evt Event) {
+	a.recorder.Record(evt)
+}
+
 func (a *Auditor) Events() []Event {
 	return a.recorder.Events()
 }
