@@ -48,8 +48,8 @@ github.com/larsartmann/go-output v0.38.4 h1:Acx2TVsJGNrsfiTH4zOac6SsoGG3D67a8f/O
 github.com/larsartmann/go-output v0.38.4/go.mod h1:HePc/cmuydQZFJ41ge8EbYec8h2W3hkOm3tvMcjc4Co=
 github.com/larsartmann/go-output/d2 v0.38.4 h1:j1VRYAufZ2hIZhR/dRtDfaEBiM0Nte4z3LN2NHQwenE=
 github.com/larsartmann/go-output/d2 v0.38.4/go.mod h1:UwxdIwbffqavFv6vkjSX5RYYUjYhzNoI5rtF8QfNXLs=
-github.com/larsartmann/go-output/daghtml v0.38.3 h1:ox2sxFzcqdiwp8PyPYLbyAEv/2cBXvxewK+SMunDI44=
-github.com/larsartmann/go-output/daghtml v0.38.3/go.mod h1:AIJjGy8TLJ7RsmmgxWrUA3Uii5mBeUtKvVnp2rsjwMk=
+github.com/larsartmann/go-output/daghtml v0.38.5 h1:pLlpjCmpLDF4aBvksZWxkrknk70oMJD+9tbMSzkRi5I=
+github.com/larsartmann/go-output/daghtml v0.38.5/go.mod h1:AIJjGy8TLJ7RsmmgxWrUA3Uii5mBeUtKvVnp2rsjwMk=
 github.com/larsartmann/go-output/delimited v0.38.4 h1:jbZs/IAQuYQMCeGPFUD0YkEYKnIe4nW4RhwMsfP5rnk=
 github.com/larsartmann/go-output/delimited v0.38.4/go.mod h1:/5xEExzHEidlnM+G3sHmpaLSsuNiwZvR8MSj6F6HP04=
 github.com/larsartmann/go-output/escape v0.38.3 h1:dk3WJ3NhQ07gO8kFGcuyDXSRtQm9mTLI005frUjsX5s=
@@ -74,10 +74,12 @@ github.com/larsartmann/go-output/tree v0.38.4 h1:sJvy+8uCk1ljDp4z4NeZDZiw/K/MCGb
 github.com/larsartmann/go-output/tree v0.38.4/go.mod h1:1nxcRDckCr2oHWwtaSg8ucjnYLVGNB/3WDJ7QMdzwoY=
 github.com/larsartmann/go-sse v0.6.2 h1:a1f/EnjhWlsNnxo0U1DygpYMy2XbUfyGBuKMWhwQg0U=
 github.com/larsartmann/go-sse v0.6.2/go.mod h1:PVVDLkzjkTR2MvqcqL3/XmWY8cdSUpEe8YWaouHVVz4=
-github.com/larsartmann/go-sse/ssetest v0.2.0 h1:xnze3rcrYrTyssums3SWZmZeCt1prJ2J6CBttovOzRM=
-github.com/larsartmann/go-sse/ssetest v0.2.0/go.mod h1:NhScY7qZtXb9cWMBrwM/dXeZ14ArAAahYCIhZUM91qM=
-github.com/larsartmann/go-workflow-auditlog v0.11.0 h1:L4N1j3gldL/DDBPuK/F0eWu5Gg+HeklsHuUR95b4neM=
-github.com/larsartmann/go-workflow-auditlog v0.11.0/go.mod h1:nH8gNp5WSEAIfI/iK7jLvQb6MPLejbwebuNuqxdvx+Q=
+github.com/larsartmann/go-sse/sseparse v0.2.1 h1:GHn8SFFZkMJRhLkmusJwtchgSPJV0/b5Keq6z3xop9k=
+github.com/larsartmann/go-sse/sseparse v0.2.1/go.mod h1:1Nql3y1hf9v/IVd4/26AfRilz0/OiDyF7YA2mvwwtHw=
+github.com/larsartmann/go-sse/ssetest v0.5.0 h1:6QQ9rURjqScKfkV8BmpNdoMSW5pxsNVs+ioLOqERS4k=
+github.com/larsartmann/go-sse/ssetest v0.5.0/go.mod h1:mTBSF8nBmmw3Eb7DOKWqgmp0B1unUOFcjt6WGdUJT0o=
+github.com/larsartmann/go-workflow-auditlog v0.13.0 h1:EvCAEX3XPJSrI/KpB140m6O4SsbCZyGdQwhB+4RFTyA=
+github.com/larsartmann/go-workflow-auditlog v0.13.0/go.mod h1:2efWDzUuyfQLoVKcPTWQnp10kkArm8CJw81U6sUw+J4=
 github.com/larsartmann/go-workflow-auditlog/viz v0.11.0 h1:lqN0wKc/i+2UDI6d42/qMg11pTrUexATZgVHBDB49wQ=
 github.com/larsartmann/go-workflow-auditlog/viz v0.11.0/go.mod h1:B+n7zDQNNqVL4OBnauEtZGqrWA0A1YIOT5Vvrh/cyRM=
 github.com/lucasb-eyer/go-colorful v1.4.1 h1:1EO+WB73+EH8EVbzlrG3KLAfEypQWVHIBqlTf+2hNss=
