@@ -146,11 +146,11 @@ type target struct {
 // land in a bounded channel; overflow drops the OLDEST pending event (the
 // local live dashboard keeps the full history).
 type Forwarder struct {
-	targets        []target
-	apiKey         string
-	sourceID       string
-	batchMax       int
-	flushInterval  time.Duration
+	targets         []target
+	apiKey          string
+	sourceID        string
+	batchMax        int
+	flushInterval   time.Duration
 	completeOnError bool
 
 	events   chan auditlog.Event
@@ -198,11 +198,13 @@ func NewWithTarget(spec, sourceID string) *Forwarder {
 	}
 
 	f := &Forwarder{
-		targets:         targets,
-		apiKey:          os.Getenv(EnvAPIKey),
-		sourceID:        sourceID,
-		batchMax:        envInt(EnvBatchMax, defaultMaxBatchEvents, 1, 8192),
-		flushInterval:   time.Duration(envInt(EnvFlushMs, int(defaultFlushInterval.Milliseconds()), 16, 60_000)) * time.Millisecond,
+		targets:  targets,
+		apiKey:   os.Getenv(EnvAPIKey),
+		sourceID: sourceID,
+		batchMax: envInt(EnvBatchMax, defaultMaxBatchEvents, 1, 8192),
+		flushInterval: time.Duration(
+			envInt(EnvFlushMs, int(defaultFlushInterval.Milliseconds()), 16, 60_000),
+		) * time.Millisecond,
 		completeOnError: envBool(EnvCompleteOnError),
 		events:          make(chan auditlog.Event, channelCap),
 		complete:        make(chan struct{}, 1),
