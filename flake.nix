@@ -62,7 +62,7 @@
               fileset = lib.fileset.gitTracked ./.;
             };
             subPackages = [ "cmd/auditlog" ];
-            vendorHash = "sha256-B+m81h3u3fp7BgzDNF42ErPbld+O0mGoTRKh+sBR4yE=";
+            vendorHash = "sha256-YptC7mr8gbThbVJYt1JGGGyoAVHaNDM+V1qmKSXdEvo=";
             meta = with lib; {
               description = "Audit logging CLI for Azure/go-workflow";
               homepage = "https://github.com/larsartmann/go-workflow-auditlog";

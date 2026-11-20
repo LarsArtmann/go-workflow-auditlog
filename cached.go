@@ -12,7 +12,7 @@ import (
 // step body, or audit logging is disabled (Attach is then a no-op, so no step
 // context is ever installed). Rejection: bad caller input, code
 // "auditlog.mark_cached_no_step_context".
-var ErrMarkCachedNoStepContext = errorfamily.NewRejection(
+var ErrMarkCachedNoStepContext error = errorfamily.NewRejection(
 	"auditlog.mark_cached_no_step_context",
 	"MarkCached requires a context injected by Auditor.Attach",
 )

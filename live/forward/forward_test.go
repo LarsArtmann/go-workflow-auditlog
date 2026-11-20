@@ -3,7 +3,7 @@ package forward_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"io"
 	"log/slog"
 	"net"
@@ -54,7 +54,7 @@ func startFakeCollectorAtPath(t *testing.T, path string) *fakeCollector {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /events", func(writer http.ResponseWriter, request *http.Request) {
 		var envelope map[string]any
-		if err := json.NewDecoder(request.Body).Decode(&envelope); err != nil {
+		if err := json.UnmarshalRead(request.Body, &envelope); err != nil {
 			writer.WriteHeader(http.StatusBadRequest)
 
 			return
@@ -68,12 +68,10 @@ func startFakeCollectorAtPath(t *testing.T, path string) *fakeCollector {
 	})
 
 	collector.server = &http.Server{Handler: mux, ReadHeaderTimeout: time.Second} //nolint:exhaustruct // test double
-	collector.wg.Add(1)
 
-	go func() {
-		defer collector.wg.Done()
+	collector.wg.Go(func() {
 		_ = collector.server.Serve(listener)
-	}()
+	})
 
 	t.Cleanup(func() {
 		_ = collector.server.Close()
@@ -116,7 +114,7 @@ func wfEvent(runID string, sequence int) auditlog.Event {
 
 func wfStatusEvent(runID string, sequence int, status auditlog.StepStatus) auditlog.Event {
 	return auditlog.Event{
-		StepRef:   auditlog.StepRef{Name: "build", StepType: "shell"},
+		Name: "build", StepType: "shell",
 		RunID:     auditlog.RunID(runID),
 		Sequence:  sequence,
 		Timestamp: time.Now().UTC(),
@@ -243,6 +241,7 @@ func TestForwarder_AutoTargetActivatesWhenSocketAppears(t *testing.T) {
 	fwd.Complete()
 
 	all := collector.awaitEnvelopes(t, 2)
+
 	last := all[len(all)-1]
 	if last["complete"] != true || last["runId"] != "run-late" {
 		t.Fatalf("explicit complete must flow after activation: %+v", last)
@@ -289,6 +288,7 @@ func TestForwarder_FanOutToUnixAndHTTP(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		body, _ := io.ReadAll(request.Body)
 		httpSink <- string(body)
+
 		writer.WriteHeader(http.StatusOK)
 	}))
 	t.Cleanup(server.Close)
@@ -322,6 +322,7 @@ func TestForwarder_PostFailuresCountedAndLogged(t *testing.T) {
 	var logBuf bytes.Buffer
 
 	original := slog.Default()
+
 	slog.SetDefault(slog.New(slog.NewTextHandler(&logBuf, nil)))
 	t.Cleanup(func() { slog.SetDefault(original) })
 
@@ -368,6 +369,7 @@ func TestForwarder_BatchMaxChunksEnvelopes(t *testing.T) {
 	}
 
 	total := 0
+
 	for _, envelope := range envelopes {
 		events, _ := envelope["events"].([]any)
 		total += len(events)

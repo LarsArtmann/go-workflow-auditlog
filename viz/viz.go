@@ -57,9 +57,9 @@ const (
 // Re-export sentinel errors so viz code can use unqualified names.
 var (
 	// ErrRenderFailed wraps rendering or marshaling failures.
-	ErrRenderFailed = auditlog.ErrRenderFailed
+	ErrRenderFailed error = auditlog.ErrRenderFailed
 	// ErrExportWriteFailed wraps file-write failures during export.
-	ErrExportWriteFailed = auditlog.ErrExportWriteFailed
+	ErrExportWriteFailed error = auditlog.ErrExportWriteFailed
 )
 
 // WriteToFile re-exports the core atomic file-write helper so viz exporters can

@@ -9,7 +9,7 @@ import (
 
 // ErrReplayNoEvents is returned when ReplayEvents receives zero events.
 // Rejection: bad caller input, code "auditlog.replay_no_events".
-var ErrReplayNoEvents = errorfamily.NewRejection(
+var ErrReplayNoEvents error = errorfamily.NewRejection(
 	"auditlog.replay_no_events",
 	"no events to replay",
 )

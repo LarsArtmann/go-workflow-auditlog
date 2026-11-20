@@ -338,6 +338,7 @@ func (srv *Server) Shutdown(ctx context.Context) error {
 			return fmt.Errorf("flush forwarder: %w", flushErr)
 		}
 	}
+
 	if drainErr != nil {
 		return fmt.Errorf("drain subscriber buffers: %w", drainErr)
 	}

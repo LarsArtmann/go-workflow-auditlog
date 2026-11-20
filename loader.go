@@ -15,7 +15,7 @@ import (
 // intrinsically: [errorfamily.Transient] — the caller may retry (e.g. the
 // file might be temporarily locked or mid-write) — code
 // "auditlog.report_load_failed". Consumers can match on it with [errors.Is].
-var ErrReportLoadFailed = errorfamily.NewTransient(
+var ErrReportLoadFailed error = errorfamily.NewTransient(
 	"auditlog.report_load_failed",
 	"report load failed",
 )

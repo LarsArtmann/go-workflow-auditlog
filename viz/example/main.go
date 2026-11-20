@@ -224,7 +224,7 @@ func buildWorkflow() *flow.Workflow {
 	flaky := &FlakyStep{}
 	detect := &CachedDetectStep{}
 
-	w := &flow.Workflow{} //nolint:exhaustruct_v5 // zero-value workflow is intentional in the demo
+	w := &flow.Workflow{}
 	w.Add(
 		// Linear pipeline: fetch → validate → transform → save.
 		flow.Step(fetch),
@@ -351,7 +351,7 @@ func buildExportTasks(audit *auditlog.Auditor, report auditlog.WorkflowReport, j
 				report,
 				join("steps.csv"),
 				output.FormatCSV,
-				output.RenderOptions{}, //nolint:exhaustruct_v5 // zero-value options are intentional
+				output.RenderOptions{},
 			)
 		}},
 		{"steps-compact.md", func() error {
@@ -359,7 +359,7 @@ func buildExportTasks(audit *auditlog.Auditor, report auditlog.WorkflowReport, j
 				report,
 				join("steps-compact.md"),
 				output.FormatMarkdown,
-				output.RenderOptions{}, //nolint:exhaustruct_v5 // zero-value options are intentional
+				output.RenderOptions{},
 				viz.WithColumns(
 					viz.ColumnStep, viz.ColumnStatus, viz.ColumnDuration,
 				),

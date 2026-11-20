@@ -10,7 +10,7 @@ import (
 
 // ErrMigrationEmptyInput is returned by [MigrateReport] when data is empty.
 // Rejection: bad caller input, code "auditlog.migration_empty_input".
-var ErrMigrationEmptyInput = errorfamily.NewRejection(
+var ErrMigrationEmptyInput error = errorfamily.NewRejection(
 	"auditlog.migration_empty_input",
 	"migration input is empty",
 )
@@ -18,7 +18,7 @@ var ErrMigrationEmptyInput = errorfamily.NewRejection(
 // ErrMigrationMissingVersion is returned by [MigrateReport] when the input
 // has no version field. Rejection: bad caller input, code
 // "auditlog.migration_missing_version".
-var ErrMigrationMissingVersion = errorfamily.NewRejection(
+var ErrMigrationMissingVersion error = errorfamily.NewRejection(
 	"auditlog.migration_missing_version",
 	"migration input has no version field",
 )

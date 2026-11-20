@@ -19,27 +19,27 @@ var (
 	// ErrEventCountMismatch indicates the report's EventCount field does not
 	// match the length of its Events slice. Corruption: the report is
 	// structurally invalid; no caller action can fix it.
-	ErrEventCountMismatch = errorfamily.NewCorruption(
+	ErrEventCountMismatch error = errorfamily.NewCorruption(
 		"auditlog.event_count_mismatch",
 		"event_count does not match len(events)",
 	)
 	// ErrStepCountMismatch indicates the report's StepCount field does not
 	// match the length of its Steps slice. Corruption.
-	ErrStepCountMismatch = errorfamily.NewCorruption(
+	ErrStepCountMismatch error = errorfamily.NewCorruption(
 		"auditlog.step_count_mismatch",
 		"step_count does not match len(steps)",
 	)
 	// ErrStatusDrift indicates a step's stored Status disagrees with the
 	// status implied by its Error pointer (see [StepInfo.DeriveStatus]).
 	// Corruption.
-	ErrStatusDrift = errorfamily.NewCorruption(
+	ErrStatusDrift error = errorfamily.NewCorruption(
 		"auditlog.status_drift",
 		"step status does not match derived status",
 	)
 	// ErrCountMismatch indicates a denormalized status-count field
 	// (SucceededCount, FailedCount, etc.) disagrees with the actual count
 	// derived from the Steps slice. Corruption.
-	ErrCountMismatch = errorfamily.NewCorruption(
+	ErrCountMismatch error = errorfamily.NewCorruption(
 		"auditlog.status_count_mismatch",
 		"status count does not match steps",
 	)
@@ -49,7 +49,7 @@ var (
 	// table/tree rendering). Infrastructure: these failures are not retryable
 	// (programming error or resource exhaustion). Consumers can match on it
 	// with [errors.Is].
-	ErrRenderFailed = errorfamily.NewInfrastructure(
+	ErrRenderFailed error = errorfamily.NewInfrastructure(
 		"auditlog.render_failed",
 		"render failed",
 	)

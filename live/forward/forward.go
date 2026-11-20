@@ -228,7 +228,7 @@ func resolveTargets(spec string) []target {
 
 	var targets []target
 
-	for _, raw := range strings.Split(spec, ",") {
+	for raw := range strings.SplitSeq(spec, ",") {
 		one := strings.TrimSpace(raw)
 		if one == "" {
 			continue
@@ -250,6 +250,7 @@ func resolveTarget(spec string) (target, bool) {
 
 	case strings.HasPrefix(spec, "unix://"):
 		path := strings.TrimPrefix(spec, "unix://")
+
 		return unixTarget(path), true
 
 	case strings.HasPrefix(spec, "http://"), strings.HasPrefix(spec, "https://"):
@@ -315,6 +316,7 @@ func probeSocket(path string) bool {
 	if err != nil {
 		return false
 	}
+
 	_ = conn.Close()
 
 	return true
@@ -428,6 +430,7 @@ func (f *Forwarder) loop() {
 	defer close(f.stopped)
 
 	pending := make([]auditlog.Event, 0, f.batchMax)
+
 	var wantComplete bool
 
 	ticker := time.NewTicker(f.flushInterval)
@@ -591,13 +594,15 @@ func (f *Forwarder) post(t *target, payload envelope) {
 	response, err := t.client.Do(request)
 	if err != nil {
 		f.deliveryFailed(t, err)
+
 		return
 	}
 
-	defer func() { _, _ = io.Copy(io.Discard, response.Body) }() //nolint:errcheck // drain for keep-alive
+	defer func() { _, _ = io.Copy(io.Discard, response.Body) }()
 
 	if response.StatusCode >= http.StatusBadRequest {
 		f.deliveryFailed(t, fmt.Errorf("collector answered %s", response.Status))
+
 		return
 	}
 
@@ -608,6 +613,7 @@ func (f *Forwarder) post(t *target, payload envelope) {
 // into failure and then only every logEveryFails-th consecutive failure.
 func (f *Forwarder) deliveryFailed(t *target, err error) {
 	t.fails++
+
 	f.failed.Add(1)
 
 	switch {

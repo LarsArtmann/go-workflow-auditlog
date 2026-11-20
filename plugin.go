@@ -46,7 +46,7 @@ type Config struct {
 // export paths. It carries its classification intrinsically:
 // [errorfamily.Rejection] (bad caller input), code "auditlog.workflow_id_path_sep".
 // Consumers can match on it with [errors.Is].
-var ErrWorkflowIDPathSep = errorfamily.NewRejection(
+var ErrWorkflowIDPathSep error = errorfamily.NewRejection(
 	"auditlog.workflow_id_path_sep",
 	"config.WorkflowID must not contain path separators",
 )
@@ -57,7 +57,7 @@ var ErrWorkflowIDPathSep = errorfamily.NewRejection(
 // [errorfamily.Infrastructure] (system-level failure, not retryable by the
 // caller), code "auditlog.export_write_failed". Consumers can match on it
 // with [errors.Is].
-var ErrExportWriteFailed = errorfamily.NewInfrastructure(
+var ErrExportWriteFailed error = errorfamily.NewInfrastructure(
 	"auditlog.export_write_failed",
 	"export write failed",
 )

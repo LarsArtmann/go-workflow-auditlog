@@ -17,7 +17,7 @@ import (
 // "auditlog.file_exists". Its cause chain still contains
 // [ErrExportWriteFailed], so consumers matching either sentinel via
 // [errors.Is] keep working.
-var ErrFileExists = errorfamily.Wrap(
+var ErrFileExists error = errorfamily.Wrap(
 	ErrExportWriteFailed,
 	errorfamily.Rejection,
 	"auditlog.file_exists",

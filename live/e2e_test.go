@@ -39,7 +39,7 @@ func (s *e2eStep) Do(ctx context.Context) error {
 
 func (s *e2eStep) String() string { return s.name }
 
-var errE2EStepFailed = e2eStepError("e2e step failed")
+var errE2EStepFailed error = e2eStepError("e2e step failed")
 
 type e2eStepError string
 

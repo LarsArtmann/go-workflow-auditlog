@@ -24,11 +24,11 @@ var (
 // intrinsically: [errorfamily.Rejection] (malformed input), so wrapped
 // validation failures classify without needing a registry entry.
 var (
-	errUnknownEventType = errorfamily.NewRejection(
+	errUnknownEventType error = errorfamily.NewRejection(
 		"auditlog.unknown_event_type",
 		"unknown event_type",
 	)
-	errUnknownPhase = errorfamily.NewRejection(
+	errUnknownPhase error = errorfamily.NewRejection(
 		"auditlog.unknown_phase",
 		"unknown phase",
 	)
@@ -65,7 +65,7 @@ func validateEvent(lineNum int, evt Event) error {
 // errNilStreamCallback is returned by [StreamEvents] when fn is nil.
 // Rejection: programming error in the caller, code
 // "auditlog.nil_stream_callback".
-var errNilStreamCallback = errorfamily.NewRejection(
+var errNilStreamCallback error = errorfamily.NewRejection(
 	"auditlog.nil_stream_callback",
 	"auditlog: StreamEvents callback is nil",
 )
